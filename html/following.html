@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+<title>${product} - ${name}</title>
+
+<link rel="stylesheet" href="${root_url}/css/normalize.css">
+<link rel="stylesheet" href="${root_url}/css/site.css">
+
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+
+</head>
+
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+
+<body>
+
+<section class="nav">
+${nav}
+</section>
+
+<section class="user_search_form" style="width: 600px">
+	<h2>Search for a user:</h2>
+	<form name="user_search" action="${root_url}/submit_user_search" method="post" accept-charset="utf-8">
+		<ul>
+			<li>
+				<label for="user" style="width: 440px">User Email or Name</label>
+				<input type="search" name="searchname" style="width: 440px" placeholder="Joe User" required>
+			</li>
+			<li>
+				<input type="submit" value="Search">
+			</li>
+		</ul>
+	</form>
+</section>
+
+<section class="users_list" style="width: 600px">
+	<h2>Users Following:</h2>
+	<table>
+	${users_list}
+	</table>
+</section>
+
+</body>
+</html>

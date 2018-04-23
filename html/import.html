@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+<title>${product} - ${name}</title>
+
+<link rel="stylesheet" href="${root_url}/css/normalize.css">
+<link rel="stylesheet" href="${root_url}/css/site.css">
+
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+
+</head>
+
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+
+<body>
+
+<section class="nav">
+${nav}
+</section>
+
+<section class="import" style="width: 600px">
+	<h2>Import From a File:</h2>
+	<form action="${root_url}/upload" method="post" enctype="multipart/form-data">
+		Select files: <input type="file" name="ufile" multiple><input type="submit">
+	</form>
+</section>
+
+</body>
+</html>

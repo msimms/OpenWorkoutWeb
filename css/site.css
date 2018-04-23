@@ -1,0 +1,126 @@
+h1 {
+	color: #000000;
+	text-transform: uppercase;
+	text-align: left;
+	font-size: 250%;
+	margin: 0px;
+	padding: 0px;
+}
+
+h2 {
+	color: #000000;
+	background: #FFFFFF;
+}
+
+.nav ul {
+	list-style-type: none;
+	overflow: hidden;
+	background-color: #333;
+	margin: 0px;
+	padding: 0px;
+}
+
+.nav li {
+	float: left;
+}
+
+.nav li a {
+	display: inline-block;
+	color: white;
+	text-align: center;
+	margin: 0px;
+	padding: 14px 16px;
+	text-decoration: none;
+}
+
+.nav li a:hover {
+	background-color: #111;
+}
+
+section {
+	color: #000000;
+	background: #FFFFFF;
+	vertical-align: top;
+	margin: 0px;
+	padding: 0px;
+}
+
+.active {
+	opacity: 1.0;
+}
+
+.left {
+	display: inline-block;
+	background-color: #777713;
+	width: 250px;
+}
+
+.right {
+	display: inline-block;
+	background-color: #FFFFFF;
+	width: 1000px;
+}
+
+.left img {
+	margin: 20px;
+	width: 200px;
+	border: 3px;
+	border-style: solid;
+	border-color: #000000;
+}
+
+table {
+	font-family: arial, sans-serif;
+	background: linear-gradient(to left, #FFFFFF , #DDDDDD);
+	margin-left: auto;
+	margin-right: auto;
+	width: 90%;
+}
+
+th {
+	padding: 5px;
+	border-bottom: 5px solid #000000;
+	border-radius: 10px 10px 0px 0px;
+	background-color: #777713;
+	text-transform: uppercase;
+}
+
+tr {
+	opacity: 0.7;
+}
+
+td {
+	border: 1px solid #FFFFFF;
+	padding: 4px;
+	border-radius: 2px;
+	text-shadow: 1px 1px #FFFFFF;
+	text-align: center;
+}
+
+tr:hover {
+	opacity: 1.0;
+}
+
+.user_search_form {
+	width: 200px;
+	margin: 50px auto;
+	padding: 25px;
+}
+
+.user_search_form ul {
+	margin: 0px;
+	padding: 0px;
+}
+
+.user_search_form li {
+	display: inline;
+	padding-bottom: .25cm;
+}
+
+.activities_list {
+	padding: 25px 25px 25px 25px;
+}
+
+div {
+	margin: 10px;
+}

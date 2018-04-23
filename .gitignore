@@ -1,0 +1,36 @@
+# Mac OS X
+*.DS_Store
+
+# Xcode
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserstate
+project.xcworkspace/
+xcuserdata/
+
+# Generated files
+*.o
+*.pyc
+
+# Python modules
+MANIFEST
+dist/
+build/
+
+# Backup files
+*~.nib
+
+# sqlite database
+*.sqlite
+
+# Mako template files
+tempmod/*
+
+# Log files
+*.log
+
+# Temp directories
+tempfile/
+tempmod/
