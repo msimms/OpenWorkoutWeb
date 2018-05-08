@@ -296,6 +296,12 @@ class StraenWeb(object):
             return ""
 
         try:
+            # Get the details of the logged in user.
+            user_id, _, _ = self.user_mgr.retrieve_user(email)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
+                return "[]"
+
             followers = self.user_mgr.list_users_followed(email)
 
             cherrypy.response.headers['Content-Type'] = 'application/json'
@@ -322,6 +328,12 @@ class StraenWeb(object):
             return ""
 
         try:
+            # Get the details of the logged in user.
+            user_id, _, _ = self.user_mgr.retrieve_user(email)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
+                return "[]"
+
             followers = self.user_mgr.retrieve_followers(email)
 
             cherrypy.response.headers['Content-Type'] = 'application/json'
@@ -630,7 +642,10 @@ class StraenWeb(object):
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             # Get the details of the logged in user.
-            user_id, user_hash, user_realname = self.user_mgr.retrieve_user(username)
+            user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             activities = self.data_mgr.retrieve_user_activities(user_id, 0, 10)
             activities_list_str = ""
@@ -663,6 +678,9 @@ class StraenWeb(object):
 
             # Get the details of the logged in user.
             user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             activities = self.data_mgr.retrieve_user_activities(user_id, 0, 10)
             activities_list_str = ""
@@ -694,7 +712,10 @@ class StraenWeb(object):
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             # Get the details of the logged in user.
-            user_id, user_hash, user_realname = self.user_mgr.retrieve_user(username)
+            user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             # Get the list of users followed by the logged in user.
             users_following = self.user_mgr.list_users_followed(user_id)
@@ -725,7 +746,10 @@ class StraenWeb(object):
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             # Get the details of the logged in user.
-            user_id, user_hash, user_realname = self.user_mgr.retrieve_user(username)
+            user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             users_followed_by = self.user_mgr.list_followers(user_id)
             users_list_str = ""
@@ -756,6 +780,9 @@ class StraenWeb(object):
 
             # Get the details of the logged in user.
             user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             devices = self.user_mgr.list_user_devices(user_id)
             device_list_str = ""
@@ -786,6 +813,12 @@ class StraenWeb(object):
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
             if username is None:
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
+
+            # Get the details of the logged in user.
+            user_id, _, _ = self.user_mgr.retrieve_user(username)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             # Generate a random name for the local file.
@@ -828,6 +861,9 @@ class StraenWeb(object):
 
             # Get the details of the logged in user.
             user_id, user_hash, user_realname = self.user_mgr.retrieve_user(username)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'import.html')
@@ -852,6 +888,9 @@ class StraenWeb(object):
 
             # Get the details of the logged in user.
             user_id, user_hash, user_realname = self.user_mgr.retrieve_user(username)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'settings.html')
@@ -872,6 +911,12 @@ class StraenWeb(object):
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
             if username is None:
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
+
+            # Get the details of the logged in user.
+            user_id, _, _ = self.self.user_mgr.retrieve_user(username)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             if self.user_mgr.request_to_follow(username, target_email):
