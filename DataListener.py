@@ -149,7 +149,7 @@ class HTTPRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_response(200)
             self.end_headers()
 
-            self.wfile.write("Content-type: text/html<BR><BR>");
+            self.wfile.write("Content-type: text/html<BR><BR>")
             self.wfile.write("<HTML>POST OK.<BR><BR>")
         else:
             self.send_error(404, 'File Not Found: %s' % self.path)
