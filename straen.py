@@ -108,6 +108,8 @@ def require(*conditions):
 
 
 class StraenWeb(object):
+    """Class containing the URL handlers."""
+
     def __init__(self, user_mgr, data_mgr):
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
@@ -1032,103 +1034,123 @@ class StraenWeb(object):
     def api(self, *args, **kw):
         """Endpoint for API calls."""
 
-        if len(args) > 0:
-            api_version = args[0]
-            if api_version == '1.0':
-                api = StraenApi.StraenApi()
-                api.handle_api_1_0_request(args[1:])
+        response = ""
+        try:
+            if len(args) > 0:
+                api_version = args[0]
+                if api_version == '1.0':
+                    api = StraenApi.StraenApi(g_root_dir)
+                    handled, response = api.handle_api_1_0_request(args[1:], kw)
+                    if not handled:
+                        cherrypy.response.status = 400
+                    else:
+                        cherrypy.response.status = 200
+                else:
+                    cherrypy.response.status = 400
+            else:
+                cherrypy.response.status = 400
+        except:
+            cherrypy.response.status = 500
+        return response
 
     @cherrypy.expose
     def index(self):
         """Renders the index page."""
         return self.login()
 
+def main():
+    global g_root_dir
+    global g_root_url
+    global g_app
 
-# Parse command line options.
-parser = argparse.ArgumentParser()
-parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background", required=False)
-parser.add_argument("--port", type=int, default=8080, help="Port on which to listen", required=False)
-parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS", required=False)
-parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS", required=False)
-parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS", required=False)
+    # Parse command line options.
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background", required=False)
+    parser.add_argument("--port", type=int, default=8080, help="Port on which to listen", required=False)
+    parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS", required=False)
+    parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS", required=False)
+    parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS", required=False)
 
-try:
-    args = parser.parse_args()
-except IOError as e:
-    parser.error(e)
-    sys.exit(1)
+    try:
+        args = parser.parse_args()
+    except IOError as e:
+        parser.error(e)
+        sys.exit(1)
 
-if args.debug:
-    if args.https:
-        g_root_url = "https://127.0.0.1:" + str(args.port)
+    if args.debug:
+        if args.https:
+            g_root_url = "https://127.0.0.1:" + str(args.port)
+        else:
+            g_root_url = "http://127.0.0.1:" + str(args.port)
     else:
-        g_root_url = "http://127.0.0.1:" + str(args.port)
-else:
+        if args.https:
+            g_root_url = 'https://straen-app.com'
+        else:
+            g_root_url = 'http://straen-app.com'
+
+        Daemonizer(cherrypy.engine).subscribe()
+
     if args.https:
-        g_root_url = 'https://straen-app.com'
-    else:
-        g_root_url = 'http://straen-app.com'
+        print "Running HTTPS...."
+        cherrypy.server.ssl_module = 'builtin'
+        cherrypy.server.ssl_certificate = args.cert
+        print "Certificate File: " + args.cert
+        cherrypy.server.ssl_private_key = args.privkey
+        print "Private Key File: " + args.privkey
 
-    Daemonizer(cherrypy.engine).subscribe()
+    signal.signal(signal.SIGINT, signal_handler)
+    mako.collection_size = 100
+    mako.directories = "templates"
 
-if args.https:
-    print "Running HTTPS...."
-    cherrypy.server.ssl_module = 'builtin'
-    cherrypy.server.ssl_certificate = args.cert
-    print "Certificate File: " + args.cert
-    cherrypy.server.ssl_private_key = args.privkey
-    print "Private Key File: " + args.privkey
+    if not os.path.exists(g_tempfile_dir):
+        os.makedirs(g_tempfile_dir)
 
-signal.signal(signal.SIGINT, signal_handler)
-mako.collection_size = 100
-mako.directories = "templates"
+    user_mgr = UserMgr.UserMgr(g_root_dir)
+    data_mgr = DataMgr.DataMgr(g_root_dir)
+    g_app = StraenWeb(user_mgr, data_mgr)
 
-if not os.path.exists(g_tempfile_dir):
-    os.makedirs(g_tempfile_dir)
+    cherrypy.tools.straenweb_auth = cherrypy.Tool('before_handler', check_auth)
 
-user_mgr = UserMgr.UserMgr(g_root_dir)
-data_mgr = DataMgr.DataMgr(g_root_dir)
-g_app = StraenWeb(user_mgr, data_mgr)
+    conf = {
+        '/':
+        {
+            'tools.staticdir.root': g_root_dir,
+            'tools.straenweb_auth.on': True,
+            'tools.sessions.on': True,
+            'tools.sessions.name': 'straenweb_auth',
+            'tools.sessions.timeout': 129600,
+            'tools.secureheaders.on': True
+        },
+        '/css':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'css'
+        },
+        '/images':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'images',
+        },
+        '/media':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'media',
+        },
+        '/.well-known':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': '.well-known',
+        },
+    }
 
-cherrypy.tools.straenweb_auth = cherrypy.Tool('before_handler', check_auth)
+    cherrypy.config.update({
+        'server.socket_host': '127.0.0.1',
+        'server.socket_port': args.port,
+        'requests.show_tracebacks': False,
+        'log.access_file': ACCESS_LOG,
+        'log.error_file': ERROR_LOG})
 
-conf = {
-    '/':
-    {
-        'tools.staticdir.root': g_root_dir,
-        'tools.straenweb_auth.on': True,
-        'tools.sessions.on': True,
-        'tools.sessions.name': 'straenweb_auth',
-        'tools.sessions.timeout': 129600,
-        'tools.secureheaders.on': True
-    },
-    '/css':
-    {
-        'tools.staticdir.on': True,
-        'tools.staticdir.dir': 'css'
-    },
-    '/images':
-    {
-        'tools.staticdir.on': True,
-        'tools.staticdir.dir': 'images',
-    },
-    '/media':
-    {
-        'tools.staticdir.on': True,
-        'tools.staticdir.dir': 'media',
-    },
-    '/.well-known':
-    {
-        'tools.staticdir.on': True,
-        'tools.staticdir.dir': '.well-known',
-    },
-}
+    cherrypy.quickstart(g_app, config=conf)
 
-cherrypy.config.update({
-    'server.socket_host': '127.0.0.1',
-    'server.socket_port': args.port,
-    'requests.show_tracebacks': False,
-    'log.access_file': ACCESS_LOG,
-    'log.error_file': ERROR_LOG})
-
-cherrypy.quickstart(g_app, config=conf)
+if __name__ == "__main__":
+    main()
