@@ -519,14 +519,14 @@ class StraenWeb(object):
         # Activity time
         activity_time = "-"
         if StraenKeys.ACTIVITY_TIME_KEY in activity:
-            activity_time = self.timestamp_code_to_str(activity[StraenKeys.ACTIVITY_TIME_KEY])
+            activity_time = "<script>document.write(unix_time_to_local_string(" + str(activity[StraenKeys.ACTIVITY_TIME_KEY]) + "))</script>"
         elif StraenKeys.ACTIVITY_LOCATIONS_KEY in activity:
             locations = activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]
             if len(locations) > 0:
                 first_loc = locations[0]
                 if StraenKeys.LOCATION_TIME_KEY in first_loc:
                     time_num = first_loc[StraenKeys.LOCATION_TIME_KEY] / 1000
-                    activity_time = self.timestamp_code_to_str(time_num)
+                    activity_time = "<script>document.write(unix_time_to_local_string(" + str(time_num) + "))</script>"
 
         # Activity visibility
         checkbox_value = "checked"
@@ -1125,6 +1125,11 @@ def main():
         {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': 'css'
+        },
+        '/js':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'js'
         },
         '/images':
         {
