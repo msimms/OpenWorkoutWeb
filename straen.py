@@ -512,9 +512,9 @@ class StraenWeb(object):
         # Activity name
         activity_id = activity[StraenKeys.ACTIVITY_ID_KEY]
         if StraenKeys.ACTIVITY_NAME_KEY in activity:
-            activity_name = activity[StraenKeys.ACTIVITY_NAME_KEY]
+            activity_name = "<b>" + activity[StraenKeys.ACTIVITY_NAME_KEY] + "</b>"
         else:
-            activity_name = "Untitled"
+            activity_name = "<b>Unnamed</b>"
 
         # Activity time
         activity_time = "-"
