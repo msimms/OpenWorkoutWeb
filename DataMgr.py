@@ -125,3 +125,13 @@ class DataMgr(Importer.LocationWriter):
         if device_str is None or len(device_str) == 0:
             return None, "Bad parameter."
         return self.database.retrieve_most_recent_activity_id_for_device(device_str)
+
+    def retrieve_activity_types(self):
+        """Returns a the list of activity types that the software understands."""
+        types = []
+        types.append("Running")
+        types.append("Cycling")
+        types.append("Swimming")
+        types.append("Push Ups / Press Ups")
+        types.append("Pull Ups")
+        return types

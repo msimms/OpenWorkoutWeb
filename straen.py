@@ -408,12 +408,12 @@ class StraenWeb(object):
 
         if device_str is None:
             my_template = Template(filename=g_error_logged_in_html_file, module_directory=g_tempmod_dir)
-            return my_template.render(product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified device.")
+            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified device.")
 
         locations = self.data_mgr.retrieve_locations(device_str, activity_id)
         if locations is None or len(locations) == 0:
             my_template = Template(filename=g_error_logged_in_html_file, module_directory=g_tempmod_dir)
-            return my_template.render(product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified device.")
+            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified device.")
 
         route = ""
         center_lat = 0
@@ -472,7 +472,7 @@ class StraenWeb(object):
 
         if device_strs is None:
             my_template = Template(filename=g_error_logged_in_html_file, module_directory=g_tempmod_dir)
-            return my_template.render(product=PRODUCT_NAME, root_url=g_root_url, error="No device IDs were specified.")
+            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, error="No device IDs were specified.")
 
         route_coordinates = ""
         center_lat = 0
@@ -790,10 +790,9 @@ class StraenWeb(object):
             device_list_str = ""
             if devices is not None and isinstance(devices, list):
                 for device in devices:
-                    device_list_str += "<tr>"
+                    device_list_str += "\t\t<tr>"
                     device_list_str += "<td>"
                     device_list_str += device
-                    device_list_str += "\n"
                     device_list_str += "</td>"
                     device_list_str += "</tr>\n"
 
@@ -851,6 +850,18 @@ class StraenWeb(object):
         return self.error()
 
     @cherrypy.expose
+    def manual_entry(self, activity_type):
+        """Called when the user selects an activity type, indicatig they want to make a manual data entry."""
+
+        try:
+            print activity_type
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            cherrypy.log.error('Unhandled exception in upload', 'EXEC', logging.WARNING)
+        return self.error()
+
+    @cherrypy.expose
     @require()
     def import_activity(self, *args, **kw):
         """Renders the import page."""
@@ -862,15 +873,21 @@ class StraenWeb(object):
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             # Get the details of the logged in user.
-            user_id, user_hash, user_realname = self.user_mgr.retrieve_user(username)
+            user_id, _, user_realname = self.user_mgr.retrieve_user(username)
             if user_id is None:
                 cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
+            # Build the list options for manual entry.
+            activity_type_list = self.data_mgr.retrieve_activity_types()
+            activity_type_list_str = "\t\t\t<option value=\"-\">-</option>\n"
+            for activity_type in activity_type_list:
+                activity_type_list_str += "\t\t\t<option value=\"" + activity_type + "\">" + activity_type + "</option>\n"
+
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'import.html')
             my_template = Template(filename=html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname)
+            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, activity_type_list=activity_type_list_str)
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
