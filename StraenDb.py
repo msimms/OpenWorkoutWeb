@@ -86,6 +86,53 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None, None, None
 
+    def update_user(self, user_id, username, realname, hash):
+        """Update method for a user."""
+        if user_id is None:
+            self.log_error(MongoDatabase.update_user.__name__ + "Unexpected empty object: user_id")
+            return None
+        if username is None:
+            self.log_error(MongoDatabase.update_user.__name__ + "Unexpected empty object: username")
+            return False
+        if realname is None:
+            self.log_error(MongoDatabase.update_user.__name__ + "Unexpected empty object: realname")
+            return False
+        if hash is None:
+            self.log_error(MongoDatabase.update_user.__name__ + "Unexpected empty object: hash")
+            return False
+        if len(username) == 0:
+            self.log_error(MongoDatabase.update_user.__name__ + "username too short")
+            return False
+        if len(realname) == 0:
+            self.log_error(MongoDatabase.update_user.__name__ + "realname too short")
+            return False
+        if len(hash) == 0:
+            self.log_error(MongoDatabase.update_user.__name__ + "hash too short")
+            return False
+
+        try:
+            return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def delete_user(self, user_id):
+        """Delete method for a user."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_user.__name__ + "Unexpected empty object: user_id")
+            return False
+
+        try:
+            user_id_obj = ObjectId(user_id)
+            user = self.users_collection.delete_one({"_id": user_id_obj})
+            if user is not None:
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def retrieve_matched_users(self, username):
         """Returns a list of user names for users that match the specified regex."""
         user_list = []

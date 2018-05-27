@@ -608,7 +608,7 @@ class StraenWeb(object):
             # Render from template.
             return self.render_page_for_activity("", "", device_str, activity_id)
         except:
-            cherrypy.log.error('Unhandled exception in device', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.live.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -629,7 +629,7 @@ class StraenWeb(object):
             # Render from template.
             return self.render_page_for_activity("", "", device_str, activity_id)
         except:
-            cherrypy.log.error('Unhandled exception in device', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.device.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -664,7 +664,7 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
-            cherrypy.log.error('Unhandled exception in my_activities', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.my_activities.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -699,7 +699,7 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
-            cherrypy.log.error('Unhandled exception in all_activities', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.all_activities.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -733,7 +733,7 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
-            cherrypy.log.error('Unhandled exception in following', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.following.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -766,7 +766,7 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
-            cherrypy.log.error('Unhandled exception in followers', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.followers.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -803,7 +803,7 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
-            cherrypy.log.error('Unhandled exception in device_list', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.device_list.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -846,7 +846,7 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
-            cherrypy.log.error('Unhandled exception in upload', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.upload.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -858,7 +858,7 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
-            cherrypy.log.error('Unhandled exception in upload', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.manual_entry.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -891,7 +891,7 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
-            cherrypy.log.error('Unhandled exception in settings', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.import_activity.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -906,7 +906,7 @@ class StraenWeb(object):
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             # Get the details of the logged in user.
-            user_id, user_hash, user_realname = self.user_mgr.retrieve_user(username)
+            user_id, _, user_realname = self.user_mgr.retrieve_user(username)
             if user_id is None:
                 cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
@@ -918,7 +918,7 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
-            cherrypy.log.error('Unhandled exception in settings', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.settings.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -933,7 +933,7 @@ class StraenWeb(object):
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             # Get the details of the logged in user.
-            user_id, _, _ = self.self.user_mgr.retrieve_user(username)
+            user_id, _, _ = self.user_mgr.retrieve_user(username)
             if user_id is None:
                 cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
@@ -946,7 +946,7 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
-            cherrypy.log.error('Unhandled exception in request_to_follow', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.request_to_follow.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -960,7 +960,7 @@ class StraenWeb(object):
             for matched_user in matched_users:
                 pass
         except:
-            cherrypy.log.error('Unhandled exception in submit_user_search', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.submit_user_search.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -987,7 +987,7 @@ class StraenWeb(object):
                     result = self.error(error_msg)
             return result
         except:
-            cherrypy.log.error('Unhandled exception in submit_login', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.submit_login.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -1008,7 +1008,99 @@ class StraenWeb(object):
                     result = self.error(error_msg)
             return result
         except:
-            cherrypy.log.error('Unhandled exception in submit_new_login', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.submit_new_login.__name__, 'EXEC', logging.WARNING)
+        return self.error()
+
+    @cherrypy.expose
+    def update_email(self, *args, **kw):
+        """Updates the user's email address."""
+
+        try:
+            # Get the logged in user.
+            username = cherrypy.session.get(SESSION_KEY)
+            if username is None:
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
+
+            # Get the details of the logged in user.
+            user_id, _, _ = self.user_mgr.retrieve_user(username)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
+
+            # Get the new email address fromt the request.
+            email = cherrypy.request.params.get("email")
+        except:
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.update_email.__name__, 'EXEC', logging.WARNING)
+        return self.error()
+
+    @cherrypy.expose
+    def update_password(self, *args, **kw):
+        """Updates the user's email password."""
+
+        try:
+            # Get the logged in user.
+            username = cherrypy.session.get(SESSION_KEY)
+            if username is None:
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
+
+            # Get the details of the logged in user.
+            user_id, _, _ = self.user_mgr.retrieve_user(username)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
+
+            # The the old and new passwords from the request.
+            old_password = cherrypy.request.params.get("old_password")
+            new_password1 = cherrypy.request.params.get("new_password1")
+            new_password2 = cherrypy.request.params.get("new_password2")
+
+            # Reauthenticate the user.
+            user_logged_in, info_str = self.authenticate_user(username, old_password)
+            if user_logged_in:
+
+                # Update the user's password in the database.
+                user_created, info_str = self.user_mgr.update_user(username, user_realname, new_password1, new_password2)
+                if user_created:
+                    cherrypy.response.status = 200
+                    return ""
+                else:
+                    cherrypy.log.error(info_str, 'EXEC', logging.ERROR)
+            else:
+                cherrypy.log.error(info_str, 'EXEC', logging.ERROR)
+        except:
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.update_password.__name__, 'EXEC', logging.WARNING)
+        return self.error()
+
+    @cherrypy.expose
+    def delete_user(self, *args, **kw):
+        """Removes the user and all associated data."""
+
+        try:
+            # Get the logged in user.
+            username = cherrypy.session.get(SESSION_KEY)
+            if username is None:
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
+
+            # Get the details of the logged in user.
+            user_id, _, _ = self.user_mgr.retrieve_user(username)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
+
+            # Get the password from the request as we'll want to reauthenticate the user before deleting.
+            password = cherrypy.request.params.get("password")
+
+            # Reauthenticate the user.
+            user_logged_in, info_str = self.authenticate_user(username, password)
+            if user_logged_in:
+                self.data_mgr.delete_user_activities(user_id)
+                self.user_mgr.delete_user(user_id)
+                cherrypy.response.status = 200
+                return ""
+            else:
+                cherrypy.log.error(info_str, 'EXEC', logging.ERROR)
+        except:
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.delete_user.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose

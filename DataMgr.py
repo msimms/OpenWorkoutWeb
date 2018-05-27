@@ -52,6 +52,20 @@ class DataMgr(Importer.LocationWriter):
                 activities.extend(device_activities)
         return activities
 
+    def delete_user_activities(self, user_id):
+        """Deletes all user activities."""
+        if self.database is None:
+            return None, "No database."
+        if user_id is None or len(user_id) == 0:
+            return None, "Bad parameter."
+
+        devices = self.database.retrieve_user_devices(user_id)
+        if devices is not None:
+            for device in devices:
+                device_activities = self.database.retrieve_device_activities(device, 0, num_results)
+                for activity in device_activities:
+                    pass
+
     def retrieve_activity_visibility(self, device_str, activity_id):
         """Returns the visibility setting for the specified activity."""
         if self.database is None:

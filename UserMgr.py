@@ -19,6 +19,8 @@ class UserMgr(object):
         self.database = None
 
     def authenticate_user(self, email, password):
+        """Validates a user against the credentials in the database."""
+
         if self.database is None:
             return False, "No database."
         if len(email) == 0:
@@ -26,7 +28,7 @@ class UserMgr(object):
         if len(password) < MIN_PASSWORD_LEN:
             return False, "The password is too short."
 
-        user_id, db_hash1, user_name = self.database.retrieve_user(email)
+        _, db_hash1, _ = self.database.retrieve_user(email)
         if db_hash1 is None:
             return False, "The user could not be found."
         db_hash2 = bcrypt.hashpw(password.encode('utf-8'), db_hash1.encode('utf-8'))
@@ -35,6 +37,8 @@ class UserMgr(object):
         return False, "The password is invalid."
 
     def create_user(self, email, realname, password1, password2, device_str):
+        """Adds a user to the database."""
+
         if self.database is None:
             return False, "No database."
         if len(email) == 0:
@@ -49,15 +53,48 @@ class UserMgr(object):
             return False, "The user already exists."
 
         salt = bcrypt.gensalt()
-        hash = bcrypt.hashpw(password1.encode('utf-8'), salt)
-        if not self.database.create_user(email, realname, hash):
+        computed_hash = bcrypt.hashpw(password1.encode('utf-8'), salt)
+        if not self.database.create_user(email, realname, computed_hash):
             return False, "An internal error was encountered when creating the user."
 
         if len(device_str) > 0:
-            user_id, user_hash, user_realname = self.database.retrieve_user(email)
+            user_id, _, _ = self.database.retrieve_user(email)
             self.database.create_user_device(user_id, device_str)
 
         return True, "The user was created."
+
+    def update_user(self, user_id, email, realname, password1, password2):
+        """Updates a user's database entry."""
+
+        if self.database is None:
+            return False, "No database."
+        if user_id is None:
+            return False, "Unexpected empty object: user_id."
+        if len(email) == 0:
+            return False, "Email address not provided."
+        if len(realname) == 0:
+            return False, "Name not provided."
+        if len(password1) < MIN_PASSWORD_LEN:
+            return False, "The password is too short."
+        if password1 != password2:
+            return False, "The passwords do not match."
+        if self.database.retrieve_user(email) is None:
+            return False, "The user already exists."
+
+        salt = bcrypt.gensalt()
+        computed_hash = bcrypt.hashpw(password1.encode('utf-8'), salt)
+        if not self.database.update_user(user_id, email, realname, computed_hash):
+            return False, "An internal error was encountered when creating the user."
+
+        return True, "The user was updated."
+
+    def delete_user(self, user_id):
+        """Removes a user from the database."""
+        if self.database is None:
+            return False, "No database."
+        if user_id is None or len(user_id) == 0:
+            return False, "Bad parameter."
+        return self.database.delete_user(user_id)
 
     def create_user_device(self, email, device_str):
         if self.database is None:
