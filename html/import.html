@@ -45,8 +45,8 @@ function show_manual_entry_options()
 		outerDiv.appendChild(label);
 
 		var value = document.createElement("input");
-		value.setAttribute("type", "text");
-		value.setAttribute("value", "0.0");
+		value.setAttribute("type", "number");
+		value.setAttribute("value", 0.0);
 		document.body.appendChild(value);
 		outerDiv.appendChild(value);
 
@@ -69,11 +69,11 @@ ${nav}
 </section>
 
 <div class="import" style="width: 600px">
-	<h2>Import From a File:</h2>
+	<h2>Import From a File</h2>
 	<form action="${root_url}/upload" method="post" enctype="multipart/form-data">
 		Select files: <input type="file" name="ufile" multiple><input type="submit">
 	</form>
-	<h2>Manual Entry:</h2>
+	<h2>Manual Entry</h2>
 	<form onChange="return show_manual_entry_options()" method="post" enctype="multipart/form-data">
 		<select id="activity_type" name="activity_type">
 ${activity_type_list}
