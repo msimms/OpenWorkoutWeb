@@ -17,18 +17,18 @@ function serialize(list)
 
 function send_post_request(url, params)
 {
+	var result = false;
+
 	var xml_http = new XMLHttpRequest();
 	var content_type = "application/x-www-form-urlencoded; charset=utf-8";
 
-	xml_http.open("POST", url, true);
+	xml_http.open("POST", url, false);
 	xml_http.setRequestHeader('Content-type', content_type);
 
 	xml_http.onreadystatechange = function()
 	{
-		if ((xml_http.readyState == 4) && (xml_http.status == 200))
-		{
-			window.location.replace("${root_url}");
-		}
+		result = (xml_http.status == 200);
 	}
 	xml_http.send(serialize(params));
+	return result;
 }

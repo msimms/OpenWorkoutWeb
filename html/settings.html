@@ -29,7 +29,10 @@ function update_email()
 	var new_email = document.getElementById("new_email").value;
 	var dict = [];
 	dict.push({["email"] : new_email});
-	send_post_request(the_url, dict);
+	if (send_post_request(the_url, dict))
+		alert("Email updated!");
+	else
+		alert("An error occurred!");
 }
 
 function update_password()
@@ -42,7 +45,10 @@ function update_password()
 	dict.push({["old_password"] : current_pword});
 	dict.push({["new_password1"] : new_pword1});
 	dict.push({["new_password2"] : new_pword2});
-	send_post_request(the_url, dict);
+	if (send_post_request(the_url, dict))
+		alert("Password updated!");
+	else
+		alert("An error occurred!");
 }
 
 function delete_user()
@@ -51,7 +57,10 @@ function delete_user()
 	var pword = document.getElementById("password").value;
 	var dict = [];
 	dict.push({["password"] : pword});
-	send_post_request(the_url, dict);
+	if (send_post_request(the_url, dict))
+		window.location.replace("${root_url}");
+	else
+		alert("An error occurred!");
 }
 </script>
 
