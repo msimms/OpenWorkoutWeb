@@ -1109,7 +1109,7 @@ class StraenWeb(object):
             new_password2 = cherrypy.request.params.get("new_password2")
 
             # Reauthenticate the user.
-            user_logged_in, info_str = self.authenticate_user(username, old_password)
+            user_logged_in, info_str = self.user_mgr.authenticate_user(username, old_password)
             if user_logged_in:
 
                 # Update the user's password in the database.
@@ -1145,7 +1145,7 @@ class StraenWeb(object):
             password = cherrypy.request.params.get("password")
 
             # Reauthenticate the user.
-            user_logged_in, info_str = self.authenticate_user(username, password)
+            user_logged_in, info_str = self.user_mgr.authenticate_user(username, password)
             if user_logged_in:
                 self.data_mgr.delete_user_activities(user_id)
                 self.user_mgr.delete_user(user_id)

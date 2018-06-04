@@ -203,7 +203,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            self.activities_collection.delete({"device_id": device_str})
+            self.activities_collection.remove({"device_str": device_str})
             return True
         except:
             traceback.print_exc(file=sys.stdout)
