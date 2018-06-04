@@ -6,6 +6,7 @@ import traceback
 from bson.objectid import ObjectId
 import pymongo
 import Database
+import StraenKeys
 
 
 class Device(object):
@@ -195,6 +196,20 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def delete_user_device(self, device_str):
+        """Deletes method for a device."""
+        if device_str is None:
+            self.log_error(MongoDatabase.delete_user_device.__name__ + "Unexpected empty object: device_str")
+            return False
+
+        try:
+            self.activities_collection.delete({"device_id": device_str})
+            return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def retrieve_users_followed(self, user_id):
         """Returns the user ids for all users that are followed by the user with the specified id."""
         if user_id is None:
@@ -277,13 +292,28 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_device_activities(self, device_str, start, num_results):
+    def retrieve_device_activity_list(self, device_str, start, num_results):
         if device_str is None:
-            self.log_error(MongoDatabase.retrieve_device_activities.__name__ + "Unexpected empty object: device_str")
+            self.log_error(MongoDatabase.retrieve_device_activity_list.__name__ + "Unexpected empty object: device_str")
+            return None
+        if num_results is not None and num_results <= 0:
             return None
 
         try:
-            return list(self.activities_collection.find({"device_str": device_str}).sort("_id", -1).skip(start).limit(num_results))
+            # Things we don't need.
+            exclude_keys = {}
+            exclude_keys[StraenKeys.CADENCE_KEY] = False
+            exclude_keys[StraenKeys.CURRENT_SPEED_KEY] = False
+            exclude_keys[StraenKeys.AVG_SPEED_KEY] = False
+            exclude_keys[StraenKeys.MOVING_SPEED_KEY] = False
+            exclude_keys[StraenKeys.HEART_RATE_KEY] = False
+            exclude_keys[StraenKeys.CURRENT_PACE_KEY] = False
+            exclude_keys[StraenKeys.POWER_KEY] = False
+
+            if start is None or num_results is None:
+                return list(self.activities_collection.find({"device_str": device_str}, exclude_keys).sort("_id", -1))
+            else:
+                return list(self.activities_collection.find({"device_str": device_str}, exclude_keys).sort("_id", -1).skip(start).limit(num_results))
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
@@ -305,6 +335,7 @@ class MongoDatabase(Database.Database):
         return None
 
     def create_activity(self, activity_id, activty_name, device_str):
+        """Create method for an activity."""
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity.__name__ + "Unexpected empty object: activity_id")
             return False
@@ -318,6 +349,21 @@ class MongoDatabase(Database.Database):
         try:
             post = {"activity_id": str(activity_id), "activty_name": activty_name, "device_str": device_str, "visibility": "public", "locations": []}
             self.activities_collection.insert(post)
+            return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def delete_activity(self, object_id):
+        """Delete method for an activity, specified by the database object ID."""
+        if object_id is None:
+            self.log_error(MongoDatabase.delete_activity.__name__ + "Unexpected empty object: object_id")
+            return False
+
+        try:
+            activity_id_obj = ObjectId(object_id)
+            self.activities_collection.delete_one({"_id": activity_id_obj})
             return True
         except:
             traceback.print_exc(file=sys.stdout)

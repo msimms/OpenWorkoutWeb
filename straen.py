@@ -368,7 +368,7 @@ class StraenWeb(object):
 
             self.data_mgr.update_activity_visibility(device_str, int(activity_id), new_visibility)
         except:
-            cherrypy.log.error('Unhandled exception in my_activities', 'EXEC', logging.WARNING)
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.update_visibility.__name__, 'EXEC', logging.WARNING)
 
     @staticmethod
     def timestamp_format():
@@ -557,6 +557,10 @@ class StraenWeb(object):
             str(row_id) + "\" onclick='handleVisibilityClick(this, \"" + activity[StraenKeys.ACTIVITY_DEVICE_STR_KEY] + "\", " + activity_id + ")';>"
         row += "<span>" + checkbox_label + "</span></label>"
         row += "</td>"
+        if user_realname is None:
+            row += "<td>"
+            row += "<button type=\"button\" onclick=\"return on_delete('" + activity[StraenKeys.ACTIVITY_DEVICE_STR_KEY] + "', '" + activity_id + "')\">Delete</button>"
+            row += "</td>"
         row += "</table>\n"
         row += "</div>\n"
         return row
@@ -650,7 +654,7 @@ class StraenWeb(object):
                 cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
-            activities = self.data_mgr.retrieve_user_activities(user_id, 0, 10)
+            activities = self.data_mgr.retrieve_user_activity_list(user_id, 0, 25)
             activities_list_str = ""
             row_id = 0
             if activities is not None and isinstance(activities, list):
@@ -685,7 +689,7 @@ class StraenWeb(object):
                 cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
-            activities = self.data_mgr.retrieve_user_activities(user_id, 0, 10)
+            activities = self.data_mgr.retrieve_user_activity_list(user_id, 0, 25)
             activities_list_str = ""
             row_id = 0
             if activities is not None and isinstance(activities, list):
@@ -894,6 +898,55 @@ class StraenWeb(object):
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.import_activity.__name__, 'EXEC', logging.WARNING)
         return self.error()
+
+    @cherrypy.expose
+    def delete_activity(self, *args, **kw):
+        """Deletes the device with the activity ID, assuming it is owned by the current user."""
+
+        try:
+            # Get the logged in user.
+            username = cherrypy.session.get(SESSION_KEY)
+            if username is None:
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
+
+            # Get the details of the logged in user.
+            user_id, _, _ = self.user_mgr.retrieve_user(username)
+            if user_id is None:
+                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
+                raise cherrypy.HTTPRedirect(LOGIN_URL)
+
+            # Get the device and activity IDs from the push request.
+            device_id = cherrypy.request.params.get("device_id")
+            activity_id = cherrypy.request.params.get("activity_id")
+
+            # Get the user's devices.
+            devices = self.data_mgr.retrieve_user_device_list(user_id)
+            if device_id not in devices:
+                cherrypy.log.error('Unknown device ID', 'EXEC', logging.ERROR)
+                raise cherrypy.HTTPRedirect("/my_activities")
+
+            # Get the activiites recorded on the specified device.
+            activities = self.data_mgr.retrieve_device_activity_list(device_id, None, None)
+            deleted = False
+            for activity in activities:
+                if StraenKeys.ACTIVITY_ID_KEY in activity:
+                    if activity[StraenKeys.ACTIVITY_ID_KEY] == activity_id:
+                        self.data_mgr.delete_activity(activity['_id'])
+                        deleted = True
+                        break
+
+            # Did we find it?
+            if not deleted:
+                cherrypy.log.error('Unknown activity ID', 'EXEC', logging.ERROR)
+                raise cherrypy.HTTPRedirect("/my_activities")
+
+            # Refresh the page.
+            raise cherrypy.HTTPRedirect("/my_activities")
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.delete_activity.__name__, 'EXEC', logging.WARNING)
+        return ""
 
     @cherrypy.expose
     @require()

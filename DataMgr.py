@@ -37,8 +37,17 @@ class DataMgr(Importer.LocationWriter):
         importer = Importer.Importer(self)
         return importer.import_file(username, local_file_name, file_extension)
 
-    def retrieve_user_activities(self, user_id, start, num_results):
-        """Returns a list containing all of the user's activities, up to num_results."""
+    def retrieve_user_device_list(self, user_id):
+        """Returns a list of all the devices associated with the specified user."""
+        if self.database is None:
+            return None, "No database."
+        if user_id is None or len(user_id) == 0:
+            return None, "Bad parameter."
+
+        return self.database.retrieve_user_devices(user_id)
+
+    def retrieve_user_activity_list(self, user_id, start, num_results):
+        """Returns a list containing all of the user's activities, up to num_results. num_results can be None for all activiites."""
         if self.database is None:
             return None, "No database."
         if user_id is None or len(user_id) == 0:
@@ -48,9 +57,18 @@ class DataMgr(Importer.LocationWriter):
         devices = self.database.retrieve_user_devices(user_id)
         if devices is not None:
             for device in devices:
-                device_activities = self.database.retrieve_device_activities(device, start, num_results)
+                device_activities = self.database.retrieve_device_activity_list(device, start, num_results)
                 activities.extend(device_activities)
         return activities
+
+    def retrieve_device_activity_list(self, device_id, start, num_results):
+        """Returns a list containing all of the device's activities, up to num_results. num_results can be None for all activiites."""
+        if self.database is None:
+            return None, "No database."
+        if device_id is None or len(device_id) == 0:
+            return None, "Bad parameter."
+
+        return self.database.retrieve_device_activity_list(device_id, start, num_results)
 
     def delete_user_activities(self, user_id):
         """Deletes all user activities."""
@@ -62,9 +80,13 @@ class DataMgr(Importer.LocationWriter):
         devices = self.database.retrieve_user_devices(user_id)
         if devices is not None:
             for device in devices:
-                device_activities = self.database.retrieve_device_activities(device, 0, num_results)
-                for activity in device_activities:
-                    pass
+                self.database.delete_user_device(device)
+
+    def delete_activity(self, object_id):
+        """Delete the activity with the specified object ID."""
+        if self.database is None:
+            return None, "No database."
+        return self.database.delete_activity(object_id)
 
     def retrieve_activity_visibility(self, device_str, activity_id):
         """Returns the visibility setting for the specified activity."""
