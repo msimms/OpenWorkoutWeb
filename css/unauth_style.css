@@ -28,7 +28,9 @@ a:active {color: #FF00CC}
 
 .loginbackground {
 	margin: 0px 0px 0px 0px;
-	height: 1080px;
+	padding: 250px;
+	width: auto;
+	height: auto;
 	background: url('../images/main_background7.jpg');
 	background-size: cover;
 }
