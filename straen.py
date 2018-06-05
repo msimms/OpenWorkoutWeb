@@ -1007,12 +1007,18 @@ class StraenWeb(object):
     @require()
     def submit_user_search(self, *args, **kw):
         """Processes a search user request."""
-
         try:
-            user = cherrypy.request.params.get("searchname")
-            matched_users = self.user_mgr.retrieve_matched_users(user)
+            searchname = cherrypy.request.params.get("searchname")
+            if searchname is None:
+                cherrypy.log.error('searchname is None ' + StraenWeb.submit_user_search.__name__, 'EXEC', logging.ERROR)
+                return self.error()
+
+            matched_users = self.user_mgr.retrieve_matched_users(searchname)
             for matched_user in matched_users:
                 pass
+
+            cherrypy.response.status = 200
+            return ""
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.submit_user_search.__name__, 'EXEC', logging.WARNING)
         return self.error()

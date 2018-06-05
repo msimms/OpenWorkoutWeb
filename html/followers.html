@@ -17,23 +17,30 @@
 
 <body>
 
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script>
+
+	function search()
+	{
+		var the_url = "${root_url}/submit_user_search";
+		var searchname = document.getElementById("searchname").value;
+		var dict = [];
+
+		dict.push({["searchname"] : searchname});
+		if (!send_post_request(the_url, dict))
+			alert("An error occurred!");
+	}
+
+</script>
+
 <section class="nav">
 ${nav}
 </section>
 
 <div class="user_search_form" style="width: 600px">
 	<h2>Search for a user</h2>
-	<form name="user_search" action="${root_url}/submit_user_search" method="post" accept-charset="utf-8">
-		<ul>
-			<li>
-				<label for="user" style="width: 440px">User Email or Name</label>
-				<input type="search" name="searchname" style="width: 440px" placeholder="Joe User" required>
-			</li>
-			<li>
-				<input type="submit" value="Search">
-			</li>
-		</ul>
-	</form>
+	<p>User Email or Name: <input type="text" id="searchname"><br></p>
+	<button type="button" onclick="return search()">Search</button>
 </div>
 
 <div class="users_list" style="width: 600px">
@@ -44,4 +51,5 @@ ${nav}
 </div>
 
 </body>
+
 </html>
