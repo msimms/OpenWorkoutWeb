@@ -39,7 +39,8 @@ g_root_dir = os.path.dirname(os.path.abspath(__file__))
 g_root_url = 'http://straen-app.com'
 g_tempfile_dir = os.path.join(g_root_dir, 'tempfile')
 g_tempmod_dir = os.path.join(g_root_dir, 'tempmod')
-g_map_single_html_file = os.path.join(g_root_dir, HTML_DIR, 'map_single.html')
+g_map_single_html_file = os.path.join(g_root_dir, HTML_DIR, 'map_single_google.html')
+g_map_multi_html_file = os.path.join(g_root_dir, HTML_DIR, 'map_multi_google.html')
 g_error_logged_in_html_file = os.path.join(g_root_dir, HTML_DIR, 'error_logged_in.html')
 g_app = None
 g_google_maps_key = ""
@@ -505,7 +506,7 @@ class StraenWeb(object):
                 last_lat = last_loc[StraenKeys.LOCATION_LAT_KEY]
                 last_lon = last_loc[StraenKeys.LOCATION_LON_KEY]
 
-        my_template = Template(filename=g_map_single_html_file, module_directory=g_tempmod_dir)
+        my_template = Template(filename=g_map_multi_html_file, module_directory=g_tempmod_dir)
         return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, googleMapsKey=g_google_maps_key, centerLat=center_lat, centerLon=center_lon, lastLat=last_lat, lastLon=last_lon, routeCoordinates=route_coordinates, routeLen=len(locations), userId=str(user_id))
 
     def render_activity_row(self, user_realname, activity, row_id):
