@@ -17,6 +17,7 @@ class StraenApi(object):
     def __init__(self, root_dir):
         super(StraenApi, self).__init__()
         self.database = StraenDb.MongoDatabase(root_dir)
+        self.database.connect()
 
     def parse_json_loc_obj(self, json_obj):
         try:
@@ -66,7 +67,7 @@ class StraenApi(object):
             if len(username) > 0:
                 user_id, _, _ = self.database.retrieve_user(username)
                 user_devices = self.database.retrieve_user_devices(user_id)
-                if user_devices is not None and device_str not in user_devicees:
+                if user_devices is not None and device_str not in user_devices:
                     self.database.create_user_device(user_id, device_str)
         except ValueError, e:
             cherrypy.log.error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj), 'EXEC', logging.WARNING)
@@ -74,11 +75,6 @@ class StraenApi(object):
             cherrypy.log.error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj), 'EXEC', logging.WARNING)
         except:
             cherrypy.log.error("Error parsing JSON location data. JSON object = " + str(json_obj), 'EXEC', logging.WARNING)
-
-    def handle_update_location(self, locations):
-        """Called when the a new GPS point is received from the app."""
-        for location_obj in locations:
-            self.parse_json_loc_obj(location_obj)
 
     def handle_upload_activity_file(self, args):
         pass
@@ -94,12 +90,19 @@ class StraenApi(object):
         if len(args) > 0:
             request = args[0]
             if request == 'update_location':
-                if "locatons" in values:
-                    self.handle_update_location(values["locations"])
+                locations_str = values.keys()[0]
+                if "locations" in locations_str:
+                    json_obj = json.loads(locations_str)
+                    for location_obj in json_obj["locations"]:
+                        self.parse_json_loc_obj(location_obj)
+                        return True, ""
             if request == 'upload_activity_file':
                 self.handle_upload_activity_file(args)
+                return True, ""
             elif request == 'add_tag_to_activity':
                 self.handle_add_tag_to_activity(args)
+                return True, ""
             elif request == 'delete_tag_from_activity':
                 self.handle_delete_tag_from_activity(args)
-                
+                return True, ""
+        return False, ""
