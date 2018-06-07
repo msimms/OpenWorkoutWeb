@@ -42,6 +42,7 @@ g_tempmod_dir = os.path.join(g_root_dir, 'tempmod')
 g_map_single_html_file = os.path.join(g_root_dir, HTML_DIR, 'map_single.html')
 g_error_logged_in_html_file = os.path.join(g_root_dir, HTML_DIR, 'error_logged_in.html')
 g_app = None
+g_google_maps_key = ""
 
 
 def signal_handler(signal, frame):
@@ -466,7 +467,7 @@ class StraenWeb(object):
                 powers_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
 
         my_template = Template(filename=g_map_single_html_file, module_directory=g_tempmod_dir)
-        return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, deviceStr=device_str, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=str(activity_id), currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str)
+        return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, deviceStr=device_str, googleMapsKey=g_google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=str(activity_id), currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str)
 
     def render_page_for_multiple_devices(self, email, user_realname, device_strs, user_id):
         """Helper function for rendering the map corresonding to a multiple devices."""
@@ -505,7 +506,7 @@ class StraenWeb(object):
                 last_lon = last_loc[StraenKeys.LOCATION_LON_KEY]
 
         my_template = Template(filename=g_map_single_html_file, module_directory=g_tempmod_dir)
-        return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, center_lat=center_lat, center_lon=center_lon, last_lat=last_lat, last_lon=last_lon, route_coordinates=route_coordinates, routeLen=len(locations), user_id=str(user_id))
+        return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, googleMapsKey=g_google_maps_key, centerLat=center_lat, centerLon=center_lon, lastLat=last_lat, lastLon=last_lon, routeCoordinates=route_coordinates, routeLen=len(locations), userId=str(user_id))
 
     def render_activity_row(self, user_realname, activity, row_id):
         """Helper function for creating a table row describing an activity."""
@@ -1007,6 +1008,7 @@ class StraenWeb(object):
     @require()
     def submit_user_search(self, *args, **kw):
         """Processes a search user request."""
+
         try:
             searchname = cherrypy.request.params.get("searchname")
             if searchname is None:
@@ -1254,6 +1256,7 @@ def main():
     global g_root_dir
     global g_root_url
     global g_app
+    global g_google_maps_key
 
     # Parse command line options.
     parser = argparse.ArgumentParser()
@@ -1262,6 +1265,7 @@ def main():
     parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS", required=False)
     parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS", required=False)
     parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS", required=False)
+    parser.add_argument("--googlemapskey", default="", help="API key for Google Maps", required=False)
 
     try:
         args = parser.parse_args()
@@ -1300,6 +1304,8 @@ def main():
     user_mgr = UserMgr.UserMgr(g_root_dir)
     data_mgr = DataMgr.DataMgr(g_root_dir)
     g_app = StraenWeb(user_mgr, data_mgr)
+
+    g_google_maps_key = args.googlemapskey
 
     cherrypy.tools.straenweb_auth = cherrypy.Tool('before_handler', check_auth)
 
