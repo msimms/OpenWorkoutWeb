@@ -1016,6 +1016,10 @@ class StraenWeb(object):
                 cherrypy.log.error('searchname is None ' + StraenWeb.submit_user_search.__name__, 'EXEC', logging.ERROR)
                 return self.error()
 
+            if len(searchname) == 0:
+                cherrypy.log.error('searchname is empty ' + StraenWeb.submit_user_search.__name__, 'EXEC', logging.ERROR)
+                return self.error()
+
             matched_users = self.user_mgr.retrieve_matched_users(searchname)
             json_result = json.dumps(matched_users, ensure_ascii=False)
             cherrypy.response.status = 200
