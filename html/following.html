@@ -25,10 +25,33 @@
 		var the_url = "${root_url}/submit_user_search";
 		var searchname = document.getElementById("searchname").value;
 		var dict = [];
+		var result_text = {};
 
 		dict.push({["searchname"] : searchname});
-		if (!send_post_request(the_url, dict))
+		if (send_post_request(the_url, dict, result_text))
+		{
+			var obj = JSON.parse(result_text.value);
+			var table = document.getElementById('search_results');
+			for (var i = 0; i < obj.length; i++)
+			{
+				var tr = document.createElement('tr');   
+				var td1 = document.createElement('td');
+				var td2 = document.createElement('td');
+				var text1 = document.createTextNode(obj[i]);
+				var text2 = document.createTextNode('Follow');
+
+				td1.appendChild(text1);
+				td2.appendChild(text2);
+				tr.appendChild(td1);
+				tr.appendChild(td2);
+
+				table.appendChild(tr);
+			}
+		}
+		else
+		{
 			alert("An error occurred!");
+		}
 	}
 
 </script>
@@ -41,6 +64,11 @@ ${nav}
 	<h2>Search for a user</h2>
 	<p>User Email or Name: <input type="text" id="searchname"><br></p>
 	<button type="button" onclick="return search()">Search</button>
+</div>
+
+<div class="users_list" style="width: 600px">
+	<table id="search_results" >
+	</table>
 </div>
 
 <div class="users_list" style="width: 600px">

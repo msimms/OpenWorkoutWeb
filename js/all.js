@@ -15,7 +15,7 @@ function serialize(list)
 	return str.join("&");
 }
 
-function send_post_request(url, params)
+function send_post_request(url, params, result_text)
 {
 	var result = false;
 
@@ -27,6 +27,10 @@ function send_post_request(url, params)
 
 	xml_http.onreadystatechange = function()
 	{
+		if (xml_http.readyState == XMLHttpRequest.DONE)
+		{
+			result_text.value = xml_http.responseText;
+		}
 		result = (xml_http.status == 200);
 	}
 	xml_http.send(serialize(params));

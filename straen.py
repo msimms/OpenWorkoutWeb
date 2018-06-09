@@ -1017,11 +1017,9 @@ class StraenWeb(object):
                 return self.error()
 
             matched_users = self.user_mgr.retrieve_matched_users(searchname)
-            for matched_user in matched_users:
-                pass
-
+            json_result = json.dumps(matched_users, ensure_ascii=False)
             cherrypy.response.status = 200
-            return ""
+            return json_result
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.submit_user_search.__name__, 'EXEC', logging.WARNING)
         return self.error()

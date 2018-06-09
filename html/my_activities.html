@@ -39,10 +39,11 @@
 		{
 			var the_url = "${root_url}/delete_activity";
 			var dict = [];
+			var result_text = {};
 
 			dict.push({["device_id"] : device_id});
 			dict.push({["activity_id"] : activity_id});
-			if (send_post_request(the_url, dict))
+			if (send_post_request(the_url, dict, result_text))
 				window.location.replace("${root_url}/all_activities");
 			else
 				alert("An error occurred!");
