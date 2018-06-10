@@ -63,6 +63,22 @@ class UserMgr(object):
 
         return True, "The user was created."
 
+    def retrieve_user(self, email):
+        """Retrieve method for a user."""
+        if self.database is None:
+            return False, "No database."
+        if email is None or len(email) == 0:
+            return False, "Bad parameter."
+        return self.database.retrieve_user(email)
+
+    def retrieve_matched_users(self, name):
+        """Returns a list of user names for users that match the specified regex."""
+        if self.database is None:
+            return False, "No database."
+        if name is None or len(name) == 0:
+            return False, "Bad parameter."
+        return self.database.retrieve_matched_users(name)
+
     def update_user(self, user_id, email, realname, password1, password2):
         """Updates a user's database entry."""
 
@@ -107,7 +123,8 @@ class UserMgr(object):
         user_id, _, _ = self.database.retrieve_user(email)
         self.database.create_user_device(user_id, device_str)
 
-    def list_user_devices(self, user_id):
+    def retrieve_user_devices(self, user_id):
+        """Returns a list of all the devices associated with the specified user."""
         if self.database is None:
             return False, "No database."
         if user_id is None or len(user_id) == 0:
@@ -129,27 +146,11 @@ class UserMgr(object):
             return False, "Bad parameter."
         return self.database.retrieve_followers(user_id)
 
-    def request_to_follow(self, email, following_name):
+    def request_to_follow(self, user_id, target_email):
         if self.database is None:
             return False, "No database."
-        if email is None or len(email) == 0:
+        if user_id is None or len(user_id) == 0:
             return False, "Bad parameter."
-        if following_name is None or len(following_name) == 0:
+        if target_email is None or len(target_email) == 0:
             return False, "Bad parameter."
-        return self.database.create_following_entry(email, following_name)
-
-    def retrieve_user(self, email):
-        """Retrieve method for a user."""
-        if self.database is None:
-            return False, "No database."
-        if email is None or len(email) == 0:
-            return False, "Bad parameter."
-        return self.database.retrieve_user(email)
-
-    def retrieve_matched_users(self, name):
-        """Returns a list of user names for users that match the specified regex."""
-        if self.database is None:
-            return False, "No database."
-        if name is None or len(name) == 0:
-            return False, "Bad parameter."
-        return self.database.retrieve_matched_users(name)
+        return self.database.create_following_entry(user_id, target_email)

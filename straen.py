@@ -732,7 +732,10 @@ class StraenWeb(object):
                 cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
-            devices = self.user_mgr.list_user_devices(user_id)
+            # Get the list of devices that are associated with the user.
+            devices = self.user_mgr.retrieve_user_devices(user_id)
+
+            # Build a list of table rows from the device information.
             device_list_str = ""
             if devices is not None and isinstance(devices, list):
                 for device in devices:
@@ -861,7 +864,7 @@ class StraenWeb(object):
             activity_id = cherrypy.request.params.get("activity_id")
 
             # Get the user's devices.
-            devices = self.data_mgr.retrieve_user_device_list(user_id)
+            devices = self.user_mgr.retrieve_user_devices(user_id)
             if device_id not in devices:
                 cherrypy.log.error('Unknown device ID', 'EXEC', logging.ERROR)
                 raise cherrypy.HTTPRedirect("/my_activities")
@@ -914,57 +917,6 @@ class StraenWeb(object):
             raise e
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.settings.__name__, 'EXEC', logging.WARNING)
-        return self.error()
-
-    @cherrypy.expose
-    @require()
-    def request_to_follow(self, email, target_email, *args, **kw):
-        """Renders the page for inviting someone to follow."""
-
-        try:
-            # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
-            if username is None:
-                raise cherrypy.HTTPRedirect(LOGIN_URL)
-
-            # Get the details of the logged in user.
-            user_id, _, _ = self.user_mgr.retrieve_user(username)
-            if user_id is None:
-                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
-                raise cherrypy.HTTPRedirect(LOGIN_URL)
-
-            if self.user_mgr.request_to_follow(username, target_email):
-                result = ""
-            else:
-                result = self.error("Unable to process the request.")
-            return result
-        except cherrypy.HTTPRedirect as e:
-            raise e
-        except:
-            cherrypy.log.error('Unhandled exception in ' + StraenWeb.request_to_follow.__name__, 'EXEC', logging.WARNING)
-        return self.error()
-
-    @cherrypy.expose
-    @require()
-    def submit_user_search(self, *args, **kw):
-        """Processes a search user request."""
-
-        try:
-            searchname = cherrypy.request.params.get("searchname")
-            if searchname is None:
-                cherrypy.log.error('searchname is None ' + StraenWeb.submit_user_search.__name__, 'EXEC', logging.ERROR)
-                return self.error()
-
-            if len(searchname) == 0:
-                cherrypy.log.error('searchname is empty ' + StraenWeb.submit_user_search.__name__, 'EXEC', logging.ERROR)
-                return self.error()
-
-            matched_users = self.user_mgr.retrieve_matched_users(searchname)
-            json_result = json.dumps(matched_users, ensure_ascii=False)
-            cherrypy.response.status = 200
-            return json_result
-        except:
-            cherrypy.log.error('Unhandled exception in ' + StraenWeb.submit_user_search.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -1172,10 +1124,17 @@ class StraenWeb(object):
 
         response = ""
         try:
+            # Get the logged in user.
+            user_id = None
+            username = cherrypy.session.get(SESSION_KEY)
+            if username is not None:
+                user_id, _, _ = self.user_mgr.retrieve_user(username)
+
+            # Process the API request.
             if len(args) > 0:
                 api_version = args[0]
                 if api_version == '1.0':
-                    api = StraenApi.StraenApi(g_root_dir)
+                    api = StraenApi.StraenApi(self.user_mgr, self.data_mgr, user_id)
                     handled, response = api.handle_api_1_0_request(args[1:], kw)
                     if not handled:
                         cherrypy.response.status = 400

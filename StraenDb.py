@@ -244,12 +244,13 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_following_entry(self, user_id, following_name):
+    def create_following_entry(self, user_id, target_email):
+        """Appends a user to the followers list of the user with the specified id."""
         if user_id is None:
             self.log_error(MongoDatabase.create_following_entry.__name__ + "Unexpected empty object: user_id")
             return None
-        if following_name is None:
-            self.log_error(MongoDatabase.create_following_entry.__name__ + "Unexpected empty object: following_name")
+        if target_email is None:
+            self.log_error(MongoDatabase.create_following_entry.__name__ + "Unexpected empty object: target_email")
             return False
 
         try:
@@ -259,8 +260,8 @@ class MongoDatabase(Database.Database):
                 user_list = []
                 if 'following' in user:
                     user_list = user['following']
-                if following_name not in user_list:
-                    user_list.append(following_name)
+                if target_email not in user_list:
+                    user_list.append(target_email)
                     user['following'] = user_list
                     self.users_collection.save(user)
         except:
@@ -268,31 +269,8 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_follower_entry(self, user_id, follower_name):
-        if user_id is None:
-            self.log_error(MongoDatabase.create_follower_entry.__name__ + "Unexpected empty object: user_id")
-            return None
-        if follower_name is None:
-            self.log_error(MongoDatabase.create_follower_entry.__name__ + "Unexpected empty object: follower_name")
-            return False
-
-        try:
-            user_id_obj = ObjectId(user_id)
-            user = self.users_collection.find_one({"_id": user_id_obj})
-            if user is not None:
-                user_list = []
-                if 'follower' in user:
-                    user_list = user['follower']
-                if follower_name not in user_list:
-                    user_list.append(follower_name)
-                    user['follower'] = user_list
-                    self.users_collection.save(user)
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return False
-
     def retrieve_device_activity_list(self, device_str, start, num_results):
+        """Retrieves the list of activities associated with the specified device."""
         if device_str is None:
             self.log_error(MongoDatabase.retrieve_device_activity_list.__name__ + "Unexpected empty object: device_str")
             return None
@@ -320,6 +298,7 @@ class MongoDatabase(Database.Database):
         return None
 
     def retrieve_most_recent_activity_id_for_device(self, device_str):
+        """Retrieves the ID for the most recent activity to be associated with the specified device."""
         if device_str is None:
             self.log_error(MongoDatabase.retrieve_most_recent_activity_id_for_device.__name__ + "Unexpected empty object: device_str")
             return None

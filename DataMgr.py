@@ -29,22 +29,24 @@ class DataMgr(Importer.LocationWriter):
         """Inherited from LocationWriter. Create method for a location."""
         if self.database is None:
             return None, "No database."
-
         return self.database.create_location(device_str, activity_id, date_time, latitude, longitude, altitude)
+
+    def create_sensordata(self, device_str, activity_id, date_time, key, value):
+        """Create method for sensor data."""
+        if self.database is None:
+            return None, "No database."
+        self.database.create_sensordata(device_str, activity_id, date_time, key, value)
+
+    def create_metadata(self, device_str, activity_id, date_time, key, value):
+        """Create method for activity metadata."""
+        if self.database is None:
+            return None, "No database."
+        self.database.create_metadata(device_str, activity_id, date_time, key, value)
 
     def import_file(self, username, local_file_name, file_extension):
         """Imports the contents of a local file into the database."""
         importer = Importer.Importer(self)
         return importer.import_file(username, local_file_name, file_extension)
-
-    def retrieve_user_device_list(self, user_id):
-        """Returns a list of all the devices associated with the specified user."""
-        if self.database is None:
-            return None, "No database."
-        if user_id is None or len(user_id) == 0:
-            return None, "Bad parameter."
-
-        return self.database.retrieve_user_devices(user_id)
 
     def retrieve_user_activity_list(self, user_id, start, num_results):
         """Returns a list containing all of the user's activities, up to num_results. num_results can be None for all activiites."""

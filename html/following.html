@@ -20,9 +20,26 @@
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
 
+	function follow()
+	{
+		var the_url = "${root_url}/api/1.0/request_to_follow";
+		var searchname = document.getElementById("target_email").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["target_email"] : searchname});
+		if (send_post_request(the_url, dict, result_text))
+		{
+		}
+		else
+		{
+			alert("An error occurred!");
+		}
+	}
+
 	function search()
 	{
-		var the_url = "${root_url}/submit_user_search";
+		var the_url = "${root_url}/api/1.0/list_matched_users";
 		var searchname = document.getElementById("searchname").value;
 		var dict = [];
 		var result_text = {};
@@ -38,11 +55,12 @@
 				var td1 = document.createElement('td');
 				var td2 = document.createElement('td');
 				var emailText = document.createTextNode(obj[i]);
-				var followLink = document.createElement('a');
+				var followLink = document.createElement('button');
 				var followLinkText = document.createTextNode('Follow');
 				followLink.appendChild(followLinkText);
 				followLink.title = "Follow";
-				followLink.href = "${root_url}/request_follow/" + encodeURI(obj[i]);
+				followLink.value = obj[i];
+				followLink.onclick = follow;
 
 				td1.appendChild(emailText);
 				td2.appendChild(followLink);
