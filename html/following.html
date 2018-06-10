@@ -20,14 +20,13 @@
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
 
-	function follow()
+	function follow(target)
 	{
 		var the_url = "${root_url}/api/1.0/request_to_follow";
-		var searchname = document.getElementById("target_email").value;
 		var dict = [];
 		var result_text = {};
 
-		dict.push({["target_email"] : searchname});
+		dict.push({["target_email"] : target.name});
 		if (send_post_request(the_url, dict, result_text))
 		{
 		}
@@ -57,10 +56,12 @@
 				var emailText = document.createTextNode(obj[i]);
 				var followLink = document.createElement('button');
 				var followLinkText = document.createTextNode('Follow');
+
 				followLink.appendChild(followLinkText);
 				followLink.title = "Follow";
 				followLink.value = obj[i];
-				followLink.onclick = follow;
+				followLink.name = obj[i];
+				followLink.addEventListener('click', function() { follow(this); });
 
 				td1.appendChild(emailText);
 				td2.appendChild(followLink);

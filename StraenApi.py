@@ -122,7 +122,12 @@ class StraenApi(object):
             return False, "Not logged in."
         if 'target_email' not in values:
             return False, "Invalid parameter."
-        if self.user_mgr.request_to_follow(self.user_id, values['target_email']):
+
+        target_email = values['target_email']
+        target_id, _, _ = self.user_mgr.retrieve_user(target_email)
+        if target_id is None:
+            return False, "Target user does not exist."
+        if self.user_mgr.request_to_follow(self.user_id, target_email):
             return True, ""
         return False, ""
 
