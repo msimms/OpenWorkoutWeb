@@ -291,72 +291,10 @@ class StraenWeb(object):
             cherrypy.log.error('Unhandled exception in create_login_submit', 'EXEC', logging.WARNING)
         return ""
 
-    @cherrypy.tools.json_out()
-    @cherrypy.expose
-    def list_users_followed(self, email=None, *args, **kw):
-        """Lists users followed by the logged in user - called from the app."""
-
-        if email is None:
-            return ""
-
-        try:
-            # Get the details of the logged in user.
-            user_id, _, _ = self.user_mgr.retrieve_user(email)
-            if user_id is None:
-                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
-                return "[]"
-
-            followers = self.user_mgr.list_users_followed(email)
-
-            cherrypy.response.headers['Content-Type'] = 'application/json'
-            response = "["
-
-            for follower in followers:
-                if len(response) > 1:
-                    response += ","
-                response += json.dumps({"username": follower})
-
-            response += "]"
-
-            return response
-        except:
-            cherrypy.log.error('Unhandled exception in list_users_followed', 'EXEC', logging.WARNING)
-        return ""
-
-    @cherrypy.tools.json_out()
-    @cherrypy.expose
-    def list_followers(self, email=None, *args, **kw):
-        """Lists users following the logged in user - called from the app."""
-
-        if email is None:
-            return ""
-
-        try:
-            # Get the details of the logged in user.
-            user_id, _, _ = self.user_mgr.retrieve_user(email)
-            if user_id is None:
-                cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
-                return "[]"
-
-            followers = self.user_mgr.retrieve_followers(email)
-
-            cherrypy.response.headers['Content-Type'] = 'application/json'
-            response = "["
-
-            for follower in followers:
-                if len(response) > 1:
-                    response += ","
-                response += json.dumps({"username": follower})
-
-            response += "]"
-
-            return response
-        except:
-            cherrypy.log.error('Unhandled exception in list_followers', 'EXEC', logging.WARNING)
-        return ""
-
     @cherrypy.expose
     def update_visibility(self, device_str, activity_id, visibility):
+        """Changes the visibility of an activity from public to private or vice versa."""
+
         if device_str is None:
             pass
         if activity_id is None:
@@ -371,6 +309,7 @@ class StraenWeb(object):
             self.data_mgr.update_activity_visibility(device_str, int(activity_id), new_visibility)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.update_visibility.__name__, 'EXEC', logging.WARNING)
+        return ""
 
     @staticmethod
     def timestamp_format():
