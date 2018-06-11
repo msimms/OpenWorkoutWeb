@@ -87,7 +87,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None, None, None
 
-    def update_user(self, user_id, username, realname, hash):
+    def update_user(self, user_id, username, realname, passhash):
         """Update method for a user."""
         if user_id is None:
             self.log_error(MongoDatabase.update_user.__name__ + "Unexpected empty object: user_id")
@@ -107,7 +107,7 @@ class MongoDatabase(Database.Database):
         if len(realname) == 0:
             self.log_error(MongoDatabase.update_user.__name__ + "realname too short")
             return False
-        if len(hash) == 0:
+        if len(passhash) == 0:
             self.log_error(MongoDatabase.update_user.__name__ + "hash too short")
             return False
 

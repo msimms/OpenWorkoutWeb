@@ -245,7 +245,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def login_submit(self, **kw):
         """Login - called from the app."""
-
         try:
             email = cherrypy.request.json["username"]
             password = cherrypy.request.json["password"]
@@ -273,7 +272,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def create_login_submit(self, **kw):
         """ Creates a new login - called from the app."""
-
         try:
             email = cherrypy.request.json["username"]
             password1 = cherrypy.request.json["password1"]
@@ -294,7 +292,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def update_visibility(self, device_str, activity_id, visibility):
         """Changes the visibility of an activity from public to private or vice versa."""
-
         if device_str is None:
             pass
         if activity_id is None:
@@ -314,13 +311,11 @@ class StraenWeb(object):
     @staticmethod
     def timestamp_format():
         """The user's desired timestamp format."""
-
         return "%Y/%m/%d %H:%M:%S"
 
     @staticmethod
     def timestamp_code_to_str(ts_code):
         """Converts from unix timestamp to human-readable"""
-
         try:
             return datetime.datetime.fromtimestamp(ts_code).strftime(StraenWeb.timestamp_format())
         except:
@@ -330,7 +325,6 @@ class StraenWeb(object):
     @staticmethod
     def create_navbar():
         """Helper function for building the navigation bar."""
-
         navbar_str = "<nav>\n" \
             "\t<ul>\n" \
             "\t\t<li><a href=\"" + g_root_url + "/my_activities/\">My Activities</a></li>\n" \
@@ -509,7 +503,6 @@ class StraenWeb(object):
     @staticmethod
     def render_user_row(user):
         """Helper function for creating a table row describing a user."""
-
         row = "<tr>"
         row += "<td>"
         row += user
@@ -519,7 +512,6 @@ class StraenWeb(object):
 
     def activity_is_public(self, device_str, activity_id):
         """Returns TRUE if the logged in user is allowed to view the specified activity."""
-
         visibility = self.data_mgr.retrieve_activity_visibility(device_str, activity_id)
         if visibility is not None:
             if visibility == "public":
@@ -531,7 +523,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def error(self, error_str=None):
         """Renders the errorpage."""
-
         try:
             cherrypy.response.status = 500
             error_html_file = os.path.join(g_root_dir, HTML_DIR, 'error.html')
@@ -545,7 +536,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def live(self, device_str):
         """Renders the map page for the current activity from a single device."""
-
         try:
             activity_id = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
             if activity_id is None:
@@ -561,7 +551,6 @@ class StraenWeb(object):
     @require()
     def device(self, device_str, *args, **kw):
         """Renders the map page for a single device."""
-
         try:
             activity_id_str = cherrypy.request.params.get("activity_id")
             if activity_id_str is None:
@@ -582,7 +571,6 @@ class StraenWeb(object):
     @require()
     def my_activities(self, *args, **kw):
         """Renders the list of the specified user's activities."""
-
         try:
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
@@ -617,7 +605,6 @@ class StraenWeb(object):
     @require()
     def all_activities(self, *args, **kw):
         """Renders the list of all activities the specified user is allowed to view."""
-
         try:
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
@@ -652,7 +639,6 @@ class StraenWeb(object):
     @require()
     def following(self, *args, **kw):
         """Renders the list of users the specified user is following."""
-
         try:
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
@@ -686,7 +672,6 @@ class StraenWeb(object):
     @require()
     def followers(self, *args, **kw):
         """Renders the list of users that are following the specified user."""
-
         try:
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
@@ -719,7 +704,6 @@ class StraenWeb(object):
     @require()
     def device_list(self, *args, **kw):
         """Renders the list of a user's devices."""
-
         try:
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
@@ -758,7 +742,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def upload(self, ufile):
         """Processes an upload request."""
-
         try:
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
@@ -801,7 +784,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def manual_entry(self, activity_type):
         """Called when the user selects an activity type, indicatig they want to make a manual data entry."""
-
         try:
             print activity_type
         except cherrypy.HTTPRedirect as e:
@@ -814,7 +796,6 @@ class StraenWeb(object):
     @require()
     def import_activity(self, *args, **kw):
         """Renders the import page."""
-
         try:
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
@@ -846,7 +827,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def delete_activity(self, *args, **kw):
         """Deletes the device with the activity ID, assuming it is owned by the current user."""
-
         try:
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
@@ -896,7 +876,6 @@ class StraenWeb(object):
     @require()
     def settings(self, *args, **kw):
         """Renders the user's settings page."""
-
         try:
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
@@ -922,7 +901,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def submit_login(self, *args, **kw):
         """Processes a login."""
-
         try:
             email = cherrypy.request.params.get("email")
             password = cherrypy.request.params.get("password")
@@ -949,7 +927,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def submit_new_login(self, email, realname, password1, password2, *args, **kw):
         """Creates a new login."""
-
         try:
             user_created, info_str = self.user_mgr.create_user(email, realname, password1, password2, "")
             if user_created:
@@ -970,7 +947,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def update_email(self, *args, **kw):
         """Updates the user's email address."""
-
         try:
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
@@ -992,7 +968,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def update_password(self, *args, **kw):
         """Updates the user's email password."""
-
         try:
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
@@ -1030,7 +1005,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def delete_user(self, *args, **kw):
         """Removes the user and all associated data."""
-
         try:
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
@@ -1062,7 +1036,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def login(self):
         """Renders the login page."""
-
         try:
             login_html_file = os.path.join(g_root_dir, HTML_DIR, 'login.html')
             my_template = Template(filename=login_html_file, module_directory=g_tempmod_dir)
@@ -1074,7 +1047,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def create_login(self):
         """Renders the create login page."""
-
         try:
             create_login_html_file = os.path.join(g_root_dir, HTML_DIR, 'create_login.html')
             my_template = Template(filename=create_login_html_file, module_directory=g_tempmod_dir)
@@ -1086,7 +1058,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def logout(self):
         """Ends the logged in session."""
-
         try:
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
@@ -1109,7 +1080,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def about(self):
         """Renders the about page."""
-
         try:
             about_html_file = os.path.join(g_root_dir, HTML_DIR, 'about.html')
             my_template = Template(filename=about_html_file, module_directory=g_tempmod_dir)
@@ -1121,7 +1091,6 @@ class StraenWeb(object):
     @cherrypy.expose
     def api(self, *args, **kw):
         """Endpoint for API calls."""
-
         response = ""
         try:
             # Get the logged in user.
@@ -1129,6 +1098,9 @@ class StraenWeb(object):
             username = cherrypy.session.get(SESSION_KEY)
             if username is not None:
                 user_id, _, _ = self.user_mgr.retrieve_user(username)
+
+            # Log the API request.
+            cherrypy.log("API request: " + str(args), context='', severity=logging.DEBUG, traceback=False)
 
             # Process the API request.
             if len(args) > 0:

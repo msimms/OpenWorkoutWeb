@@ -19,6 +19,6 @@ LOCATION_TIME_KEY = 'time'
 ACTIVITY_ID_KEY = "activity_id"
 ACTIVITY_DEVICE_STR_KEY = "device_str"
 ACTIVITY_LOCATIONS_KEY = "locations"
-ACTIVITY_NAME_KEY = "activity_name"
+ACTIVITY_NAME_KEY = "name"
 ACTIVITY_TIME_KEY = "time"
 ACTIVITY_VISIBILITY_KEY = "visibility"

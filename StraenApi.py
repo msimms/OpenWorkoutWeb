@@ -1,12 +1,11 @@
 # Copyright 2017 Michael J Simms
 """API request handlers"""
 
-import cherrypy
-import cgi
 import json
 import logging
 import time
-import StraenDb
+import cherrypy
+import Exporter
 import StraenKeys
 
 g_not_meta_data = ["DeviceId", "ActivityId", "ActivityName", "User Name", "Latitude", "Longitude", "Altitude", "Horizontal Accuracy", "Vertical Accuracy"]
@@ -88,6 +87,12 @@ class StraenApi(object):
                 return True, ""
         return False, ""
 
+    def handle_add_activity(self, values):
+        """Called when an API message to add a new activity is received."""
+        if self.user_id is None:
+            return False, "Not logged in."
+        return True, ""
+
     def handle_upload_activity_file(self, values):
         """Called when an API message to upload a file is received."""
         if self.user_id is None:
@@ -112,7 +117,14 @@ class StraenApi(object):
             return False, "Not logged in."
         if 'searchname' not in values:
             return False, "Invalid parameter."
-        matched_users = self.user_mgr.retrieve_matched_users(values['searchname'])
+
+        search_name = values['searchname']
+        search_name_len = len(search_name)
+        if search_name_len < 3:
+            return False, "Search name is too short."
+        if search_name_len > 100:
+            return False, "Search name is too long."
+        matched_users = self.user_mgr.retrieve_matched_users(search_name)[:100] # Limit the number of results
         json_result = json.dumps(matched_users, ensure_ascii=False)
         return True, json_result
 
@@ -131,6 +143,30 @@ class StraenApi(object):
             return True, ""
         return False, ""
 
+    def handle_unfollow(self, values):
+        """Called when an API message request to follow another user is received."""
+        if self.user_id is None:
+            return False, "Not logged in."
+        if 'target_email' not in values:
+            return False, "Invalid parameter."
+
+        target_email = values['target_email']
+        target_id, _, _ = self.user_mgr.retrieve_user(target_email)
+        if target_id is None:
+            return False, "Target user does not exist."
+        return False, ""
+
+    def handle_export_activity(self, values):
+        """Called when an API message request to follow another user is received."""
+        if self.user_id is None:
+            return False, "Not logged in."
+        if 'activity_id' not in values:
+            return False, "Invalid parameter."
+
+        exporter = Exporter.Exporter()
+        result = exporter.export(self.data_mgr, values['activity_id'])
+        return True, result
+
     def handle_api_1_0_request(self, args, values):
         """Called to parse a version 1.0 API message."""
         if len(args) <= 0:
@@ -139,7 +175,9 @@ class StraenApi(object):
         request = args[0]
         if request == 'update_location':
             return self.handle_update_location(values)
-        if request == 'upload_activity_file':
+        elif request == 'add_activity':
+            return self.handle_add_activity(values)
+        elif request == 'upload_activity_file':
             return self.handle_upload_activity_file(values)
         elif request == 'add_tag_to_activity':
             return self.handle_add_tag_to_activity(values)
@@ -149,4 +187,6 @@ class StraenApi(object):
             return self.handle_list_matched_users(values)
         elif request == 'request_to_follow':
             return self.handle_request_to_follow(values)
+        elif request == 'unfollow':
+            return self.handle_unfollow(values)
         return False, ""
