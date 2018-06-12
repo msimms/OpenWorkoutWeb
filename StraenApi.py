@@ -4,6 +4,7 @@
 import json
 import logging
 import time
+import uuid
 import cherrypy
 import Exporter
 import StraenKeys
@@ -87,11 +88,42 @@ class StraenApi(object):
                 return True, ""
         return False, ""
 
+    def handle_add_time_and_distance_activity(self, values):
+        """Called when an API message to add a new activity based on time and distance is received."""
+        if StraenKeys.TIME_KEY not in values:
+            return False, "Time not specified."
+        if StraenKeys.DISTANCE_KEY not in values:
+            return False, "Distance not specified."
+
+        activity_id = str(uuid.uuid4())
+        return True, ""
+
+    def handle_add_sets_and_reps_activity(self, values):
+        """Called when an API message to add a new activity based on sets and reps is received."""
+        if StraenKeys.SETS_KEY not in values:
+            return False, "Sets not specified."
+
+        activity_id = str(uuid.uuid4())
+        sets = values[StraenKeys.SETS_KEY]
+        print sets
+        return True, ""
+
     def handle_add_activity(self, values):
         """Called when an API message to add a new activity is received."""
         if self.user_id is None:
             return False, "Not logged in."
-        return True, ""
+        if StraenKeys.ACTIVITY_TYPE_KEY not in values:
+            return False, "Activity type not specified."
+
+        switcher = {
+            StraenKeys.TYPE_RUNNING_KEY : self.handle_add_time_and_distance_activity,
+            StraenKeys.TYPE_CYCLING_KEY : self.handle_add_time_and_distance_activity,
+            StraenKeys.TYPE_SWIMMING_KEY : self.handle_add_time_and_distance_activity,
+            StraenKeys.TYPE_PULL_UPS_KEY : self.handle_add_sets_and_reps_activity
+        }
+
+        func = switcher.get(values[StraenKeys.ACTIVITY_TYPE_KEY], lambda: "Invalid activity type")
+        return func(values)
 
     def handle_upload_activity_file(self, values):
         """Called when an API message to upload a file is received."""

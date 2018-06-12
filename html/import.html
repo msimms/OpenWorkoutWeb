@@ -17,51 +17,97 @@
 
 <body>
 
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
-function show_manual_entry_options()
-{
-	var activityType = document.getElementById("activity_type").value;
-	var outerDiv = document.getElementById("block");
 
-	// Remove existing items, if any.
-	while (outerDiv.firstChild)
+	function save(target)
 	{
-    	outerDiv.removeChild(outerDiv.firstChild);
+		var the_url = "${root_url}/api/1.0/add_activity";
+		var dict = [];
+		var sets = [];
+		var result_text = {};
+		var activityType = document.getElementById("activity_type").value;
+		var innerDiv = document.getElementById("manual_entry_div");
+
+		for (var i = 0; i < innerDiv.children.length; i++)
+		{
+			var divChild = innerDiv.children[i];
+			if (divChild.name == "Repititions")
+			{
+				sets.push(divChild.value);
+			}
+			else if ((divChild.name == "Time") || (divChild.name == "Distance"))
+			{
+				dict.push({[divChild.name] : divChild.value});
+			}
+		}
+		dict.push({["Sets"] : JSON.stringify(sets)});
+		dict.push({["activity_type"] : activityType});
+
+		if (send_post_request(the_url, dict, result_text))
+		{
+		}
+		else
+		{
+			alert(result_text.value);
+		}
 	}
 
-	// Add data fields.
-	var fields = ["Time", "Distance"];
-	switch (activityType)
+	function show_manual_entry_options()
 	{
-		case "Push Ups / Press Ups":
-		case "Pull Ups":
-			fields = ["Sets", "Reps"];
-			break;
+		var activityType = document.getElementById("activity_type").value;
+		var outerDiv = document.getElementById("block");
+		var innerDiv = document.createElement('div');
+		innerDiv.id = "manual_entry_div";
+
+		// Remove existing items, if any.
+		while (outerDiv.firstChild)
+		{
+			outerDiv.removeChild(outerDiv.firstChild);
+		}
+
+		// Determine which data fields are needed.
+		var fields = ["Time", "Distance"];
+		switch (activityType)
+		{
+			case "Push Ups / Press Ups":
+			case "Pull Ups":
+				fields = ["Repititions", "Repititions", "Repititions"];
+				break;
+		}
+
+		// Add the data fields.
+		for (i = 0, len = fields.length; i < len; i++)
+		{
+			var label = document.createTextNode(fields[i] + ": ");
+			innerDiv.appendChild(label);
+
+			var value = document.createElement("input");
+			value.name = fields[i];
+			value.setAttribute("type", "number");
+			value.setAttribute("value", 0.0);
+			innerDiv.appendChild(value);
+
+			var br = document.createElement("br");
+			innerDiv.appendChild(br);
+		}
+
+		// Add to the div.
+		outerDiv.appendChild(innerDiv);
+
+		// Create a save button.
+		var saveBtn = document.createElement('button');
+		var saveBtnText = document.createTextNode('Save');
+		saveBtn.appendChild(saveBtnText);
+		saveBtn.title = "Save";
+		saveBtn.addEventListener('click', function() { save(this); });
+
+		// Add the save button to the screen.
+		outerDiv.appendChild(saveBtn);
+
+		return false;
 	}
 
-	for (i = 0, len = fields.length; i < len; i++)
-	{
-		var label = document.createTextNode(fields[i] + ": ");
-		outerDiv.appendChild(label);
-
-		var value = document.createElement("input");
-		value.setAttribute("type", "number");
-		value.setAttribute("value", 0.0);
-		document.body.appendChild(value);
-		outerDiv.appendChild(value);
-
-		var br = document.createElement("br");
-		outerDiv.appendChild(br);
-	}
-
-	// Add a submit button.
-	var btn = document.createElement("button");
-	var t = document.createTextNode("Submit");
-    btn.appendChild(t);
-	outerDiv.appendChild(btn);
-
-	return false;
-}
 </script>
 
 <section class="nav">
