@@ -1134,9 +1134,10 @@ def main():
     # Parse command line options.
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background", required=False)
-    parser.add_argument("--host", default="", help="Host name on which the user will access this website", required=False)
+    parser.add_argument("--host", default="", help="Host name on which users will access this website", required=False)
+    parser.add_argument("--hostport", type=int, default=0, help="Port on which users will access this website", required=False)
     parser.add_argument("--bind", default="127.0.0.1", help="Host name on which to bind", required=False)
-    parser.add_argument("--port", type=int, default=0, help="Port on which to listen", required=False)
+    parser.add_argument("--bindport", type=int, default=8080, help="Port on which to bind", required=False)
     parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS", required=False)
     parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS", required=False)
     parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS", required=False)
@@ -1167,8 +1168,8 @@ def main():
         print "Hostname not provided, will use " + args.host
 
     g_root_url = protocol + "://" + args.host
-    if args.port > 0:
-        g_root_url = g_root_url + ":" + str(args.port)
+    if args.hostport > 0:
+        g_root_url = g_root_url + ":" + str(args.hostport)
     print "Root URL is " + g_root_url
 
     if not args.debug:
@@ -1228,7 +1229,7 @@ def main():
 
     cherrypy.config.update({
         'server.socket_host': args.bind,
-        'server.socket_port': args.port,
+        'server.socket_port': args.bindport,
         'requests.show_tracebacks': False,
         'log.access_file': ACCESS_LOG,
         'log.error_file': ERROR_LOG})
