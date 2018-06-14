@@ -83,9 +83,10 @@ class StraenApi(object):
         locations_str = values.keys()[0]
         if "locations" in locations_str:
             json_obj = json.loads(locations_str)
-            for location_obj in json_obj["locations"]:
+            locations = json_obj["locations"]
+            for location_obj in locations:
                 self.parse_json_loc_obj(location_obj)
-                return True, ""
+            return True, ""
         return False, ""
 
     def handle_add_time_and_distance_activity(self, values):
