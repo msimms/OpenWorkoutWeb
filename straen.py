@@ -1136,7 +1136,7 @@ def main():
     parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background", required=False)
     parser.add_argument("--host", default="", help="Host name on which the user will access this website", required=False)
     parser.add_argument("--bind", default="127.0.0.1", help="Host name on which to bind", required=False)
-    parser.add_argument("--port", type=int, default=8080, help="Port on which to listen", required=False)
+    parser.add_argument("--port", type=int, default=0, help="Port on which to listen", required=False)
     parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS", required=False)
     parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS", required=False)
     parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS", required=False)
@@ -1166,7 +1166,9 @@ def main():
             args.host = "straen-app.com"
         print "Hostname not provided, will use " + args.host
 
-    g_root_url = protocol + "://" + args.host + ":" + str(args.port)
+    g_root_url = protocol + "://" + args.host
+    if args.port > 0:
+        g_root_url = g_root_url + ":" + str(args.port)
     print "Root URL is " + g_root_url
 
     if not args.debug:
