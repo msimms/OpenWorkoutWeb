@@ -1134,6 +1134,8 @@ def main():
     # Parse command line options.
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background", required=False)
+    parser.add_argument("--host", default="", help="Host name on which the user will access this website", required=False)
+    parser.add_argument("--bind", default="127.0.0.1", help="Host name on which to bind", required=False)
     parser.add_argument("--port", type=int, default=8080, help="Port on which to listen", required=False)
     parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS", required=False)
     parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS", required=False)
@@ -1146,19 +1148,6 @@ def main():
         parser.error(e)
         sys.exit(1)
 
-    if args.debug:
-        if args.https:
-            g_root_url = "https://127.0.0.1:" + str(args.port)
-        else:
-            g_root_url = "http://127.0.0.1:" + str(args.port)
-    else:
-        if args.https:
-            g_root_url = 'https://straen-app.com'
-        else:
-            g_root_url = 'http://straen-app.com'
-
-        Daemonizer(cherrypy.engine).subscribe()
-
     if args.https:
         print "Running HTTPS...."
         cherrypy.server.ssl_module = 'builtin'
@@ -1166,6 +1155,22 @@ def main():
         print "Certificate File: " + args.cert
         cherrypy.server.ssl_private_key = args.privkey
         print "Private Key File: " + args.privkey
+        protocol = "https"
+    else:
+        protocol = "http"
+
+    if len(args.host) == 0:
+        if args.debug:
+            args.host = "127.0.0.1"
+        else:
+            args.host = "straen-app.com"
+        print "Hostname not provided, will use " + args.host
+
+    g_root_url = protocol + "://" + args.host + ":" + str(args.port)
+    print "Root URL is " + g_root_url
+
+    if not args.debug:
+        Daemonizer(cherrypy.engine).subscribe()
 
     signal.signal(signal.SIGINT, signal_handler)
     mako.collection_size = 100
@@ -1220,7 +1225,7 @@ def main():
     }
 
     cherrypy.config.update({
-        'server.socket_host': '127.0.0.1',
+        'server.socket_host': args.bind,
         'server.socket_port': args.port,
         'requests.show_tracebacks': False,
         'log.access_file': ACCESS_LOG,
