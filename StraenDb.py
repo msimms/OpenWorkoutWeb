@@ -171,9 +171,10 @@ class MongoDatabase(Database.Database):
             if user is not None:
                 if 'devices' in user:
                     devices = user['devices']
-            devices.append(device_str)
-            user['devices'] = devices
-            self.users_collection.save(user)
+            if device_str not in devices:
+                devices.append(device_str)
+                user['devices'] = devices
+                self.users_collection.save(user)
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
