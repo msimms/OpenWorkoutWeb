@@ -684,6 +684,7 @@ class StraenWeb(object):
                 cherrypy.log.error('Unknown user ID', 'EXEC', logging.ERROR)
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
+            # Get the list of users following the logged in user.
             users_followed_by = self.user_mgr.list_followers(user_id)
             users_list_str = ""
             if users_followed_by is not None and isinstance(users_followed_by, list):

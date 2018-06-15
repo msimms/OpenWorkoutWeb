@@ -161,6 +161,42 @@ class StraenApi(object):
         json_result = json.dumps(matched_users, ensure_ascii=False)
         return True, json_result
 
+    def list_users_following(self, values):
+        """Called when an API message to list the users you are following is received."""
+        if self.user_id is None:
+            return False, "Not logged in."
+        if 'target_email' not in values:
+            return False, "Invalid parameter."
+
+        target_email = values['target_email']
+        target_id, _, _ = self.user_mgr.retrieve_user(target_email)
+        if target_id is None:
+            return False, "Target user does not exist."
+
+        users_following = self.user_mgr.list_users_followed(user_id)
+        users_list_str = ""
+        if users_following is not None and isinstance(users_following, list):
+            users_list_str = str(users_following)
+        return False, users_list_str
+
+    def list_users_followed_by(self, values):
+        """Called when an API message to list the users who are following you is received."""
+        if self.user_id is None:
+            return False, "Not logged in."
+        if 'target_email' not in values:
+            return False, "Invalid parameter."
+
+        target_email = values['target_email']
+        target_id, _, _ = self.user_mgr.retrieve_user(target_email)
+        if target_id is None:
+            return False, "Target user does not exist."
+
+        users_followed_by = self.user_mgr.list_followers(user_id)
+        users_list_str = ""
+        if users_followed_by is not None and isinstance(users_followed_by, list):
+            users_list_str = str(users_following)
+        return False, users_list_str
+
     def handle_request_to_follow(self, values):
         """Called when an API message request to follow another user is received."""
         if self.user_id is None:
@@ -228,6 +264,10 @@ class StraenApi(object):
             return self.handle_delete_tag_from_activity(values)
         elif request == 'list_matched_users':
             return self.handle_list_matched_users(values)
+        elif request == 'list_users_following':
+            return self.list_users_following(values)
+        elif request == 'list_users_followed_by':
+            return self.list_users_followed_by(values)
         elif request == 'request_to_follow':
             return self.handle_request_to_follow(values)
         elif request == 'unfollow':
