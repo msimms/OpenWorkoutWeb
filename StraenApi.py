@@ -200,6 +200,16 @@ class StraenApi(object):
         result = exporter.export(self.data_mgr, values['activity_id'])
         return True, result
 
+    def handle_claim_device(self, values):
+        """Called when an API message request to follow another user is received."""
+        if self.user_id is None:
+            return False, "Not logged in."
+        if 'device_id' not in values:
+            return False, "Invalid parameter."
+
+        self.data_mgr.create_user_device(self.user_id, values['device_id'])
+        return True, ""
+
     def handle_api_1_0_request(self, args, values):
         """Called to parse a version 1.0 API message."""
         if len(args) <= 0:
@@ -222,4 +232,8 @@ class StraenApi(object):
             return self.handle_request_to_follow(values)
         elif request == 'unfollow':
             return self.handle_unfollow(values)
+        elif request == 'export_activity':
+            return self.handle_export_activity(values)
+        elif request == 'claim_device':
+            return self.handle_claim_device(values)
         return False, ""
