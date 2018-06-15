@@ -80,14 +80,63 @@ class StraenApi(object):
 
     def handle_update_location(self, values):
         """Called when an API message to update the location of a device is received."""
-        locations_str = values.keys()[0]
-        if "locations" in locations_str:
-            json_obj = json.loads(locations_str)
-            locations = json_obj["locations"]
+        if "locations" in values:
+            locations = values["locations"]
             for location_obj in locations:
                 self.parse_json_loc_obj(location_obj)
             return True, ""
         return False, ""
+
+    def handle_login_submit(self, values):
+        """Called when an API message to log in is received."""
+        if self.user_id is not None:
+            return False, "Already logged in."
+
+        if StraenKeys.USERNAME_KEY not in values:
+            return False, "Username not specified."
+        if StraenKeys.PASSWORD_KEY not in values:
+            return False, "Password not specified."
+        if StraenKeys.DEVICE_KEY not in values:
+            return False, "Device ID not specified."
+
+        email = values[StraenKeys.USERNAME_KEY]
+        password = values[StraenKeys.PASSWORD_KEY]
+        device_str = values[StraenKeys.DEVICE_KEY]
+
+        user_logged_in, info_str = self.user_mgr.authenticate_user(email, password)
+        if user_logged_in:
+            self.user_mgr.create_user_device(email, device_str)
+        else:
+            return False, info_str
+
+        return True, ""
+
+    def handle_create_login_submit(self, values):
+        """Called when an API message to create an account is received."""
+        if self.user_id is not None:
+            return False, "Already logged in."
+        if StraenKeys.USERNAME_KEY not in values:
+            return False, "Username not specified."
+        if StraenKeys.PASSWORD1_KEY not in values:
+            return False, "Password not specified."
+        if StraenKeys.PASSWORD2_KEY not in values:
+            return False, "Password confirmation not specified."
+        if StraenKeys.DEVICE_KEY not in values:
+            return False, "Device ID not specified."
+        if StraenKeys.REALNAME_KEY not in values:
+            return False, "Real name not specified."
+
+        email = values[StraenKeys.USERNAME_KEY]
+        password1 = values[StraenKeys.PASSWORD1_KEY]
+        password2 = values[StraenKeys.PASSWORD2_KEY]
+        device_str = values[StraenKeys.DEVICE_KEY]
+        realname = values[StraenKeys.REALNAME_KEY]
+
+        user_created, info_str = self.user_mgr.create_user(email, realname, password1, password2, device_str)
+        if not user_created:
+            return False, info_str
+
+        return True, ""
 
     def handle_add_time_and_distance_activity(self, values):
         """Called when an API message to add a new activity based on time and distance is received."""
@@ -157,6 +206,7 @@ class StraenApi(object):
             return False, "Search name is too short."
         if search_name_len > 100:
             return False, "Search name is too long."
+
         matched_users = self.user_mgr.retrieve_matched_users(search_name)[:100] # Limit the number of results
         json_result = json.dumps(matched_users, ensure_ascii=False)
         return True, json_result
@@ -173,7 +223,7 @@ class StraenApi(object):
         if target_id is None:
             return False, "Target user does not exist."
 
-        users_following = self.user_mgr.list_users_followed(user_id)
+        users_following = self.user_mgr.list_users_followed(self.user_id)
         users_list_str = ""
         if users_following is not None and isinstance(users_following, list):
             users_list_str = str(users_following)
@@ -191,10 +241,10 @@ class StraenApi(object):
         if target_id is None:
             return False, "Target user does not exist."
 
-        users_followed_by = self.user_mgr.list_followers(user_id)
+        users_followed_by = self.user_mgr.list_followers(self.user_id)
         users_list_str = ""
         if users_followed_by is not None and isinstance(users_followed_by, list):
-            users_list_str = str(users_following)
+            users_list_str = str(users_followed_by)
         return False, users_list_str
 
     def handle_request_to_follow(self, values):
@@ -252,28 +302,34 @@ class StraenApi(object):
             return False, ""
 
         request = args[0]
+        json_values = json.loads(values)
+
         if request == 'update_location':
-            return self.handle_update_location(values)
+            return self.handle_update_location(json_values)
+        elif request == 'login_submit':
+            return self.handle_login_submit(json_values)
+        elif request == 'create_login_submit':
+            return self.handle_create_login_submit(json_values)
         elif request == 'add_activity':
-            return self.handle_add_activity(values)
+            return self.handle_add_activity(json_values)
         elif request == 'upload_activity_file':
-            return self.handle_upload_activity_file(values)
+            return self.handle_upload_activity_file(json_values)
         elif request == 'add_tag_to_activity':
-            return self.handle_add_tag_to_activity(values)
+            return self.handle_add_tag_to_activity(json_values)
         elif request == 'delete_tag_from_activity':
-            return self.handle_delete_tag_from_activity(values)
+            return self.handle_delete_tag_from_activity(json_values)
         elif request == 'list_matched_users':
-            return self.handle_list_matched_users(values)
+            return self.handle_list_matched_users(json_values)
         elif request == 'list_users_following':
-            return self.list_users_following(values)
+            return self.list_users_following(json_values)
         elif request == 'list_users_followed_by':
-            return self.list_users_followed_by(values)
+            return self.list_users_followed_by(json_values)
         elif request == 'request_to_follow':
-            return self.handle_request_to_follow(values)
+            return self.handle_request_to_follow(json_values)
         elif request == 'unfollow':
-            return self.handle_unfollow(values)
+            return self.handle_unfollow(json_values)
         elif request == 'export_activity':
-            return self.handle_export_activity(values)
+            return self.handle_export_activity(json_values)
         elif request == 'claim_device':
-            return self.handle_claim_device(values)
+            return self.handle_claim_device(json_values)
         return False, ""

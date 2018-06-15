@@ -240,55 +240,6 @@ class StraenWeb(object):
             cherrypy.log.error('Unhandled exception in update_metadata', 'EXEC', logging.WARNING)
         return ""
 
-    @cherrypy.tools.json_in()
-    @cherrypy.tools.json_out()
-    @cherrypy.expose
-    def login_submit(self, **kw):
-        """Login - called from the app."""
-        try:
-            email = cherrypy.request.json["username"]
-            password = cherrypy.request.json["password"]
-            device_str = cherrypy.request.json["device"]
-
-            response = "["
-
-            if email is None or password is None:
-                response += "\"error\": \"An email address and password were not provided.\""
-            else:
-                user_logged_in, info_str = self.user_mgr.authenticate_user(email, password)
-                if user_logged_in:
-                    self.user_mgr.create_user_device(email, device_str)
-                else:
-                    response += "\"error\": \"" + info_str + "\""
-
-            response += "]"
-            return response
-        except:
-            cherrypy.log.error('Unhandled exception in login_submit', 'EXEC', logging.WARNING)
-        return ""
-
-    @cherrypy.tools.json_in()
-    @cherrypy.tools.json_out()
-    @cherrypy.expose
-    def create_login_submit(self, **kw):
-        """ Creates a new login - called from the app."""
-        try:
-            email = cherrypy.request.json["username"]
-            password1 = cherrypy.request.json["password1"]
-            password2 = cherrypy.request.json["password2"]
-            realname = cherrypy.request.json["realname"]
-            device_str = cherrypy.request.json["device"]
-
-            response = "["
-            user_created, info_str = self.user_mgr.create_user(email, realname, password1, password2, device_str)
-            if user_created:
-                response += "\"error\": \"" + info_str + "\""
-            response += "]"
-            return response
-        except:
-            cherrypy.log.error('Unhandled exception in create_login_submit', 'EXEC', logging.WARNING)
-        return ""
-
     @cherrypy.expose
     def update_visibility(self, device_str, activity_id, visibility):
         """Changes the visibility of an activity from public to private or vice versa."""
@@ -1100,6 +1051,10 @@ class StraenWeb(object):
             if username is not None:
                 user_id, _, _ = self.user_mgr.retrieve_user(username)
 
+            # Read the post data.
+            cl = cherrypy.request.headers['Content-Length']
+            raw_body = cherrypy.request.body.read(int(cl))
+
             # Log the API request.
             cherrypy.log("API request: " + str(args), context='', severity=logging.DEBUG, traceback=False)
 
@@ -1108,7 +1063,7 @@ class StraenWeb(object):
                 api_version = args[0]
                 if api_version == '1.0':
                     api = StraenApi.StraenApi(self.user_mgr, self.data_mgr, user_id)
-                    handled, response = api.handle_api_1_0_request(args[1:], kw)
+                    handled, response = api.handle_api_1_0_request(args[1:], raw_body)
                     if not handled:
                         cherrypy.response.status = 400
                     else:
