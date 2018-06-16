@@ -501,16 +501,14 @@ class StraenWeb(object):
         """Renders the map page for a single device."""
         try:
             activity_id_str = cherrypy.request.params.get("activity_id")
-            if activity_id_str is None:
-                activity_id = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
-            else:
-                activity_id = int(activity_id_str)
 
-            if activity_id is None:
-                return self.error()
+            if activity_id_str is None:
+                activity_id_str = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
+                if activity_id_str is None:
+                    return self.error()
 
             # Render from template.
-            return self.render_page_for_activity("", "", device_str, activity_id)
+            return self.render_page_for_activity("", "", device_str, activity_id_str)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.device.__name__, 'EXEC', logging.WARNING)
         return self.error()
