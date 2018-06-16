@@ -426,9 +426,6 @@ class StraenWeb(object):
         row = "<div>\n"
         row += "<table>"
         row += "<td>"
-        row += activity_id
-        row += "</td>"
-        row += "<td>"
         row += activity_time
         row += "</td>"
         row += "<td>"
