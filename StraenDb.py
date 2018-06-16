@@ -289,8 +289,10 @@ class MongoDatabase(Database.Database):
             exclude_keys[StraenKeys.CURRENT_PACE_KEY] = False
             exclude_keys[StraenKeys.POWER_KEY] = False
 
-            if start is None or num_results is None:
+            if start is None and num_results is None:
                 return list(self.activities_collection.find({"device_str": device_str}, exclude_keys).sort("_id", -1))
+            elif num_results is None:
+                return list(self.activities_collection.find({"device_str": device_str}, exclude_keys).sort("_id", -1).skip(start))
             else:
                 return list(self.activities_collection.find({"device_str": device_str}, exclude_keys).sort("_id", -1).skip(start).limit(num_results))
         except:

@@ -2,8 +2,20 @@
 """Data store abstraction"""
 
 import StraenDb
+import StraenKeys
 import Importer
 
+def get_activities_sort_key(item):
+    if StraenKeys.ACTIVITY_TIME_KEY in item:
+        return item[StraenKeys.ACTIVITY_TIME_KEY]
+    elif StraenKeys.ACTIVITY_LOCATIONS_KEY in item:
+        locations = item[StraenKeys.ACTIVITY_LOCATIONS_KEY]
+        if len(locations) > 0:
+            first_loc = locations[0]
+            if StraenKeys.LOCATION_TIME_KEY in first_loc:
+                time_num = first_loc[StraenKeys.LOCATION_TIME_KEY] / 1000
+                return time_num
+    return 0
 
 class DataMgr(Importer.LocationWriter):
     """Data store abstraction"""
@@ -59,8 +71,10 @@ class DataMgr(Importer.LocationWriter):
         devices = self.database.retrieve_user_devices(user_id)
         if devices is not None:
             for device in devices:
-                device_activities = self.database.retrieve_device_activity_list(device, start, num_results)
+                device_activities = self.database.retrieve_device_activity_list(device, start, None)
                 activities.extend(device_activities)
+            if len(activities) > 0:
+                activities = sorted(activities, key=get_activities_sort_key, reverse=True)[:num_results]
         return activities
 
     def retrieve_device_activity_list(self, device_id, start, num_results):
