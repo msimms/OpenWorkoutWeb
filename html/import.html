@@ -17,6 +17,8 @@
 
 <body>
 
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
@@ -70,7 +72,7 @@
 		}
 
 		// Determine which data fields are needed.
-		var fields = ["Time", "Distance"];
+		var fields = ["Duration", "Distance"];
 		switch (activityType)
 		{
 			case "Push Ups / Press Ups":
@@ -78,6 +80,21 @@
 				fields = ["Repititions", "Repititions", "Repititions"];
 				break;
 		}
+
+		// Add a label for the date picker.
+		var dateLabel = document.createTextNode("Date: ");
+		innerDiv.appendChild(dateLabel);
+
+		// Add the date picker.
+		var newDate = document.createElement('input');
+		newDate.type = "input";
+		newDate.id = "date";
+		newDate.className = "pickDate"; 
+		$(newDate).datepicker();
+
+		innerDiv.appendChild(newDate);
+		var br = document.createElement("br");
+		innerDiv.appendChild(br);
 
 		// Add the data fields.
 		for (i = 0, len = fields.length; i < len; i++)
