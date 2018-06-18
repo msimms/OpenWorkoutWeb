@@ -82,15 +82,18 @@ ${nav}
 <div class="settings" style="width: 600px">
 	<h2>Preferences</h2>
 	<button type="button" onclick="return update_prefs()">Update</button>
+	<hr>
 	<h2>Email</h2>
 	<p>New Email Address: <input type="text" id="new_email"><br></p>
 	<button type="button" onclick="return update_email()">Update</button>
 	<p>Note: Your email address is only used for login authentication.</p>
+	<hr>
 	<h2>Password</h2>
 	<p>Current Password: <input type="password" id="current_password"><br></p>
 	<p>New Password: <input type="password" id="new_password1"><br></p>
 	<p>Confirm Password: <input type="password" id="new_password2"><br></p>
 	<button type="button" onclick="return update_password()">Update</button>
+	<hr>
 	<h2>Delete</h2>
 	<p>Password: <input type="password" id="password"><br></p>
 	<button type="button" onclick="return delete_user()">Delete My Account and All My Data</button>
