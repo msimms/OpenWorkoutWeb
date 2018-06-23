@@ -130,17 +130,11 @@ class StraenWeb(object):
     def update_track(self, device_str=None, activity_id_str=None, num=None, *args, **kw):
         if device_str is None:
             return ""
-        if activity_id_str is None:
-            return ""
         if num is None:
             return ""
 
         try:
-            activity_id = int(activity_id_str)
-            if activity_id == 0:
-                return ""
-
-            locations = self.data_mgr.retrieve_most_recent_locations(device_str, activity_id, int(num))
+            locations = self.data_mgr.retrieve_most_recent_locations(device_str, activity_id_str, int(num))
 
             cherrypy.response.headers['Content-Type'] = 'application/json'
             response = "["
@@ -166,18 +160,14 @@ class StraenWeb(object):
             return ""
 
         try:
-            activity_id = int(activity_id_str)
-            if activity_id == 0:
-                return ""
-
             cherrypy.response.headers['Content-Type'] = 'application/json'
             response = "["
 
-            names = self.data_mgr.retrieve_metadata(StraenKeys.NAME_KEY, device_str, activity_id)
+            names = self.data_mgr.retrieve_metadata(StraenKeys.NAME_KEY, device_str, activity_id_str)
             if names != None and len(names) > 0:
                 response += json.dumps({"name": StraenKeys.NAME_KEY, "value": names[-1][1]})
 
-            times = self.data_mgr.retrieve_metadata(StraenKeys.TIME_KEY, device_str, activity_id)
+            times = self.data_mgr.retrieve_metadata(StraenKeys.TIME_KEY, device_str, activity_id_str)
             if times != None and len(times) > 0:
                 if len(response) > 1:
                     response += ","
@@ -185,7 +175,7 @@ class StraenWeb(object):
                 value_str = datetime.datetime.fromtimestamp(times[-1][1] / 1000, localtimezone).strftime('%Y-%m-%d %H:%M:%S')
                 response += json.dumps({"name": StraenKeys.TIME_KEY, "value": value_str})
 
-            distances = self.data_mgr.retrieve_metadata(StraenKeys.DISTANCE_KEY, device_str, activity_id)
+            distances = self.data_mgr.retrieve_metadata(StraenKeys.DISTANCE_KEY, device_str, activity_id_str)
             if distances != None and len(distances) > 0:
                 if len(response) > 1:
                     response += ","
@@ -193,7 +183,7 @@ class StraenWeb(object):
                 value = float(distance.values()[0])
                 response += json.dumps({"name": StraenKeys.DISTANCE_KEY, "value": "{:.2f}".format(value)})
 
-            avg_speeds = self.data_mgr.retrieve_metadata(StraenKeys.AVG_SPEED_KEY, device_str, activity_id)
+            avg_speeds = self.data_mgr.retrieve_metadata(StraenKeys.AVG_SPEED_KEY, device_str, activity_id_str)
             if avg_speeds != None and len(avg_speeds) > 0:
                 if len(response) > 1:
                     response += ","
@@ -201,7 +191,7 @@ class StraenWeb(object):
                 value = float(speed.values()[0])
                 response += json.dumps({"name": StraenKeys.AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
 
-            moving_speeds = self.data_mgr.retrieve_metadata(StraenKeys.MOVING_SPEED_KEY, device_str, activity_id)
+            moving_speeds = self.data_mgr.retrieve_metadata(StraenKeys.MOVING_SPEED_KEY, device_str, activity_id_str)
             if moving_speeds != None and len(moving_speeds) > 0:
                 if len(response) > 1:
                     response += ","
@@ -209,7 +199,7 @@ class StraenWeb(object):
                 value = float(speed.values()[0])
                 response += json.dumps({"name": StraenKeys.MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
 
-            heart_rates = self.data_mgr.retrieve_sensordata(StraenKeys.HEART_RATE_KEY, device_str, activity_id)
+            heart_rates = self.data_mgr.retrieve_sensordata(StraenKeys.HEART_RATE_KEY, device_str, activity_id_str)
             if heart_rates != None and len(heart_rates) > 0:
                 if len(response) > 1:
                     response += ","
@@ -217,7 +207,7 @@ class StraenWeb(object):
                 value = float(heart_rate.values()[0])
                 response += json.dumps({"name": StraenKeys.HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
 
-            cadences = self.data_mgr.retrieve_sensordata(StraenKeys.CADENCE_KEY, device_str, activity_id)
+            cadences = self.data_mgr.retrieve_sensordata(StraenKeys.CADENCE_KEY, device_str, activity_id_str)
             if cadences != None and len(cadences) > 0:
                 if len(response) > 1:
                     response += ","
@@ -225,7 +215,7 @@ class StraenWeb(object):
                 value = float(cadence.values()[0])
                 response += json.dumps({"name": StraenKeys.CADENCE_KEY, "value": "{:.2f}".format(value)})
 
-            powers = self.data_mgr.retrieve_sensordata(StraenKeys.POWER_KEY, device_str, activity_id)
+            powers = self.data_mgr.retrieve_sensordata(StraenKeys.POWER_KEY, device_str, activity_id_str)
             if powers != None and len(powers) > 0:
                 if len(response) > 1:
                     response += ","
