@@ -264,33 +264,36 @@ class StraenWeb(object):
         return "-"
 
     @staticmethod
-    def create_navbar():
+    def create_navbar(logged_in):
         """Helper function for building the navigation bar."""
         navbar_str = "<nav>\n" \
-            "\t<ul>\n" \
-            "\t\t<li><a href=\"" + g_root_url + "/my_activities/\">My Activities</a></li>\n" \
-            "\t\t<li><a href=\"" + g_root_url + "/all_activities/\">All Activities</a></li>\n" \
-            "\t\t<li><a href=\"" + g_root_url + "/following/\">Following</a></li>\n" \
-            "\t\t<li><a href=\"" + g_root_url + "/followers/\">Followers</a></li>\n" \
-            "\t\t<li><a href=\"" + g_root_url + "/device_list/\">Devices</a></li>\n" \
-            "\t\t<li><a href=\"" + g_root_url + "/import_activity/\">Import</a></li>\n" \
-            "\t\t<li><a href=\"" + g_root_url + "/settings/\">Settings</a></li>\n" \
-            "\t\t<li><a href=\"" + g_root_url + "/logout/\">Log Out</a></li>\n" \
-            "\t</ul>\n" \
-            "</nav>"
+            "\t<ul>\n"
+        if logged_in:
+            navbar_str += \
+                "\t\t<li><a href=\"" + g_root_url + "/my_activities/\">My Activities</a></li>\n" \
+                "\t\t<li><a href=\"" + g_root_url + "/all_activities/\">All Activities</a></li>\n" \
+                "\t\t<li><a href=\"" + g_root_url + "/following/\">Following</a></li>\n" \
+                "\t\t<li><a href=\"" + g_root_url + "/followers/\">Followers</a></li>\n" \
+                "\t\t<li><a href=\"" + g_root_url + "/device_list/\">Devices</a></li>\n" \
+                "\t\t<li><a href=\"" + g_root_url + "/import_activity/\">Import</a></li>\n" \
+                "\t\t<li><a href=\"" + g_root_url + "/settings/\">Settings</a></li>\n" \
+                "\t\t<li><a href=\"" + g_root_url + "/logout/\">Log Out</a></li>\n"
+        else:
+            navbar_str += "\t\t<li><a href=\"" + g_root_url + "/login/\">Log In</a></li>\n"
+        navbar_str += "\t</ul>\n</nav>"
         return navbar_str
 
-    def render_page_for_activity(self, email, user_realname, device_str, activity_id):
+    def render_page_for_activity(self, email, user_realname, device_str, activity_id, logged_in):
         """Helper function for rendering the map corresonding to a specific device and activity."""
 
         if device_str is None:
             my_template = Template(filename=g_error_logged_in_html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified device.")
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified device.")
 
         locations = self.data_mgr.retrieve_locations(device_str, activity_id)
         if locations is None or len(locations) == 0:
             my_template = Template(filename=g_error_logged_in_html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified device.")
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified device.")
 
         route = ""
         center_lat = 0
@@ -342,14 +345,14 @@ class StraenWeb(object):
                 powers_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
 
         my_template = Template(filename=g_map_single_html_file, module_directory=g_tempmod_dir)
-        return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, deviceStr=device_str, googleMapsKey=g_google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=str(activity_id), currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, deviceStr=device_str, googleMapsKey=g_google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=str(activity_id), currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str)
 
-    def render_page_for_multiple_devices(self, email, user_realname, device_strs, user_id):
+    def render_page_for_multiple_devices(self, email, user_realname, device_strs, user_id, logged_in):
         """Helper function for rendering the map corresonding to a multiple devices."""
 
         if device_strs is None:
             my_template = Template(filename=g_error_logged_in_html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, error="No device IDs were specified.")
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, error="No device IDs were specified.")
 
         route_coordinates = ""
         center_lat = 0
@@ -381,7 +384,7 @@ class StraenWeb(object):
                 last_lon = last_loc[StraenKeys.LOCATION_LON_KEY]
 
         my_template = Template(filename=g_map_multi_html_file, module_directory=g_tempmod_dir)
-        return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, googleMapsKey=g_google_maps_key, centerLat=center_lat, centerLon=center_lon, lastLat=last_lat, lastLon=last_lon, routeCoordinates=route_coordinates, routeLen=len(locations), userId=str(user_id))
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, googleMapsKey=g_google_maps_key, centerLat=center_lat, centerLon=center_lon, lastLat=last_lat, lastLon=last_lon, routeCoordinates=route_coordinates, routeLen=len(locations), userId=str(user_id))
 
     def render_activity_row(self, user_realname, activity, row_id):
         """Helper function for creating a table row describing an activity."""
@@ -479,8 +482,11 @@ class StraenWeb(object):
             if activity_id is None:
                 return self.error()
 
+            # Get the logged in user.
+            username = cherrypy.session.get(SESSION_KEY)
+
             # Render from template.
-            return self.render_page_for_activity("", "", device_str, activity_id)
+            return self.render_page_for_activity("", "", device_str, activity_id, username is not None)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.live.__name__, 'EXEC', logging.WARNING)
         return self.error()
@@ -497,8 +503,11 @@ class StraenWeb(object):
                 if activity_id_str is None:
                     return self.error()
 
+            # Get the logged in user.
+            username = cherrypy.session.get(SESSION_KEY)
+
             # Render from template.
-            return self.render_page_for_activity("", "", device_str, activity_id_str)
+            return self.render_page_for_activity("", "", device_str, activity_id_str, username is not None)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.device.__name__, 'EXEC', logging.WARNING)
         return self.error()
@@ -530,7 +539,7 @@ class StraenWeb(object):
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'my_activities.html')
             my_template = Template(filename=html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, activities_list=activities_list_str)
+            return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, activities_list=activities_list_str)
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
@@ -564,7 +573,7 @@ class StraenWeb(object):
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'all_activities.html')
             my_template = Template(filename=html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, activities_list=activities_list_str)
+            return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, activities_list=activities_list_str)
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
@@ -597,7 +606,7 @@ class StraenWeb(object):
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'following.html')
             my_template = Template(filename=html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, users_list=users_list_str)
+            return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, users_list=users_list_str)
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
@@ -630,7 +639,7 @@ class StraenWeb(object):
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'followers.html')
             my_template = Template(filename=html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, users_list=users_list_str)
+            return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, users_list=users_list_str)
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
@@ -669,7 +678,7 @@ class StraenWeb(object):
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'device_list.html')
             my_template = Template(filename=html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, device_list=device_list_str)
+            return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, device_list=device_list_str)
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
@@ -754,7 +763,7 @@ class StraenWeb(object):
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'import.html')
             my_template = Template(filename=html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, activity_type_list=activity_type_list_str)
+            return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, activity_type_list=activity_type_list_str)
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
@@ -828,7 +837,7 @@ class StraenWeb(object):
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'settings.html')
             my_template = Template(filename=html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname)
+            return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname)
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
