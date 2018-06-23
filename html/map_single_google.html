@@ -11,7 +11,7 @@
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 <meta content="utf-8" http-equiv="encoding">
-	
+
 <link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
 
 </head>
@@ -160,7 +160,7 @@ ${route}
 			'<p>';
 		for (var i = 0; i < objList.length; ++i)
 		{
-			if (objList[i].name != "Name")
+			if ((objList[i].name != "Name") && (objList[i].name != "Avg. Speed"))
 			{
 				contentString += objList[i].name;
 				contentString += " = ";
@@ -172,7 +172,7 @@ ${route}
 			'</p>' +
 			'</div>' +
 			'</div>';
-			
+
 		if (infoWindow)
 		{
 			infoWindow.close();
@@ -188,7 +188,7 @@ ${route}
 		({
 			content: contentString
 		});
-		
+
 		marker = new google.maps.Marker
 		({
 			position: new google.maps.LatLng(lastLat, lastLon),
