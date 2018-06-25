@@ -33,6 +33,7 @@ PRODUCT_NAME = 'Straen'
 SESSION_KEY = '_straen_username'
 
 LOGIN_URL = '/login'
+DEFAULT_LOGGED_IN_URL = '/all_activities'
 HTML_DIR = 'html'
 
 g_root_dir = os.path.dirname(os.path.abspath(__file__))
@@ -493,8 +494,8 @@ class StraenWeb(object):
     def device(self, device_str, *args, **kw):
         """Renders the map page for a single device."""
         try:
+            # Get the activity ID being requested. If one is not provided then get the latest activity for the device
             activity_id_str = cherrypy.request.params.get("activity_id")
-
             if activity_id_str is None:
                 activity_id_str = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
                 if activity_id_str is None:
@@ -859,7 +860,7 @@ class StraenWeb(object):
                 if user_logged_in:
                     cherrypy.session.regenerate()
                     cherrypy.session[SESSION_KEY] = cherrypy.request.login = email
-                    result = self.all_activities(email, None, None)
+                    raise cherrypy.HTTPRedirect(DEFAULT_LOGGED_IN_URL)
                 else:
                     error_msg = "Unable to authenticate the user."
                     if len(info_str) > 0:
@@ -867,6 +868,8 @@ class StraenWeb(object):
                         error_msg += info_str
                     result = self.error(error_msg)
             return result
+        except cherrypy.HTTPRedirect as e:
+            raise e
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.submit_login.__name__, 'EXEC', logging.WARNING)
         return self.error()
@@ -879,7 +882,7 @@ class StraenWeb(object):
             if user_created:
                 cherrypy.session.regenerate()
                 cherrypy.session[SESSION_KEY] = cherrypy.request.login = email
-                result = self.all_activities(email, *args, **kw)
+                raise cherrypy.HTTPRedirect(DEFAULT_LOGGED_IN_URL)
             else:
                 error_msg = "Unable to create the user."
                 if len(info_str) > 0:
@@ -984,9 +987,16 @@ class StraenWeb(object):
     def login(self):
         """Renders the login page."""
         try:
+            # If a user is already logged in then go straight to the landing page.
+            username = cherrypy.session.get(SESSION_KEY)
+            if username is not None:
+                raise cherrypy.HTTPRedirect(DEFAULT_LOGGED_IN_URL)
+
             login_html_file = os.path.join(g_root_dir, HTML_DIR, 'login.html')
             my_template = Template(filename=login_html_file, module_directory=g_tempmod_dir)
             result = my_template.render(product=PRODUCT_NAME, root_url=g_root_url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
         except:
             result = self.error()
         return result
