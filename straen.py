@@ -1160,6 +1160,11 @@ def main():
             'tools.staticdir.on': True,
             'tools.staticdir.dir': 'js'
         },
+        '/jquery-timepicker':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'jquery-timepicker'
+        },
         '/images':
         {
             'tools.staticdir.on': True,

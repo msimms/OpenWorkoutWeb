@@ -23,6 +23,12 @@
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 
+<script type="text/javascript" src="${root_url}/jquery-timepicker/jquery.timepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="${root_url}/jquery-timepicker/jquery.timepicker.css" />
+
+<script type="text/javascript" src="${root_url}/jquery-timepicker/lib/bootstrap-datepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="${root_url}/jquery-timepicker/lib/bootstrap-datepicker.css" />
+
 <script>
 
 	function save(target)
@@ -91,8 +97,21 @@
 		newDate.id = "date";
 		newDate.className = "pickDate"; 
 		$(newDate).datepicker();
-
 		innerDiv.appendChild(newDate);
+
+		// Add a label for the start time picker.
+		var dateLabel = document.createTextNode("Start Time: ");
+		innerDiv.appendChild(dateLabel);
+
+		// Add the start time picker.
+		var newStartTime = document.createElement('input');
+		newStartTime.type = "input";
+		newStartTime.id = "time";
+		newStartTime.className = "pickTime"; 
+		$(newStartTime).timepicker();
+		innerDiv.appendChild(newStartTime);
+
+		// Add a line break.
 		var br = document.createElement("br");
 		innerDiv.appendChild(br);
 
