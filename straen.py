@@ -416,9 +416,7 @@ class StraenWeb(object):
                 checkbox_value = "unchecked"
                 checkbox_label = "Private"
 
-        row = "<div>\n"
-        row += "<table>"
-        row += "<td>"
+        row  = "<td>"
         row += activity_time
         row += "</td>"
         row += "<td>"
@@ -437,8 +435,7 @@ class StraenWeb(object):
             row += "<td>"
             row += "<button type=\"button\" onclick=\"return on_delete('" + activity[StraenKeys.ACTIVITY_DEVICE_STR_KEY] + "', '" + activity_id + "')\">Delete</button>"
             row += "</td>"
-        row += "</table>\n"
-        row += "</div>\n"
+        row += "<tr>"
         return row
 
     @staticmethod
@@ -529,12 +526,14 @@ class StraenWeb(object):
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             activities = self.data_mgr.retrieve_user_activity_list(user_id, 0, 25)
-            activities_list_str = ""
             row_id = 0
+            activities_list_str = "<table>\n"
             if activities is not None and isinstance(activities, list):
                 for activity in activities:
                     activities_list_str += self.render_activity_row(None, activity, row_id)
                     row_id = row_id + 1
+                    activities_list_str += "\n"
+            activities_list_str += "</table>\n"
 
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'my_activities.html')
@@ -563,12 +562,14 @@ class StraenWeb(object):
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             activities = self.data_mgr.retrieve_user_activity_list(user_id, 0, 25)
-            activities_list_str = ""
             row_id = 0
+            activities_list_str = "<table>\n"
             if activities is not None and isinstance(activities, list):
                 for activity in activities:
                     activities_list_str += self.render_activity_row(user_realname, activity, row_id)
                     row_id = row_id + 1
+                    activities_list_str += "\n"
+            activities_list_str += "</table>\n"
 
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'all_activities.html')
