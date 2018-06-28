@@ -83,8 +83,8 @@ def check_auth(*args, **kwargs):
                 device = url_params[0]
                 activity_params = url_params[1].split("=")
                 if activity_params is not None and len(activity_params) >= 2:
-                    activity_id = activity_params[1]
-                    if g_app.activity_is_public(device, activity_id):
+                    activity_id_str = activity_params[1]
+                    if g_app.activity_is_public(device, activity_id_str):
                         return
 
         username = cherrypy.session.get(SESSION_KEY)
@@ -128,14 +128,14 @@ class StraenWeb(object):
 
     @cherrypy.tools.json_out()
     @cherrypy.expose
-    def update_track(self, device_str=None, activity_id_str=None, num=None, *args, **kw):
-        if device_str is None:
+    def update_track(self, activity_id_str=None, num=None, *args, **kw):
+        if activity_id_str is None:
             return ""
         if num is None:
             return ""
 
         try:
-            locations = self.data_mgr.retrieve_most_recent_locations(device_str, activity_id_str, int(num))
+            locations = self.data_mgr.retrieve_most_recent_locations(activity_id_str, int(num))
 
             cherrypy.response.headers['Content-Type'] = 'application/json'
             response = "["
@@ -154,9 +154,7 @@ class StraenWeb(object):
 
     @cherrypy.tools.json_out()
     @cherrypy.expose
-    def update_metadata(self, device_str=None, activity_id_str=None, *args, **kw):
-        if device_str is None:
-            return ""
+    def update_metadata(self, activity_id_str=None, *args, **kw):
         if activity_id_str is None:
             return ""
 
@@ -164,11 +162,11 @@ class StraenWeb(object):
             cherrypy.response.headers['Content-Type'] = 'application/json'
             response = "["
 
-            names = self.data_mgr.retrieve_metadata(StraenKeys.NAME_KEY, device_str, activity_id_str)
+            names = self.data_mgr.retrieve_metadata(StraenKeys.NAME_KEY, activity_id_str)
             if names != None and len(names) > 0:
                 response += json.dumps({"name": StraenKeys.NAME_KEY, "value": names[-1][1]})
 
-            times = self.data_mgr.retrieve_metadata(StraenKeys.TIME_KEY, device_str, activity_id_str)
+            times = self.data_mgr.retrieve_metadata(StraenKeys.TIME_KEY, activity_id_str)
             if times != None and len(times) > 0:
                 if len(response) > 1:
                     response += ","
@@ -176,7 +174,7 @@ class StraenWeb(object):
                 value_str = datetime.datetime.fromtimestamp(times[-1][1] / 1000, localtimezone).strftime('%Y-%m-%d %H:%M:%S')
                 response += json.dumps({"name": StraenKeys.TIME_KEY, "value": value_str})
 
-            distances = self.data_mgr.retrieve_metadata(StraenKeys.DISTANCE_KEY, device_str, activity_id_str)
+            distances = self.data_mgr.retrieve_metadata(StraenKeys.DISTANCE_KEY, activity_id_str)
             if distances != None and len(distances) > 0:
                 if len(response) > 1:
                     response += ","
@@ -184,7 +182,7 @@ class StraenWeb(object):
                 value = float(distance.values()[0])
                 response += json.dumps({"name": StraenKeys.DISTANCE_KEY, "value": "{:.2f}".format(value)})
 
-            avg_speeds = self.data_mgr.retrieve_metadata(StraenKeys.AVG_SPEED_KEY, device_str, activity_id_str)
+            avg_speeds = self.data_mgr.retrieve_metadata(StraenKeys.AVG_SPEED_KEY, activity_id_str)
             if avg_speeds != None and len(avg_speeds) > 0:
                 if len(response) > 1:
                     response += ","
@@ -192,7 +190,7 @@ class StraenWeb(object):
                 value = float(speed.values()[0])
                 response += json.dumps({"name": StraenKeys.AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
 
-            moving_speeds = self.data_mgr.retrieve_metadata(StraenKeys.MOVING_SPEED_KEY, device_str, activity_id_str)
+            moving_speeds = self.data_mgr.retrieve_metadata(StraenKeys.MOVING_SPEED_KEY, activity_id_str)
             if moving_speeds != None and len(moving_speeds) > 0:
                 if len(response) > 1:
                     response += ","
@@ -200,7 +198,7 @@ class StraenWeb(object):
                 value = float(speed.values()[0])
                 response += json.dumps({"name": StraenKeys.MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
 
-            heart_rates = self.data_mgr.retrieve_sensordata(StraenKeys.HEART_RATE_KEY, device_str, activity_id_str)
+            heart_rates = self.data_mgr.retrieve_sensordata(StraenKeys.HEART_RATE_KEY, activity_id_str)
             if heart_rates != None and len(heart_rates) > 0:
                 if len(response) > 1:
                     response += ","
@@ -208,7 +206,7 @@ class StraenWeb(object):
                 value = float(heart_rate.values()[0])
                 response += json.dumps({"name": StraenKeys.HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
 
-            cadences = self.data_mgr.retrieve_sensordata(StraenKeys.CADENCE_KEY, device_str, activity_id_str)
+            cadences = self.data_mgr.retrieve_sensordata(StraenKeys.CADENCE_KEY, activity_id_str)
             if cadences != None and len(cadences) > 0:
                 if len(response) > 1:
                     response += ","
@@ -216,7 +214,7 @@ class StraenWeb(object):
                 value = float(cadence.values()[0])
                 response += json.dumps({"name": StraenKeys.CADENCE_KEY, "value": "{:.2f}".format(value)})
 
-            powers = self.data_mgr.retrieve_sensordata(StraenKeys.POWER_KEY, device_str, activity_id_str)
+            powers = self.data_mgr.retrieve_sensordata(StraenKeys.POWER_KEY, activity_id_str)
             if powers != None and len(powers) > 0:
                 if len(response) > 1:
                     response += ","
@@ -232,11 +230,9 @@ class StraenWeb(object):
         return ""
 
     @cherrypy.expose
-    def update_visibility(self, device_str, activity_id, visibility):
+    def update_visibility(self, activity_id_str, visibility):
         """Changes the visibility of an activity from public to private or vice versa."""
-        if device_str is None:
-            pass
-        if activity_id is None:
+        if activity_id_str is None:
             pass
 
         try:
@@ -245,7 +241,7 @@ class StraenWeb(object):
             else:
                 new_visibility = "private"
 
-            self.data_mgr.update_activity_visibility(device_str, int(activity_id), new_visibility)
+            self.data_mgr.update_activity_visibility(activity_id_str, new_visibility)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.update_visibility.__name__, 'EXEC', logging.WARNING)
         return ""
@@ -284,14 +280,10 @@ class StraenWeb(object):
         navbar_str += "\t</ul>\n</nav>"
         return navbar_str
 
-    def render_page_for_activity(self, email, user_realname, device_str, activity_id, logged_in):
+    def render_page_for_activity(self, email, user_realname, activity_id_str, logged_in):
         """Helper function for rendering the map corresonding to a specific device and activity."""
 
-        if device_str is None:
-            my_template = Template(filename=g_error_logged_in_html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified device.")
-
-        locations = self.data_mgr.retrieve_locations(device_str, activity_id)
+        locations = self.data_mgr.retrieve_locations(activity_id_str)
         if locations is None or len(locations) == 0:
             my_template = Template(filename=g_error_logged_in_html_file, module_directory=g_tempmod_dir)
             return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified device.")
@@ -313,7 +305,7 @@ class StraenWeb(object):
             last_lat = last_loc[StraenKeys.LOCATION_LAT_KEY]
             last_lon = last_loc[StraenKeys.LOCATION_LON_KEY]
 
-        current_speeds = self.data_mgr.retrieve_metadata(StraenKeys.CURRENT_SPEED_KEY, device_str, activity_id)
+        current_speeds = self.data_mgr.retrieve_metadata(StraenKeys.CURRENT_SPEED_KEY, activity_id_str)
         current_speeds_str = ""
         if current_speeds is not None and isinstance(current_speeds, list):
             for current_speed in current_speeds:
@@ -321,7 +313,7 @@ class StraenWeb(object):
                 value = current_speed.values()[0]
                 current_speeds_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
 
-        heart_rates = self.data_mgr.retrieve_sensordata(StraenKeys.HEART_RATE_KEY, device_str, activity_id)
+        heart_rates = self.data_mgr.retrieve_sensordata(StraenKeys.HEART_RATE_KEY, activity_id_str)
         heart_rates_str = ""
         if heart_rates is not None and isinstance(heart_rates, list):
             for heart_rate in heart_rates:
@@ -329,7 +321,7 @@ class StraenWeb(object):
                 value = heart_rate.values()[0]
                 heart_rates_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
 
-        cadences = self.data_mgr.retrieve_sensordata(StraenKeys.CADENCE_KEY, device_str, activity_id)
+        cadences = self.data_mgr.retrieve_sensordata(StraenKeys.CADENCE_KEY, activity_id_str)
         cadences_str = ""
         if cadences is not None and isinstance(cadences, list):
             for cadence in cadences:
@@ -337,7 +329,7 @@ class StraenWeb(object):
                 value = cadence.values()[0]
                 cadences_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
 
-        powers = self.data_mgr.retrieve_sensordata(StraenKeys.POWER_KEY, device_str, activity_id)
+        powers = self.data_mgr.retrieve_sensordata(StraenKeys.POWER_KEY, activity_id_str)
         powers_str = ""
         if powers is not None and isinstance(powers, list):
             for power in powers:
@@ -346,7 +338,7 @@ class StraenWeb(object):
                 powers_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
 
         my_template = Template(filename=g_map_single_html_file, module_directory=g_tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, deviceStr=device_str, googleMapsKey=g_google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=str(activity_id), currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, googleMapsKey=g_google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id_str, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str)
 
     def render_page_for_multiple_devices(self, email, user_realname, device_strs, user_id, logged_in):
         """Helper function for rendering the map corresonding to a multiple devices."""
@@ -363,10 +355,11 @@ class StraenWeb(object):
         device_index = 0
 
         for device_str in device_strs:
-            activity_id = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
-            if activity_id is None:
+            activity_id_str = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
+            if activity_id_str is None:
                 continue
-            locations = self.data_mgr.retrieve_locations(device_str, activity_id)
+
+            locations = self.data_mgr.retrieve_locations(activity_id_str)
             if locations is None:
                 continue
 
@@ -387,11 +380,19 @@ class StraenWeb(object):
         my_template = Template(filename=g_map_multi_html_file, module_directory=g_tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, googleMapsKey=g_google_maps_key, centerLat=center_lat, centerLon=center_lon, lastLat=last_lat, lastLon=last_lon, routeCoordinates=route_coordinates, routeLen=len(locations), userId=str(user_id))
 
-    def render_activity_row(self, user_realname, activity, row_id):
+    @staticmethod
+    def render_activity_row(user_realname, activity, row_id):
         """Helper function for creating a table row describing an activity."""
 
+        # Activity ID
+        if StraenKeys.ACTIVITY_ID_KEY in activity:
+            activity_id_str = activity[StraenKeys.ACTIVITY_ID_KEY]
+        else:
+            return None
+        if activity_id_str is None or len(activity_id_str) == 0:
+            return None
+
         # Activity name
-        activity_id = activity[StraenKeys.ACTIVITY_ID_KEY]
         if StraenKeys.ACTIVITY_NAME_KEY in activity:
             activity_name = "<b>" + activity[StraenKeys.ACTIVITY_NAME_KEY] + "</b>"
         else:
@@ -424,17 +425,16 @@ class StraenWeb(object):
         if user_realname is not None:
             row += user_realname
             row += "<br>"
-        row += "<a href=\"" + g_root_url + "\\device\\" + activity[StraenKeys.ACTIVITY_DEVICE_STR_KEY] + "?activity_id=" + activity_id + "\">"
+        row += "<a href=\"" + g_root_url + "/activity/" + activity_id_str + "\">"
         row += activity_name
         row += "</a></td>"
         row += "<td>"
-        row += "<input type=\"checkbox\" value=\"\" " + checkbox_value + " id=\"" + \
-            str(row_id) + "\" onclick='handleVisibilityClick(this, \"" + activity[StraenKeys.ACTIVITY_DEVICE_STR_KEY] + "\", " + activity_id + ")';>"
+        row += "<input type=\"checkbox\" value=\"\" " + checkbox_value + " id=\"" + str(row_id) + "\" onclick=\"handleVisibilityClick(this, '" + activity_id_str + "')\";>"
         row += "<span>" + checkbox_label + "</span></label>"
         row += "</td>"
         if user_realname is None:
             row += "<td>"
-            row += "<button type=\"button\" onclick=\"return on_delete('" + activity[StraenKeys.ACTIVITY_DEVICE_STR_KEY] + "', '" + activity_id + "')\">Delete</button>"
+            row += "<button type=\"button\" onclick=\"return on_delete('" + activity_id_str + "')\">Delete</button>"
             row += "</td>"
         row += "<tr>"
         return row
@@ -449,9 +449,9 @@ class StraenWeb(object):
         row += "</tr>\n"
         return row
 
-    def activity_is_public(self, device_str, activity_id):
+    def activity_is_public(self, device_str, activity_id_str):
         """Returns TRUE if the logged in user is allowed to view the specified activity."""
-        visibility = self.data_mgr.retrieve_activity_visibility(device_str, activity_id)
+        visibility = self.data_mgr.retrieve_activity_visibility(device_str, activity_id_str)
         if visibility is not None:
             if visibility == "public":
                 return True
@@ -476,17 +476,31 @@ class StraenWeb(object):
     def live(self, device_str):
         """Renders the map page for the current activity from a single device."""
         try:
-            activity_id = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
-            if activity_id is None:
+            activity_id_str = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
+            if activity_id_str is None:
                 return self.error()
 
             # Get the logged in user.
             username = cherrypy.session.get(SESSION_KEY)
 
             # Render from template.
-            return self.render_page_for_activity("", "", device_str, activity_id, username is not None)
+            return self.render_page_for_activity("", "", activity_id_str, username is not None)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.live.__name__, 'EXEC', logging.WARNING)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
+    def activity(self, activity_id_str, *args, **kw):
+        """Renders the map page for an activity."""
+        try:
+            # Get the logged in user.
+            username = cherrypy.session.get(SESSION_KEY)
+
+            # Render from template.
+            return self.render_page_for_activity("", "", activity_id_str, username is not None)
+        except:
+            cherrypy.log.error('Unhandled exception in ' + StraenWeb.activity.__name__, 'EXEC', logging.WARNING)
         return self.error()
 
     @cherrypy.expose
@@ -505,7 +519,7 @@ class StraenWeb(object):
             username = cherrypy.session.get(SESSION_KEY)
 
             # Render from template.
-            return self.render_page_for_activity("", "", device_str, activity_id_str, username is not None)
+            return self.render_page_for_activity("", "", activity_id_str, username is not None)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.device.__name__, 'EXEC', logging.WARNING)
         return self.error()
@@ -531,9 +545,11 @@ class StraenWeb(object):
             activities_list_str = "<table>\n"
             if activities is not None and isinstance(activities, list):
                 for activity in activities:
-                    activities_list_str += self.render_activity_row(None, activity, row_id)
-                    row_id = row_id + 1
-                    activities_list_str += "\n"
+                    activity_str = self.render_activity_row(None, activity, row_id)
+                    if activity_str is not None and len(activity_str) > 0:
+                        row_id = row_id + 1
+                        activities_list_str += activity_str
+                        activities_list_str += "\n"
             activities_list_str += "</table>\n"
 
             # Render from template.
@@ -567,9 +583,11 @@ class StraenWeb(object):
             activities_list_str = "<table>\n"
             if activities is not None and isinstance(activities, list):
                 for activity in activities:
-                    activities_list_str += self.render_activity_row(user_realname, activity, row_id)
-                    row_id = row_id + 1
-                    activities_list_str += "\n"
+                    activity_str = self.render_activity_row(user_realname, activity, row_id)
+                    if activity_str is not None and len(activity_str) > 0:
+                        row_id = row_id + 1
+                        activities_list_str += activity_str
+                        activities_list_str += "\n"
             activities_list_str += "</table>\n"
 
             # Render from template.

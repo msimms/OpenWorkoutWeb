@@ -33,27 +33,27 @@ class DataMgr(Importer.LocationWriter):
         """Inherited from LocationWriter."""
         return None, None
 
-    def create_track(self, device_str, activity_id, track_name, track_description):
+    def create_track(self, device_str, activity_id_str, track_name, track_description):
         """Inherited from LocationWriter."""
         pass
 
-    def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
+    def create_location(self, device_str, activity_id_str, date_time, latitude, longitude, altitude):
         """Inherited from LocationWriter. Create method for a location."""
         if self.database is None:
             return None, "No database."
-        return self.database.create_location(device_str, activity_id, date_time, latitude, longitude, altitude)
+        return self.database.create_location(device_str, activity_id_str, date_time, latitude, longitude, altitude)
 
-    def create_sensordata(self, device_str, activity_id, date_time, key, value):
+    def create_sensordata(self, device_str, activity_id_str, date_time, key, value):
         """Create method for sensor data."""
         if self.database is None:
             return None, "No database."
-        self.database.create_sensordata(device_str, activity_id, date_time, key, value)
+        self.database.create_sensordata(device_str, activity_id_str, date_time, key, value)
 
-    def create_metadata(self, device_str, activity_id, date_time, key, value):
+    def create_metadata(self, device_str, activity_id_str, date_time, key, value):
         """Create method for activity metadata."""
         if self.database is None:
             return None, "No database."
-        self.database.create_metadata(device_str, activity_id, date_time, key, value)
+        self.database.create_metadata(device_str, activity_id_str, date_time, key, value)
 
     def import_file(self, username, local_file_name, file_extension):
         """Imports the contents of a local file into the database."""
@@ -68,13 +68,20 @@ class DataMgr(Importer.LocationWriter):
             return None, "Bad parameter."
 
         activities = []
+
+        # List activities recorded on devices registered to the user.
         devices = self.database.retrieve_user_devices(user_id)
+        devices = list(set(devices)) # De-duplicate
         if devices is not None:
             for device in devices:
                 device_activities = self.database.retrieve_device_activity_list(device, start, None)
                 activities.extend(device_activities)
-            if len(activities) > 0:
-                activities = sorted(activities, key=get_activities_sort_key, reverse=True)[:num_results]
+
+        # List activities with no device that are associated with the user.
+
+        # Sort and limit the list.
+        if len(activities) > 0:
+            activities = sorted(activities, key=get_activities_sort_key, reverse=True)[:num_results]
         return activities
 
     def retrieve_device_activity_list(self, device_id, start, num_results):
@@ -94,6 +101,7 @@ class DataMgr(Importer.LocationWriter):
             return None, "Bad parameter."
 
         devices = self.database.retrieve_user_devices(user_id)
+        devices = list(set(devices)) # De-duplicate
         if devices is not None:
             for device in devices:
                 self.database.delete_user_device(device)
@@ -104,71 +112,61 @@ class DataMgr(Importer.LocationWriter):
             return None, "No database."
         return self.database.delete_activity(object_id)
 
-    def retrieve_activity_visibility(self, device_str, activity_id):
+    def retrieve_activity_visibility(self, device_str, activity_id_str):
         """Returns the visibility setting for the specified activity."""
         if self.database is None:
             return None, "No database."
         if device_str is None or len(device_str) == 0:
             return None, "Bad parameter."
-        if activity_id is None:
+        if activity_id_str is None or len(activity_id_str) == 0:
             return None, "Bad parameter."
-        return self.database.retrieve_activity_visibility(device_str, activity_id)
+        return self.database.retrieve_activity_visibility(device_str, activity_id_str)
 
-    def update_activity_visibility(self, device_str, activity_id, visibility):
+    def update_activity_visibility(self, activity_id_str, visibility):
         """Changes the visibility setting for the specified activity."""
         if self.database is None:
             return None, "No database."
-        if device_str is None or len(device_str) == 0:
-            return None, "Bad parameter."
-        if activity_id is None:
+        if activity_id_str is None or len(activity_id_str) == 0:
             return None, "Bad parameter."
         if visibility is None:
             return None, "Bad parameter."
-        return self.database.update_activity_visibility(device_str, activity_id, visibility)
+        return self.database.update_activity_visibility(activity_id_str, visibility)
 
-    def retrieve_locations(self, device_str, activity_id):
+    def retrieve_locations(self, activity_id_str):
         """Returns the location list for the specified activity."""
         if self.database is None:
             return None, "No database."
-        if device_str is None or len(device_str) == 0:
+        if activity_id_str is None or len(activity_id_str) == 0:
             return None, "Bad parameter."
-        if activity_id is None:
-            return None, "Bad parameter."
-        return self.database.retrieve_locations(device_str, activity_id)
+        return self.database.retrieve_locations(activity_id_str)
 
-    def retrieve_metadata(self, key, device_str, activity_id):
+    def retrieve_metadata(self, key, activity_id_str):
         """Returns all the sensordata for the specified sensor for the given activity."""
         if self.database is None:
             return None, "No database."
         if key is None or len(key) == 0:
             return None, "Bad parameter."
-        if device_str is None or len(device_str) == 0:
+        if activity_id_str is None or len(activity_id_str) == 0:
             return None, "Bad parameter."
-        if activity_id is None:
-            return None, "Bad parameter."
-        return self.database.retrieve_metadata(key, device_str, activity_id)
+        return self.database.retrieve_metadata(key, activity_id_str)
 
-    def retrieve_sensordata(self, key, device_str, activity_id):
+    def retrieve_sensordata(self, key, activity_id_str):
         """Returns all the sensor data for the specified sensor for the given activity."""
         if self.database is None:
             return None, "No database."
         if key is None or len(key) == 0:
             return None, "Bad parameter."
-        if device_str is None or len(device_str) == 0:
+        if activity_id_str is None or len(activity_id_str) == 0:
             return None, "Bad parameter."
-        if activity_id is None:
-            return None, "Bad parameter."
-        return self.database.retrieve_sensordata(key, device_str, activity_id)
+        return self.database.retrieve_sensordata(key, activity_id_str)
 
-    def retrieve_most_recent_locations(self, device_str, activity_id, num):
+    def retrieve_most_recent_locations(self, activity_id_str, num):
         """Returns the most recent 'num' locations for the specified device and activity."""
         if self.database is None:
             return None, "No database."
-        if device_str is None or len(device_str) == 0:
+        if activity_id_str is None or len(activity_id_str) == 0:
             return None, "Bad parameter."
-        if activity_id is None:
-            return None, "Bad parameter."
-        return self.database.retrieve_most_recent_locations(device_str, activity_id, num)
+        return self.database.retrieve_most_recent_locations(activity_id_str, num)
 
     def retrieve_most_recent_activity_id_for_device(self, device_str):
         """Returns the most recent activity id for the specified device."""

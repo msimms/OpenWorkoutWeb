@@ -107,7 +107,7 @@ ${route}
 
 		routePath.setMap(map);
 
-		$.ajax({ type: 'POST', url: "${root_url}/update_metadata/${deviceStr}/${activityId}", success: updateMetadata, dataType: "application/json" });
+		$.ajax({ type: 'POST', url: "${root_url}/update_metadata/${activityId}", success: updateMetadata, dataType: "application/json" });
 	}
 
 	google.maps.event.addDomListener(window, 'load', initialize);
@@ -206,8 +206,8 @@ ${route}
 
 	var checkForUpdates = function()
 	{
-		$.ajax({ type: 'POST', url: "${root_url}/update_track/${deviceStr}/${activityId}/${routeLen}", success: appendToTrack, dataType: "application/json" });
-		$.ajax({ type: 'POST', url: "${root_url}/update_metadata/${deviceStr}/${activityId}", success: updateMetadata, dataType: "application/json" });
+		$.ajax({ type: 'POST', url: "${root_url}/update_track/${activityId}/${routeLen}", success: appendToTrack, dataType: "application/json" });
+		$.ajax({ type: 'POST', url: "${root_url}/update_metadata/${activityId}", success: updateMetadata, dataType: "application/json" });
 	};
 
 	//setInterval(checkForUpdates, 15000);
