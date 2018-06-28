@@ -129,7 +129,9 @@ class UserMgr(object):
             return False, "No database."
         if user_id is None or len(user_id) == 0:
             return False, "Bad parameter."
-        return self.database.retrieve_user_devices(user_id)
+        devices = self.database.retrieve_user_devices(user_id)
+        devices = list(set(devices)) # De-duplicate
+        return devices
 
     def list_users_followed(self, user_id):
         """Returns the user ids for all users that are followed by the user with the specified id."""
