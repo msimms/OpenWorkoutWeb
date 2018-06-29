@@ -393,7 +393,7 @@ class StraenWeb(object):
             return None
 
         # Activity name
-        if StraenKeys.ACTIVITY_NAME_KEY in activity:
+        if StraenKeys.ACTIVITY_NAME_KEY in activity and len(activity[StraenKeys.ACTIVITY_NAME_KEY]) > 0:
             activity_name = "<b>" + activity[StraenKeys.ACTIVITY_NAME_KEY] + "</b>"
         else:
             activity_name = "<b>Unnamed</b>"

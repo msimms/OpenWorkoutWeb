@@ -7,6 +7,8 @@ PASSWORD1_KEY = "password1"
 PASSWORD2_KEY = "password2"
 DEVICE_KEY = "device"
 REALNAME_KEY = "realname"
+HASH_KEY = "hash"
+DEVICES_KEY = "devices"
 
 NAME_KEY = "Name"
 TIME_KEY = "Time"
@@ -20,9 +22,10 @@ CURRENT_PACE_KEY = "Current Pace"
 POWER_KEY = "Power"
 SETS_KEY = "Sets"
 
-LOCATION_LAT_KEY = 'latitude'
-LOCATION_LON_KEY = 'longitude'
-LOCATION_TIME_KEY = 'time'
+LOCATION_LAT_KEY = "latitude"
+LOCATION_LON_KEY = "longitude"
+LOCATION_ALT_KEY = "altitude"
+LOCATION_TIME_KEY = "time"
 
 ACTIVITY_ID_KEY = "activity_id"
 ACTIVITY_TYPE_KEY = "activity_type"
@@ -31,6 +34,7 @@ ACTIVITY_LOCATIONS_KEY = "locations"
 ACTIVITY_NAME_KEY = "name"
 ACTIVITY_TIME_KEY = "time"
 ACTIVITY_VISIBILITY_KEY = "visibility"
+ACTIVITY_COMMENTS_KEY = "comments"
 
 TYPE_RUNNING_KEY = "Running"
 TYPE_CYCLING_KEY = "Cycling"

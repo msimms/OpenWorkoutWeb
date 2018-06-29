@@ -60,7 +60,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            post = {"username": username, "realname": realname, "hash": passhash, "devices": [], "following": [], "followed by": []}
+            post = {StraenKeys.USERNAME_KEY: username, StraenKeys.REALNAME_KEY: realname, StraenKeys.HASH_KEY: passhash, StraenKeys.DEVICES_KEY: [], "following": [], "followed by": []}
             self.users_collection.insert(post)
             return True
         except:
@@ -78,9 +78,9 @@ class MongoDatabase(Database.Database):
             return None, None, None
 
         try:
-            user = self.users_collection.find_one({"username": username})
+            user = self.users_collection.find_one({StraenKeys.USERNAME_KEY: username})
             if user is not None:
-                return str(user['_id']), user['hash'], user['realname']
+                return str(user['_id']), user[StraenKeys.HASH_KEY], user[StraenKeys.REALNAME_KEY]
             return None, None, None
         except:
             traceback.print_exc(file=sys.stdout)
@@ -146,10 +146,10 @@ class MongoDatabase(Database.Database):
             return user_list
 
         try:
-            matched_users = self.users_collection.find({"username": {"$regex": username}})
+            matched_users = self.users_collection.find({StraenKeys.USERNAME_KEY: {"$regex": username}})
             if matched_users is not None:
                 for matched_user in matched_users:
-                    user_list.append(matched_user["username"])
+                    user_list.append(matched_user[StraenKeys.USERNAME_KEY])
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
@@ -169,11 +169,11 @@ class MongoDatabase(Database.Database):
             user = self.users_collection.find_one({"_id": user_id_obj})
             devices = []
             if user is not None:
-                if 'devices' in user:
-                    devices = user['devices']
+                if StraenKeys.DEVICES_KEY in user:
+                    devices = user[StraenKeys.DEVICES_KEY]
             if device_str not in devices:
                 devices.append(device_str)
-                user['devices'] = devices
+                user[StraenKeys.DEVICES_KEY] = devices
                 self.users_collection.save(user)
         except:
             traceback.print_exc(file=sys.stdout)
@@ -190,8 +190,8 @@ class MongoDatabase(Database.Database):
             user_id_obj = ObjectId(user_id)
             user = self.users_collection.find_one({"_id": user_id_obj})
             if user is not None:
-                if 'devices' in user:
-                    return user['devices']
+                if StraenKeys.DEVICES_KEY in user:
+                    return user[StraenKeys.DEVICES_KEY]
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
@@ -204,7 +204,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            self.activities_collection.remove({"device_str": device_str})
+            self.activities_collection.remove({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
             return True
         except:
             traceback.print_exc(file=sys.stdout)
@@ -290,11 +290,11 @@ class MongoDatabase(Database.Database):
             exclude_keys[StraenKeys.POWER_KEY] = False
 
             if start is None and num_results is None:
-                return list(self.activities_collection.find({"device_str": device_str}, exclude_keys).sort("_id", -1))
+                return list(self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort("_id", -1))
             elif num_results is None:
-                return list(self.activities_collection.find({"device_str": device_str}, exclude_keys).sort("_id", -1).skip(start))
+                return list(self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort("_id", -1).skip(start))
             else:
-                return list(self.activities_collection.find({"device_str": device_str}, exclude_keys).sort("_id", -1).skip(start).limit(num_results))
+                return list(self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort("_id", -1).skip(start).limit(num_results))
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
@@ -307,16 +307,16 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            device_activities = self.activities_collection.find({"device_str": device_str}).sort("_id", -1).limit(1)
+            device_activities = self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}).sort("_id", -1).limit(1)
             if device_activities is not None and device_activities.count() > 0:
                 activity = device_activities.next()
-                return activity["activity_id"]
+                return activity[StraenKeys.ACTIVITY_ID_KEY]
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_activity(self, activity_id_str, activty_name, device_str):
+    def create_activity(self, activity_id_str, activty_name, date_time, device_str):
         """Create method for an activity."""
         if activity_id_str is None:
             self.log_error(MongoDatabase.create_activity.__name__ + "Unexpected empty object: activity_id_str")
@@ -324,12 +324,15 @@ class MongoDatabase(Database.Database):
         if activty_name is None:
             self.log_error(MongoDatabase.create_activity.__name__ + "Unexpected empty object: activty_name")
             return False
+        if date_time is None:
+            self.log_error(MongoDatabase.create_activity.__name__ + "Unexpected empty object: date_time")
+            return False
         if device_str is None:
             self.log_error(MongoDatabase.create_activity.__name__ + "Unexpected empty object: device_str")
             return False
 
         try:
-            post = {"activity_id": activity_id_str, "activty_name": activty_name, "device_str": device_str, "visibility": "public", "locations": []}
+            post = {StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_NAME_KEY: activty_name, StraenKeys.ACTIVITY_TIME_KEY: date_time, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str, StraenKeys.ACTIVITY_VISIBILITY_KEY: "public", StraenKeys.ACTIVITY_LOCATIONS_KEY: []}
             self.activities_collection.insert(post)
             return True
         except:
@@ -362,10 +365,10 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            activity = self.activities_collection.find_one({"activity_id": activity_id_str, "device_str": device_str})
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if activity is not None:
-                if "visibility" in activity:
-                    visibility = activity["visibility"]
+                if StraenKeys.ACTIVITY_VISIBILITY_KEY in activity:
+                    visibility = activity[StraenKeys.ACTIVITY_VISIBILITY_KEY]
                     return visibility
         except:
             traceback.print_exc(file=sys.stdout)
@@ -382,9 +385,9 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            activity = self.activities_collection.find_one({"activity_id": activity_id_str})
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
             if activity is not None:
-                activity["visibility"] = visibility
+                activity[StraenKeys.ACTIVITY_VISIBILITY_KEY] = visibility
                 self.activities_collection.save(activity)
                 return True
         except:
@@ -408,11 +411,11 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            activity = self.activities_collection.find_one({"activity_id": activity_id_str, "device_str": device_str})
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if len(activity) > 0:
-                data = activity["comments"]
+                data = activity[StraenKeys.ACTIVITY_COMMENTS_KEY]
                 data.append({commenter_id, comment})
-                activity["comments"] = data
+                activity[StraenKeys.ACTIVITY_COMMENTS_KEY] = data
                 self.activities_collection.save(activity)
                 return True
         except:
@@ -439,10 +442,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            activity = self.activities_collection.find_one({"activity_id": activity_id_str, "device_str": device_str})
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if len(activity) == 0:
-                if self.create_activity(activity_id_str, "", device_str):
-                    activity = self.activities_collection.find_one({"device_id": device_str, "activity_id": activity_id_str})
+                if self.create_activity(activity_id_str, "", date_time, device_str):
+                    activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if len(activity) > 0:
                 data = []
                 if key in activity:
@@ -467,7 +470,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            activity = self.activities_collection.find_one({"activity_id": activity_id_str})
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
             if activity is not None:
                 if key in activity:
                     metadata = activity[key]
@@ -497,10 +500,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            activity = self.activities_collection.find_one({"activity_id": activity_id_str, "device_str": device_str})
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if len(activity) == 0:
-                if self.create_activity(activity_id_str, "", device_str):
-                    activity = self.activities_collection.find_one({"device_id": device_str, "activity_id": activity_id_str})
+                if self.create_activity(activity_id_str, "", date_time, device_str):
+                    activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if len(activity) > 0:
                 data = []
                 if sensor_type in activity:
@@ -525,7 +528,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            activity = self.activities_collection.find_one({"activity_id": activity_id_str})
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
             if activity is not None:
                 if sensor_type in activity:
                     sensor_data = activity[sensor_type]
@@ -554,17 +557,17 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            activity = self.activities_collection.find_one({"activity_id": activity_id_str, "device_str": device_str})
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if activity is None:
-                if self.create_activity(activity_id_str, "", device_str):
-                    activity = self.activities_collection.find_one({"device_id": device_str, "activity_id": activity_id_str})
+                if self.create_activity(activity_id_str, "", date_time, device_str):
+                    activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if activity is not None:
                 location_list = []
-                if 'locations' in activity:
-                    location_list = activity['locations']
-                value = {"time": date_time, "latitude": latitude, "longitude": longitude, "altitude": altitude}
+                if StraenKeys.ACTIVITY_LOCATIONS_KEY in activity:
+                    location_list = activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]
+                value = {"time": date_time, StraenKeys.LOCATION_LAT_KEY: latitude, StraenKeys.LOCATION_LON_KEY: longitude, StraenKeys.LOCATION_ALT_KEY: altitude}
                 location_list.append(value)
-                activity['locations'] = location_list
+                activity[StraenKeys.ACTIVITY_LOCATIONS_KEY] = location_list
                 self.activities_collection.save(activity)
                 return True
         except:
@@ -583,9 +586,9 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            activity = self.activities_collection.find_one({"activity_id": activity_id_str})
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
             if activity is not None:
-                locations = activity['locations']
+                locations = activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]
                 return locations
         except:
             traceback.print_exc(file=sys.stdout)
