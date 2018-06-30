@@ -11,7 +11,7 @@
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 <meta content="utf-8" http-equiv="encoding">
-	
+
 <link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
 
 </head>
@@ -19,7 +19,8 @@
 <style type="text/css">
 	html { height: 100% }
 	body { height: 100%; margin: 0; padding: 0 }
-	#map-canvas { height: 75% }
+	div { margin: 0px }
+	#map_canvas { height: 75% }
 
 	div.bar
 	{
@@ -52,10 +53,10 @@
 ${nav}
 </section>
 
-<div id="map-canvas">
+<div id="map_canvas">
 
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBhsgYoAKyYFhf3JABWflVMNBDi5tPXvZo"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}"></script>
 <script type="text/javascript">
 	var contentString
 	var routePath
@@ -88,7 +89,7 @@ ${nav}
 			zoom: 12
 		};
 
-		map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+		map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 
 		var routeCoordinates =
 		[
@@ -106,7 +107,7 @@ ${route}
 
 		routePath.setMap(map);
 
-		$.ajax({ type: 'POST', url: "${root_url}/update_metadata/${deviceStr}/${activityId}", success: updateMetadata, dataType: "application/json" });
+		$.ajax({ type: 'POST', url: "${root_url}/update_metadata/${activityId}", success: updateMetadata, dataType: "application/json" });
 	}
 
 	google.maps.event.addDomListener(window, 'load', initialize);
@@ -159,7 +160,7 @@ ${route}
 			'<p>';
 		for (var i = 0; i < objList.length; ++i)
 		{
-			if (objList[i].name != "Name")
+			if ((objList[i].name != "Name") && (objList[i].name != "Avg. Speed"))
 			{
 				contentString += objList[i].name;
 				contentString += " = ";
@@ -171,7 +172,7 @@ ${route}
 			'</p>' +
 			'</div>' +
 			'</div>';
-			
+
 		if (infoWindow)
 		{
 			infoWindow.close();
@@ -187,7 +188,7 @@ ${route}
 		({
 			content: contentString
 		});
-		
+
 		marker = new google.maps.Marker
 		({
 			position: new google.maps.LatLng(lastLat, lastLon),
@@ -205,8 +206,8 @@ ${route}
 
 	var checkForUpdates = function()
 	{
-		$.ajax({ type: 'POST', url: "${root_url}/update_track/${deviceStr}/${activityId}/${routeLen}", success: appendToTrack, dataType: "application/json" });
-		$.ajax({ type: 'POST', url: "${root_url}/update_metadata/${deviceStr}/${activityId}", success: updateMetadata, dataType: "application/json" });
+		$.ajax({ type: 'POST', url: "${root_url}/update_track/${activityId}/${routeLen}", success: appendToTrack, dataType: "application/json" });
+		$.ajax({ type: 'POST', url: "${root_url}/update_metadata/${activityId}", success: updateMetadata, dataType: "application/json" });
 	};
 
 	//setInterval(checkForUpdates, 15000);
@@ -216,7 +217,7 @@ ${route}
 
 <div id="charts"/>
 
-<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
 <script type="text/javascript">
 	function drawChart(data, title, color)
 	{

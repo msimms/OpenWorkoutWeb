@@ -17,16 +17,155 @@
 
 <body>
 
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+
+<script type="text/javascript" src="${root_url}/jquery-timepicker/jquery.timepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="${root_url}/jquery-timepicker/jquery.timepicker.css" />
+
+<script>
+
+	function save(target)
+	{
+		var the_url = "${root_url}/api/1.0/add_activity";
+		var dict = [];
+		var sets = [];
+		var result_text = {};
+		var activityType = document.getElementById("activity_type").value;
+		var innerDiv = document.getElementById("manual_entry_div");
+
+		for (var i = 0; i < innerDiv.children.length; i++)
+		{
+			var divChild = innerDiv.children[i];
+			if (divChild.name == "Repititions")
+			{
+				sets.push(divChild.value);
+			}
+			else if ((divChild.name == "Time") || (divChild.name == "Distance"))
+			{
+				dict.push({[divChild.name] : divChild.value});
+			}
+		}
+		dict.push({["Sets"] : JSON.stringify(sets)});
+		dict.push({["activity_type"] : activityType});
+
+		if (send_post_request(the_url, dict, result_text))
+		{
+		}
+		else
+		{
+			alert(result_text.value);
+		}
+	}
+
+	function show_manual_entry_options()
+	{
+		var activityType = document.getElementById("activity_type").value;
+		var outerDiv = document.getElementById("block");
+		var innerDiv = document.createElement('div');
+		innerDiv.id = "manual_entry_div";
+
+		// Remove existing items, if any.
+		while (outerDiv.firstChild)
+		{
+			outerDiv.removeChild(outerDiv.firstChild);
+		}
+
+		// Determine which data fields are needed.
+		var fields = ["Duration", "Distance"];
+		switch (activityType)
+		{
+			case "Push Ups / Press Ups":
+			case "Pull Ups":
+				fields = ["Repititions", "Repititions", "Repititions"];
+				break;
+		}
+
+		// Add a label for the date picker.
+		var dateLabel = document.createTextNode("Date: ");
+		innerDiv.appendChild(dateLabel);
+
+		// Add the date picker.
+		var newDate = document.createElement('input');
+		newDate.type = "input";
+		newDate.id = "date";
+		newDate.className = "pickDate"; 
+		$(newDate).datepicker();
+		innerDiv.appendChild(newDate);
+
+		// Add a label for the start time picker.
+		var dateLabel = document.createTextNode("Start Time: ");
+		innerDiv.appendChild(dateLabel);
+
+		// Add the start time picker.
+		var newStartTime = document.createElement('input');
+		newStartTime.type = "input";
+		newStartTime.id = "time";
+		newStartTime.className = "pickTime"; 
+		$(newStartTime).timepicker({ 'timeFormat': 'h:i A' });
+		innerDiv.appendChild(newStartTime);
+
+		// Add a line break.
+		var br = document.createElement("br");
+		innerDiv.appendChild(br);
+
+		// Add the data fields.
+		for (i = 0, len = fields.length; i < len; i++)
+		{
+			var label = document.createTextNode(fields[i] + ": ");
+			innerDiv.appendChild(label);
+
+			var value = document.createElement("input");
+			value.name = fields[i];
+			value.setAttribute("type", "number");
+			value.setAttribute("value", 0.0);
+			innerDiv.appendChild(value);
+
+			var br = document.createElement("br");
+			innerDiv.appendChild(br);
+		}
+
+		// Add to the div.
+		outerDiv.appendChild(innerDiv);
+
+		// Create a save button.
+		var saveBtn = document.createElement('button');
+		var saveBtnText = document.createTextNode('Save');
+		saveBtn.appendChild(saveBtnText);
+		saveBtn.title = "Save";
+		saveBtn.addEventListener('click', function() { save(this); });
+
+		// Add the save button to the screen.
+		outerDiv.appendChild(saveBtn);
+
+		return false;
+	}
+
+</script>
+
 <section class="nav">
 ${nav}
 </section>
 
-<section class="import" style="width: 600px">
-	<h2>Import From a File:</h2>
+<div class="import" style="width: 600px">
+	<h2>Import From a File</h2>
 	<form action="${root_url}/upload" method="post" enctype="multipart/form-data">
 		Select files: <input type="file" name="ufile" multiple><input type="submit">
 	</form>
-</section>
+	<hr>
+	<h2>Manual Entry</h2>
+	<form onChange="return show_manual_entry_options()" method="post" enctype="multipart/form-data">
+		<select id="activity_type" name="activity_type">
+${activity_type_list}
+		</select>
+	</form>
+</div>
 
+<div class="block" id="block">
+</div>
+	
 </body>
 </html>

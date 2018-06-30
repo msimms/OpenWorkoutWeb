@@ -17,31 +17,22 @@
 
 <body>
 
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script>
+
+</script>
+
 <section class="nav">
 ${nav}
 </section>
 
-<section class="user_search_form" style="width: 600px">
-	<h2>Search for a user:</h2>
-	<form name="user_search" action="${root_url}/submit_user_search" method="post" accept-charset="utf-8">
-		<ul>
-			<li>
-				<label for="user" style="width: 440px">User Email or Name</label>
-				<input type="search" name="searchname" style="width: 440px" placeholder="Joe User" required>
-			</li>
-			<li>
-				<input type="submit" value="Search">
-			</li>
-		</ul>
-	</form>
-</section>
-
-<section class="users_list" style="width: 600px">
-	<h2>Followers:</h2>
+<div class="users_list" style="width: 600px">
+	<h2>Followers</h2>
 	<table>
 	${users_list}
 	</table>
-</section>
+</div>
 
 </body>
+
 </html>

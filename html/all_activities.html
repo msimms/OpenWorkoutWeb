@@ -5,6 +5,7 @@
 
 <title>${product} - ${name}</title>
 
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
 <link rel="stylesheet" href="${root_url}/css/normalize.css">
 <link rel="stylesheet" href="${root_url}/css/site.css">
 
@@ -17,19 +18,36 @@
 
 <body>
 
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 <script type="text/javascript">
 
-function handleVisibilityClick(cb, device_id, activity_id)
-{
-	$.ajax({ type: 'POST', url: "${root_url}/update_visibility/" + device_id + "/" + activity_id + "/" + cb.checked, dataType: "application/json" });
-	id = cb.id;
-	if ($('#' + id).is(':checked')) {
-		$('#' + id + "+span").html('Public');
-	} else {
-		$('#' + id + "+span").html('Private');
+	function handleVisibilityClick(cb, activity_id)
+	{
+		$.ajax({ type: 'POST', url: "${root_url}/update_visibility/" + activity_id + "/" + cb.checked, dataType: "application/json" });
+		id = cb.id;
+		if ($('#' + id).is(':checked')) {
+			$('#' + id + "+span").html('Public');
+		} else {
+			$('#' + id + "+span").html('Private');
+		}
 	}
-}
+
+	function on_delete(activity_id)
+	{
+		if (confirm('Are you sure you want to do this?'))
+		{
+			var the_url = "${root_url}/delete_activity";
+			var dict = [];
+			var result_text = {};
+
+			dict.push({["activity_id"] : activity_id});
+			if (send_post_request(the_url, dict, result_text))
+				window.location.replace("${root_url}/all_activities");
+			else
+				alert("An error occurred!");
+		}
+	}
 
 </script>
 
@@ -37,9 +55,9 @@ function handleVisibilityClick(cb, device_id, activity_id)
 ${nav}
 </section>
 
-<section class="activities_list" style="width: 600px">
+<div class="activities_list" style="width: 600px">
 ${activities_list}
-</section>
+</div>
 
 </body>
 </html>

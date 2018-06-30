@@ -17,31 +17,90 @@
 
 <body>
 
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script>
+
+	function follow(target)
+	{
+		var the_url = "${root_url}/api/1.0/request_to_follow";
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["target_email"] : target.name});
+		if (send_post_request(the_url, dict, result_text))
+		{
+		}
+		else
+		{
+			alert(result_text.value);
+		}
+	}
+
+	function search()
+	{
+		var the_url = "${root_url}/api/1.0/list_matched_users";
+		var searchname = document.getElementById("searchname").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["searchname"] : searchname});
+		if (send_post_request(the_url, dict, result_text))
+		{
+			var obj = JSON.parse(result_text.value);
+			var table = document.getElementById('search_results');
+			for (var i = 0; i < obj.length; i++)
+			{
+				var tr = document.createElement('tr');   
+				var td1 = document.createElement('td');
+				var td2 = document.createElement('td');
+				var emailText = document.createTextNode(obj[i]);
+				var followLink = document.createElement('button');
+				var followLinkText = document.createTextNode('Follow');
+
+				followLink.appendChild(followLinkText);
+				followLink.title = "Follow";
+				followLink.value = obj[i];
+				followLink.name = obj[i];
+				followLink.addEventListener('click', function() { follow(this); });
+
+				td1.appendChild(emailText);
+				td2.appendChild(followLink);
+				tr.appendChild(td1);
+				tr.appendChild(td2);
+
+				table.appendChild(tr);
+			}
+		}
+		else
+		{
+			alert(result_text.value);
+		}
+	}
+
+</script>
+
 <section class="nav">
 ${nav}
 </section>
 
-<section class="user_search_form" style="width: 600px">
-	<h2>Search for a user:</h2>
-	<form name="user_search" action="${root_url}/submit_user_search" method="post" accept-charset="utf-8">
-		<ul>
-			<li>
-				<label for="user" style="width: 440px">User Email or Name</label>
-				<input type="search" name="searchname" style="width: 440px" placeholder="Joe User" required>
-			</li>
-			<li>
-				<input type="submit" value="Search">
-			</li>
-		</ul>
-	</form>
-</section>
+<div class="user_search_form" style="width: 600px">
+	<h2>Search for a user</h2>
+	<p>User Email or Name: <input type="text" id="searchname"><br></p>
+	<button type="button" onclick="return search()">Search</button>
+</div>
 
-<section class="users_list" style="width: 600px">
-	<h2>Users Following:</h2>
+<div class="users_list" style="width: 600px">
+	<table id="search_results" >
+	</table>
+</div>
+
+<div class="users_list" style="width: 600px">
+	<h2>Users Following</h2>
 	<table>
 	${users_list}
 	</table>
-</section>
+</div>
 
 </body>
+
 </html>
