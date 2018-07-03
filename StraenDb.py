@@ -281,13 +281,15 @@ class MongoDatabase(Database.Database):
         try:
             # Things we don't need.
             exclude_keys = {}
-            exclude_keys[StraenKeys.CADENCE_KEY] = False
-            exclude_keys[StraenKeys.CURRENT_SPEED_KEY] = False
-            exclude_keys[StraenKeys.AVG_SPEED_KEY] = False
-            exclude_keys[StraenKeys.MOVING_SPEED_KEY] = False
-            exclude_keys[StraenKeys.HEART_RATE_KEY] = False
-            exclude_keys[StraenKeys.CURRENT_PACE_KEY] = False
-            exclude_keys[StraenKeys.POWER_KEY] = False
+            exclude_keys[StraenKeys.APP_CADENCE_KEY] = False
+            exclude_keys[StraenKeys.APP_CURRENT_SPEED_KEY] = False
+            exclude_keys[StraenKeys.APP_AVG_SPEED_KEY] = False
+            exclude_keys[StraenKeys.APP_MOVING_SPEED_KEY] = False
+            exclude_keys[StraenKeys.APP_HEART_RATE_KEY] = False
+            exclude_keys[StraenKeys.APP_AVG_HEART_RATE_KEY] = False
+            exclude_keys[StraenKeys.APP_CURRENT_PACE_KEY] = False
+            exclude_keys[StraenKeys.APP_POWER_KEY] = False
+            exclude_keys[StraenKeys.ACTIVITY_LOCATIONS_KEY] = False
 
             if start is None and num_results is None:
                 return list(self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort("_id", -1))
@@ -379,10 +381,10 @@ class MongoDatabase(Database.Database):
         """Changes the visibility setting for the specified activity."""
         if activity_id_str is None:
             self.log_error(MongoDatabase.update_activity_visibility.__name__ + "Unexpected empty object: activity_id_str")
-            return None
+            return False
         if visibility is None:
             self.log_error(MongoDatabase.update_activity_visibility.__name__ + "Unexpected empty object: visibility")
-            return None
+            return False
 
         try:
             activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
@@ -423,11 +425,8 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_metadata(self, device_str, activity_id_str, date_time, key, value):
+    def create_metadata(self, activity_id_str, date_time, key, value, create_list):
         """Create method for a piece of metaadata."""
-        if device_str is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + "Unexpected empty object: device_str")
-            return False
         if activity_id_str is None:
             self.log_error(MongoDatabase.create_metadata.__name__ + "Unexpected empty object: activity_id_str")
             return False
@@ -440,19 +439,22 @@ class MongoDatabase(Database.Database):
         if value is None:
             self.log_error(MongoDatabase.create_metadata.__name__ + "Unexpected empty object: value")
             return False
+        if create_list is None:
+            self.log_error(MongoDatabase.create_metadata.__name__ + "Unexpected empty object: value")
+            return False
 
         try:
-            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
-            if len(activity) == 0:
-                if self.create_activity(activity_id_str, "", date_time, device_str):
-                    activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
             if len(activity) > 0:
-                data = []
-                if key in activity:
-                    data = activity[key]
-                value = {str(date_time): str(value)}
-                data.append(value)
-                activity[key] = data
+                if create_list is True:
+                    data = []
+                    if key in activity:
+                        data = activity[key]
+                    value = {str(date_time): str(value)}
+                    data.append(value)
+                    activity[key] = data
+                else:
+                    activity[key] = value
                 self.activities_collection.save(activity)
                 return True
         except:
@@ -481,11 +483,8 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_sensordata(self, device_str, activity_id_str, date_time, sensor_type, value):
+    def create_sensordata(self, activity_id_str, date_time, sensor_type, value):
         """Create method for a piece of sensor data, such as a heart rate or power meter reading."""
-        if device_str is None:
-            self.log_error(MongoDatabase.create_sensordata.__name__ + "Unexpected empty object: device_str")
-            return False
         if activity_id_str is None:
             self.log_error(MongoDatabase.create_sensordata.__name__ + "Unexpected empty object: activity_id_str")
             return False
@@ -500,10 +499,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
-            if len(activity) == 0:
-                if self.create_activity(activity_id_str, "", date_time, device_str):
-                    activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
             if len(activity) > 0:
                 data = []
                 if sensor_type in activity:
@@ -559,13 +555,13 @@ class MongoDatabase(Database.Database):
         try:
             activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if activity is None:
-                if self.create_activity(activity_id_str, "", date_time, device_str):
+                if self.create_activity(activity_id_str, "", date_time / 1000, device_str):
                     activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if activity is not None:
                 location_list = []
                 if StraenKeys.ACTIVITY_LOCATIONS_KEY in activity:
                     location_list = activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]
-                value = {"time": date_time, StraenKeys.LOCATION_LAT_KEY: latitude, StraenKeys.LOCATION_LON_KEY: longitude, StraenKeys.LOCATION_ALT_KEY: altitude}
+                value = {StraenKeys.LOCATION_TIME_KEY: date_time, StraenKeys.LOCATION_LAT_KEY: latitude, StraenKeys.LOCATION_LON_KEY: longitude, StraenKeys.LOCATION_ALT_KEY: altitude}
                 location_list.append(value)
                 activity[StraenKeys.ACTIVITY_LOCATIONS_KEY] = location_list
                 self.activities_collection.save(activity)

@@ -32,6 +32,9 @@ ERROR_LOG = 'error.log'
 PRODUCT_NAME = 'Straen'
 SESSION_KEY = '_straen_username'
 
+UNNAMED_ACTIVITY_TITLE = "Unnamed"
+UNSPECIFIED_ACTIVITY_TYPE = "Unknown"
+
 LOGIN_URL = '/login'
 DEFAULT_LOGGED_IN_URL = '/all_activities'
 HTML_DIR = 'html'
@@ -162,65 +165,65 @@ class StraenWeb(object):
             cherrypy.response.headers['Content-Type'] = 'application/json'
             response = "["
 
-            names = self.data_mgr.retrieve_metadata(StraenKeys.NAME_KEY, activity_id_str)
+            names = self.data_mgr.retrieve_metadata(StraenKeys.APP_NAME_KEY, activity_id_str)
             if names != None and len(names) > 0:
-                response += json.dumps({"name": StraenKeys.NAME_KEY, "value": names[-1][1]})
+                response += json.dumps({"name": StraenKeys.APP_NAME_KEY, "value": names[-1][1]})
 
-            times = self.data_mgr.retrieve_metadata(StraenKeys.TIME_KEY, activity_id_str)
+            times = self.data_mgr.retrieve_metadata(StraenKeys.APP_TIME_KEY, activity_id_str)
             if times != None and len(times) > 0:
                 if len(response) > 1:
                     response += ","
                 localtimezone = tzlocal()
                 value_str = datetime.datetime.fromtimestamp(times[-1][1] / 1000, localtimezone).strftime('%Y-%m-%d %H:%M:%S')
-                response += json.dumps({"name": StraenKeys.TIME_KEY, "value": value_str})
+                response += json.dumps({"name": StraenKeys.APP_TIME_KEY, "value": value_str})
 
-            distances = self.data_mgr.retrieve_metadata(StraenKeys.DISTANCE_KEY, activity_id_str)
+            distances = self.data_mgr.retrieve_metadata(StraenKeys.APP_DISTANCE_KEY, activity_id_str)
             if distances != None and len(distances) > 0:
                 if len(response) > 1:
                     response += ","
                 distance = distances[len(distances) - 1]
                 value = float(distance.values()[0])
-                response += json.dumps({"name": StraenKeys.DISTANCE_KEY, "value": "{:.2f}".format(value)})
+                response += json.dumps({"name": StraenKeys.APP_DISTANCE_KEY, "value": "{:.2f}".format(value)})
 
-            avg_speeds = self.data_mgr.retrieve_metadata(StraenKeys.AVG_SPEED_KEY, activity_id_str)
+            avg_speeds = self.data_mgr.retrieve_metadata(StraenKeys.APP_AVG_SPEED_KEY, activity_id_str)
             if avg_speeds != None and len(avg_speeds) > 0:
                 if len(response) > 1:
                     response += ","
                 speed = avg_speeds[len(avg_speeds) - 1]
                 value = float(speed.values()[0])
-                response += json.dumps({"name": StraenKeys.AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
+                response += json.dumps({"name": StraenKeys.APP_AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
 
-            moving_speeds = self.data_mgr.retrieve_metadata(StraenKeys.MOVING_SPEED_KEY, activity_id_str)
+            moving_speeds = self.data_mgr.retrieve_metadata(StraenKeys.APP_MOVING_SPEED_KEY, activity_id_str)
             if moving_speeds != None and len(moving_speeds) > 0:
                 if len(response) > 1:
                     response += ","
                 speed = moving_speeds[len(moving_speeds) - 1]
                 value = float(speed.values()[0])
-                response += json.dumps({"name": StraenKeys.MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
+                response += json.dumps({"name": StraenKeys.APP_MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
 
-            heart_rates = self.data_mgr.retrieve_sensordata(StraenKeys.HEART_RATE_KEY, activity_id_str)
+            heart_rates = self.data_mgr.retrieve_sensordata(StraenKeys.APP_HEART_RATE_KEY, activity_id_str)
             if heart_rates != None and len(heart_rates) > 0:
                 if len(response) > 1:
                     response += ","
                 heart_rate = heart_rates[len(heart_rates) - 1]
                 value = float(heart_rate.values()[0])
-                response += json.dumps({"name": StraenKeys.HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
+                response += json.dumps({"name": StraenKeys.APP_HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
 
-            cadences = self.data_mgr.retrieve_sensordata(StraenKeys.CADENCE_KEY, activity_id_str)
+            cadences = self.data_mgr.retrieve_sensordata(StraenKeys.APP_CADENCE_KEY, activity_id_str)
             if cadences != None and len(cadences) > 0:
                 if len(response) > 1:
                     response += ","
                 cadence = cadences[len(cadences) - 1]
                 value = float(cadence.values()[0])
-                response += json.dumps({"name": StraenKeys.CADENCE_KEY, "value": "{:.2f}".format(value)})
+                response += json.dumps({"name": StraenKeys.APP_CADENCE_KEY, "value": "{:.2f}".format(value)})
 
-            powers = self.data_mgr.retrieve_sensordata(StraenKeys.POWER_KEY, activity_id_str)
+            powers = self.data_mgr.retrieve_sensordata(StraenKeys.APP_POWER_KEY, activity_id_str)
             if powers != None and len(powers) > 0:
                 if len(response) > 1:
                     response += ","
                 power = powers[len(powers) - 1]
                 value = float(power.values()[0])
-                response += json.dumps({"name": StraenKeys.POWER_KEY, "value": "{:.2f} watts".format(value)})
+                response += json.dumps({"name": StraenKeys.APP_POWER_KEY, "value": "{:.2f} watts".format(value)})
 
             response += "]"
 
@@ -263,8 +266,7 @@ class StraenWeb(object):
     @staticmethod
     def create_navbar(logged_in):
         """Helper function for building the navigation bar."""
-        navbar_str = "<nav>\n" \
-            "\t<ul>\n"
+        navbar_str = "<nav>\n\t<ul>\n"
         if logged_in:
             navbar_str += \
                 "\t\t<li><a href=\"" + g_root_url + "/my_activities/\">My Activities</a></li>\n" \
@@ -293,6 +295,10 @@ class StraenWeb(object):
         center_lon = 0
         last_lat = 0
         last_lon = 0
+        max_speed = 0.0
+        max_heart_rate = 0.0
+        max_cadence = 0.0
+        max_power = 0.0
 
         for location in locations:
             route += "\t\t\t\tnewCoord(" + str(location[StraenKeys.LOCATION_LAT_KEY]) + ", " + str(location[StraenKeys.LOCATION_LON_KEY]) + "),\n"
@@ -305,40 +311,71 @@ class StraenWeb(object):
             last_lat = last_loc[StraenKeys.LOCATION_LAT_KEY]
             last_lon = last_loc[StraenKeys.LOCATION_LON_KEY]
 
-        current_speeds = self.data_mgr.retrieve_metadata(StraenKeys.CURRENT_SPEED_KEY, activity_id_str)
+        current_speeds = self.data_mgr.retrieve_metadata(StraenKeys.APP_CURRENT_SPEED_KEY, activity_id_str)
         current_speeds_str = ""
         if current_speeds is not None and isinstance(current_speeds, list):
             for current_speed in current_speeds:
                 time = current_speed.keys()[0]
-                value = current_speed.values()[0]
+                value = float(current_speed.values()[0])
                 current_speeds_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
+                if value > max_speed:
+                    max_speed = value
 
-        heart_rates = self.data_mgr.retrieve_sensordata(StraenKeys.HEART_RATE_KEY, activity_id_str)
+        heart_rates = self.data_mgr.retrieve_sensordata(StraenKeys.APP_HEART_RATE_KEY, activity_id_str)
         heart_rates_str = ""
         if heart_rates is not None and isinstance(heart_rates, list):
             for heart_rate in heart_rates:
                 time = heart_rate.keys()[0]
-                value = heart_rate.values()[0]
+                value = float(heart_rate.values()[0])
                 heart_rates_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
+                if value > max_heart_rate:
+                    max_heart_rate = value
 
-        cadences = self.data_mgr.retrieve_sensordata(StraenKeys.CADENCE_KEY, activity_id_str)
+        cadences = self.data_mgr.retrieve_sensordata(StraenKeys.APP_CADENCE_KEY, activity_id_str)
         cadences_str = ""
         if cadences is not None and isinstance(cadences, list):
             for cadence in cadences:
                 time = cadence.keys()[0]
-                value = cadence.values()[0]
+                value = float(cadence.values()[0])
                 cadences_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
+                if value > max_cadence:
+                    max_cadence = value
 
-        powers = self.data_mgr.retrieve_sensordata(StraenKeys.POWER_KEY, activity_id_str)
+        powers = self.data_mgr.retrieve_sensordata(StraenKeys.APP_POWER_KEY, activity_id_str)
         powers_str = ""
         if powers is not None and isinstance(powers, list):
             for power in powers:
                 time = power.keys()[0]
-                value = power.values()[0]
+                value = float(power.values()[0])
                 powers_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
+                if value > max_power:
+                    max_power = value
+
+        # Build the summary data view.
+        summary = "<ul>\n"
+        activity_type = self.data_mgr.retrieve_metadata(StraenKeys.ACTIVITY_TYPE_KEY, activity_id_str)
+        if activity_type is None:
+            activity_type = UNSPECIFIED_ACTIVITY_TYPE
+        summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
+        name = self.data_mgr.retrieve_metadata(StraenKeys.APP_NAME_KEY, activity_id_str)
+        if name is None:
+            name = UNNAMED_ACTIVITY_TITLE
+        summary += "\t<li>Name: " + name + "</li>\n"
+        avg_speed = self.data_mgr.retrieve_metadata(StraenKeys.APP_AVG_SPEED_KEY, activity_id_str)
+        if avg_speed is not None:
+            summary += "\t<li>Avg. Speed: {:.2f}</li>\n".format(avg_speed)
+        if max_speed > 1:
+            summary += "\t<li>Max. Speed: {:.2f}</li>\n".format(max_speed)
+        if max_heart_rate > 1:
+            summary += "\t<li>Max. Heart Rate: {:.2f}</li>\n".format(max_heart_rate)
+        if max_cadence:
+            summary += "\t<li>Max. Cadence: {:.2f}</li>\n".format(max_cadence)
+        if max_power:
+            summary += "\t<li>Max. Power: {:.2f}</li>\n".format(max_power)
+        summary += "</ul>\n"
 
         my_template = Template(filename=g_map_single_html_file, module_directory=g_tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, googleMapsKey=g_google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id_str, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, summary=summary, googleMapsKey=g_google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id_str, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str)
 
     def render_page_for_multiple_devices(self, email, user_realname, device_strs, user_id, logged_in):
         """Helper function for rendering the map corresonding to a multiple devices."""
@@ -392,23 +429,22 @@ class StraenWeb(object):
         if activity_id_str is None or len(activity_id_str) == 0:
             return None
 
+        # Activity type
+        if StraenKeys.ACTIVITY_TYPE_KEY in activity and len(activity[StraenKeys.ACTIVITY_TYPE_KEY]) > 0:
+            activity_type = "<b>" + activity[StraenKeys.ACTIVITY_TYPE_KEY] + "</b>"
+        else:
+            activity_type = "<b>" + UNSPECIFIED_ACTIVITY_TYPE + "</b>"
+
         # Activity name
         if StraenKeys.ACTIVITY_NAME_KEY in activity and len(activity[StraenKeys.ACTIVITY_NAME_KEY]) > 0:
             activity_name = "<b>" + activity[StraenKeys.ACTIVITY_NAME_KEY] + "</b>"
         else:
-            activity_name = "<b>Unnamed</b>"
+            activity_name = "<b>" + UNNAMED_ACTIVITY_TITLE + "</b>"
 
         # Activity time
         activity_time = "-"
         if StraenKeys.ACTIVITY_TIME_KEY in activity:
             activity_time = "<script>document.write(unix_time_to_local_string(" + str(activity[StraenKeys.ACTIVITY_TIME_KEY]) + "))</script>"
-        elif StraenKeys.ACTIVITY_LOCATIONS_KEY in activity:
-            locations = activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]
-            if len(locations) > 0:
-                first_loc = locations[0]
-                if StraenKeys.LOCATION_TIME_KEY in first_loc:
-                    time_num = first_loc[StraenKeys.LOCATION_TIME_KEY] / 1000
-                    activity_time = "<script>document.write(unix_time_to_local_string(" + str(time_num) + "))</script>"
 
         # Activity visibility
         checkbox_value = "checked"
@@ -419,6 +455,9 @@ class StraenWeb(object):
                 checkbox_label = "Private"
 
         row  = "<td>"
+        row += activity_type
+        row += "</td>"
+        row += "<td>"
         row += activity_time
         row += "</td>"
         row += "<td>"
@@ -872,22 +911,20 @@ class StraenWeb(object):
             password = cherrypy.request.params.get("password")
 
             if email is None or password is None:
-                result = self.error("An email address and password were not provided.")
+                raise Exception("An email address and password were not provided.")
             else:
-                user_logged_in, info_str = self.user_mgr.authenticate_user(email, password)
-                if user_logged_in:
+                if self.user_mgr.authenticate_user(email, password):
                     cherrypy.session.regenerate()
                     cherrypy.session[SESSION_KEY] = cherrypy.request.login = email
                     raise cherrypy.HTTPRedirect(DEFAULT_LOGGED_IN_URL)
                 else:
-                    error_msg = "Unable to authenticate the user."
-                    if len(info_str) > 0:
-                        error_msg += " "
-                        error_msg += info_str
-                    result = self.error(error_msg)
-            return result
+                    raise Exception("Unknown error.")
         except cherrypy.HTTPRedirect as e:
             raise e
+        except Exception as e:
+            error_msg = 'Unable to authenticate the user. ' + str(e.args[0])
+            cherrypy.log.error(error_msg, 'EXEC', logging.WARNING)
+            return self.error(error_msg)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.submit_login.__name__, 'EXEC', logging.WARNING)
         return self.error()
@@ -896,18 +933,18 @@ class StraenWeb(object):
     def submit_new_login(self, email, realname, password1, password2, *args, **kw):
         """Creates a new login."""
         try:
-            user_created, info_str = self.user_mgr.create_user(email, realname, password1, password2, "")
-            if user_created:
+            if self.user_mgr.create_user(email, realname, password1, password2, ""):
                 cherrypy.session.regenerate()
                 cherrypy.session[SESSION_KEY] = cherrypy.request.login = email
                 raise cherrypy.HTTPRedirect(DEFAULT_LOGGED_IN_URL)
             else:
-                error_msg = "Unable to create the user."
-                if len(info_str) > 0:
-                    error_msg += " "
-                    error_msg += info_str
-                    result = self.error(error_msg)
-            return result
+                raise Exception("Unknown error.")
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except Exception as e:
+            error_msg = 'Unable to create the user. ' + str(e.args[0])
+            cherrypy.log.error(error_msg, 'EXEC', logging.WARNING)
+            return self.error(error_msg)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.submit_new_login.__name__, 'EXEC', logging.WARNING)
         return self.error()
@@ -929,6 +966,10 @@ class StraenWeb(object):
 
             # Get the new email address fromt the request.
             email = cherrypy.request.params.get("email")
+        except Exception as e:
+            error_msg = 'Unable to create the user. ' + str(e.args[0])
+            cherrypy.log.error(error_msg, 'EXEC', logging.WARNING)
+            return self.error(error_msg)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.update_email.__name__, 'EXEC', logging.WARNING)
         return self.error()
@@ -954,18 +995,17 @@ class StraenWeb(object):
             new_password2 = cherrypy.request.params.get("new_password2")
 
             # Reauthenticate the user.
-            user_logged_in, info_str = self.user_mgr.authenticate_user(username, old_password)
-            if user_logged_in:
+            if self.user_mgr.authenticate_user(username, old_password):
 
                 # Update the user's password in the database.
-                user_created, info_str = self.user_mgr.update_user(username, user_realname, new_password1, new_password2)
-                if user_created:
+                if self.user_mgr.update_user(username, user_realname, new_password1, new_password2):
                     cherrypy.response.status = 200
                     return ""
-                else:
-                    cherrypy.log.error(info_str, 'EXEC', logging.ERROR)
-            else:
-                cherrypy.log.error(info_str, 'EXEC', logging.ERROR)
+
+        except Exception as e:
+            error_msg = 'Unable to create the user. ' + str(e.args[0])
+            cherrypy.log.error(error_msg, 'EXEC', logging.WARNING)
+            return self.error(error_msg)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.update_password.__name__, 'EXEC', logging.WARNING)
         return self.error()
@@ -989,14 +1029,16 @@ class StraenWeb(object):
             password = cherrypy.request.params.get("password")
 
             # Reauthenticate the user.
-            user_logged_in, info_str = self.user_mgr.authenticate_user(username, password)
-            if user_logged_in:
+            if self.user_mgr.authenticate_user(username, password):
                 self.data_mgr.delete_user_activities(user_id)
                 self.user_mgr.delete_user(user_id)
                 cherrypy.response.status = 200
                 return ""
-            else:
-                cherrypy.log.error(info_str, 'EXEC', logging.ERROR)
+
+        except Exception as e:
+            error_msg = 'Unable to create the user. ' + str(e.args[0])
+            cherrypy.log.error(error_msg, 'EXEC', logging.WARNING)
+            return self.error(error_msg)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.delete_user.__name__, 'EXEC', logging.WARNING)
         return self.error()

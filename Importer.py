@@ -11,7 +11,7 @@ import StraenKeys
 class LocationWriter(object):
     """Base class for any class that handles data read from the Importer."""
 
-    def create(self, username, stream_name, stream_description, activity_type):
+    def create_activity(self, username, stream_name, stream_description, activity_type):
         """Pure virtual method for starting a location stream - creates the activity ID for the specified user."""
         pass
 
@@ -39,7 +39,7 @@ class Importer(object):
         with open(file_name, 'r') as gpx_file:
             gpx = gpxpy.parse(gpx_file)
 
-            device_str, activity_id_str = self.location_writer.create(username, gpx.name, gpx.description, "")
+            device_str, activity_id_str = self.location_writer.create_activity(username, gpx.name, gpx.description, "")
 
             for track in gpx.tracks:
                 self.location_writer.create_track(device_str, activity_id_str, track.name, track.description)
@@ -52,11 +52,11 @@ class Importer(object):
 
                         extensions = point.extensions
                         if 'power' in extensions:
-                            self.location_writer.create_sensor_reading(device_str, activity_id_str, dt_unix, StraenKeys.POWER_KEY, extensions['power'])
+                            self.location_writer.create_sensor_reading(device_str, activity_id_str, dt_unix, StraenKeys.APP_POWER_KEY, extensions['power'])
                         if 'gpxtpx:TrackPointExtension' in extensions:
                             gpxtpx_extensions = extensions['gpxtpx:TrackPointExtension']
                             if 'gpxtpx:hr' in gpxtpx_extensions:
-                                self.location_writer.create_sensor_reading(device_str, activity_id_str, dt_unix, StraenKeys.HEART_RATE_KEY, gpxtpx_extensions['gpxtpx:hr'])
+                                self.location_writer.create_sensor_reading(device_str, activity_id_str, dt_unix, StraenKeys.APP_HEART_RATE_KEY, gpxtpx_extensions['gpxtpx:hr'])
 
             return True
         return False
@@ -65,7 +65,7 @@ class Importer(object):
         """Imports the specified TCX file."""
         tcx = tcxparser.TCXParser(file_name)
         if tcx is not None:
-            device_str, activity_id_str = self.location_writer.create(username, "", "", tcx.activity_type)
+            device_str, activity_id_str = self.location_writer.create_activity(username, "", "", tcx.activity_type)
 
             for activity in tcx.activity:
                 for lap in activity.Lap:

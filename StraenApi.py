@@ -24,20 +24,25 @@ class StraenApi(object):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
         try:
             # Parse required identifiers.
-            device_str = json_obj["DeviceId"]
-            activity_id_str = json_obj["ActivityId"]
+            device_str = json_obj[StraenKeys.APP_DEVICE_ID_KEY]
+            activity_id_str = json_obj[StraenKeys.APP_ID_KEY]
 
             # Parse optional identifiers.
             username = ""
             try:
-                username = json_obj["User Name"]
+                username = json_obj[StraenKeys.APP_USERNAME_KEY]
+            except:
+                pass
+            activity_type = ""
+            try:
+                activity_type = json_obj[StraenKeys.APP_TYPE_KEY]
             except:
                 pass
 
             # Parse the metadata looking for the timestamp.
-            date_time = time.time()
+            date_time = int(time.time() * 1000)
             try:
-                time_str = json_obj["Time"]
+                time_str = json_obj[StraenKeys.APP_TIME_KEY]
                 date_time = int(time_str)
             except:
                 pass
@@ -60,10 +65,10 @@ class StraenApi(object):
                 key = item[0]
                 value = item[1]
                 if not key in g_not_meta_data:
-                    if key in [StraenKeys.CADENCE_KEY, StraenKeys.HEART_RATE_KEY, StraenKeys.POWER_KEY]:
-                        self.data_mgr.create_sensordata(device_str, activity_id_str, date_time, key, value)
-                    elif key in [StraenKeys.CURRENT_SPEED_KEY, StraenKeys.CURRENT_PACE_KEY]:
-                        self.data_mgr.create_metadata(device_str, activity_id_str, date_time, key, value)
+                    if key in [StraenKeys.APP_CADENCE_KEY, StraenKeys.APP_HEART_RATE_KEY, StraenKeys.APP_POWER_KEY]:
+                        self.data_mgr.create_sensordata(activity_id_str, date_time, key, value)
+                    elif key in [StraenKeys.APP_CURRENT_SPEED_KEY, StraenKeys.APP_CURRENT_PACE_KEY]:
+                        self.data_mgr.create_metadata(activity_id_str, date_time, key, value, True)
 
             # Update the user device association.
             if len(username) > 0:
@@ -140,9 +145,9 @@ class StraenApi(object):
 
     def handle_add_time_and_distance_activity(self, values):
         """Called when an API message to add a new activity based on time and distance is received."""
-        if StraenKeys.TIME_KEY not in values:
+        if StraenKeys.APP_TIME_KEY not in values:
             return False, "Time not specified."
-        if StraenKeys.DISTANCE_KEY not in values:
+        if StraenKeys.APP_DISTANCE_KEY not in values:
             return False, "Distance not specified."
 
         activity_id_str = str(uuid.uuid4())
@@ -150,11 +155,11 @@ class StraenApi(object):
 
     def handle_add_sets_and_reps_activity(self, values):
         """Called when an API message to add a new activity based on sets and reps is received."""
-        if StraenKeys.SETS_KEY not in values:
+        if StraenKeys.APP_SETS_KEY not in values:
             return False, "Sets not specified."
 
         activity_id_str = str(uuid.uuid4())
-        sets = values[StraenKeys.SETS_KEY]
+        sets = values[StraenKeys.APP_SETS_KEY]
         print sets
         return True, ""
 
@@ -283,7 +288,7 @@ class StraenApi(object):
             return False, "Invalid parameter."
 
         exporter = Exporter.Exporter()
-        result = exporter.export(self.data_mgr, values['activity_id'])
+        result = exporter.export(self.data_mgr, values[StraenKeys.ACTIVITY_ID_KEY])
         return True, result
 
     def handle_claim_device(self, values):
