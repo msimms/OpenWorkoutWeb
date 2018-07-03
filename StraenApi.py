@@ -70,6 +70,10 @@ class StraenApi(object):
                     elif key in [StraenKeys.APP_CURRENT_SPEED_KEY, StraenKeys.APP_CURRENT_PACE_KEY]:
                         self.data_mgr.create_metadata(activity_id_str, date_time, key, value, True)
 
+            # Udpate the activity type.
+            if len(activity_type) > 0:
+                self.data_mgr.create_metadata(activity_id_str, date_time, StraenKeys.ACTIVITY_TYPE_KEY, activity_type, False)
+
             # Update the user device association.
             if len(username) > 0:
                 user_id, _, _ = self.user_mgr.retrieve_user(username)
@@ -108,11 +112,10 @@ class StraenApi(object):
         password = values[StraenKeys.PASSWORD_KEY]
         device_str = values[StraenKeys.DEVICE_KEY]
 
-        user_logged_in, info_str = self.user_mgr.authenticate_user(email, password)
-        if user_logged_in:
+        if self.user_mgr.authenticate_user(email, password):
             self.user_mgr.create_user_device(email, device_str)
         else:
-            return False, info_str
+            return False, ""
 
         return True, ""
 
@@ -137,9 +140,8 @@ class StraenApi(object):
         device_str = values[StraenKeys.DEVICE_KEY]
         realname = values[StraenKeys.REALNAME_KEY]
 
-        user_created, info_str = self.user_mgr.create_user(email, realname, password1, password2, device_str)
-        if not user_created:
-            return False, info_str
+        if not self.user_mgr.create_user(email, realname, password1, password2, device_str):
+            return False, ""
 
         return True, ""
 
