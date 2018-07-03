@@ -1137,6 +1137,9 @@ class StraenWeb(object):
                     cherrypy.response.status = 400
             else:
                 cherrypy.response.status = 400
+        except Exception as e:
+            response = str(e.args[0])
+            cherrypy.response.status = 500
         except:
             cherrypy.response.status = 500
         return response

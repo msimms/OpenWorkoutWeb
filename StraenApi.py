@@ -99,40 +99,39 @@ class StraenApi(object):
     def handle_login_submit(self, values):
         """Called when an API message to log in is received."""
         if self.user_id is not None:
-            return False, "Already logged in."
+            raise Exception("Already logged in.")
 
         if StraenKeys.USERNAME_KEY not in values:
-            return False, "Username not specified."
+            raise Exception("Username not specified.")
         if StraenKeys.PASSWORD_KEY not in values:
-            return False, "Password not specified."
+            raise Exception("Password not specified.")
         if StraenKeys.DEVICE_KEY not in values:
-            return False, "Device ID not specified."
+            raise Exception("Device ID not specified.")
 
         email = values[StraenKeys.USERNAME_KEY]
         password = values[StraenKeys.PASSWORD_KEY]
         device_str = values[StraenKeys.DEVICE_KEY]
 
-        if self.user_mgr.authenticate_user(email, password):
-            self.user_mgr.create_user_device(email, device_str)
-        else:
-            return False, ""
+        if not self.user_mgr.authenticate_user(email, password):
+            raise Exception("Authentication failed.")
 
-        return True, ""
+        return self.user_mgr.create_user_device(email, device_str), ""
 
     def handle_create_login_submit(self, values):
         """Called when an API message to create an account is received."""
         if self.user_id is not None:
-            return False, "Already logged in."
+            raise Exception("Already logged in.")
+
         if StraenKeys.USERNAME_KEY not in values:
-            return False, "Username not specified."
+            raise Exception("Username not specified.")
         if StraenKeys.PASSWORD1_KEY not in values:
-            return False, "Password not specified."
+            raise Exception("Password not specified.")
         if StraenKeys.PASSWORD2_KEY not in values:
-            return False, "Password confirmation not specified."
+            raise Exception("Password confirmation not specified.")
         if StraenKeys.DEVICE_KEY not in values:
-            return False, "Device ID not specified."
+            raise Exception("Device ID not specified.")
         if StraenKeys.REALNAME_KEY not in values:
-            return False, "Real name not specified."
+            raise Exception("Real name not specified.")
 
         email = values[StraenKeys.USERNAME_KEY]
         password1 = values[StraenKeys.PASSWORD1_KEY]
@@ -141,16 +140,16 @@ class StraenApi(object):
         realname = values[StraenKeys.REALNAME_KEY]
 
         if not self.user_mgr.create_user(email, realname, password1, password2, device_str):
-            return False, ""
+            raise Exception("User creation failed.")
 
         return True, ""
 
     def handle_add_time_and_distance_activity(self, values):
         """Called when an API message to add a new activity based on time and distance is received."""
         if StraenKeys.APP_TIME_KEY not in values:
-            return False, "Time not specified."
+            raise Exception("Time not specified.")
         if StraenKeys.APP_DISTANCE_KEY not in values:
-            return False, "Distance not specified."
+            raise Exception("Distance not specified.")
 
         activity_id_str = str(uuid.uuid4())
         return True, ""
@@ -158,7 +157,7 @@ class StraenApi(object):
     def handle_add_sets_and_reps_activity(self, values):
         """Called when an API message to add a new activity based on sets and reps is received."""
         if StraenKeys.APP_SETS_KEY not in values:
-            return False, "Sets not specified."
+            raise Exception("Sets not specified.")
 
         activity_id_str = str(uuid.uuid4())
         sets = values[StraenKeys.APP_SETS_KEY]
@@ -168,9 +167,9 @@ class StraenApi(object):
     def handle_add_activity(self, values):
         """Called when an API message to add a new activity is received."""
         if self.user_id is None:
-            return False, "Not logged in."
+            raise Exception("Not logged in.")
         if StraenKeys.ACTIVITY_TYPE_KEY not in values:
-            return False, "Activity type not specified."
+            raise Exception("Activity type not specified.")
 
         switcher = {
             StraenKeys.TYPE_RUNNING_KEY : self.handle_add_time_and_distance_activity,
@@ -180,39 +179,39 @@ class StraenApi(object):
         }
 
         func = switcher.get(values[StraenKeys.ACTIVITY_TYPE_KEY], lambda: "Invalid activity type")
-        return func(values)
+        return True, func(values)
 
     def handle_upload_activity_file(self, values):
         """Called when an API message to upload a file is received."""
         if self.user_id is None:
-            return False, "Not logged in."
+            raise Exception("Not logged in.")
         return True, ""
 
     def handle_add_tag_to_activity(self, values):
         """Called when an API message to add a tag to an activity is received."""
         if self.user_id is None:
-            return False, "Not logged in."
+            raise Exception("Not logged in.")
         return True, ""
 
     def handle_delete_tag_from_activity(self, values):
         """Called when an API message to delete a tag from an activity is received."""
         if self.user_id is None:
-            return False, "Not logged in."
+            raise Exception("Not logged in.")
         return True, ""
 
     def handle_list_matched_users(self, values):
         """Called when an API message to list users is received."""
         if self.user_id is None:
-            return False, "Not logged in."
+            raise Exception("Not logged in.")
         if 'searchname' not in values:
-            return False, "Invalid parameter."
+            raise Exception("Invalid parameter.")
 
         search_name = values['searchname']
         search_name_len = len(search_name)
         if search_name_len < 3:
-            return False, "Search name is too short."
+            raise Exception("Search name is too short.")
         if search_name_len > 100:
-            return False, "Search name is too long."
+            raise Exception("Search name is too long.")
 
         matched_users = self.user_mgr.retrieve_matched_users(search_name)[:100] # Limit the number of results
         json_result = json.dumps(matched_users, ensure_ascii=False)
@@ -221,14 +220,14 @@ class StraenApi(object):
     def list_users_following(self, values):
         """Called when an API message to list the users you are following is received."""
         if self.user_id is None:
-            return False, "Not logged in."
+            raise Exception("Not logged in.")
         if 'target_email' not in values:
-            return False, "Invalid parameter."
+            raise Exception("Invalid parameter.")
 
         target_email = values['target_email']
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
-            return False, "Target user does not exist."
+            raise Exception("Target user does not exist.")
 
         users_following = self.user_mgr.list_users_followed(self.user_id)
         users_list_str = ""
@@ -239,14 +238,14 @@ class StraenApi(object):
     def list_users_followed_by(self, values):
         """Called when an API message to list the users who are following you is received."""
         if self.user_id is None:
-            return False, "Not logged in."
+            raise Exception("Not logged in.")
         if 'target_email' not in values:
-            return False, "Invalid parameter."
+            raise Exception("Invalid parameter.")
 
         target_email = values['target_email']
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
-            return False, "Target user does not exist."
+            raise Exception("Target user does not exist.")
 
         users_followed_by = self.user_mgr.list_followers(self.user_id)
         users_list_str = ""
@@ -257,14 +256,14 @@ class StraenApi(object):
     def handle_request_to_follow(self, values):
         """Called when an API message request to follow another user is received."""
         if self.user_id is None:
-            return False, "Not logged in."
+            raise Exception("Not logged in.")
         if 'target_email' not in values:
-            return False, "Invalid parameter."
+            raise Exception("Invalid parameter.")
 
         target_email = values['target_email']
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
-            return False, "Target user does not exist."
+            raise Exception("Target user does not exist.")
         if self.user_mgr.request_to_follow(self.user_id, target_email):
             return True, ""
         return False, ""
@@ -272,22 +271,22 @@ class StraenApi(object):
     def handle_unfollow(self, values):
         """Called when an API message request to follow another user is received."""
         if self.user_id is None:
-            return False, "Not logged in."
+            raise Exception("Not logged in.")
         if 'target_email' not in values:
-            return False, "Invalid parameter."
+            raise Exception("Invalid parameter.")
 
         target_email = values['target_email']
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
-            return False, "Target user does not exist."
+            raise Exception("Target user does not exist.")
         return False, ""
 
     def handle_export_activity(self, values):
         """Called when an API message request to follow another user is received."""
         if self.user_id is None:
-            return False, "Not logged in."
+            raise Exception("Not logged in.")
         if 'activity_id' not in values:
-            return False, "Invalid parameter."
+            raise Exception("Invalid parameter.")
 
         exporter = Exporter.Exporter()
         result = exporter.export(self.data_mgr, values[StraenKeys.ACTIVITY_ID_KEY])
@@ -296,9 +295,9 @@ class StraenApi(object):
     def handle_claim_device(self, values):
         """Called when an API message request to follow another user is received."""
         if self.user_id is None:
-            return False, "Not logged in."
+            raise Exception("Not logged in.")
         if 'device_id' not in values:
-            return False, "Invalid parameter."
+            raise Exception("Invalid parameter.")
 
         self.data_mgr.create_user_device(self.user_id, values['device_id'])
         return True, ""

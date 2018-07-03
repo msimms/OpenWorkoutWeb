@@ -116,7 +116,7 @@ class UserMgr(object):
             return False, "Device string not provided."
 
         user_id, _, _ = self.database.retrieve_user(email)
-        self.database.create_user_device(user_id, device_str)
+        return self.database.create_user_device(user_id, device_str)
 
     def retrieve_user_devices(self, user_id):
         """Returns a list of all the devices associated with the specified user."""
