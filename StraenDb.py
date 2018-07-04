@@ -606,3 +606,43 @@ class MongoDatabase(Database.Database):
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
         return None
+
+    def create_tag(self, activity_id_str, tag):
+        """Adds a tag to the specified activity."""
+        if activity_id_str is None:
+            self.log_error(MongoDatabase.create_tag.__name__ + "Unexpected empty object: activity_id_str")
+            return False
+        if tag is None:
+            self.log_error(MongoDatabase.create_tag.__name__ + "Unexpected empty object: tag")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
+            if len(activity) > 0:
+                data = []
+                if StraenKeys.ACTIVITY_TAGS_KEY in activity:
+                    data = activity[StraenKeys.ACTIVITY_TAGS_KEY]
+                data.append(tag)
+                activity[StraenKeys.ACTIVITY_TAGS_KEY] = data
+                self.activities_collection.save(activity)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_tags(self, activity_id_str):
+        """Retrieves all the tags for the specified activity."""
+        if activity_id_str is None:
+            self.log_error(MongoDatabase.retrieve_tags.__name__ + "Unexpected empty object: activity_id_str")
+            return None
+
+        try:
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
+            if activity is not None:
+                locations = activity[StraenKeys.ACTIVITY_TAGS_KEY]
+                return locations
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None

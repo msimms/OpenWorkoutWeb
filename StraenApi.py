@@ -269,7 +269,7 @@ class StraenApi(object):
         return False, ""
 
     def handle_unfollow(self, values):
-        """Called when an API message request to follow another user is received."""
+        """Called when an API message request to unfollow another user is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
         if 'target_email' not in values:
@@ -282,7 +282,7 @@ class StraenApi(object):
         return False, ""
 
     def handle_export_activity(self, values):
-        """Called when an API message request to follow another user is received."""
+        """Called when an API message request to export an activity."""
         if self.user_id is None:
             raise Exception("Not logged in.")
         if 'activity_id' not in values:
@@ -293,13 +293,33 @@ class StraenApi(object):
         return True, result
 
     def handle_claim_device(self, values):
-        """Called when an API message request to follow another user is received."""
+        """Called when an API message request to associate a device with the logged in user is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
         if 'device_id' not in values:
             raise Exception("Invalid parameter.")
 
         self.data_mgr.create_user_device(self.user_id, values['device_id'])
+        return True, ""
+
+    def handle_create_tag(self, values):
+        """Called when an API message create a tag is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if 'activity_id' not in values:
+            raise Exception("Invalid parameter.")
+        if 'tag' not in values:
+            raise Exception("Invalid parameter.")
+
+        return True, ""
+
+    def handle_list_tags(self, values):
+        """Called when an API message create list tags associated with an activity is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if 'activity_id' not in values:
+            raise Exception("Invalid parameter.")
+
         return True, ""
 
     def handle_api_1_0_request(self, args, values):
@@ -338,4 +358,8 @@ class StraenApi(object):
             return self.handle_export_activity(json_values)
         elif request == 'claim_device':
             return self.handle_claim_device(json_values)
+        elif request == 'create_tag':
+            return self.handle_create_tag(json_values)
+        elif request == 'list_tags':
+            return self.handle_list_tags(json_values)
         return False, ""

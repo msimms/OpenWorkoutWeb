@@ -43,6 +43,7 @@ ACTIVITY_NAME_KEY = "name"
 ACTIVITY_TIME_KEY = "time"
 ACTIVITY_VISIBILITY_KEY = "visibility"
 ACTIVITY_COMMENTS_KEY = "comments"
+ACTIVITY_TAGS_KEY = "tags"
 
 # Activity types
 TYPE_RUNNING_KEY = "Running"
