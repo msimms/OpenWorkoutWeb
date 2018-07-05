@@ -299,8 +299,8 @@ class StraenApi(object):
         if 'device_id' not in values:
             raise Exception("Invalid parameter.")
 
-        self.data_mgr.create_user_device(self.user_id, values['device_id'])
-        return True, ""
+        result = self.user_mgr.create_user_device(self.user_id, values['device_id'])
+        return result, ""
 
     def handle_create_tag(self, values):
         """Called when an API message create a tag is received."""
