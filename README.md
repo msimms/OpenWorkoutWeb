@@ -23,5 +23,8 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Support for HTTPS.
 * Many small bug fixes.
 
+### 0.3
+* Support for tags.
+
 ## Social
 Twitter: [@StraenApp](https://twitter.com/StraenApp)

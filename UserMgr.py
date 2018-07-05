@@ -108,6 +108,7 @@ class UserMgr(object):
         return self.database.delete_user(user_id)
 
     def create_user_device(self, email, device_str):
+        """Associates a device with a user."""
         if self.database is None:
             raise Exception("No database.")
         if len(email) == 0:
@@ -137,6 +138,7 @@ class UserMgr(object):
         return self.database.retrieve_users_followed(user_id)
 
     def list_followers(self, user_id):
+        """Returns the user ids for all users that follow the user with the specified id."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None or len(user_id) == 0:
@@ -144,6 +146,7 @@ class UserMgr(object):
         return self.database.retrieve_followers(user_id)
 
     def request_to_follow(self, user_id, target_email):
+        """Appends a user to the followers list of the user with the specified id."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None or len(user_id) == 0:
