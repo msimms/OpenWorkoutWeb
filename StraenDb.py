@@ -640,8 +640,8 @@ class MongoDatabase(Database.Database):
         try:
             activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
             if activity is not None:
-                locations = activity[StraenKeys.ACTIVITY_TAGS_KEY]
-                return locations
+                tags = activity[StraenKeys.ACTIVITY_TAGS_KEY]
+                return tags
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])

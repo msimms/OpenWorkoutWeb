@@ -285,7 +285,7 @@ class StraenApi(object):
         """Called when an API message request to export an activity."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if 'activity_id' not in values:
+        if StraenKeys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
 
         exporter = Exporter.Exporter()
@@ -306,21 +306,23 @@ class StraenApi(object):
         """Called when an API message create a tag is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if 'activity_id' not in values:
+        if StraenKeys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
-        if 'tag' not in values:
+        if StraenKeys.ACTIVITY_TAGS_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        return True, ""
+        result = self.data_mgr.create_tag(values[StraenKeys.ACTIVITY_ID_KEY], values[StraenKeys.ACTIVITY_TAGS_KEY])
+        return result, ""
 
     def handle_list_tags(self, values):
         """Called when an API message create list tags associated with an activity is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if 'activity_id' not in values:
+        if StraenKeys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        return True, ""
+        result = self.data_mgr.retrieve_tags(values[StraenKeys.ACTIVITY_ID_KEY])
+        return result, ""
 
     def handle_api_1_0_request(self, args, values):
         """Called to parse a version 1.0 API message."""
