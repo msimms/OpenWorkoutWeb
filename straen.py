@@ -7,6 +7,7 @@ import datetime
 import json
 import logging
 import mako
+import markdown
 import os
 import re
 import signal
@@ -1067,9 +1068,16 @@ class StraenWeb(object):
             if username is not None:
                 raise cherrypy.HTTPRedirect(DEFAULT_LOGGED_IN_URL)
 
+            html = ""
+            readme_file_name = os.path.join(g_root_dir, 'README.md')
+            with open(readme_file_name, 'r') as readme_file:
+                md = readme_file.read()
+                extensions = ['extra', 'smarty']
+                html = markdown.markdown(md, extensions=extensions, output_format='html5')
+
             login_html_file = os.path.join(g_root_dir, HTML_DIR, 'login.html')
             my_template = Template(filename=login_html_file, module_directory=g_tempmod_dir)
-            result = my_template.render(product=PRODUCT_NAME, root_url=g_root_url)
+            result = my_template.render(product=PRODUCT_NAME, root_url=g_root_url, readme=html)
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
