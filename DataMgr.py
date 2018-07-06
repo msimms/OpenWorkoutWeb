@@ -191,7 +191,18 @@ class DataMgr(Importer.LocationWriter):
             raise Exception("No database.")
         if device_str is None or len(device_str) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_most_recent_activity_id_for_device(device_str)
+        activity = self.database.retrieve_most_recent_activity_for_device(device_str)
+        if activity is None:
+            return None
+        return activity[StraenKeys.ACTIVITY_ID_KEY]
+
+    def retrieve_most_recent_activity_for_device(self, device_str):
+        """Returns the most recent activity for the specified device."""
+        if self.database is None:
+            raise Exception("No database.")
+        if device_str is None or len(device_str) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_most_recent_activity_for_device(device_str)
 
     def create_tag(self, activity_id_str, tag):
         """Returns the most recent 'num' locations for the specified device and activity."""

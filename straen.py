@@ -738,12 +738,16 @@ class StraenWeb(object):
             # Build a list of table rows from the device information.
             device_list_str = ""
             if devices is not None and isinstance(devices, list):
+                device_list_str += "<td><b>Unique Identifier</b></td><td><b>Last Heard From</b></td><tr>\n"
                 for device in devices:
+                    activity = self.data_mgr.retrieve_most_recent_activity_for_device(device)
                     device_list_str += "\t\t<tr>"
                     device_list_str += "<td><a href=\"" + g_root_url + "/device/" + device + "\">"
                     device_list_str += device
-                    device_list_str += "</a></td>"
-                    device_list_str += "</tr>\n"
+                    device_list_str += "</a></td><td>"
+                    if activity is not None:
+                        device_list_str += "<script>document.write(unix_time_to_local_string(" + str(activity[StraenKeys.ACTIVITY_TIME_KEY]) + "))</script>"
+                    device_list_str += "</td></tr>\n"
 
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'device_list.html')

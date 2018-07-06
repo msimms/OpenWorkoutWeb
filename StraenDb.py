@@ -318,17 +318,17 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def retrieve_most_recent_activity_id_for_device(self, device_str):
+    def retrieve_most_recent_activity_for_device(self, device_str):
         """Retrieves the ID for the most recent activity to be associated with the specified device."""
         if device_str is None:
-            self.log_error(MongoDatabase.retrieve_most_recent_activity_id_for_device.__name__ + "Unexpected empty object: device_str")
+            self.log_error(MongoDatabase.retrieve_most_recent_activity_for_device.__name__ + "Unexpected empty object: device_str")
             return None
 
         try:
             device_activities = self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}).sort("_id", -1).limit(1)
             if device_activities is not None and device_activities.count() > 0:
                 activity = device_activities.next()
-                return activity[StraenKeys.ACTIVITY_ID_KEY]
+                return activity
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
