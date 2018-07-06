@@ -282,7 +282,7 @@ class StraenWeb(object):
         navbar_str += "\t</ul>\n</nav>"
         return navbar_str
 
-    def render_page_for_activity(self, email, user_realname, activity_id_str, logged_in):
+    def render_page_for_activity(self, email, user_realname, activity_id_str, logged_in, is_live):
         """Helper function for rendering the map corresonding to a specific device and activity."""
 
         locations = self.data_mgr.retrieve_locations(activity_id_str)
@@ -374,8 +374,13 @@ class StraenWeb(object):
             summary += "\t<li>Max. Power: {:.2f}</li>\n".format(max_power)
         summary += "</ul>\n"
 
+        if is_live:
+            page_title = "Live Tracking"
+        else:
+            page_title = "Activity"
+
         my_template = Template(filename=g_map_single_html_file, module_directory=g_tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, summary=summary, googleMapsKey=g_google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id_str, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=g_google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id_str, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str)
 
     def render_page_for_multiple_devices(self, email, user_realname, device_strs, user_id, logged_in):
         """Helper function for rendering the map corresonding to a multiple devices."""
@@ -520,10 +525,13 @@ class StraenWeb(object):
                 return self.error()
 
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            logged_in_username = cherrypy.session.get(SESSION_KEY)
+
+            # Determine who owns the device.
+            device_user = self.user_mgr.retrieve_user_from_device(device_str)
 
             # Render from template.
-            return self.render_page_for_activity("", "", activity_id_str, username is not None)
+            return self.render_page_for_activity(device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id_str, logged_in_username is not None, True)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.live.__name__, 'EXEC', logging.WARNING)
         return self.error()
@@ -534,10 +542,10 @@ class StraenWeb(object):
         """Renders the map page for an activity."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            logged_in_username = cherrypy.session.get(SESSION_KEY)
 
             # Render from template.
-            return self.render_page_for_activity("", "", activity_id_str, username is not None)
+            return self.render_page_for_activity("", "", activity_id_str, logged_in_username is not None, False)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.activity.__name__, 'EXEC', logging.WARNING)
         return self.error()
@@ -555,10 +563,13 @@ class StraenWeb(object):
                     return self.error()
 
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            logged_in_username = cherrypy.session.get(SESSION_KEY)
+
+            # Determine who owns the device.
+            device_user = self.user_mgr.retrieve_user_from_device(device_str)
 
             # Render from template.
-            return self.render_page_for_activity("", "", activity_id_str, username is not None)
+            return self.render_page_for_activity(device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id_str, logged_in_username is not None, False)
         except:
             cherrypy.log.error('Unhandled exception in ' + StraenWeb.device.__name__, 'EXEC', logging.WARNING)
         return self.error()
@@ -729,9 +740,9 @@ class StraenWeb(object):
             if devices is not None and isinstance(devices, list):
                 for device in devices:
                     device_list_str += "\t\t<tr>"
-                    device_list_str += "<td>"
+                    device_list_str += "<td><a href=\"" + g_root_url + "/device/" + device + "\">"
                     device_list_str += device
-                    device_list_str += "</td>"
+                    device_list_str += "</a></td>"
                     device_list_str += "</tr>\n"
 
             # Render from template.

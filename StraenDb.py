@@ -197,6 +197,22 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def retrieve_user_from_device(self, device_str):
+        """Finds the user associated with the device."""
+        if self.database is None:
+            raise Exception("No database.")
+        if len(device_str) == 0:
+            return False, "Device string not provided."
+
+        try:
+            user = self.users_collection.find_one({"devices": device_str})
+            print user
+            return user
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
     def delete_user_device(self, device_str):
         """Deletes method for a device."""
         if device_str is None:

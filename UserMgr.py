@@ -115,7 +115,6 @@ class UserMgr(object):
             return False, "Email address not provided."
         if len(device_str) == 0:
             return False, "Device string not provided."
-
         user_id, _, _ = self.database.retrieve_user(email)
         return self.database.create_user_device(user_id, device_str)
 
@@ -128,6 +127,14 @@ class UserMgr(object):
         devices = self.database.retrieve_user_devices(user_id)
         devices = list(set(devices)) # De-duplicate
         return devices
+
+    def retrieve_user_from_device(self, device_str):
+        """Finds the user associated with the device."""
+        if self.database is None:
+            raise Exception("No database.")
+        if len(device_str) == 0:
+            return False, "Device string not provided."
+        return self.database.retrieve_user_from_device(device_str)
 
     def list_users_followed(self, user_id):
         """Returns the user ids for all users that are followed by the user with the specified id."""
