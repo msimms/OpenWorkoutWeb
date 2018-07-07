@@ -22,18 +22,21 @@ class StraenApi(object):
 
     def parse_json_loc_obj(self, json_obj):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
+        device_str = ""
+        username = ""
+        activity_type = ""
+        activity_id_str = ""
+
         try:
             # Parse required identifiers.
             device_str = json_obj[StraenKeys.APP_DEVICE_ID_KEY]
             activity_id_str = json_obj[StraenKeys.APP_ID_KEY]
 
             # Parse optional identifiers.
-            username = ""
             try:
                 username = json_obj[StraenKeys.APP_USERNAME_KEY]
             except:
                 pass
-            activity_type = ""
             try:
                 activity_type = json_obj[StraenKeys.APP_TYPE_KEY]
             except:
@@ -69,10 +72,30 @@ class StraenApi(object):
                         self.data_mgr.create_sensordata(activity_id_str, date_time, key, value)
                     elif key in [StraenKeys.APP_CURRENT_SPEED_KEY, StraenKeys.APP_CURRENT_PACE_KEY]:
                         self.data_mgr.create_metadata(activity_id_str, date_time, key, value, True)
+        except ValueError, e:
+            cherrypy.log.error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj), 'EXEC', logging.WARNING)
+        except KeyError, e:
+            cherrypy.log.error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj), 'EXEC', logging.WARNING)
+        except:
+            cherrypy.log.error("Error parsing JSON location data. JSON object = " + str(json_obj), 'EXEC', logging.WARNING)
+        return device_str, username, activity_type, activity_id_str
+
+    def handle_update_location(self, values):
+        """Called when an API message to update the location of a device is received."""
+        if "locations" in values:
+            locations = values["locations"]
+            device_str = ""
+            username = ""
+            activity_type = ""
+            activity_id_str = ""
+
+            # Parse each of the location objects.
+            for location_obj in locations:
+                device_str, username, activity_type, activity_id_str = self.parse_json_loc_obj(location_obj)
 
             # Udpate the activity type.
             if len(activity_type) > 0:
-                self.data_mgr.create_metadata(activity_id_str, date_time, StraenKeys.ACTIVITY_TYPE_KEY, activity_type, False)
+                self.data_mgr.create_metadata(activity_id_str, 0, StraenKeys.ACTIVITY_TYPE_KEY, activity_type, False)
 
             # Update the user device association.
             if len(username) > 0:
@@ -80,19 +103,6 @@ class StraenApi(object):
                 user_devices = self.user_mgr.retrieve_user_devices(user_id)
                 if user_devices is not None and device_str not in user_devices:
                     self.user_mgr.create_user_device(user_id, device_str)
-        except ValueError, e:
-            cherrypy.log.error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj), 'EXEC', logging.WARNING)
-        except KeyError, e:
-            cherrypy.log.error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj), 'EXEC', logging.WARNING)
-        except:
-            cherrypy.log.error("Error parsing JSON location data. JSON object = " + str(json_obj), 'EXEC', logging.WARNING)
-
-    def handle_update_location(self, values):
-        """Called when an API message to update the location of a device is received."""
-        if "locations" in values:
-            locations = values["locations"]
-            for location_obj in locations:
-                self.parse_json_loc_obj(location_obj)
             return True, ""
         return False, ""
 
