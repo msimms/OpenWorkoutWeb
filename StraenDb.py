@@ -9,6 +9,15 @@ import Database
 import StraenKeys
 
 
+def retrieve_time_from_location(location):
+    """Used with the sort function."""
+    return location['time']
+
+def retrieve_time_from_time_value_pair(value):
+    """Used with the sort function."""
+    return value.keys()[0]
+
+
 class Device(object):
     def __init__(self):
         self.id = 0
@@ -18,6 +27,7 @@ class Device(object):
 
 
 class MongoDatabase(Database.Database):
+    """Mongo DB implementation of the Straen database."""
     conn = None
     database = None
     users_collection = None
@@ -205,9 +215,7 @@ class MongoDatabase(Database.Database):
             return False, "Device string not provided."
 
         try:
-            user = self.users_collection.find_one({"devices": device_str})
-            print user
-            return user
+            return self.users_collection.find_one({"devices": device_str})
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
@@ -492,6 +500,7 @@ class MongoDatabase(Database.Database):
             if activity is not None:
                 if key in activity:
                     metadata = activity[key]
+                    metadata.sort(key=retrieve_time_from_time_value_pair)
                     return metadata
         except:
             traceback.print_exc(file=sys.stdout)
@@ -543,6 +552,7 @@ class MongoDatabase(Database.Database):
             if activity is not None:
                 if sensor_type in activity:
                     sensor_data = activity[sensor_type]
+                    sensor_data.sort(key=retrieve_time_from_time_value_pair)
                     return sensor_data
         except:
             traceback.print_exc(file=sys.stdout)
@@ -600,6 +610,7 @@ class MongoDatabase(Database.Database):
             activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
             if activity is not None:
                 locations = activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]
+                locations.sort(key=retrieve_time_from_location)
                 return locations
         except:
             traceback.print_exc(file=sys.stdout)
@@ -617,6 +628,7 @@ class MongoDatabase(Database.Database):
 
         try:
             locations = self.retrieve_locations(activity_id_str)
+            locations.sort(key=retrieve_time_from_location)
             return locations
         except:
             traceback.print_exc(file=sys.stdout)
