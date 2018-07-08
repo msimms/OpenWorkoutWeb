@@ -10,10 +10,19 @@ Why develop a workout tracker when there are so many closed-source options avail
 ## Major Features
 * Enables the live tracking feature of the Straen mobile app.
 
+## Major Todos
+* Support for strength-based activities.
+* Activity import.
+* Activity export.
+* Continuous scrolling for the activity feed.
+* Import from other services.
+* Better graphics.
+
 ## Version History
 
 ### 0.1
 * Initial version. Application exhibits basic functionality: can login and view activities received from the iOS companion app.
+* Live tracking is functional.
 
 ### 0.2
 * Added the ability to update email address and password.
@@ -25,6 +34,7 @@ Why develop a workout tracker when there are so many closed-source options avail
 
 ### 0.3
 * Support for tags.
+
 
 ## Social
 Twitter: [@StraenApp](https://twitter.com/StraenApp)
