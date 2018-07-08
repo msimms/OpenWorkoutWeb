@@ -5,7 +5,6 @@ import json
 import logging
 import time
 import uuid
-import cherrypy
 import Exporter
 import StraenKeys
 
@@ -19,6 +18,11 @@ class StraenApi(object):
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
         self.user_id = user_id
+
+    def log_error(self, log_str):
+        """Writes an error message to the log file."""
+        logger = logging.getLogger()
+        logger.debug(log_str)
 
     def parse_json_loc_obj(self, json_obj):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
@@ -57,11 +61,11 @@ class StraenApi(object):
                 alt = json_obj["Altitude"]
                 self.data_mgr.create_location(device_str, activity_id_str, date_time, lat, lon, alt)
             except ValueError, e:
-                cherrypy.log.error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj), 'EXEC', logging.WARNING)
+                self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
             except KeyError, e:
-                cherrypy.log.error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj), 'EXEC', logging.WARNING)
+                self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
             except:
-                cherrypy.log.error("Error parsing JSON location data. JSON object = " + str(json_obj), 'EXEC', logging.WARNING)
+                self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
 
             # Parse the rest of the data, which will be a combination of metadata and sensor data.
             for item in json_obj.iteritems():
@@ -73,17 +77,18 @@ class StraenApi(object):
                     elif key in [StraenKeys.APP_CURRENT_SPEED_KEY, StraenKeys.APP_CURRENT_PACE_KEY]:
                         self.data_mgr.create_metadata(activity_id_str, date_time, key, value, True)
         except ValueError, e:
-            cherrypy.log.error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj), 'EXEC', logging.WARNING)
+            self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except KeyError, e:
-            cherrypy.log.error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj), 'EXEC', logging.WARNING)
+            self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except:
-            cherrypy.log.error("Error parsing JSON location data. JSON object = " + str(json_obj), 'EXEC', logging.WARNING)
+            self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
         return device_str, username, activity_type, activity_id_str
 
     def handle_update_location(self, values):
         """Called when an API message to update the location of a device is received."""
         if "locations" in values:
             locations = values["locations"]
+
             device_str = ""
             username = ""
             activity_type = ""
