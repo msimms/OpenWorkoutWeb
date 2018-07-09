@@ -31,7 +31,6 @@ from mako.template import Template
 ACCESS_LOG = 'access.log'
 ERROR_LOG = 'error.log'
 PRODUCT_NAME = 'Straen'
-SESSION_KEY = '_straen_username'
 
 UNNAMED_ACTIVITY_TITLE = "Unnamed"
 UNSPECIFIED_ACTIVITY_TYPE = "Unknown"
@@ -91,7 +90,7 @@ def check_auth(*args, **kwargs):
                     if g_app.activity_is_public(device, activity_id_str):
                         return
 
-        username = cherrypy.session.get(SESSION_KEY)
+        username = g_app.user_mgr.get_logged_in_user()
         if username:
             cherrypy.request.login = username
             for condition in conditions:
@@ -531,7 +530,7 @@ class StraenWeb(object):
                 return self.error()
 
             # Get the logged in user.
-            logged_in_username = cherrypy.session.get(SESSION_KEY)
+            logged_in_username = self.user_mgr.get_logged_in_user()
 
             # Determine who owns the device.
             device_user = self.user_mgr.retrieve_user_from_device(device_str)
@@ -548,7 +547,7 @@ class StraenWeb(object):
         """Renders the map page for an activity."""
         try:
             # Get the logged in user.
-            logged_in_username = cherrypy.session.get(SESSION_KEY)
+            logged_in_username = self.user_mgr.get_logged_in_user()
 
             # Render from template.
             return self.render_page_for_activity("", "", activity_id_str, logged_in_username is not None, False)
@@ -569,7 +568,7 @@ class StraenWeb(object):
                     return self.error()
 
             # Get the logged in user.
-            logged_in_username = cherrypy.session.get(SESSION_KEY)
+            logged_in_username = self.user_mgr.get_logged_in_user()
 
             # Determine who owns the device.
             device_user = self.user_mgr.retrieve_user_from_device(device_str)
@@ -586,7 +585,7 @@ class StraenWeb(object):
         """Renders the list of the specified user's activities."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is None:
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
@@ -624,7 +623,7 @@ class StraenWeb(object):
         """Renders the list of all activities the specified user is allowed to view."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is None:
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
@@ -662,7 +661,7 @@ class StraenWeb(object):
         """Renders the list of users the specified user is following."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is None:
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
@@ -695,7 +694,7 @@ class StraenWeb(object):
         """Renders the list of users that are following the specified user."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is None:
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
@@ -728,7 +727,7 @@ class StraenWeb(object):
         """Renders the list of a user's devices."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is None:
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
@@ -770,7 +769,7 @@ class StraenWeb(object):
         """Processes an upload request."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is None:
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
@@ -824,7 +823,7 @@ class StraenWeb(object):
         """Renders the import page."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is None:
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
@@ -855,7 +854,7 @@ class StraenWeb(object):
         """Deletes the device with the activity ID, assuming it is owned by the current user."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is None:
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
@@ -904,7 +903,7 @@ class StraenWeb(object):
         """Renders the user's settings page."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is None:
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
@@ -935,8 +934,7 @@ class StraenWeb(object):
                 raise Exception("An email address and password were not provided.")
             else:
                 if self.user_mgr.authenticate_user(email, password):
-                    cherrypy.session.regenerate()
-                    cherrypy.session[SESSION_KEY] = cherrypy.request.login = email
+                    self.user_mgr.create_new_session(email)
                     raise cherrypy.HTTPRedirect(DEFAULT_LOGGED_IN_URL)
                 else:
                     raise Exception("Unknown error.")
@@ -955,8 +953,7 @@ class StraenWeb(object):
         """Creates a new login."""
         try:
             if self.user_mgr.create_user(email, realname, password1, password2, ""):
-                cherrypy.session.regenerate()
-                cherrypy.session[SESSION_KEY] = cherrypy.request.login = email
+                self.user_mgr.create_new_session(email)
                 raise cherrypy.HTTPRedirect(DEFAULT_LOGGED_IN_URL)
             else:
                 raise Exception("Unknown error.")
@@ -975,7 +972,7 @@ class StraenWeb(object):
         """Updates the user's email address."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is None:
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
@@ -1000,7 +997,7 @@ class StraenWeb(object):
         """Updates the user's email password."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is None:
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
@@ -1036,7 +1033,7 @@ class StraenWeb(object):
         """Removes the user and all associated data."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is None:
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
@@ -1069,7 +1066,7 @@ class StraenWeb(object):
         """Renders the login page."""
         try:
             # If a user is already logged in then go straight to the landing page.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is not None:
                 raise cherrypy.HTTPRedirect(DEFAULT_LOGGED_IN_URL)
 
@@ -1105,13 +1102,12 @@ class StraenWeb(object):
         """Ends the logged in session."""
         try:
             # Get the logged in user.
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is None:
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
             # Clear the session.
-            sess = cherrypy.session
-            sess[SESSION_KEY] = None
+            self.user_mgr.clear_session()
 
             # Send the user back to the login screen.
             raise cherrypy.HTTPRedirect(LOGIN_URL)
@@ -1140,7 +1136,7 @@ class StraenWeb(object):
         try:
             # Get the logged in user.
             user_id = None
-            username = cherrypy.session.get(SESSION_KEY)
+            username = self.user_mgr.get_logged_in_user()
             if username is not None:
                 user_id, _, _ = self.user_mgr.retrieve_user(username)
 

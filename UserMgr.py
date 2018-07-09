@@ -1,6 +1,7 @@
 # Copyright 2017 Michael J Simms
 
 import bcrypt
+import SessionMgr
 import StraenDb
 
 
@@ -12,11 +13,24 @@ class UserMgr(object):
     def __init__(self, root_dir):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
+        self.session_mgr = SessionMgr.SessionMgr()
         super(UserMgr, self).__init__()
 
     def terminate(self):
         """Destructor"""
         self.database = None
+
+    def get_logged_in_user(self):
+        """Returns the username associated with the current session."""
+        return self.session_mgr.get_logged_in_user()
+
+    def create_new_session(self, username):
+        """Starts a new session."""
+        self.session_mgr.create_new_session(username)
+
+    def clear_session(self):
+        """Ends the current session."""
+        self.session_mgr.clear_session()
 
     def authenticate_user(self, email, password):
         """Validates a user against the credentials in the database."""
