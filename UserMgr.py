@@ -90,8 +90,23 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         return self.database.retrieve_matched_users(name)
 
-    def update_user(self, user_id, email, realname, password1, password2):
+    def update_user_email(self, user_id, email, realname):
         """Updates a user's database entry."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Unexpected empty object: user_id.")
+        if len(email) == 0:
+            raise Exception("Email address not provided.")
+        if len(realname) == 0:
+            raise Exception("Name not provided.")
+
+        if not self.database.update_user(user_id, email, realname, None):
+            raise Exception("An internal error was encountered when updating the user.")
+        return True
+
+    def update_user_password(self, user_id, email, realname, password1, password2):
+        """Updates a user's password."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
@@ -104,8 +119,6 @@ class UserMgr(object):
             raise Exception("The password is too short.")
         if password1 != password2:
             raise Exception("The passwords do not match.")
-        if self.database.retrieve_user(email) is None:
-            raise Exception("The user already exists.")
 
         salt = bcrypt.gensalt()
         computed_hash = bcrypt.hashpw(password1.encode('utf-8'), salt)

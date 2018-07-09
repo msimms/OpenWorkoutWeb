@@ -108,21 +108,23 @@ class MongoDatabase(Database.Database):
         if realname is None:
             self.log_error(MongoDatabase.update_user.__name__ + "Unexpected empty object: realname")
             return False
-        if hash is None:
-            self.log_error(MongoDatabase.update_user.__name__ + "Unexpected empty object: hash")
-            return False
         if len(username) == 0:
             self.log_error(MongoDatabase.update_user.__name__ + "username too short")
             return False
         if len(realname) == 0:
             self.log_error(MongoDatabase.update_user.__name__ + "realname too short")
             return False
-        if len(passhash) == 0:
-            self.log_error(MongoDatabase.update_user.__name__ + "hash too short")
-            return False
 
         try:
-            return True
+            user_id_obj = ObjectId(user_id)
+            user = self.users_collection.find_one({"_id": user_id_obj})
+            if user is not None:
+                user[StraenKeys.USERNAME_KEY] = username
+                user[StraenKeys.REALNAME_KEY] = realname
+                if passhash is not None:
+                    user[StraenKeys.HASH_KEY] = passhash
+                self.users_collection.save(user)
+                return True
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])

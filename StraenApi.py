@@ -4,6 +4,7 @@
 import json
 import logging
 import time
+import urllib
 import uuid
 import Exporter
 import StraenKeys
@@ -156,7 +157,86 @@ class StraenApi(object):
 
         if not self.user_mgr.create_user(email, realname, password1, password2, device_str):
             raise Exception("User creation failed.")
+        return True, ""
 
+    def handle_update_email(self, values):
+        """Updates the user's email address."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if 'email' not in values:
+            raise Exception("Email not specified.")
+
+        # Get the logged in user.
+        current_username = self.user_mgr.get_logged_in_user()
+        if current_username is None:
+            raise Exception("Empty username.")
+
+        # Decode the parameter.
+        new_username = urllib.unquote_plus(values['email'])
+
+        # Get the user details.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(current_username)
+
+        # Update the user's password in the database.
+        if not self.user_mgr.update_user_email(user_id, new_username, user_realname):
+            raise Exception("Update failed.")
+        return True, ""
+
+    def handle_update_password(self, values):
+        """Updates the user's email password."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if 'old_password' not in values:
+            raise Exception("Old password not specified.")
+        if 'new_password1' not in values:
+            raise Exception("New password not specified.")
+        if 'new_password2' not in values:
+            raise Exception("New password confirmation not specified.")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise Exception("Empty username.")
+
+        # Get the user details.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+
+        # The the old and new passwords from the request.
+        old_password = urllib.unquote_plus(values["old_password"])
+        new_password1 = urllib.unquote_plus(values["new_password1"])
+        new_password2 = urllib.unquote_plus(values["new_password2"])
+
+        # Reauthenticate the user.
+        if not self.user_mgr.authenticate_user(username, old_password):
+            raise Exception("Authentication failed.")
+
+        # Update the user's password in the database.
+        if not self.user_mgr.update_user_password(user_id, username, user_realname, new_password1, new_password2):
+            raise Exception("Update failed.")
+        return True, ""
+
+    def handle_delete_user(self, values):
+        """Removes the user and all associated data."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if StraenKeys.PASSWORD_KEY not in values:
+            raise Exception("Password not specified.")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise Exception("Empty username.")
+
+        # Reauthenticate the user.
+        password = values[StraenKeys.PASSWORD_KEY]
+        if not self.user_mgr.authenticate_user(username, password):
+            raise Exception("Authentication failed.")
+
+        # Delete all the user's activities.
+        self.data_mgr.delete_user_activities(self.user_id)
+
+        # Delete the user.
+        self.user_mgr.delete_user(self.user_id)
         return True, ""
 
     def handle_add_time_and_distance_activity(self, values):
@@ -353,6 +433,12 @@ class StraenApi(object):
             return self.handle_login_submit(json_values)
         elif request == 'create_login_submit':
             return self.handle_create_login_submit(json_values)
+        elif request == 'update_email':
+            return self.handle_update_email(json_values)
+        elif request == 'update_password':
+            return self.handle_update_password(json_values)
+        elif request == 'delete_user':
+            return self.handle_delete_user(json_values)
         elif request == 'add_activity':
             return self.handle_add_activity(json_values)
         elif request == 'upload_activity_file':
