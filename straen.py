@@ -597,15 +597,17 @@ class StraenWeb(object):
 
             activities = self.data_mgr.retrieve_user_activity_list(user_id, 0, 25)
             row_id = 0
-            activities_list_str = "<table>\n"
+            activities_list_str = "No activities."
             if activities is not None and isinstance(activities, list):
-                for activity in activities:
-                    activity_str = self.render_activity_row(None, activity, row_id)
-                    if activity_str is not None and len(activity_str) > 0:
-                        row_id = row_id + 1
-                        activities_list_str += activity_str
-                        activities_list_str += "\n"
-            activities_list_str += "</table>\n"
+                if len(activities) > 0:
+                    activities_list_str = "<table>\n"
+                    for activity in activities:
+                        activity_str = self.render_activity_row(None, activity, row_id)
+                        if activity_str is not None and len(activity_str) > 0:
+                            row_id = row_id + 1
+                            activities_list_str += activity_str
+                            activities_list_str += "\n"
+                    activities_list_str += "</table>\n"
 
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'my_activities.html')
@@ -635,15 +637,17 @@ class StraenWeb(object):
 
             activities = self.data_mgr.retrieve_user_activity_list(user_id, 0, 25)
             row_id = 0
-            activities_list_str = "<table>\n"
+            activities_list_str = "No activities."
             if activities is not None and isinstance(activities, list):
-                for activity in activities:
-                    activity_str = self.render_activity_row(user_realname, activity, row_id)
-                    if activity_str is not None and len(activity_str) > 0:
-                        row_id = row_id + 1
-                        activities_list_str += activity_str
-                        activities_list_str += "\n"
-            activities_list_str += "</table>\n"
+                if len(activities) > 0:
+                    activities_list_str = "<table>\n"
+                    for activity in activities:
+                        activity_str = self.render_activity_row(user_realname, activity, row_id)
+                        if activity_str is not None and len(activity_str) > 0:
+                            row_id = row_id + 1
+                            activities_list_str += activity_str
+                            activities_list_str += "\n"
+                    activities_list_str += "</table>\n"
 
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'all_activities.html')
@@ -673,10 +677,12 @@ class StraenWeb(object):
 
             # Get the list of users followed by the logged in user.
             users_following = self.user_mgr.list_users_followed(user_id)
-            users_list_str = ""
+            users_list_str = "Not currently following anyone."
             if users_following is not None and isinstance(users_following, list):
-                for user in users_following:
-                    users_list_str += self.render_user_row(user)
+                if len(users_following) > 0:
+                    users_list_str = ""
+                    for user in users_following:
+                        users_list_str += self.render_user_row(user)
 
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'following.html')
@@ -706,10 +712,12 @@ class StraenWeb(object):
 
             # Get the list of users following the logged in user.
             users_followed_by = self.user_mgr.list_followers(user_id)
-            users_list_str = ""
+            users_list_str = "Not currently being followed by anyone."
             if users_followed_by is not None and isinstance(users_followed_by, list):
-                for user in users_followed_by:
-                    users_list_str += self.render_user_row(user)
+                if len(users_followed_by) > 0:
+                    users_list_str = ""
+                    for user in users_followed_by:
+                        users_list_str += self.render_user_row(user)
 
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'followers.html')
