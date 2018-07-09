@@ -169,7 +169,13 @@ class UserMgr(object):
             raise Exception("No database.")
         if user_id is None or len(user_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_users_followed(user_id)
+
+        user_names_followed = []
+        user_ids_followed = self.database.retrieve_users_followed(user_id)
+        for user_id_followed in user_ids_followed:
+            username = self.database.retrieve_username_from_id(user_id_followed)
+            user_names_followed.append(username)
+        return user_names_followed
 
     def list_followers(self, user_id):
         """Returns the user ids for all users that follow the user with the specified id."""
@@ -179,12 +185,12 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         return self.database.retrieve_followers(user_id)
 
-    def request_to_follow(self, user_id, target_email):
+    def request_to_follow(self, user_id, target_id):
         """Appends a user to the followers list of the user with the specified id."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None or len(user_id) == 0:
             raise Exception("Bad parameter.")
-        if target_email is None or len(target_email) == 0:
+        if target_id is None or len(target_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.create_following_entry(user_id, target_email)
+        return self.database.create_following_entry(user_id, target_id)

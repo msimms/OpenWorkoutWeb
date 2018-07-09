@@ -327,7 +327,7 @@ class StraenApi(object):
         if 'searchname' not in values:
             raise Exception("Invalid parameter.")
 
-        search_name = values['searchname']
+        search_name = urllib.unquote_plus(values['searchname'])
         search_name_len = len(search_name)
         if search_name_len < 3:
             raise Exception("Search name is too short.")
@@ -345,7 +345,7 @@ class StraenApi(object):
         if 'target_email' not in values:
             raise Exception("Invalid parameter.")
 
-        target_email = values['target_email']
+        target_email = urllib.unquote_plus(values['target_email'])
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise Exception("Target user does not exist.")
@@ -354,7 +354,7 @@ class StraenApi(object):
         users_list_str = ""
         if users_following is not None and isinstance(users_following, list):
             users_list_str = str(users_following)
-        return False, users_list_str
+        return True, users_list_str
 
     def list_users_followed_by(self, values):
         """Called when an API message to list the users who are following you is received."""
@@ -363,7 +363,7 @@ class StraenApi(object):
         if 'target_email' not in values:
             raise Exception("Invalid parameter.")
 
-        target_email = values['target_email']
+        target_email = urllib.unquote_plus(values['target_email'])
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise Exception("Target user does not exist.")
@@ -372,7 +372,7 @@ class StraenApi(object):
         users_list_str = ""
         if users_followed_by is not None and isinstance(users_followed_by, list):
             users_list_str = str(users_followed_by)
-        return False, users_list_str
+        return True, users_list_str
 
     def handle_request_to_follow(self, values):
         """Called when an API message request to follow another user is received."""
@@ -381,13 +381,13 @@ class StraenApi(object):
         if 'target_email' not in values:
             raise Exception("Invalid parameter.")
 
-        target_email = values['target_email']
+        target_email = urllib.unquote_plus(values['target_email'])
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise Exception("Target user does not exist.")
-        if self.user_mgr.request_to_follow(self.user_id, target_email):
-            return True, ""
-        return False, ""
+        if not self.user_mgr.request_to_follow(self.user_id, target_id):
+            raise Exception("Request failed.")
+        return True, ""
 
     def handle_unfollow(self, values):
         """Called when an API message request to unfollow another user is received."""
@@ -396,7 +396,7 @@ class StraenApi(object):
         if 'target_email' not in values:
             raise Exception("Invalid parameter.")
 
-        target_email = values['target_email']
+        target_email = urllib.unquote_plus(values['target_email'])
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise Exception("Target user does not exist.")

@@ -97,6 +97,23 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None, None, None
 
+    def retrieve_username_from_id(self, user_id):
+        """Retrieve method for a user."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_username_from_id.__name__ + "Unexpected empty object: user_id")
+            return None
+
+        try:
+            user_id_obj = ObjectId(user_id)
+            user = self.users_collection.find_one({"_id": user_id_obj})
+            if user is not None:
+                return user[StraenKeys.USERNAME_KEY]
+            return None
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
     def update_user(self, user_id, username, realname, passhash):
         """Update method for a user."""
         if user_id is None:
@@ -271,13 +288,13 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_following_entry(self, user_id, target_email):
+    def create_following_entry(self, user_id, target_id):
         """Appends a user to the followers list of the user with the specified id."""
         if user_id is None:
             self.log_error(MongoDatabase.create_following_entry.__name__ + "Unexpected empty object: user_id")
             return None
-        if target_email is None:
-            self.log_error(MongoDatabase.create_following_entry.__name__ + "Unexpected empty object: target_email")
+        if target_id is None:
+            self.log_error(MongoDatabase.create_following_entry.__name__ + "Unexpected empty object: target_id")
             return False
 
         try:
@@ -287,10 +304,11 @@ class MongoDatabase(Database.Database):
                 user_list = []
                 if 'following' in user:
                     user_list = user['following']
-                if target_email not in user_list:
-                    user_list.append(target_email)
+                if target_id not in user_list:
+                    user_list.append(target_id)
                     user['following'] = user_list
                     self.users_collection.save(user)
+                    return True
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])

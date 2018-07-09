@@ -29,6 +29,7 @@
 		dict.push({["target_email"] : target.name});
 		if (send_post_request(the_url, dict, result_text))
 		{
+			window.location.replace("${root_url}/following");
 		}
 		else
 		{
