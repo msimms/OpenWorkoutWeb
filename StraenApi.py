@@ -239,6 +239,32 @@ class StraenApi(object):
         self.user_mgr.delete_user(self.user_id)
         return True, ""
 
+    def handle_delete_activity(self, values):
+        """Removes the specified activity."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if StraenKeys.ACTIVITY_ID_KEY not in values:
+            raise Exception("Activity ID not specified.")
+
+        # Get the device and activity IDs from the push request.
+        activity_id = values[StraenKeys.ACTIVITY_ID_KEY]
+
+        # Get the activiites that belong to the logged in user.
+        activities = self.data_mgr.retrieve_user_activity_list(self.user_id, None, None)
+        deleted = False
+        for activity in activities:
+            if StraenKeys.ACTIVITY_ID_KEY in activity:
+                if activity[StraenKeys.ACTIVITY_ID_KEY] == activity_id:
+                    self.data_mgr.delete_activity(activity['_id'])
+                    deleted = True
+                    break
+
+        # Did we find it?
+        if not deleted:
+            raise Exception("An error occurred. Nothing deleted.")
+
+        return True, ""
+
     def handle_add_time_and_distance_activity(self, values):
         """Called when an API message to add a new activity based on time and distance is received."""
         if StraenKeys.APP_TIME_KEY not in values:
@@ -439,6 +465,8 @@ class StraenApi(object):
             return self.handle_update_password(json_values)
         elif request == 'delete_user':
             return self.handle_delete_user(json_values)
+        elif request == 'delete_activity':
+            return self.handle_delete_activity(json_values)
         elif request == 'add_activity':
             return self.handle_add_activity(json_values)
         elif request == 'upload_activity_file':

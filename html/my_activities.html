@@ -43,7 +43,7 @@
 
 			dict.push({["activity_id"] : activity_id});
 			if (send_post_request(the_url, dict, result_text))
-				window.location.replace("${root_url}/all_activities");
+				window.location.replace("${root_url}/my_activities");
 			else
 				alert("An error occurred!");
 		}

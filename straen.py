@@ -850,54 +850,6 @@ class StraenWeb(object):
         return self.error()
 
     @cherrypy.expose
-    def delete_activity(self, *args, **kw):
-        """Deletes the device with the activity ID, assuming it is owned by the current user."""
-        try:
-            # Get the logged in user.
-            username = self.user_mgr.get_logged_in_user()
-            if username is None:
-                raise cherrypy.HTTPRedirect(LOGIN_URL)
-
-            # Get the details of the logged in user.
-            user_id, _, _ = self.user_mgr.retrieve_user(username)
-            if user_id is None:
-                self.log_error('Unknown user ID')
-                raise cherrypy.HTTPRedirect(LOGIN_URL)
-
-            # Get the device and activity IDs from the push request.
-            device_id = cherrypy.request.params.get("device_id")
-            activity_id = cherrypy.request.params.get("activity_id")
-
-            # Get the user's devices.
-            devices = self.user_mgr.retrieve_user_devices(user_id)
-            if device_id not in devices:
-                self.log_error('Unknown device ID')
-                raise cherrypy.HTTPRedirect("/my_activities")
-
-            # Get the activiites recorded on the specified device.
-            activities = self.data_mgr.retrieve_device_activity_list(device_id, None, None)
-            deleted = False
-            for activity in activities:
-                if StraenKeys.ACTIVITY_ID_KEY in activity:
-                    if activity[StraenKeys.ACTIVITY_ID_KEY] == activity_id:
-                        self.data_mgr.delete_activity(activity['_id'])
-                        deleted = True
-                        break
-
-            # Did we find it?
-            if not deleted:
-                self.log_error('Unknown activity ID')
-                raise cherrypy.HTTPRedirect("/my_activities")
-
-            # Refresh the page.
-            raise cherrypy.HTTPRedirect("/my_activities")
-        except cherrypy.HTTPRedirect as e:
-            raise e
-        except:
-            self.log_error('Unhandled exception in ' + StraenWeb.delete_activity.__name__)
-        return ""
-
-    @cherrypy.expose
     @require()
     def settings(self, *args, **kw):
         """Renders the user's settings page."""
