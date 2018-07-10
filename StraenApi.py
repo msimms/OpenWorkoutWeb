@@ -250,7 +250,7 @@ class StraenApi(object):
         activity_id = values[StraenKeys.ACTIVITY_ID_KEY]
 
         # Get the activiites that belong to the logged in user.
-        activities = self.data_mgr.retrieve_user_activity_list(self.user_id, None, None)
+        activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None)
         deleted = False
         for activity in activities:
             if StraenKeys.ACTIVITY_ID_KEY in activity:

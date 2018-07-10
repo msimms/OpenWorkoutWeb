@@ -428,8 +428,14 @@ class StraenWeb(object):
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, googleMapsKey=g_google_maps_key, centerLat=center_lat, centerLon=center_lon, lastLat=last_lat, lastLon=last_lon, routeCoordinates=route_coordinates, routeLen=len(locations), userId=str(user_id))
 
     @staticmethod
-    def render_activity_row(user_realname, activity, row_id):
+    def render_activity_row(activity, row_id, show_my_options):
         """Helper function for creating a table row describing an activity."""
+
+        # User's real name.
+        if StraenKeys.REALNAME_KEY in activity:
+            user_realname = activity[StraenKeys.REALNAME_KEY]
+        else:
+            user_realname = None
 
         # Activity ID
         if StraenKeys.ACTIVITY_ID_KEY in activity:
@@ -478,10 +484,10 @@ class StraenWeb(object):
         row += activity_name
         row += "</a></td>"
         row += "<td>"
-        row += "<input type=\"checkbox\" value=\"\" " + checkbox_value + " id=\"" + str(row_id) + "\" onclick=\"handleVisibilityClick(this, '" + activity_id_str + "')\";>"
-        row += "<span>" + checkbox_label + "</span></label>"
-        row += "</td>"
-        if user_realname is None:
+        if show_my_options:
+            row += "<input type=\"checkbox\" value=\"\" " + checkbox_value + " id=\"" + str(row_id) + "\" onclick=\"handleVisibilityClick(this, '" + activity_id_str + "')\";>"
+            row += "<span>" + checkbox_label + "</span></label>"
+            row += "</td>"
             row += "<td>"
             row += "<button type=\"button\" onclick=\"return on_delete('" + activity_id_str + "')\">Delete</button>"
             row += "</td>"
@@ -598,14 +604,14 @@ class StraenWeb(object):
                 self.log_error('Unknown user ID')
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
-            activities = self.data_mgr.retrieve_user_activity_list(user_id, 0, 25)
+            activities = self.data_mgr.retrieve_user_activity_list(user_id, user_realname, 0, 25)
             row_id = 0
             activities_list_str = "No activities."
             if activities is not None and isinstance(activities, list):
                 if len(activities) > 0:
                     activities_list_str = "<table>\n"
                     for activity in activities:
-                        activity_str = self.render_activity_row(None, activity, row_id)
+                        activity_str = self.render_activity_row(activity, row_id, True)
                         if activity_str is not None and len(activity_str) > 0:
                             row_id = row_id + 1
                             activities_list_str += activity_str
@@ -638,14 +644,14 @@ class StraenWeb(object):
                 self.log_error('Unknown user ID')
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
-            activities = self.data_mgr.retrieve_user_activity_list(user_id, 0, 25)
+            activities = self.data_mgr.retrieve_all_activities_visible_to_user(user_id, user_realname, 0, 25)
             row_id = 0
             activities_list_str = "No activities."
             if activities is not None and isinstance(activities, list):
                 if len(activities) > 0:
                     activities_list_str = "<table>\n"
                     for activity in activities:
-                        activity_str = self.render_activity_row(user_realname, activity, row_id)
+                        activity_str = self.render_activity_row(activity, row_id, False)
                         if activity_str is not None and len(activity_str) > 0:
                             row_id = row_id + 1
                             activities_list_str += activity_str

@@ -74,7 +74,7 @@ class DataMgr(Importer.LocationWriter):
                 activity[StraenKeys.ACTIVITY_TIME_KEY] = time_num
                 self.create_metadata(activity_id_str, time_num, StraenKeys.ACTIVITY_TIME_KEY, time_num, False)
 
-    def retrieve_user_activity_list(self, user_id, start, num_results):
+    def retrieve_user_activity_list(self, user_id, user_realname, start, num_results):
         """Returns a list containing all of the user's activities, up to num_results. num_results can be None for all activiites."""
         if self.database is None:
             raise Exception("No database.")
@@ -90,10 +90,32 @@ class DataMgr(Importer.LocationWriter):
             for device in devices:
                 device_activities = self.database.retrieve_device_activity_list(device, start, None)
                 for device_activity in device_activities:
+                    device_activity[StraenKeys.REALNAME_KEY] = user_realname
                     self.update_activity_start_time(device_activity)
                 activities.extend(device_activities)
 
         # List activities with no device that are associated with the user.
+
+        # Sort and limit the list.
+        if len(activities) > 0:
+            activities = sorted(activities, key=get_activities_sort_key, reverse=True)[:num_results]
+        return activities
+
+    def retrieve_all_activities_visible_to_user(self, user_id, user_realname, start, num_results):
+        """Returns a list containing all of the activities visible to the specified user, up to num_results. num_results can be None for all activiites."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None or len(user_id) == 0:
+            raise Exception("Bad parameter.")
+
+        # Start with the user's own activities.
+        activities = self.retrieve_user_activity_list(user_id, user_realname, start, num_results)
+
+        # Add the activities of users they follow.
+        followed_users = self.database.retrieve_users_followed(user_id)
+        for followed_user in followed_users:
+            more_activities = self.retrieve_user_activity_list(followed_user[StraenKeys.ID_KEY], followed_user[StraenKeys.REALNAME_KEY], start, num_results)
+            activities.extend(more_activities)
 
         # Sort and limit the list.
         if len(activities) > 0:

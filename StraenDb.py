@@ -270,6 +270,7 @@ class MongoDatabase(Database.Database):
                     for following_id in following_ids:
                         username, realname = self.retrieve_user_from_id(following_id)
                         user = {}
+                        user["_id"] = following_id
                         user[StraenKeys.USERNAME_KEY] = username
                         user[StraenKeys.REALNAME_KEY] = realname
                         following_users.append(user)
