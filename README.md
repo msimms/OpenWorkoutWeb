@@ -35,6 +35,8 @@ Why develop a workout tracker when there are so many closed-source options avail
 
 ### 0.3
 * Support for tags.
+* Implemented basic user following.
+* Many small bug fixes.
 
 
 ## Social

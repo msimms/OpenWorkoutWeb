@@ -97,22 +97,22 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None, None, None
 
-    def retrieve_username_from_id(self, user_id):
+    def retrieve_user_from_id(self, user_id):
         """Retrieve method for a user."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_username_from_id.__name__ + "Unexpected empty object: user_id")
-            return None
+            self.log_error(MongoDatabase.retrieve_user_from_id.__name__ + "Unexpected empty object: user_id")
+            return None, None
 
         try:
             user_id_obj = ObjectId(user_id)
             user = self.users_collection.find_one({"_id": user_id_obj})
             if user is not None:
-                return user[StraenKeys.USERNAME_KEY]
-            return None
+                return user[StraenKeys.USERNAME_KEY], user[StraenKeys.REALNAME_KEY]
+            return None, None
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
-        return None
+        return None, None
 
     def update_user(self, user_id, username, realname, passhash):
         """Update method for a user."""
@@ -265,7 +265,15 @@ class MongoDatabase(Database.Database):
             user = self.users_collection.find_one({"_id": user_id_obj})
             if user is not None:
                 if 'following' in user:
-                    return user['following']
+                    following_ids = user['following']
+                    following_users = []
+                    for following_id in following_ids:
+                        username, realname = self.retrieve_user_from_id(following_id)
+                        user = {}
+                        user[StraenKeys.USERNAME_KEY] = username
+                        user[StraenKeys.REALNAME_KEY] = realname
+                        following_users.append(user)
+                    return following_users
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
@@ -278,11 +286,8 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            user_id_obj = ObjectId(user_id)
-            user = self.users_collection.find_one({"_id": user_id_obj})
-            if user is not None:
-                if 'followers' in user:
-                    return user['followers']
+            followers = self.users_collection.find({"following": user_id})
+            return list(followers)
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])

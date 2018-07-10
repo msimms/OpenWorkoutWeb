@@ -493,7 +493,10 @@ class StraenWeb(object):
         """Helper function for creating a table row describing a user."""
         row = "<tr>"
         row += "<td>"
-        row += user
+        row += user[StraenKeys.USERNAME_KEY]
+        row += "</td>"
+        row += "<td>"
+        row += user[StraenKeys.REALNAME_KEY]
         row += "</td>"
         row += "</tr>\n"
         return row

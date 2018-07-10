@@ -169,13 +169,7 @@ class UserMgr(object):
             raise Exception("No database.")
         if user_id is None or len(user_id) == 0:
             raise Exception("Bad parameter.")
-
-        user_names_followed = []
-        user_ids_followed = self.database.retrieve_users_followed(user_id)
-        for user_id_followed in user_ids_followed:
-            username = self.database.retrieve_username_from_id(user_id_followed)
-            user_names_followed.append(username)
-        return user_names_followed
+        return self.database.retrieve_users_followed(user_id)
 
     def list_followers(self, user_id):
         """Returns the user ids for all users that follow the user with the specified id."""
