@@ -1110,7 +1110,6 @@ def main():
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
     cherrypy.tools.straenweb_auth = cherrypy.Tool('before_handler', check_auth)
-    
 
     conf = {
         '/':

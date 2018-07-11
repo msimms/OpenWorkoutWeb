@@ -74,6 +74,13 @@ class DataMgr(Importer.LocationWriter):
                 activity[StraenKeys.ACTIVITY_TIME_KEY] = time_num
                 self.create_metadata(activity_id_str, time_num, StraenKeys.ACTIVITY_TIME_KEY, time_num, False)
 
+    def is_activity_public(self, activity):
+        """Helper function for returning whether or not an activity is publically visible."""
+        if StraenKeys.ACTIVITY_VISIBILITY_KEY in activity:
+            if activity[StraenKeys.ACTIVITY_VISIBILITY_KEY] == "private":
+                return False
+        return True
+
     def retrieve_user_activity_list(self, user_id, user_realname, start, num_results):
         """Returns a list containing all of the user's activities, up to num_results. num_results can be None for all activiites."""
         if self.database is None:
@@ -115,7 +122,9 @@ class DataMgr(Importer.LocationWriter):
         followed_users = self.database.retrieve_users_followed(user_id)
         for followed_user in followed_users:
             more_activities = self.retrieve_user_activity_list(followed_user[StraenKeys.ID_KEY], followed_user[StraenKeys.REALNAME_KEY], start, num_results)
-            activities.extend(more_activities)
+            for another_activity in more_activities:
+                if self.is_activity_public(another_activity):
+                    activities.append(another_activity)
 
         # Sort and limit the list.
         if len(activities) > 0:
