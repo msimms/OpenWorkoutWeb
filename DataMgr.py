@@ -121,7 +121,7 @@ class DataMgr(Importer.LocationWriter):
         # Add the activities of users they follow.
         followed_users = self.database.retrieve_users_followed(user_id)
         for followed_user in followed_users:
-            more_activities = self.retrieve_user_activity_list(followed_user[StraenKeys.ID_KEY], followed_user[StraenKeys.REALNAME_KEY], start, num_results)
+            more_activities = self.retrieve_user_activity_list(followed_user[StraenKeys.DATABASE_ID_KEY], followed_user[StraenKeys.REALNAME_KEY], start, num_results)
             for another_activity in more_activities:
                 if self.is_activity_public(another_activity):
                     activities.append(another_activity)

@@ -2,7 +2,7 @@
 """Key strings from key/value pairs returned by the app"""
 
 # Keys associated with user management.
-ID_KEY = "_id"
+DATABASE_ID_KEY = "_id"
 USERNAME_KEY = "username"
 PASSWORD_KEY = "password"
 PASSWORD1_KEY = "password1"
@@ -11,6 +11,10 @@ DEVICE_KEY = "device"
 REALNAME_KEY = "realname"
 HASH_KEY = "hash"
 DEVICES_KEY = "devices"
+FOLLOWING_KEY = "following"
+
+# User settings
+DEFAULT_PRIVACY = "default privacy"
 
 # Keys inherited from the mobile app.
 APP_NAME_KEY = "Name"
@@ -43,6 +47,8 @@ ACTIVITY_LOCATIONS_KEY = "locations"
 ACTIVITY_NAME_KEY = "name"
 ACTIVITY_TIME_KEY = "time"
 ACTIVITY_VISIBILITY_KEY = "visibility"
+ACTIVITY_VISIBILITY_PUBLIC = "Public"
+ACTIVITY_VISIBILITY_PRIVATE = "Private"
 ACTIVITY_COMMENTS_KEY = "comments"
 ACTIVITY_TAGS_KEY = "tags"
 

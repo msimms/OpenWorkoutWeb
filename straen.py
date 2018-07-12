@@ -237,23 +237,6 @@ class StraenWeb(object):
             self.log_error('Unhandled exception in update_metadata')
         return ""
 
-    @cherrypy.expose
-    def update_visibility(self, activity_id_str, visibility):
-        """Changes the visibility of an activity from public to private or vice versa."""
-        if activity_id_str is None:
-            pass
-
-        try:
-            if visibility == "true" or visibility == "True":
-                new_visibility = "public"
-            else:
-                new_visibility = "private"
-
-            self.data_mgr.update_activity_visibility(activity_id_str, new_visibility)
-        except:
-            self.log_error('Unhandled exception in ' + StraenWeb.update_visibility.__name__)
-        return ""
-
     @staticmethod
     def timestamp_format():
         """The user's desired timestamp format."""
@@ -882,10 +865,23 @@ class StraenWeb(object):
                 self.log_error('Unknown user ID')
                 raise cherrypy.HTTPRedirect(LOGIN_URL)
 
+            # Get the current settings.
+            selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, StraenKeys.DEFAULT_PRIVACY)
+
+            # Render the alcohol units option.
+            privacy_options = "\t\t<option value=\"Public\""
+            if selected_default_privacy == StraenKeys.ACTIVITY_VISIBILITY_PUBLIC:
+                privacy_options += " selected"
+            privacy_options += ">Public</option>\n"
+            privacy_options += "\t\t<option value=\"Private\""
+            if selected_default_privacy == StraenKeys.ACTIVITY_VISIBILITY_PRIVATE:
+                privacy_options += " selected"
+            privacy_options += ">Private</option>"
+
             # Render from template.
             html_file = os.path.join(g_root_dir, HTML_DIR, 'settings.html')
             my_template = Template(filename=html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname)
+            return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=g_root_url, email=username, name=user_realname, privacy_options=privacy_options)
         except cherrypy.HTTPRedirect as e:
             raise e
         except:

@@ -24,13 +24,23 @@
 
 	function handleVisibilityClick(cb, activity_id)
 	{
-		$.ajax({ type: 'POST', url: "${root_url}/update_visibility/" + activity_id + "/" + cb.checked, dataType: "application/json" });
-		id = cb.id;
-		if ($('#' + id).is(':checked')) {
-			$('#' + id + "+span").html('Public');
-		} else {
-			$('#' + id + "+span").html('Private');
+		var the_url = "${root_url}/api/1.0/update_visibility";
+		var dict = [];
+		var result_text = {};
+		var is_public = $('#' + cb.id).is(':checked') ? "public" : "private";
+
+		dict.push({["activity_id"] : activity_id});
+		dict.push({["visibility"] : is_public});
+		if (send_post_request(the_url, dict, result_text))
+		{
+			if (is_public) {
+				$('#' + cb.id + "+span").html('Public');
+			} else {
+				$('#' + cb.id + "+span").html('Private');
+			}
 		}
+		else
+			alert("An error occurred!");
 	}
 
 	function on_delete(activity_id)

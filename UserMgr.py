@@ -3,6 +3,7 @@
 import bcrypt
 import SessionMgr
 import StraenDb
+import StraenKeys
 
 
 MIN_PASSWORD_LEN  = 8
@@ -188,3 +189,29 @@ class UserMgr(object):
         if target_id is None or len(target_id) == 0:
             raise Exception("Bad parameter.")
         return self.database.create_following_entry(user_id, target_id)
+
+    def update_user_setting(self, user_id, key, value):
+        """Create/update method for user preferences."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if key is None or len(key) == 0:
+            raise Exception("Bad parameter.")
+        if value is None or len(value) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.update_user_setting(user_id, key, value)
+
+    def retrieve_user_setting(self, user_id, key):
+        """Retrieve method for user preferences."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if key is None or len(key) == 0:
+            raise Exception("Bad parameter.")
+        result = self.database.retrieve_user_setting(user_id, key)
+        if result is None:
+            if key == StraenKeys.DEFAULT_PRIVACY:
+                result = StraenKeys.ACTIVITY_VISIBILITY_PUBLIC
+        return result

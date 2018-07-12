@@ -445,6 +445,38 @@ class StraenApi(object):
         result = self.data_mgr.retrieve_tags(values[StraenKeys.ACTIVITY_ID_KEY])
         return result, ""
 
+    def handle_update_settings(self, values):
+        """Called when the user submits a setting change."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+
+        result = True
+
+        # Update the alcohol units setting.
+        for key in values:
+            decoded_key = urllib.unquote_plus(key)
+            if decoded_key == StraenKeys.DEFAULT_PRIVACY:
+                default_privacy = urllib.unquote_plus(values[key])
+                result = self.user_mgr.update_user_setting(self.user_id, StraenKeys.DEFAULT_PRIVACY, default_privacy)
+
+        return result, ""
+
+    def handle_update_visibility(self, values):
+        """Called when the user updates the visibility of an activity."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if StraenKeys.ACTIVITY_ID_KEY not in values:
+            raise Exception("Drink ID not specified.")
+        if StraenKeys.ACTIVITY_VISIBILITY_KEY not in values:
+            raise Exception("Visibility not specified.")
+
+        visibility = urllib.unquote_plus(values[StraenKeys.ACTIVITY_VISIBILITY_KEY])
+        if not (visibility == StraenKeys.ACTIVITY_VISIBILITY_PUBLIC or visibility == StraenKeys.ACTIVITY_VISIBILITY_PRIVATE):
+            raise Exception("Invalid visibility value.")
+
+        result = self.data_mgr.update_activity_visibility(values[StraenKeys.ACTIVITY_ID_KEY], visibility)
+        return result, ""
+
     def handle_api_1_0_request(self, args, values):
         """Called to parse a version 1.0 API message."""
         if len(args) <= 0:
@@ -493,4 +525,8 @@ class StraenApi(object):
             return self.handle_create_tag(json_values)
         elif request == 'list_tags':
             return self.handle_list_tags(json_values)
+        elif request == 'update_settings':
+            return self.handle_update_settings(json_values)
+        elif request == 'update_visibility':
+            return self.handle_update_visibility(json_values)
         return False, ""

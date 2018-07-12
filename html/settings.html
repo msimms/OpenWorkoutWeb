@@ -20,8 +20,18 @@
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
 
-	function update_prefs()
+	function update_settings()
 	{
+		var the_url = "${root_url}/api/1.0/update_settings";
+		var units = document.getElementById("privacy_options").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["default privacy"] : units});
+		if (send_post_request(the_url, dict, result_text))
+			alert("Settings updated!");
+		else
+			alert("An error occurred!");
 	}
 
 	function update_email()
@@ -80,8 +90,12 @@ ${nav}
 </section>
 
 <div class="settings" style="width: 600px">
-	<h2>Preferences</h2>
-	<button type="button" onclick="return update_prefs()">Update</button>
+	<h2>Settings</h2>
+	<label for="privacy_options" class="checkin">Default Activity Privacy</label>
+	<select id="privacy_options" class="checkin" >
+${privacy_options}
+	</select>
+	<button type="button" onclick="return update_settings()">Update</button>
 	<hr>
 	<h2>Email</h2>
 	<p>New Email Address: <input type="text" id="new_email"><br></p>

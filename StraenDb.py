@@ -70,7 +70,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            post = {StraenKeys.USERNAME_KEY: username, StraenKeys.REALNAME_KEY: realname, StraenKeys.HASH_KEY: passhash, StraenKeys.DEVICES_KEY: [], "following": [], "followed by": []}
+            post = {StraenKeys.USERNAME_KEY: username, StraenKeys.REALNAME_KEY: realname, StraenKeys.HASH_KEY: passhash, StraenKeys.DEVICES_KEY: [], StraenKeys.FOLLOWING_KEY: [], StraenKeys.DEFAULT_PRIVACY: StraenKeys.ACTIVITY_VISIBILITY_PUBLIC}
             self.users_collection.insert(post)
             return True
         except:
@@ -90,7 +90,7 @@ class MongoDatabase(Database.Database):
         try:
             user = self.users_collection.find_one({StraenKeys.USERNAME_KEY: username})
             if user is not None:
-                return str(user['_id']), user[StraenKeys.HASH_KEY], user[StraenKeys.REALNAME_KEY]
+                return str(user[StraenKeys.DATABASE_ID_KEY]), user[StraenKeys.HASH_KEY], user[StraenKeys.REALNAME_KEY]
             return None, None, None
         except:
             traceback.print_exc(file=sys.stdout)
@@ -105,7 +105,7 @@ class MongoDatabase(Database.Database):
 
         try:
             user_id_obj = ObjectId(user_id)
-            user = self.users_collection.find_one({"_id": user_id_obj})
+            user = self.users_collection.find_one({StraenKeys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 return user[StraenKeys.USERNAME_KEY], user[StraenKeys.REALNAME_KEY]
             return None, None
@@ -134,7 +134,7 @@ class MongoDatabase(Database.Database):
 
         try:
             user_id_obj = ObjectId(user_id)
-            user = self.users_collection.find_one({"_id": user_id_obj})
+            user = self.users_collection.find_one({StraenKeys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 user[StraenKeys.USERNAME_KEY] = username
                 user[StraenKeys.REALNAME_KEY] = realname
@@ -155,7 +155,7 @@ class MongoDatabase(Database.Database):
 
         try:
             user_id_obj = ObjectId(user_id)
-            user = self.users_collection.delete_one({"_id": user_id_obj})
+            user = self.users_collection.delete_one({StraenKeys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 return True
         except:
@@ -195,7 +195,7 @@ class MongoDatabase(Database.Database):
 
         try:
             user_id_obj = ObjectId(user_id)
-            user = self.users_collection.find_one({"_id": user_id_obj})
+            user = self.users_collection.find_one({StraenKeys.DATABASE_ID_KEY: user_id_obj})
             devices = []
             if user is not None:
                 if StraenKeys.DEVICES_KEY in user:
@@ -217,7 +217,7 @@ class MongoDatabase(Database.Database):
 
         try:
             user_id_obj = ObjectId(user_id)
-            user = self.users_collection.find_one({"_id": user_id_obj})
+            user = self.users_collection.find_one({StraenKeys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 if StraenKeys.DEVICES_KEY in user:
                     return user[StraenKeys.DEVICES_KEY]
@@ -262,15 +262,15 @@ class MongoDatabase(Database.Database):
 
         try:
             user_id_obj = ObjectId(user_id)
-            user = self.users_collection.find_one({"_id": user_id_obj})
+            user = self.users_collection.find_one({StraenKeys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
-                if 'following' in user:
-                    following_ids = user['following']
+                if StraenKeys.FOLLOWING_KEY in user:
+                    following_ids = user[StraenKeys.FOLLOWING_KEY]
                     following_users = []
                     for following_id in following_ids:
                         username, realname = self.retrieve_user_from_id(following_id)
                         user = {}
-                        user["_id"] = following_id
+                        user[StraenKeys.DATABASE_ID_KEY] = following_id
                         user[StraenKeys.USERNAME_KEY] = username
                         user[StraenKeys.REALNAME_KEY] = realname
                         following_users.append(user)
@@ -287,7 +287,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            followers = self.users_collection.find({"following": user_id})
+            followers = self.users_collection.find({StraenKeys.FOLLOWING_KEY: user_id})
             return list(followers)
         except:
             traceback.print_exc(file=sys.stdout)
@@ -305,20 +305,64 @@ class MongoDatabase(Database.Database):
 
         try:
             user_id_obj = ObjectId(user_id)
-            user = self.users_collection.find_one({"_id": user_id_obj})
+            user = self.users_collection.find_one({StraenKeys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 user_list = []
-                if 'following' in user:
-                    user_list = user['following']
+                if StraenKeys.FOLLOWING_KEY in user:
+                    user_list = user[StraenKeys.FOLLOWING_KEY]
                 if target_id not in user_list:
                     user_list.append(target_id)
-                    user['following'] = user_list
+                    user[StraenKeys.FOLLOWING_KEY] = user_list
                     self.users_collection.save(user)
                     return True
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
         return False
+
+    def update_user_setting(self, user_id, key, value):
+        """Create/update method for user preferences."""
+        if user_id is None:
+            self.log_error(MongoDatabase.update_user_setting.__name__ + "Unexpected empty object: user_id")
+            return False
+        if key is None:
+            self.log_error(MongoDatabase.update_user_setting.__name__ + "Unexpected empty object: key")
+            return False
+        if value is None:
+            self.log_error(MongoDatabase.update_user_setting.__name__ + "Unexpected empty object: value")
+            return False
+
+        try:
+            user_id_obj = ObjectId(user_id)
+            user = self.users_collection.find_one({StraenKeys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+                user[key] = value
+                self.users_collection.save(user)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_user_setting(self, user_id, key):
+        """Retrieve method for user preferences."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_user_setting.__name__ + "Unexpected empty object: user_id")
+            return None
+        if key is None:
+            self.log_error(MongoDatabase.retrieve_user_setting.__name__ + "Unexpected empty object: key")
+            return None
+
+        try:
+            user_id_obj = ObjectId(user_id)
+            user = self.users_collection.find_one({StraenKeys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+                if key in user:
+                    return user[key]
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
 
     def retrieve_device_activity_list(self, device_str, start, num_results):
         """Retrieves the list of activities associated with the specified device."""
@@ -342,11 +386,11 @@ class MongoDatabase(Database.Database):
             exclude_keys[StraenKeys.ACTIVITY_LOCATIONS_KEY] = False
 
             if start is None and num_results is None:
-                return list(self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort("_id", -1))
+                return list(self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort(StraenKeys.DATABASE_ID_KEY, -1))
             elif num_results is None:
-                return list(self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort("_id", -1).skip(start))
+                return list(self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort(StraenKeys.DATABASE_ID_KEY, -1).skip(start))
             else:
-                return list(self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort("_id", -1).skip(start).limit(num_results))
+                return list(self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort(StraenKeys.DATABASE_ID_KEY, -1).skip(start).limit(num_results))
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
@@ -359,7 +403,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            device_activities = self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}).sort("_id", -1).limit(1)
+            device_activities = self.activities_collection.find({StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str}).sort(StraenKeys.DATABASE_ID_KEY, -1).limit(1)
             if device_activities is not None and device_activities.count() > 0:
                 activity = device_activities.next()
                 return activity
@@ -400,7 +444,7 @@ class MongoDatabase(Database.Database):
 
         try:
             activity_id_obj = ObjectId(object_id)
-            self.activities_collection.delete_one({"_id": activity_id_obj})
+            self.activities_collection.delete_one({StraenKeys.DATABASE_ID_KEY: activity_id_obj})
             return True
         except:
             traceback.print_exc(file=sys.stdout)
