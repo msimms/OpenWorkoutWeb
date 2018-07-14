@@ -2,6 +2,7 @@
 """Key strings from key/value pairs returned by the app"""
 
 # Keys associated with user management.
+SESSION_KEY = '_straen_username'
 DATABASE_ID_KEY = "_id"
 USERNAME_KEY = "username"
 PASSWORD_KEY = "password"
