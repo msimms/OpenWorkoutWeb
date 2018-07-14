@@ -570,7 +570,8 @@ class MongoDatabase(Database.Database):
             if activity is not None:
                 if key in activity:
                     metadata = activity[key]
-                    metadata.sort(key=retrieve_time_from_time_value_pair)
+                    if isinstance(metadata, list):
+                        metadata.sort(key=retrieve_time_from_time_value_pair)
                     return metadata
         except:
             traceback.print_exc(file=sys.stdout)
