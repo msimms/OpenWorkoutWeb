@@ -487,50 +487,49 @@ class StraenApi(object):
             return False, ""
 
         request = args[0]
-        json_values = json.loads(values)
 
         if request == 'update_location':
-            return self.handle_update_location(json_values)
+            return self.handle_update_location(values)
         elif request == 'login_submit':
-            return self.handle_login_submit(json_values)
+            return self.handle_login_submit(values)
         elif request == 'create_login_submit':
-            return self.handle_create_login_submit(json_values)
+            return self.handle_create_login_submit(values)
         elif request == 'update_email':
-            return self.handle_update_email(json_values)
+            return self.handle_update_email(values)
         elif request == 'update_password':
-            return self.handle_update_password(json_values)
+            return self.handle_update_password(values)
         elif request == 'delete_user':
-            return self.handle_delete_user(json_values)
+            return self.handle_delete_user(values)
         elif request == 'delete_activity':
-            return self.handle_delete_activity(json_values)
+            return self.handle_delete_activity(values)
         elif request == 'add_activity':
-            return self.handle_add_activity(json_values)
+            return self.handle_add_activity(values)
         elif request == 'upload_activity_file':
-            return self.handle_upload_activity_file(json_values)
+            return self.handle_upload_activity_file(values)
         elif request == 'add_tag_to_activity':
-            return self.handle_add_tag_to_activity(json_values)
+            return self.handle_add_tag_to_activity(values)
         elif request == 'delete_tag_from_activity':
-            return self.handle_delete_tag_from_activity(json_values)
+            return self.handle_delete_tag_from_activity(values)
         elif request == 'list_matched_users':
-            return self.handle_list_matched_users(json_values)
+            return self.handle_list_matched_users(values)
         elif request == 'list_users_following':
-            return self.list_users_following(json_values)
+            return self.list_users_following(values)
         elif request == 'list_users_followed_by':
-            return self.list_users_followed_by(json_values)
+            return self.list_users_followed_by(values)
         elif request == 'request_to_follow':
-            return self.handle_request_to_follow(json_values)
+            return self.handle_request_to_follow(values)
         elif request == 'unfollow':
-            return self.handle_unfollow(json_values)
+            return self.handle_unfollow(values)
         elif request == 'export_activity':
-            return self.handle_export_activity(json_values)
+            return self.handle_export_activity(values)
         elif request == 'claim_device':
-            return self.handle_claim_device(json_values)
+            return self.handle_claim_device(values)
         elif request == 'create_tag':
-            return self.handle_create_tag(json_values)
+            return self.handle_create_tag(values)
         elif request == 'list_tags':
-            return self.handle_list_tags(json_values)
+            return self.handle_list_tags(values)
         elif request == 'update_settings':
-            return self.handle_update_settings(json_values)
+            return self.handle_update_settings(values)
         elif request == 'update_visibility':
-            return self.handle_update_visibility(json_values)
+            return self.handle_update_visibility(values)
         return False, ""
