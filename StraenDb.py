@@ -548,7 +548,7 @@ class MongoDatabase(Database.Database):
                         data = activity[key]
 
                         # Make sure time values are monotonically increasing.
-                        if data and int(data[-1].keys()[0]) >= date_time:
+                        if data and int(data[-1].keys()[0]) > date_time:
                             self.log_error(MongoDatabase.create_metadata.__name__ + ": Received out-of-order time value.")
                             return False
 
@@ -612,7 +612,7 @@ class MongoDatabase(Database.Database):
                     data = activity[sensor_type]
 
                     # Make sure time values are monotonically increasing.
-                    if data and int(data[-1].keys()[0]) >= date_time:
+                    if data and int(data[-1].keys()[0]) > date_time:
                         self.log_error(MongoDatabase.create_sensordata.__name__ + ": Received out-of-order time value.")
                         return False
 
@@ -677,7 +677,7 @@ class MongoDatabase(Database.Database):
                     location_list = activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]
 
                     # Make sure time values are monotonically increasing.
-                    if location_list and int(location_list[-1][StraenKeys.LOCATION_TIME_KEY]) >= date_time:
+                    if location_list and int(location_list[-1][StraenKeys.LOCATION_TIME_KEY]) > date_time:
                         self.log_error(MongoDatabase.create_location.__name__ + ": Received out-of-order time value.")
                         return False
 
