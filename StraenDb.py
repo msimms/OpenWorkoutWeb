@@ -547,9 +547,12 @@ class MongoDatabase(Database.Database):
                     value = {str(date_time): str(value)}
                     data.append(value)
                     activity[key] = data
+                    self.activities_collection.save(activity)
                 else:
-                    activity[key] = value
-                self.activities_collection.save(activity)
+                    # Only update the activity if the key/value pair is new or has changed.
+                    if key not in activity or activity[key] != value:
+                        activity[key] = value
+                        self.activities_collection.save(activity)
                 return True
         except:
             traceback.print_exc(file=sys.stdout)
