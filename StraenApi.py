@@ -455,8 +455,12 @@ class StraenApi(object):
         # Update the alcohol units setting.
         for key in values:
             decoded_key = urllib.unquote_plus(key)
+
+            # Default privacy/visibility.
             if decoded_key == StraenKeys.DEFAULT_PRIVACY:
                 default_privacy = urllib.unquote_plus(values[key])
+                if not (default_privacy == StraenKeys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == StraenKeys.ACTIVITY_VISIBILITY_PRIVATE):
+                    raise Exception("Invalid visibility value.")
                 result = self.user_mgr.update_user_setting(self.user_id, StraenKeys.DEFAULT_PRIVACY, default_privacy)
 
         return result, ""
