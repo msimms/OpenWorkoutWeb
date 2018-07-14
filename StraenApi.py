@@ -66,12 +66,11 @@ class StraenApi(object):
             # Parse the rest of the data, which will be a combination of metadata and sensor data.
             for item in json_obj.iteritems():
                 key = item[0]
-                value = item[1]
                 if not key in g_not_meta_data:
                     if key in [StraenKeys.APP_CADENCE_KEY, StraenKeys.APP_HEART_RATE_KEY, StraenKeys.APP_POWER_KEY]:
-                        self.data_mgr.create_sensordata(activity_id_str, date_time, key, value)
+                        self.data_mgr.create_sensordata(activity_id_str, date_time, key, item[1])
                     elif key in [StraenKeys.APP_CURRENT_SPEED_KEY, StraenKeys.APP_CURRENT_PACE_KEY]:
-                        self.data_mgr.create_metadata(activity_id_str, date_time, key, value, True)
+                        self.data_mgr.create_metadata(activity_id_str, date_time, key, item[1], True)
         except ValueError, e:
             self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except KeyError, e:
