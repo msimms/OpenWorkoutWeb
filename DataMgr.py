@@ -39,6 +39,12 @@ class DataMgr(Importer.LocationWriter):
             raise Exception("No database.")
         return self.database.create_location(device_str, activity_id_str, date_time, latitude, longitude, altitude)
 
+    def create_locations(self, device_str, activity_id_str, locations):
+        """Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
+        if self.database is None:
+            raise Exception("No database.")
+        return self.database.create_locations(device_str, activity_id_str, locations)
+
     def create_sensordata(self, activity_id_str, date_time, key, value):
         """Create method for sensor data."""
         if self.database is None:

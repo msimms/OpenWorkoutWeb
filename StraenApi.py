@@ -31,6 +31,7 @@ class StraenApi(object):
         username = ""
         activity_type = ""
         activity_id_str = ""
+        location = []
 
         try:
             # Parse required identifiers.
@@ -38,29 +39,23 @@ class StraenApi(object):
             activity_id_str = json_obj[StraenKeys.APP_ID_KEY]
 
             # Parse optional identifiers.
-            try:
+            if StraenKeys.APP_USERNAME_KEY in json_obj:
                 username = json_obj[StraenKeys.APP_USERNAME_KEY]
-            except:
-                pass
-            try:
+            if StraenKeys.APP_TYPE_KEY in json_obj:
                 activity_type = json_obj[StraenKeys.APP_TYPE_KEY]
-            except:
-                pass
 
-            # Parse the metadata looking for the timestamp.
+            # Parse the metadata for the timestamp.
             date_time = int(time.time() * 1000)
-            try:
+            if StraenKeys.APP_TIME_KEY in json_obj:
                 time_str = json_obj[StraenKeys.APP_TIME_KEY]
                 date_time = int(time_str)
-            except:
-                pass
 
             # Parse the location data.
             try:
-                lat = json_obj["Latitude"]
-                lon = json_obj["Longitude"]
-                alt = json_obj["Altitude"]
-                self.data_mgr.create_location(device_str, activity_id_str, date_time, lat, lon, alt)
+                lat = json_obj[StraenKeys.APP_LOCATION_LAT_KEY]
+                lon = json_obj[StraenKeys.APP_LOCATION_LON_KEY]
+                alt = json_obj[StraenKeys.APP_LOCATION_ALT_KEY]
+                location = [date_time, lat, lon, alt]
             except ValueError, e:
                 self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
             except KeyError, e:
@@ -83,34 +78,40 @@ class StraenApi(object):
             self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except:
             self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
-        return device_str, username, activity_type, activity_id_str
+        return device_str, username, activity_type, activity_id_str, location
 
     def handle_update_location(self, values):
         """Called when an API message to update the location of a device is received."""
-        if "locations" in values:
-            locations = values["locations"]
+        if StraenKeys.APP_LOCATIONS_KEY not in values:
+            raise Exception("locations list not found.")
 
-            device_str = ""
-            username = ""
-            activity_type = ""
-            activity_id_str = ""
+        encoded_locations = values[StraenKeys.APP_LOCATIONS_KEY]
 
-            # Parse each of the location objects.
-            for location_obj in locations:
-                device_str, username, activity_type, activity_id_str = self.parse_json_loc_obj(location_obj)
+        device_str = ""
+        username = ""
+        activity_type = ""
+        activity_id_str = ""
+        locations = []
 
-            # Udpate the activity type.
-            if len(activity_type) > 0:
-                self.data_mgr.create_metadata(activity_id_str, 0, StraenKeys.ACTIVITY_TYPE_KEY, activity_type, False)
+        # Parse each of the location objects.
+        for location_obj in encoded_locations:
+            device_str, username, activity_type, activity_id_str, location = self.parse_json_loc_obj(location_obj)
+            locations.append(location)
 
-            # Update the user device association.
-            if len(username) > 0:
-                user_id, _, _ = self.user_mgr.retrieve_user(username)
-                user_devices = self.user_mgr.retrieve_user_devices(user_id)
-                if user_devices is not None and device_str not in user_devices:
-                    self.user_mgr.create_user_device(user_id, device_str)
-            return True, ""
-        return False, ""
+        # Update the locations.
+        self.data_mgr.create_locations(device_str, activity_id_str, locations)
+
+        # Udpate the activity type.
+        if len(activity_type) > 0:
+            self.data_mgr.create_metadata(activity_id_str, 0, StraenKeys.ACTIVITY_TYPE_KEY, activity_type, False)
+
+        # Update the user device association.
+        if len(username) > 0:
+            user_id, _, _ = self.user_mgr.retrieve_user(username)
+            user_devices = self.user_mgr.retrieve_user_devices(user_id)
+            if user_devices is not None and device_str not in user_devices:
+                self.user_mgr.create_user_device(user_id, device_str)
+        return True, ""
 
     def handle_login_submit(self, values):
         """Called when an API message to log in is received."""

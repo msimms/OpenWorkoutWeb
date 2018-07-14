@@ -691,6 +691,44 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def create_locations(self, device_str, activity_id_str, locations):
+        """Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
+        if device_str is None:
+            self.log_error(MongoDatabase.create_locations.__name__ + ": Unexpected empty object: device_str")
+            return False
+        if activity_id_str is None:
+            self.log_error(MongoDatabase.create_locations.__name__ + ": Unexpected empty object: activity_id_str")
+            return False
+        if not locations:
+            self.log_error(MongoDatabase.create_locations.__name__ + ": Unexpected empty object: locations")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            if activity is None:
+                first_location = locations[0]
+                if self.create_activity(activity_id_str, "", first_location[0] / 1000, device_str):
+                    activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            if activity is not None:
+                location_list = []
+                if StraenKeys.ACTIVITY_LOCATIONS_KEY in activity:
+                    location_list = activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]
+                for location in locations:
+                    # Make sure time values are monotonically increasing.
+                    if location_list and int(location_list[-1][StraenKeys.LOCATION_TIME_KEY]) > location[0]:
+                        self.log_error(MongoDatabase.create_locations.__name__ + ": Received out-of-order time value.")
+                    else:
+                        value = {StraenKeys.LOCATION_TIME_KEY: location[0], StraenKeys.LOCATION_LAT_KEY: location[1], StraenKeys.LOCATION_LON_KEY: location[2], StraenKeys.LOCATION_ALT_KEY: location[3]}
+                        location_list.append(value)
+
+                activity[StraenKeys.ACTIVITY_LOCATIONS_KEY] = location_list
+                self.activities_collection.save(activity)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def create_sensor_reading(self, device_str, activity_id_str, date_time, key, value):
         """Inherited from LocationWriter. Processes a sensor reading from the importer."""
         pass
