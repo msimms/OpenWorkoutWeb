@@ -1011,26 +1011,33 @@ class StraenWeb(object):
             if username is not None:
                 user_id, _, _ = self.user_mgr.retrieve_user(username)
 
-            # Read the post data.
-            cl = cherrypy.request.headers['Content-Length']
-            raw_body = cherrypy.request.body.read(int(cl))
+            # The the API params.
+            if cherrypy.request.method == "GET":
+                params = kw
+            else:
+                cl = cherrypy.request.headers['Content-Length']
+                params = cherrypy.request.body.read(int(cl))
+                params = json.loads(params)
 
             # Process the API request.
             if len(args) > 0:
                 api_version = args[0]
                 if api_version == '1.0':
                     api = StraenApi.StraenApi(self.user_mgr, self.data_mgr, user_id)
-                    handled, response = api.handle_api_1_0_request(args[1:], raw_body)
+                    handled, response = api.handle_api_1_0_request(args[1:], params)
                     if not handled:
+                        self.log_error("Failed to handle request: " + args[1:])
                         cherrypy.response.status = 400
                     else:
                         cherrypy.response.status = 200
                 else:
+                    self.log_error("Failed to handle request for api version " + api_version)
                     cherrypy.response.status = 400
             else:
                 cherrypy.response.status = 400
         except Exception as e:
             response = str(e.args[0])
+            self.log_error(response)
             cherrypy.response.status = 500
         except:
             cherrypy.response.status = 500
