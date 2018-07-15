@@ -16,7 +16,8 @@ class SessionMgr(object):
 
     def get_logged_in_user_from_cookie(self, auth_cookie):
         """Returns the username associated with the specified authentication cookie."""
-        for session_id, session in cherrypy.session.cache.items():
+        cache_items = cherrypy.session.cache.items()
+        for session_id, session in cache_items:
             if session_id == auth_cookie:
                 if StraenKeys.SESSION_KEY in session:
                     return session[StraenKeys.SESSION_KEY]
@@ -24,8 +25,10 @@ class SessionMgr(object):
 
     def create_new_session(self, username):
         """Starts a new session."""
+        cherrypy.session.load()
         cherrypy.session.regenerate()
         cherrypy.session[StraenKeys.SESSION_KEY] = cherrypy.request.login = username
+        return cherrypy.session.id
 
     def clear_session(self):
         """Ends the current session."""

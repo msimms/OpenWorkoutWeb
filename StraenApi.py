@@ -121,17 +121,21 @@ class StraenApi(object):
             raise Exception("Username not specified.")
         if StraenKeys.PASSWORD_KEY not in values:
             raise Exception("Password not specified.")
-        if StraenKeys.DEVICE_KEY not in values:
-            raise Exception("Device ID not specified.")
 
-        email = values[StraenKeys.USERNAME_KEY]
-        password = values[StraenKeys.PASSWORD_KEY]
-        device_str = values[StraenKeys.DEVICE_KEY]
+        email = urllib.unquote_plus(values[StraenKeys.USERNAME_KEY])
+        password = urllib.unquote_plus(values[StraenKeys.PASSWORD_KEY])
 
         if not self.user_mgr.authenticate_user(email, password):
             raise Exception("Authentication failed.")
 
-        return self.user_mgr.create_user_device(email, device_str), ""
+        if StraenKeys.DEVICE_KEY in values:
+            device_str = urllib.unquote_plus(values[StraenKeys.DEVICE_KEY])
+            result = self.user_mgr.create_user_device(email, device_str)
+        else:
+            result = True
+
+        cookie = self.user_mgr.create_new_session(email)
+        return result, str(cookie)
 
     def handle_create_login_submit(self, values):
         """Called when an API message to create an account is received."""
@@ -140,24 +144,36 @@ class StraenApi(object):
 
         if StraenKeys.USERNAME_KEY not in values:
             raise Exception("Username not specified.")
+        if StraenKeys.REALNAME_KEY not in values:
+            raise Exception("Real name not specified.")
         if StraenKeys.PASSWORD1_KEY not in values:
             raise Exception("Password not specified.")
         if StraenKeys.PASSWORD2_KEY not in values:
             raise Exception("Password confirmation not specified.")
-        if StraenKeys.DEVICE_KEY not in values:
-            raise Exception("Device ID not specified.")
-        if StraenKeys.REALNAME_KEY not in values:
-            raise Exception("Real name not specified.")
 
-        email = values[StraenKeys.USERNAME_KEY]
-        password1 = values[StraenKeys.PASSWORD1_KEY]
-        password2 = values[StraenKeys.PASSWORD2_KEY]
-        device_str = values[StraenKeys.DEVICE_KEY]
-        realname = values[StraenKeys.REALNAME_KEY]
+        email = urllib.unquote_plus(values[StraenKeys.USERNAME_KEY])
+        realname = urllib.unquote_plus(values[StraenKeys.REALNAME_KEY])
+        password1 = urllib.unquote_plus(values[StraenKeys.PASSWORD1_KEY])
+        password2 = urllib.unquote_plus(values[StraenKeys.PASSWORD2_KEY])
+
+        if StraenKeys.DEVICE_KEY in values:
+            device_str = urllib.unquote_plus(values[StraenKeys.DEVICE_KEY])
+        else:
+            device_str = ""
 
         if not self.user_mgr.create_user(email, realname, password1, password2, device_str):
             raise Exception("User creation failed.")
-        return True, ""
+
+        cookie = self.user_mgr.create_new_session(email)
+        return True, str(cookie)
+
+    def handle_logout(self, values):
+        """Ends the session for the specified user."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+
+        # End the session
+        self.user_mgr.clear_session()
 
     def handle_update_email(self, values):
         """Updates the user's email address."""
@@ -508,14 +524,21 @@ class StraenApi(object):
         if len(args) <= 0:
             return False, ""
 
-        request = args[0]
+        if self.user_id is None:
+            if StraenKeys.SESSION_KEY in values:
+                username = self.user_mgr.get_logged_in_user_from_cookie(values[StraenKeys.SESSION_KEY])
+                if username is not None:
+                    self.user_id, _, _ = self.user_mgr.retrieve_user(username)
 
+        request = args[0]
         if request == 'update_location':
             return self.handle_update_location(values)
         elif request == 'login_submit':
             return self.handle_login_submit(values)
         elif request == 'create_login_submit':
             return self.handle_create_login_submit(values)
+        elif request == 'logout':
+            return self.handle_logout(values)
         elif request == 'update_email':
             return self.handle_update_email(values)
         elif request == 'update_password':

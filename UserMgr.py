@@ -27,11 +27,11 @@ class UserMgr(object):
 
     def get_logged_in_user_from_cookie(self, auth_cookie):
         """Returns the username associated with the specified authentication cookie."""
-        return self.get_logged_in_user_from_cookie(auth_cookie)
+        return self.session_mgr.get_logged_in_user_from_cookie(auth_cookie)
 
     def create_new_session(self, username):
         """Starts a new session."""
-        self.session_mgr.create_new_session(username)
+        return self.session_mgr.create_new_session(username)
 
     def clear_session(self):
         """Ends the current session."""
