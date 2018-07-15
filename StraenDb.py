@@ -491,34 +491,6 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_activity_comment(self, device_str, activity_id_str, commenter_id, comment):
-        """Create method for a comment on an activity."""
-        if device_str is None:
-            self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Unexpected empty object: device_str")
-            return False
-        if activity_id_str is None:
-            self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Unexpected empty object: activity_id_str")
-            return False
-        if commenter_id is None:
-            self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Unexpected empty object: commenter_id")
-            return False
-        if comment is None:
-            self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Unexpected empty object: comment")
-            return False
-
-        try:
-            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
-            if activity is not None:
-                data = activity[StraenKeys.ACTIVITY_COMMENTS_KEY]
-                data.append({commenter_id, comment})
-                activity[StraenKeys.ACTIVITY_COMMENTS_KEY] = data
-                self.activities_collection.save(activity)
-                return True
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return False
-
     def create_metadata(self, activity_id_str, date_time, key, value, create_list):
         """Create method for a piece of metaadata."""
         if activity_id_str is None:
@@ -801,8 +773,51 @@ class MongoDatabase(Database.Database):
         try:
             activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
             if activity is not None:
-                tags = activity[StraenKeys.ACTIVITY_TAGS_KEY]
-                return tags
+                if StraenKeys.ACTIVITY_TAGS_KEY in activity:
+                    return activity[StraenKeys.ACTIVITY_TAGS_KEY]
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def create_activity_comment(self, activity_id_str, commenter_id, comment):
+        """Create method for a comment on an activity."""
+        if activity_id_str is None:
+            self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Unexpected empty object: activity_id_str")
+            return False
+        if commenter_id is None:
+            self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Unexpected empty object: commenter_id")
+            return False
+        if comment is None:
+            self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Unexpected empty object: comment")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
+            if activity is not None:
+                data = []
+                if StraenKeys.ACTIVITY_COMMENTS_KEY in activity:
+                    data = activity[StraenKeys.ACTIVITY_COMMENTS_KEY]
+                data.append({commenter_id, comment})
+                activity[StraenKeys.ACTIVITY_COMMENTS_KEY] = data
+                self.activities_collection.save(activity)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_activity_comments(self, activity_id_str):
+        """Returns a list containing all of the comments on the specified activity."""
+        if activity_id_str is None:
+            self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Unexpected empty object: activity_id_str")
+            return None
+
+        try:
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
+            if activity is not None:
+                if StraenKeys.ACTIVITY_COMMENTS_KEY in activity:
+                    return activity[StraenKeys.ACTIVITY_COMMENTS_KEY]
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])

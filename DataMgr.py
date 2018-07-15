@@ -251,13 +251,31 @@ class DataMgr(Importer.LocationWriter):
             raise Exception("Bad parameter.")
         return self.database.create_tag(activity_id_str, tag)
 
-    def list_tags(self, activity_id_str):
+    def retrieve_tags(self, activity_id_str):
         """Returns the most recent 'num' locations for the specified device and activity."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id_str is None or len(activity_id_str) == 0:
             raise Exception("Bad parameter.")
         return self.database.retrieve_tags(activity_id_str)
+
+    def create_activity_comment(self, activity_id_str, commenter_id, comment):
+        """Create method for a comment on an activity."""
+        if self.database is None:
+            raise Exception("No database.")
+        if commenter_id is None:
+            raise Exception("Bad parameter.")
+        if comment is None or len(comment) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.create_activity_comment(activity_id_str, commenter_id, comment)
+
+    def retrieve_activity_comments(self, activity_id_str):
+        """Returns a list containing all of the comments on the specified activity."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id_str is None or len(activity_id_str) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_activity_comments(activity_id_str)
 
     def retrieve_activity_types(self):
         """Returns a the list of activity types that the software understands."""

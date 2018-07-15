@@ -445,6 +445,28 @@ class StraenApi(object):
         result = self.data_mgr.retrieve_tags(values[StraenKeys.ACTIVITY_ID_KEY])
         return result, ""
 
+    def handle_create_comment(self, values):
+        """Called when an API message create a comment is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if StraenKeys.ACTIVITY_ID_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if StraenKeys.ACTIVITY_COMMENTS_KEY not in values:
+            raise Exception("Invalid parameter.")
+
+        result = self.data_mgr.create_comment(values[StraenKeys.ACTIVITY_ID_KEY], values[StraenKeys.ACTIVITY_COMMENTS_KEY])
+        return result, ""
+
+    def handle_list_comments(self, values):
+        """Called when an API message create list comments associated with an activity is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if StraenKeys.ACTIVITY_ID_KEY not in values:
+            raise Exception("Invalid parameter.")
+
+        result = self.data_mgr.retrieve_comments(values[StraenKeys.ACTIVITY_ID_KEY])
+        return result, ""
+
     def handle_update_settings(self, values):
         """Called when the user submits a setting change."""
         if self.user_id is None:
@@ -528,6 +550,10 @@ class StraenApi(object):
             return self.handle_create_tag(values)
         elif request == 'list_tags':
             return self.handle_list_tags(values)
+        elif request == 'create_comment':
+            return self.handle_create_comment(values)
+        elif request == 'list_comments':
+            return self.handle_list_comments(values)
         elif request == 'update_settings':
             return self.handle_update_settings(values)
         elif request == 'update_visibility':

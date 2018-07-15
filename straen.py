@@ -360,15 +360,30 @@ class StraenWeb(object):
             summary += "\t<li>Max. Cadence: {:.2f}</li>\n".format(max_cadence)
         if max_power:
             summary += "\t<li>Max. Power: {:.2f}</li>\n".format(max_power)
+        tags = self.data_mgr.retrieve_tags(activity_id_str)
+        if tags is not None:
+            summary += "\t<li>Tags: "
+            for tag in tags:
+                summary += tag
+                summary += " "
+            summary += "</li>\n"
         summary += "</ul>\n"
 
+        # List the comments.
+        comments_str = ""
+        comments = self.data_mgr.retrieve_activity_comments(activity_id_str)
+        if comments is not None:
+            for comment in comments:
+                pass
+
+        # Build the page title.
         if is_live:
             page_title = "Live Tracking"
         else:
             page_title = "Activity"
 
         my_template = Template(filename=g_map_single_html_file, module_directory=g_tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=g_google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id_str, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=g_google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id_str, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str, comments=comments_str)
 
     def render_page_for_multiple_devices(self, email, user_realname, device_strs, user_id, logged_in):
         """Helper function for rendering the map corresonding to a multiple devices."""
