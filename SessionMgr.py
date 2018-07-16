@@ -19,8 +19,9 @@ class SessionMgr(object):
         cache_items = cherrypy.session.cache.items()
         for session_id, session in cache_items:
             if session_id == auth_cookie:
-                if StraenKeys.SESSION_KEY in session:
-                    return session[StraenKeys.SESSION_KEY]
+                session_user = session[0]
+                if StraenKeys.SESSION_KEY in session_user:
+                    return session_user[StraenKeys.SESSION_KEY]
         return None
 
     def create_new_session(self, username):

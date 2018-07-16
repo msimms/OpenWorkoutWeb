@@ -174,6 +174,7 @@ class StraenApi(object):
 
         # End the session
         self.user_mgr.clear_session()
+        return True, ""
 
     def handle_update_email(self, values):
         """Updates the user's email address."""
