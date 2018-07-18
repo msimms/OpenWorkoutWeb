@@ -25,25 +25,11 @@ class StraenApi(object):
         logger = logging.getLogger()
         logger.debug(log_str)
 
-    def parse_json_loc_obj(self, json_obj):
+    def parse_json_loc_obj(self, activity_id_str, json_obj):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
-        device_str = ""
-        username = ""
-        activity_type = ""
-        activity_id_str = ""
         location = []
 
         try:
-            # Parse required identifiers.
-            device_str = json_obj[StraenKeys.APP_DEVICE_ID_KEY]
-            activity_id_str = json_obj[StraenKeys.APP_ID_KEY]
-
-            # Parse optional identifiers.
-            if StraenKeys.APP_USERNAME_KEY in json_obj:
-                username = json_obj[StraenKeys.APP_USERNAME_KEY]
-            if StraenKeys.APP_TYPE_KEY in json_obj:
-                activity_type = json_obj[StraenKeys.APP_TYPE_KEY]
-
             # Parse the metadata for the timestamp.
             date_time = int(time.time() * 1000)
             if StraenKeys.APP_TIME_KEY in json_obj:
@@ -77,24 +63,35 @@ class StraenApi(object):
             self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except:
             self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
-        return device_str, username, activity_type, activity_id_str, location
+        return location
 
     def handle_update_location(self, values):
         """Called when an API message to update the location of a device is received."""
         if StraenKeys.APP_LOCATIONS_KEY not in values:
             raise Exception("locations list not found.")
 
-        encoded_locations = values[StraenKeys.APP_LOCATIONS_KEY]
-
         device_str = ""
-        username = ""
-        activity_type = ""
         activity_id_str = ""
+        activity_type = ""
+        username = ""
         locations = []
 
+        print values
+
+        # Parse required identifiers.
+        device_str = values[StraenKeys.APP_DEVICE_ID_KEY]
+        activity_id_str = values[StraenKeys.APP_ID_KEY]
+
+        # Parse optional identifiers.
+        if StraenKeys.APP_TYPE_KEY in values:
+            activity_type = values[StraenKeys.APP_TYPE_KEY]
+        if StraenKeys.APP_USERNAME_KEY in values:
+            username = values[StraenKeys.APP_USERNAME_KEY]
+
         # Parse each of the location objects.
+        encoded_locations = values[StraenKeys.APP_LOCATIONS_KEY]
         for location_obj in encoded_locations:
-            device_str, username, activity_type, activity_id_str, location = self.parse_json_loc_obj(location_obj)
+            location = self.parse_json_loc_obj(activity_id_str, location_obj)
             locations.append(location)
 
         # Update the locations.
