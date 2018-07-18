@@ -76,8 +76,6 @@ class StraenApi(object):
         username = ""
         locations = []
 
-        print values
-
         # Parse required identifiers.
         device_str = values[StraenKeys.APP_DEVICE_ID_KEY]
         activity_id_str = values[StraenKeys.APP_ID_KEY]
