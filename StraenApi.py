@@ -65,16 +65,37 @@ class StraenApi(object):
             self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
         return location
 
-    def handle_update_location(self, values):
-        """Called when an API message to update the location of a device is received."""
-        if StraenKeys.APP_LOCATIONS_KEY not in values:
-            raise Exception("locations list not found.")
+    def parse_json_accel_obj(self, activity_id_str, json_obj):
+        """Helper function that parses the JSON object, which contains location data, and updates the database."""
+        accel = []
 
+        try:
+            # Parse the metadata for the timestamp.
+            date_time = int(time.time() * 1000)
+            if StraenKeys.APP_TIME_KEY in json_obj:
+                time_str = json_obj[StraenKeys.APP_TIME_KEY]
+                date_time = int(time_str)
+
+            x = json_obj[StraenKeys.APP_AXIS_NAME_X]
+            y = json_obj[StraenKeys.APP_AXIS_NAME_Y]
+            z = json_obj[StraenKeys.APP_AXIS_NAME_Z]
+            accel = [date_time, x, y, z]
+        except ValueError, e:
+            self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
+        except KeyError, e:
+            self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
+        except:
+            self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
+        return accel
+
+    def handle_update_status(self, values):
+        """Called when an API message to update the status of a device is received."""
         device_str = ""
         activity_id_str = ""
         activity_type = ""
         username = ""
         locations = []
+        accels = []
 
         # Parse required identifiers.
         device_str = values[StraenKeys.APP_DEVICE_ID_KEY]
@@ -86,14 +107,27 @@ class StraenApi(object):
         if StraenKeys.APP_USERNAME_KEY in values:
             username = values[StraenKeys.APP_USERNAME_KEY]
 
-        # Parse each of the location objects.
-        encoded_locations = values[StraenKeys.APP_LOCATIONS_KEY]
-        for location_obj in encoded_locations:
-            location = self.parse_json_loc_obj(activity_id_str, location_obj)
-            locations.append(location)
+        if StraenKeys.APP_LOCATIONS_KEY in values:
 
-        # Update the locations.
-        self.data_mgr.create_locations(device_str, activity_id_str, locations)
+            # Parse each of the location objects.
+            encoded_locations = values[StraenKeys.APP_LOCATIONS_KEY]
+            for location_obj in encoded_locations:
+                location = self.parse_json_loc_obj(activity_id_str, location_obj)
+                locations.append(location)
+
+            # Update the locations.
+            self.data_mgr.create_locations(device_str, activity_id_str, locations)
+
+        if StraenKeys.APP_ACCELEROMETER_KEY in values:
+
+            # Parse each of the accelerometer objects.
+            encoded_accel = values[StraenKeys.APP_ACCELEROMETER_KEY]
+            for accel_obj in encoded_accel:
+                accel = self.parse_json_accel_obj(activity_id_str, accel_obj)
+                accels.append(accel)
+
+            # Update the accelerometer readings.
+            self.data_mgr.create_accelerometer_reading(device_str, activity_id_str, accels)
 
         # Udpate the activity type.
         if len(activity_type) > 0:
@@ -527,8 +561,8 @@ class StraenApi(object):
                     self.user_id, _, _ = self.user_mgr.retrieve_user(username)
 
         request = args[0]
-        if request == 'update_location':
-            return self.handle_update_location(values)
+        if request == 'update_status':
+            return self.handle_update_status(values)
         elif request == 'login_submit':
             return self.handle_login_submit(values)
         elif request == 'create_login_submit':

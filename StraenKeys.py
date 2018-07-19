@@ -38,11 +38,20 @@ APP_LOCATIONS_KEY = "locations"
 APP_LOCATION_LAT_KEY = "Latitude"
 APP_LOCATION_LON_KEY = "Longitude"
 APP_LOCATION_ALT_KEY = "Altitude"
+APP_ACCELEROMETER_KEY = "accelerometer"
+APP_AXIS_NAME_X = "x"
+APP_AXIS_NAME_Y = "y"
+APP_AXIS_NAME_Z = "z"
 
 LOCATION_LAT_KEY = "latitude"
 LOCATION_LON_KEY = "longitude"
 LOCATION_ALT_KEY = "altitude"
 LOCATION_TIME_KEY = "time"
+
+ACCELEROMETER_AXIS_NAME_X = "x"
+ACCELEROMETER_AXIS_NAME_Y = "y"
+ACCELEROMETER_AXIS_NAME_Z = "z"
+ACCELEROMETER_TIME_KEY = "time"
 
 # Keys used exclusively by the web app.
 ACTIVITY_ID_KEY = "activity_id"

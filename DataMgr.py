@@ -45,6 +45,12 @@ class DataMgr(Importer.LocationWriter):
             raise Exception("No database.")
         return self.database.create_locations(device_str, activity_id_str, locations)
 
+    def create_accelerometer_reading(self, device_str, activity_id_str, accels):
+        """Adds several accelerometer readings to the database. 'accels' is an array of arrays in the form [time, x, y, z]."""
+        if self.database is None:
+            raise Exception("No database.")
+        return self.database.create_accelerometer_reading(device_str, activity_id_str, accels)
+
     def create_sensordata(self, activity_id_str, date_time, key, value):
         """Create method for sensor data."""
         if self.database is None:
