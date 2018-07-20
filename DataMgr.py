@@ -200,6 +200,14 @@ class DataMgr(Importer.LocationWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_locations(activity_id_str)
 
+    def retrieve_accelerometer_readings(self, activity_id_str):
+        """Returns the location list for the specified activity."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id_str is None or len(activity_id_str) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_accelerometer_readings(activity_id_str)
+
     def retrieve_metadata(self, key, activity_id_str):
         """Returns all the sensordata for the specified sensor for the given activity."""
         if self.database is None:

@@ -9,6 +9,10 @@ import Database
 import StraenKeys
 
 
+def retrieve_time_from_accelerometer_reading(location):
+    """Used with the sort function."""
+    return location['time']
+
 def retrieve_time_from_location(location):
     """Used with the sort function."""
     return location['time']
@@ -717,7 +721,6 @@ class MongoDatabase(Database.Database):
             activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if activity is None:
                 first_accel = accels[0]
-                print first_accel
                 if self.create_activity(activity_id_str, "", first_accel[0] / 1000, device_str):
                     activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if activity is not None:
@@ -753,9 +756,10 @@ class MongoDatabase(Database.Database):
         try:
             activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
             if activity is not None:
-                locations = activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]
-                locations.sort(key=retrieve_time_from_location)
-                return locations
+                if StraenKeys.ACTIVITY_LOCATIONS_KEY in activity:
+                    locations = activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]
+                    locations.sort(key=retrieve_time_from_location)
+                    return locations
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
@@ -774,6 +778,24 @@ class MongoDatabase(Database.Database):
             locations = self.retrieve_locations(activity_id_str)
             locations.sort(key=retrieve_time_from_location)
             return locations
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def retrieve_accelerometer_readings(self, activity_id_str):
+        """Returns all the locations for the specified activity."""
+        if activity_id_str is None:
+            self.log_error(MongoDatabase.retrieve_accelerometer_readings.__name__ + ": Unexpected empty object: activity_id_str")
+            return None
+
+        try:
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id_str})
+            if activity is not None:
+                if StraenKeys.APP_ACCELEROMETER_KEY in activity:
+                    accels = activity[StraenKeys.APP_ACCELEROMETER_KEY]
+                    accels.sort(key=retrieve_time_from_accelerometer_reading)
+                    return accels
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])

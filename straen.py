@@ -43,6 +43,7 @@ g_root_dir = os.path.dirname(os.path.abspath(__file__))
 g_root_url = 'http://straen-app.com'
 g_tempfile_dir = os.path.join(g_root_dir, 'tempfile')
 g_tempmod_dir = os.path.join(g_root_dir, 'tempmod')
+g_lifting_activity_html_file = os.path.join(g_root_dir, HTML_DIR, 'lifting_activity.html')
 g_map_single_html_file = os.path.join(g_root_dir, HTML_DIR, 'map_single_google.html')
 g_map_multi_html_file = os.path.join(g_root_dir, HTML_DIR, 'map_multi_google.html')
 g_error_logged_in_html_file = os.path.join(g_root_dir, HTML_DIR, 'error_logged_in.html')
@@ -270,13 +271,66 @@ class StraenWeb(object):
         navbar_str += "\t</ul>\n</nav>"
         return navbar_str
 
-    def render_page_for_activity(self, email, user_realname, activity_id_str, logged_in, is_live):
+    def render_page_for_lifting_activity(self, email, user_realname, activity_id_str, accels, logged_in, is_live):
         """Helper function for rendering the map corresonding to a specific device and activity."""
 
-        locations = self.data_mgr.retrieve_locations(activity_id_str)
+        # Read the accelerometer data.
+        if accels is None or len(accels) == 0:
+            my_template = Template(filename=g_error_logged_in_html_file, module_directory=g_tempmod_dir)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified activity.")
+
+        # Format the accelerometer data.
+        x_axis = ""
+        y_axis = ""
+        z_axis = ""
+        for accel in accels:
+            x_axis += "\t\t\t\t{ date: new Date(" + str(accel[StraenKeys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[StraenKeys.ACCELEROMETER_AXIS_NAME_X]) + " },\n"
+            y_axis += "\t\t\t\t{ date: new Date(" + str(accel[StraenKeys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[StraenKeys.ACCELEROMETER_AXIS_NAME_Y]) + " },\n"
+            z_axis += "\t\t\t\t{ date: new Date(" + str(accel[StraenKeys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[StraenKeys.ACCELEROMETER_AXIS_NAME_Z]) + " },\n"
+
+        # Build the summary data view.
+        summary = "<ul>\n"
+        activity_type = self.data_mgr.retrieve_metadata(StraenKeys.ACTIVITY_TYPE_KEY, activity_id_str)
+        if activity_type is None:
+            activity_type = UNSPECIFIED_ACTIVITY_TYPE
+        summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
+        name = self.data_mgr.retrieve_metadata(StraenKeys.APP_NAME_KEY, activity_id_str)
+        if name is None:
+            name = UNNAMED_ACTIVITY_TITLE
+        summary += "\t<li>Name: " + name + "</li>\n"
+        tags = self.data_mgr.retrieve_tags(activity_id_str)
+        if tags is not None:
+            summary += "\t<li>Tags: "
+            for tag in tags:
+                summary += tag
+                summary += " "
+            summary += "</li>\n"
+        summary += "</ul>\n"
+
+        # List the comments.
+        comments_str = ""
+        comments = self.data_mgr.retrieve_activity_comments(activity_id_str)
+        if comments is not None:
+            for comment in comments:
+                pass
+
+        # Build the page title.
+        if is_live:
+            page_title = "Live Tracking"
+        else:
+            page_title = "Activity"
+
+        my_template = Template(filename=g_lifting_activity_html_file, module_directory=g_tempmod_dir)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, activityId=activity_id_str, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, comments=comments_str)
+
+    def render_page_for_mapped_activity(self, email, user_realname, activity_id_str, locations, logged_in, is_live):
+        """Helper function for rendering the map corresonding to a specific activity."""
+
+        global g_google_maps_key
+
         if locations is None or len(locations) == 0:
             my_template = Template(filename=g_error_logged_in_html_file, module_directory=g_tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified device.")
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified activity.")
 
         route = ""
         center_lat = 0
@@ -385,8 +439,32 @@ class StraenWeb(object):
         my_template = Template(filename=g_map_single_html_file, module_directory=g_tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=g_google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id_str, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str, comments=comments_str)
 
-    def render_page_for_multiple_devices(self, email, user_realname, device_strs, user_id, logged_in):
-        """Helper function for rendering the map corresonding to a multiple devices."""
+    def render_page_for_activity(self, email, user_realname, activity_id_str, is_live):
+        """Helper function for rendering the page corresonding to a specific activity."""
+
+        try:
+            logged_in_username = self.user_mgr.get_logged_in_user()
+
+            locations = self.data_mgr.retrieve_locations(activity_id_str)
+            accels = self.data_mgr.retrieve_accelerometer_readings(activity_id_str)
+
+            if locations is not None and len(locations) > 0:
+                return self.render_page_for_mapped_activity(email, user_realname, activity_id_str, locations, logged_in_username is not None, is_live)
+            elif accels is not None and len(accels) > 0:
+                return self.render_page_for_lifting_activity(email, user_realname, activity_id_str, accels, logged_in_username is not None, is_live)
+            else:
+                my_template = Template(filename=g_error_logged_in_html_file, module_directory=g_tempmod_dir)
+                return my_template.render(nav=self.create_navbar(logged_in_username is not None), product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified activity.")
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.activity.__name__)
+        return self.error()
+
+    def render_page_for_multiple_mapped_activities(self, email, user_realname, device_strs, user_id, logged_in):
+        """Helper function for rendering the map to track multiple devices."""
+
+        global g_google_maps_key
 
         if device_strs is None:
             my_template = Template(filename=g_error_logged_in_html_file, module_directory=g_tempmod_dir)
@@ -536,14 +614,11 @@ class StraenWeb(object):
             if activity_id_str is None:
                 return self.error()
 
-            # Get the logged in user.
-            logged_in_username = self.user_mgr.get_logged_in_user()
-
             # Determine who owns the device.
             device_user = self.user_mgr.retrieve_user_from_device(device_str)
 
             # Render from template.
-            return self.render_page_for_activity(device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id_str, logged_in_username is not None, True)
+            return self.render_page_for_activity(device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id_str, True)
         except:
             self.log_error('Unhandled exception in ' + StraenWeb.live.__name__)
         return self.error()
@@ -553,11 +628,7 @@ class StraenWeb(object):
     def activity(self, activity_id_str, *args, **kw):
         """Renders the map page for an activity."""
         try:
-            # Get the logged in user.
-            logged_in_username = self.user_mgr.get_logged_in_user()
-
-            # Render from template.
-            return self.render_page_for_activity("", "", activity_id_str, logged_in_username is not None, False)
+            return self.render_page_for_activity("", "", activity_id_str, False)
         except:
             self.log_error('Unhandled exception in ' + StraenWeb.activity.__name__)
         return self.error()
@@ -574,14 +645,11 @@ class StraenWeb(object):
                 if activity_id_str is None:
                     return self.error()
 
-            # Get the logged in user.
-            logged_in_username = self.user_mgr.get_logged_in_user()
-
             # Determine who owns the device.
             device_user = self.user_mgr.retrieve_user_from_device(device_str)
 
             # Render from template.
-            return self.render_page_for_activity(device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id_str, logged_in_username is not None, False)
+            return self.render_page_for_activity(device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id_str, False)
         except:
             self.log_error('Unhandled exception in ' + StraenWeb.device.__name__)
         return self.error()
