@@ -238,7 +238,7 @@ class MongoDatabase(Database.Database):
             return False, "Device string not provided."
 
         try:
-            return self.users_collection.find_one({"devices": device_str})
+            return self.users_collection.find_one({StraenKeys.DEVICES_KEY: device_str})
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
