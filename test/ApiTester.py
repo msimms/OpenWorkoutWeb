@@ -6,7 +6,13 @@ import requests
 import sys
 
 
+def print_test_title(title):
+    """Utility function for print a string followed by a line of equal lenth."""
+    print title
+    print '-' * len(title)
+
 def send_post_request(url, payload):
+    """Utility function for sending an HTTP POST and returning the status code and response text."""
     print "URL: " + url
     response = requests.post(url, json=payload)
     print "Response code: " + str(response.status_code)
@@ -23,7 +29,7 @@ def logout(root_url, cookie):
     """Ends the existing session."""
     url = root_url + "logout"
     payload = {'_straen_username': cookie}
-    send_post_request(url, payload)
+    return send_post_request(url, payload)
 
 def main():
     # Parse command line options.
@@ -42,12 +48,20 @@ def main():
     api_url = args.url + "/api/1.0/"
 
     # Login.
+    print_test_title("Login")
     code, cookie = login(api_url, args.username, args.password)
     if code == 200:
-        print "Test passed!"
+        print "Test passed!\n"
+    else:
+        print "Test failed!\n"
 
     # Logout.
-    logout(api_url, cookie)
+    print_test_title("Logout")
+    code, result = logout(api_url, cookie)
+    if code == 200:
+        print "Test passed!\n"
+    else:
+        print "Test failed!\n"
 
 if __name__ == "__main__":
     main()
