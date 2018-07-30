@@ -427,8 +427,12 @@ class StraenWeb(object):
         comments_str = ""
         comments = self.data_mgr.retrieve_activity_comments(activity_id)
         if comments is not None:
+            comments_str = "<table>"
             for comment in comments:
-                pass
+                comments_str += "<td>"
+                comments_str += comment
+                comments_str += "</td><tr>"
+            comments_str += "</table>"
 
         # Build the page title.
         if is_live:
