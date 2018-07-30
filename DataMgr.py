@@ -166,6 +166,14 @@ class DataMgr(Importer.LocationWriter):
                 self.database.delete_user_device(device)
         return True
 
+    def retrieve_activity(self, activity_id):
+        """Retrieve method for an activity, specified by the activity ID."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_activity(activity_id)
+
     def delete_activity(self, object_id):
         """Delete the activity with the specified object ID."""
         if self.database is None:

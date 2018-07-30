@@ -440,6 +440,19 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def retrieve_activity(self, activity_id):
+        """Retrieve method for an activity, specified by the activity ID."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.retrieve_activity.__name__ + ": Unexpected empty object: activity_id")
+            return None
+
+        try:
+            return self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id})
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
     def delete_activity(self, object_id):
         """Delete method for an activity, specified by the database object ID."""
         if object_id is None:

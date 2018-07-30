@@ -443,19 +443,16 @@ class StraenWeb(object):
         my_template = Template(filename=g_map_single_html_file, module_directory=g_tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=g_root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=g_google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str, comments=comments_str)
 
-    def render_page_for_activity(self, email, user_realname, activity_id, is_live):
+    def render_page_for_activity(self, activity, email, user_realname, activity_id, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
 
         try:
             logged_in_username = self.user_mgr.get_logged_in_user()
 
-            locations = self.data_mgr.retrieve_locations(activity_id)
-            accels = self.data_mgr.retrieve_accelerometer_readings(activity_id)
-
-            if locations is not None and len(locations) > 0:
-                return self.render_page_for_mapped_activity(email, user_realname, activity_id, locations, logged_in_username is not None, is_live)
-            elif accels is not None and len(accels) > 0:
-                return self.render_page_for_lifting_activity(email, user_realname, activity_id, accels, logged_in_username is not None, is_live)
+            if StraenKeys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]) > 0:
+                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity[StraenKeys.ACTIVITY_LOCATIONS_KEY], logged_in_username is not None, is_live)
+            elif StraenKeys.APP_ACCELEROMETER_KEY in activity:
+                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity[StraenKeys.APP_ACCELEROMETER_KEY], logged_in_username is not None, is_live)
             else:
                 my_template = Template(filename=g_error_logged_in_html_file, module_directory=g_tempmod_dir)
                 return my_template.render(nav=self.create_navbar(logged_in_username is not None), product=PRODUCT_NAME, root_url=g_root_url, error="There is no data for the specified activity.")
@@ -621,8 +618,11 @@ class StraenWeb(object):
             # Determine who owns the device.
             device_user = self.user_mgr.retrieve_user_from_device(device_str)
 
+            # Load the activity.
+            activity = self.data_mgr.retrieve_activity(activity_id)
+
             # Render from template.
-            return self.render_page_for_activity(device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id, True)
+            return self.render_page_for_activity(activity, device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id, True)
         except:
             self.log_error('Unhandled exception in ' + StraenWeb.live.__name__)
         return self.error()
@@ -632,7 +632,20 @@ class StraenWeb(object):
     def activity(self, activity_id, *args, **kw):
         """Renders the map page for an activity."""
         try:
-            return self.render_page_for_activity("", "", activity_id, False)
+            # Load the activity.
+            activity = self.data_mgr.retrieve_activity(activity_id)
+
+            username = ""
+            realname = ""
+
+            if StraenKeys.ACTIVITY_DEVICE_STR_KEY in activity:
+                # Determine who owns the device.
+                device_user = self.user_mgr.retrieve_user_from_device(activity[StraenKeys.ACTIVITY_DEVICE_STR_KEY])
+                username = device_user[StraenKeys.USERNAME_KEY]
+                realname = device_user[StraenKeys.REALNAME_KEY]
+
+            # Render from template.
+            return self.render_page_for_activity(activity, username, realname, activity_id, False)
         except:
             self.log_error('Unhandled exception in ' + StraenWeb.activity.__name__)
         return self.error()
@@ -652,8 +665,11 @@ class StraenWeb(object):
             # Determine who owns the device.
             device_user = self.user_mgr.retrieve_user_from_device(device_str)
 
+            # Load the activity.
+            activity = self.data_mgr.retrieve_activity(activity_id)
+
             # Render from template.
-            return self.render_page_for_activity(device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id, False)
+            return self.render_page_for_activity(activity, device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id, False)
         except:
             self.log_error('Unhandled exception in ' + StraenWeb.device.__name__)
         return self.error()
