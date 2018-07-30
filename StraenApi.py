@@ -25,7 +25,7 @@ class StraenApi(object):
         logger = logging.getLogger()
         logger.debug(log_str)
 
-    def parse_json_loc_obj(self, activity_id_str, json_obj):
+    def parse_json_loc_obj(self, activity_id, json_obj):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
         location = []
 
@@ -54,9 +54,9 @@ class StraenApi(object):
                 key = item[0]
                 if not key in g_not_meta_data:
                     if key in [StraenKeys.APP_CADENCE_KEY, StraenKeys.APP_HEART_RATE_KEY, StraenKeys.APP_POWER_KEY]:
-                        self.data_mgr.create_sensordata(activity_id_str, date_time, key, item[1])
+                        self.data_mgr.create_sensordata(activity_id, date_time, key, item[1])
                     elif key in [StraenKeys.APP_CURRENT_SPEED_KEY, StraenKeys.APP_CURRENT_PACE_KEY]:
-                        self.data_mgr.create_metadata(activity_id_str, date_time, key, item[1], True)
+                        self.data_mgr.create_metadata(activity_id, date_time, key, item[1], True)
         except ValueError, e:
             self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except KeyError, e:
@@ -65,7 +65,7 @@ class StraenApi(object):
             self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
         return location
 
-    def parse_json_accel_obj(self, activity_id_str, json_obj):
+    def parse_json_accel_obj(self, activity_id, json_obj):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
         accel = []
 
@@ -91,7 +91,7 @@ class StraenApi(object):
     def handle_update_status(self, values):
         """Called when an API message to update the status of a device is received."""
         device_str = ""
-        activity_id_str = ""
+        activity_id = ""
         activity_type = ""
         username = ""
         locations = []
@@ -99,7 +99,7 @@ class StraenApi(object):
 
         # Parse required identifiers.
         device_str = values[StraenKeys.APP_DEVICE_ID_KEY]
-        activity_id_str = values[StraenKeys.APP_ID_KEY]
+        activity_id = values[StraenKeys.APP_ID_KEY]
 
         # Parse optional identifiers.
         if StraenKeys.APP_TYPE_KEY in values:
@@ -112,26 +112,26 @@ class StraenApi(object):
             # Parse each of the location objects.
             encoded_locations = values[StraenKeys.APP_LOCATIONS_KEY]
             for location_obj in encoded_locations:
-                location = self.parse_json_loc_obj(activity_id_str, location_obj)
+                location = self.parse_json_loc_obj(activity_id, location_obj)
                 locations.append(location)
 
             # Update the locations.
-            self.data_mgr.create_locations(device_str, activity_id_str, locations)
+            self.data_mgr.create_locations(device_str, activity_id, locations)
 
         if StraenKeys.APP_ACCELEROMETER_KEY in values:
 
             # Parse each of the accelerometer objects.
             encoded_accel = values[StraenKeys.APP_ACCELEROMETER_KEY]
             for accel_obj in encoded_accel:
-                accel = self.parse_json_accel_obj(activity_id_str, accel_obj)
+                accel = self.parse_json_accel_obj(activity_id, accel_obj)
                 accels.append(accel)
 
             # Update the accelerometer readings.
-            self.data_mgr.create_accelerometer_reading(device_str, activity_id_str, accels)
+            self.data_mgr.create_accelerometer_reading(device_str, activity_id, accels)
 
         # Udpate the activity type.
         if len(activity_type) > 0:
-            self.data_mgr.create_metadata(activity_id_str, 0, StraenKeys.ACTIVITY_TYPE_KEY, activity_type, False)
+            self.data_mgr.create_metadata(activity_id, 0, StraenKeys.ACTIVITY_TYPE_KEY, activity_type, False)
 
         # Update the user device association.
         if len(username) > 0:
@@ -318,7 +318,7 @@ class StraenApi(object):
         if StraenKeys.APP_DISTANCE_KEY not in values:
             raise Exception("Distance not specified.")
 
-        activity_id_str = str(uuid.uuid4())
+        activity_id = str(uuid.uuid4())
         return True, ""
 
     def handle_add_sets_and_reps_activity(self, values):
@@ -326,7 +326,7 @@ class StraenApi(object):
         if StraenKeys.APP_SETS_KEY not in values:
             raise Exception("Sets not specified.")
 
-        activity_id_str = str(uuid.uuid4())
+        activity_id = str(uuid.uuid4())
         sets = values[StraenKeys.APP_SETS_KEY]
         print sets
         return True, ""
