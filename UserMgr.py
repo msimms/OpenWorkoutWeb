@@ -87,6 +87,14 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         return self.database.retrieve_user(email)
 
+    def retrieve_user_from_id(self, user_id):
+        """Retrieve method for a user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_user_from_id(user_id)
+
     def retrieve_matched_users(self, name):
         """Returns a list of user names for users that match the specified regex."""
         if self.database is None:

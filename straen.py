@@ -271,6 +271,25 @@ class StraenWeb(object):
         navbar_str += "\t</ul>\n</nav>"
         return navbar_str
 
+    def render_comments(self, activity_id, logged_in):
+        """Helper function for building the comments string."""
+        comments = self.data_mgr.retrieve_activity_comments(activity_id)
+        comments_str = ""
+        if comments is not None:
+            for comment_entry in comments:
+                decoded_entry = json.loads(comment_entry)
+                commenter_id = decoded_entry[StraenKeys.ACTIVITY_COMMENTER_ID_KEY]
+                _, commenter_name = self.user_mgr.retrieve_user_from_id(commenter_id)
+                comments_str += "<td>"
+                comments_str += commenter_name
+                comments_str += " says \""
+                comments_str += decoded_entry[StraenKeys.ACTIVITY_COMMENT_KEY]
+                comments_str += "\"</td><tr>"
+        if logged_in:
+            comments_str += "<td><textarea rows=\"4\" cols=\"100\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>"
+            comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>"
+        return comments_str
+
     def render_page_for_lifting_activity(self, email, user_realname, activity_id, accels, logged_in, is_live):
         """Helper function for rendering the map corresonding to a specific device and activity."""
 
@@ -308,11 +327,7 @@ class StraenWeb(object):
         summary += "</ul>\n"
 
         # List the comments.
-        comments_str = ""
-        comments = self.data_mgr.retrieve_activity_comments(activity_id)
-        if comments is not None:
-            for comment in comments:
-                pass
+        comments_str = self.render_comments(activity_id, logged_in)
 
         # Build the page title.
         if is_live:
@@ -424,15 +439,7 @@ class StraenWeb(object):
         summary += "</ul>\n"
 
         # List the comments.
-        comments_str = ""
-        comments = self.data_mgr.retrieve_activity_comments(activity_id)
-        if comments is not None:
-            comments_str = "<table>"
-            for comment in comments:
-                comments_str += "<td>"
-                comments_str += comment
-                comments_str += "</td><tr>"
-            comments_str += "</table>"
+        comments_str = self.render_comments(activity_id, logged_in)
 
         # Build the page title.
         if is_live:

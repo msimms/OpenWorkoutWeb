@@ -497,10 +497,10 @@ class StraenApi(object):
             raise Exception("Not logged in.")
         if StraenKeys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
-        if StraenKeys.ACTIVITY_COMMENTS_KEY not in values:
+        if StraenKeys.ACTIVITY_COMMENT_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.create_comment(values[StraenKeys.ACTIVITY_ID_KEY], values[StraenKeys.ACTIVITY_COMMENTS_KEY])
+        result = self.data_mgr.create_activity_comment(values[StraenKeys.ACTIVITY_ID_KEY], self.user_id, values[StraenKeys.ACTIVITY_COMMENT_KEY])
         return result, ""
 
     def handle_list_comments(self, values):

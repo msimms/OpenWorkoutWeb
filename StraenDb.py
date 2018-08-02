@@ -1,6 +1,7 @@
 # Copyright 2017 Michael J Simms
 """Database implementation"""
 
+import json
 import sys
 import traceback
 from bson.objectid import ObjectId
@@ -872,7 +873,9 @@ class MongoDatabase(Database.Database):
                 data = []
                 if StraenKeys.ACTIVITY_COMMENTS_KEY in activity:
                     data = activity[StraenKeys.ACTIVITY_COMMENTS_KEY]
-                data.append({commenter_id, comment})
+                entry_dict = {StraenKeys.ACTIVITY_COMMENTER_ID_KEY: commenter_id, StraenKeys.ACTIVITY_COMMENT_KEY: comment}
+                entry_str = json.dumps(entry_dict)
+                data.append(entry_str)
                 activity[StraenKeys.ACTIVITY_COMMENTS_KEY] = data
                 self.activities_collection.save(activity)
                 return True

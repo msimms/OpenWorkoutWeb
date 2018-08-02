@@ -127,8 +127,29 @@ ${zAxis}
 
 </div>
 
-<section>
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script>
+	function create_comment()
+	{
+		var the_url = "${root_url}/api/1.0/create_comment";
+		var comment = document.getElementById("comment").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["activity_id"] : "${activityId}"});
+		dict.push({["comment"] : comment});
+		if (send_post_request(the_url, dict, result_text))
+			window.location.reload();
+		else
+			alert("An error occurred!");
+	}
+</script>
+
+<section class="comments">
+Comments:
+<table>
 ${comments}
+</table>
 </section>
 
 </body>
