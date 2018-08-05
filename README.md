@@ -34,7 +34,9 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Many small bug fixes.
 
 ### 0.3
+* Rudimentary support for lifting activities (pull-ups, push-ups, etc.)
 * Support for tags.
+* Allow activities to be public or private.
 * Implemented basic user following.
 * Many small bug fixes.
 
