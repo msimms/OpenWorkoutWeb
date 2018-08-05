@@ -527,6 +527,7 @@ class StraenApi(object):
             # Default privacy/visibility.
             if decoded_key == StraenKeys.DEFAULT_PRIVACY:
                 default_privacy = urllib.unquote_plus(values[key])
+                default_privacy = default_privacy.lower()
                 if not (default_privacy == StraenKeys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == StraenKeys.ACTIVITY_VISIBILITY_PRIVATE):
                     raise Exception("Invalid visibility value.")
                 result = self.user_mgr.update_user_setting(self.user_id, StraenKeys.DEFAULT_PRIVACY, default_privacy)
@@ -543,6 +544,7 @@ class StraenApi(object):
             raise Exception("Visibility not specified.")
 
         visibility = urllib.unquote_plus(values[StraenKeys.ACTIVITY_VISIBILITY_KEY])
+        visibility = visibility.lower()
         if not (visibility == StraenKeys.ACTIVITY_VISIBILITY_PUBLIC or visibility == StraenKeys.ACTIVITY_VISIBILITY_PRIVATE):
             raise Exception("Invalid visibility value.")
 

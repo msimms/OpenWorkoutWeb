@@ -93,6 +93,14 @@ class DataMgr(Importer.LocationWriter):
                 return False
         return True
 
+    def is_activity_id_public(self, device_str, activity_id):
+        """Helper function for returning whether or not an activity is publically visible."""
+        visibility = self.retrieve_activity_visibility(device_str, activity_id)
+        if visibility is not None:
+            if visibility == "private":
+                return False
+        return True
+
     def retrieve_user_activity_list(self, user_id, user_realname, start, num_results):
         """Returns a list containing all of the user's activities, up to num_results. num_results can be None for all activiites."""
         if self.database is None:

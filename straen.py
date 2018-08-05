@@ -88,7 +88,7 @@ def check_auth(*args, **kwargs):
                 activity_params = url_params[1].split("=")
                 if activity_params is not None and len(activity_params) >= 2:
                     activity_id = activity_params[1]
-                    if g_app.activity_is_public(device, activity_id):
+                    if g_app.data_mgr.is_activity_id_public(device, activity_id):
                         return
 
         username = g_app.user_mgr.get_logged_in_user()
@@ -591,16 +591,6 @@ class StraenWeb(object):
         row += "</tr>\n"
         return row
 
-    def activity_is_public(self, device_str, activity_id):
-        """Returns TRUE if the logged in user is allowed to view the specified activity."""
-        visibility = self.data_mgr.retrieve_activity_visibility(device_str, activity_id)
-        if visibility is not None:
-            if visibility == "public":
-                return True
-            elif visibility == "private":
-                return False
-        return True
-
     @cherrypy.expose
     def error(self, error_str=None):
         """Renders the errorpage."""
@@ -618,15 +608,28 @@ class StraenWeb(object):
     def live(self, device_str):
         """Renders the map page for the current activity from a single device."""
         try:
+            # Get the logged in user (if any).
+            logged_in_userid = None
+            logged_in_username = self.user_mgr.get_logged_in_user()
+            if logged_in_username is not None:
+                logged_in_userid, _, _ = self.user_mgr.retrieve_user(logged_in_username)
+
+            # Determine the ID of the most recent activity logged from the specified device.
             activity_id = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
             if activity_id is None:
                 return self.error()
 
             # Determine who owns the device.
             device_user = self.user_mgr.retrieve_user_from_device(device_str)
+            device_user_id = device_user[StraenKeys.DATABASE_ID_KEY]
+            belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
 
             # Load the activity.
             activity = self.data_mgr.retrieve_activity(activity_id)
+
+            # Determine if the current user can view the activity.
+            if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
+                return self.error("The requested activity is not public.")
 
             # Render from template.
             return self.render_page_for_activity(activity, device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id, True)
@@ -635,21 +638,32 @@ class StraenWeb(object):
         return self.error()
 
     @cherrypy.expose
-    @require()
     def activity(self, activity_id, *args, **kw):
         """Renders the map page for an activity."""
         try:
+            # Get the logged in user (if any).
+            logged_in_userid = None
+            logged_in_username = self.user_mgr.get_logged_in_user()
+            if logged_in_username is not None:
+                logged_in_userid, _, _ = self.user_mgr.retrieve_user(logged_in_username)
+
             # Load the activity.
             activity = self.data_mgr.retrieve_activity(activity_id)
 
+            # Determine who owns the device, and hence the activity.
             username = ""
             realname = ""
-
+            belongs_to_current_user = False
             if StraenKeys.ACTIVITY_DEVICE_STR_KEY in activity:
-                # Determine who owns the device.
                 device_user = self.user_mgr.retrieve_user_from_device(activity[StraenKeys.ACTIVITY_DEVICE_STR_KEY])
+                device_user_id = device_user[StraenKeys.DATABASE_ID_KEY]
                 username = device_user[StraenKeys.USERNAME_KEY]
                 realname = device_user[StraenKeys.REALNAME_KEY]
+                belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
+
+            # Determine if the current user can view the activity.
+            if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
+                return self.error("The requested activity is not public.")
 
             # Render from template.
             return self.render_page_for_activity(activity, username, realname, activity_id, False)
@@ -658,10 +672,15 @@ class StraenWeb(object):
         return self.error()
 
     @cherrypy.expose
-    @require()
     def device(self, device_str, *args, **kw):
         """Renders the map page for a single device."""
         try:
+            # Get the logged in user (if any).
+            logged_in_userid = None
+            logged_in_username = self.user_mgr.get_logged_in_user()
+            if logged_in_username is not None:
+                logged_in_userid, _, _ = self.user_mgr.retrieve_user(logged_in_username)
+
             # Get the activity ID being requested. If one is not provided then get the latest activity for the device
             activity_id = cherrypy.request.params.get("activity_id")
             if activity_id is None:
@@ -671,9 +690,15 @@ class StraenWeb(object):
 
             # Determine who owns the device.
             device_user = self.user_mgr.retrieve_user_from_device(device_str)
+            device_user_id = device_user[StraenKeys.DATABASE_ID_KEY]
+            belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
 
             # Load the activity.
             activity = self.data_mgr.retrieve_activity(activity_id)
+
+            # Determine if the current user can view the activity.
+            if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
+                return self.error("The requested activity is not public.")
 
             # Render from template.
             return self.render_page_for_activity(activity, device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id, False)
@@ -977,6 +1002,7 @@ class StraenWeb(object):
 
             # Get the current settings.
             selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, StraenKeys.DEFAULT_PRIVACY)
+            selected_default_privacy = selected_default_privacy.lower()
 
             # Render the alcohol units option.
             privacy_options = "\t\t<option value=\"Public\""
