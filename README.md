@@ -9,6 +9,7 @@ Why develop a workout tracker when there are so many closed-source options avail
 
 ## Major Features
 * Enables the live tracking feature of the Straen mobile app.
+* Supports strength (lifting) activities as well as distance (aerobic) activities.
 
 ## Major Todos
 * Support for strength-based activities.
@@ -34,8 +35,9 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Many small bug fixes.
 
 ### 0.3
-* Rudimentary support for lifting activities (pull-ups, push-ups, etc.)
+* Rudimentary support for lifting activities (pull-ups, push-ups, etc.).
 * Support for tags.
+* Support for comments.
 * Allow activities to be public or private.
 * Implemented basic user following.
 * Many small bug fixes.
