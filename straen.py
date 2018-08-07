@@ -418,6 +418,9 @@ class StraenWeb(object):
         if name is None:
             name = UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
+        distance = self.data_mgr.retrieve_metadata(StraenKeys.APP_DISTANCE_KEY, activity_id)
+        if distance is not None:
+            summary += "\t<li>Distance: {:.2f}</li>\n".format(distance)
         avg_speed = self.data_mgr.retrieve_metadata(StraenKeys.APP_AVG_SPEED_KEY, activity_id)
         if avg_speed is not None:
             summary += "\t<li>Avg. Speed: {:.2f}</li>\n".format(avg_speed)
