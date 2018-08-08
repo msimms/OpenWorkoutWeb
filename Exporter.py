@@ -10,9 +10,9 @@ class Exporter(object):
     def __init__(self):
         super(Exporter, self).__init__()
 
-    def export(self, data_mgr, activity_id_str):
-        data_mgr.retrieve_locations(activity_id_str)
-        data_mgr.retrieve_metadata(key, activity_id_str)
-        data_mgr.retrieve_sensordata(key, activity_id_str)
+    def export(self, data_mgr, activity_id):
+        data_mgr.retrieve_locations(activity_id)
+        data_mgr.retrieve_metadata(key, activity_id)
+        data_mgr.retrieve_sensordata(key, activity_id)
 
         return ""

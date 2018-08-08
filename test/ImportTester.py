@@ -14,17 +14,17 @@ import Importer
 class TestLocationWriter(Importer.LocationWriter):
     """Subclass that implements the location writer and will receive the locations as they are read from the file."""
 
-    def create(self, username, stream_name, stream_description, activity_type):
+    def create_activity(self, username, stream_name, stream_description, activity_type):
         return None, None
 
-    def create_track(self, device_str, activity_id_str, track_name, track_description):
+    def create_track(self, device_str, activity_id, track_name, track_description):
         pass
 
-    def create_location(self, device_str, activity_id_str, date_time, latitude, longitude, altitude):
-        print device_str, activity_id_str, date_time, latitude, longitude, altitude
+    def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
+        print device_str, activity_id, date_time, latitude, longitude, altitude
 
-    def create_sensor_reading(self, device_str, activity_id_str, date_time, key, value):
-        print device_str, activity_id_str, date_time, key, value
+    def create_sensor_reading(self, device_str, activity_id, date_time, key, value):
+        print device_str, activity_id, date_time, key, value
 
 def main():
     """Starts the tests."""

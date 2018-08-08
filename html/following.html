@@ -29,6 +29,7 @@
 		dict.push({["target_email"] : target.name});
 		if (send_post_request(the_url, dict, result_text))
 		{
+			window.location.replace("${root_url}/following");
 		}
 		else
 		{
@@ -95,7 +96,7 @@ ${nav}
 </div>
 
 <div class="users_list" style="width: 600px">
-	<h2>Users Following</h2>
+	<h2>Users I Am Following</h2>
 	<table>
 	${users_list}
 	</table>

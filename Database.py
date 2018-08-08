@@ -1,24 +1,21 @@
 # Copyright 2017 Michael J Simms
 """Database base classes"""
 
-import os
+import logging
 import sqlite3
 
 
 class Database(object):
     """Base class for a database. Encapsulates common functionality."""
     db_file = ""
-    log_file_name = ""
 
     def __init__(self, root_dir):
-        self.log_file_name = os.path.join(root_dir, 'database.log')
         super(Database, self).__init__()
 
     def log_error(self, log_str):
-        """Writes a error message to the log file."""
-        with open(self.log_file_name, 'a') as log_file:
-            log_file.write(str(log_str) + "\n")
-            log_file.close()
+        """Writes an error message to the log file."""
+        logger = logging.getLogger()
+        logger.debug(log_str)
 
     def is_quoted(self, log_str):
         """Determines if the provided string starts and ends with a double quote."""

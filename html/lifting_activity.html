@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+<title>${product} - ${name} - ${pagetitle}</title>
+
+<link rel="stylesheet" href="${root_url}/css/normalize.css">
+<link rel="stylesheet" href="${root_url}/css/site.css">
+
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+
+</head>
+
+<style type="text/css">
+	html { height: 100% }
+	body { height: 100%; margin: 0; padding: 0 }
+	div { margin: 0px }
+	#map_canvas { height: 75% }
+
+	div.bar
+	{
+		display: inline-block;
+		width: 20px;
+		height: 75px;	/* Gets overriden by D3-assigned height below */
+		background-color: teal;
+	}
+
+	path
+	{
+		stroke: steelblue;
+		stroke-width: 2;
+		fill: none;
+	}
+
+	.axis path,
+	.axis line
+	{
+		fill: none;
+		stroke: #000;
+		stroke-width: 1;
+		shape-rendering: crispEdges;
+	}
+</style>
+
+<body>
+
+<section class="nav">
+${nav}
+</section>
+
+<section class="summary">
+${summary}
+</section>
+
+<div id="charts"/>
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript">
+	function drawChart(data, title, color)
+	{
+		var margin = {top: 20, right: 20, bottom: 20, left: 50},
+			width = $("#charts").width() - margin.left - margin.right,
+			height = 200 - margin.top - margin.bottom;
+
+		var x = d3.time.scale().range([0, width]);
+		var y = d3.scale.linear().range([height, 0]);
+
+		var xAxis = d3.svg.axis().scale(x).orient("bottom");
+		var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
+
+		var valueline = d3.svg.line()
+			.x(function(d) { return x(d.date); })
+			.y(function(d) { return y(d.value); });
+
+		var svg = d3.select("#charts")
+			.append("svg:svg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		x.domain(d3.extent(data, function(d) { return d.date; }));
+		y.domain(d3.extent(data, function(d) { return d.value; }));
+
+		svg.append("path")
+			.attr("class", "line")
+			.attr("d", valueline(data))
+			.style("stroke", color);
+		svg.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + height + ")")
+			.call(xAxis);
+		svg.append("g")
+			.attr("class", "y axis")
+			.call(yAxis)
+			.append("text")
+			.attr("transform", "rotate(-90)")
+			.attr("y", 6)
+			.attr("dy", ".71em")
+			.style("text-anchor", "end")
+			.text(title);
+	}
+
+	var xAxis = [
+${xAxis}
+	];
+	var yAxis = [
+${yAxis}
+	];
+	var zAxis = [
+${zAxis}
+	];
+
+	if (xAxis.length > 0)
+		$(function() { drawChart(xAxis, "x", "DodgerBlue") });
+	if (yAxis.length > 0)
+		$(function() { drawChart(yAxis, "y", "FireBrick") });
+	if (zAxis.length > 0)
+		$(function() { drawChart(zAxis, "z", "ForestGreen") });
+</script>
+
+</div>
+
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script>
+	function create_comment()
+	{
+		var the_url = "${root_url}/api/1.0/create_comment";
+		var comment = document.getElementById("comment").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["activity_id"] : "${activityId}"});
+		dict.push({["comment"] : comment});
+		if (send_post_request(the_url, dict, result_text))
+			window.location.reload();
+		else
+			alert("An error occurred!");
+	}
+</script>
+
+<section class="comments">
+Comments:
+<table>
+${comments}
+</table>
+</section>
+
+</body>
+
+</html>
