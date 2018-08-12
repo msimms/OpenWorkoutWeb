@@ -15,11 +15,8 @@ import StraenApp
 import DataMgr
 import UserMgr
 
-from dateutil.tz import tzlocal
 from cherrypy import tools
 from cherrypy.process.plugins import Daemonizer
-from mako.lookup import TemplateLookup
-from mako.template import Template
 
 
 ACCESS_LOG = 'access.log'
@@ -117,6 +114,7 @@ class StraenWeb(object):
             return ""
         if num is None:
             return ""
+
         try:
             cherrypy.response.headers['Content-Type'] = 'application/json'
             return self.app.update_track(activity_id)
@@ -129,6 +127,7 @@ class StraenWeb(object):
     def update_metadata(self, activity_id=None, *args, **kw):
         if activity_id is None:
             return ""
+
         try:
             cherrypy.response.headers['Content-Type'] = 'application/json'
             return self.app.update_metadata(activity_id)
@@ -138,7 +137,7 @@ class StraenWeb(object):
 
     @cherrypy.expose
     def error(self, error_str=None):
-        """Renders the errorpage."""
+        """Renders the error page."""
         try:
             cherrypy.response.status = 500
             return self.app.error(error_str)
@@ -244,6 +243,7 @@ class StraenWeb(object):
         return self.error()
 
     @cherrypy.expose
+    @require()
     def upload(self, ufile):
         """Processes an upload request."""
         try:
@@ -257,8 +257,9 @@ class StraenWeb(object):
         return self.error()
 
     @cherrypy.expose
+    @require()
     def manual_entry(self, activity_type):
-        """Called when the user selects an activity type, indicatig they want to make a manual data entry."""
+        """Called when the user selects an activity type, indicating they want to make a manual data entry."""
         try:
             return self.app.manual_entry(activity_type)
         except StraenApp.RedirectException as e:
