@@ -28,8 +28,163 @@ def signal_handler(signal, frame):
         g_app.terminate()
     sys.exit(0)
 
+def log_error(log_str):
+    """Writes an error message to the log file."""
+    logger = logging.getLogger()
+    logger.error(log_str)
+
+@g_flask_app.route('/update_track')
+def update_track(activity_id=None, num=None):
+    if activity_id is None:
+        return ""
+    if num is None:
+        return ""
+
+    try:
+        return g_app.update_track(activity_id)
+    except:
+        pass
+    return ""
+
+@g_flask_app.route('/update_metadata')
+def update_metadata(activity_id=None):
+    if activity_id is None:
+        return ""
+
+    try:
+        return g_app.update_metadata(activity_id)
+    except:
+        g_app.log_error('Unhandled exception in update_metadata')
+    return ""
+
+@g_flask_app.route('/error')
+def error(error_str=None):
+    """Renders the error page."""
+    try:
+        return g_app.error(error_str)
+    except:
+        pass
+    return g_app.error()
+
+@g_flask_app.route('/live')
+def live(device_str):
+    """Renders the map page for the current activity from a single device."""
+    try:
+        return g_app.live(device_str)
+    except:
+        g_app.log_error('Unhandled exception in ' + live.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/activity')
+def activity(activity_id):
+    """Renders the map page for an activity."""
+    try:
+        return g_app.activity(activity_id)
+    except:
+        g_app.log_error('Unhandled exception in ' + activity.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/device')
+def device(device_str):
+    """Renders the map page for a single device."""
+    try:
+        return g_app.device(device_str)
+    except:
+        g_app.log_error('Unhandled exception in ' + device.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/my_activities')
+def my_activities():
+    """Renders the list of the specified user's activities."""
+    try:
+        return g_app.my_activities()
+    except:
+        g_app.log_error('Unhandled exception in ' + my_activities.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/all_activities')
+def all_activities():
+    """Renders the list of all activities the specified user is allowed to view."""
+    try:
+        return g_app.all_activities()
+    except:
+        g_app.log_error('Unhandled exception in ' + all_activities.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/following')
+def following():
+    """Renders the list of users the specified user is following."""
+    try:
+        return g_app.following()
+    except:
+        g_app.log_error('Unhandled exception in ' + following.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/followers')
+def followers():
+    """Renders the list of users that are following the specified user."""
+    try:
+        return g_app.followers()
+    except:
+        g_app.log_error('Unhandled exception in ' + followers.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/device_list')
+def device_list():
+    """Renders the list of a user's devices."""
+    try:
+        return g_app.device_list()
+    except:
+        g_app.log_error('Unhandled exception in ' + device_list.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/upload')
+def upload(ufile):
+    """Processes an upload request."""
+    try:
+        return g_app.upload(ufile)
+    except:
+        g_app.log_error('Unhandled exception in ' + upload.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/manual_entry')
+def manual_entry(activity_type):
+    """Called when the user selects an activity type, indicating they want to make a manual data entry."""
+    try:
+        return g_app.manual_entry(activity_type)
+    except:
+        g_app.log_error('Unhandled exception in ' + manual_entry.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/import_activity')
+def import_activity():
+    """Renders the import page."""
+    try:
+        return g_app.import_activity()
+    except:
+        g_app.log_error('Unhandled exception in ' + import_activity.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/settings')
+def settings():
+    """Renders the user's settings page."""
+    try:
+        return g_app.settings()
+    except:
+        g_app.log_error('Unhandled exception in ' + settings.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/submit_login')
+def submit_login():
+    """Processes a login."""
+    try:
+        pass
+    except:
+        g_app.log_error('Unhandled exception in ' + submit_login.__name__)
+    return g_app.error()
+
 @g_flask_app.route('/submit_new_login')
-def submit_new_login(email, realname, password1, password2, *args, **kw):
+def submit_new_login(email, realname, password1, password2):
     """Creates a new login."""
     try:
         return g_app.submit_new_login(email, realname, password1, password2)
