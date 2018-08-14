@@ -33,6 +33,15 @@ def log_error(log_str):
     logger = logging.getLogger()
     logger.error(log_str)
 
+@g_flask_app.route('/stats')
+def stats():
+    """Renders the internal statistics page."""
+    try:
+        return g_app.stats()
+    except:
+        g_app.log_error('Unhandled exception in ' + stats.__name__)
+    return g_app.error()
+
 @g_flask_app.route('/update_track')
 def update_track(activity_id=None, num=None):
     if activity_id is None:

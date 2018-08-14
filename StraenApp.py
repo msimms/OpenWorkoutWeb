@@ -9,6 +9,7 @@ import mako
 import markdown
 import os
 import sys
+import threading
 import traceback
 import uuid
 
@@ -30,6 +31,26 @@ UNSPECIFIED_ACTIVITY_TYPE = "Unknown"
 LOGIN_URL = '/login'
 DEFAULT_LOGGED_IN_URL = '/all_activities'
 HTML_DIR = 'html'
+
+
+g_stats_lock = threading.Lock()
+g_stats = {}
+
+
+def statistics(function):
+
+    def wrapper(*args, **kwargs):
+        global g_stats_lock
+        global g_stats
+
+        g_stats_lock.acquire()
+        try:
+            g_stats[function.__name__] = g_stats[function.__name__] + 1
+        except:
+            g_stats[function.__name__] = 1
+        g_stats_lock.release()
+        return function(*args, **kwargs)
+    return wrapper
 
 
 class RedirectException(Exception):
@@ -69,6 +90,36 @@ class StraenApp(object):
         """Writes an error message to the log file."""
         logger = logging.getLogger()
         logger.error(log_str)
+
+    def stats(self):
+        """Renders the list of a user's devices."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Build a list of table rows from the device information.
+        g_stats_lock.acquire()
+        stats_str = "<td><b>Page</b></td><td><b>Num Accesses</b></td><tr>\n"
+        for key, value in g_stats.iteritems():
+            stats_str += "\t\t<tr><td>"
+            stats_str += str(key)
+            stats_str += "</td><td>"
+            stats_str += str(value)
+            stats_str += "</td></tr>\n"
+        g_stats_lock.release()
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'stats.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, page_stats=stats_str)
 
     def update_track(self, activity_id=None, num=None):
         if activity_id is None:
@@ -520,6 +571,7 @@ class StraenApp(object):
             pass
         return my_template.render(product=PRODUCT_NAME, root_url=self.root_url, error=error_str)
 
+    @statistics
     def live(self, device_str):
         """Renders the map page for the current activity from a single device."""
 
@@ -549,6 +601,7 @@ class StraenApp(object):
         # Render from template.
         return self.render_page_for_activity(activity, device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id, True)
 
+    @statistics
     def activity(self, activity_id):
         """Renders the map page for an activity."""
 
@@ -579,6 +632,7 @@ class StraenApp(object):
         # Render from template.
         return self.render_page_for_activity(activity, username, realname, activity_id, False)
 
+    @statistics
     def device(self, device_str):
         """Renders the map page for a single device."""
 
@@ -610,6 +664,7 @@ class StraenApp(object):
         # Render from template.
         return self.render_page_for_activity(activity, device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id, False)
 
+    @statistics
     def my_activities(self):
         """Renders the list of the specified user's activities."""
 
@@ -643,6 +698,7 @@ class StraenApp(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activities_list=activities_list_str)
 
+    @statistics
     def all_activities(self):
         """Renders the list of all activities the specified user is allowed to view."""
 
@@ -676,6 +732,7 @@ class StraenApp(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activities_list=activities_list_str)
 
+    @statistics
     def following(self):
         """Renders the list of users the specified user is following."""
 
@@ -704,6 +761,7 @@ class StraenApp(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, users_list=users_list_str)
 
+    @statistics
     def followers(self):
         """Renders the list of users that are following the specified user."""
 
@@ -732,6 +790,7 @@ class StraenApp(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, users_list=users_list_str)
 
+    @statistics
     def device_list(self):
         """Renders the list of a user's devices."""
 
@@ -768,6 +827,7 @@ class StraenApp(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, device_list=device_list_str)
 
+    @statistics
     def upload(self, ufile):
         """Processes an upload request."""
 
@@ -803,10 +863,12 @@ class StraenApp(object):
         # Remove the local file.
         os.remove(local_file_name)
 
+    @statistics
     def manual_entry(self, activity_type):
         """Called when the user selects an activity type, indicatig they want to make a manual data entry."""
         print activity_type
 
+    @statistics
     def import_activity(self):
         """Renders the import page."""
 
@@ -832,6 +894,7 @@ class StraenApp(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_type_list=activity_type_list_str)
 
+    @statistics
     def settings(self):
         """Renders the user's settings page."""
 
@@ -882,6 +945,7 @@ class StraenApp(object):
             raise RedirectException(DEFAULT_LOGGED_IN_URL)
         raise Exception("Unknown error.")
 
+    @statistics
     def login(self):
         """Renders the login page."""
 
@@ -901,12 +965,14 @@ class StraenApp(object):
         my_template = Template(filename=login_html_file, module_directory=self.tempmod_dir)
         return my_template.render(product=PRODUCT_NAME, root_url=self.root_url, readme=html)
 
+    @statistics
     def create_login(self):
         """Renders the create login page."""
         create_login_html_file = os.path.join(self.root_dir, HTML_DIR, 'create_login.html')
         my_template = Template(filename=create_login_html_file, module_directory=self.tempmod_dir)
         return my_template.render(product=PRODUCT_NAME, root_url=self.root_url)
 
+    @statistics
     def logout(self):
         """Ends the logged in session."""
 
@@ -921,6 +987,7 @@ class StraenApp(object):
         # Send the user back to the login screen.
         raise RedirectException(LOGIN_URL)
 
+    @statistics
     def about(self):
         """Renders the about page."""
         about_html_file = os.path.join(self.root_dir, HTML_DIR, 'about.html')

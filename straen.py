@@ -107,6 +107,15 @@ class StraenWeb(object):
         logger = logging.getLogger()
         logger.error(log_str)
 
+    @cherrypy.expose
+    def stats(self):
+        """Renders the internal statistics page."""
+        try:
+            return self.app.stats()
+        except:
+            pass
+        return self.app.error("")
+
     @cherrypy.tools.json_out()
     @cherrypy.expose
     def update_track(self, activity_id=None, num=None, *args, **kw):
