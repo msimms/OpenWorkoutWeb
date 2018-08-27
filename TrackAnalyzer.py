@@ -24,22 +24,24 @@ class TrackAnalyzer(object):
         self.avg_speed = 0.0 # Average sppeed (in meters/second)
 
     def update_current_speed(self):
-        """Computers the current speed of the workout. Called by 'append_location'."""
+        """Computes the current speed of the workout. Called by 'append_location'."""
         pass
 
     def update_average_speed(self, date_time):
-        """Computers the average speed of the workout. Called by 'append_location'."""
+        """Computes the average speed of the workout. Called by 'append_location'."""
         elapsed_seconds = date_time - self.start_time
         if elapsed_seconds > 0:
             self.avg_speed = self.total_distance / elapsed_seconds
 
     def append_location(self, date_time, latitude, longitude, altitude):
         """Adds another location to the analyzer. Locations should be sent in order."""
+
+        # Not much we can do with the first location other than note the start time.
         if self.start_time is None:
             self.start_time = date_time
 
         # Update the total distance calculation.
-        if self.last_lat is not None:
+        elif self.last_lat is not None:
             meters_traveled = distance.haversine_distance(latitude, longitude, altitude, self.last_lat, self.last_lon, self.last_alt)
             self.total_distance = self.total_distance + meters_traveled
 
