@@ -1,3 +1,6 @@
 [submodule "jquery-timepicker"]
 	path = jquery-timepicker
 	url = https://github.com/jonthornton/jquery-timepicker
+[submodule "LibMath"]
+	path = LibMath
+	url = https://github.com/msimms/LibMath
