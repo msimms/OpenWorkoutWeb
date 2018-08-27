@@ -6,24 +6,33 @@ import inspect
 import os
 import sys
 
+# Locate and load the importer module.
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import Importer
+import TrackAnalyzer
 
 class TestLocationWriter(Importer.LocationWriter):
     """Subclass that implements the location writer and will receive the locations as they are read from the file."""
 
+    def __init__(self):
+        Importer.LocationWriter.__init__(self)
+        self.track_analyzer = None
+
     def create_activity(self, username, stream_name, stream_description, activity_type):
+        self.track_analyzer = TrackAnalyzer.TrackAnalyzer() # Need a fresh analyzer object for each activity
         return None, None
 
     def create_track(self, device_str, activity_id, track_name, track_description):
         pass
 
     def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
-        print device_str, activity_id, date_time, latitude, longitude, altitude
+        """Called for each location that is read from the input file."""
+        self.track_analyzer.append_location(date_time, latitude, longitude, altitude)
 
     def create_sensor_reading(self, device_str, activity_id, date_time, key, value):
+        """Called for each sensor reading that is read from the input file."""
         print device_str, activity_id, date_time, key, value
 
 def main():
@@ -32,6 +41,7 @@ def main():
     successes = []
     failures = []
 
+    # Parse the command line arguments.
     parser = argparse.ArgumentParser()
     parser.add_argument("--dir", type=str, action="store", default=os.path.dirname(os.path.realpath(__file__)), help="Directory of files to be processed", required=True)
     args = parser.parse_args()
