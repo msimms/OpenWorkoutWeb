@@ -33,7 +33,7 @@ class TestLocationWriter(Importer.LocationWriter):
 
     def create_sensor_reading(self, device_str, activity_id, date_time, key, value):
         """Called for each sensor reading that is read from the input file."""
-        print device_str, activity_id, date_time, key, value
+        pass
 
 def main():
     """Starts the tests."""

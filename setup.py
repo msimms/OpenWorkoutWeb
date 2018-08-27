@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-requirements = ['cherrypy', 'gpxpy', 'mako', 'bson', 'pymongo', 'bcrypt', 'python-tcxparser', 'fitparse', 'markdown']
+requirements = ['cherrypy', 'gpxpy', 'mako', 'bson', 'pymongo', 'bcrypt', 'python-tcxparser', 'fitparse', 'markdown', 'scipy']
 
 setup(
     name='straenweb',
