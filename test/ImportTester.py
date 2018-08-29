@@ -12,6 +12,9 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import Importer
 import TrackAnalyzer
+import StraenKeys
+import HeartRateAnalyzer
+import PowerAnalyzer
 
 class TestLocationWriter(Importer.LocationWriter):
     """Subclass that implements the location writer and will receive the locations as they are read from the file."""
@@ -19,6 +22,7 @@ class TestLocationWriter(Importer.LocationWriter):
     def __init__(self):
         Importer.LocationWriter.__init__(self)
         self.track_analyzer = None
+        self.sensor_analyzers = []
 
     def create_activity(self, username, stream_name, stream_description, activity_type):
         self.track_analyzer = TrackAnalyzer.TrackAnalyzer() # Need a fresh analyzer object for each activity
@@ -33,7 +37,28 @@ class TestLocationWriter(Importer.LocationWriter):
 
     def create_sensor_reading(self, device_str, activity_id, date_time, key, value):
         """Called for each sensor reading that is read from the input file."""
-        pass
+        found = False
+        for sensor_analyzer in self.sensor_analyzers:
+            if sensor_analyzer.type == key:
+                sensor_analyzer.append_sensor_value(date_time, value)
+                found = True
+                break
+        if not found:
+            if key == StraenKeys.APP_HEART_RATE_KEY:
+                sensor_analyzer = HeartRateAnalyzer.HeartRateAnalyzer()
+                sensor_analyzer.append_sensor_value(date_time, value)
+                self.sensor_analyzers.append(sensor_analyzer)
+            elif key == StraenKeys.APP_POWER_KEY:
+                sensor_analyzer = PowerAnalyzer.PowerAnalyzer()
+                sensor_analyzer.append_sensor_value(date_time, value)
+                self.sensor_analyzers.append(sensor_analyzer)
+
+    def finish_activity(self):
+        """Called for post-processing."""
+        for sensor_analyzer in self.sensor_analyzers:
+            sensor_analyzer.analyze()
+        self.track_analyzer = None
+        self.sensor_analyzers = []
 
 def main():
     """Starts the tests."""
@@ -50,6 +75,7 @@ def main():
     importer = Importer.Importer(store)
     test_dir = os.path.abspath(os.path.join('.', args.dir))
 
+    # Process each file in the specified directory as well as its subdirectories.
     for subdir, _, files in os.walk(test_dir):
         print "Processing all files in: " + test_dir
         for current_file in files:

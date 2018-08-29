@@ -27,77 +27,95 @@ class LocationWriter(object):
         """Pure virtual method for processing a sensor reading from the importer."""
         pass
 
+    def finish_activity(self):
+        """Pure virtual method for any post-processing."""
+        pass
+
 class Importer(object):
     """Importer for GPX and TCX location files."""
 
-    def __init__(self, location_store):
+    def __init__(self, activity_writer):
         super(Importer, self).__init__()
-        self.location_writer = location_store
+        self.activity_writer = activity_writer
 
     def import_gpx_file(self, username, file_name):
         """Imports the specified GPX file."""
+
+        # The GPX parser requires a file handle and not a file name.
         with open(file_name, 'r') as gpx_file:
+
             # Parse the file.
             gpx = gpxpy.parse(gpx_file)
 
             # Indicate the start of the activity.
-            device_str, activity_id = self.location_writer.create_activity(username, gpx.name, gpx.description, "")
+            device_str, activity_id = self.activity_writer.create_activity(username, gpx.name, gpx.description, "")
 
             for track in gpx.tracks:
-                self.location_writer.create_track(device_str, activity_id, track.name, track.description)
+                self.activity_writer.create_track(device_str, activity_id, track.name, track.description)
                 for segment in track.segments:
                     for point in segment.points:
+
                         # Read the timestamp.
                         dt_str = str(point.time) + " UTC"
                         dt_obj = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S %Z").timetuple()
                         dt_unix = calendar.timegm(dt_obj)
 
                         # Store the location.
-                        self.location_writer.create_location(device_str, activity_id, dt_unix, point.latitude, point.longitude, point.elevation)
+                        self.activity_writer.create_location(device_str, activity_id, dt_unix, point.latitude, point.longitude, point.elevation)
 
                         # Look for other attributes.
                         extensions = point.extensions
                         if 'power' in extensions:
-                            self.location_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_POWER_KEY, extensions['power'])
+                            self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_POWER_KEY, extensions['power'])
                         if 'gpxtpx:TrackPointExtension' in extensions:
                             gpxtpx_extensions = extensions['gpxtpx:TrackPointExtension']
                             if 'gpxtpx:hr' in gpxtpx_extensions:
-                                self.location_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_HEART_RATE_KEY, gpxtpx_extensions['gpxtpx:hr'])
+                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_HEART_RATE_KEY, gpxtpx_extensions['gpxtpx:hr'])
                             if 'gpxtpx:cad' in gpxtpx_extensions:
-                                self.location_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_CADENCE_KEY, gpxtpx_extensions['gpxtpx:cad'])
+                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_CADENCE_KEY, gpxtpx_extensions['gpxtpx:cad'])
                             if 'gpxtpx:atemp' in gpxtpx_extensions:
-                                self.location_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_TEMP_KEY, gpxtpx_extensions['gpxtpx:atemp'])
+                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_TEMP_KEY, gpxtpx_extensions['gpxtpx:atemp'])
 
+            # Let it be known that we are finished with this activity.
+            self.activity_writer.finish_activity()
             return True
         return False
 
     def import_tcx_file(self, username, file_name):
         """Imports the specified TCX file."""
+
         # Parse the file.
         tcx = tcxparser.TCXParser(file_name)
         if tcx is not None:
-            # Indicate the start of the activity.
-            device_str, activity_id = self.location_writer.create_activity(username, "", "", tcx.activity_type)
 
+            # TCX files can contain multiple activities.
             for activity in tcx.activity:
+
+                # Indicate the start of the activity.
+                device_str, activity_id = self.activity_writer.create_activity(username, "", "", tcx.activity_type)
+
                 for lap in activity.Lap:
                     for track in lap.Track:
                         for point in track.Trackpoint:
+
                             # Read the timestamp.
                             dt_obj = datetime.datetime.strptime(str(point.Time), "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()
                             dt_unix = calendar.timegm(dt_obj)
 
                             # Store the location.
-                            self.location_writer.create_location(device_str, activity_id, dt_unix, point.Position.LatitudeDegrees, point.Position.LongitudeDegrees, point.AltitudeMeters)
+                            self.activity_writer.create_location(device_str, activity_id, dt_unix, point.Position.LatitudeDegrees, point.Position.LongitudeDegrees, point.AltitudeMeters)
 
                             # Look for other attributes.
                             attributes = dir(point)
                             if 'Cadence' in attributes:
-                                self.location_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_CADENCE_KEY, point.Cadence)
+                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_CADENCE_KEY, point.Cadence)
                             if 'HeartRateBpm' in attributes:
-                                self.location_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_HEART_RATE_KEY, point.HeartRateBpm.Value)
+                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_HEART_RATE_KEY, point.HeartRateBpm.Value)
                             if 'Extensions' in attributes:
                                 pass
+
+                # Let it be known that we are finished with this activity.
+                self.activity_writer.finish_activity()
             return True
         return False
 
