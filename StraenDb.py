@@ -758,7 +758,7 @@ class MongoDatabase(Database.Database):
         return False
 
     def create_sensor_reading(self, device_str, activity_id, date_time, key, value):
-        """Inherited from LocationWriter. Processes a sensor reading from the importer."""
+        """Inherited from ActivityWriter. Processes a sensor reading from the importer."""
         pass
 
     def retrieve_locations(self, activity_id):

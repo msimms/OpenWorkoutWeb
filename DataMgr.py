@@ -11,30 +11,30 @@ def get_activities_sort_key(item):
         return item[StraenKeys.ACTIVITY_TIME_KEY]
     return 0
 
-class DataMgr(Importer.LocationWriter):
+class DataMgr(Importer.ActivityWriter):
     """Data store abstraction"""
 
     def __init__(self, root_dir):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
-        super(Importer.LocationWriter, self).__init__()
+        super(Importer.ActivityWriter, self).__init__()
 
     def terminate(self):
         """Destructor"""
         self.database = None
 
     def create_activity(self, username, stream_name, stream_description, activity_type):
-        """Inherited from LocationWriter."""
+        """Inherited from ActivityWriter."""
         if self.database is None:
             raise Exception("No database.")
         return None, None
 
     def create_track(self, device_str, activity_id, track_name, track_description):
-        """Inherited from LocationWriter."""
+        """Inherited from ActivityWriter."""
         pass
 
     def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
-        """Inherited from LocationWriter. Create method for a location."""
+        """Inherited from ActivityWriter. Create method for a location."""
         if self.database is None:
             raise Exception("No database.")
         return self.database.create_location(device_str, activity_id, date_time, latitude, longitude, altitude)

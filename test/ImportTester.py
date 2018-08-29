@@ -12,15 +12,13 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import Importer
 import TrackAnalyzer
-import StraenKeys
-import HeartRateAnalyzer
-import PowerAnalyzer
+import SensorAnalyzerFactory
 
-class TestLocationWriter(Importer.LocationWriter):
+class TestActivityWriter(Importer.ActivityWriter):
     """Subclass that implements the location writer and will receive the locations as they are read from the file."""
 
     def __init__(self):
-        Importer.LocationWriter.__init__(self)
+        Importer.ActivityWriter.__init__(self)
         self.track_analyzer = None
         self.sensor_analyzers = []
 
@@ -44,12 +42,9 @@ class TestLocationWriter(Importer.LocationWriter):
                 found = True
                 break
         if not found:
-            if key == StraenKeys.APP_HEART_RATE_KEY:
-                sensor_analyzer = HeartRateAnalyzer.HeartRateAnalyzer()
-                sensor_analyzer.append_sensor_value(date_time, value)
-                self.sensor_analyzers.append(sensor_analyzer)
-            elif key == StraenKeys.APP_POWER_KEY:
-                sensor_analyzer = PowerAnalyzer.PowerAnalyzer()
+            factory = SensorAnalyzerFactory.SensorAnalyzerFactory()
+            sensor_analyzer = factory.create(key)
+            if sensor_analyzer:
                 sensor_analyzer.append_sensor_value(date_time, value)
                 self.sensor_analyzers.append(sensor_analyzer)
 
@@ -71,7 +66,7 @@ def main():
     parser.add_argument("--dir", type=str, action="store", default=os.path.dirname(os.path.realpath(__file__)), help="Directory of files to be processed", required=True)
     args = parser.parse_args()
 
-    store = TestLocationWriter()
+    store = TestActivityWriter()
     importer = Importer.Importer(store)
     test_dir = os.path.abspath(os.path.join('.', args.dir))
 

@@ -1,5 +1,5 @@
 # Copyright 2017 Michael J Simms
-"""Parses GPX and TCX files, passing the contents to a LocationWriter object."""
+"""Parses GPX and TCX files, passing the contents to a ActivityWriter object."""
 
 import calendar
 import datetime
@@ -8,7 +8,7 @@ import tcxparser
 
 import StraenKeys
 
-class LocationWriter(object):
+class ActivityWriter(object):
     """Base class for any class that handles data read from the Importer."""
 
     def create_activity(self, username, stream_name, stream_description, activity_type):
