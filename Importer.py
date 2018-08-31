@@ -4,7 +4,7 @@
 import calendar
 import datetime
 import gpxpy
-import tcxparser
+from lxml import objectify
 
 import StraenKeys
 
@@ -85,39 +85,56 @@ class Importer(object):
         """Imports the specified TCX file."""
 
         # Parse the file.
-        tcx = tcxparser.TCXParser(file_name)
-        if tcx is not None:
+        tree = objectify.parse(file_name)
+        if tree is None:
+            return False
 
-            # TCX files can contain multiple activities.
-            for activity in tcx.activity:
+        # Get the first node in the XML tree.
+        root = tree.getroot()
+        if root is None:
+            return False
 
-                # Indicate the start of the activity.
-                device_str, activity_id = self.activity_writer.create_activity(username, "", "", tcx.activity_type)
+        # The interesting stuff starts with an activity.
+        activity = root.Activities.Activity
 
-                for lap in activity.Lap:
+        if hasattr(activity, 'Sport'):
+            activity_type = activity.Sport
+        else:
+            activity_type = "Unknown"
+
+        # Indicate the start of the activity.
+        device_str, activity_id = self.activity_writer.create_activity(username, "", "", activity_type)
+
+        if hasattr(activity, 'Lap'):
+            for lap in activity.Lap:
+                if hasattr(lap, 'Track'):
                     for track in lap.Track:
-                        for point in track.Trackpoint:
+                        if hasattr(track, 'Trackpoint'):
+                            for point in track.Trackpoint:
 
-                            # Read the timestamp.
-                            dt_obj = datetime.datetime.strptime(str(point.Time), "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()
-                            dt_unix = calendar.timegm(dt_obj)
+                                # Read the timestamp.
+                                dt_obj = datetime.datetime.strptime(str(point.Time), "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()
+                                dt_unix = calendar.timegm(dt_obj)
 
-                            # Store the location.
-                            self.activity_writer.create_location(device_str, activity_id, dt_unix, point.Position.LatitudeDegrees, point.Position.LongitudeDegrees, point.AltitudeMeters)
+                                # Store the location.
+                                self.activity_writer.create_location(device_str, activity_id, dt_unix, point.Position.LatitudeDegrees, point.Position.LongitudeDegrees, point.AltitudeMeters)
 
-                            # Look for other attributes.
-                            attributes = dir(point)
-                            if 'Cadence' in attributes:
-                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_CADENCE_KEY, point.Cadence)
-                            if 'HeartRateBpm' in attributes:
-                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_HEART_RATE_KEY, point.HeartRateBpm.Value)
-                            if 'Extensions' in attributes:
-                                pass
+                                # Look for other attributes.
+                                if hasattr(point, 'Cadence'):
+                                    self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_CADENCE_KEY, point.Cadence)
+                                if hasattr(point, 'HeartRateBpm'):
+                                    self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_HEART_RATE_KEY, point.HeartRateBpm.Value)
+                                if hasattr(point, 'Extensions'):
+                                    elements = point.Extensions
+                                    children = elements.getchildren()
+                                    if len(children) > 0:
+                                        subelement = children[0]
+                                        if hasattr(subelement, 'Watts'):
+                                            self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_POWER_KEY, subelement.Watts)
 
-                # Let it be known that we are finished with this activity.
-                self.activity_writer.finish_activity()
-            return True
-        return False
+        # Let it be known that we are finished with this activity.
+        self.activity_writer.finish_activity()
+        return True
 
     def import_file(self, username, local_file_name, file_extension):
         """Imports the specified file, parsing it based on the provided extension."""
