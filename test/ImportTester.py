@@ -24,6 +24,7 @@ class TestActivityWriter(Importer.ActivityWriter):
 
     def create_activity(self, username, stream_name, stream_description, activity_type):
         self.track_analyzer = TrackAnalyzer.TrackAnalyzer() # Need a fresh analyzer object for each activity
+        print "Activity Type: " + activity_type
         return None, None
 
     def create_track(self, device_str, activity_id, track_name, track_description):

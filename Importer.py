@@ -38,6 +38,12 @@ class Importer(object):
         super(Importer, self).__init__()
         self.activity_writer = activity_writer
 
+    def normalize_activity_type(self, activity_type):
+        """Takes the various activity names that appear in GPX and TCX files and normalizes to the ones used in this app."""
+        if activity_type == 'Biking':
+            activity_type = 'Cycling'
+        return activity_type
+
     def import_gpx_file(self, username, file_name):
         """Imports the specified GPX file."""
 
@@ -96,14 +102,11 @@ class Importer(object):
 
         # The interesting stuff starts with an activity.
         activity = root.Activities.Activity
-
-        if hasattr(activity, 'Sport'):
-            activity_type = activity.Sport
-        else:
-            activity_type = "Unknown"
+        activity_type = activity.attrib['Sport']
 
         # Indicate the start of the activity.
-        device_str, activity_id = self.activity_writer.create_activity(username, "", "", activity_type)
+        normalized_activity_type = self.normalize_activity_type(activity_type)
+        device_str, activity_id = self.activity_writer.create_activity(username, "", "", normalized_activity_type)
 
         if hasattr(activity, 'Lap'):
             for lap in activity.Lap:
