@@ -13,7 +13,6 @@ Why develop a workout tracker when there are so many closed-source options avail
 
 ## Major Todos
 * Support for strength-based activities.
-* Activity import.
 * Activity export.
 * Continuous scrolling for the activity feed.
 * Import from other services.
@@ -42,6 +41,9 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Implemented basic user following.
 * Many small bug fixes.
 
+### 0.4
+* Activity importing from TCX and GPX files.
+* Beginnings of statistical analysis.
 
 ## Social
 Twitter: [@StraenApp](https://twitter.com/StraenApp)
