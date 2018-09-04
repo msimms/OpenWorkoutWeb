@@ -18,3 +18,13 @@ class SensorAnalyzerFactory(object):
         elif sensor_type == StraenKeys.APP_POWER_KEY:
             sensor_analyzer = PowerAnalyzer.PowerAnalyzer()
         return sensor_analyzer
+
+    def create_with_data(self, sensor_type, data):
+        """Creates a sensor analyzer object of the specified type and loads it with the given data."""
+        sensor_analyzer = self.create(sensor_type)
+        if sensor_analyzer is not None:
+            for datum in data:
+                time = datum.keys()[0]
+                value = float(datum.values()[0])
+                sensor_analyzer.append_sensor_value(time, value)
+        return sensor_analyzer

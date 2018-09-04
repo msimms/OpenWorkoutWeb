@@ -13,6 +13,7 @@ import threading
 import traceback
 import uuid
 
+import SensorAnalyzerFactory
 import StraenApi
 import StraenKeys
 import DataMgr
@@ -309,6 +310,36 @@ class StraenApp(object):
         my_template = Template(filename=self.lifting_activity_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, comments=comments_str)
 
+    def render_metadata_for_page(self, key, activity_id):
+        """Helper function for processing meatadata and formatting it for display."""
+        max_value = 0.0
+        data = self.data_mgr.retrieve_metadata(key, activity_id)
+        data_str = ""
+        if data is not None and isinstance(data, list):
+            for datum in data:
+                time = datum.keys()[0]
+                value = float(datum.values()[0])
+                data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
+                if value > max_value:
+                    max_value = value
+        return data_str, max_value
+
+    def render_sensor_data_for_page(self, key, activity_id):
+        """Helper function for processing sensor data and formatting it for display."""
+        max_value = 0.0
+        data = self.data_mgr.retrieve_sensordata(key, activity_id)
+        data_str = ""
+        if data is not None and isinstance(data, list):
+            analyzer_factory = SensorAnalyzerFactory.SensorAnalyzerFactory()
+            analyzer = analyzer_factory.create_with_data(key, data)
+            for datum in data:
+                time = datum.keys()[0]
+                value = float(datum.values()[0])
+                data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
+                if value > max_value:
+                    max_value = value
+        return data_str, max_value
+
     def render_page_for_mapped_activity(self, email, user_realname, activity_id, locations, logged_in, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
 
@@ -321,10 +352,6 @@ class StraenApp(object):
         center_lon = 0
         last_lat = 0
         last_lon = 0
-        max_speed = 0.0
-        max_heart_rate = 0.0
-        max_cadence = 0.0
-        max_power = 0.0
 
         for location in locations:
             route += "\t\t\t\tnewCoord(" + str(location[StraenKeys.LOCATION_LAT_KEY]) + ", " + str(location[StraenKeys.LOCATION_LON_KEY]) + "),\n"
@@ -337,60 +364,26 @@ class StraenApp(object):
             last_lat = last_loc[StraenKeys.LOCATION_LAT_KEY]
             last_lon = last_loc[StraenKeys.LOCATION_LON_KEY]
 
-        current_speeds = self.data_mgr.retrieve_metadata(StraenKeys.APP_CURRENT_SPEED_KEY, activity_id)
-        current_speeds_str = ""
-        if current_speeds is not None and isinstance(current_speeds, list):
-            for current_speed in current_speeds:
-                time = current_speed.keys()[0]
-                value = float(current_speed.values()[0])
-                current_speeds_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
-                if value > max_speed:
-                    max_speed = value
-
-        heart_rates = self.data_mgr.retrieve_sensordata(StraenKeys.APP_HEART_RATE_KEY, activity_id)
-        heart_rates_str = ""
-        if heart_rates is not None and isinstance(heart_rates, list):
-            for heart_rate in heart_rates:
-                time = heart_rate.keys()[0]
-                value = float(heart_rate.values()[0])
-                heart_rates_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
-                if value > max_heart_rate:
-                    max_heart_rate = value
-
-        cadences = self.data_mgr.retrieve_sensordata(StraenKeys.APP_CADENCE_KEY, activity_id)
-        cadences_str = ""
-        if cadences is not None and isinstance(cadences, list):
-            for cadence in cadences:
-                time = cadence.keys()[0]
-                value = float(cadence.values()[0])
-                cadences_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
-                if value > max_cadence:
-                    max_cadence = value
-
-        powers = self.data_mgr.retrieve_sensordata(StraenKeys.APP_POWER_KEY, activity_id)
-        powers_str = ""
-        if powers is not None and isinstance(powers, list):
-            for power in powers:
-                time = power.keys()[0]
-                value = float(power.values()[0])
-                powers_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
-                if value > max_power:
-                    max_power = value
+        # Get all the things.
+        current_speeds_str, max_speed = self.render_metadata_for_page(StraenKeys.APP_CURRENT_SPEED_KEY, activity_id)
+        heart_rates_str, max_heart_rate = self.render_sensor_data_for_page(StraenKeys.APP_HEART_RATE_KEY, activity_id)
+        cadences_str, max_cadence = self.render_sensor_data_for_page(StraenKeys.APP_CADENCE_KEY, activity_id)
+        powers_str, max_power = self.render_sensor_data_for_page(StraenKeys.APP_POWER_KEY, activity_id)
+        distance = self.data_mgr.retrieve_metadata(StraenKeys.APP_DISTANCE_KEY, activity_id)
+        avg_speed = self.data_mgr.retrieve_metadata(StraenKeys.APP_AVG_SPEED_KEY, activity_id)
+        name = self.data_mgr.retrieve_metadata(StraenKeys.APP_NAME_KEY, activity_id)
+        activity_type = self.data_mgr.retrieve_metadata(StraenKeys.ACTIVITY_TYPE_KEY, activity_id)
 
         # Build the summary data view.
         summary = "<ul>\n"
-        activity_type = self.data_mgr.retrieve_metadata(StraenKeys.ACTIVITY_TYPE_KEY, activity_id)
         if activity_type is None:
             activity_type = UNSPECIFIED_ACTIVITY_TYPE
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
-        name = self.data_mgr.retrieve_metadata(StraenKeys.APP_NAME_KEY, activity_id)
         if name is None:
             name = UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
-        distance = self.data_mgr.retrieve_metadata(StraenKeys.APP_DISTANCE_KEY, activity_id)
         if distance is not None:
             summary += "\t<li>Distance: {:.2f}</li>\n".format(distance)
-        avg_speed = self.data_mgr.retrieve_metadata(StraenKeys.APP_AVG_SPEED_KEY, activity_id)
         if avg_speed is not None:
             summary += "\t<li>Avg. Speed: {:.2f}</li>\n".format(avg_speed)
         if max_speed > 1:
@@ -420,7 +413,7 @@ class StraenApp(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.map_single_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, powers=powers_str, comments=comments_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, comments=comments_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_id, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""

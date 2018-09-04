@@ -274,6 +274,9 @@ ${currentSpeeds}
 	var heartRates = [
 ${heartRates}
 	];
+	var cadences = [
+${cadences}
+	];
 	var powers = [
 ${powers}
 	];
@@ -282,6 +285,8 @@ ${powers}
 		$(function() { drawChart(speeds, "Speed", "DodgerBlue") });
 	if (heartRates.length > 0)
 		$(function() { drawChart(heartRates, "BPM", "FireBrick") });
+	if (cadences.length > 0)
+		$(function() { drawChart(cadences, "RPM", "ForestGreen") });
 	if (powers.length > 0)
 		$(function() { drawChart(powers, "Watts", "ForestGreen") });
 </script>
