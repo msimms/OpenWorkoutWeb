@@ -52,7 +52,7 @@ class TestActivityWriter(Importer.ActivityWriter):
     def finish_activity(self):
         """Called for post-processing."""
         for sensor_analyzer in self.sensor_analyzers:
-            sensor_analyzer.analyze()
+            print sensor_analyzer.analyze()
         self.track_analyzer = None
         self.sensor_analyzers = []
 

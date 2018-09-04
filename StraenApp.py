@@ -329,16 +329,18 @@ class StraenApp(object):
         max_value = 0.0
         data = self.data_mgr.retrieve_sensordata(key, activity_id)
         data_str = ""
+        analysis = {}
         if data is not None and isinstance(data, list):
             analyzer_factory = SensorAnalyzerFactory.SensorAnalyzerFactory()
             analyzer = analyzer_factory.create_with_data(key, data)
+            analysis = analyzer.analyze()
             for datum in data:
                 time = datum.keys()[0]
                 value = float(datum.values()[0])
                 data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
                 if value > max_value:
                     max_value = value
-        return data_str, max_value
+        return data_str, max_value, analysis
 
     def render_page_for_mapped_activity(self, email, user_realname, activity_id, locations, logged_in, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
@@ -366,9 +368,9 @@ class StraenApp(object):
 
         # Get all the things.
         current_speeds_str, max_speed = self.render_metadata_for_page(StraenKeys.APP_CURRENT_SPEED_KEY, activity_id)
-        heart_rates_str, max_heart_rate = self.render_sensor_data_for_page(StraenKeys.APP_HEART_RATE_KEY, activity_id)
-        cadences_str, max_cadence = self.render_sensor_data_for_page(StraenKeys.APP_CADENCE_KEY, activity_id)
-        powers_str, max_power = self.render_sensor_data_for_page(StraenKeys.APP_POWER_KEY, activity_id)
+        heart_rates_str, max_heart_rate, heart_rate_analysis = self.render_sensor_data_for_page(StraenKeys.APP_HEART_RATE_KEY, activity_id)
+        cadences_str, max_cadence, cadence_analysis = self.render_sensor_data_for_page(StraenKeys.APP_CADENCE_KEY, activity_id)
+        powers_str, max_power, power_analysis = self.render_sensor_data_for_page(StraenKeys.APP_POWER_KEY, activity_id)
         distance = self.data_mgr.retrieve_metadata(StraenKeys.APP_DISTANCE_KEY, activity_id)
         avg_speed = self.data_mgr.retrieve_metadata(StraenKeys.APP_AVG_SPEED_KEY, activity_id)
         name = self.data_mgr.retrieve_metadata(StraenKeys.APP_NAME_KEY, activity_id)
@@ -403,6 +405,27 @@ class StraenApp(object):
             summary += "</li>\n"
         summary += "</ul>\n"
 
+        # Build the detailed analysis.
+        details_str = ""
+        for key in heart_rate_analysis:
+            details_str = details_str + "<td>"
+            details_str = details_str + key
+            details_str = details_str + "</td><td>"
+            details_str = details_str + str(heart_rate_analysis[key])
+            details_str = details_str + "</td><tr>"
+        for key in cadence_analysis:
+            details_str = details_str + "<td>"
+            details_str = details_str + key
+            details_str = details_str + "</td><td>"
+            details_str = details_str + str(cadence_analysis[key])
+            details_str = details_str + "</td><tr>"
+        for key in power_analysis:
+            details_str = details_str + "<td>"
+            details_str = details_str + key
+            details_str = details_str + "</td><td>"
+            details_str = details_str + str(power_analysis[key])
+            details_str = details_str + "</td><tr>"
+
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
 
@@ -413,7 +436,7 @@ class StraenApp(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.map_single_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, comments=comments_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, comments=comments_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_id, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""

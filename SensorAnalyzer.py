@@ -6,14 +6,18 @@ import numpy
 class SensorAnalyzer(object):
     """Class for performing calculations on basic sensor information (heart rate, power, etc.)."""
 
-    def __init__(self, type):
+    def __init__(self, sensor_type, units):
         super(SensorAnalyzer, self).__init__()
-        self.type = type
+        self.type = sensor_type
+        self.units = units
         self.start_time = None
+        self.end_time = None
         self.max = 0.0 # Maximum sensor value
         self.avg = 0.0 # Average sensor value
         self.sum = 0.0 # Used in computing the average
         self.readings = [] # All the readings
+        self.value_readings = [] # All the readings, just the value part
+        self.num_readings = 0 # Cached for efficiency
 
     def update_maximum_value(self, reading):
         """Computes the maximum value for the workout. Called by 'append_sensor_value'."""
@@ -23,23 +27,34 @@ class SensorAnalyzer(object):
     def update_average_value(self, reading):
         """Computes the average value for the workout. Called by 'append_sensor_value'."""
         self.sum = self.sum + reading
-        num_readings = len(self.readings)
-        if num_readings > 0:
-            self.avg = self.sum / num_readings
+        if self.num_readings > 0:
+            self.avg = self.sum / self.num_readings
 
     def append_sensor_value(self, date_time, value):
         """Adds another reading to the analyzer."""
         if self.start_time is None:
             self.start_time = date_time
+        self.end_time = date_time
 
-        self.readings.append(value)
+        self.num_readings = self.num_readings + 1
+        self.readings.append([date_time, value])
+        self.value_readings.append(value)
         self.update_maximum_value(value)
         self.update_average_value(value)
 
     def analyze(self):
-        """Performs K means clustering on the sensor readings to find the ."""
-        if len(self.readings) > 0:
-            km = KMeans(n_clusters=4)
-            readings2 = numpy.array(self.readings)
-            km.fit(readings2.reshape(-1,1))
-            print(km.cluster_centers_)
+        """Called when all sensor readings have been processed."""
+        results = {}
+        if len(self.value_readings) > 0:
+            # Perform kmeans clustering.
+            np_readings = numpy.array(self.value_readings)
+            kmeans_analyzer = KMeans(n_clusters=4)
+            kmeans_analyzer.fit(np_readings.reshape(-1,1))
+            clusters = kmeans_analyzer.cluster_centers_
+            cluster_num = 1
+            for cluster in clusters:
+                key_str = self.type + " Cluster " + str(cluster_num)
+                value_str = "{:.2f}".format(cluster[0])
+                results[key_str] = value_str + " " + self.units
+                cluster_num = cluster_num + 1
+        return results

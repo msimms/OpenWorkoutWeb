@@ -1,6 +1,7 @@
 # Copyright 2018 Michael J Simms
 
 import StraenKeys
+import CadenceAnalyzer
 import HeartRateAnalyzer
 import PowerAnalyzer
 
@@ -13,7 +14,9 @@ class SensorAnalyzerFactory(object):
     def create(self, sensor_type):
         """Creates a sensor analyzer object of the specified type."""
         sensor_analyzer = None
-        if sensor_type == StraenKeys.APP_HEART_RATE_KEY:
+        if sensor_type == StraenKeys.APP_CADENCE_KEY:
+            sensor_analyzer = CadenceAnalyzer.CadenceAnalyzer()
+        elif sensor_type == StraenKeys.APP_HEART_RATE_KEY:
             sensor_analyzer = HeartRateAnalyzer.HeartRateAnalyzer()
         elif sensor_type == StraenKeys.APP_POWER_KEY:
             sensor_analyzer = PowerAnalyzer.PowerAnalyzer()

@@ -44,16 +44,13 @@ class TrackAnalyzer(object):
         # Loop through the list, in reverse order, updating the current speed, and all "bests"
         distance_sum = 0.0
         first_time = 0
-        last_time = 0
         last_km_speed = 0.0
         last_mile_speed = 0.0
         self.current_speed = 0.0
         for time_distance_pair in reversed(self.distance_buf):
-            if last_time == 0:
-                last_time = time_distance_pair[0]
             first_time = time_distance_pair[0]
             distance_sum = distance_sum + time_distance_pair[1]
-            total_time = last_time - first_time
+            total_time = self.last_time - first_time
 
             # Divide by zero check for the first iteration.
             if total_time > 0:
