@@ -403,11 +403,13 @@ class StraenApp(object):
         if max_power:
             summary += "\t<li>Max. Power: {:.2f} ".format(max_power) + Units.get_power_units_str() + "</li>\n"
         if location_analyzer.best_km > 0.0:
-            best_km = Units.convert_speed(location_analyzer.best_km, location_analyzer.distance_units, location_analyzer.time_units, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOUR)
-            summary += "\t<li>Best KM: {:.2f} ".format(best_km) + Units.get_speed_units_str(Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOUR) + "</li>\n"
+            best_km = 1.0 / location_analyzer.best_km
+            best_km = Units.convert_speed(best_km, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS)
+            summary += "\t<li>Best KM: {:.2f} ".format(best_km) + Units.get_speed_units_str(Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS) + "</li>\n"
         if location_analyzer.best_mile > 0.0:
-            best_mile = Units.convert_speed(location_analyzer.best_mile, location_analyzer.distance_units, location_analyzer.time_units, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOUR)
-            summary += "\t<li>Best Mile: {:.2f} ".format(best_mile) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOUR) + "</li>\n"
+            best_mile = 1.0 / location_analyzer.best_mile
+            best_mile = Units.convert_speed(best_mile, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
+            summary += "\t<li>Best Mile: {:.2f} ".format(best_mile) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
         tags = self.data_mgr.retrieve_tags(activity_id)
         if tags is not None:
             summary += "\t<li>Tags: "

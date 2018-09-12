@@ -27,10 +27,8 @@ class LocationAnalyzer(object):
         self.avg_speed = 0.0 # Average speed (in meters/second)
         self.current_speed = 0.0 # Current speed (in meters/second)
         self.best_speed = 0.0 # Best speed (in meters/second)
-        self.best_km = 0.0 # Best one kilometer average speed (in meters/second)
-        self.best_mile = 0.0 # Best one mile average speed (in meters/second)
-        self.distance_units = Units.UNITS_DISTANCE_METERS
-        self.time_units = Units.UNITS_TIME_SECONDS
+        self.best_km = 0.0 # Best one kilometer time (in seconds)
+        self.best_mile = 0.0 # Best one mile time (in seconds)
 
     def update_average_speed(self, date_time):
         """Computes the average speed of the workout. Called by 'append_location'."""
@@ -42,8 +40,6 @@ class LocationAnalyzer(object):
         """Computes the average speed over the last mile. Called by 'append_location'."""
 
         total_meters = 0.0
-        last_km_speed = 0.0
-        last_mile_speed = 0.0
         self.current_speed = 0.0
 
         # Loop through the list, in reverse order, updating the current speed, and all "bests".
@@ -54,27 +50,24 @@ class LocationAnalyzer(object):
             # Divide by zero check.
             if total_time > 0:
 
-                # Average speed over the given distance.
+                # Convert time from ms to secs.
                 total_seconds = total_time / 1000.0
-                speed = total_meters / total_seconds
 
                 # Current speed is the average of the last three seconds.
-                if self.current_speed == 0.0 and int(total_seconds) == 3:
-                    self.current_speed = speed
+                if int(total_seconds) == 3 and self.current_speed == 0.0:
+                    self.current_speed = total_meters / total_seconds
                     if self.current_speed > self.best_speed:
                         self.best_speed = self.current_speed
 
                 # Is this a new kilometer record for this activity?
-                if int(total_meters) == 1000 and last_km_speed == 0.0:
-                    last_km_speed = speed
-                    if last_km_speed > self.best_km:
-                        self.best_km = last_km_speed
+                elif int(total_meters) == 1000:
+                    if total_seconds < self.best_km or self.best_km == 0.0:
+                        self.best_km = total_seconds
 
                 # Is this a new mile record for this activity?
-                elif int(total_meters) == int(Units.METERS_PER_MILE) and last_mile_speed == 0.0:
-                    last_mile_speed = speed
-                    if last_mile_speed > self.best_mile:
-                        self.best_mile = last_mile_speed
+                elif int(total_meters) == int(Units.METERS_PER_MILE):
+                    if total_seconds < self.best_mile or self.best_mile == 0.0:
+                        self.best_mile = total_seconds
 
                 # A mile is the longest distance we're looking for, so just break.
                 elif int(total_meters) > Units.METERS_PER_MILE:

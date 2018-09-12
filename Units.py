@@ -6,7 +6,7 @@ UNITS_DISTANCE_MILES = 3
 
 UNITS_TIME_SECONDS = 1
 UNITS_TIME_MINUTES = 2
-UNITS_TIME_HOUR = 3
+UNITS_TIME_HOURS = 3
 
 METERS_PER_MILE = 1609.34
 
@@ -34,14 +34,14 @@ def convert_speed(value, in_distance_units, in_time_units, out_distance_units, o
     if in_time_units == UNITS_TIME_SECONDS:
         if out_time_units == UNITS_TIME_MINUTES:
             value = value * 60.0
-        elif out_time_units == UNITS_TIME_HOUR:
+        elif out_time_units == UNITS_TIME_HOURS:
             value = value * 60.0 * 60.0
     elif in_time_units == UNITS_TIME_MINUTES:
         if out_time_units == UNITS_TIME_SECONDS:
             value = value / 60.0
-        elif out_time_units == UNITS_TIME_HOUR:
+        elif out_time_units == UNITS_TIME_HOURS:
             value = value * 60.0
-    elif in_time_units == UNITS_TIME_HOUR:
+    elif in_time_units == UNITS_TIME_HOURS:
         if out_time_units == UNITS_TIME_SECONDS:
             value = value / 60.0 / 60.0
         elif out_time_units == UNITS_TIME_MINUTES:
@@ -65,7 +65,7 @@ def get_speed_units_str(distance_units, time_units):
         units_str = units_str + "min"
     elif time_units == UNITS_TIME_SECONDS:
         units_str = units_str + "sec"
-    elif time_units == UNITS_TIME_HOUR:
+    elif time_units == UNITS_TIME_HOURS:
         units_str = units_str + "hour"
     return units_str
 
@@ -77,7 +77,7 @@ def get_pace_units_str(distance_units, time_units):
         units_str = "mins"
     elif time_units == UNITS_TIME_SECONDS:
         units_str = "secs"
-    elif time_units == UNITS_TIME_HOUR:
+    elif time_units == UNITS_TIME_HOURS:
         units_str = "hours"
 
     units_str = units_str + " / "
