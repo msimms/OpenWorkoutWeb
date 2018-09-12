@@ -2,12 +2,13 @@
 
 import SensorAnalyzer
 import StraenKeys
+import Units
 
 class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on power data."""
 
     def __init__(self):
-        SensorAnalyzer.SensorAnalyzer.__init__(self, StraenKeys.APP_POWER_KEY, "Watts")
+        SensorAnalyzer.SensorAnalyzer.__init__(self, StraenKeys.APP_POWER_KEY, Units.get_power_units_str())
         self.best_5_sec_power = 0.0
         self.best_20_min_power = 0.0
         self.best_1_hour_power = 0.0

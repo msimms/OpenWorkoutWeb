@@ -13,10 +13,12 @@ import threading
 import traceback
 import uuid
 
+import LocationAnalyzer
 import SensorAnalyzerFactory
 import StraenApi
 import StraenKeys
 import DataMgr
+import Units
 import UserMgr
 
 from dateutil.tz import tzlocal
@@ -355,6 +357,10 @@ class StraenApp(object):
         last_lat = 0
         last_lon = 0
 
+        # Compute location-based things.
+        location_analyzer = LocationAnalyzer.LocationAnalyzer()
+        location_analyzer.append_locations(locations)
+
         for location in locations:
             route += "\t\t\t\tnewCoord(" + str(location[StraenKeys.LOCATION_LAT_KEY]) + ", " + str(location[StraenKeys.LOCATION_LON_KEY]) + "),\n"
             last_loc = location
@@ -391,11 +397,17 @@ class StraenApp(object):
         if max_speed > 1:
             summary += "\t<li>Max. Speed: {:.2f}</li>\n".format(max_speed)
         if max_heart_rate > 1:
-            summary += "\t<li>Max. Heart Rate: {:.2f}</li>\n".format(max_heart_rate)
+            summary += "\t<li>Max. Heart Rate: {:.2f} ".format(max_heart_rate) + Units.get_heart_rate_units_str() + "</li>\n"
         if max_cadence:
-            summary += "\t<li>Max. Cadence: {:.2f}</li>\n".format(max_cadence)
+            summary += "\t<li>Max. Cadence: {:.2f} ".format(max_cadence) + Units.get_cadence_units_str() + "</li>\n"
         if max_power:
-            summary += "\t<li>Max. Power: {:.2f}</li>\n".format(max_power)
+            summary += "\t<li>Max. Power: {:.2f} ".format(max_power) + Units.get_power_units_str() + "</li>\n"
+        if location_analyzer.best_km > 0.0:
+            best_km = Units.convert_speed(location_analyzer.best_km, location_analyzer.distance_units, location_analyzer.time_units, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOUR)
+            summary += "\t<li>Best KM: {:.2f} ".format(best_km) + Units.get_speed_units_str(Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOUR) + "</li>\n"
+        if location_analyzer.best_mile > 0.0:
+            best_mile = Units.convert_speed(location_analyzer.best_mile, location_analyzer.distance_units, location_analyzer.time_units, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOUR)
+            summary += "\t<li>Best Mile: {:.2f} ".format(best_mile) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOUR) + "</li>\n"
         tags = self.data_mgr.retrieve_tags(activity_id)
         if tags is not None:
             summary += "\t<li>Tags: "

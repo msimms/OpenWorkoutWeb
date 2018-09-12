@@ -11,7 +11,7 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import Importer
-import TrackAnalyzer
+import LocationAnalyzer
 import SensorAnalyzerFactory
 
 class TestActivityWriter(Importer.ActivityWriter):
@@ -19,11 +19,11 @@ class TestActivityWriter(Importer.ActivityWriter):
 
     def __init__(self):
         Importer.ActivityWriter.__init__(self)
-        self.track_analyzer = None
+        self.location_analyzer = None
         self.sensor_analyzers = []
 
     def create_activity(self, username, stream_name, stream_description, activity_type):
-        self.track_analyzer = TrackAnalyzer.TrackAnalyzer() # Need a fresh analyzer object for each activity
+        self.location_analyzer = LocationAnalyzer.LocationAnalyzer() # Need a fresh analyzer object for each activity
         print "Activity Type: " + activity_type
         return None, None
 
@@ -32,7 +32,7 @@ class TestActivityWriter(Importer.ActivityWriter):
 
     def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
         """Called for each location that is read from the input file."""
-        self.track_analyzer.append_location(date_time, latitude, longitude, altitude)
+        self.location_analyzer.append_location(date_time, latitude, longitude, altitude)
 
     def create_sensor_reading(self, device_str, activity_id, date_time, key, value):
         """Called for each sensor reading that is read from the input file."""
@@ -53,7 +53,7 @@ class TestActivityWriter(Importer.ActivityWriter):
         """Called for post-processing."""
         for sensor_analyzer in self.sensor_analyzers:
             print sensor_analyzer.analyze()
-        self.track_analyzer = None
+        self.location_analyzer = None
         self.sensor_analyzers = []
 
 def main():
