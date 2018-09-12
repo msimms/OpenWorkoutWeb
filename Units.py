@@ -10,55 +10,77 @@ UNITS_TIME_HOURS = 3
 
 METERS_PER_MILE = 1609.34
 
+def convert_distance(value, in_units, out_units):
+    """Unit conversion for distance values."""
+    if in_units == UNITS_DISTANCE_METERS:
+        if out_units == UNITS_DISTANCE_KILOMETERS:
+            return value / 1000.0
+        elif out_units == UNITS_DISTANCE_MILES:
+            return value / METERS_PER_MILE
+    elif in_units == UNITS_DISTANCE_KILOMETERS:
+        if out_units == UNITS_DISTANCE_METERS:
+            return value * 1000.0
+        elif out_units == UNITS_DISTANCE_MILES:
+            return value * (METERS_PER_MILE / 1000.0)
+    elif in_units == UNITS_DISTANCE_MILES:
+        if out_units == UNITS_DISTANCE_METERS:
+            return value * METERS_PER_MILE
+        elif out_units == UNITS_DISTANCE_KILOMETERS:
+            return value / (METERS_PER_MILE / 1000.0)
+    return value
+
+def convert_time(value, in_units, out_units):
+    """Unit conversion for time values."""
+    if in_units == UNITS_TIME_SECONDS:
+        if out_units == UNITS_TIME_MINUTES:
+            return value / 60.0
+        elif out_units == UNITS_TIME_HOURS:
+            return value / 60.0 / 60.0
+    elif in_units == UNITS_TIME_MINUTES:
+        if out_units == UNITS_TIME_SECONDS:
+            return value * 60.0
+        elif out_units == UNITS_TIME_HOURS:
+            return value / 60.0
+    elif in_units == UNITS_TIME_HOURS:
+        if out_units == UNITS_TIME_SECONDS:
+            return value * 60.0 * 60.0
+        elif out_units == UNITS_TIME_MINUTES:
+            return value * 60.0
+    return value
+
 def convert_speed(value, in_distance_units, in_time_units, out_distance_units, out_time_units):
     """Unit conversion for speed values."""
-
-    # Convert the numerator.
-    if in_distance_units == UNITS_DISTANCE_METERS:
-        if out_distance_units == UNITS_DISTANCE_KILOMETERS:
-            value = value / 1000.0
-        elif out_distance_units == UNITS_DISTANCE_MILES:
-            value = value / METERS_PER_MILE
-    elif in_distance_units == UNITS_DISTANCE_KILOMETERS:
-        if out_distance_units == UNITS_DISTANCE_METERS:
-            value = value * 1000.0
-        elif out_distance_units == UNITS_DISTANCE_MILES:
-            value = value * (METERS_PER_MILE / 1000.0)
-    elif in_distance_units == UNITS_DISTANCE_MILES:
-        if out_distance_units == UNITS_DISTANCE_METERS:
-            value = value * METERS_PER_MILE
-        elif out_distance_units == UNITS_DISTANCE_KILOMETERS:
-            value = value / (METERS_PER_MILE / 1000.0)
-
-    # Convert the denominator.
+    value = convert_distance(value, in_distance_units, out_distance_units)
     if in_time_units == UNITS_TIME_SECONDS:
         if out_time_units == UNITS_TIME_MINUTES:
-            value = value * 60.0
+            return value * 60.0
         elif out_time_units == UNITS_TIME_HOURS:
-            value = value * 60.0 * 60.0
+            return value * 60.0 * 60.0
     elif in_time_units == UNITS_TIME_MINUTES:
         if out_time_units == UNITS_TIME_SECONDS:
-            value = value / 60.0
+            return value / 60.0
         elif out_time_units == UNITS_TIME_HOURS:
-            value = value * 60.0
+            return value * 60.0
     elif in_time_units == UNITS_TIME_HOURS:
         if out_time_units == UNITS_TIME_SECONDS:
-            value = value / 60.0 / 60.0
+            return value / 60.0 / 60.0
         elif out_time_units == UNITS_TIME_MINUTES:
-            value = value / 60.0
+            return value / 60.0
     return value
+
+def get_distance_units_str(distance_units):
+    """Returns the units in which distance is displayed."""
+    if distance_units == UNITS_DISTANCE_METERS:
+        return "meters"
+    elif distance_units == UNITS_DISTANCE_KILOMETERS:
+        return "kms"
+    elif distance_units == UNITS_DISTANCE_MILES:
+        return "miles"
+    return ""
 
 def get_speed_units_str(distance_units, time_units):
     """Returns the units in which speed is displayed."""
-    units_str = ""
-
-    if distance_units == UNITS_DISTANCE_METERS:
-        units_str = "meters"
-    elif distance_units == UNITS_DISTANCE_KILOMETERS:
-        units_str = "kms"
-    elif distance_units == UNITS_DISTANCE_MILES:
-        units_str = "miles"
-
+    units_str = get_distance_units_str(distance_units)
     units_str = units_str + " / "
 
     if time_units == UNITS_TIME_MINUTES:

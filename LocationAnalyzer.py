@@ -22,19 +22,22 @@ class LocationAnalyzer(object):
         self.last_lat = None
         self.last_lon = None
         self.last_alt = None
+
         self.distance_buf = [] # Used for the current speed calcuations
         self.total_distance = 0.0 # Distance traveled (in meters)
-        self.avg_speed = 0.0 # Average speed (in meters/second)
-        self.current_speed = 0.0 # Current speed (in meters/second)
-        self.best_speed = 0.0 # Best speed (in meters/second)
-        self.best_km = 0.0 # Best one kilometer time (in seconds)
-        self.best_mile = 0.0 # Best one mile time (in seconds)
+
+        self.avg_speed = None # Average speed (in meters/second)
+        self.current_speed = None # Current speed (in meters/second)
+        self.best_speed = None # Best speed (in meters/second)
+
+        self.best_km = None # Best one kilometer time (in seconds)
+        self.best_mile = None # Best one mile time (in seconds)
 
     def update_average_speed(self, date_time):
         """Computes the average speed of the workout. Called by 'append_location'."""
-        elapsed_seconds = date_time - self.start_time
-        if elapsed_seconds > 0:
-            self.avg_speed = self.total_distance / elapsed_seconds
+        elapsed_milliseconds = date_time - self.start_time
+        if elapsed_milliseconds > 0:
+            self.avg_speed = self.total_distance / (elapsed_milliseconds / 1000.0)
 
     def update_speeds(self):
         """Computes the average speed over the last mile. Called by 'append_location'."""
@@ -53,20 +56,20 @@ class LocationAnalyzer(object):
                 # Convert time from ms to secs.
                 total_seconds = total_time / 1000.0
 
-                # Current speed is the average of the last three seconds.
-                if int(total_seconds) == 3 and self.current_speed == 0.0:
+                # Current speed is the average of the last ten seconds.
+                if int(total_seconds) == 10 or self.current_speed is None:
                     self.current_speed = total_meters / total_seconds
-                    if self.current_speed > self.best_speed:
+                    if self.best_speed is None or self.current_speed > self.best_speed:
                         self.best_speed = self.current_speed
 
                 # Is this a new kilometer record for this activity?
-                elif int(total_meters) == 1000:
-                    if total_seconds < self.best_km or self.best_km == 0.0:
+                if int(total_meters) == 1000:
+                    if self.best_km is None or total_seconds < self.best_km:
                         self.best_km = total_seconds
 
                 # Is this a new mile record for this activity?
                 elif int(total_meters) == int(Units.METERS_PER_MILE):
-                    if total_seconds < self.best_mile or self.best_mile == 0.0:
+                    if self.best_mile is None or total_seconds < self.best_mile:
                         self.best_mile = total_seconds
 
                 # A mile is the longest distance we're looking for, so just break.
@@ -85,7 +88,6 @@ class LocationAnalyzer(object):
             meters_traveled = distance.haversine_distance(latitude, longitude, altitude, self.last_lat, self.last_lon, self.last_alt)
             self.distance_buf.append([date_time, meters_traveled])
             self.total_distance = self.total_distance + meters_traveled
-
             self.update_average_speed(date_time)
             self.update_speeds()
 
@@ -102,18 +104,4 @@ class LocationAnalyzer(object):
             latitude = location[StraenKeys.LOCATION_LAT_KEY]
             longitude = location[StraenKeys.LOCATION_LON_KEY]
             altitude = location[StraenKeys.LOCATION_ALT_KEY]
-
-            if self.start_time is None:
-                self.start_time = date_time
-            elif self.last_time is not None:
-                meters_traveled = distance.haversine_distance(latitude, longitude, altitude, self.last_lat, self.last_lon, self.last_alt)
-                self.distance_buf.append([date_time, meters_traveled])
-                self.total_distance = self.total_distance + meters_traveled
-
-                self.update_average_speed(date_time)
-                self.update_speeds()
-
-            self.last_time = date_time
-            self.last_lat = latitude
-            self.last_lon = longitude
-            self.last_alt = altitude
+            self.append_location(date_time, latitude, longitude, altitude)
