@@ -27,7 +27,7 @@ class SensorAnalyzerFactory(object):
         sensor_analyzer = self.create(sensor_type)
         if sensor_analyzer is not None:
             for datum in data:
-                time = datum.keys()[0]
+                time = int(datum.keys()[0])
                 value = float(datum.values()[0])
                 sensor_analyzer.append_sensor_value(time, value)
         return sensor_analyzer
