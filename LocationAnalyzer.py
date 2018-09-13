@@ -25,6 +25,7 @@ class LocationAnalyzer(object):
 
         self.distance_buf = [] # Used for the current speed calcuations
         self.total_distance = 0.0 # Distance traveled (in meters)
+        self.total_vertical = 0.0 # Total ascent (in meters)
 
         self.avg_speed = None # Average speed (in meters/second)
         self.current_speed = None # Current speed (in meters/second)
@@ -88,6 +89,7 @@ class LocationAnalyzer(object):
             meters_traveled = distance.haversine_distance(latitude, longitude, altitude, self.last_lat, self.last_lon, self.last_alt)
             self.distance_buf.append([date_time, meters_traveled])
             self.total_distance = self.total_distance + meters_traveled
+            self.total_vertical = self.total_vertical + abs(altitude - self.last_alt)
             self.update_average_speed(date_time)
             self.update_speeds()
 

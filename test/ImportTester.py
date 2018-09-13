@@ -61,6 +61,7 @@ class TestActivityWriter(Importer.ActivityWriter):
         print "Location-Based Calculations:"
         print "----------------------------"
         print "Total Distance: {:.2f}".format(self.location_analyzer.total_distance)
+        print "Vertical Ascent: {:.2f}".format(self.location_analyzer.total_vertical)
         if self.location_analyzer.avg_speed is not None:
             print "Average Speed: {:.2f}".format(self.location_analyzer.avg_speed)
         if self.location_analyzer.current_speed is not None:
