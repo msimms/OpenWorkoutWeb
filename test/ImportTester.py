@@ -93,8 +93,8 @@ def main():
 
     # Process each file in the specified directory as well as its subdirectories.
     for subdir, _, files in os.walk(test_dir):
-        title_str = "Processing all files in: " + test_dir
-        print title_str
+        title_str = "Processing all files in " + test_dir + ":"
+        print title_str + "\n"
         for current_file in files:
             full_path = os.path.join(subdir, current_file)
             title_str = "Processing: " + full_path
@@ -103,12 +103,15 @@ def main():
             print "=" * len(title_str)
             _, temp_file_ext = os.path.splitext(full_path)
             if importer.import_file("test user", full_path, temp_file_ext):
-                print "Success"
+                print "Success!\n"
                 successes.append(current_file)
             else:
-                print "Failed"
+                print "Failure!\n"
                 failures.append(current_file)
 
+    title_str = "Summary:"
+    print title_str
+    print "=" * len(title_str)
     print "Num success: " + str(len(successes))
     print "Num failures: " + str(len(failures))
 
