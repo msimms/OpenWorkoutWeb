@@ -29,7 +29,7 @@ g_app = None
 def signal_handler(signal, frame):
     global g_app
 
-    print "Exiting..."
+    print("Exiting...")
     if g_app is not None:
         g_app.terminate()
     sys.exit(0)
@@ -98,7 +98,7 @@ class StraenWeb(object):
 
     def terminate(self):
         """Destructor"""
-        print "Terminating"
+        print("Terminating")
         self.app.terminate()
         self.app = None
 
@@ -459,12 +459,12 @@ def main():
         sys.exit(1)
 
     if args.https:
-        print "Running HTTPS...."
+        print("Running HTTPS....")
         cherrypy.server.ssl_module = 'builtin'
         cherrypy.server.ssl_certificate = args.cert
-        print "Certificate File: " + args.cert
+        print("Certificate File: " + args.cert)
         cherrypy.server.ssl_private_key = args.privkey
-        print "Private Key File: " + args.privkey
+        print("Private Key File: " + args.privkey)
         protocol = "https"
     else:
         protocol = "http"
@@ -474,13 +474,13 @@ def main():
             args.host = "127.0.0.1"
         else:
             args.host = "straen-app.com"
-        print "Hostname not provided, will use " + args.host
+        print("Hostname not provided, will use " + args.host)
 
     root_dir = os.path.dirname(os.path.abspath(__file__))
     root_url = protocol + "://" + args.host
     if args.hostport > 0:
         root_url = root_url + ":" + str(args.hostport)
-    print "Root URL is " + root_url
+    print("Root URL is " + root_url)
 
     if not args.debug:
         Daemonizer(cherrypy.engine).subscribe()

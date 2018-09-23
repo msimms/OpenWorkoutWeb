@@ -25,8 +25,8 @@ class TestActivityWriter(Importer.ActivityWriter):
     def create_activity(self, username, stream_name, stream_description, activity_type):
         self.location_analyzer = LocationAnalyzer.LocationAnalyzer() # Need a fresh analyzer object for each activity
         title_str = "Activity Type: " + activity_type
-        print title_str
-        print "-" * len(title_str)
+        print(title_str)
+        print("-" * len(title_str))
         return None, None
 
     def create_track(self, device_str, activity_id, track_name, track_description):
@@ -55,23 +55,23 @@ class TestActivityWriter(Importer.ActivityWriter):
         """Called for post-processing."""
         for sensor_analyzer in self.sensor_analyzers:
             title_str = sensor_analyzer.type + ":"
-            print title_str
-            print "-" * len(title_str)
-            print sensor_analyzer.analyze()
-        print "Location-Based Calculations:"
-        print "----------------------------"
-        print "Total Distance: {:.2f}".format(self.location_analyzer.total_distance)
-        print "Vertical Ascent: {:.2f}".format(self.location_analyzer.total_vertical)
+            print(title_str)
+            print("-" * len(title_str))
+            print(sensor_analyzer.analyze())
+        print("Location-Based Calculations:")
+        print("----------------------------")
+        print("Total Distance: {:.2f}".format(self.location_analyzer.total_distance))
+        print("Vertical Ascent: {:.2f}".format(self.location_analyzer.total_vertical))
         if self.location_analyzer.avg_speed is not None:
-            print "Average Speed: {:.2f}".format(self.location_analyzer.avg_speed)
+            print("Average Speed: {:.2f}".format(self.location_analyzer.avg_speed))
         if self.location_analyzer.current_speed is not None:
-            print "Current Speed: {:.2f}".format(self.location_analyzer.current_speed)
+            print("Current Speed: {:.2f}".format(self.location_analyzer.current_speed))
         if self.location_analyzer.best_speed is not None:
-            print "Best Speed: {:.2f}".format(self.location_analyzer.best_speed)
+            print("Best Speed: {:.2f}".format(self.location_analyzer.best_speed))
         if self.location_analyzer.best_km is not None:
-            print "Best KM: {:.2f}".format(self.location_analyzer.best_km)
+            print("Best KM: {:.2f}".format(self.location_analyzer.best_km))
         if self.location_analyzer.best_mile is not None:
-            print "Best Mile: {:.2f}".format(self.location_analyzer.best_mile)
+            print("Best Mile: {:.2f}".format(self.location_analyzer.best_mile))
 
         self.location_analyzer = None
         self.sensor_analyzers = []
@@ -94,26 +94,26 @@ def main():
     # Process each file in the specified directory as well as its subdirectories.
     for subdir, _, files in os.walk(test_dir):
         title_str = "Processing all files in " + test_dir + ":"
-        print title_str + "\n"
+        print(title_str + "\n")
         for current_file in files:
             full_path = os.path.join(subdir, current_file)
             title_str = "Processing: " + full_path
-            print "=" * len(title_str)
-            print title_str
-            print "=" * len(title_str)
+            print("=" * len(title_str))
+            print(title_str)
+            print("=" * len(title_str))
             _, temp_file_ext = os.path.splitext(full_path)
             if importer.import_file("test user", full_path, temp_file_ext):
-                print "Success!\n"
+                print("Success!\n")
                 successes.append(current_file)
             else:
-                print "Failure!\n"
+                print("Failure!\n")
                 failures.append(current_file)
 
     title_str = "Summary:"
-    print title_str
-    print "=" * len(title_str)
-    print "Num success: " + str(len(successes))
-    print "Num failures: " + str(len(failures))
+    print(title_str)
+    print("=" * len(title_str))
+    print("Num success: " + str(len(successes)))
+    print("Num failures: " + str(len(failures)))
 
 if __name__ == "__main__":
     main()
