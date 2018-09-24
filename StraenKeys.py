@@ -13,6 +13,7 @@ REALNAME_KEY = "realname"
 HASH_KEY = "hash"
 DEVICES_KEY = "devices"
 FOLLOWING_KEY = "following"
+PR_KEY = "pr"
 
 # User settings
 DEFAULT_PRIVACY = "default privacy"

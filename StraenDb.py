@@ -369,6 +369,67 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def create_user_pr(self, user_id, record_name, record_value):
+        """Create method for a user's personal record."""
+        if user_id is None:
+            self.log_error(MongoDatabase.create_user_pr.__name__ + ": Unexpected empty object: user_id")
+            return False
+
+        try:
+            user_id_obj = ObjectId(user_id)
+            user = self.users_collection.find_one({StraenKeys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+                pr_list = []
+                if StraenKeys.PR_KEY in user:
+                    pr_list = user[StraenKeys.PR_KEY]
+                pr_list.append({record_name, record_value})
+                user[StraenKeys.PR_KEY] = pr_list
+                self.users_collection.save(user)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def update_user_pr(self, user_id, record_name, record_value):
+        """Update method for a user's personal record."""
+        if user_id is None:
+            self.log_error(MongoDatabase.update_user_pr.__name__ + ": Unexpected empty object: user_id")
+            return False
+
+        try:
+            user_id_obj = ObjectId(user_id)
+            user = self.users_collection.find_one({StraenKeys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+                pr_list = user[StraenKeys.PR_KEY]
+                if record_name in pr_list:
+                    pr_list[record_name] = record_value
+                    user[StraenKeys.PR_KEY] = pr_list
+                    self.users_collection.save(user)
+                    return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_user_personal_record(self, user_id, record_name):
+        """Retrieve method for a user's personal record."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_user_personal_record.__name__ + ": Unexpected empty object: user_id")
+            return None
+
+        try:
+            user_id_obj = ObjectId(user_id)
+            user = self.users_collection.find_one({StraenKeys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+                pr_list = user[StraenKeys.PR_KEY]
+                if record_name in pr_list:
+                    return pr_list[record_name]
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
     def retrieve_device_activity_list(self, device_str, start, num_results):
         """Retrieves the list of activities associated with the specified device."""
         if device_str is None:
@@ -531,6 +592,9 @@ class MongoDatabase(Database.Database):
             activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id})
             if activity is not None:
 
+                # Make sure we're working with a number.
+                num_value = float(value)
+
                 # The metadata is a list.
                 if create_list is True:
                     data = []
@@ -542,14 +606,14 @@ class MongoDatabase(Database.Database):
                             self.log_error(MongoDatabase.create_metadata.__name__ + ": Received out-of-order time value.")
                             return False
 
-                    value = {str(date_time): str(value)}
-                    data.append(value)
+                    time_value_pair = {date_time: num_value}
+                    data.append(time_value_pair)
                     activity[key] = data
                     self.activities_collection.save(activity)
 
                 # The metadata is a scalar, just make sure it hasn't changed before updating it.
                 elif key not in activity or activity[key] != value:
-                    activity[key] = value
+                    activity[key] = num_value
                     self.activities_collection.save(activity)
                 return True
         except:
@@ -597,6 +661,10 @@ class MongoDatabase(Database.Database):
         try:
             activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id})
             if activity is not None:
+
+                # Make sure we're working with a number.
+                num_value = float(value)
+
                 data = []
                 if sensor_type in activity:
                     data = activity[sensor_type]
@@ -606,8 +674,8 @@ class MongoDatabase(Database.Database):
                         self.log_error(MongoDatabase.create_sensordata.__name__ + ": Received out-of-order time value.")
                         return False
 
-                value = {str(date_time): str(value)}
-                data.append(value)
+                time_value_pair = {date_time: num_value}
+                data.append(time_value_pair)
                 activity[sensor_type] = data
                 self.activities_collection.save(activity)
                 return True
