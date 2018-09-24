@@ -373,7 +373,7 @@ class StraenApp(object):
             last_lon = last_loc[StraenKeys.LOCATION_LON_KEY]
 
         # Get all the things.
-        current_speeds_str, max_speed = self.render_metadata_for_page(StraenKeys.APP_CURRENT_SPEED_KEY, activity_id)
+        current_speeds_str, _ = self.render_metadata_for_page(StraenKeys.APP_CURRENT_SPEED_KEY, activity_id)
         heart_rates_str, max_heart_rate, heart_rate_analysis = self.render_sensor_data_for_page(StraenKeys.APP_HEART_RATE_KEY, activity_id)
         cadences_str, max_cadence, cadence_analysis = self.render_sensor_data_for_page(StraenKeys.APP_CADENCE_KEY, activity_id)
         powers_str, max_power, power_analysis = self.render_sensor_data_for_page(StraenKeys.APP_POWER_KEY, activity_id)
