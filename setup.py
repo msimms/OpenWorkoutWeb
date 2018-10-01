@@ -4,7 +4,7 @@ requirements = ['cherrypy', 'gpxpy', 'mako', 'bson', 'pymongo', 'bcrypt', 'fitpa
 
 setup(
     name='straenweb',
-    version='0.1.0',
+    version='0.4.0',
     description='',
     url='https://github.com/msimms/StraenWeb',
     author='Mike Simms',
