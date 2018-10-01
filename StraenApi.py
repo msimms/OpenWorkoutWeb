@@ -144,7 +144,7 @@ class StraenApi(object):
     def handle_login_submit(self, values):
         """Called when an API message to log in is received."""
         if self.user_id is not None:
-            raise Exception("Already logged in.")
+            return True, self.user_mgr.get_logged_in_user()
 
         if StraenKeys.USERNAME_KEY not in values:
             raise Exception("Username not specified.")
