@@ -4,6 +4,9 @@
 import calendar
 import datetime
 import gpxpy
+import logging
+import traceback
+import sys
 from lxml import objectify
 
 import StraenKeys
@@ -147,5 +150,7 @@ class Importer(object):
             elif file_extension == '.tcx':
                 return self.import_tcx_file(username, local_file_name)
         except:
-            pass
+            traceback.print_exc(file=sys.stdout)
+            logger = logging.getLogger()
+            logger.error(sys.exc_info()[0])
         return False
