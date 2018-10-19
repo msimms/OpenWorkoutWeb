@@ -28,9 +28,9 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 average_power = total / curr_time_diff
                 if average_power > self.best_5_sec_power:
                     self.best_5_sec_power = average_power
-                if duration < 120:
+                if duration < 1200:
                     return
-            elif curr_time_diff == 120:
+            elif curr_time_diff == 1200:
                 average_power = total / curr_time_diff
                 if average_power > self.best_20_min_power:
                     self.best_20_min_power = average_power
@@ -52,6 +52,6 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
         # Compute the intensity factory (IF = NP / FTP).
 
         results["5 Sec. Avg. Power"] = self.best_5_sec_power
-        results["20 Sec. Avg. Power"] = self.best_20_min_power
+        results["20 Min. Avg. Power"] = self.best_20_min_power
         results["1 Hour Avg. Power"] = self.best_1_hour_power
         return results
