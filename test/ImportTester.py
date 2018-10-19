@@ -3,6 +3,7 @@
 
 import argparse
 import inspect
+import logging
 import os
 import sys
 
@@ -13,6 +14,9 @@ sys.path.insert(0, parentdir)
 import Importer
 import LocationAnalyzer
 import SensorAnalyzerFactory
+
+ERROR_LOG = 'error.log'
+
 
 class TestActivityWriter(Importer.ActivityWriter):
     """Subclass that implements the location writer and will receive the locations as they are read from the file."""
@@ -78,6 +82,8 @@ class TestActivityWriter(Importer.ActivityWriter):
 
 def main():
     """Starts the tests."""
+
+    logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
     successes = []
     failures = []
