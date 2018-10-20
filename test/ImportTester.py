@@ -120,6 +120,8 @@ def main():
     print("=" * len(title_str))
     print("Num success: " + str(len(successes)))
     print("Num failures: " + str(len(failures)))
+    for failure in failures:
+        print("- " + failure)
 
 if __name__ == "__main__":
     main()
