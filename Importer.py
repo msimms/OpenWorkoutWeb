@@ -123,7 +123,12 @@ class Importer(object):
                                 dt_unix = calendar.timegm(dt_obj)
 
                                 # Store the location.
-                                self.activity_writer.create_location(device_str, activity_id, dt_unix, point.Position.LatitudeDegrees, point.Position.LongitudeDegrees, point.AltitudeMeters)
+                                if hasattr(point, 'Position'):
+                                    if hasattr(point, 'AltitudeMeters'):
+                                        altitudeMeters = point.AltitudeMeters
+                                    else:
+                                        altitudeMeters = 0.0
+                                    self.activity_writer.create_location(device_str, activity_id, dt_unix, point.Position.LatitudeDegrees, point.Position.LongitudeDegrees, altitudeMeters)
 
                                 # Look for other attributes.
                                 if hasattr(point, 'Cadence'):
