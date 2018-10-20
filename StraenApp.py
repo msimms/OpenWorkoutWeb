@@ -1024,3 +1024,8 @@ class StraenApp(object):
         about_html_file = os.path.join(self.root_dir, HTML_DIR, 'about.html')
         my_template = Template(filename=about_html_file, module_directory=self.tempmod_dir)
         return my_template.render(product=PRODUCT_NAME, root_url=self.root_url)
+
+    @statistics
+    def status(self):
+        """Renders the status page. Used as a simple way to tell if the site is up."""
+        return "Up"

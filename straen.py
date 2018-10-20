@@ -389,6 +389,16 @@ class StraenWeb(object):
         return result
 
     @cherrypy.expose
+    def status(self):
+        """Renders the status page. Used as a simple way to tell if the site is up."""
+        result = ""
+        try:
+            result = self.app.status()
+        except:
+            result = self.error()
+        return result
+
+    @cherrypy.expose
     def api(self, *args, **kw):
         """Endpoint for API calls."""
         response = ""

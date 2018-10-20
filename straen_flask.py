@@ -238,6 +238,16 @@ def about():
         result = g_app.error()
     return result
 
+@g_flask_app.route('/status')
+def status():
+    """Renders the status page. Used as a simple way to tell if the site is up."""
+    result = ""
+    try:
+        result = g_app.status()
+    except:
+        result = g_app.error()
+    return result
+
 @g_flask_app.route('/')
 def index():
     """Renders the index page."""
