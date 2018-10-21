@@ -592,8 +592,11 @@ class MongoDatabase(Database.Database):
             activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id})
             if activity is not None:
 
-                # Make sure we're working with a number.
-                num_value = float(value)
+                # Make sure we're working with a number, if the value is supposed to be a number.
+                try:
+                    value = float(value)
+                except ValueError:
+                    pass
 
                 # The metadata is a list.
                 if create_list is True:
@@ -606,14 +609,14 @@ class MongoDatabase(Database.Database):
                             self.log_error(MongoDatabase.create_metadata.__name__ + ": Received out-of-order time value.")
                             return False
 
-                    time_value_pair = {date_time: num_value}
+                    time_value_pair = {str(date_time): value}
                     data.append(time_value_pair)
                     activity[key] = data
                     self.activities_collection.save(activity)
 
                 # The metadata is a scalar, just make sure it hasn't changed before updating it.
                 elif key not in activity or activity[key] != value:
-                    activity[key] = num_value
+                    activity[key] = value
                     self.activities_collection.save(activity)
                 return True
         except:
