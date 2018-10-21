@@ -66,8 +66,9 @@ class Importer(object):
 
                         # Read the timestamp.
                         dt_str = str(point.time) + " UTC"
-                        dt_obj = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S %Z").timetuple()
-                        dt_unix = calendar.timegm(dt_obj)
+                        dt_obj = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S %Z")
+                        dt_tuple = dt_obj.timetuple()
+                        dt_unix = calendar.timegm(dt_tuple) * 1000
 
                         # Store the location.
                         self.activity_writer.create_location(device_str, activity_id, dt_unix, point.latitude, point.longitude, point.elevation)
@@ -119,8 +120,10 @@ class Importer(object):
                             for point in track.Trackpoint:
 
                                 # Read the timestamp.
-                                dt_obj = datetime.datetime.strptime(str(point.Time), "%Y-%m-%dT%H:%M:%S.%fZ").timetuple()
-                                dt_unix = calendar.timegm(dt_obj)
+                                dt_obj = datetime.datetime.strptime(str(point.Time), "%Y-%m-%dT%H:%M:%S.%fZ")
+                                dt_tuple = dt_obj.timetuple()
+                                dt_unix = calendar.timegm(dt_tuple) * 1000
+                                dt_unix = dt_unix + dt_obj.microsecond / 1000
 
                                 # Store the location.
                                 if hasattr(point, 'Position'):

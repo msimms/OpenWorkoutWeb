@@ -64,18 +64,25 @@ class TestActivityWriter(Importer.ActivityWriter):
             print(sensor_analyzer.analyze())
         print("Location-Based Calculations:")
         print("----------------------------")
-        print("Total Distance: {:.2f}".format(self.location_analyzer.total_distance))
-        print("Vertical Ascent: {:.2f}".format(self.location_analyzer.total_vertical))
+        print("Total Distance: {:.2f} meters".format(self.location_analyzer.total_distance))
+        print("Vertical Ascent: {:.2f} meters".format(self.location_analyzer.total_vertical))
+        if self.location_analyzer.start_time is not None and self.location_analyzer.last_time is not None:
+            total_time = (self.location_analyzer.last_time - self.location_analyzer.start_time) / 1000
+            print("Total Time: {:.2f} seconds".format(total_time))
         if self.location_analyzer.avg_speed is not None:
-            print("Average Speed: {:.2f}".format(self.location_analyzer.avg_speed))
+            print("Average Speed: {:.2f} meters/second".format(self.location_analyzer.avg_speed))
         if self.location_analyzer.current_speed is not None:
-            print("Current Speed: {:.2f}".format(self.location_analyzer.current_speed))
+            print("Current Speed: {:.2f} meters/second".format(self.location_analyzer.current_speed))
         if self.location_analyzer.best_speed is not None:
             print("Best Speed: {:.2f}".format(self.location_analyzer.best_speed))
         if self.location_analyzer.best_km is not None:
-            print("Best KM: {:.2f}".format(self.location_analyzer.best_km))
+            print("Best KM: {:.2f} seconds".format(self.location_analyzer.best_km))
         if self.location_analyzer.best_mile is not None:
-            print("Best Mile: {:.2f}".format(self.location_analyzer.best_mile))
+            print("Best Mile: {:.2f} seconds".format(self.location_analyzer.best_mile))
+        if self.location_analyzer.best_5k is not None:
+            print("Best 5K: {:.2f} seconds".format(self.location_analyzer.best_5k))
+        if self.location_analyzer.best_10k is not None:
+            print("Best 10K: {:.2f} seconds".format(self.location_analyzer.best_10k))
 
         self.location_analyzer = None
         self.sensor_analyzers = []

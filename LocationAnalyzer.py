@@ -34,12 +34,20 @@ class LocationAnalyzer(object):
 
         self.best_km = None # Best one kilometer time (in seconds)
         self.best_mile = None # Best one mile time (in seconds)
+        self.best_5k = None # Best five kilometer time (in seconds)
+        self.best_10k = None # Best ten kilometer time (in seconds)
 
     def update_average_speed(self, date_time):
         """Computes the average speed of the workout. Called by 'append_location'."""
         elapsed_milliseconds = date_time - self.start_time
         if elapsed_milliseconds > 0:
             self.avg_speed = self.total_distance / (elapsed_milliseconds / 1000.0)
+
+    def do_record_check(self, record, seconds, meters, record_meters):
+        if int(meters) == record_meters:
+            if record is None or seconds < record:
+                record = seconds
+        return record
 
     def update_speeds(self):
         """Computes the average speed over the last mile. Called by 'append_location'."""
@@ -52,6 +60,8 @@ class LocationAnalyzer(object):
 
             # Convert time from ms to seconds - seconds from this point to the end of the activity.
             total_seconds = (self.last_time - time_distance_pair[0]) / 1000.0
+            if total_seconds <= 0:
+                continue
 
             # Distance travelled from this point to the end of the activity.
             total_meters = self.last_total - time_distance_pair[2]
@@ -65,20 +75,16 @@ class LocationAnalyzer(object):
                     break
 
             # Is this a new kilometer record for this activity?
-            if int(total_meters) == 1000:
-                if self.best_km is None or total_seconds < self.best_km:
-                    self.best_km = total_seconds
-                if self.last_total < Units.METERS_PER_MILE:
-                    break
+            self.best_km = self.do_record_check(self.best_km, total_seconds, total_meters, 1000)
 
             # Is this a new mile record for this activity?
-            elif int(total_meters) == int(Units.METERS_PER_MILE):
-                if self.best_mile is None or total_seconds < self.best_mile:
-                    self.best_mile = total_seconds
+            self.best_mile = self.do_record_check(self.best_mile, total_seconds, total_meters, Units.METERS_PER_MILE)
 
-            # A mile is the longest distance we're looking for, so just break.
-            elif int(total_meters) > Units.METERS_PER_MILE:
-                break
+            # Is this a new 5K record for this activity?
+            self.best_5k = self.do_record_check(self.best_5k, total_seconds, total_meters, 5000)
+
+            # Is this a new 10K record for this activity?
+            self.best_10k = self.do_record_check(self.best_10k, total_seconds, total_meters, 10000)
 
     def append_location(self, date_time, latitude, longitude, altitude):
         """Adds another location to the analyzer. Locations should be sent in order."""
