@@ -24,7 +24,7 @@ class DataMgr(Importer.ActivityWriter):
         self.database = None
 
     def create_activity(self, username, stream_name, stream_description, activity_type):
-        """Inherited from ActivityWriter."""
+        """Inherited from ActivityWriter. Called when we start reading an activity file."""
         if self.database is None:
             raise Exception("No database.")
         return None, None
@@ -62,6 +62,10 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
         return self.database.create_metadata(activity_id, date_time, key, value, create_list)
+
+    def finish_activity(self):
+        """Inherited from ActivityWriter. Called for post-processing."""
+        pass
 
     def import_file(self, username, local_file_name, file_extension):
         """Imports the contents of a local file into the database."""

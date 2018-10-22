@@ -32,10 +32,7 @@ class LocationAnalyzer(object):
         self.current_speed = None # Current speed (in meters/second)
         self.best_speed = None # Best speed (in meters/second)
 
-        self.best_km = None # Best one kilometer time (in seconds)
-        self.best_mile = None # Best one mile time (in seconds)
-        self.best_5k = None # Best five kilometer time (in seconds)
-        self.best_10k = None # Best ten kilometer time (in seconds)
+        self.bests = [] # Best times within the current activity (best mile, etc.)
 
     def update_average_speed(self, date_time):
         """Computes the average speed of the workout. Called by 'append_location'."""
@@ -43,11 +40,30 @@ class LocationAnalyzer(object):
         if elapsed_milliseconds > 0:
             self.avg_speed = self.total_distance / (elapsed_milliseconds / 1000.0)
 
-    def do_record_check(self, record, seconds, meters, record_meters):
-        if int(meters) == record_meters:
-            if record is None or seconds < record:
-                record = seconds
-        return record
+    def get_best_time(self, record_name):
+        """Returns the time associated with the specified record, or None if not found."""
+        for index, item in enumerate(self.bests):
+            if record_name in item:
+                return item[record_name]
+        return None
+
+    def get_record(self, record_name):
+        """Returns the record index and value for the record with the specified name, or None if not found."""
+        for index, item in enumerate(self.bests):
+            if record_name in item:
+                return index, item[record_name]
+        return None, None
+
+    def do_record_check(self, record_name, seconds, meters, record_meters):
+        """Looks up the existing record and, if necessary, updates it."""
+        if int(meters) == int(record_meters):
+            new_record = { record_name: seconds }
+            index, old_value = self.get_record(record_name)
+            if old_value is not None:
+                if seconds < old_value:
+                    self.bests[index] = new_record
+                return
+            self.bests.append(new_record)
 
     def update_speeds(self):
         """Computes the average speed over the last mile. Called by 'append_location'."""
@@ -75,16 +91,19 @@ class LocationAnalyzer(object):
                     break
 
             # Is this a new kilometer record for this activity?
-            self.best_km = self.do_record_check(self.best_km, total_seconds, total_meters, 1000)
+            self.do_record_check(StraenKeys.BEST_1K, total_seconds, total_meters, 1000)
 
             # Is this a new mile record for this activity?
-            self.best_mile = self.do_record_check(self.best_mile, total_seconds, total_meters, Units.METERS_PER_MILE)
+            self.do_record_check(StraenKeys.BEST_MILE, total_seconds, total_meters, Units.METERS_PER_MILE)
 
             # Is this a new 5K record for this activity?
-            self.best_5k = self.do_record_check(self.best_5k, total_seconds, total_meters, 5000)
+            self.do_record_check(StraenKeys.BEST_5K, total_seconds, total_meters, 5000)
 
             # Is this a new 10K record for this activity?
-            self.best_10k = self.do_record_check(self.best_10k, total_seconds, total_meters, 10000)
+            self.do_record_check(StraenKeys.BEST_10K, total_seconds, total_meters, 10000)
+
+            # Is this a new half marathon record for this activity?
+            self.do_record_check(StraenKeys.BEST_HALF_MARATHON, total_seconds, total_meters, Units.METERS_PER_MILE * 13.1)
 
     def append_location(self, date_time, latitude, longitude, altitude):
         """Adds another location to the analyzer. Locations should be sent in order."""

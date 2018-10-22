@@ -6,6 +6,7 @@ import inspect
 import logging
 import os
 import sys
+import uuid
 
 # Locate and load the importer module.
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -14,6 +15,8 @@ sys.path.insert(0, parentdir)
 import Importer
 import LocationAnalyzer
 import SensorAnalyzerFactory
+import StraenKeys
+import Summarizer
 
 ERROR_LOG = 'error.log'
 
@@ -25,23 +28,28 @@ class TestActivityWriter(Importer.ActivityWriter):
         Importer.ActivityWriter.__init__(self)
         self.location_analyzer = None
         self.sensor_analyzers = []
+        self.summarizer = Summarizer.Summarizer()
+        self.current_activity_id = None
 
     def create_activity(self, username, stream_name, stream_description, activity_type):
+        """Inherited from ActivityWriter. Called when we start reading an activity file."""
         self.location_analyzer = LocationAnalyzer.LocationAnalyzer() # Need a fresh analyzer object for each activity
+        self.current_activity_id = str(uuid.uuid4())
         title_str = "Activity Type: " + activity_type
         print(title_str)
         print("-" * len(title_str))
         return None, None
 
     def create_track(self, device_str, activity_id, track_name, track_description):
+        """Inherited from ActivityWriter."""
         pass
 
     def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
-        """Called for each location that is read from the input file."""
+        """Inherited from ActivityWriter. Called for each location that is read from the input file."""
         self.location_analyzer.append_location(date_time, latitude, longitude, altitude)
 
     def create_sensor_reading(self, device_str, activity_id, date_time, key, value):
-        """Called for each sensor reading that is read from the input file."""
+        """Inherited from ActivityWriter. Called for each sensor reading that is read from the input file."""
         found = False
         for sensor_analyzer in self.sensor_analyzers:
             if sensor_analyzer.type == key:
@@ -56,7 +64,7 @@ class TestActivityWriter(Importer.ActivityWriter):
                 self.sensor_analyzers.append(sensor_analyzer)
 
     def finish_activity(self):
-        """Called for post-processing."""
+        """Inherited from ActivityWriter. Called for post-processing."""
         for sensor_analyzer in self.sensor_analyzers:
             title_str = sensor_analyzer.type + ":"
             print(title_str)
@@ -75,14 +83,22 @@ class TestActivityWriter(Importer.ActivityWriter):
             print("Current Speed: {:.2f} meters/second".format(self.location_analyzer.current_speed))
         if self.location_analyzer.best_speed is not None:
             print("Best Speed: {:.2f}".format(self.location_analyzer.best_speed))
-        if self.location_analyzer.best_km is not None:
-            print("Best KM: {:.2f} seconds".format(self.location_analyzer.best_km))
-        if self.location_analyzer.best_mile is not None:
-            print("Best Mile: {:.2f} seconds".format(self.location_analyzer.best_mile))
-        if self.location_analyzer.best_5k is not None:
-            print("Best 5K: {:.2f} seconds".format(self.location_analyzer.best_5k))
-        if self.location_analyzer.best_10k is not None:
-            print("Best 10K: {:.2f} seconds".format(self.location_analyzer.best_10k))
+
+        best = self.location_analyzer.get_best_time(StraenKeys.BEST_1K)
+        if best is not None:
+            print("Best KM: {:.2f} seconds".format(best))
+        best = self.location_analyzer.get_best_time(StraenKeys.BEST_MILE)
+        if best is not None:
+            print("Best Mile: {:.2f} seconds".format(best))
+        best = self.location_analyzer.get_best_time(StraenKeys.BEST_5K)
+        if best is not None:
+            print("Best 5K: {:.2f} seconds".format(best))
+        best = self.location_analyzer.get_best_time(StraenKeys.BEST_10K)
+        if best is not None:
+            print("Best 10K: {:.2f} seconds".format(best))
+        best = self.location_analyzer.get_best_time(StraenKeys.BEST_HALF_MARATHON)
+        if best is not None:
+            print("Best Half Marathon: {:.2f} seconds".format(best))
 
         self.location_analyzer = None
         self.sensor_analyzers = []

@@ -70,6 +70,14 @@ ACTIVITY_COMMENTS_KEY = "comments"
 ACTIVITY_COMMENTER_ID_KEY = "commenter_id"
 ACTIVITY_TAGS_KEY = "tags"
 
+# Keys used to summarize activity data.
+BEST_1K = "Best 1K"
+BEST_MILE = "Best Mile"
+BEST_5K = "Best 5K"
+BEST_10K = "Best 10K"
+BEST_HALF_MARATHON = "Best Half Marathon"
+BEST_MARATHON = "Best Marathon"
+
 # Activity types
 TYPE_RUNNING_KEY = "Running"
 TYPE_CYCLING_KEY = "Cycling"
