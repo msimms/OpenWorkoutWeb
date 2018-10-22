@@ -3,6 +3,7 @@
 import inspect
 import os
 import sys
+import SensorAnalyzer
 import StraenKeys
 import Units
 
@@ -12,11 +13,12 @@ libmathdir = os.path.join(currentdir, 'LibMath', 'python')
 sys.path.insert(0, libmathdir)
 import distance
 
-class LocationAnalyzer(object):
+class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on a location track."""
 
     def __init__(self):
-        super(LocationAnalyzer, self).__init__()
+        SensorAnalyzer.SensorAnalyzer.__init__(self, StraenKeys.APP_DISTANCE_KEY, Units.get_speed_units_str(Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS))
+
         self.start_time = None
         self.last_time = None
         self.last_lat = None
@@ -32,38 +34,18 @@ class LocationAnalyzer(object):
         self.current_speed = None # Current speed (in meters/second)
         self.best_speed = None # Best speed (in meters/second)
 
-        self.bests = [] # Best times within the current activity (best mile, etc.)
-
     def update_average_speed(self, date_time):
         """Computes the average speed of the workout. Called by 'append_location'."""
         elapsed_milliseconds = date_time - self.start_time
         if elapsed_milliseconds > 0:
             self.avg_speed = self.total_distance / (elapsed_milliseconds / 1000.0)
 
-    def get_best_time(self, record_name):
-        """Returns the time associated with the specified record, or None if not found."""
-        for index, item in enumerate(self.bests):
-            if record_name in item:
-                return item[record_name]
-        return None
-
-    def get_record(self, record_name):
-        """Returns the record index and value for the record with the specified name, or None if not found."""
-        for index, item in enumerate(self.bests):
-            if record_name in item:
-                return index, item[record_name]
-        return None, None
-
     def do_record_check(self, record_name, seconds, meters, record_meters):
         """Looks up the existing record and, if necessary, updates it."""
         if int(meters) == int(record_meters):
-            new_record = { record_name: seconds }
-            index, old_value = self.get_record(record_name)
-            if old_value is not None:
-                if seconds < old_value:
-                    self.bests[index] = new_record
-                return
-            self.bests.append(new_record)
+            old_value = self.get_best_time(record_name)
+            if old_value is None or seconds < old_value:
+                self.bests[record_name] = seconds
 
     def update_speeds(self):
         """Computes the average speed over the last mile. Called by 'append_location'."""

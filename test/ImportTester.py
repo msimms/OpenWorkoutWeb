@@ -26,10 +26,10 @@ class TestActivityWriter(Importer.ActivityWriter):
 
     def __init__(self):
         Importer.ActivityWriter.__init__(self)
-        self.location_analyzer = None
-        self.sensor_analyzers = []
         self.summarizer = Summarizer.Summarizer()
         self.current_activity_id = None
+        self.location_analyzer = None
+        self.sensor_analyzers = []
 
     def create_activity(self, username, stream_name, stream_description, activity_type):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
@@ -100,6 +100,8 @@ class TestActivityWriter(Importer.ActivityWriter):
         if best is not None:
             print("Best Half Marathon: {:.2f} seconds".format(best))
 
+        self.summarizer.add_activity_data(self.current_activity_id, self.location_analyzer.bests)
+        self.current_activity_id = None
         self.location_analyzer = None
         self.sensor_analyzers = []
 
@@ -138,6 +140,15 @@ def main():
                 print("Failure!\n")
                 failures.append(current_file)
 
+    # Print the summary data.
+    title_str = "Bests:"
+    print(title_str)
+    print("=" * len(title_str))
+    for key in store.summarizer.bests:
+        print(key + " = " + str(store.summarizer.bests[key]))
+    print("\n")
+
+    # Print the success and failure summary.
     title_str = "Summary:"
     print(title_str)
     print("=" * len(title_str))

@@ -18,6 +18,13 @@ class SensorAnalyzer(object):
         self.readings = [] # All the readings
         self.value_readings = [] # All the readings, just the value part
         self.num_readings = 0 # Cached for efficiency
+        self.bests = {} # Best times within the current activity (best mile, best 20 minute power, etc.)
+
+    def get_best_time(self, record_name):
+        """Returns the time associated with the specified record, or None if not found."""
+        if record_name in self.bests:
+            return self.bests[record_name]
+        return None
 
     def update_maximum_value(self, reading):
         """Computes the maximum value for the workout. Called by 'append_sensor_value'."""
@@ -57,4 +64,5 @@ class SensorAnalyzer(object):
                 value_str = "{:.2f}".format(cluster[0])
                 results[key_str] = value_str + " " + self.units
                 cluster_num = cluster_num + 1
+        results.update(self.bests)
         return results

@@ -77,6 +77,9 @@ BEST_5K = "Best 5K"
 BEST_10K = "Best 10K"
 BEST_HALF_MARATHON = "Best Half Marathon"
 BEST_MARATHON = "Best Marathon"
+BEST_5_SEC_POWER = "5 Second Power"
+BEST_20_MIN_POWER = "20 Minute Power"
+BEST_1_HOUR_POWER = "1 Hour Power"
 
 # Activity types
 TYPE_RUNNING_KEY = "Running"
