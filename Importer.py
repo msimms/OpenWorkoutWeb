@@ -41,10 +41,13 @@ class Importer(object):
         super(Importer, self).__init__()
         self.activity_writer = activity_writer
 
-    def normalize_activity_type(self, activity_type):
+    @staticmethod
+    def normalize_activity_type(activity_type):
         """Takes the various activity names that appear in GPX and TCX files and normalizes to the ones used in this app."""
         if activity_type == 'Biking':
             activity_type = 'Cycling'
+        elif len(activity_type) == 0:
+            activity_type = 'Unknown'
         return activity_type
 
     def import_gpx_file(self, username, file_name):
@@ -57,7 +60,7 @@ class Importer(object):
             gpx = gpxpy.parse(gpx_file)
 
             # Indicate the start of the activity.
-            device_str, activity_id = self.activity_writer.create_activity(username, gpx.name, gpx.description, "")
+            device_str, activity_id = self.activity_writer.create_activity(username, gpx.name, gpx.description, 'Unknown')
 
             for track in gpx.tracks:
                 self.activity_writer.create_track(device_str, activity_id, track.name, track.description)
@@ -109,7 +112,7 @@ class Importer(object):
         activity_type = activity.attrib['Sport']
 
         # Indicate the start of the activity.
-        normalized_activity_type = self.normalize_activity_type(activity_type)
+        normalized_activity_type = Importer.normalize_activity_type(activity_type)
         device_str, activity_id = self.activity_writer.create_activity(username, "", "", normalized_activity_type)
 
         if hasattr(activity, 'Lap'):

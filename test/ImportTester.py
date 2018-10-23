@@ -28,6 +28,7 @@ class TestActivityWriter(Importer.ActivityWriter):
         Importer.ActivityWriter.__init__(self)
         self.summarizer = Summarizer.Summarizer()
         self.current_activity_id = None
+        self.current_activity_type = None
         self.location_analyzer = None
         self.sensor_analyzers = []
 
@@ -35,6 +36,7 @@ class TestActivityWriter(Importer.ActivityWriter):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
         self.location_analyzer = LocationAnalyzer.LocationAnalyzer() # Need a fresh analyzer object for each activity
         self.current_activity_id = str(uuid.uuid4())
+        self.current_activity_type = activity_type
         title_str = "Activity Type: " + activity_type
         print(title_str)
         print("-" * len(title_str))
@@ -69,7 +71,10 @@ class TestActivityWriter(Importer.ActivityWriter):
             title_str = sensor_analyzer.type + ":"
             print(title_str)
             print("-" * len(title_str))
-            print(sensor_analyzer.analyze())
+            sensor_analysis = sensor_analyzer.analyze()
+            print(sensor_analysis)
+            self.summarizer.add_activity_data(self.current_activity_id, self.current_activity_type, sensor_analysis)
+
         print("Location-Based Calculations:")
         print("----------------------------")
         print("Total Distance: {:.2f} meters".format(self.location_analyzer.total_distance))
@@ -100,10 +105,23 @@ class TestActivityWriter(Importer.ActivityWriter):
         if best is not None:
             print("Best Half Marathon: {:.2f} seconds".format(best))
 
-        self.summarizer.add_activity_data(self.current_activity_id, self.location_analyzer.bests)
+        self.summarizer.add_activity_data(self.current_activity_id, self.current_activity_type, self.location_analyzer.bests)
         self.current_activity_id = None
+        self.current_activity_type = None
         self.location_analyzer = None
         self.sensor_analyzers = []
+
+def print_records(store, activity_type):
+    title_str = "Best " + activity_type + " Times:"
+    print(title_str)
+    print("=" * len(title_str))
+    bests = store.summarizer.get_record_dictionary(activity_type)
+    if len(bests) > 0:
+        for key in bests:
+            print(key + " = " + str(bests[key]))
+    else:
+        print("none")
+    print("\n")
 
 def main():
     """Starts the tests."""
@@ -141,12 +159,9 @@ def main():
                 failures.append(current_file)
 
     # Print the summary data.
-    title_str = "Bests:"
-    print(title_str)
-    print("=" * len(title_str))
-    for key in store.summarizer.bests:
-        print(key + " = " + str(store.summarizer.bests[key]))
-    print("\n")
+    print_records(store, StraenKeys.TYPE_RUNNING_KEY)
+    print_records(store, StraenKeys.TYPE_CYCLING_KEY)
+    print_records(store, StraenKeys.TYPE_SWIMMING_KEY)
 
     # Print the success and failure summary.
     title_str = "Summary:"
