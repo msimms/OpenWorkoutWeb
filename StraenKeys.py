@@ -82,6 +82,7 @@ BEST_CENTURY = "Best Century"
 BEST_5_SEC_POWER = "5 Second Power"
 BEST_20_MIN_POWER = "20 Minute Power"
 BEST_1_HOUR_POWER = "1 Hour Power"
+CLUSTER = 'Cluster'
 
 # Activity types
 TYPE_RUNNING_KEY = "Running"

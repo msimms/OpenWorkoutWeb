@@ -14,7 +14,7 @@ import StraenKeys
 class ActivityWriter(object):
     """Base class for any class that handles data read from the Importer."""
 
-    def create_activity(self, username, stream_name, stream_description, activity_type):
+    def create_activity(self, username, stream_name, stream_description, activity_type, start_time):
         """Pure virtual method for starting a location stream - creates the activity ID for the specified user."""
         pass
 
@@ -59,8 +59,12 @@ class Importer(object):
             # Parse the file.
             gpx = gpxpy.parse(gpx_file)
 
+            # Find the start timestamp.
+            start_time_tuple = gpx.time.timetuple()
+            start_time_unix = calendar.timegm(start_time_tuple)
+
             # Indicate the start of the activity.
-            device_str, activity_id = self.activity_writer.create_activity(username, gpx.name, gpx.description, 'Unknown')
+            device_str, activity_id = self.activity_writer.create_activity(username, gpx.name, gpx.description, 'Unknown', start_time_unix)
 
             for track in gpx.tracks:
                 self.activity_writer.create_track(device_str, activity_id, track.name, track.description)
@@ -111,9 +115,16 @@ class Importer(object):
         activity = root.Activities.Activity
         activity_type = activity.attrib['Sport']
 
+        # Find the start timestamp.
+        start_time_unix = 0
+        if hasattr(activity, 'Id'):
+            start_time_obj = datetime.datetime.strptime(str(activity.Id), "%Y-%m-%dT%H:%M:%S.%fZ")
+            start_time_tuple = start_time_obj.timetuple()
+            start_time_unix = calendar.timegm(start_time_tuple)
+
         # Indicate the start of the activity.
         normalized_activity_type = Importer.normalize_activity_type(activity_type)
-        device_str, activity_id = self.activity_writer.create_activity(username, "", "", normalized_activity_type)
+        device_str, activity_id = self.activity_writer.create_activity(username, "", "", normalized_activity_type, start_time_unix)
 
         if hasattr(activity, 'Lap'):
             for lap in activity.Lap:

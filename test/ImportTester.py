@@ -29,14 +29,16 @@ class TestActivityWriter(Importer.ActivityWriter):
         self.summarizer = Summarizer.Summarizer()
         self.current_activity_id = None
         self.current_activity_type = None
+        self.current_activity_start_time = None
         self.location_analyzer = None
         self.sensor_analyzers = []
 
-    def create_activity(self, username, stream_name, stream_description, activity_type):
+    def create_activity(self, username, stream_name, stream_description, activity_type, start_time):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
         self.location_analyzer = LocationAnalyzer.LocationAnalyzer() # Need a fresh analyzer object for each activity
         self.current_activity_id = str(uuid.uuid4())
         self.current_activity_type = activity_type
+        self.current_activity_start_time = start_time
         title_str = "Activity Type: " + activity_type
         print(title_str)
         print("-" * len(title_str))
@@ -73,10 +75,11 @@ class TestActivityWriter(Importer.ActivityWriter):
             print("-" * len(title_str))
             sensor_analysis = sensor_analyzer.analyze()
             print(sensor_analysis)
-            self.summarizer.add_activity_data(self.current_activity_id, self.current_activity_type, sensor_analysis)
+            self.summarizer.add_activity_data(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, sensor_analysis)
 
         print("Location-Based Calculations:")
         print("----------------------------")
+
         print("Total Distance: {:.2f} meters".format(self.location_analyzer.total_distance))
         print("Vertical Ascent: {:.2f} meters".format(self.location_analyzer.total_vertical))
         if self.location_analyzer.start_time is not None and self.location_analyzer.last_time is not None:
@@ -105,7 +108,9 @@ class TestActivityWriter(Importer.ActivityWriter):
         if best is not None:
             print("Best Half Marathon: {:.2f} seconds".format(best))
 
-        self.summarizer.add_activity_data(self.current_activity_id, self.current_activity_type, self.location_analyzer.bests)
+        self.summarizer.add_activity_datum(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, StraenKeys.APP_DISTANCE_KEY, self.location_analyzer.total_distance)
+        self.summarizer.add_activity_datum(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, StraenKeys.APP_AVG_SPEED_KEY, self.location_analyzer.avg_speed)
+        self.summarizer.add_activity_data(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, self.location_analyzer.bests)
         self.current_activity_id = None
         self.current_activity_type = None
         self.location_analyzer = None

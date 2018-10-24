@@ -23,7 +23,7 @@ class DataMgr(Importer.ActivityWriter):
         """Destructor"""
         self.database = None
 
-    def create_activity(self, username, stream_name, stream_description, activity_type):
+    def create_activity(self, username, stream_name, stream_description, activity_type, start_time):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
         if self.database is None:
             raise Exception("No database.")
