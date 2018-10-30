@@ -20,6 +20,12 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Better graphics.
 * Replace Google Maps with Open Street Map.
 
+## Installation
+
+    git clone https://github.com/msimms/StraenWeb.git
+    cd StraenWeb
+    pip install -r requirements.txt
+
 ## Version History
 
 ### 0.1
