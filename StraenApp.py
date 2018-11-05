@@ -329,13 +329,9 @@ class StraenApp(object):
     def render_sensor_data_for_page(self, key, activity_id):
         """Helper function for processing sensor data and formatting it for display."""
         max_value = 0.0
-        data = self.data_mgr.retrieve_sensordata(key, activity_id)
+        data, analysis = self.data_mgr.retrieve_sensordata(key, activity_id)
         data_str = ""
-        analysis = {}
         if data is not None and isinstance(data, list):
-            analyzer_factory = SensorAnalyzerFactory.SensorAnalyzerFactory()
-            analyzer = analyzer_factory.create_with_data(key, data)
-            analysis = analyzer.analyze()
             for datum in data:
                 time = datum.keys()[0]
                 value = float(datum.values()[0])
@@ -403,12 +399,12 @@ class StraenApp(object):
             summary += "\t<li>Max. Cadence: {:.2f} ".format(max_cadence) + Units.get_cadence_units_str() + "</li>\n"
         if max_power:
             summary += "\t<li>Max. Power: {:.2f} ".format(max_power) + Units.get_power_units_str() + "</li>\n"
-        if location_analyzer.best_km is not None:
-            value = 1.0 / location_analyzer.best_km
+        if location_analyzer.bests[StraenKeys.BEST_1K] is not None:
+            value = 1.0 / location_analyzer.bests[StraenKeys.BEST_1K]
             value = Units.convert_speed(value, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS)
             summary += "\t<li>Best KM: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS) + "</li>\n"
-        if location_analyzer.best_mile is not None:
-            value = 1.0 / location_analyzer.best_mile
+        if location_analyzer.bests[StraenKeys.BEST_MILE] is not None:
+            value = 1.0 / location_analyzer.bests[StraenKeys.BEST_MILE]
             value = Units.convert_speed(value, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
             summary += "\t<li>Best Mile: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
         tags = self.data_mgr.retrieve_tags(activity_id)
@@ -422,24 +418,27 @@ class StraenApp(object):
 
         # Build the detailed analysis.
         details_str = ""
-        for key in heart_rate_analysis:
-            details_str = details_str + "<td>"
-            details_str = details_str + key
-            details_str = details_str + "</td><td>"
-            details_str = details_str + str(heart_rate_analysis[key])
-            details_str = details_str + "</td><tr>"
-        for key in cadence_analysis:
-            details_str = details_str + "<td>"
-            details_str = details_str + key
-            details_str = details_str + "</td><td>"
-            details_str = details_str + str(cadence_analysis[key])
-            details_str = details_str + "</td><tr>"
-        for key in power_analysis:
-            details_str = details_str + "<td>"
-            details_str = details_str + key
-            details_str = details_str + "</td><td>"
-            details_str = details_str + str(power_analysis[key])
-            details_str = details_str + "</td><tr>"
+        if heart_rate_analysis is not None:
+            for key in heart_rate_analysis:
+                details_str = details_str + "<td>"
+                details_str = details_str + key
+                details_str = details_str + "</td><td>"
+                details_str = details_str + str(heart_rate_analysis[key])
+                details_str = details_str + "</td><tr>"
+        if cadence_analysis is not None:
+            for key in cadence_analysis:
+                details_str = details_str + "<td>"
+                details_str = details_str + key
+                details_str = details_str + "</td><td>"
+                details_str = details_str + str(cadence_analysis[key])
+                details_str = details_str + "</td><tr>"
+        if power_analysis is not None:
+            for key in power_analysis:
+                details_str = details_str + "<td>"
+                details_str = details_str + key
+                details_str = details_str + "</td><td>"
+                details_str = details_str + str(power_analysis[key])
+                details_str = details_str + "</td><tr>"
 
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
