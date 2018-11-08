@@ -81,7 +81,6 @@ class Summarizer(object):
         if summary_data_key.find(StraenKeys.CLUSTER) > 0:
             return
 
-
         # Get the record set that corresponds with the activity type.
         record_set = self.get_record_dictionary(activity_type)
 

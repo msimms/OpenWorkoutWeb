@@ -97,9 +97,9 @@ class DataMgr(Importer.ActivityWriter):
                 return False
         return True
 
-    def is_activity_id_public(self, device_str, activity_id):
+    def is_activity_id_public(self, activity_id):
         """Helper function for returning whether or not an activity is publically visible."""
-        visibility = self.retrieve_activity_visibility(device_str, activity_id)
+        visibility = self.retrieve_activity_visibility(activity_id)
         if visibility is not None:
             if visibility == "private":
                 return False
@@ -246,7 +246,14 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_sensordata(key, activity_id)
+
+        analysis = self.database.retrieve_activity_summary(activity_id)
+        data = self.database.retrieve_sensordata(key, activity_id)
+        if analysis is None and data is not None and isinstance(data, list):
+            analyzer_factory = SensorAnalyzerFactory.SensorAnalyzerFactory()
+            analyzer = analyzer_factory.create_with_data(key, data)
+            analysis = analyzer.analyze()
+        return data, analysis
 
     def retrieve_most_recent_locations(self, activity_id, num):
         """Returns the most recent 'num' locations for the specified device and activity."""

@@ -69,6 +69,7 @@ ACTIVITY_COMMENT_KEY = "comment"
 ACTIVITY_COMMENTS_KEY = "comments"
 ACTIVITY_COMMENTER_ID_KEY = "commenter_id"
 ACTIVITY_TAGS_KEY = "tags"
+ACTIVITY_SUMMARY_KEY = "summary_data"
 
 # Keys used to summarize activity data.
 BEST_1K = "Best 1K"

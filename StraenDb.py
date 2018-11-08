@@ -530,17 +530,14 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_activity_visibility(self, device_str, activity_id):
+    def retrieve_activity_visibility(self, activity_id):
         """Returns the visibility setting for the specified activity."""
-        if device_str is None:
-            self.log_error(MongoDatabase.retrieve_activity_visibility.__name__ + ": Unexpected empty object: device_str")
-            return None
         if activity_id is None:
             self.log_error(MongoDatabase.retrieve_activity_visibility.__name__ + ": Unexpected empty object: activity_id")
             return None
 
         try:
-            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id, StraenKeys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id})
             if activity is not None:
                 if StraenKeys.ACTIVITY_VISIBILITY_KEY in activity:
                     visibility = activity[StraenKeys.ACTIVITY_VISIBILITY_KEY]
@@ -565,6 +562,53 @@ class MongoDatabase(Database.Database):
                 activity[StraenKeys.ACTIVITY_VISIBILITY_KEY] = visibility
                 self.activities_collection.save(activity)
                 return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def create_activity_summary(self, activity_id, summary_data):
+        """Create method for activity summary data. Summary data is data computed from the raw data."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_activity_summary.__name__ + ": Unexpected empty object: activity_id")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                activity[StraenKeys.ACTIVITY_SUMMARY_KEY] = summary_data
+                self.activities_collection.save(activity)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_activity_summary(self, activity_id):
+        """Returns the activity summary data. Summary data is data computed from the raw data."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.retrieve_activity_summary.__name__ + ": Unexpected empty object: activity_id")
+            return None
+
+        try:
+            activity = self.activities_collection.find_one({StraenKeys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                if StraenKeys.ACTIVITY_SUMMARY_KEY in activity:
+                    summary_data = activity[StraenKeys.ACTIVITY_SUMMARY_KEY]
+                    return summary_data
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def delete_activity_summary(self, activity_id):
+        """Delete method for activity summary data. Summary data is data computed from the raw data."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.delete_activity_summary.__name__ + ": Unexpected empty object: activity_id")
+            return False
+
+        try:
+            pass
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])

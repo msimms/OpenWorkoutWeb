@@ -59,11 +59,10 @@ def check_auth(*args, **kwargs):
         if requested_url_parts[0] == "device":
             url_params = requested_url_parts[1].split("?")
             if url_params is not None and len(url_params) >= 2:
-                device = url_params[0]
                 activity_params = url_params[1].split("=")
                 if activity_params is not None and len(activity_params) >= 2:
                     activity_id = activity_params[1]
-                    if g_app.data_mgr.is_activity_id_public(device, activity_id):
+                    if g_app.data_mgr.is_activity_id_public(activity_id):
                         return
 
         username = g_app.app.user_mgr.get_logged_in_user()
