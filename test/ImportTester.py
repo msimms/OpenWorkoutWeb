@@ -42,6 +42,9 @@ class TestActivityWriter(Importer.ActivityWriter):
         title_str = "Activity Type: " + activity_type
         print(title_str)
         print("-" * len(title_str))
+        title_str = "ID: " + self.current_activity_id
+        print(title_str)
+        print("-" * len(title_str))
         return None, None
 
     def create_track(self, device_str, activity_id, track_name, track_description):
@@ -104,13 +107,20 @@ class TestActivityWriter(Importer.ActivityWriter):
         best = self.location_analyzer.get_best_time(StraenKeys.BEST_10K)
         if best is not None:
             print("Best 10K: {:.2f} seconds".format(best))
+        best = self.location_analyzer.get_best_time(StraenKeys.BEST_15K)
+        if best is not None:
+            print("Best 15K: {:.2f} seconds".format(best))
         best = self.location_analyzer.get_best_time(StraenKeys.BEST_HALF_MARATHON)
         if best is not None:
             print("Best Half Marathon: {:.2f} seconds".format(best))
+        best = self.location_analyzer.get_best_time(StraenKeys.BEST_MARATHON)
+        if best is not None:
+            print("Best Marathon: {:.2f} seconds".format(best))
 
         self.summarizer.add_activity_datum(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, StraenKeys.APP_DISTANCE_KEY, self.location_analyzer.total_distance)
         self.summarizer.add_activity_datum(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, StraenKeys.APP_AVG_SPEED_KEY, self.location_analyzer.avg_speed)
         self.summarizer.add_activity_data(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, self.location_analyzer.bests)
+
         self.current_activity_id = None
         self.current_activity_type = None
         self.location_analyzer = None
@@ -151,17 +161,18 @@ def main():
         print(title_str + "\n")
         for current_file in files:
             full_path = os.path.join(subdir, current_file)
-            title_str = "Processing: " + full_path
-            print("=" * len(title_str))
-            print(title_str)
-            print("=" * len(title_str))
             _, temp_file_ext = os.path.splitext(full_path)
-            if importer.import_file("test user", full_path, temp_file_ext):
-                print("Success!\n")
-                successes.append(current_file)
-            else:
-                print("Failure!\n")
-                failures.append(current_file)
+            if temp_file_ext in ['.gpx', '.tcx']:
+                title_str = "Processing: " + full_path
+                print("=" * len(title_str))
+                print(title_str)
+                print("=" * len(title_str))
+                if importer.import_file("test user", full_path, temp_file_ext):
+                    print("Success!\n")
+                    successes.append(current_file)
+                else:
+                    print("Failure!\n")
+                    failures.append(current_file)
 
     # Print the summary data.
     print_records(store, StraenKeys.TYPE_RUNNING_KEY)

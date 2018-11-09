@@ -84,8 +84,14 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             # Is this a new 10K record for this activity?
             self.do_record_check(StraenKeys.BEST_10K, total_seconds, total_meters, 10000)
 
-            # Is this a new half marathon record for this activity?
-            self.do_record_check(StraenKeys.BEST_HALF_MARATHON, total_seconds, total_meters, Units.METERS_PER_MILE * 13.1)
+            # Is this a new 15K record for this activity?
+            self.do_record_check(StraenKeys.BEST_15K, total_seconds, total_meters, 15000)
+
+            # Is this a new metric century record for this activity?
+            self.do_record_check(StraenKeys.BEST_METRIC_CENTURY, total_seconds, total_meters, 100000)
+
+            # Is this a new century record for this activity?
+            self.do_record_check(StraenKeys.BEST_CENTURY, total_seconds, total_meters, Units.METERS_PER_MILE * 100.0)
 
     def append_location(self, date_time, latitude, longitude, altitude):
         """Adds another location to the analyzer. Locations should be sent in order."""

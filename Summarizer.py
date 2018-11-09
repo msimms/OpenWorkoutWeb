@@ -68,7 +68,7 @@ class Summarizer(object):
 
     @staticmethod
     def is_better(key, lhs, rhs):
-        if key in [ StraenKeys.BEST_1K, StraenKeys.BEST_MILE, StraenKeys.BEST_10K, StraenKeys.BEST_HALF_MARATHON, StraenKeys.BEST_MARATHON, StraenKeys.BEST_METRIC_CENTURY, StraenKeys.BEST_CENTURY ]:
+        if key in [ StraenKeys.BEST_1K, StraenKeys.BEST_MILE, StraenKeys.BEST_10K, StraenKeys.BEST_15K, StraenKeys.BEST_HALF_MARATHON, StraenKeys.BEST_MARATHON, StraenKeys.BEST_METRIC_CENTURY, StraenKeys.BEST_CENTURY ]:
             return lhs < rhs
         elif key in [ StraenKeys.APP_AVG_SPEED_KEY, StraenKeys.BEST_5_SEC_POWER, StraenKeys.BEST_20_MIN_POWER, StraenKeys.BEST_1_HOUR_POWER ]:
             return rhs > lhs
