@@ -6,6 +6,7 @@ import inspect
 import logging
 import os
 import sys
+import time
 import uuid
 
 # Locate and load the importer module.
@@ -156,6 +157,8 @@ def main():
     test_dir = os.path.abspath(os.path.join('.', args.dir))
 
     # Process each file in the specified directory as well as its subdirectories.
+    total_time = 0
+    num_files_processed = 0
     for subdir, _, files in os.walk(test_dir):
         title_str = "Processing all files in " + test_dir + ":"
         print(title_str + "\n")
@@ -167,12 +170,20 @@ def main():
                 print("=" * len(title_str))
                 print(title_str)
                 print("=" * len(title_str))
+                start_time = time.time()
                 if importer.import_file("test user", full_path, temp_file_ext):
+                    elapsed_time = time.time() - start_time
+                    total_time = total_time + elapsed_time
+                    num_files_processed = num_files_processed + 1
+                    print("Elapsed time: " + str(elapsed_time) + " seconds")
                     print("Success!\n")
                     successes.append(current_file)
                 else:
                     print("Failure!\n")
                     failures.append(current_file)
+
+    # Print the time summary.
+    print("Average time / sample: " + str(total_time / num_files_processed) + " seconds\n")
 
     # Print the summary data.
     print_records(store, StraenKeys.TYPE_RUNNING_KEY)
