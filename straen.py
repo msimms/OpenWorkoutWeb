@@ -10,7 +10,7 @@ import os
 import signal
 import sys
 
-import StraenApi
+import Api
 import App
 import DataMgr
 import UserMgr
@@ -420,7 +420,7 @@ class StraenWeb(object):
             if len(args) > 0:
                 api_version = args[0]
                 if api_version == '1.0':
-                    api = StraenApi.StraenApi(self.app.user_mgr, self.app.data_mgr, user_id)
+                    api = Api.Api(self.app.user_mgr, self.app.data_mgr, user_id)
                     handled, response = api.handle_api_1_0_request(args[1:], params)
                     if not handled:
                         self.log_error("Failed to handle request: " + args[1:])

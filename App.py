@@ -16,7 +16,7 @@ import uuid
 import Keys
 import LocationAnalyzer
 import SensorAnalyzerFactory
-import StraenApi
+import Api
 import DataMgr
 import Units
 import UserMgr

@@ -11,11 +11,11 @@ import Keys
 
 g_not_meta_data = ["DeviceId", "ActivityId", "ActivityName", "User Name", "Latitude", "Longitude", "Altitude", "Horizontal Accuracy", "Vertical Accuracy"]
 
-class StraenApi(object):
+class Api(object):
     """Class for managing API messages."""
 
     def __init__(self, user_mgr, data_mgr, user_id):
-        super(StraenApi, self).__init__()
+        super(Api, self).__init__()
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
         self.user_id = user_id
