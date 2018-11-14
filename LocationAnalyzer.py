@@ -13,6 +13,7 @@ libmathdir = os.path.join(currentdir, 'LibMath', 'python')
 sys.path.insert(0, libmathdir)
 import distance
 
+
 class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on a location track."""
 
@@ -26,7 +27,8 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         self.last_alt = None
         self.last_total = 0.0
 
-        self.distance_buf = [] # Used for the current speed calcuations
+        self.distance_buf = [] # Holds the distance calculations; used for the current speed calcuations
+        self.speed_graph = [] # Holds the current speed calculations 
         self.total_distance = 0.0 # Distance traveled (in meters)
         self.total_vertical = 0.0 # Total ascent (in meters)
 
@@ -65,12 +67,13 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             total_meters = self.last_total - time_distance_pair[2]
 
             # Current speed is the average of the last ten seconds.
-            if int(total_seconds) == 10 or self.current_speed is None:
+            if int(total_seconds) == 7 or self.current_speed is None:
                 self.current_speed = total_meters / total_seconds
                 if self.best_speed is None or self.current_speed > self.best_speed:
                     self.best_speed = self.current_speed
                 if self.last_total < 1000:
                     break
+                self.speed_graph.insert(0, self.current_speed)
 
             # Is this a new kilometer record for this activity?
             self.do_record_check(StraenKeys.BEST_1K, total_seconds, total_meters, 1000)

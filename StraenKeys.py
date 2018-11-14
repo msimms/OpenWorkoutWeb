@@ -84,6 +84,12 @@ BEST_CENTURY = "Best Century"
 BEST_5_SEC_POWER = "5 Second Power"
 BEST_20_MIN_POWER = "20 Minute Power"
 BEST_1_HOUR_POWER = "1 Hour Power"
+MAX_POWER = "Maximum Power"
+MAX_HEART_RATE = "Maximum Heart Rate"
+MAX_CADENCE = "Maximum Cadence"
+AVG_POWER = "Average Power"
+AVG_HEART_RATE = "Average Heart Rate"
+AVG_CADENCE = "Average Cadence"
 CLUSTER = 'Cluster'
 
 # Activity types

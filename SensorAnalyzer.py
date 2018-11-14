@@ -53,17 +53,17 @@ class SensorAnalyzer(object):
     def analyze(self):
         """Called when all sensor readings have been processed."""
         results = {}
-        if len(self.value_readings) > 0:
-            # Perform kmeans clustering.
-            np_readings = numpy.array(self.value_readings)
-            kmeans_analyzer = KMeans(n_clusters=4)
-            kmeans_analyzer.fit(np_readings.reshape(-1,1))
-            clusters = kmeans_analyzer.cluster_centers_
-            cluster_num = 1
-            for cluster in clusters:
-                key_str = self.type + " " + StraenKeys.CLUSTER + " " + str(cluster_num)
-                value_str = "{:.2f}".format(cluster[0])
-                results[key_str] = value_str + " " + self.units
-                cluster_num = cluster_num + 1
+#        if len(self.value_readings) > 0:
+#            # Perform kmeans clustering.
+#            np_readings = numpy.array(self.value_readings)
+#            kmeans_analyzer = KMeans(n_clusters=4)
+#            kmeans_analyzer.fit(np_readings.reshape(-1,1))
+#            clusters = kmeans_analyzer.cluster_centers_
+#            cluster_num = 1
+#            for cluster in clusters:
+#                key_str = self.type + " " + StraenKeys.CLUSTER + " " + str(cluster_num)
+#                value_str = "{:.2f}".format(cluster[0])
+#                results[key_str] = value_str + " " + self.units
+#                cluster_num = cluster_num + 1
         results.update(self.bests)
         return results

@@ -46,6 +46,8 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     def analyze(self):
         """Called when all sensor readings have been processed."""
         results = SensorAnalyzer.SensorAnalyzer.analyze(self)
+        results[StraenKeys.MAX_POWER] = self.max
+        results[StraenKeys.AVG_POWER] = self.avg
 
         # Compute normalized power.
 
