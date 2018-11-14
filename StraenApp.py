@@ -943,7 +943,7 @@ class StraenApp(object):
         selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, StraenKeys.DEFAULT_PRIVACY)
         selected_default_privacy = selected_default_privacy.lower()
 
-        # Render the alcohol units option.
+        # Render the privacy option.
         privacy_options = "\t\t<option value=\"Public\""
         if selected_default_privacy == StraenKeys.ACTIVITY_VISIBILITY_PUBLIC:
             privacy_options += " selected"

@@ -1,5 +1,5 @@
 # Copyright 2017 Michael J Simms
-"""Key strings from key/value pairs returned by the app"""
+"""Key strings for all key/value pairs used in the app"""
 
 # Keys associated with user management.
 SESSION_KEY = '_straen_username'
