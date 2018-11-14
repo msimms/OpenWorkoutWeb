@@ -64,7 +64,7 @@ class RedirectException(Exception):
         super(RedirectException, self).__init__()
 
 
-class StraenApp(object):
+class App(object):
     """Class containing the URL handlers."""
 
     def __init__(self, user_mgr, data_mgr, root_dir, root_url, google_maps_key):
@@ -79,7 +79,7 @@ class StraenApp(object):
         self.map_single_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
         self.map_multi_html_file = os.path.join(root_dir, HTML_DIR, 'map_multi_google.html')
         self.error_logged_in_html_file = os.path.join(root_dir, HTML_DIR, 'error_logged_in.html')
-        super(StraenApp, self).__init__()
+        super(App, self).__init__()
 
     def terminate(self):
         """Destructor"""
@@ -222,7 +222,7 @@ class StraenApp(object):
     def timestamp_code_to_str(ts_code):
         """Converts from unix timestamp to human-readable"""
         try:
-            return datetime.datetime.fromtimestamp(ts_code).strftime(StraenApp.timestamp_format())
+            return datetime.datetime.fromtimestamp(ts_code).strftime(App.timestamp_format())
         except:
             pass
         return "-"
@@ -468,7 +468,7 @@ class StraenApp(object):
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenApp.activity.__name__)
+            self.log_error('Unhandled exception in ' + App.activity.__name__)
         return self.error()
 
     def render_page_for_multiple_mapped_activities(self, email, user_realname, device_strs, user_id, logged_in):

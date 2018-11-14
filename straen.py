@@ -11,7 +11,7 @@ import signal
 import sys
 
 import StraenApi
-import StraenApp
+import App
 import DataMgr
 import UserMgr
 
@@ -186,7 +186,7 @@ class StraenWeb(object):
         """Renders the list of the specified user's activities."""
         try:
             return self.app.my_activities()
-        except StraenApp.RedirectException as e:
+        except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
             raise e
@@ -200,7 +200,7 @@ class StraenWeb(object):
         """Renders the list of all activities the specified user is allowed to view."""
         try:
             return self.app.all_activities()
-        except StraenApp.RedirectException as e:
+        except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
             raise e
@@ -214,7 +214,7 @@ class StraenWeb(object):
         """Renders the list of users the specified user is following."""
         try:
             return self.app.following()
-        except StraenApp.RedirectException as e:
+        except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
             raise e
@@ -228,7 +228,7 @@ class StraenWeb(object):
         """Renders the list of users that are following the specified user."""
         try:
             return self.app.followers()
-        except StraenApp.RedirectException as e:
+        except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
             raise e
@@ -242,7 +242,7 @@ class StraenWeb(object):
         """Renders the list of a user's devices."""
         try:
             return self.app.device_list()
-        except StraenApp.RedirectException as e:
+        except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
             raise e
@@ -256,7 +256,7 @@ class StraenWeb(object):
         """Processes an upload request."""
         try:
             return self.app.upload(ufile)
-        except StraenApp.RedirectException as e:
+        except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
             raise e
@@ -270,7 +270,7 @@ class StraenWeb(object):
         """Called when the user selects an activity type, indicating they want to make a manual data entry."""
         try:
             return self.app.manual_entry(activity_type)
-        except StraenApp.RedirectException as e:
+        except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
             raise e
@@ -284,7 +284,7 @@ class StraenWeb(object):
         """Renders the import page."""
         try:
             return self.app.import_activity()
-        except StraenApp.RedirectException as e:
+        except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
             raise e
@@ -298,7 +298,7 @@ class StraenWeb(object):
         """Renders the user's settings page."""
         try:
             return self.app.settings()
-        except StraenApp.RedirectException as e:
+        except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
             raise e
@@ -313,7 +313,7 @@ class StraenWeb(object):
             email = cherrypy.request.params.get("email")
             password = cherrypy.request.params.get("password")
             return self.app.submit_login(email, password)
-        except StraenApp.RedirectException as e:
+        except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
             raise e
@@ -330,7 +330,7 @@ class StraenWeb(object):
         """Creates a new login."""
         try:
             return self.app.submit_new_login(email, realname, password1, password2)
-        except StraenApp.RedirectException as e:
+        except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
             raise e
@@ -347,7 +347,7 @@ class StraenWeb(object):
         """Renders the login page."""
         try:
             return self.app.login()
-        except StraenApp.RedirectException as e:
+        except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
             raise e
@@ -369,7 +369,7 @@ class StraenWeb(object):
         """Ends the logged in session."""
         try:
             return self.app.logout()
-        except StraenApp.RedirectException as e:
+        except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
             raise e
@@ -504,7 +504,7 @@ def main():
 
     user_mgr = UserMgr.UserMgr(root_dir)
     data_mgr = DataMgr.DataMgr(root_dir)
-    backend = StraenApp.StraenApp(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey)
+    backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey)
     g_app = StraenWeb(backend)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')

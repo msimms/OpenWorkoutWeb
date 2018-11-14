@@ -11,7 +11,7 @@ from flask import Flask
 
 import DataMgr
 import UserMgr
-import StraenApp
+import App
 
 
 ERROR_LOG = 'error.log'
@@ -304,7 +304,7 @@ def main():
 
     user_mgr = UserMgr.UserMgr(root_dir)
     data_mgr = DataMgr.DataMgr(root_dir)
-    g_app = StraenApp.StraenApp(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey)
+    g_app = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
