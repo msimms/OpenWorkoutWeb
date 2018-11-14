@@ -1,14 +1,27 @@
 # Copyright 2018 Michael J Simms
 
+import inspect
+import os
+import sys
+
 import Keys
 import SensorAnalyzer
 import Units
+
+# Locate and load the distance module.
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+libmathdir = os.path.join(currentdir, 'LibMath', 'python')
+sys.path.insert(0, libmathdir)
+import statistics
 
 class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on power data."""
 
     def __init__(self):
         SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_POWER_KEY, Units.get_power_units_str())
+        self.np_buf = []
+        self.current_30_sec_buf = []
+        self.current_30_sec_buf_start_time = 0
 
     def do_power_record_check(self, record_name, watts):
         """Looks up the existing record and, if necessary, updates it."""
@@ -23,6 +36,15 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
         total = 0
         duration = self.end_time - self.start_time
 
+        # Update the buffers needed for the normalized power calculation.
+        if date_time - self.current_30_sec_buf_start_time > 30000:
+            if len(self.current_30_sec_buf) > 0:
+                self.np_buf.append(statistics.mean(self.current_30_sec_buf))
+                self.current_30_sec_buf = []
+            self.current_30_sec_buf_start_time = date_time
+        self.current_30_sec_buf.append(value)
+
+        # Search for best efforts.
         for reading in reversed(self.readings):
             reading_time = reading[0]
             total = total + reading[1]
@@ -49,8 +71,26 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
         results[Keys.MAX_POWER] = self.max
         results[Keys.AVG_POWER] = self.avg
 
+        #
         # Compute normalized power.
+        #
 
+        # Throw away the first 30 second average.
+        self.np_buf.pop(0)
+
+        # Raise all items to the fourth power.
+        for idx, item in enumerate(self.np_buf):
+            item = pow(item, 4)
+            self.np_buf[idx] = item
+
+        # Average the values that were raised to the fourth.
+        np = statistics.mean(self.np_buf)
+
+        # Take the fourth root.
+        results[Keys.NORMALIZED_POWER] = pow(np, 0.25)
+
+        #
         # Compute the intensity factory (IF = NP / FTP).
+        #
 
         return results

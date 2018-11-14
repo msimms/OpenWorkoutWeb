@@ -90,6 +90,7 @@ MAX_CADENCE = "Maximum Cadence"
 AVG_POWER = "Average Power"
 AVG_HEART_RATE = "Average Heart Rate"
 AVG_CADENCE = "Average Cadence"
+NORMALIZED_POWER = "Normalized Power"
 CLUSTER = 'Cluster'
 
 # Activity types
