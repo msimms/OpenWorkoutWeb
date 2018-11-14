@@ -9,7 +9,7 @@ import traceback
 import sys
 from lxml import objectify
 
-import StraenKeys
+import Keys
 
 class ActivityWriter(object):
     """Base class for any class that handles data read from the Importer."""
@@ -83,15 +83,15 @@ class Importer(object):
                         # Look for other attributes.
                         extensions = point.extensions
                         if 'power' in extensions:
-                            self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_POWER_KEY, extensions['power'])
+                            self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_POWER_KEY, extensions['power'])
                         if 'gpxtpx:TrackPointExtension' in extensions:
                             gpxtpx_extensions = extensions['gpxtpx:TrackPointExtension']
                             if 'gpxtpx:hr' in gpxtpx_extensions:
-                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_HEART_RATE_KEY, gpxtpx_extensions['gpxtpx:hr'])
+                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_HEART_RATE_KEY, gpxtpx_extensions['gpxtpx:hr'])
                             if 'gpxtpx:cad' in gpxtpx_extensions:
-                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_CADENCE_KEY, gpxtpx_extensions['gpxtpx:cad'])
+                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_CADENCE_KEY, gpxtpx_extensions['gpxtpx:cad'])
                             if 'gpxtpx:atemp' in gpxtpx_extensions:
-                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_TEMP_KEY, gpxtpx_extensions['gpxtpx:atemp'])
+                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_TEMP_KEY, gpxtpx_extensions['gpxtpx:atemp'])
 
             # Let it be known that we are finished with this activity.
             self.activity_writer.finish_activity()
@@ -149,16 +149,16 @@ class Importer(object):
 
                                 # Look for other attributes.
                                 if hasattr(point, 'Cadence'):
-                                    self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_CADENCE_KEY, point.Cadence)
+                                    self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_CADENCE_KEY, point.Cadence)
                                 if hasattr(point, 'HeartRateBpm'):
-                                    self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_HEART_RATE_KEY, point.HeartRateBpm.Value)
+                                    self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_HEART_RATE_KEY, point.HeartRateBpm.Value)
                                 if hasattr(point, 'Extensions'):
                                     elements = point.Extensions
                                     children = elements.getchildren()
                                     if len(children) > 0:
                                         subelement = children[0]
                                         if hasattr(subelement, 'Watts'):
-                                            self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, StraenKeys.APP_POWER_KEY, subelement.Watts)
+                                            self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_POWER_KEY, subelement.Watts)
 
         # Let it be known that we are finished with this activity.
         self.activity_writer.finish_activity()

@@ -1,14 +1,14 @@
 # Copyright 2018 Michael J Simms
 
+import Keys
 import SensorAnalyzer
-import StraenKeys
 import Units
 
 class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on power data."""
 
     def __init__(self):
-        SensorAnalyzer.SensorAnalyzer.__init__(self, StraenKeys.APP_POWER_KEY, Units.get_power_units_str())
+        SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_POWER_KEY, Units.get_power_units_str())
 
     def do_power_record_check(self, record_name, watts):
         """Looks up the existing record and, if necessary, updates it."""
@@ -29,25 +29,25 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
             curr_time_diff = (self.end_time - reading_time) / 1000
             if curr_time_diff == 5:
                 average_power = total / curr_time_diff
-                self.do_power_record_check(StraenKeys.BEST_5_SEC_POWER, average_power)
+                self.do_power_record_check(Keys.BEST_5_SEC_POWER, average_power)
                 if duration < 1200:
                     return
             elif curr_time_diff == 1200:
                 average_power = total / curr_time_diff
-                self.do_power_record_check(StraenKeys.BEST_20_MIN_POWER, average_power)
+                self.do_power_record_check(Keys.BEST_20_MIN_POWER, average_power)
                 if duration < 3600:
                     return
             elif curr_time_diff == 3600:
                 average_power = total / curr_time_diff
-                self.do_power_record_check(StraenKeys.BEST_1_HOUR_POWER, average_power)
+                self.do_power_record_check(Keys.BEST_1_HOUR_POWER, average_power)
             elif curr_time_diff > 3600:
                 return
 
     def analyze(self):
         """Called when all sensor readings have been processed."""
         results = SensorAnalyzer.SensorAnalyzer.analyze(self)
-        results[StraenKeys.MAX_POWER] = self.max
-        results[StraenKeys.AVG_POWER] = self.avg
+        results[Keys.MAX_POWER] = self.max
+        results[Keys.AVG_POWER] = self.avg
 
         # Compute normalized power.
 

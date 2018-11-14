@@ -15,8 +15,8 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import Importer
 import LocationAnalyzer
+import Keys
 import SensorAnalyzerFactory
-import StraenKeys
 import Summarizer
 
 ERROR_LOG = 'error.log'
@@ -96,30 +96,30 @@ class TestActivityWriter(Importer.ActivityWriter):
         if self.location_analyzer.best_speed is not None:
             print("Best Speed: {:.2f}".format(self.location_analyzer.best_speed))
 
-        best = self.location_analyzer.get_best_time(StraenKeys.BEST_1K)
+        best = self.location_analyzer.get_best_time(Keys.BEST_1K)
         if best is not None:
             print("Best KM: {:.2f} seconds".format(best))
-        best = self.location_analyzer.get_best_time(StraenKeys.BEST_MILE)
+        best = self.location_analyzer.get_best_time(Keys.BEST_MILE)
         if best is not None:
             print("Best Mile: {:.2f} seconds".format(best))
-        best = self.location_analyzer.get_best_time(StraenKeys.BEST_5K)
+        best = self.location_analyzer.get_best_time(Keys.BEST_5K)
         if best is not None:
             print("Best 5K: {:.2f} seconds".format(best))
-        best = self.location_analyzer.get_best_time(StraenKeys.BEST_10K)
+        best = self.location_analyzer.get_best_time(Keys.BEST_10K)
         if best is not None:
             print("Best 10K: {:.2f} seconds".format(best))
-        best = self.location_analyzer.get_best_time(StraenKeys.BEST_15K)
+        best = self.location_analyzer.get_best_time(Keys.BEST_15K)
         if best is not None:
             print("Best 15K: {:.2f} seconds".format(best))
-        best = self.location_analyzer.get_best_time(StraenKeys.BEST_HALF_MARATHON)
+        best = self.location_analyzer.get_best_time(Keys.BEST_HALF_MARATHON)
         if best is not None:
             print("Best Half Marathon: {:.2f} seconds".format(best))
-        best = self.location_analyzer.get_best_time(StraenKeys.BEST_MARATHON)
+        best = self.location_analyzer.get_best_time(Keys.BEST_MARATHON)
         if best is not None:
             print("Best Marathon: {:.2f} seconds".format(best))
 
-        self.summarizer.add_activity_datum(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, StraenKeys.APP_DISTANCE_KEY, self.location_analyzer.total_distance)
-        self.summarizer.add_activity_datum(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, StraenKeys.APP_AVG_SPEED_KEY, self.location_analyzer.avg_speed)
+        self.summarizer.add_activity_datum(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, Keys.APP_DISTANCE_KEY, self.location_analyzer.total_distance)
+        self.summarizer.add_activity_datum(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, Keys.APP_AVG_SPEED_KEY, self.location_analyzer.avg_speed)
         self.summarizer.add_activity_data(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, self.location_analyzer.bests)
 
         self.current_activity_id = None
@@ -186,9 +186,9 @@ def main():
     print("Average time / sample: " + str(total_time / num_files_processed) + " seconds\n")
 
     # Print the summary data.
-    print_records(store, StraenKeys.TYPE_RUNNING_KEY)
-    print_records(store, StraenKeys.TYPE_CYCLING_KEY)
-    print_records(store, StraenKeys.TYPE_SWIMMING_KEY)
+    print_records(store, Keys.TYPE_RUNNING_KEY)
+    print_records(store, Keys.TYPE_CYCLING_KEY)
+    print_records(store, Keys.TYPE_SWIMMING_KEY)
 
     # Print the success and failure summary.
     title_str = "Summary:"

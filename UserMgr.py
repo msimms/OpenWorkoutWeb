@@ -1,9 +1,9 @@
 # Copyright 2017 Michael J Simms
 
 import bcrypt
+import Keys
 import SessionMgr
 import StraenDb
-import StraenKeys
 
 
 MIN_PASSWORD_LEN  = 8
@@ -224,6 +224,6 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         result = self.database.retrieve_user_setting(user_id, key)
         if result is None:
-            if key == StraenKeys.DEFAULT_PRIVACY:
-                result = StraenKeys.ACTIVITY_VISIBILITY_PUBLIC
+            if key == Keys.DEFAULT_PRIVACY:
+                result = Keys.ACTIVITY_VISIBILITY_PUBLIC
         return result

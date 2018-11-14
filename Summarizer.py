@@ -1,7 +1,7 @@
 # Copyright 2018 Michael J Simms
 
 import time
-import StraenKeys
+import Keys
 import Units
 
 
@@ -19,25 +19,25 @@ class Summarizer(object):
 
     def get_record_dictionary(self, activity_type):
         """Returns the record dictionary that corresponds to the given activity type."""
-        if activity_type == StraenKeys.TYPE_RUNNING_KEY:
+        if activity_type == Keys.TYPE_RUNNING_KEY:
             return self.running_bests
-        elif activity_type == StraenKeys.TYPE_CYCLING_KEY:
+        elif activity_type == Keys.TYPE_CYCLING_KEY:
             return self.cycling_bests
-        elif activity_type == StraenKeys.TYPE_SWIMMING_KEY:
+        elif activity_type == Keys.TYPE_SWIMMING_KEY:
             return self.swimming_bests
         return {}
 
     def get_annual_record_dictionary(self, activity_type, year):
         """Returns the record dictionary that corresponds to the given activity type."""
-        if activity_type == StraenKeys.TYPE_RUNNING_KEY:
+        if activity_type == Keys.TYPE_RUNNING_KEY:
             if year not in self.annual_running_bests:
                 self.annual_running_bests[year] = {}
             return self.annual_running_bests[year]
-        elif activity_type == StraenKeys.TYPE_CYCLING_KEY:
+        elif activity_type == Keys.TYPE_CYCLING_KEY:
             if year not in self.annual_cycling_bests:
                 self.annual_cycling_bests[year] = {}
             return self.annual_cycling_bests[year]
-        elif activity_type == StraenKeys.TYPE_SWIMMING_KEY:
+        elif activity_type == Keys.TYPE_SWIMMING_KEY:
             if year not in self.annual_swimming_bests:
                 self.annual_swimming_bests[year] = {}
             return self.annual_swimming_bests[year]
@@ -68,9 +68,9 @@ class Summarizer(object):
 
     @staticmethod
     def is_better(key, lhs, rhs):
-        if key in [ StraenKeys.BEST_1K, StraenKeys.BEST_MILE, StraenKeys.BEST_10K, StraenKeys.BEST_15K, StraenKeys.BEST_HALF_MARATHON, StraenKeys.BEST_MARATHON, StraenKeys.BEST_METRIC_CENTURY, StraenKeys.BEST_CENTURY ]:
+        if key in [ Keys.BEST_1K, Keys.BEST_MILE, Keys.BEST_10K, Keys.BEST_15K, Keys.BEST_HALF_MARATHON, Keys.BEST_MARATHON, Keys.BEST_METRIC_CENTURY, Keys.BEST_CENTURY ]:
             return lhs < rhs
-        elif key in [ StraenKeys.APP_AVG_SPEED_KEY, StraenKeys.BEST_5_SEC_POWER, StraenKeys.BEST_20_MIN_POWER, StraenKeys.BEST_1_HOUR_POWER ]:
+        elif key in [ Keys.APP_AVG_SPEED_KEY, Keys.BEST_5_SEC_POWER, Keys.BEST_20_MIN_POWER, Keys.BEST_1_HOUR_POWER ]:
             return rhs > lhs
         return False
 
@@ -78,7 +78,7 @@ class Summarizer(object):
         """Submits one item of an activity's metadata for summary analysis."""
 
         # Ignore these ones.
-        if summary_data_key.find(StraenKeys.CLUSTER) > 0:
+        if summary_data_key.find(Keys.CLUSTER) > 0:
             return
 
         # Get the record set that corresponds with the activity type.

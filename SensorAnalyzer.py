@@ -2,7 +2,7 @@
 
 from sklearn.cluster import KMeans
 import numpy
-import StraenKeys
+import Keys
 
 class SensorAnalyzer(object):
     """Class for performing calculations on basic sensor information (heart rate, power, etc.)."""
@@ -61,7 +61,7 @@ class SensorAnalyzer(object):
 #            clusters = kmeans_analyzer.cluster_centers_
 #            cluster_num = 1
 #            for cluster in clusters:
-#                key_str = self.type + " " + StraenKeys.CLUSTER + " " + str(cluster_num)
+#                key_str = self.type + " " + Keys.CLUSTER + " " + str(cluster_num)
 #                value_str = "{:.2f}".format(cluster[0])
 #                results[key_str] = value_str + " " + self.units
 #                cluster_num = cluster_num + 1

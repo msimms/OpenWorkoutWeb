@@ -1,14 +1,14 @@
 # Copyright 2017 Michael J Simms
 """Data store abstraction"""
 
+import Keys
 import StraenDb
-import StraenKeys
 import Importer
 
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
-    if StraenKeys.ACTIVITY_TIME_KEY in item:
-        return item[StraenKeys.ACTIVITY_TIME_KEY]
+    if Keys.ACTIVITY_TIME_KEY in item:
+        return item[Keys.ACTIVITY_TIME_KEY]
     return 0
 
 class DataMgr(Importer.ActivityWriter):
@@ -74,26 +74,26 @@ class DataMgr(Importer.ActivityWriter):
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
-        if StraenKeys.ACTIVITY_TIME_KEY in activity:
+        if Keys.ACTIVITY_TIME_KEY in activity:
             return
 
-        if StraenKeys.ACTIVITY_LOCATIONS_KEY in activity:
-            locations = activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]
+        if Keys.ACTIVITY_LOCATIONS_KEY in activity:
+            locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
         else:
-            locations = self.retrieve_locations(activity[StraenKeys.ACTIVITY_ID_KEY])
+            locations = self.retrieve_locations(activity[Keys.ACTIVITY_ID_KEY])
 
         if len(locations) > 0:
             first_loc = locations[0]
-            if StraenKeys.LOCATION_TIME_KEY in first_loc:
-                time_num = first_loc[StraenKeys.LOCATION_TIME_KEY] / 1000 # Milliseconds to seconds
-                activity_id = activity[StraenKeys.ACTIVITY_ID_KEY]
-                activity[StraenKeys.ACTIVITY_TIME_KEY] = time_num
-                self.create_metadata(activity_id, time_num, StraenKeys.ACTIVITY_TIME_KEY, time_num, False)
+            if Keys.LOCATION_TIME_KEY in first_loc:
+                time_num = first_loc[Keys.LOCATION_TIME_KEY] / 1000 # Milliseconds to seconds
+                activity_id = activity[Keys.ACTIVITY_ID_KEY]
+                activity[Keys.ACTIVITY_TIME_KEY] = time_num
+                self.create_metadata(activity_id, time_num, Keys.ACTIVITY_TIME_KEY, time_num, False)
 
     def is_activity_public(self, activity):
         """Helper function for returning whether or not an activity is publically visible."""
-        if StraenKeys.ACTIVITY_VISIBILITY_KEY in activity:
-            if activity[StraenKeys.ACTIVITY_VISIBILITY_KEY] == "private":
+        if Keys.ACTIVITY_VISIBILITY_KEY in activity:
+            if activity[Keys.ACTIVITY_VISIBILITY_KEY] == "private":
                 return False
         return True
 
@@ -121,7 +121,7 @@ class DataMgr(Importer.ActivityWriter):
             for device in devices:
                 device_activities = self.database.retrieve_device_activity_list(device, start, None)
                 for device_activity in device_activities:
-                    device_activity[StraenKeys.REALNAME_KEY] = user_realname
+                    device_activity[Keys.REALNAME_KEY] = user_realname
                     self.update_activity_start_time(device_activity)
                 activities.extend(device_activities)
 
@@ -145,7 +145,7 @@ class DataMgr(Importer.ActivityWriter):
         # Add the activities of users they follow.
         followed_users = self.database.retrieve_users_followed(user_id)
         for followed_user in followed_users:
-            more_activities = self.retrieve_user_activity_list(followed_user[StraenKeys.DATABASE_ID_KEY], followed_user[StraenKeys.REALNAME_KEY], start, num_results)
+            more_activities = self.retrieve_user_activity_list(followed_user[Keys.DATABASE_ID_KEY], followed_user[Keys.REALNAME_KEY], start, num_results)
             for another_activity in more_activities:
                 if self.is_activity_public(another_activity):
                     activities.append(another_activity)
@@ -272,7 +272,7 @@ class DataMgr(Importer.ActivityWriter):
         activity = self.database.retrieve_most_recent_activity_for_device(device_str)
         if activity is None:
             return None
-        return activity[StraenKeys.ACTIVITY_ID_KEY]
+        return activity[Keys.ACTIVITY_ID_KEY]
 
     def retrieve_most_recent_activity_for_device(self, device_str):
         """Returns the most recent activity for the specified device."""

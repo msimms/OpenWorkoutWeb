@@ -2,7 +2,6 @@
 """Writes GPX and TCX files."""
 
 import DataMgr
-import StraenKeys
 
 class Exporter(object):
     """Exporter for GPX and TCX location files."""

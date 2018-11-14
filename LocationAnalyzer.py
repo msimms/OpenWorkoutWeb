@@ -3,8 +3,8 @@
 import inspect
 import os
 import sys
+import Keys
 import SensorAnalyzer
-import StraenKeys
 import Units
 
 # Locate and load the distance module.
@@ -18,7 +18,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on a location track."""
 
     def __init__(self):
-        SensorAnalyzer.SensorAnalyzer.__init__(self, StraenKeys.APP_DISTANCE_KEY, Units.get_speed_units_str(Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS))
+        SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_DISTANCE_KEY, Units.get_speed_units_str(Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS))
 
         self.start_time = None
         self.last_time = None
@@ -76,25 +76,25 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 self.speed_graph.insert(0, self.current_speed)
 
             # Is this a new kilometer record for this activity?
-            self.do_record_check(StraenKeys.BEST_1K, total_seconds, total_meters, 1000)
+            self.do_record_check(Keys.BEST_1K, total_seconds, total_meters, 1000)
 
             # Is this a new mile record for this activity?
-            self.do_record_check(StraenKeys.BEST_MILE, total_seconds, total_meters, Units.METERS_PER_MILE)
+            self.do_record_check(Keys.BEST_MILE, total_seconds, total_meters, Units.METERS_PER_MILE)
 
             # Is this a new 5K record for this activity?
-            self.do_record_check(StraenKeys.BEST_5K, total_seconds, total_meters, 5000)
+            self.do_record_check(Keys.BEST_5K, total_seconds, total_meters, 5000)
 
             # Is this a new 10K record for this activity?
-            self.do_record_check(StraenKeys.BEST_10K, total_seconds, total_meters, 10000)
+            self.do_record_check(Keys.BEST_10K, total_seconds, total_meters, 10000)
 
             # Is this a new 15K record for this activity?
-            self.do_record_check(StraenKeys.BEST_15K, total_seconds, total_meters, 15000)
+            self.do_record_check(Keys.BEST_15K, total_seconds, total_meters, 15000)
 
             # Is this a new metric century record for this activity?
-            self.do_record_check(StraenKeys.BEST_METRIC_CENTURY, total_seconds, total_meters, 100000)
+            self.do_record_check(Keys.BEST_METRIC_CENTURY, total_seconds, total_meters, 100000)
 
             # Is this a new century record for this activity?
-            self.do_record_check(StraenKeys.BEST_CENTURY, total_seconds, total_meters, Units.METERS_PER_MILE * 100.0)
+            self.do_record_check(Keys.BEST_CENTURY, total_seconds, total_meters, Units.METERS_PER_MILE * 100.0)
 
     def append_location(self, date_time, latitude, longitude, altitude):
         """Adds another location to the analyzer. Locations should be sent in order."""
@@ -122,8 +122,8 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         """Adds many locations to the analyzer. Locations should be sent in order."""
 
         for location in locations:
-            date_time = location[StraenKeys.LOCATION_TIME_KEY]
-            latitude = location[StraenKeys.LOCATION_LAT_KEY]
-            longitude = location[StraenKeys.LOCATION_LON_KEY]
-            altitude = location[StraenKeys.LOCATION_ALT_KEY]
+            date_time = location[Keys.LOCATION_TIME_KEY]
+            latitude = location[Keys.LOCATION_LAT_KEY]
+            longitude = location[Keys.LOCATION_LON_KEY]
+            altitude = location[Keys.LOCATION_ALT_KEY]
             self.append_location(date_time, latitude, longitude, altitude)

@@ -13,10 +13,10 @@ import threading
 import traceback
 import uuid
 
+import Keys
 import LocationAnalyzer
 import SensorAnalyzerFactory
 import StraenApi
-import StraenKeys
 import DataMgr
 import Units
 import UserMgr
@@ -149,65 +149,65 @@ class StraenApp(object):
 
         response = "["
 
-        names = self.data_mgr.retrieve_metadata(StraenKeys.APP_NAME_KEY, activity_id)
+        names = self.data_mgr.retrieve_metadata(Keys.APP_NAME_KEY, activity_id)
         if names != None and len(names) > 0:
-            response += json.dumps({"name": StraenKeys.APP_NAME_KEY, "value": names[-1][1]})
+            response += json.dumps({"name": Keys.APP_NAME_KEY, "value": names[-1][1]})
 
-        times = self.data_mgr.retrieve_metadata(StraenKeys.APP_TIME_KEY, activity_id)
+        times = self.data_mgr.retrieve_metadata(Keys.APP_TIME_KEY, activity_id)
         if times != None and len(times) > 0:
             if len(response) > 1:
                 response += ","
             localtimezone = tzlocal()
             value_str = datetime.datetime.fromtimestamp(times[-1][1] / 1000, localtimezone).strftime('%Y-%m-%d %H:%M:%S')
-            response += json.dumps({"name": StraenKeys.APP_TIME_KEY, "value": value_str})
+            response += json.dumps({"name": Keys.APP_TIME_KEY, "value": value_str})
 
-        distances = self.data_mgr.retrieve_metadata(StraenKeys.APP_DISTANCE_KEY, activity_id)
+        distances = self.data_mgr.retrieve_metadata(Keys.APP_DISTANCE_KEY, activity_id)
         if distances != None and len(distances) > 0:
             if len(response) > 1:
                 response += ","
             distance = distances[len(distances) - 1]
             value = float(distance.values()[0])
-            response += json.dumps({"name": StraenKeys.APP_DISTANCE_KEY, "value": "{:.2f}".format(value)})
+            response += json.dumps({"name": Keys.APP_DISTANCE_KEY, "value": "{:.2f}".format(value)})
 
-        avg_speeds = self.data_mgr.retrieve_metadata(StraenKeys.APP_AVG_SPEED_KEY, activity_id)
+        avg_speeds = self.data_mgr.retrieve_metadata(Keys.APP_AVG_SPEED_KEY, activity_id)
         if avg_speeds != None and len(avg_speeds) > 0:
             if len(response) > 1:
                 response += ","
             speed = avg_speeds[len(avg_speeds) - 1]
             value = float(speed.values()[0])
-            response += json.dumps({"name": StraenKeys.APP_AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
+            response += json.dumps({"name": Keys.APP_AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
 
-        moving_speeds = self.data_mgr.retrieve_metadata(StraenKeys.APP_MOVING_SPEED_KEY, activity_id)
+        moving_speeds = self.data_mgr.retrieve_metadata(Keys.APP_MOVING_SPEED_KEY, activity_id)
         if moving_speeds != None and len(moving_speeds) > 0:
             if len(response) > 1:
                 response += ","
             speed = moving_speeds[len(moving_speeds) - 1]
             value = float(speed.values()[0])
-            response += json.dumps({"name": StraenKeys.APP_MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
+            response += json.dumps({"name": Keys.APP_MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
 
-        heart_rates = self.data_mgr.retrieve_sensordata(StraenKeys.APP_HEART_RATE_KEY, activity_id)
+        heart_rates = self.data_mgr.retrieve_sensordata(Keys.APP_HEART_RATE_KEY, activity_id)
         if heart_rates != None and len(heart_rates) > 0:
             if len(response) > 1:
                 response += ","
             heart_rate = heart_rates[len(heart_rates) - 1]
             value = float(heart_rate.values()[0])
-            response += json.dumps({"name": StraenKeys.APP_HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
+            response += json.dumps({"name": Keys.APP_HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
 
-        cadences = self.data_mgr.retrieve_sensordata(StraenKeys.APP_CADENCE_KEY, activity_id)
+        cadences = self.data_mgr.retrieve_sensordata(Keys.APP_CADENCE_KEY, activity_id)
         if cadences != None and len(cadences) > 0:
             if len(response) > 1:
                 response += ","
             cadence = cadences[len(cadences) - 1]
             value = float(cadence.values()[0])
-            response += json.dumps({"name": StraenKeys.APP_CADENCE_KEY, "value": "{:.2f}".format(value)})
+            response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.2f}".format(value)})
 
-        powers = self.data_mgr.retrieve_sensordata(StraenKeys.APP_POWER_KEY, activity_id)
+        powers = self.data_mgr.retrieve_sensordata(Keys.APP_POWER_KEY, activity_id)
         if powers != None and len(powers) > 0:
             if len(response) > 1:
                 response += ","
             power = powers[len(powers) - 1]
             value = float(power.values()[0])
-            response += json.dumps({"name": StraenKeys.APP_POWER_KEY, "value": "{:.2f} watts".format(value)})
+            response += json.dumps({"name": Keys.APP_POWER_KEY, "value": "{:.2f} watts".format(value)})
 
         response += "]"
 
@@ -252,12 +252,12 @@ class StraenApp(object):
         if comments is not None:
             for comment_entry in comments:
                 decoded_entry = json.loads(comment_entry)
-                commenter_id = decoded_entry[StraenKeys.ACTIVITY_COMMENTER_ID_KEY]
+                commenter_id = decoded_entry[Keys.ACTIVITY_COMMENTER_ID_KEY]
                 _, commenter_name = self.user_mgr.retrieve_user_from_id(commenter_id)
                 comments_str += "<td>"
                 comments_str += commenter_name
                 comments_str += " says \""
-                comments_str += decoded_entry[StraenKeys.ACTIVITY_COMMENT_KEY]
+                comments_str += decoded_entry[Keys.ACTIVITY_COMMENT_KEY]
                 comments_str += "\"</td><tr>"
         if logged_in:
             comments_str += "<td><textarea rows=\"4\" cols=\"100\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>"
@@ -277,17 +277,17 @@ class StraenApp(object):
         y_axis = ""
         z_axis = ""
         for accel in accels:
-            x_axis += "\t\t\t\t{ date: new Date(" + str(accel[StraenKeys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[StraenKeys.ACCELEROMETER_AXIS_NAME_X]) + " },\n"
-            y_axis += "\t\t\t\t{ date: new Date(" + str(accel[StraenKeys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[StraenKeys.ACCELEROMETER_AXIS_NAME_Y]) + " },\n"
-            z_axis += "\t\t\t\t{ date: new Date(" + str(accel[StraenKeys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[StraenKeys.ACCELEROMETER_AXIS_NAME_Z]) + " },\n"
+            x_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_X]) + " },\n"
+            y_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Y]) + " },\n"
+            z_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Z]) + " },\n"
 
         # Build the summary data view.
         summary = "<ul>\n"
-        activity_type = self.data_mgr.retrieve_metadata(StraenKeys.ACTIVITY_TYPE_KEY, activity_id)
+        activity_type = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
         if activity_type is None:
             activity_type = UNSPECIFIED_ACTIVITY_TYPE
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
-        name = self.data_mgr.retrieve_metadata(StraenKeys.APP_NAME_KEY, activity_id)
+        name = self.data_mgr.retrieve_metadata(Keys.APP_NAME_KEY, activity_id)
         if name is None:
             name = UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
@@ -358,23 +358,23 @@ class StraenApp(object):
         location_analyzer.append_locations(locations)
 
         for location in locations:
-            route += "\t\t\t\tnewCoord(" + str(location[StraenKeys.LOCATION_LAT_KEY]) + ", " + str(location[StraenKeys.LOCATION_LON_KEY]) + "),\n"
+            route += "\t\t\t\tnewCoord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
             last_loc = location
 
         if len(locations) > 0:
             first_loc = locations[0]
-            center_lat = first_loc[StraenKeys.LOCATION_LAT_KEY]
-            center_lon = first_loc[StraenKeys.LOCATION_LON_KEY]
-            last_lat = last_loc[StraenKeys.LOCATION_LAT_KEY]
-            last_lon = last_loc[StraenKeys.LOCATION_LON_KEY]
+            center_lat = first_loc[Keys.LOCATION_LAT_KEY]
+            center_lon = first_loc[Keys.LOCATION_LON_KEY]
+            last_lat = last_loc[Keys.LOCATION_LAT_KEY]
+            last_lon = last_loc[Keys.LOCATION_LON_KEY]
 
         # Get all the things.
-        current_speeds_str, _ = self.render_metadata_for_page(StraenKeys.APP_CURRENT_SPEED_KEY, activity_id)
-        heart_rates_str, max_heart_rate, heart_rate_analysis = self.render_sensor_data_for_page(StraenKeys.APP_HEART_RATE_KEY, activity_id)
-        cadences_str, max_cadence, cadence_analysis = self.render_sensor_data_for_page(StraenKeys.APP_CADENCE_KEY, activity_id)
-        powers_str, max_power, power_analysis = self.render_sensor_data_for_page(StraenKeys.APP_POWER_KEY, activity_id)
-        name = self.data_mgr.retrieve_metadata(StraenKeys.APP_NAME_KEY, activity_id)
-        activity_type = self.data_mgr.retrieve_metadata(StraenKeys.ACTIVITY_TYPE_KEY, activity_id)
+        current_speeds_str, _ = self.render_metadata_for_page(Keys.APP_CURRENT_SPEED_KEY, activity_id)
+        heart_rates_str, max_heart_rate, heart_rate_analysis = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity_id)
+        cadences_str, max_cadence, cadence_analysis = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity_id)
+        powers_str, max_power, power_analysis = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity_id)
+        name = self.data_mgr.retrieve_metadata(Keys.APP_NAME_KEY, activity_id)
+        activity_type = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
 
         # Build the summary data view.
         summary = "<ul>\n"
@@ -399,12 +399,12 @@ class StraenApp(object):
             summary += "\t<li>Max. Cadence: {:.2f} ".format(max_cadence) + Units.get_cadence_units_str() + "</li>\n"
         if max_power:
             summary += "\t<li>Max. Power: {:.2f} ".format(max_power) + Units.get_power_units_str() + "</li>\n"
-        if location_analyzer.bests[StraenKeys.BEST_1K] is not None:
-            value = 1.0 / location_analyzer.bests[StraenKeys.BEST_1K]
+        if location_analyzer.bests[Keys.BEST_1K] is not None:
+            value = 1.0 / location_analyzer.bests[Keys.BEST_1K]
             value = Units.convert_speed(value, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS)
             summary += "\t<li>Best KM: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS) + "</li>\n"
-        if location_analyzer.bests[StraenKeys.BEST_MILE] is not None:
-            value = 1.0 / location_analyzer.bests[StraenKeys.BEST_MILE]
+        if location_analyzer.bests[Keys.BEST_MILE] is not None:
+            value = 1.0 / location_analyzer.bests[Keys.BEST_MILE]
             value = Units.convert_speed(value, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
             summary += "\t<li>Best Mile: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
         tags = self.data_mgr.retrieve_tags(activity_id)
@@ -458,10 +458,10 @@ class StraenApp(object):
         try:
             logged_in_username = self.user_mgr.get_logged_in_user()
 
-            if StraenKeys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]) > 0:
-                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity[StraenKeys.ACTIVITY_LOCATIONS_KEY], logged_in_username is not None, is_live)
-            elif StraenKeys.APP_ACCELEROMETER_KEY in activity:
-                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity[StraenKeys.APP_ACCELEROMETER_KEY], logged_in_username is not None, is_live)
+            if Keys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[Keys.ACTIVITY_LOCATIONS_KEY]) > 0:
+                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity[Keys.ACTIVITY_LOCATIONS_KEY], logged_in_username is not None, is_live)
+            elif Keys.APP_ACCELEROMETER_KEY in activity:
+                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity[Keys.APP_ACCELEROMETER_KEY], logged_in_username is not None, is_live)
             else:
                 my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
                 return my_template.render(nav=self.create_navbar(logged_in_username is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
@@ -496,17 +496,17 @@ class StraenApp(object):
 
             route_coordinates += "\t\t\tvar routeCoordinates" + str(device_index) + " = \n\t\t\t[\n"
             for location in locations:
-                route_coordinates += "\t\t\t\tnewCoord(" + str(location[StraenKeys.LOCATION_LAT_KEY]) + ", " + str(location[StraenKeys.LOCATION_LON_KEY]) + "),\n"
+                route_coordinates += "\t\t\t\tnewCoord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
                 last_loc = location
             route_coordinates += "\t\t\t];\n"
             route_coordinates += "\t\t\taddRoute(routeCoordinates" + str(device_index) + ");\n\n"
 
             if len(locations) > 0:
                 first_loc = locations[0]
-                center_lat = first_loc[StraenKeys.LOCATION_LAT_KEY]
-                center_lon = first_loc[StraenKeys.LOCATION_LON_KEY]
-                last_lat = last_loc[StraenKeys.LOCATION_LAT_KEY]
-                last_lon = last_loc[StraenKeys.LOCATION_LON_KEY]
+                center_lat = first_loc[Keys.LOCATION_LAT_KEY]
+                center_lon = first_loc[Keys.LOCATION_LON_KEY]
+                last_lat = last_loc[Keys.LOCATION_LAT_KEY]
+                last_lon = last_loc[Keys.LOCATION_LON_KEY]
 
         my_template = Template(filename=self.map_multi_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, googleMapsKey=self.google_maps_key, centerLat=center_lat, centerLon=center_lon, lastLat=last_lat, lastLon=last_lon, routeCoordinates=route_coordinates, routeLen=len(locations), userId=str(user_id))
@@ -515,41 +515,41 @@ class StraenApp(object):
         """Helper function for creating a table row describing an activity."""
 
         # User's real name.
-        if StraenKeys.REALNAME_KEY in activity:
-            user_realname = activity[StraenKeys.REALNAME_KEY]
+        if Keys.REALNAME_KEY in activity:
+            user_realname = activity[Keys.REALNAME_KEY]
         else:
             user_realname = None
 
         # Activity ID
-        if StraenKeys.ACTIVITY_ID_KEY in activity:
-            activity_id = activity[StraenKeys.ACTIVITY_ID_KEY]
+        if Keys.ACTIVITY_ID_KEY in activity:
+            activity_id = activity[Keys.ACTIVITY_ID_KEY]
         else:
             return None
         if activity_id is None or len(activity_id) == 0:
             return None
 
         # Activity type
-        if StraenKeys.ACTIVITY_TYPE_KEY in activity and len(activity[StraenKeys.ACTIVITY_TYPE_KEY]) > 0:
-            activity_type = "<b>" + activity[StraenKeys.ACTIVITY_TYPE_KEY] + "</b>"
+        if Keys.ACTIVITY_TYPE_KEY in activity and len(activity[Keys.ACTIVITY_TYPE_KEY]) > 0:
+            activity_type = "<b>" + activity[Keys.ACTIVITY_TYPE_KEY] + "</b>"
         else:
             activity_type = "<b>" + UNSPECIFIED_ACTIVITY_TYPE + "</b>"
 
         # Activity name
-        if StraenKeys.ACTIVITY_NAME_KEY in activity and len(activity[StraenKeys.ACTIVITY_NAME_KEY]) > 0:
-            activity_name = "<b>" + activity[StraenKeys.ACTIVITY_NAME_KEY] + "</b>"
+        if Keys.ACTIVITY_NAME_KEY in activity and len(activity[Keys.ACTIVITY_NAME_KEY]) > 0:
+            activity_name = "<b>" + activity[Keys.ACTIVITY_NAME_KEY] + "</b>"
         else:
             activity_name = "<b>" + UNNAMED_ACTIVITY_TITLE + "</b>"
 
         # Activity time
         activity_time = "-"
-        if StraenKeys.ACTIVITY_TIME_KEY in activity:
-            activity_time = "<script>document.write(unix_time_to_local_string(" + str(activity[StraenKeys.ACTIVITY_TIME_KEY]) + "))</script>"
+        if Keys.ACTIVITY_TIME_KEY in activity:
+            activity_time = "<script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script>"
 
         # Activity visibility
         checkbox_value = "checked"
         checkbox_label = "Public"
-        if StraenKeys.ACTIVITY_VISIBILITY_KEY in activity:
-            if activity[StraenKeys.ACTIVITY_VISIBILITY_KEY] == "private":
+        if Keys.ACTIVITY_VISIBILITY_KEY in activity:
+            if activity[Keys.ACTIVITY_VISIBILITY_KEY] == "private":
                 checkbox_value = "unchecked"
                 checkbox_label = "Private"
 
@@ -582,10 +582,10 @@ class StraenApp(object):
         """Helper function for creating a table row describing a user."""
         row = "<tr>"
         row += "<td>"
-        row += user[StraenKeys.USERNAME_KEY]
+        row += user[Keys.USERNAME_KEY]
         row += "</td>"
         row += "<td>"
-        row += user[StraenKeys.REALNAME_KEY]
+        row += user[Keys.REALNAME_KEY]
         row += "</td>"
         row += "</tr>\n"
         return row
@@ -618,7 +618,7 @@ class StraenApp(object):
 
         # Determine who owns the device.
         device_user = self.user_mgr.retrieve_user_from_device(device_str)
-        device_user_id = device_user[StraenKeys.DATABASE_ID_KEY]
+        device_user_id = device_user[Keys.DATABASE_ID_KEY]
         belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
 
         # Load the activity.
@@ -629,7 +629,7 @@ class StraenApp(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id, True)
+        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, True)
 
     @statistics
     def activity(self, activity_id):
@@ -648,11 +648,11 @@ class StraenApp(object):
         username = ""
         realname = ""
         belongs_to_current_user = False
-        if StraenKeys.ACTIVITY_DEVICE_STR_KEY in activity:
-            device_user = self.user_mgr.retrieve_user_from_device(activity[StraenKeys.ACTIVITY_DEVICE_STR_KEY])
-            device_user_id = device_user[StraenKeys.DATABASE_ID_KEY]
-            username = device_user[StraenKeys.USERNAME_KEY]
-            realname = device_user[StraenKeys.REALNAME_KEY]
+        if Keys.ACTIVITY_DEVICE_STR_KEY in activity:
+            device_user = self.user_mgr.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
+            device_user_id = device_user[Keys.DATABASE_ID_KEY]
+            username = device_user[Keys.USERNAME_KEY]
+            realname = device_user[Keys.REALNAME_KEY]
             belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
 
         # Determine if the current user can view the activity.
@@ -681,7 +681,7 @@ class StraenApp(object):
 
         # Determine who owns the device.
         device_user = self.user_mgr.retrieve_user_from_device(device_str)
-        device_user_id = device_user[StraenKeys.DATABASE_ID_KEY]
+        device_user_id = device_user[Keys.DATABASE_ID_KEY]
         belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
 
         # Load the activity.
@@ -692,7 +692,7 @@ class StraenApp(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, device_user[StraenKeys.USERNAME_KEY], device_user[StraenKeys.REALNAME_KEY], activity_id, False)
+        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, False)
 
     @statistics
     def my_activities(self):
@@ -849,7 +849,7 @@ class StraenApp(object):
                 device_list_str += device
                 device_list_str += "</a></td><td>"
                 if activity is not None:
-                    device_list_str += "<script>document.write(unix_time_to_local_string(" + str(activity[StraenKeys.ACTIVITY_TIME_KEY]) + "))</script>"
+                    device_list_str += "<script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script>"
                 device_list_str += "</td></tr>\n"
 
         # Render from template.
@@ -940,16 +940,16 @@ class StraenApp(object):
             raise RedirectException(LOGIN_URL)
 
         # Get the current settings.
-        selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, StraenKeys.DEFAULT_PRIVACY)
+        selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, Keys.DEFAULT_PRIVACY)
         selected_default_privacy = selected_default_privacy.lower()
 
         # Render the privacy option.
         privacy_options = "\t\t<option value=\"Public\""
-        if selected_default_privacy == StraenKeys.ACTIVITY_VISIBILITY_PUBLIC:
+        if selected_default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC:
             privacy_options += " selected"
         privacy_options += ">Public</option>\n"
         privacy_options += "\t\t<option value=\"Private\""
-        if selected_default_privacy == StraenKeys.ACTIVITY_VISIBILITY_PRIVATE:
+        if selected_default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE:
             privacy_options += " selected"
         privacy_options += ">Private</option>"
 

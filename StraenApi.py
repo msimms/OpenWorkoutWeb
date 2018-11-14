@@ -7,7 +7,7 @@ import time
 import urllib
 import uuid
 import Exporter
-import StraenKeys
+import Keys
 
 g_not_meta_data = ["DeviceId", "ActivityId", "ActivityName", "User Name", "Latitude", "Longitude", "Altitude", "Horizontal Accuracy", "Vertical Accuracy"]
 
@@ -32,15 +32,15 @@ class StraenApi(object):
         try:
             # Parse the metadata for the timestamp.
             date_time = int(time.time() * 1000)
-            if StraenKeys.APP_TIME_KEY in json_obj:
-                time_str = json_obj[StraenKeys.APP_TIME_KEY]
+            if Keys.APP_TIME_KEY in json_obj:
+                time_str = json_obj[Keys.APP_TIME_KEY]
                 date_time = int(time_str)
 
             # Parse the location data.
             try:
-                lat = json_obj[StraenKeys.APP_LOCATION_LAT_KEY]
-                lon = json_obj[StraenKeys.APP_LOCATION_LON_KEY]
-                alt = json_obj[StraenKeys.APP_LOCATION_ALT_KEY]
+                lat = json_obj[Keys.APP_LOCATION_LAT_KEY]
+                lon = json_obj[Keys.APP_LOCATION_LON_KEY]
+                alt = json_obj[Keys.APP_LOCATION_ALT_KEY]
                 location = [date_time, lat, lon, alt]
             except ValueError, e:
                 self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
@@ -53,9 +53,9 @@ class StraenApi(object):
             for item in json_obj.iteritems():
                 key = item[0]
                 if not key in g_not_meta_data:
-                    if key in [StraenKeys.APP_CADENCE_KEY, StraenKeys.APP_HEART_RATE_KEY, StraenKeys.APP_POWER_KEY]:
+                    if key in [Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]:
                         self.data_mgr.create_sensordata(activity_id, date_time, key, item[1])
-                    elif key in [StraenKeys.APP_CURRENT_SPEED_KEY, StraenKeys.APP_CURRENT_PACE_KEY]:
+                    elif key in [Keys.APP_CURRENT_SPEED_KEY, Keys.APP_CURRENT_PACE_KEY]:
                         self.data_mgr.create_metadata(activity_id, date_time, key, item[1], True)
         except ValueError, e:
             self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
@@ -72,13 +72,13 @@ class StraenApi(object):
         try:
             # Parse the metadata for the timestamp.
             date_time = int(time.time() * 1000)
-            if StraenKeys.APP_TIME_KEY in json_obj:
-                time_str = json_obj[StraenKeys.APP_TIME_KEY]
+            if Keys.APP_TIME_KEY in json_obj:
+                time_str = json_obj[Keys.APP_TIME_KEY]
                 date_time = int(time_str)
 
-            x = json_obj[StraenKeys.APP_AXIS_NAME_X]
-            y = json_obj[StraenKeys.APP_AXIS_NAME_Y]
-            z = json_obj[StraenKeys.APP_AXIS_NAME_Z]
+            x = json_obj[Keys.APP_AXIS_NAME_X]
+            y = json_obj[Keys.APP_AXIS_NAME_Y]
+            z = json_obj[Keys.APP_AXIS_NAME_Z]
             accel = [date_time, x, y, z]
         except ValueError, e:
             self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
@@ -98,19 +98,19 @@ class StraenApi(object):
         accels = []
 
         # Parse required identifiers.
-        device_str = values[StraenKeys.APP_DEVICE_ID_KEY]
-        activity_id = values[StraenKeys.APP_ID_KEY]
+        device_str = values[Keys.APP_DEVICE_ID_KEY]
+        activity_id = values[Keys.APP_ID_KEY]
 
         # Parse optional identifiers.
-        if StraenKeys.APP_TYPE_KEY in values:
-            activity_type = values[StraenKeys.APP_TYPE_KEY]
-        if StraenKeys.APP_USERNAME_KEY in values:
-            username = values[StraenKeys.APP_USERNAME_KEY]
+        if Keys.APP_TYPE_KEY in values:
+            activity_type = values[Keys.APP_TYPE_KEY]
+        if Keys.APP_USERNAME_KEY in values:
+            username = values[Keys.APP_USERNAME_KEY]
 
-        if StraenKeys.APP_LOCATIONS_KEY in values:
+        if Keys.APP_LOCATIONS_KEY in values:
 
             # Parse each of the location objects.
-            encoded_locations = values[StraenKeys.APP_LOCATIONS_KEY]
+            encoded_locations = values[Keys.APP_LOCATIONS_KEY]
             for location_obj in encoded_locations:
                 location = self.parse_json_loc_obj(activity_id, location_obj)
                 locations.append(location)
@@ -118,10 +118,10 @@ class StraenApi(object):
             # Update the locations.
             self.data_mgr.create_locations(device_str, activity_id, locations)
 
-        if StraenKeys.APP_ACCELEROMETER_KEY in values:
+        if Keys.APP_ACCELEROMETER_KEY in values:
 
             # Parse each of the accelerometer objects.
-            encoded_accel = values[StraenKeys.APP_ACCELEROMETER_KEY]
+            encoded_accel = values[Keys.APP_ACCELEROMETER_KEY]
             for accel_obj in encoded_accel:
                 accel = self.parse_json_accel_obj(activity_id, accel_obj)
                 accels.append(accel)
@@ -131,7 +131,7 @@ class StraenApi(object):
 
         # Udpate the activity type.
         if len(activity_type) > 0:
-            self.data_mgr.create_metadata(activity_id, 0, StraenKeys.ACTIVITY_TYPE_KEY, activity_type, False)
+            self.data_mgr.create_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
 
         # Update the user device association.
         if len(username) > 0:
@@ -146,19 +146,19 @@ class StraenApi(object):
         if self.user_id is not None:
             return True, self.user_mgr.get_logged_in_user()
 
-        if StraenKeys.USERNAME_KEY not in values:
+        if Keys.USERNAME_KEY not in values:
             raise Exception("Username not specified.")
-        if StraenKeys.PASSWORD_KEY not in values:
+        if Keys.PASSWORD_KEY not in values:
             raise Exception("Password not specified.")
 
-        email = urllib.unquote_plus(values[StraenKeys.USERNAME_KEY])
-        password = urllib.unquote_plus(values[StraenKeys.PASSWORD_KEY])
+        email = urllib.unquote_plus(values[Keys.USERNAME_KEY])
+        password = urllib.unquote_plus(values[Keys.PASSWORD_KEY])
 
         if not self.user_mgr.authenticate_user(email, password):
             raise Exception("Authentication failed.")
 
-        if StraenKeys.DEVICE_KEY in values:
-            device_str = urllib.unquote_plus(values[StraenKeys.DEVICE_KEY])
+        if Keys.DEVICE_KEY in values:
+            device_str = urllib.unquote_plus(values[Keys.DEVICE_KEY])
             result = self.user_mgr.create_user_device(email, device_str)
         else:
             result = True
@@ -171,22 +171,22 @@ class StraenApi(object):
         if self.user_id is not None:
             raise Exception("Already logged in.")
 
-        if StraenKeys.USERNAME_KEY not in values:
+        if Keys.USERNAME_KEY not in values:
             raise Exception("Username not specified.")
-        if StraenKeys.REALNAME_KEY not in values:
+        if Keys.REALNAME_KEY not in values:
             raise Exception("Real name not specified.")
-        if StraenKeys.PASSWORD1_KEY not in values:
+        if Keys.PASSWORD1_KEY not in values:
             raise Exception("Password not specified.")
-        if StraenKeys.PASSWORD2_KEY not in values:
+        if Keys.PASSWORD2_KEY not in values:
             raise Exception("Password confirmation not specified.")
 
-        email = urllib.unquote_plus(values[StraenKeys.USERNAME_KEY])
-        realname = urllib.unquote_plus(values[StraenKeys.REALNAME_KEY])
-        password1 = urllib.unquote_plus(values[StraenKeys.PASSWORD1_KEY])
-        password2 = urllib.unquote_plus(values[StraenKeys.PASSWORD2_KEY])
+        email = urllib.unquote_plus(values[Keys.USERNAME_KEY])
+        realname = urllib.unquote_plus(values[Keys.REALNAME_KEY])
+        password1 = urllib.unquote_plus(values[Keys.PASSWORD1_KEY])
+        password2 = urllib.unquote_plus(values[Keys.PASSWORD2_KEY])
 
-        if StraenKeys.DEVICE_KEY in values:
-            device_str = urllib.unquote_plus(values[StraenKeys.DEVICE_KEY])
+        if Keys.DEVICE_KEY in values:
+            device_str = urllib.unquote_plus(values[Keys.DEVICE_KEY])
         else:
             device_str = ""
 
@@ -265,7 +265,7 @@ class StraenApi(object):
         """Removes the user and all associated data."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if StraenKeys.PASSWORD_KEY not in values:
+        if Keys.PASSWORD_KEY not in values:
             raise Exception("Password not specified.")
 
         # Get the logged in user.
@@ -274,7 +274,7 @@ class StraenApi(object):
             raise Exception("Empty username.")
 
         # Reauthenticate the user.
-        password = values[StraenKeys.PASSWORD_KEY]
+        password = values[Keys.PASSWORD_KEY]
         if not self.user_mgr.authenticate_user(username, password):
             raise Exception("Authentication failed.")
 
@@ -289,18 +289,18 @@ class StraenApi(object):
         """Removes the specified activity."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if StraenKeys.ACTIVITY_ID_KEY not in values:
+        if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Activity ID not specified.")
 
         # Get the device and activity IDs from the push request.
-        activity_id = values[StraenKeys.ACTIVITY_ID_KEY]
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
 
         # Get the activiites that belong to the logged in user.
         activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None)
         deleted = False
         for activity in activities:
-            if StraenKeys.ACTIVITY_ID_KEY in activity:
-                if activity[StraenKeys.ACTIVITY_ID_KEY] == activity_id:
+            if Keys.ACTIVITY_ID_KEY in activity:
+                if activity[Keys.ACTIVITY_ID_KEY] == activity_id:
                     self.data_mgr.delete_activity(activity['_id'])
                     deleted = True
                     break
@@ -313,9 +313,9 @@ class StraenApi(object):
 
     def handle_add_time_and_distance_activity(self, values):
         """Called when an API message to add a new activity based on time and distance is received."""
-        if StraenKeys.APP_TIME_KEY not in values:
+        if Keys.APP_TIME_KEY not in values:
             raise Exception("Time not specified.")
-        if StraenKeys.APP_DISTANCE_KEY not in values:
+        if Keys.APP_DISTANCE_KEY not in values:
             raise Exception("Distance not specified.")
 
         activity_id = str(uuid.uuid4())
@@ -323,11 +323,11 @@ class StraenApi(object):
 
     def handle_add_sets_and_reps_activity(self, values):
         """Called when an API message to add a new activity based on sets and reps is received."""
-        if StraenKeys.APP_SETS_KEY not in values:
+        if Keys.APP_SETS_KEY not in values:
             raise Exception("Sets not specified.")
 
         activity_id = str(uuid.uuid4())
-        sets = values[StraenKeys.APP_SETS_KEY]
+        sets = values[Keys.APP_SETS_KEY]
         print sets
         return True, ""
 
@@ -335,17 +335,17 @@ class StraenApi(object):
         """Called when an API message to add a new activity is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if StraenKeys.ACTIVITY_TYPE_KEY not in values:
+        if Keys.ACTIVITY_TYPE_KEY not in values:
             raise Exception("Activity type not specified.")
 
         switcher = {
-            StraenKeys.TYPE_RUNNING_KEY : self.handle_add_time_and_distance_activity,
-            StraenKeys.TYPE_CYCLING_KEY : self.handle_add_time_and_distance_activity,
-            StraenKeys.TYPE_SWIMMING_KEY : self.handle_add_time_and_distance_activity,
-            StraenKeys.TYPE_PULL_UPS_KEY : self.handle_add_sets_and_reps_activity
+            Keys.TYPE_RUNNING_KEY : self.handle_add_time_and_distance_activity,
+            Keys.TYPE_CYCLING_KEY : self.handle_add_time_and_distance_activity,
+            Keys.TYPE_SWIMMING_KEY : self.handle_add_time_and_distance_activity,
+            Keys.TYPE_PULL_UPS_KEY : self.handle_add_sets_and_reps_activity
         }
 
-        func = switcher.get(values[StraenKeys.ACTIVITY_TYPE_KEY], lambda: "Invalid activity type")
+        func = switcher.get(values[Keys.ACTIVITY_TYPE_KEY], lambda: "Invalid activity type")
         return True, func(values)
 
     def handle_upload_activity_file(self, values):
@@ -452,11 +452,11 @@ class StraenApi(object):
         """Called when an API message request to export an activity."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if StraenKeys.ACTIVITY_ID_KEY not in values:
+        if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
 
         exporter = Exporter.Exporter()
-        result = exporter.export(self.data_mgr, values[StraenKeys.ACTIVITY_ID_KEY])
+        result = exporter.export(self.data_mgr, values[Keys.ACTIVITY_ID_KEY])
         return True, result
 
     def handle_claim_device(self, values):
@@ -473,44 +473,44 @@ class StraenApi(object):
         """Called when an API message create a tag is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if StraenKeys.ACTIVITY_ID_KEY not in values:
+        if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
-        if StraenKeys.ACTIVITY_TAGS_KEY not in values:
+        if Keys.ACTIVITY_TAGS_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.create_tag(values[StraenKeys.ACTIVITY_ID_KEY], values[StraenKeys.ACTIVITY_TAGS_KEY])
+        result = self.data_mgr.create_tag(values[Keys.ACTIVITY_ID_KEY], values[Keys.ACTIVITY_TAGS_KEY])
         return result, ""
 
     def handle_list_tags(self, values):
         """Called when an API message create list tags associated with an activity is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if StraenKeys.ACTIVITY_ID_KEY not in values:
+        if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.retrieve_tags(values[StraenKeys.ACTIVITY_ID_KEY])
+        result = self.data_mgr.retrieve_tags(values[Keys.ACTIVITY_ID_KEY])
         return result, ""
 
     def handle_create_comment(self, values):
         """Called when an API message create a comment is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if StraenKeys.ACTIVITY_ID_KEY not in values:
+        if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
-        if StraenKeys.ACTIVITY_COMMENT_KEY not in values:
+        if Keys.ACTIVITY_COMMENT_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.create_activity_comment(values[StraenKeys.ACTIVITY_ID_KEY], self.user_id, values[StraenKeys.ACTIVITY_COMMENT_KEY])
+        result = self.data_mgr.create_activity_comment(values[Keys.ACTIVITY_ID_KEY], self.user_id, values[Keys.ACTIVITY_COMMENT_KEY])
         return result, ""
 
     def handle_list_comments(self, values):
         """Called when an API message create list comments associated with an activity is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if StraenKeys.ACTIVITY_ID_KEY not in values:
+        if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.retrieve_comments(values[StraenKeys.ACTIVITY_ID_KEY])
+        result = self.data_mgr.retrieve_comments(values[Keys.ACTIVITY_ID_KEY])
         return result, ""
 
     def handle_update_settings(self, values):
@@ -525,12 +525,12 @@ class StraenApi(object):
             decoded_key = urllib.unquote_plus(key)
 
             # Default privacy/visibility.
-            if decoded_key == StraenKeys.DEFAULT_PRIVACY:
+            if decoded_key == Keys.DEFAULT_PRIVACY:
                 default_privacy = urllib.unquote_plus(values[key])
                 default_privacy = default_privacy.lower()
-                if not (default_privacy == StraenKeys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == StraenKeys.ACTIVITY_VISIBILITY_PRIVATE):
+                if not (default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE):
                     raise Exception("Invalid visibility value.")
-                result = self.user_mgr.update_user_setting(self.user_id, StraenKeys.DEFAULT_PRIVACY, default_privacy)
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY, default_privacy)
 
         return result, ""
 
@@ -538,17 +538,17 @@ class StraenApi(object):
         """Called when the user updates the visibility of an activity."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if StraenKeys.ACTIVITY_ID_KEY not in values:
+        if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Drink ID not specified.")
-        if StraenKeys.ACTIVITY_VISIBILITY_KEY not in values:
+        if Keys.ACTIVITY_VISIBILITY_KEY not in values:
             raise Exception("Visibility not specified.")
 
-        visibility = urllib.unquote_plus(values[StraenKeys.ACTIVITY_VISIBILITY_KEY])
+        visibility = urllib.unquote_plus(values[Keys.ACTIVITY_VISIBILITY_KEY])
         visibility = visibility.lower()
-        if not (visibility == StraenKeys.ACTIVITY_VISIBILITY_PUBLIC or visibility == StraenKeys.ACTIVITY_VISIBILITY_PRIVATE):
+        if not (visibility == Keys.ACTIVITY_VISIBILITY_PUBLIC or visibility == Keys.ACTIVITY_VISIBILITY_PRIVATE):
             raise Exception("Invalid visibility value.")
 
-        result = self.data_mgr.update_activity_visibility(values[StraenKeys.ACTIVITY_ID_KEY], visibility)
+        result = self.data_mgr.update_activity_visibility(values[Keys.ACTIVITY_ID_KEY], visibility)
         return result, ""
 
     def handle_api_1_0_request(self, args, values):
@@ -557,8 +557,8 @@ class StraenApi(object):
             return False, ""
 
         if self.user_id is None:
-            if StraenKeys.SESSION_KEY in values:
-                username = self.user_mgr.get_logged_in_user_from_cookie(values[StraenKeys.SESSION_KEY])
+            if Keys.SESSION_KEY in values:
+                username = self.user_mgr.get_logged_in_user_from_cookie(values[Keys.SESSION_KEY])
                 if username is not None:
                     self.user_id, _, _ = self.user_mgr.retrieve_user(username)
 
