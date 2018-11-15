@@ -138,6 +138,16 @@ def print_records(store, activity_type):
     else:
         print("none")
     print("\n")
+    years = store.summarizer.get_annual_record_years(activity_type)
+    for year in years:
+        print str(year) + ":"
+        bests = store.summarizer.get_annual_record_dictionary(activity_type, year)
+        if len(bests) > 0:
+            for key in bests:
+                print(key + " = " + str(bests[key]))
+        else:
+            print("none")
+        print("\n")
 
 def main():
     """Starts the tests."""

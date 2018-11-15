@@ -43,6 +43,16 @@ class Summarizer(object):
             return self.annual_swimming_bests[year]
         return {}
 
+    def get_annual_record_years(self, activity_type):
+        """Returns the keys for the annual record dictionary that corresponds to the given activity type."""
+        if activity_type == Keys.TYPE_RUNNING_KEY:
+            return self.annual_running_bests.keys()
+        elif activity_type == Keys.TYPE_CYCLING_KEY:
+            return self.annual_cycling_bests.keys()
+        elif activity_type == Keys.TYPE_SWIMMING_KEY:
+            return self.annual_swimming_bests.keys()
+        return {}
+
     def get_best_time(self, activity_type, record_name):
         """Returns the time associated with the specified record, or None if not found."""
         record_set = self.get_record_dictionary(activity_type)
