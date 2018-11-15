@@ -182,9 +182,6 @@ def main():
                     print("Failure!\n")
                     failures.append(current_file)
 
-    # Print the time summary.
-    print("Average time / sample: " + str(total_time / num_files_processed) + " seconds\n")
-
     # Print the summary data.
     print_records(store, Keys.TYPE_RUNNING_KEY)
     print_records(store, Keys.TYPE_CYCLING_KEY)
@@ -198,6 +195,9 @@ def main():
     print("Num failures: " + str(len(failures)))
     for failure in failures:
         print("- " + failure)
+
+    # Print the time summary.
+    print("Average time per sample: " + str(total_time / num_files_processed) + " seconds\n")
 
 if __name__ == "__main__":
     main()

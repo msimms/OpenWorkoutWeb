@@ -78,21 +78,33 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             self.do_record_check(Keys.BEST_1K, total_seconds, total_meters, 1000)
 
             # Is this a new mile record for this activity?
+            if total_meters < Units.METERS_PER_MILE:
+                continue
             self.do_record_check(Keys.BEST_MILE, total_seconds, total_meters, Units.METERS_PER_MILE)
 
             # Is this a new 5K record for this activity?
+            if total_meters < 5000:
+                continue
             self.do_record_check(Keys.BEST_5K, total_seconds, total_meters, 5000)
 
             # Is this a new 10K record for this activity?
+            if total_meters < 10000:
+                continue
             self.do_record_check(Keys.BEST_10K, total_seconds, total_meters, 10000)
 
             # Is this a new 15K record for this activity?
+            if total_meters < 15000:
+                continue
             self.do_record_check(Keys.BEST_15K, total_seconds, total_meters, 15000)
 
             # Is this a new metric century record for this activity?
+            if total_meters < 100000:
+                continue
             self.do_record_check(Keys.BEST_METRIC_CENTURY, total_seconds, total_meters, 100000)
 
             # Is this a new century record for this activity?
+            if total_meters < Units.METERS_PER_MILE * 100.0:
+                continue
             self.do_record_check(Keys.BEST_CENTURY, total_seconds, total_meters, Units.METERS_PER_MILE * 100.0)
 
     def append_location(self, date_time, latitude, longitude, altitude):
