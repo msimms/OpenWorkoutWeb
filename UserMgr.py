@@ -11,10 +11,10 @@ MIN_PASSWORD_LEN  = 8
 class UserMgr(object):
     """Class for managing users"""
 
-    def __init__(self, root_dir):
+    def __init__(self, session_mgr, root_dir):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
-        self.session_mgr = SessionMgr.SessionMgr()
+        self.session_mgr = session_mgr
         super(UserMgr, self).__init__()
 
     def terminate(self):

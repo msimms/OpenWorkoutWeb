@@ -7,16 +7,19 @@ import mako
 import os
 import signal
 import sys
-from flask import Flask
+import flask
 
-import DataMgr
-import UserMgr
+import Api
 import App
+import DataMgr
+import SessionMgr
+import UserMgr
 
 
 ERROR_LOG = 'error.log'
 
-g_flask_app = Flask(__name__)
+g_flask_app = flask.Flask(__name__)
+g_flask_app.secret_key = 'UB2s60qJrithXHt2w71f'
 g_app = None
 
 
@@ -107,6 +110,8 @@ def my_activities():
     """Renders the list of the specified user's activities."""
     try:
         return g_app.my_activities()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
     except:
         g_app.log_error('Unhandled exception in ' + my_activities.__name__)
     return g_app.error()
@@ -116,6 +121,8 @@ def all_activities():
     """Renders the list of all activities the specified user is allowed to view."""
     try:
         return g_app.all_activities()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
     except:
         g_app.log_error('Unhandled exception in ' + all_activities.__name__)
     return g_app.error()
@@ -125,6 +132,8 @@ def following():
     """Renders the list of users the specified user is following."""
     try:
         return g_app.following()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
     except:
         g_app.log_error('Unhandled exception in ' + following.__name__)
     return g_app.error()
@@ -134,6 +143,8 @@ def followers():
     """Renders the list of users that are following the specified user."""
     try:
         return g_app.followers()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
     except:
         g_app.log_error('Unhandled exception in ' + followers.__name__)
     return g_app.error()
@@ -143,6 +154,8 @@ def device_list():
     """Renders the list of a user's devices."""
     try:
         return g_app.device_list()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
     except:
         g_app.log_error('Unhandled exception in ' + device_list.__name__)
     return g_app.error()
@@ -152,6 +165,8 @@ def upload(ufile):
     """Processes an upload request."""
     try:
         return g_app.upload(ufile)
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
     except:
         g_app.log_error('Unhandled exception in ' + upload.__name__)
     return g_app.error()
@@ -161,6 +176,8 @@ def manual_entry(activity_type):
     """Called when the user selects an activity type, indicating they want to make a manual data entry."""
     try:
         return g_app.manual_entry(activity_type)
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
     except:
         g_app.log_error('Unhandled exception in ' + manual_entry.__name__)
     return g_app.error()
@@ -170,6 +187,8 @@ def import_activity():
     """Renders the import page."""
     try:
         return g_app.import_activity()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
     except:
         g_app.log_error('Unhandled exception in ' + import_activity.__name__)
     return g_app.error()
@@ -179,24 +198,30 @@ def settings():
     """Renders the user's settings page."""
     try:
         return g_app.settings()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
     except:
         g_app.log_error('Unhandled exception in ' + settings.__name__)
     return g_app.error()
 
-@g_flask_app.route('/submit_login')
+@g_flask_app.route('/submit_login', methods = ['POST'])
 def submit_login():
     """Processes a login."""
     try:
         pass
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
     except:
         g_app.log_error('Unhandled exception in ' + submit_login.__name__)
     return g_app.error()
 
-@g_flask_app.route('/submit_new_login')
+@g_flask_app.route('/submit_new_login', methods = ['POST'])
 def submit_new_login(email, realname, password1, password2):
     """Creates a new login."""
     try:
         return g_app.submit_new_login(email, realname, password1, password2)
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
     except:
         g_app.log_error('Unhandled exception in ' + submit_new_login.__name__)
     return g_app.error()
@@ -206,6 +231,8 @@ def login():
     """Renders the login page."""
     try:
         return g_app.login()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
     except:
         return g_app.error()
     return g_app.error()
@@ -224,6 +251,8 @@ def logout():
     """Ends the logged in session."""
     try:
         return g_app.logout()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
     except:
         return g_app.error()
     return g_app.error()
@@ -263,8 +292,6 @@ def main():
     parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background", required=False)
     parser.add_argument("--host", default="", help="Host name on which users will access this website", required=False)
     parser.add_argument("--hostport", type=int, default=0, help="Port on which users will access this website", required=False)
-    parser.add_argument("--bind", default="127.0.0.1", help="Host name on which to bind", required=False)
-    parser.add_argument("--bindport", type=int, default=8080, help="Port on which to bind", required=False)
     parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS", required=False)
     parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS", required=False)
     parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS", required=False)
@@ -302,7 +329,8 @@ def main():
     if not os.path.exists(tempfile_dir):
         os.makedirs(tempfile_dir)
 
-    user_mgr = UserMgr.UserMgr(root_dir)
+    session_mgr = SessionMgr.FlaskSessionMgr()
+    user_mgr = UserMgr.UserMgr(session_mgr, root_dir)
     data_mgr = DataMgr.DataMgr(root_dir)
     g_app = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey)
 

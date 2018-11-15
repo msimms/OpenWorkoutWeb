@@ -13,6 +13,7 @@ import sys
 import Api
 import App
 import DataMgr
+import SessionMgr
 import UserMgr
 
 from cherrypy import tools
@@ -502,7 +503,8 @@ def main():
     if not os.path.exists(tempfile_dir):
         os.makedirs(tempfile_dir)
 
-    user_mgr = UserMgr.UserMgr(root_dir)
+    session_mgr = SessionMgr.CherryPySessionMgr()
+    user_mgr = UserMgr.UserMgr(session_mgr, root_dir)
     data_mgr = DataMgr.DataMgr(root_dir)
     backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey)
     g_app = StraenWeb(backend)

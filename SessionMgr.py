@@ -1,10 +1,32 @@
 # Copyright 2018 Michael J Simms
 
 import cherrypy
+import flask
 import Keys
 
 
 class SessionMgr(object):
+    def __init__(self):
+        super(SessionMgr, self).__init__()
+
+    def get_logged_in_user(self):
+        """Returns the username associated with the current session."""
+        pass
+
+    def get_logged_in_user_from_cookie(self, auth_cookie):
+        """Returns the username associated with the specified authentication cookie."""
+        pass
+
+    def create_new_session(self, username):
+        """Starts a new session."""
+        pass
+
+    def clear_session(self):
+        """Ends the current session."""
+        pass
+
+
+class CherryPySessionMgr(SessionMgr):
     """Class for managing sessions. A user may have more than one session"""
 
     def __init__(self):
@@ -35,3 +57,26 @@ class SessionMgr(object):
         """Ends the current session."""
         sess = cherrypy.session
         sess[Keys.SESSION_KEY] = None
+
+
+class FlaskSessionMgr(SessionMgr):
+    """Class for managing sessions. A user may have more than one session"""
+
+    def __init__(self):
+        super(SessionMgr, self).__init__()
+
+    def get_logged_in_user(self):
+        """Returns the username associated with the current session."""
+        pass
+
+    def get_logged_in_user_from_cookie(self, auth_cookie):
+        """Returns the username associated with the specified authentication cookie."""
+        pass
+
+    def create_new_session(self, username):
+        """Starts a new session."""
+        pass
+
+    def clear_session(self):
+        """Ends the current session."""
+        pass
