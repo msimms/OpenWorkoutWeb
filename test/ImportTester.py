@@ -94,7 +94,7 @@ class TestActivityWriter(Importer.ActivityWriter):
         if self.location_analyzer.current_speed is not None:
             print("Current Speed: {:.2f} meters/second".format(self.location_analyzer.current_speed))
         if self.location_analyzer.best_speed is not None:
-            print("Best Speed: {:.2f}".format(self.location_analyzer.best_speed))
+            print("Best Speed: {:.2f} meters/second".format(self.location_analyzer.best_speed))
 
         best = self.location_analyzer.get_best_time(Keys.BEST_1K)
         if best is not None:
@@ -175,7 +175,7 @@ def main():
                     elapsed_time = time.time() - start_time
                     total_time = total_time + elapsed_time
                     num_files_processed = num_files_processed + 1
-                    print("Elapsed time: " + str(elapsed_time) + " seconds")
+                    print("Elapsed Processing Time: " + str(elapsed_time) + " seconds")
                     print("Success!\n")
                     successes.append(current_file)
                 else:
