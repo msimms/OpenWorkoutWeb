@@ -98,25 +98,25 @@ class TestActivityWriter(Importer.ActivityWriter):
 
         best = self.location_analyzer.get_best_time(Keys.BEST_1K)
         if best is not None:
-            print("Best KM: {:.2f} seconds".format(best))
+            print("Best KM: {:.2f} minutes".format(best / 60))
         best = self.location_analyzer.get_best_time(Keys.BEST_MILE)
         if best is not None:
-            print("Best Mile: {:.2f} seconds".format(best))
+            print("Best Mile: {:.2f} minutes".format(best / 60))
         best = self.location_analyzer.get_best_time(Keys.BEST_5K)
         if best is not None:
-            print("Best 5K: {:.2f} seconds".format(best))
+            print("Best 5K: {:.2f} minutes".format(best / 60))
         best = self.location_analyzer.get_best_time(Keys.BEST_10K)
         if best is not None:
-            print("Best 10K: {:.2f} seconds".format(best))
+            print("Best 10K: {:.2f} minutes".format(best / 60))
         best = self.location_analyzer.get_best_time(Keys.BEST_15K)
         if best is not None:
-            print("Best 15K: {:.2f} seconds".format(best))
+            print("Best 15K: {:.2f} minutes".format(best / 60))
         best = self.location_analyzer.get_best_time(Keys.BEST_HALF_MARATHON)
         if best is not None:
-            print("Best Half Marathon: {:.2f} seconds".format(best))
+            print("Best Half Marathon: {:.2f} minutes".format(best / 60))
         best = self.location_analyzer.get_best_time(Keys.BEST_MARATHON)
         if best is not None:
-            print("Best Marathon: {:.2f} seconds".format(best))
+            print("Best Marathon: {:.2f} minutes".format(best / 60))
 
         self.summarizer.add_activity_datum(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, Keys.APP_DISTANCE_KEY, self.location_analyzer.total_distance)
         self.summarizer.add_activity_datum(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, Keys.APP_AVG_SPEED_KEY, self.location_analyzer.avg_speed)
