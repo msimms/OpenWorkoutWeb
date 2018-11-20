@@ -353,10 +353,6 @@ class App(object):
         last_lat = 0
         last_lon = 0
 
-        # Compute location-based things.
-        location_analyzer = LocationAnalyzer.LocationAnalyzer()
-        location_analyzer.append_locations(locations)
-
         for location in locations:
             route += "\t\t\t\tnewCoord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
             last_loc = location
@@ -375,11 +371,15 @@ class App(object):
         powers_str, max_power, power_analysis = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity_id)
         name = self.data_mgr.retrieve_metadata(Keys.APP_NAME_KEY, activity_id)
         activity_type = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
+        if activity_type is None:
+            activity_type = UNSPECIFIED_ACTIVITY_TYPE
+
+        # Compute location-based things.
+        location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
+        location_analyzer.append_locations(locations)
 
         # Build the summary data view.
         summary = "<ul>\n"
-        if activity_type is None:
-            activity_type = UNSPECIFIED_ACTIVITY_TYPE
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
         if name is None:
             name = UNNAMED_ACTIVITY_TITLE
@@ -390,8 +390,9 @@ class App(object):
         if location_analyzer.avg_speed is not None:
             value = Units.convert_speed(location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
             summary += "\t<li>Avg. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
-        if location_analyzer.best_speed is not None:
-            value = Units.convert_speed(location_analyzer.best_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
+        best_speed = self.location_analyzer.get_best_time(Keys.BEST_SPEED)
+        if best_speed is not None:
+            value = Units.convert_speed(best_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
             summary += "\t<li>Max. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
         if max_heart_rate > 1:
             summary += "\t<li>Max. Heart Rate: {:.2f} ".format(max_heart_rate) + Units.get_heart_rate_units_str() + "</li>\n"

@@ -72,6 +72,7 @@ ACTIVITY_TAGS_KEY = "tags"
 ACTIVITY_SUMMARY_KEY = "summary_data"
 
 # Keys used to summarize activity data.
+BEST_SPEED = "Best Speed"
 BEST_1K = "Best 1K"
 BEST_MILE = "Best Mile"
 BEST_5K = "Best 5K"

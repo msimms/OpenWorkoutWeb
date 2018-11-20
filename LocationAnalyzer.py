@@ -12,14 +12,17 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 libmathdir = os.path.join(currentdir, 'LibMath', 'python')
 sys.path.insert(0, libmathdir)
 import distance
+import peaks
+import statistics
 
 
 class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on a location track."""
 
-    def __init__(self):
+    def __init__(self, activity_type):
         SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_DISTANCE_KEY, Units.get_speed_units_str(Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS))
 
+        self.activity_type = activity_type
         self.start_time = None
         self.last_time = None
         self.last_lat = None
@@ -27,13 +30,20 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         self.last_alt = None
 
         self.distance_buf = [] # Holds the distance calculations; used for the current speed calcuations
+        self.speed_times = [] # Holds the times associated with self.speed_graph
         self.speed_graph = [] # Holds the current speed calculations 
         self.total_distance = 0.0 # Distance traveled (in meters)
         self.total_vertical = 0.0 # Total ascent (in meters)
 
         self.avg_speed = None # Average speed (in meters/second)
         self.current_speed = None # Current speed (in meters/second)
-        self.best_speed = None # Best speed (in meters/second)
+
+        # This refers to the number of seconds used when averaging samples together to
+        # compute the current speed. The exact numbers were chosen based on experimentation.
+        if activity_type is Keys.TYPE_CYCLING_KEY:
+            self.speed_window_size = 7
+        else:
+            self.speed_window_size = 11
 
     def update_average_speed(self, date_time):
         """Computes the average speed of the workout. Called by 'append_location'."""
@@ -58,21 +68,24 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         for time_distance_pair in reversed(self.distance_buf):
 
             # Convert time from ms to seconds - seconds from this point to the end of the activity.
-            total_seconds = (self.last_time - time_distance_pair[0]) / 1000.0
+            current_time = time_distance_pair[0]
+            total_seconds = (self.last_time - current_time) / 1000.0
             if total_seconds <= 0:
                 continue
 
             # Distance travelled from this point to the end of the activity.
-            total_meters = self.total_distance - time_distance_pair[2]
+            current_distance = time_distance_pair[2]
+            total_meters = self.total_distance - current_distance
 
             # Current speed is the average of the last ten seconds.
-            if int(total_seconds) == 7 or self.current_speed is None:
+            if int(total_seconds) == self.speed_window_size or self.current_speed is None:
                 self.current_speed = total_meters / total_seconds
-                if self.best_speed is None or self.current_speed > self.best_speed:
-                    self.best_speed = self.current_speed
+                if Keys.BEST_SPEED not in self.bests or self.current_speed > self.bests[Keys.BEST_SPEED]:
+                    self.bests[Keys.BEST_SPEED] = self.current_speed
                 if self.total_distance < 1000:
                     break
-                self.speed_graph.insert(0, self.current_speed)
+                self.speed_times.append(current_time)
+                self.speed_graph.append(self.current_speed)
 
             # Is this a new kilometer record for this activity?
             self.do_record_check(Keys.BEST_1K, total_seconds, total_meters, 1000)
@@ -137,3 +150,36 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             longitude = location[Keys.LOCATION_LON_KEY]
             altitude = location[Keys.LOCATION_ALT_KEY]
             self.append_location(date_time, latitude, longitude, altitude)
+    
+    def check_pace_line(self, peak_list, start_index, end_index):
+        """Examines a line of near-constant pace/speed."""
+        if start_index >= end_index:
+            return
+
+        start_time = self.speed_times[start_index]
+        end_time = self.speed_times[end_index]
+        line_duration = end_time - start_time
+        if line_duration > 30000:
+            speeds = self.speed_graph[start_index:end_index - 1]
+            avg_speed = statistics.mean(speeds)
+            avg_pace = Units.meters_per_sec_to_minutes_per_mile(avg_speed)
+            print str(line_duration / 1000) + " seconds at " + str(avg_pace) + " minutes/mile"
+
+    def analyze(self):
+        """Called when all sensor readings have been processed."""
+        results = SensorAnalyzer.SensorAnalyzer.analyze(self)
+
+        # Do pace analysis.
+        if len(self.speed_graph) > 1:
+
+            # Find peaks in the speed graph.
+            peak_list = peaks.find_peaks_in_numeric_array(self.speed_graph, 2.0)
+
+            # Examine the lines between the peaks.
+            last_peak_index = 0
+            for peak in peak_list:
+                peak_index = peak.left_trough.x
+                self.check_pace_line(peak_list, last_peak_index, peak_index)
+                last_peak_index = peak_index + 1
+            self.check_pace_line(peak_list, last_peak_index, len(self.speed_graph) - 1)
+        return results

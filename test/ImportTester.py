@@ -18,6 +18,7 @@ import LocationAnalyzer
 import Keys
 import SensorAnalyzerFactory
 import Summarizer
+import Units
 
 ERROR_LOG = 'error.log'
 
@@ -36,16 +37,19 @@ class TestActivityWriter(Importer.ActivityWriter):
 
     def create_activity(self, username, stream_name, stream_description, activity_type, start_time):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
-        self.location_analyzer = LocationAnalyzer.LocationAnalyzer() # Need a fresh analyzer object for each activity
+
+        self.location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type) # Need a fresh analyzer object for each activity
         self.current_activity_id = str(uuid.uuid4())
         self.current_activity_type = activity_type
         self.current_activity_start_time = start_time
+
         title_str = "Activity Type: " + activity_type
         print(title_str)
         print("-" * len(title_str))
         title_str = "ID: " + self.current_activity_id
         print(title_str)
         print("-" * len(title_str))
+
         return None, None
 
     def create_track(self, device_str, activity_id, track_name, track_description):
@@ -73,6 +77,11 @@ class TestActivityWriter(Importer.ActivityWriter):
 
     def finish_activity(self):
         """Inherited from ActivityWriter. Called for post-processing."""
+
+        # Do location-based analysis.
+        self.location_analyzer.analyze()
+
+        # Do sensor analysis.
         for sensor_analyzer in self.sensor_analyzers:
             title_str = sensor_analyzer.type + ":"
             print(title_str)
@@ -91,10 +100,17 @@ class TestActivityWriter(Importer.ActivityWriter):
             print("Total Time: {:.2f} seconds".format(total_time))
         if self.location_analyzer.avg_speed is not None:
             print("Average Speed: {:.2f} meters/second".format(self.location_analyzer.avg_speed))
+            pace = Units.meters_per_sec_to_minutes_per_mile(self.location_analyzer.avg_speed)
+            print("Average Pace: {:.2f} minutes/mile".format(pace))
         if self.location_analyzer.current_speed is not None:
             print("Current Speed: {:.2f} meters/second".format(self.location_analyzer.current_speed))
-        if self.location_analyzer.best_speed is not None:
-            print("Best Speed: {:.2f} meters/second".format(self.location_analyzer.best_speed))
+            pace = Units.meters_per_sec_to_minutes_per_mile(self.location_analyzer.current_speed)
+            print("Current Pace: {:.2f} minutes/mile".format(pace))
+        best = self.location_analyzer.get_best_time(Keys.BEST_SPEED)
+        if best is not None:
+            print("Best Speed: {:.2f} meters/second".format(best))
+            pace = Units.meters_per_sec_to_minutes_per_mile(best)
+            print("Best Pace: {:.2f} minutes/mile".format(pace))
 
         best = self.location_analyzer.get_best_time(Keys.BEST_1K)
         if best is not None:
@@ -128,9 +144,13 @@ class TestActivityWriter(Importer.ActivityWriter):
         self.sensor_analyzers = []
 
 def print_records(store, activity_type):
+
+    # Print title.
     title_str = "Best " + activity_type + " Times:"
     print(title_str)
     print("=" * len(title_str))
+
+    # Print all-time records.
     bests = store.summarizer.get_record_dictionary(activity_type)
     if len(bests) > 0:
         for key in bests:
@@ -138,6 +158,8 @@ def print_records(store, activity_type):
     else:
         print("none")
     print("\n")
+
+    # Print annual records.
     years = store.summarizer.get_annual_record_years(activity_type)
     for year in years:
         print str(year) + ":"
