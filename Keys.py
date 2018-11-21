@@ -14,6 +14,8 @@ HASH_KEY = "hash"
 DEVICES_KEY = "devices"
 FOLLOWING_KEY = "following"
 PR_KEY = "pr"
+EMAIL_KEY = "email"
+TARGET_EMAIL_KEY = "target_email"
 
 # User settings
 DEFAULT_PRIVACY = "default privacy"

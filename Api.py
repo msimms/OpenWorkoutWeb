@@ -7,6 +7,7 @@ import time
 import urllib
 import uuid
 import Exporter
+import InputChecker
 import Keys
 
 g_not_meta_data = ["DeviceId", "ActivityId", "ActivityName", "User Name", "Latitude", "Longitude", "Altitude", "Horizontal Accuracy", "Vertical Accuracy"]
@@ -388,10 +389,10 @@ class Api(object):
         """Called when an API message to list the users you are following is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if 'target_email' not in values:
+        if Keys.TARGET_EMAIL_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        target_email = urllib.unquote_plus(values['target_email'])
+        target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise Exception("Target user does not exist.")
@@ -406,10 +407,13 @@ class Api(object):
         """Called when an API message to list the users who are following you is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if 'target_email' not in values:
+        if Keys.TARGET_EMAIL_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        target_email = urllib.unquote_plus(values['target_email'])
+        target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
+        if not InputChecker.is_email_address(target_email):
+            raise Exception("Invalid email address.")
+
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise Exception("Target user does not exist.")
@@ -424,10 +428,13 @@ class Api(object):
         """Called when an API message request to follow another user is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if 'target_email' not in values:
+        if Keys.TARGET_EMAIL_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        target_email = urllib.unquote_plus(values['target_email'])
+        target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
+        if not InputChecker.is_email_address(target_email):
+            raise Exception("Invalid email address.")
+
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise Exception("Target user does not exist.")
@@ -439,10 +446,13 @@ class Api(object):
         """Called when an API message request to unfollow another user is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if 'target_email' not in values:
+        if Keys.TARGET_EMAIL_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        target_email = urllib.unquote_plus(values['target_email'])
+        target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
+        if not InputChecker.is_email_address(target_email):
+            raise Exception("Invalid email address.")
+
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise Exception("Target user does not exist.")
@@ -478,7 +488,11 @@ class Api(object):
         if Keys.ACTIVITY_TAGS_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.create_tag(values[Keys.ACTIVITY_ID_KEY], values[Keys.ACTIVITY_TAGS_KEY])
+        tags = values[Keys.ACTIVITY_TAGS_KEY]
+        if not InputChecker.is_safe(tags):
+            raise Exception("Invalid parameter.")
+
+        result = self.data_mgr.create_tag(values[Keys.ACTIVITY_ID_KEY], tags)
         return result, ""
 
     def handle_list_tags(self, values):
@@ -500,7 +514,11 @@ class Api(object):
         if Keys.ACTIVITY_COMMENT_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.create_activity_comment(values[Keys.ACTIVITY_ID_KEY], self.user_id, values[Keys.ACTIVITY_COMMENT_KEY])
+        comment = values[Keys.ACTIVITY_COMMENT_KEY]
+        if not InputChecker.is_safe(comment):
+            raise Exception("Invalid parameter.")
+
+        result = self.data_mgr.create_activity_comment(values[Keys.ACTIVITY_ID_KEY], self.user_id, comment)
         return result, ""
 
     def handle_list_comments(self, values):
