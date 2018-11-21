@@ -193,6 +193,17 @@ def import_activity():
         g_app.log_error('Unhandled exception in ' + import_activity.__name__)
     return g_app.error()
 
+@g_flask_app.route('/profile')
+def profile():
+    """Renders the user's profile page."""
+    try:
+        return g_app.profile()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error('Unhandled exception in ' + profile.__name__)
+    return g_app.error()
+
 @g_flask_app.route('/settings')
 def settings():
     """Renders the user's settings page."""

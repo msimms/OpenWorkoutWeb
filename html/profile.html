@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+<title>${product} - ${name}</title>
+
+<link rel="stylesheet" href="${root_url}/css/normalize.css">
+<link rel="stylesheet" href="${root_url}/css/site.css">
+
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+
+</head>
+
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+
+<body>
+
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script>
+
+	function update_profile()
+	{
+		var the_url = "${root_url}/api/1.0/update_profile";
+		var units = document.getElementById("privacy_options").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["default privacy"] : units});
+		if (send_post_request(the_url, dict, result_text))
+			alert("Profile updated!");
+		else
+			alert("An error occurred!");
+	}
+
+</script>
+
+<section class="nav">
+${nav}
+</section>
+
+<div class="profile" style="width: 600px">
+	<h2>Height</h2>
+	<button type="button" onclick="return update_height()">Update</button>
+	<hr>
+	<h2>Weight</h2>
+	<button type="button" onclick="return update_weight()">Update</button>
+	<hr>
+	<h2>Gender</h2>
+	<button type="button" onclick="return update_gender()">Update</button>
+	<hr>
+	<h2>BMI</h2>
+	<hr>
+	<h2>VO2 Max</h2>
+	<hr>
+	<h2>Personal Records</h2>
+</div>
+
+</body>
+</html>

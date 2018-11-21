@@ -238,6 +238,7 @@ class App(object):
                 "\t\t<li><a href=\"" + self.root_url + "/followers/\">Followers</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/device_list/\">Devices</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/import_activity/\">Import</a></li>\n" \
+                "\t\t<li><a href=\"" + self.root_url + "/profile/\">Profile</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/settings/\">Settings</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/logout/\">Log Out</a></li>\n"
         else:
@@ -926,6 +927,26 @@ class App(object):
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_type_list=activity_type_list_str)
 
     @statistics
+    def profile(self):
+        """Renders the user's profile page."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Render from the template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname)
+
+    @statistics
     def settings(self):
         """Renders the user's settings page."""
 
@@ -954,7 +975,7 @@ class App(object):
             privacy_options += " selected"
         privacy_options += ">Private</option>"
 
-        # Render from template.
+        # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'settings.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, privacy_options=privacy_options)

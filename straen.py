@@ -295,6 +295,20 @@ class StraenWeb(object):
 
     @cherrypy.expose
     @require()
+    def profile(self, *args, **kw):
+        """Renders the user's profile page."""
+        try:
+            return self.app.profile()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error('Unhandled exception in ' + StraenWeb.profile.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
     def settings(self, *args, **kw):
         """Renders the user's settings page."""
         try:
