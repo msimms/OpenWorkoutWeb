@@ -351,7 +351,7 @@ def main():
     markdown_logger = logging.getLogger("MARKDOWN")
     markdown_logger.setLevel(logging.ERROR)
 
-    g_flask_app.run()
+    g_flask_app.run(debug=args.debug)
 
 if __name__ == '__main__':
     main()
