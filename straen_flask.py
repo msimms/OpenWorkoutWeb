@@ -219,7 +219,9 @@ def settings():
 def submit_login():
     """Processes a login."""
     try:
-        pass
+        email = flask.request.form.get('email')
+        password = flask.request.form.get('password')
+        return g_app.submit_login(email, password)
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
@@ -227,9 +229,13 @@ def submit_login():
     return g_app.error()
 
 @g_flask_app.route('/submit_new_login', methods = ['POST'])
-def submit_new_login(email, realname, password1, password2):
+def submit_new_login():
     """Creates a new login."""
     try:
+        email = flask.request.form.get('email')
+        realname = flask.request.form.get('realname')
+        password1 = flask.request.form.get('password1')
+        password2 = flask.request.form.get('password2')
         return g_app.submit_new_login(email, realname, password1, password2)
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
