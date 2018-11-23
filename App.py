@@ -391,7 +391,7 @@ class App(object):
         if location_analyzer.avg_speed is not None:
             value = Units.convert_speed(location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
             summary += "\t<li>Avg. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
-        best_speed = self.location_analyzer.get_best_time(Keys.BEST_SPEED)
+        best_speed = location_analyzer.get_best_time(Keys.BEST_SPEED)
         if best_speed is not None:
             value = Units.convert_speed(best_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
             summary += "\t<li>Max. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
