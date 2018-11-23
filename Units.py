@@ -32,7 +32,7 @@ def convert_distance(value, in_units, out_units):
             return value / (METERS_PER_MILE / 1000.0)
     return value
 
-def convert_to_preferred_distance(user_mgr, user_id, value, in_units):
+def convert_to_preferred_distance_units(user_mgr, user_id, value, in_units):
     """Unit conversion for distance values. Converts to either metric or standard, depending on the user's preferences."""
     if user_id is not None:
         selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
@@ -85,6 +85,19 @@ def convert_speed(value, in_distance_units, in_time_units, out_distance_units, o
         elif out_time_units == UNITS_TIME_MINUTES:
             return value / 60.0
     return value
+
+def convert_to_preferred_speed_units(user_mgr, user_id, value, in_distance_units, in_time_units):
+    """Unit conversion for speed values. Converts to either metric or standard, depending on the user's preferences."""
+    out_time_units = UNITS_TIME_HOURS
+    if user_id is not None:
+        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+        if selected_units == Keys.UNITS_METRIC_KEY:
+            out_distance_units = UNITS_DISTANCE_KILOMETERS
+        else:
+            out_distance_units = UNITS_DISTANCE_MILES
+    else:
+        out_distance_units = UNITS_DISTANCE_MILES
+    return convert_speed(value, in_distance_units, in_time_units, out_distance_units, out_time_units), out_distance_units, out_time_units
 
 def meters_per_sec_to_minutes_per_mile(value):
     return 1.0 / convert_speed(value, UNITS_DISTANCE_METERS, UNITS_TIME_SECONDS, UNITS_DISTANCE_MILES, UNITS_TIME_MINUTES)

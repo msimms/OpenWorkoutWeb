@@ -392,15 +392,15 @@ class App(object):
             name = UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
         if location_analyzer.total_distance is not None:
-            value, value_units = Units.convert_to_preferred_distance(self.user_mgr, logged_in_userid, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
+            value, value_units = Units.convert_to_preferred_distance_units(self.user_mgr, logged_in_userid, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
             summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
         if location_analyzer.avg_speed is not None:
-            value = Units.convert_speed(location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
-            summary += "\t<li>Avg. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
+            value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_userid, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
+            summary += "\t<li>Avg. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(value_distance_units, value_time_units) + "</li>\n"
         best_speed = location_analyzer.get_best_time(Keys.BEST_SPEED)
         if best_speed is not None:
-            value = Units.convert_speed(best_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
-            summary += "\t<li>Max. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
+            value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_userid, best_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
+            summary += "\t<li>Max. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(value_distance_units, value_time_units) + "</li>\n"
         if max_heart_rate > 1:
             summary += "\t<li>Max. Heart Rate: {:.2f} ".format(max_heart_rate) + Units.get_heart_rate_units_str() + "</li>\n"
         if max_cadence:
