@@ -20,6 +20,7 @@ ERROR_LOG = 'error.log'
 
 g_flask_app = flask.Flask(__name__)
 g_flask_app.secret_key = 'UB2s60qJrithXHt2w71f'
+g_flask_app.url_map.strict_slashes = False
 g_app = None
 
 
@@ -30,11 +31,6 @@ def signal_handler(signal, frame):
     if g_app is not None:
         g_app.terminate()
     sys.exit(0)
-
-def log_error(log_str):
-    """Writes an error message to the log file."""
-    logger = logging.getLogger()
-    logger.error(log_str)
 
 @g_flask_app.route('/stats')
 def stats():
@@ -224,6 +220,10 @@ def submit_login():
         return g_app.submit_login(email, password)
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
+    except Exception as e:
+        error_msg = 'Unable to authenticate the user. ' + str(e.args[0])
+        g_app.log_error(error_msg)
+        return self.error(error_msg)
     except:
         g_app.log_error('Unhandled exception in ' + submit_login.__name__)
     return g_app.error()
@@ -239,6 +239,10 @@ def submit_new_login():
         return g_app.submit_new_login(email, realname, password1, password2)
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
+    except Exception as e:
+        error_msg = 'Unable to create the user. ' + str(e.args[0])
+        g_app.log_error(error_msg)
+        return self.error(error_msg)
     except:
         g_app.log_error('Unhandled exception in ' + submit_new_login.__name__)
     return g_app.error()

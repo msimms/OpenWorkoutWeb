@@ -75,7 +75,7 @@ class FlaskSessionMgr(SessionMgr):
 
     def create_new_session(self, username):
         """Starts a new session."""
-        pass
+        flask.session[Keys.SESSION_KEY] = username
 
     def clear_session(self):
         """Ends the current session."""
