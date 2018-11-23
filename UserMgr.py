@@ -228,4 +228,4 @@ class UserMgr(object):
                 result = Keys.ACTIVITY_VISIBILITY_PUBLIC
             elif key == Keys.PREFERRED_UNITS_KEY:
                 result = Keys.UNITS_STANDARD_KEY
-        return result
+        return result.lower()

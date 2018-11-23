@@ -1,5 +1,8 @@
 # Copyright 2018 Michael J Simms
 
+import Keys
+import UserMgr
+
 UNITS_DISTANCE_METERS = 1
 UNITS_DISTANCE_KILOMETERS = 2
 UNITS_DISTANCE_MILES = 3
@@ -28,6 +31,21 @@ def convert_distance(value, in_units, out_units):
         elif out_units == UNITS_DISTANCE_KILOMETERS:
             return value / (METERS_PER_MILE / 1000.0)
     return value
+
+def convert_to_preferred_distance(user_mgr, user_id, value, in_units):
+    """Unit conversion for distance values. Converts to either metric or standard, depending on the user's preferences."""
+    if user_id is not None:
+        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+        if selected_units == Keys.UNITS_METRIC_KEY:
+            if value < 1000:
+                out_units = UNITS_DISTANCE_METERS
+            else:
+                out_units = UNITS_DISTANCE_KILOMETERS
+        else:
+            out_units = UNITS_DISTANCE_MILES
+    else:
+        out_units = UNITS_DISTANCE_MILES
+    return convert_distance(value, in_units, out_units), out_units
 
 def convert_time(value, in_units, out_units):
     """Unit conversion for time values."""

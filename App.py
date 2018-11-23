@@ -265,8 +265,11 @@ class App(object):
             comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>"
         return comments_str
 
-    def render_page_for_lifting_activity(self, email, user_realname, activity_id, accels, logged_in, is_live):
+    def render_page_for_lifting_activity(self, email, user_realname, activity_id, accels, logged_in_username, is_live):
         """Helper function for rendering the map corresonding to a specific device and activity."""
+
+        # Is the user logged in?
+        logged_in = logged_in_username is not None
 
         # Read the accelerometer data.
         if accels is None or len(accels) == 0:
@@ -341,8 +344,11 @@ class App(object):
                     max_value = value
         return data_str, max_value, analysis
 
-    def render_page_for_mapped_activity(self, email, user_realname, activity_id, locations, logged_in, is_live):
+    def render_page_for_mapped_activity(self, email, user_realname, activity_id, locations, logged_in_userid, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
+
+        # Is the user logged in?
+        logged_in = logged_in_userid is not None
 
         if locations is None or len(locations) == 0:
             my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
@@ -386,8 +392,8 @@ class App(object):
             name = UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
         if location_analyzer.total_distance is not None:
-            value = Units.convert_distance(location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS, Units.UNITS_DISTANCE_MILES)
-            summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(Units.UNITS_DISTANCE_MILES) + "</li>\n"
+            value, value_units = Units.convert_to_preferred_distance(self.user_mgr, logged_in_userid, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
+            summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
         if location_analyzer.avg_speed is not None:
             value = Units.convert_speed(location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
             summary += "\t<li>Avg. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
@@ -454,16 +460,14 @@ class App(object):
         my_template = Template(filename=self.map_single_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, comments=comments_str)
 
-    def render_page_for_activity(self, activity, email, user_realname, activity_id, is_live):
+    def render_page_for_activity(self, activity, email, user_realname, activity_id, logged_in_userid, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
 
         try:
-            logged_in_username = self.user_mgr.get_logged_in_user()
-
             if Keys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[Keys.ACTIVITY_LOCATIONS_KEY]) > 0:
-                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity[Keys.ACTIVITY_LOCATIONS_KEY], logged_in_username is not None, is_live)
+                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity[Keys.ACTIVITY_LOCATIONS_KEY], logged_in_userid, is_live)
             elif Keys.APP_ACCELEROMETER_KEY in activity:
-                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity[Keys.APP_ACCELEROMETER_KEY], logged_in_username is not None, is_live)
+                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity[Keys.APP_ACCELEROMETER_KEY], logged_in_userid, is_live)
             else:
                 my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
                 return my_template.render(nav=self.create_navbar(logged_in_username is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
@@ -631,7 +635,7 @@ class App(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, True)
+        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, logged_in_userid, True)
 
     @statistics
     def activity(self, activity_id):
@@ -662,7 +666,7 @@ class App(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, username, realname, activity_id, False)
+        return self.render_page_for_activity(activity, username, realname, activity_id, logged_in_userid, False)
 
     @statistics
     def device(self, device_str):
@@ -694,7 +698,7 @@ class App(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, False)
+        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, logged_in_userid, False)
 
     @statistics
     def my_activities(self):
@@ -963,9 +967,7 @@ class App(object):
 
         # Get the current settings.
         selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, Keys.DEFAULT_PRIVACY)
-        selected_default_privacy = selected_default_privacy.lower()
         selected_units = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        selected_units = selected_units.lower()
 
         # Render the privacy option.
         privacy_options = "\t\t<option value=\"Public\""
