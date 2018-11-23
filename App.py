@@ -605,7 +605,7 @@ class App(object):
                 error_str = "Internal Error."
         except:
             pass
-        return my_template.render(product=PRODUCT_NAME, root_url=self.root_url, error=error_str)
+        return ""
 
     @statistics
     def live(self, device_str):

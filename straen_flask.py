@@ -16,11 +16,16 @@ import SessionMgr
 import UserMgr
 
 
+CSS_DIR = 'css'
+JS_DIR = 'js'
+IMAGES_DIR = 'images'
+MEDIA_DIR = 'media'
 ERROR_LOG = 'error.log'
 
 g_flask_app = flask.Flask(__name__)
 g_flask_app.secret_key = 'UB2s60qJrithXHt2w71f'
 g_flask_app.url_map.strict_slashes = False
+g_root_dir = os.path.dirname(os.path.abspath(__file__))
 g_app = None
 
 
@@ -31,6 +36,42 @@ def signal_handler(signal, frame):
     if g_app is not None:
         g_app.terminate()
     sys.exit(0)
+
+@g_flask_app.route('/css/<file_name>')
+def css(file_name):
+    """Returns the CSS page."""
+    try:
+        return flask.send_from_directory(CSS_DIR, file_name)
+    except:
+        g_app.log_error('Unhandled exception in ' + css.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/js/<file_name>')
+def js(file_name):
+    """Returns the JS page."""
+    try:
+        return flask.send_from_directory(JS_DIR, file_name)
+    except:
+        g_app.log_error('Unhandled exception in ' + js.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/images/<file_name>')
+def images(file_name):
+    """Returns images."""
+    try:
+        return flask.send_from_directory(IMAGES_DIR, file_name)
+    except:
+        g_app.log_error('Unhandled exception in ' + images.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/media/<file_name>')
+def media(file_name):
+    """Returns media files (icons, etc.)."""
+    try:
+        return flask.send_from_directory(MEDIA_DIR, file_name)
+    except:
+        g_app.log_error('Unhandled exception in ' + media.__name__)
+    return g_app.error()
 
 @g_flask_app.route('/stats')
 def stats():
@@ -312,7 +353,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background", required=False)
     parser.add_argument("--host", default="", help="Host name on which users will access this website", required=False)
-    parser.add_argument("--hostport", type=int, default=0, help="Port on which users will access this website", required=False)
+    parser.add_argument("--hostport", type=int, default=5000, help="Port on which users will access this website", required=False)
     parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS", required=False)
     parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS", required=False)
     parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS", required=False)
@@ -336,7 +377,6 @@ def main():
             args.host = "straen-app.com"
         print "Hostname not provided, will use " + args.host
 
-    root_dir = os.path.dirname(os.path.abspath(__file__))
     root_url = protocol + "://" + args.host
     if args.hostport > 0:
         root_url = root_url + ":" + str(args.hostport)
@@ -346,14 +386,14 @@ def main():
     mako.collection_size = 100
     mako.directories = "templates"
 
-    tempfile_dir = os.path.join(root_dir, 'tempfile')
+    tempfile_dir = os.path.join(g_root_dir, 'tempfile')
     if not os.path.exists(tempfile_dir):
         os.makedirs(tempfile_dir)
 
     session_mgr = SessionMgr.FlaskSessionMgr()
-    user_mgr = UserMgr.UserMgr(session_mgr, root_dir)
-    data_mgr = DataMgr.DataMgr(root_dir)
-    g_app = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey)
+    user_mgr = UserMgr.UserMgr(session_mgr, g_root_dir)
+    data_mgr = DataMgr.DataMgr(g_root_dir)
+    g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, args.googlemapskey)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 

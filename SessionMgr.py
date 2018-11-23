@@ -67,7 +67,9 @@ class FlaskSessionMgr(SessionMgr):
 
     def get_logged_in_user(self):
         """Returns the username associated with the current session."""
-        return flask.session[Keys.SESSION_KEY]
+        if Keys.SESSION_KEY in flask.session:
+            return flask.session[Keys.SESSION_KEY]
+        return None
 
     def get_logged_in_user_from_cookie(self, auth_cookie):
         """Returns the username associated with the specified authentication cookie."""
