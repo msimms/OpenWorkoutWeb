@@ -44,6 +44,8 @@ Why develop a workout tracker when there are so many closed-source options avail
 ### 0.4
 * Activity importing from TCX and GPX files.
 * Beginnings of statistical analysis.
+* Ability to switch between metric and imperial units.
+* Code refactoring to support multiple frameworks (cherrypy and flask).
 
 ## Social
 Twitter: [@StraenApp](https://twitter.com/StraenApp)
