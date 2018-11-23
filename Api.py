@@ -549,6 +549,12 @@ class Api(object):
                 if not (default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE):
                     raise Exception("Invalid visibility value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY, default_privacy)
+            elif decoded_key == Keys.PREFERRED_UNITS_KEY:
+                preferred_units = urllib.unquote_plus(values[key])
+                preferred_units = preferred_units.lower()
+                if not (preferred_units == Keys.UNITS_METRIC_KEY or preferred_units == Keys.UNITS_STANDARD_KEY):
+                    raise Exception("Invalid units value.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY, preferred_units)
 
         return result, ""
 

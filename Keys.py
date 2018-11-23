@@ -73,6 +73,10 @@ ACTIVITY_COMMENTER_ID_KEY = "commenter_id"
 ACTIVITY_TAGS_KEY = "tags"
 ACTIVITY_SUMMARY_KEY = "summary_data"
 
+PREFERRED_UNITS_KEY = "preferred units"
+UNITS_METRIC_KEY = "metric"
+UNITS_STANDARD_KEY = "standard"
+
 # Keys used to summarize activity data.
 BEST_SPEED = "Best Speed"
 BEST_1K = "Best 1K"

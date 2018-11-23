@@ -23,11 +23,13 @@
 	function update_settings()
 	{
 		var the_url = "${root_url}/api/1.0/update_settings";
-		var units = document.getElementById("privacy_options").value;
+		var privacy = document.getElementById("privacy_options").value;
+		var units = document.getElementById("units").value;
 		var dict = [];
 		var result_text = {};
 
-		dict.push({["default privacy"] : units});
+		dict.push({["default privacy"] : privacy});
+		dict.push({["preferred units"] : units});
 		if (send_post_request(the_url, dict, result_text))
 			alert("Settings updated!");
 		else
@@ -91,10 +93,18 @@ ${nav}
 
 <div class="settings" style="width: 600px">
 	<h2>Settings</h2>
+	<p>
 	<label for="privacy_options" class="checkin">Default Activity Privacy</label>
 	<select id="privacy_options" class="checkin" >
 ${privacy_options}
 	</select>
+	</p>
+	<p>
+	<label for="units" class="checkin">Preferred Units</label>
+	<select id="units" class="checkin" >
+${unit_options}
+	</select>
+	</p>
 	<button type="button" onclick="return update_settings()">Update</button>
 	<hr>
 	<h2>Email</h2>

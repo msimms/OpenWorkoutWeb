@@ -964,6 +964,8 @@ class App(object):
         # Get the current settings.
         selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, Keys.DEFAULT_PRIVACY)
         selected_default_privacy = selected_default_privacy.lower()
+        selected_units = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+        selected_units = selected_units.lower()
 
         # Render the privacy option.
         privacy_options = "\t\t<option value=\"Public\""
@@ -975,19 +977,28 @@ class App(object):
             privacy_options += " selected"
         privacy_options += ">Private</option>"
 
+        # Render the units
+        unit_options = "\t\t<option value=\"Metric\""
+        if selected_units == Keys.UNITS_METRIC_KEY:
+            unit_options += " selected"
+        unit_options += ">Metric</option>\n"
+        unit_options += "\t\t<option value=\"Standard\""
+        if selected_units == Keys.UNITS_STANDARD_KEY:
+            unit_options += " selected"
+        unit_options += ">Standard</option>"
+
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'settings.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, privacy_options=privacy_options)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, privacy_options=privacy_options, unit_options=unit_options)
 
     def submit_login(self, email, password):
         """Processes a login."""
         if email is None or password is None:
             raise Exception("An email address and password were not provided.")
-        else:
-            if self.user_mgr.authenticate_user(email, password):
-                self.user_mgr.create_new_session(email)
-                raise RedirectException(DEFAULT_LOGGED_IN_URL)
+        elif self.user_mgr.authenticate_user(email, password):
+            self.user_mgr.create_new_session(email)
+            raise RedirectException(DEFAULT_LOGGED_IN_URL)
         raise Exception("Unknown error.")
 
     def submit_new_login(self, email, realname, password1, password2):
