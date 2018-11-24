@@ -59,6 +59,7 @@ class TestActivityWriter(Importer.ActivityWriter):
     def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
         """Inherited from ActivityWriter. Called for each location that is read from the input file."""
         self.location_analyzer.append_location(date_time, latitude, longitude, altitude)
+        self.location_analyzer.update_speeds()
 
     def create_sensor_reading(self, device_str, activity_id, date_time, key, value):
         """Inherited from ActivityWriter. Called for each sensor reading that is read from the input file."""

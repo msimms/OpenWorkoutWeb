@@ -384,6 +384,8 @@ class App(object):
         # Compute location-based things.
         location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
         location_analyzer.append_locations(locations)
+        if not is_live:
+            location_analyzer.update_speeds()
 
         # Build the summary data view.
         summary = "<ul>\n"
@@ -401,20 +403,20 @@ class App(object):
         if best_speed is not None:
             value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_userid, best_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
             summary += "\t<li>Max. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(value_distance_units, value_time_units) + "</li>\n"
+        best_time = location_analyzer.get_best_time(Keys.BEST_1K)
+        if best_time is not None:
+            value = Units.convert_speed(1.0 / best_time, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS)
+            summary += "\t<li>Best KM: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS) + "</li>\n"
+        best_time = location_analyzer.get_best_time(Keys.BEST_MILE)
+        if best_time is not None:
+            value = Units.convert_speed(1.0 / best_time, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
+            summary += "\t<li>Best Mile: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
         if max_heart_rate > 1:
             summary += "\t<li>Max. Heart Rate: {:.2f} ".format(max_heart_rate) + Units.get_heart_rate_units_str() + "</li>\n"
         if max_cadence:
             summary += "\t<li>Max. Cadence: {:.2f} ".format(max_cadence) + Units.get_cadence_units_str() + "</li>\n"
         if max_power:
             summary += "\t<li>Max. Power: {:.2f} ".format(max_power) + Units.get_power_units_str() + "</li>\n"
-        if location_analyzer.bests[Keys.BEST_1K] is not None:
-            value = 1.0 / location_analyzer.bests[Keys.BEST_1K]
-            value = Units.convert_speed(value, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS)
-            summary += "\t<li>Best KM: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS) + "</li>\n"
-        if location_analyzer.bests[Keys.BEST_MILE] is not None:
-            value = 1.0 / location_analyzer.bests[Keys.BEST_MILE]
-            value = Units.convert_speed(value, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
-            summary += "\t<li>Best Mile: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
         tags = self.data_mgr.retrieve_tags(activity_id)
         if tags is not None:
             summary += "\t<li>Tags: "

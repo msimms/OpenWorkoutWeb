@@ -134,7 +134,6 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             self.distance_buf.append([date_time, meters_traveled, self.total_distance])
             self.total_vertical = self.total_vertical + abs(altitude - self.last_alt)
             self.update_average_speed(date_time)
-            self.update_speeds()
 
         self.last_time = date_time
         self.last_lat = latitude
@@ -159,7 +158,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         start_time = self.speed_times[start_index]
         end_time = self.speed_times[end_index]
         line_duration = end_time - start_time
-        if line_duration > 30000:
+        if line_duration > 60000:
             speeds = self.speed_graph[start_index:end_index - 1]
             avg_speed = statistics.mean(speeds)
             avg_pace = Units.meters_per_sec_to_minutes_per_mile(avg_speed)
