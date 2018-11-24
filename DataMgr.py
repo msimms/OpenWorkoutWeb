@@ -4,6 +4,7 @@
 import Keys
 import StraenDb
 import Importer
+import SensorAnalyzerFactory
 
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
