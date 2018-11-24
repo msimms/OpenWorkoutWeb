@@ -23,11 +23,15 @@
 	function update_profile()
 	{
 		var the_url = "${root_url}/api/1.0/update_profile";
-		var units = document.getElementById("privacy_options").value;
+		var height = document.getElementById("height").value;
+		var weight = document.getElementById("weight").value;
+		var gender = document.getElementById("gender").value;
 		var dict = [];
 		var result_text = {};
 
-		dict.push({["default privacy"] : units});
+		dict.push({["height"] : height});
+		dict.push({["weight"] : weight});
+		dict.push({["gender"] : gender});
 		if (send_post_request(the_url, dict, result_text))
 			alert("Profile updated!");
 		else
@@ -42,13 +46,18 @@ ${nav}
 
 <div class="profile" style="width: 600px">
 	<h2>Height</h2>
-	<button type="button" onclick="return update_height()">Update</button>
+	<input type="text" id="height">
+	<button type="button" onclick="return update_profile()">Update</button>
 	<hr>
 	<h2>Weight</h2>
-	<button type="button" onclick="return update_weight()">Update</button>
+	<input type="text" id="weight">
+	<button type="button" onclick="return update_profile()">Update</button>
 	<hr>
 	<h2>Gender</h2>
-	<button type="button" onclick="return update_gender()">Update</button>
+	<select id="gender" class="checkin" >
+${gender_options}
+	</select>
+	<button type="button" onclick="return update_profile()">Update</button>
 	<hr>
 	<h2>BMI</h2>
 	<hr>

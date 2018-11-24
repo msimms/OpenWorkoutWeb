@@ -228,4 +228,6 @@ class UserMgr(object):
                 result = Keys.ACTIVITY_VISIBILITY_PUBLIC
             elif key == Keys.PREFERRED_UNITS_KEY:
                 result = Keys.UNITS_STANDARD_KEY
+            elif key == Keys.GENDER_KEY:
+                result = Keys.GENDER_MALE_KEY
         return result.lower()

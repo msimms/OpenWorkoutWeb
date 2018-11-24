@@ -945,10 +945,23 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        # Get the current settings.
+        selected_gender = self.user_mgr.retrieve_user_setting(user_id, Keys.GENDER_KEY)
+
+        # Render the privacy option.
+        gender_options = "\t\t<option value=\"Male\""
+        if selected_gender == Keys.GENDER_MALE_KEY:
+            gender_options += " selected"
+        gender_options += ">Male</option>\n"
+        gender_options += "\t\t<option value=\"Female\""
+        if selected_gender == Keys.GENDER_FEMALE_KEY:
+            gender_options += " selected"
+        gender_options += ">Female</option>"
+
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, gender_options=gender_options)
 
     @statistics
     def settings(self):

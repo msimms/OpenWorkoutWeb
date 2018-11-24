@@ -19,6 +19,14 @@ TARGET_EMAIL_KEY = "target_email"
 
 # User settings
 DEFAULT_PRIVACY = "default privacy"
+PREFERRED_UNITS_KEY = "preferred units"
+UNITS_METRIC_KEY = "metric"
+UNITS_STANDARD_KEY = "standard"
+HEIGHT_KEY = "height"
+WEIGHT_KEY = "weight"
+GENDER_KEY = "gender"
+GENDER_MALE_KEY = "male"
+GENDER_FEMALE_KEY = "female"
 
 # Keys inherited from the mobile app.
 APP_NAME_KEY = "Name"
@@ -72,10 +80,6 @@ ACTIVITY_COMMENTS_KEY = "comments"
 ACTIVITY_COMMENTER_ID_KEY = "commenter_id"
 ACTIVITY_TAGS_KEY = "tags"
 ACTIVITY_SUMMARY_KEY = "summary_data"
-
-PREFERRED_UNITS_KEY = "preferred units"
-UNITS_METRIC_KEY = "metric"
-UNITS_STANDARD_KEY = "standard"
 
 # Keys used to summarize activity data.
 BEST_SPEED = "Best Speed"

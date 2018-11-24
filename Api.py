@@ -542,23 +542,47 @@ class Api(object):
 
         result = True
 
-        # Update the alcohol units setting.
+        # Update the user's setting.
         for key in values:
             decoded_key = urllib.unquote_plus(key)
 
             # Default privacy/visibility.
             if decoded_key == Keys.DEFAULT_PRIVACY:
-                default_privacy = urllib.unquote_plus(values[key])
-                default_privacy = default_privacy.lower()
+                default_privacy = urllib.unquote_plus(values[key]).lower()
                 if not (default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE):
                     raise Exception("Invalid visibility value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY, default_privacy)
+            
+            # Metric or imperial?
             elif decoded_key == Keys.PREFERRED_UNITS_KEY:
-                preferred_units = urllib.unquote_plus(values[key])
-                preferred_units = preferred_units.lower()
+                preferred_units = urllib.unquote_plus(values[key]).lower()
                 if not (preferred_units == Keys.UNITS_METRIC_KEY or preferred_units == Keys.UNITS_STANDARD_KEY):
                     raise Exception("Invalid units value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY, preferred_units)
+
+        return result, ""
+
+    def handle_update_profile(self, values):
+        """Called when the user submits a profile change."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+
+        result = True
+
+        # Update the user's profile.
+        for key in values:
+            decoded_key = urllib.unquote_plus(key)
+
+            # Gender
+            if decoded_key == Keys.HEIGHT_KEY:
+                height = urllib.unquote_plus(values[key]).lower()
+            elif decoded_key == Keys.WEIGHT_KEY:
+                weight = urllib.unquote_plus(values[key]).lower()
+            elif decoded_key == Keys.GENDER_KEY:
+                gender = urllib.unquote_plus(values[key]).lower()
+                if not (gender == Keys.GENDER_MALE_KEY or gender == Keys.GENDER_FEMALE_KEY):
+                    raise Exception("Invalid gender value.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.GENDER_KEY, gender)
 
         return result, ""
 
@@ -639,6 +663,8 @@ class Api(object):
             return self.handle_list_comments(values)
         elif request == 'update_settings':
             return self.handle_update_settings(values)
+        elif request == 'update_profile':
+            return self.handle_update_profile(values)
         elif request == 'update_visibility':
             return self.handle_update_visibility(values)
         return False, ""
