@@ -153,6 +153,8 @@ class Api(object):
             raise Exception("Password not specified.")
 
         email = urllib.unquote_plus(values[Keys.USERNAME_KEY])
+        if not InputChecker.is_email_address(email):
+            raise Exception("Invalid email address.")
         password = urllib.unquote_plus(values[Keys.PASSWORD_KEY])
 
         if not self.user_mgr.authenticate_user(email, password):
@@ -182,6 +184,8 @@ class Api(object):
             raise Exception("Password confirmation not specified.")
 
         email = urllib.unquote_plus(values[Keys.USERNAME_KEY])
+        if not InputChecker.is_email_address(email):
+            raise Exception("Invalid email address.")
         realname = urllib.unquote_plus(values[Keys.REALNAME_KEY])
         password1 = urllib.unquote_plus(values[Keys.PASSWORD1_KEY])
         password2 = urllib.unquote_plus(values[Keys.PASSWORD2_KEY])
