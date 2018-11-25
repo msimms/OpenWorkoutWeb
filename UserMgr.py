@@ -230,4 +230,6 @@ class UserMgr(object):
                 result = Keys.UNITS_STANDARD_KEY
             elif key == Keys.GENDER_KEY:
                 result = Keys.GENDER_MALE_KEY
+            else:
+                result = ""
         return result.lower()

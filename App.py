@@ -948,7 +948,17 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Get the current settings.
+        selected_height = self.user_mgr.retrieve_user_setting(user_id, Keys.HEIGHT_KEY)
+        selected_weight = self.user_mgr.retrieve_user_setting(user_id, Keys.WEIGHT_KEY)
         selected_gender = self.user_mgr.retrieve_user_setting(user_id, Keys.GENDER_KEY)
+
+        # Render the user's height.
+        if selected_height is None:
+            selected_height = ""
+
+        # Render the user's weight.
+        if selected_weight is None:
+            selected_weight = ""
 
         # Render the privacy option.
         gender_options = "\t\t<option value=\"Male\""
@@ -963,7 +973,7 @@ class App(object):
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, gender_options=gender_options)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, weight=selected_weight, height=selected_height, gender_options=gender_options)
 
     @statistics
     def settings(self):

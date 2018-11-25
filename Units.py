@@ -6,12 +6,14 @@ import UserMgr
 UNITS_DISTANCE_METERS = 1
 UNITS_DISTANCE_KILOMETERS = 2
 UNITS_DISTANCE_MILES = 3
+UINTS_DISTANCE_FEET = 4
 
 UNITS_TIME_SECONDS = 1
 UNITS_TIME_MINUTES = 2
 UNITS_TIME_HOURS = 3
 
 METERS_PER_MILE = 1609.34
+FEET_PER_MILE = 5280.0
 
 def convert_distance(value, in_units, out_units):
     """Unit conversion for distance values."""
@@ -20,16 +22,22 @@ def convert_distance(value, in_units, out_units):
             return value / 1000.0
         elif out_units == UNITS_DISTANCE_MILES:
             return value / METERS_PER_MILE
+        elif out_units == UINTS_DISTANCE_FEET:
+            return value / METERS_PER_MILE / FEET_PER_MILE
     elif in_units == UNITS_DISTANCE_KILOMETERS:
         if out_units == UNITS_DISTANCE_METERS:
             return value * 1000.0
         elif out_units == UNITS_DISTANCE_MILES:
             return value * (METERS_PER_MILE / 1000.0)
+        elif out_units == UINTS_DISTANCE_FEET:
+            return value * (METERS_PER_MILE / 1000.0 / FEET_PER_MILE)
     elif in_units == UNITS_DISTANCE_MILES:
         if out_units == UNITS_DISTANCE_METERS:
             return value * METERS_PER_MILE
         elif out_units == UNITS_DISTANCE_KILOMETERS:
             return value / (METERS_PER_MILE / 1000.0)
+        elif out_units == UINTS_DISTANCE_FEET:
+            return value / (METERS_PER_MILE / 1000.0 / FEET_PER_MILE)
     return value
 
 def convert_to_preferred_distance_units(user_mgr, user_id, value, in_units):
