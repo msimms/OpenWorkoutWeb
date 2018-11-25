@@ -1,9 +1,9 @@
 # Copyright 2017 Michael J Simms
 
 import bcrypt
+import Keys
 import SessionMgr
 import StraenDb
-import StraenKeys
 
 
 MIN_PASSWORD_LEN  = 8
@@ -11,10 +11,10 @@ MIN_PASSWORD_LEN  = 8
 class UserMgr(object):
     """Class for managing users"""
 
-    def __init__(self, root_dir):
+    def __init__(self, session_mgr, root_dir):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
-        self.session_mgr = SessionMgr.SessionMgr()
+        self.session_mgr = session_mgr
         super(UserMgr, self).__init__()
 
     def terminate(self):
@@ -224,6 +224,12 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         result = self.database.retrieve_user_setting(user_id, key)
         if result is None:
-            if key == StraenKeys.DEFAULT_PRIVACY:
-                result = StraenKeys.ACTIVITY_VISIBILITY_PUBLIC
-        return result
+            if key == Keys.DEFAULT_PRIVACY:
+                result = Keys.ACTIVITY_VISIBILITY_PUBLIC
+            elif key == Keys.PREFERRED_UNITS_KEY:
+                result = Keys.UNITS_STANDARD_KEY
+            elif key == Keys.GENDER_KEY:
+                result = Keys.GENDER_MALE_KEY
+            else:
+                result = ""
+        return result.lower()

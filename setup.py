@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
-requirements = ['cherrypy', 'gpxpy', 'mako', 'bson', 'pymongo', 'bcrypt', 'python-tcxparser', 'fitparse', 'markdown']
+requirements = ['cherrypy', 'gpxpy', 'mako', 'bson', 'pymongo', 'bcrypt', 'fitparse', 'markdown', 'scipy', 'sklearn', 'flask', 'unidecode']
 
 setup(
     name='straenweb',
-    version='0.1.0',
+    version='0.4.0',
     description='',
     url='https://github.com/msimms/StraenWeb',
     author='Mike Simms',

@@ -1,40 +1,41 @@
 # Copyright 2017 Michael J Simms
 """Data store abstraction"""
 
+import Keys
 import StraenDb
-import StraenKeys
 import Importer
+import SensorAnalyzerFactory
 
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
-    if StraenKeys.ACTIVITY_TIME_KEY in item:
-        return item[StraenKeys.ACTIVITY_TIME_KEY]
+    if Keys.ACTIVITY_TIME_KEY in item:
+        return item[Keys.ACTIVITY_TIME_KEY]
     return 0
 
-class DataMgr(Importer.LocationWriter):
+class DataMgr(Importer.ActivityWriter):
     """Data store abstraction"""
 
     def __init__(self, root_dir):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
-        super(Importer.LocationWriter, self).__init__()
+        super(Importer.ActivityWriter, self).__init__()
 
     def terminate(self):
         """Destructor"""
         self.database = None
 
-    def create_activity(self, username, stream_name, stream_description, activity_type):
-        """Inherited from LocationWriter."""
+    def create_activity(self, username, stream_name, stream_description, activity_type, start_time):
+        """Inherited from ActivityWriter. Called when we start reading an activity file."""
         if self.database is None:
             raise Exception("No database.")
         return None, None
 
     def create_track(self, device_str, activity_id, track_name, track_description):
-        """Inherited from LocationWriter."""
+        """Inherited from ActivityWriter."""
         pass
 
     def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
-        """Inherited from LocationWriter. Create method for a location."""
+        """Inherited from ActivityWriter. Create method for a location."""
         if self.database is None:
             raise Exception("No database.")
         return self.database.create_location(device_str, activity_id, date_time, latitude, longitude, altitude)
@@ -63,6 +64,10 @@ class DataMgr(Importer.LocationWriter):
             raise Exception("No database.")
         return self.database.create_metadata(activity_id, date_time, key, value, create_list)
 
+    def finish_activity(self):
+        """Inherited from ActivityWriter. Called for post-processing."""
+        pass
+
     def import_file(self, username, local_file_name, file_extension):
         """Imports the contents of a local file into the database."""
         importer = Importer.Importer(self)
@@ -70,32 +75,32 @@ class DataMgr(Importer.LocationWriter):
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
-        if StraenKeys.ACTIVITY_TIME_KEY in activity:
+        if Keys.ACTIVITY_TIME_KEY in activity:
             return
 
-        if StraenKeys.ACTIVITY_LOCATIONS_KEY in activity:
-            locations = activity[StraenKeys.ACTIVITY_LOCATIONS_KEY]
+        if Keys.ACTIVITY_LOCATIONS_KEY in activity:
+            locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
         else:
-            locations = self.retrieve_locations(activity[StraenKeys.ACTIVITY_ID_KEY])
+            locations = self.retrieve_locations(activity[Keys.ACTIVITY_ID_KEY])
 
         if len(locations) > 0:
             first_loc = locations[0]
-            if StraenKeys.LOCATION_TIME_KEY in first_loc:
-                time_num = first_loc[StraenKeys.LOCATION_TIME_KEY] / 1000 # Milliseconds to seconds
-                activity_id = activity[StraenKeys.ACTIVITY_ID_KEY]
-                activity[StraenKeys.ACTIVITY_TIME_KEY] = time_num
-                self.create_metadata(activity_id, time_num, StraenKeys.ACTIVITY_TIME_KEY, time_num, False)
+            if Keys.LOCATION_TIME_KEY in first_loc:
+                time_num = first_loc[Keys.LOCATION_TIME_KEY] / 1000 # Milliseconds to seconds
+                activity_id = activity[Keys.ACTIVITY_ID_KEY]
+                activity[Keys.ACTIVITY_TIME_KEY] = time_num
+                self.create_metadata(activity_id, time_num, Keys.ACTIVITY_TIME_KEY, time_num, False)
 
     def is_activity_public(self, activity):
         """Helper function for returning whether or not an activity is publically visible."""
-        if StraenKeys.ACTIVITY_VISIBILITY_KEY in activity:
-            if activity[StraenKeys.ACTIVITY_VISIBILITY_KEY] == "private":
+        if Keys.ACTIVITY_VISIBILITY_KEY in activity:
+            if activity[Keys.ACTIVITY_VISIBILITY_KEY] == "private":
                 return False
         return True
 
-    def is_activity_id_public(self, device_str, activity_id):
+    def is_activity_id_public(self, activity_id):
         """Helper function for returning whether or not an activity is publically visible."""
-        visibility = self.retrieve_activity_visibility(device_str, activity_id)
+        visibility = self.retrieve_activity_visibility(activity_id)
         if visibility is not None:
             if visibility == "private":
                 return False
@@ -117,7 +122,7 @@ class DataMgr(Importer.LocationWriter):
             for device in devices:
                 device_activities = self.database.retrieve_device_activity_list(device, start, None)
                 for device_activity in device_activities:
-                    device_activity[StraenKeys.REALNAME_KEY] = user_realname
+                    device_activity[Keys.REALNAME_KEY] = user_realname
                     self.update_activity_start_time(device_activity)
                 activities.extend(device_activities)
 
@@ -141,7 +146,7 @@ class DataMgr(Importer.LocationWriter):
         # Add the activities of users they follow.
         followed_users = self.database.retrieve_users_followed(user_id)
         for followed_user in followed_users:
-            more_activities = self.retrieve_user_activity_list(followed_user[StraenKeys.DATABASE_ID_KEY], followed_user[StraenKeys.REALNAME_KEY], start, num_results)
+            more_activities = self.retrieve_user_activity_list(followed_user[Keys.DATABASE_ID_KEY], followed_user[Keys.REALNAME_KEY], start, num_results)
             for another_activity in more_activities:
                 if self.is_activity_public(another_activity):
                     activities.append(another_activity)
@@ -242,7 +247,14 @@ class DataMgr(Importer.LocationWriter):
             raise Exception("Bad parameter.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_sensordata(key, activity_id)
+
+        analysis = self.database.retrieve_activity_summary(activity_id)
+        data = self.database.retrieve_sensordata(key, activity_id)
+        if analysis is None and data is not None and isinstance(data, list):
+            analyzer_factory = SensorAnalyzerFactory.SensorAnalyzerFactory()
+            analyzer = analyzer_factory.create_with_data(key, data)
+            analysis = analyzer.analyze()
+        return data, analysis
 
     def retrieve_most_recent_locations(self, activity_id, num):
         """Returns the most recent 'num' locations for the specified device and activity."""
@@ -261,7 +273,7 @@ class DataMgr(Importer.LocationWriter):
         activity = self.database.retrieve_most_recent_activity_for_device(device_str)
         if activity is None:
             return None
-        return activity[StraenKeys.ACTIVITY_ID_KEY]
+        return activity[Keys.ACTIVITY_ID_KEY]
 
     def retrieve_most_recent_activity_for_device(self, device_str):
         """Returns the most recent activity for the specified device."""

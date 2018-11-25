@@ -13,18 +13,11 @@ Why develop a workout tracker when there are so many closed-source options avail
 
 ## Major Todos
 * Support for strength-based activities.
-* Activity import.
 * Activity export.
 * Continuous scrolling for the activity feed.
 * Import from other services.
 * Better graphics.
 * Replace Google Maps with Open Street Map.
-
-## Installation
-
-    git clone https://github.com/msimms/StraenWeb.git
-    cd StraenWeb
-    pip install -r requirements.txt
 
 ## Version History
 
@@ -48,6 +41,11 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Implemented basic user following.
 * Many small bug fixes.
 
+### 0.4
+* Activity importing from TCX and GPX files.
+* Beginnings of statistical analysis.
+* Ability to switch between metric and imperial units.
+* Code refactoring to support multiple frameworks (cherrypy and flask).
 
 ## Social
 Twitter: [@StraenApp](https://twitter.com/StraenApp)

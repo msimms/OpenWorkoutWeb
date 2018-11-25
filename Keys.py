@@ -1,5 +1,5 @@
 # Copyright 2017 Michael J Simms
-"""Key strings from key/value pairs returned by the app"""
+"""Key strings for all key/value pairs used in the app"""
 
 # Keys associated with user management.
 SESSION_KEY = '_straen_username'
@@ -13,9 +13,20 @@ REALNAME_KEY = "realname"
 HASH_KEY = "hash"
 DEVICES_KEY = "devices"
 FOLLOWING_KEY = "following"
+PR_KEY = "pr"
+EMAIL_KEY = "email"
+TARGET_EMAIL_KEY = "target_email"
 
 # User settings
 DEFAULT_PRIVACY = "default privacy"
+PREFERRED_UNITS_KEY = "preferred units"
+UNITS_METRIC_KEY = "metric"
+UNITS_STANDARD_KEY = "standard"
+HEIGHT_KEY = "height"
+WEIGHT_KEY = "weight"
+GENDER_KEY = "gender"
+GENDER_MALE_KEY = "male"
+GENDER_FEMALE_KEY = "female"
 
 # Keys inherited from the mobile app.
 APP_NAME_KEY = "Name"
@@ -26,6 +37,7 @@ APP_ID_KEY = "ActivityId"
 APP_TYPE_KEY = "ActivityType"
 APP_DISTANCE_KEY = "Distance"
 APP_CADENCE_KEY = "Cadence"
+APP_TEMP_KEY = "Temperature"
 APP_CURRENT_SPEED_KEY = "Current Speed"
 APP_AVG_SPEED_KEY = "Avgerage Speed"
 APP_MOVING_SPEED_KEY = "Moving Speed"
@@ -67,6 +79,30 @@ ACTIVITY_COMMENT_KEY = "comment"
 ACTIVITY_COMMENTS_KEY = "comments"
 ACTIVITY_COMMENTER_ID_KEY = "commenter_id"
 ACTIVITY_TAGS_KEY = "tags"
+ACTIVITY_SUMMARY_KEY = "summary_data"
+
+# Keys used to summarize activity data.
+BEST_SPEED = "Best Speed"
+BEST_1K = "Best 1K"
+BEST_MILE = "Best Mile"
+BEST_5K = "Best 5K"
+BEST_10K = "Best 10K"
+BEST_15K = "Best 15K"
+BEST_HALF_MARATHON = "Best Half Marathon"
+BEST_MARATHON = "Best Marathon"
+BEST_METRIC_CENTURY = "Best Metric Century"
+BEST_CENTURY = "Best Century"
+BEST_5_SEC_POWER = "5 Second Power"
+BEST_20_MIN_POWER = "20 Minute Power"
+BEST_1_HOUR_POWER = "1 Hour Power"
+MAX_POWER = "Maximum Power"
+MAX_HEART_RATE = "Maximum Heart Rate"
+MAX_CADENCE = "Maximum Cadence"
+AVG_POWER = "Average Power"
+AVG_HEART_RATE = "Average Heart Rate"
+AVG_CADENCE = "Average Cadence"
+NORMALIZED_POWER = "Normalized Power"
+CLUSTER = 'Cluster'
 
 # Activity types
 TYPE_RUNNING_KEY = "Running"
