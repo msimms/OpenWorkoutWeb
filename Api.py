@@ -603,18 +603,14 @@ class Api(object):
         result = self.data_mgr.update_activity_visibility(values[Keys.ACTIVITY_ID_KEY], visibility)
         return result, ""
 
-    def handle_api_1_0_request(self, args, values):
+    def handle_api_1_0_request(self, request, values):
         """Called to parse a version 1.0 API message."""
-        if len(args) <= 0:
-            return False, ""
-
         if self.user_id is None:
             if Keys.SESSION_KEY in values:
                 username = self.user_mgr.get_logged_in_user_from_cookie(values[Keys.SESSION_KEY])
                 if username is not None:
                     self.user_id, _, _ = self.user_mgr.retrieve_user(username)
 
-        request = args[0]
         if request == 'update_status':
             return self.handle_update_status(values)
         elif request == 'login_submit':
