@@ -13,9 +13,9 @@ import threading
 import traceback
 import uuid
 
+import AnalysisScheduler
 import Keys
 import LocationAnalyzer
-import SensorAnalyzerFactory
 import Api
 import DataMgr
 import Units
@@ -29,7 +29,6 @@ from mako.template import Template
 PRODUCT_NAME = 'Straen'
 
 UNNAMED_ACTIVITY_TITLE = "Unnamed"
-UNSPECIFIED_ACTIVITY_TYPE = "Unknown"
 
 LOGIN_URL = '/login'
 DEFAULT_LOGGED_IN_URL = '/all_activities'
@@ -79,15 +78,23 @@ class App(object):
         self.map_single_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
         self.map_multi_html_file = os.path.join(root_dir, HTML_DIR, 'map_multi_google.html')
         self.error_logged_in_html_file = os.path.join(root_dir, HTML_DIR, 'error_logged_in.html')
+        self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler(self.data_mgr, 2)
+        self.analysis_scheduler.start()
         super(App, self).__init__()
 
     def terminate(self):
         """Destructor"""
-        print "Terminating"
-        self.user_mgr.terminate()
-        self.user_mgr = None
+        print("Terminating the application...")
+        print("Terminating data analysis...")
+        self.analysis_scheduler.terminate()
+        self.analysis_scheduler.join()
+        self.analysis_scheduler = None
+        print("Terminating data management...")
         self.data_mgr.terminate()
         self.data_mgr = None
+        print("Terminating session management...")
+        self.user_mgr.terminate()
+        self.user_mgr = None
 
     def log_error(self, log_str):
         """Writes an error message to the log file."""
@@ -289,7 +296,7 @@ class App(object):
         summary = "<ul>\n"
         activity_type = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
         if activity_type is None:
-            activity_type = UNSPECIFIED_ACTIVITY_TYPE
+            activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
         name = self.data_mgr.retrieve_metadata(Keys.APP_NAME_KEY, activity_id)
         if name is None:
@@ -379,44 +386,54 @@ class App(object):
         name = self.data_mgr.retrieve_metadata(Keys.APP_NAME_KEY, activity_id)
         activity_type = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
         if activity_type is None:
-            activity_type = UNSPECIFIED_ACTIVITY_TYPE
+            activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
 
         # Compute location-based things.
         location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
         location_analyzer.append_locations(locations)
-        if not is_live:
-            location_analyzer.update_speeds()
+
+        # Retrieve cached summary data.
+        summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
 
         # Build the summary data view.
         summary = "<ul>\n"
+
+        # Add the activity type.
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
+
+        # Add the activity name.
         if name is None:
             name = UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
+
         if location_analyzer.total_distance is not None:
             value, value_units = Units.convert_to_preferred_distance_units(self.user_mgr, logged_in_userid, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
             summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
         if location_analyzer.avg_speed is not None:
             value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_userid, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
             summary += "\t<li>Avg. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(value_distance_units, value_time_units) + "</li>\n"
-        best_speed = location_analyzer.get_best_time(Keys.BEST_SPEED)
-        if best_speed is not None:
-            value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_userid, best_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
-            summary += "\t<li>Max. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(value_distance_units, value_time_units) + "</li>\n"
-        best_time = location_analyzer.get_best_time(Keys.BEST_1K)
-        if best_time is not None:
-            value = Units.convert_speed(1.0 / best_time, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS)
-            summary += "\t<li>Best KM: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS) + "</li>\n"
-        best_time = location_analyzer.get_best_time(Keys.BEST_MILE)
-        if best_time is not None:
-            value = Units.convert_speed(1.0 / best_time, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
-            summary += "\t<li>Best Mile: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
+
+        # Add summary data that was computed out-of-band and cached.
+        if summary_data is not None:
+
+            if Keys.BEST_SPEED in summary_data:
+                value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_userid, summary_data[Keys.BEST_SPEED], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
+                summary += "\t<li>Max. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(value_distance_units, value_time_units) + "</li>\n"
+            if Keys.BEST_1K in summary_data:
+                value = Units.convert_speed(1.0 / summary_data[Keys.BEST_1K], Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS)
+                summary += "\t<li>Best KM: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS) + "</li>\n"
+            if Keys.BEST_MILE in summary_data:
+                value = Units.convert_speed(1.0 / summary_data[Keys.BEST_MILE], Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
+                summary += "\t<li>Best Mile: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
+
         if max_heart_rate > 1:
             summary += "\t<li>Max. Heart Rate: {:.2f} ".format(max_heart_rate) + Units.get_heart_rate_units_str() + "</li>\n"
         if max_cadence:
             summary += "\t<li>Max. Cadence: {:.2f} ".format(max_cadence) + Units.get_cadence_units_str() + "</li>\n"
         if max_power:
             summary += "\t<li>Max. Power: {:.2f} ".format(max_power) + Units.get_power_units_str() + "</li>\n"
+
+        # Add tag data.
         tags = self.data_mgr.retrieve_tags(activity_id)
         if tags is not None:
             summary += "\t<li>Tags: "
@@ -540,7 +557,7 @@ class App(object):
         if Keys.ACTIVITY_TYPE_KEY in activity and len(activity[Keys.ACTIVITY_TYPE_KEY]) > 0:
             activity_type = "<b>" + activity[Keys.ACTIVITY_TYPE_KEY] + "</b>"
         else:
-            activity_type = "<b>" + UNSPECIFIED_ACTIVITY_TYPE + "</b>"
+            activity_type = "<b>" + Keys.TYPE_UNSPECIFIED_ACTIVITY + "</b>"
 
         # Activity name
         if Keys.ACTIVITY_NAME_KEY in activity and len(activity[Keys.ACTIVITY_NAME_KEY]) > 0:
@@ -895,7 +912,9 @@ class App(object):
                 saved_file.write(data)
 
         # Parse the file and store it's contents in the database.
-        if not self.data_mgr.import_file(username, local_file_name, uploaded_file_ext):
+        if self.data_mgr.import_file(username, local_file_name, uploaded_file_ext):
+            self.analysis_scheduler.add_to_queue()
+        else:
             self.log_error('Unhandled exception in upload when processing ' + uploaded_file_name)
 
         # Remove the local file.

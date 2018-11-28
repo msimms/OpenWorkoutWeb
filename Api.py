@@ -15,10 +15,11 @@ g_not_meta_data = ["DeviceId", "ActivityId", "ActivityName", "User Name", "Latit
 class Api(object):
     """Class for managing API messages."""
 
-    def __init__(self, user_mgr, data_mgr, user_id):
+    def __init__(self, user_mgr, data_mgr, analysis_scheduler, user_id):
         super(Api, self).__init__()
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
+        self.analysis_scheduler = analysis_scheduler
         self.user_id = user_id
 
     def log_error(self, log_str):
@@ -140,6 +141,10 @@ class Api(object):
             user_devices = self.user_mgr.retrieve_user_devices(user_id)
             if user_devices is not None and device_str not in user_devices:
                 self.user_mgr.create_user_device(user_id, device_str)
+
+        # Schedule for analysis.
+        self.analysis_scheduler.add_to_queue(activity_id)
+
         return True, ""
 
     def handle_login_submit(self, values):

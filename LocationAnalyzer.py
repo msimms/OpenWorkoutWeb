@@ -162,7 +162,6 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             speeds = self.speed_graph[start_index:end_index - 1]
             avg_speed = statistics.mean(speeds)
             avg_pace = Units.meters_per_sec_to_minutes_per_mile(avg_speed)
-            print str(line_duration / 1000) + " seconds at " + str(avg_pace) + " minutes/mile"
 
     def analyze(self):
         """Called when all sensor readings have been processed."""

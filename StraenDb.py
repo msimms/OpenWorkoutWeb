@@ -567,53 +567,6 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_activity_summary(self, activity_id, summary_data):
-        """Create method for activity summary data. Summary data is data computed from the raw data."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_summary.__name__ + ": Unexpected empty object: activity_id")
-            return False
-
-        try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                activity[Keys.ACTIVITY_SUMMARY_KEY] = summary_data
-                self.activities_collection.save(activity)
-                return True
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return False
-
-    def retrieve_activity_summary(self, activity_id):
-        """Returns the activity summary data. Summary data is data computed from the raw data."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_activity_summary.__name__ + ": Unexpected empty object: activity_id")
-            return None
-
-        try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if Keys.ACTIVITY_SUMMARY_KEY in activity:
-                    summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
-                    return summary_data
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return None
-
-    def delete_activity_summary(self, activity_id):
-        """Delete method for activity summary data. Summary data is data computed from the raw data."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.delete_activity_summary.__name__ + ": Unexpected empty object: activity_id")
-            return False
-
-        try:
-            pass
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return False
-
     def create_metadata(self, activity_id, date_time, key, value, create_list):
         """Create method for a piece of metaadata."""
         if activity_id is None:
@@ -929,6 +882,55 @@ class MongoDatabase(Database.Database):
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
         return None
+
+    def create_activity_summary(self, activity_id, summary_data):
+        """Create method for activity summary data. Summary data is data computed from the raw data."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_activity_summary.__name__ + ": Unexpected empty object: activity_id")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                activity[Keys.ACTIVITY_SUMMARY_KEY] = summary_data
+                self.activities_collection.save(activity)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_activity_summary(self, activity_id):
+        """Returns the activity summary data. Summary data is data computed from the raw data."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.retrieve_activity_summary.__name__ + ": Unexpected empty object: activity_id")
+            return None
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                if Keys.ACTIVITY_SUMMARY_KEY in activity:
+                    summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
+                    return summary_data
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def delete_activity_summary(self, activity_id):
+        """Delete method for activity summary data. Summary data is data computed from the raw data."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.delete_activity_summary.__name__ + ": Unexpected empty object: activity_id")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                pass
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
 
     def create_tag(self, activity_id, tag):
         """Adds a tag to the specified activity."""

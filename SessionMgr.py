@@ -6,6 +6,8 @@ import Keys
 
 
 class SessionMgr(object):
+    """Class for managing sessions. A user may have more than one session"""
+
     def __init__(self):
         super(SessionMgr, self).__init__()
 
@@ -27,7 +29,7 @@ class SessionMgr(object):
 
 
 class CherryPySessionMgr(SessionMgr):
-    """Class for managing sessions. A user may have more than one session"""
+    """Class for managing sessions when using the cherrypy framework. A user may have more than one session"""
 
     def __init__(self):
         super(SessionMgr, self).__init__()
@@ -60,7 +62,7 @@ class CherryPySessionMgr(SessionMgr):
 
 
 class FlaskSessionMgr(SessionMgr):
-    """Class for managing sessions. A user may have more than one session"""
+    """Class for managing sessions when using the flask framework. A user may have more than one session"""
 
     def __init__(self):
         super(SessionMgr, self).__init__()

@@ -70,8 +70,7 @@ class TestActivityWriter(Importer.ActivityWriter):
                 found = True
                 break
         if not found:
-            factory = SensorAnalyzerFactory.SensorAnalyzerFactory()
-            sensor_analyzer = factory.create(key)
+            sensor_analyzer = SensorAnalyzerFactory.create(key)
             if sensor_analyzer:
                 sensor_analyzer.append_sensor_value(date_time, value)
                 self.sensor_analyzers.append(sensor_analyzer)
@@ -230,7 +229,10 @@ def main():
         print("- " + failure)
 
     # Print the time summary.
-    print("Average time per sample: " + str(total_time / num_files_processed) + " seconds\n")
+    if num_files_processed > 0:
+        print("Average time per sample: " + str(total_time / num_files_processed) + " seconds\n")
+    else:
+        print("No files processed.\n")
 
 if __name__ == "__main__":
     main()

@@ -33,7 +33,7 @@ g_app = None
 def signal_handler(signal, frame):
     global g_app
 
-    print "Exiting..."
+    print("Exiting...")
     if g_app is not None:
         g_app.terminate()
     sys.exit(0)
@@ -360,7 +360,7 @@ def api(version, method):
 
         # Process the API request.
         if version == '1.0':
-            api = Api.Api(g_app.user_mgr, g_app.data_mgr, user_id)
+            api = Api.Api(g_app.user_mgr, g_app.data_mgr, g_app.analysis_scheduler, user_id)
             handled, response = api.handle_api_1_0_request(method, params)
             if not handled:
                 g_app.log_error("Failed to handle request: " + method)
@@ -414,12 +414,12 @@ def main():
             args.host = "127.0.0.1"
         else:
             args.host = "straen-app.com"
-        print "Hostname not provided, will use " + args.host
+        print("Hostname not provided, will use " + args.host)
 
     root_url = protocol + "://" + args.host
     if args.hostport > 0:
         root_url = root_url + ":" + str(args.hostport)
-    print "Root URL is " + root_url
+    print("Root URL is " + root_url)
 
     signal.signal(signal.SIGINT, signal_handler)
     mako.collection_size = 100

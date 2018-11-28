@@ -251,9 +251,9 @@ class DataMgr(Importer.ActivityWriter):
         analysis = self.database.retrieve_activity_summary(activity_id)
         data = self.database.retrieve_sensordata(key, activity_id)
         if analysis is None and data is not None and isinstance(data, list):
-            analyzer_factory = SensorAnalyzerFactory.SensorAnalyzerFactory()
-            analyzer = analyzer_factory.create_with_data(key, data)
-            analysis = analyzer.analyze()
+            analyzer = SensorAnalyzerFactory.create_with_data(key, data)
+            if analyzer is not None:
+                analysis = analyzer.analyze()
         return data, analysis
 
     def retrieve_most_recent_locations(self, activity_id, num):
@@ -282,6 +282,24 @@ class DataMgr(Importer.ActivityWriter):
         if device_str is None or len(device_str) == 0:
             raise Exception("Bad parameter.")
         return self.database.retrieve_most_recent_activity_for_device(device_str)
+
+    def create_activity_summary(self, activity_id, summary_data):
+        """Create method for activity summary data. Summary data is data computed from the raw data."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None or len(activity_id) == 0:
+            raise Exception("Bad parameter.")
+        if summary_data is None:
+            raise Exception("Bad parameter.")
+        return self.database.create_activity_summary(activity_id, summary_data)
+
+    def retrieve_activity_summary(self, activity_id):
+        """Retrieve method for activity summary data. Summary data is data computed from the raw data."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None or len(activity_id) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_activity_summary(activity_id)
 
     def create_tag(self, activity_id, tag):
         """Returns the most recent 'num' locations for the specified device and activity."""
