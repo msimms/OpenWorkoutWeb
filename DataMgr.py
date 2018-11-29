@@ -247,14 +247,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-
-        analysis = self.database.retrieve_activity_summary(activity_id)
-        data = self.database.retrieve_sensordata(key, activity_id)
-        if analysis is None and data is not None and isinstance(data, list):
-            analyzer = SensorAnalyzerFactory.create_with_data(key, data)
-            if analyzer is not None:
-                analysis = analyzer.analyze()
-        return data, analysis
+        return self.database.retrieve_sensordata(key, activity_id)
 
     def retrieve_most_recent_locations(self, activity_id, num):
         """Returns the most recent 'num' locations for the specified device and activity."""

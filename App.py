@@ -340,7 +340,7 @@ class App(object):
     def render_sensor_data_for_page(self, key, activity_id):
         """Helper function for processing sensor data and formatting it for display."""
         max_value = 0.0
-        data, analysis = self.data_mgr.retrieve_sensordata(key, activity_id)
+        data = self.data_mgr.retrieve_sensordata(key, activity_id)
         data_str = ""
         if data is not None and isinstance(data, list):
             for datum in data:
@@ -349,7 +349,7 @@ class App(object):
                 data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
                 if value > max_value:
                     max_value = value
-        return data_str, max_value, analysis
+        return data_str, max_value
 
     def render_page_for_mapped_activity(self, email, user_realname, activity_id, locations, logged_in_userid, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
@@ -380,9 +380,9 @@ class App(object):
 
         # Get all the things.
         current_speeds_str, _ = self.render_metadata_for_page(Keys.APP_CURRENT_SPEED_KEY, activity_id)
-        heart_rates_str, max_heart_rate, heart_rate_analysis = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity_id)
-        cadences_str, max_cadence, cadence_analysis = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity_id)
-        powers_str, max_power, power_analysis = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity_id)
+        heart_rates_str, max_heart_rate = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity_id)
+        cadences_str, max_cadence = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity_id)
+        powers_str, max_power = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity_id)
         name = self.data_mgr.retrieve_metadata(Keys.APP_NAME_KEY, activity_id)
         activity_type = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
         if activity_type is None:
@@ -447,26 +447,12 @@ class App(object):
 
         # Build the detailed analysis.
         details_str = ""
-        if heart_rate_analysis is not None:
-            for key in heart_rate_analysis:
+        if summary_data is not None:
+            for key in summary_data:
                 details_str = details_str + "<td>"
                 details_str = details_str + key
                 details_str = details_str + "</td><td>"
-                details_str = details_str + str(heart_rate_analysis[key])
-                details_str = details_str + "</td><tr>"
-        if cadence_analysis is not None:
-            for key in cadence_analysis:
-                details_str = details_str + "<td>"
-                details_str = details_str + key
-                details_str = details_str + "</td><td>"
-                details_str = details_str + str(cadence_analysis[key])
-                details_str = details_str + "</td><tr>"
-        if power_analysis is not None:
-            for key in power_analysis:
-                details_str = details_str + "<td>"
-                details_str = details_str + key
-                details_str = details_str + "</td><td>"
-                details_str = details_str + str(power_analysis[key])
+                details_str = details_str + str(summary_data[key])
                 details_str = details_str + "</td><tr>"
 
         # List the comments.
