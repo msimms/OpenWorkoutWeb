@@ -392,8 +392,10 @@ class App(object):
         location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
         location_analyzer.append_locations(locations)
 
-        # Retrieve cached summary data.
+        # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
+        if summary_data is None:
+            self.analysis_scheduler.add_to_queue(activity_id)
 
         # Build the summary data view.
         summary = "<ul>\n"

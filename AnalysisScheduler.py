@@ -68,9 +68,8 @@ class AnalysisWorker(threading.Thread):
             sensor_types_to_analyze = SensorAnalyzerFactory.supported_sensor_types()
             for sensor_type in sensor_types_to_analyze:
                 if sensor_type in activity:
-                    print("Analyzing " + sensor_type)
-#                    SensorAnalyzerFactory.create_with_data(sensor_analyzer)
-                    pass
+                    sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_analyzer, activity[sensor_type])
+                    summary_data.update(sensor_analyzer.analyze())
 
             # Save the results.
             self.data_mgr.create_activity_summary(self.activity_id, summary_data)
@@ -106,7 +105,13 @@ class AnalysisScheduler(threading.Thread):
         """Adds the activity ID to the list of activities to be analyzed."""
         self.mutex.acquire()
         try:
-            if not activity_id in self.queue:
+            # Is this item currently being worked?
+            being_worked = False
+            for worker in self.workers:
+                if worker.activity_id == activity_id:
+                    being_worked = True
+
+            if not (being_worked or activity_id in self.queue):
                 self.queue.append(activity_id)
         finally:
             self.mutex.release()
