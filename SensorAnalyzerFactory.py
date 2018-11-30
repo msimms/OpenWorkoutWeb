@@ -1,17 +1,20 @@
 # Copyright 2018 Michael J Simms
 
 import Keys
+import AccelerometerAnalyzer
 import CadenceAnalyzer
 import HeartRateAnalyzer
 import PowerAnalyzer
 
 def supported_sensor_types():
-    return [Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]
+    return [Keys.APP_ACCELEROMETER_KEY, Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]
 
 def create(sensor_type):
     """Creates a sensor analyzer object of the specified type."""
     sensor_analyzer = None
-    if sensor_type == Keys.APP_CADENCE_KEY:
+    if sensor_type == Keys.APP_ACCELEROMETER_KEY:
+        sensor_analyzer = AccelerometerAnalyzer.AccelerometerAnalyzer()
+    elif sensor_type == Keys.APP_CADENCE_KEY:
         sensor_analyzer = CadenceAnalyzer.CadenceAnalyzer()
     elif sensor_type == Keys.APP_HEART_RATE_KEY:
         sensor_analyzer = HeartRateAnalyzer.HeartRateAnalyzer()

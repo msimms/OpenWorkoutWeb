@@ -56,14 +56,6 @@ class AnalysisWorker(threading.Thread):
             if self.quitting:
                 return
 
-            # Do the accelerometer analysis.
-            if Keys.APP_ACCELEROMETER_KEY in activity:
-                pass
-
-            # Check for interrupt.
-            if self.quitting:
-                return
-
             # Do the sensor analysis.
             sensor_types_to_analyze = SensorAnalyzerFactory.supported_sensor_types()
             for sensor_type in sensor_types_to_analyze:

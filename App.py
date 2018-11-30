@@ -445,15 +445,20 @@ class App(object):
             summary += "</li>\n"
         summary += "</ul>\n"
 
-        # Build the detailed analysis.
+        # Build the detailed analysis table.
         details_str = ""
         if summary_data is not None:
-            for key in summary_data:
-                details_str = details_str + "<td>"
-                details_str = details_str + key
-                details_str = details_str + "</td><td>"
-                details_str = details_str + str(summary_data[key])
-                details_str = details_str + "</td><tr>"
+            for key in sorted(summary_data):
+                details_str += "<td><b>"
+                details_str += key
+                details_str += "</b></td><td>"
+                value = summary_data[key]
+                if key.find("Speed") > 0:
+                    value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_userid, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
+                    details_str += "{:.2f}".format(value) + " " + Units.get_speed_units_str(value_distance_units, value_time_units)
+                else:
+                    details_str += Units.convert_seconds_to_hours_mins_secs(value)
+                details_str += "</td><tr>"
 
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
