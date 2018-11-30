@@ -8,7 +8,7 @@ import Keys
 import SensorAnalyzer
 import Units
 
-# Locate and load the distance module.
+# Locate and load the statistics module.
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 libmathdir = os.path.join(currentdir, 'LibMath', 'python')
 sys.path.insert(0, libmathdir)

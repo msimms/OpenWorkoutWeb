@@ -189,13 +189,13 @@ class Importer(object):
                 x = float(row[1])
                 y = float(row[2])
                 z = float(row[3])
-                accel = [ x, y, z ]
+                accel_data = [ x, y, z ]
 
                 # Indicate the start of the activity.
                 if row_count == 1:
                     device_str, activity_id = self.activity_writer.create_activity(username, "", "", "Lifting", ts)
 
-                self.activity_writer.create_sensor_reading(device_str, activity_id, ts, Keys.APP_ACCELEROMETER_KEY, accel)
+                self.activity_writer.create_sensor_reading(device_str, activity_id, ts, Keys.APP_ACCELEROMETER_KEY, accel_data)
                 row_count = row_count + 1
 
         # Let it be known that we are finished with this activity.
