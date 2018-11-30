@@ -2,6 +2,7 @@
 """Parses GPX and TCX files, passing the contents to a ActivityWriter object."""
 
 import calendar
+import csv
 import datetime
 import gpxpy
 import logging
@@ -164,6 +165,43 @@ class Importer(object):
         self.activity_writer.finish_activity()
         return True
 
+    def import_accelerometer_csv_file(self, username, file_name):
+        """Imports a CSV file containing accelerometer data."""
+
+        columns = []
+        ts_list = []
+        x_list = []
+        y_list = []
+        z_list = []
+        row_count = 0
+        device_str = ""
+        activity_id = ""
+
+        with open(file_name) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            for row in csv_reader:
+                # Skip the header row.
+                if row_count == 0:
+                    row_count = row_count + 1
+                    continue
+
+                ts = float(row[0])
+                x = float(row[1])
+                y = float(row[2])
+                z = float(row[3])
+                accel = [ x, y, z ]
+
+                # Indicate the start of the activity.
+                if row_count == 1:
+                    device_str, activity_id = self.activity_writer.create_activity(username, "", "", "Lifting", ts)
+
+                self.activity_writer.create_sensor_reading(device_str, activity_id, ts, Keys.APP_ACCELEROMETER_KEY, accel)
+                row_count = row_count + 1
+
+        # Let it be known that we are finished with this activity.
+        self.activity_writer.finish_activity()
+        return True
+
     def import_file(self, username, local_file_name, file_extension):
         """Imports the specified file, parsing it based on the provided extension."""
         try:
@@ -171,6 +209,8 @@ class Importer(object):
                 return self.import_gpx_file(username, local_file_name)
             elif file_extension == '.tcx':
                 return self.import_tcx_file(username, local_file_name)
+            elif file_extension == '.csv':
+                return self.import_accelerometer_csv_file(username, local_file_name)
         except:
             traceback.print_exc(file=sys.stdout)
             logger = logging.getLogger()

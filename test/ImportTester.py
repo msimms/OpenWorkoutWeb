@@ -197,7 +197,7 @@ def main():
         for current_file in files:
             full_path = os.path.join(subdir, current_file)
             _, temp_file_ext = os.path.splitext(full_path)
-            if temp_file_ext in ['.gpx', '.tcx']:
+            if temp_file_ext in ['.gpx', '.tcx', '.csv']:
                 title_str = "Processing: " + full_path
                 print("=" * len(title_str))
                 print(title_str)
