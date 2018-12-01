@@ -453,7 +453,14 @@ class App(object):
                 details_str += key
                 details_str += "</b></td><td>"
                 value = summary_data[key]
-                if key.find("Speed") > 0:
+
+                if key.find("Heart Rate") > 0:
+                    details_str += "{:.2f}".format(value) + " " + Units.get_heart_rate_units_str()
+                elif key.find("Cadence") > 0:
+                    details_str += "{:.2f}".format(value) + " " + Units.get_cadence_units_str()
+                elif key.find("Power") > 0:
+                    details_str += "{:.2f}".format(value) + " " + Units.get_power_units_str()
+                elif key.find("Speed") > 0:
                     value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_userid, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
                     details_str += "{:.2f}".format(value) + " " + Units.get_speed_units_str(value_distance_units, value_time_units)
                 else:
@@ -877,7 +884,7 @@ class App(object):
 
     @statistics
     def upload(self, ufile):
-        """Processes an upload request."""
+        """Processes an request from the upload form."""
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -897,16 +904,17 @@ class App(object):
         local_file_name = local_file_name + uploaded_file_ext
 
         # Write the file.
-        with open(local_file_name, 'wb') as saved_file:
+        with open(local_file_name, 'wb') as local_file:
             while True:
                 data = ufile.file.read(8192)
                 if not data:
                     break
-                saved_file.write(data)
+                local_file.write(data)
 
-        # Parse the file and store it's contents in the database.
-        if self.data_mgr.import_file(username, local_file_name, uploaded_file_ext):
-            self.analysis_scheduler.add_to_queue()
+        # Parse the file and store it's contents in the database. Once imported, queue the activity for detailed analysis.
+        success, device_id, activity_id = self.data_mgr.import_file(username, local_file_name, uploaded_file_ext)
+        if success:
+            self.analysis_scheduler.add_to_queue(activity_id)
         else:
             self.log_error('Unhandled exception in upload when processing ' + uploaded_file_name)
 

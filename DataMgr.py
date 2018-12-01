@@ -27,7 +27,7 @@ class DataMgr(Importer.ActivityWriter):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
         if self.database is None:
             raise Exception("No database.")
-        return None, None
+        return self.database.create_activity(str(uuid.uuid4()), stream_name, start_time, "")
 
     def create_track(self, device_str, activity_id, track_name, track_description):
         """Inherited from ActivityWriter."""

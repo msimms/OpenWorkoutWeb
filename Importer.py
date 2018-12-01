@@ -96,8 +96,9 @@ class Importer(object):
 
             # Let it be known that we are finished with this activity.
             self.activity_writer.finish_activity()
-            return True
-        return False
+            return True, device_str, activity_id
+
+        return False, "", ""
 
     def import_tcx_file(self, username, file_name):
         """Imports the specified TCX file."""
@@ -105,12 +106,12 @@ class Importer(object):
         # Parse the file.
         tree = objectify.parse(file_name)
         if tree is None:
-            return False
+            return False, "", ""
 
         # Get the first node in the XML tree.
         root = tree.getroot()
         if root is None:
-            return False
+            return False, "", ""
 
         # The interesting stuff starts with an activity.
         activity = root.Activities.Activity
@@ -163,7 +164,7 @@ class Importer(object):
 
         # Let it be known that we are finished with this activity.
         self.activity_writer.finish_activity()
-        return True
+        return True, device_str, activity_id
 
     def import_accelerometer_csv_file(self, username, file_name):
         """Imports a CSV file containing accelerometer data."""
@@ -200,7 +201,7 @@ class Importer(object):
 
         # Let it be known that we are finished with this activity.
         self.activity_writer.finish_activity()
-        return True
+        return True, device_str, activity_id
 
     def import_file(self, username, local_file_name, file_extension):
         """Imports the specified file, parsing it based on the provided extension."""
@@ -215,4 +216,4 @@ class Importer(object):
             traceback.print_exc(file=sys.stdout)
             logger = logging.getLogger()
             logger.error(sys.exc_info()[0])
-        return False
+        return False, "", ""

@@ -28,6 +28,10 @@ GENDER_KEY = "gender"
 GENDER_MALE_KEY = "male"
 GENDER_FEMALE_KEY = "female"
 
+# Keys associated with uploading data
+UPLOADED_FILE_NAME_KEY = "uploaded file name"
+UPLOADED_FILE_DATA_KEY = "uploaded file data"
+
 # Keys inherited from the mobile app.
 APP_NAME_KEY = "Name"
 APP_TIME_KEY = "Time"

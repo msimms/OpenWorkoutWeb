@@ -362,6 +362,33 @@ class Api(object):
         """Called when an API message to upload a file is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
+        if Keys.UPLOADED_FILE_NAME_KEY not in values:
+            raise Exception("File name not specified.")
+        if Keys.UPLOADED_FILE_DATA_KEY not in values:
+            raise Exception("File data not specified.")
+
+        # Generate a random name for the local file.
+        uploaded_file_name = values[Keys.UPLOADED_FILE_NAME_KEY]
+        upload_path = os.path.normpath(self.tempfile_dir)
+        uploaded_file_name, uploaded_file_ext = os.path.splitext(uploaded_file_name)
+        local_file_name = os.path.join(upload_path, str(uuid.uuid4()))
+        local_file_name = local_file_name + uploaded_file_ext
+
+        # Write the file.
+        with open(local_file_name, 'wb') as local_file:
+            local_file.write(values[Keys.UPLOADED_FILE_DATA_KEY])
+
+        # Parse the file and store it's contents in the database.
+        success, device_id, activity_id = self.data_mgr.import_file(username, local_file_name, uploaded_file_ext)
+        if not success:
+            raise Exception('Unhandled exception in upload when processing ' + uploaded_file_name)
+
+        # Schedule for analysis.
+        self.analysis_scheduler.add_to_queue(activity_id)
+
+        # Remove the local file.
+        os.remove(local_file_name)
+
         return True, ""
 
     def handle_add_tag_to_activity(self, values):
