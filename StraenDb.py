@@ -674,7 +674,7 @@ class MongoDatabase(Database.Database):
                         self.log_error(MongoDatabase.create_sensordata.__name__ + ": Received out-of-order time value.")
                         return False
 
-                time_value_pair = {date_time: num_value}
+                time_value_pair = {str(date_time): num_value}
                 data.append(time_value_pair)
                 activity[sensor_type] = data
                 self.activities_collection.save(activity)
