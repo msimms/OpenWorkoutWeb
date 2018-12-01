@@ -2,6 +2,7 @@
 """Database implementation"""
 
 import json
+import re
 import sys
 import traceback
 from bson.objectid import ObjectId
@@ -509,7 +510,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            return self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            return self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: re.compile(activity_id, re.IGNORECASE)})
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])

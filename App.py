@@ -668,12 +668,14 @@ class App(object):
 
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
+        if activity is None:
+            return self.error("The requested activity does not exist.")
 
         # Determine who owns the device, and hence the activity.
         username = ""
         realname = ""
         belongs_to_current_user = False
-        if Keys.ACTIVITY_DEVICE_STR_KEY in activity:
+        if Keys.ACTIVITY_DEVICE_STR_KEY in activity and len(activity[Keys.ACTIVITY_DEVICE_STR_KEY]) > 0:
             device_user = self.user_mgr.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
             device_user_id = device_user[Keys.DATABASE_ID_KEY]
             username = device_user[Keys.USERNAME_KEY]
@@ -711,6 +713,8 @@ class App(object):
 
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
+        if activity is None:
+            return self.error("The requested activity does not exist.")
 
         # Determine if the current user can view the activity.
         if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
