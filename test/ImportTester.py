@@ -203,7 +203,8 @@ def main():
                 print(title_str)
                 print("=" * len(title_str))
                 start_time = time.time()
-                if importer.import_file("test user", full_path, temp_file_ext):
+                success, device_id, activity_id = importer.import_file("test user", full_path, temp_file_ext)
+                if success:
                     elapsed_time = time.time() - start_time
                     total_time = total_time + elapsed_time
                     num_files_processed = num_files_processed + 1
