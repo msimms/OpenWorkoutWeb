@@ -37,6 +37,8 @@ class DataMgr(Importer.ActivityWriter):
         activity_id = self.create_activity_id()
         if not self.database.create_activity(activity_id, stream_name, start_time, device_str):
             return None, None
+        if activity_type is not None and len(activity_type) > 0:
+            self.database.create_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
         return device_str, activity_id
 
     def create_track(self, device_str, activity_id, track_name, track_description):
