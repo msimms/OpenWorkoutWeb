@@ -60,7 +60,7 @@ class AnalysisWorker(threading.Thread):
             sensor_types_to_analyze = SensorAnalyzerFactory.supported_sensor_types()
             for sensor_type in sensor_types_to_analyze:
                 if sensor_type in activity:
-                    sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_analyzer, activity[sensor_type])
+                    sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, activity[sensor_type])
                     summary_data.update(sensor_analyzer.analyze())
 
             # Save the results.
