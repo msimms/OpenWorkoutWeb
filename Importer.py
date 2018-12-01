@@ -79,7 +79,7 @@ class Importer(object):
                         dt_unix = calendar.timegm(dt_tuple) * 1000
 
                         # Store the location.
-                        self.activity_writer.create_location(device_str, activity_id, dt_unix, point.latitude, point.longitude, point.elevation)
+                        self.activity_writer.create_location(device_str, activity_id, dt_unix, float(point.latitude), float(point.longitude), float(point.elevation))
 
                         # Look for other attributes.
                         extensions = point.extensions
@@ -147,7 +147,7 @@ class Importer(object):
                                         altitudeMeters = point.AltitudeMeters
                                     else:
                                         altitudeMeters = 0.0
-                                    self.activity_writer.create_location(device_str, activity_id, dt_unix, point.Position.LatitudeDegrees, point.Position.LongitudeDegrees, altitudeMeters)
+                                    self.activity_writer.create_location(device_str, activity_id, dt_unix, float(point.Position.LatitudeDegrees), float(point.Position.LongitudeDegrees), float(altitudeMeters))
 
                                 # Look for other attributes.
                                 if hasattr(point, 'Cadence'):

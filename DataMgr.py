@@ -1,6 +1,7 @@
 # Copyright 2017 Michael J Simms
 """Data store abstraction"""
 
+import uuid
 import Keys
 import StraenDb
 import Importer
@@ -23,11 +24,20 @@ class DataMgr(Importer.ActivityWriter):
         """Destructor"""
         self.database = None
 
+    def create_activity_id(self):
+        """Generates a new activity ID."""
+        return str(uuid.uuid4())
+
     def create_activity(self, username, stream_name, stream_description, activity_type, start_time):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
         if self.database is None:
             raise Exception("No database.")
-        return self.database.create_activity(str(uuid.uuid4()), stream_name, start_time, "")
+
+        device_str = ""
+        activity_id = self.create_activity_id()
+        if not self.database.create_activity(activity_id, stream_name, start_time, device_str):
+            return None, None
+        return device_str, activity_id
 
     def create_track(self, device_str, activity_id, track_name, track_description):
         """Inherited from ActivityWriter."""

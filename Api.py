@@ -328,7 +328,7 @@ class Api(object):
         if Keys.APP_DISTANCE_KEY not in values:
             raise Exception("Distance not specified.")
 
-        activity_id = str(uuid.uuid4())
+        activity_id = self.data_mgr.create_activity_id()
         return True, ""
 
     def handle_add_sets_and_reps_activity(self, values):
@@ -336,7 +336,7 @@ class Api(object):
         if Keys.APP_SETS_KEY not in values:
             raise Exception("Sets not specified.")
 
-        activity_id = str(uuid.uuid4())
+        activity_id = self.data_mgr.create_activity_id()
         sets = values[Keys.APP_SETS_KEY]
         print sets
         return True, ""
