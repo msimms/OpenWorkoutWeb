@@ -75,19 +75,21 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
         # Compute normalized power.
         #
 
-        # Throw away the first 30 second average.
-        self.np_buf.pop(0)
+        if len(self.np_buf) > 0:
 
-        # Raise all items to the fourth power.
-        for idx, item in enumerate(self.np_buf):
-            item = pow(item, 4)
-            self.np_buf[idx] = item
+            # Throw away the first 30 second average.
+            self.np_buf.pop(0)
 
-        # Average the values that were raised to the fourth.
-        np = statistics.mean(self.np_buf)
+            # Raise all items to the fourth power.
+            for idx, item in enumerate(self.np_buf):
+                item = pow(item, 4)
+                self.np_buf[idx] = item
 
-        # Take the fourth root.
-        results[Keys.NORMALIZED_POWER] = pow(np, 0.25)
+            # Average the values that were raised to the fourth.
+            np = statistics.mean(self.np_buf)
+
+            # Take the fourth root.
+            results[Keys.NORMALIZED_POWER] = pow(np, 0.25)
 
         #
         # Compute the intensity factory (IF = NP / FTP).
