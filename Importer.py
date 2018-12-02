@@ -27,6 +27,10 @@ class ActivityWriter(object):
         """Pure virtual method for processing a location read by the importer."""
         pass
 
+    def create_locations(self, device_str, activity_id, locations):
+        """Inherited from ActivityWriter. Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
+        pass
+
     def create_sensor_reading(self, device_str, activity_id, date_time, key, value):
         """Pure virtual method for processing a sensor reading from the importer."""
         pass
@@ -128,6 +132,8 @@ class Importer(object):
         normalized_activity_type = Importer.normalize_activity_type(activity_type)
         device_str, activity_id = self.activity_writer.create_activity(username, user_id, "", "", normalized_activity_type, start_time_unix)
 
+        locations = []
+
         if hasattr(activity, 'Lap'):
             for lap in activity.Lap:
                 if hasattr(lap, 'Track'):
@@ -143,11 +149,15 @@ class Importer(object):
 
                                 # Store the location.
                                 if hasattr(point, 'Position'):
+                                    location = []
+                                    location.append(dt_unix)
+                                    location.append(float(point.Position.LatitudeDegrees))
+                                    location.append(float(point.Position.LongitudeDegrees))
                                     if hasattr(point, 'AltitudeMeters'):
-                                        altitudeMeters = point.AltitudeMeters
+                                        location.append(float(point.AltitudeMeters))
                                     else:
-                                        altitudeMeters = 0.0
-                                    self.activity_writer.create_location(device_str, activity_id, dt_unix, float(point.Position.LatitudeDegrees), float(point.Position.LongitudeDegrees), float(altitudeMeters))
+                                        location.append(0.0)
+                                    locations.append(location)
 
                                 # Look for other attributes.
                                 if hasattr(point, 'Cadence'):
@@ -161,6 +171,9 @@ class Importer(object):
                                         subelement = children[0]
                                         if hasattr(subelement, 'Watts'):
                                             self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_POWER_KEY, subelement.Watts)
+
+        # Write all the locations at once.
+        self.activity_writer.create_locations(device_str, activity_id, locations)
 
         # Let it be known that we are finished with this activity.
         self.activity_writer.finish_activity()
