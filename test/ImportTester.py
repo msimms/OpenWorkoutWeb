@@ -46,6 +46,7 @@ class TestActivityWriter(Importer.ActivityWriter):
         title_str = "Activity Type: " + activity_type
         print(title_str)
         print("-" * len(title_str))
+
         title_str = "ID: " + self.current_activity_id
         print(title_str)
         print("-" * len(title_str))
@@ -66,19 +67,24 @@ class TestActivityWriter(Importer.ActivityWriter):
         for location in locations:
             self.create_location(device_str, activity_id, location[0], location[1], location[2], location[3])
 
-    def create_sensor_reading(self, device_str, activity_id, date_time, key, value):
+    def create_sensor_reading(self, activity_id, date_time, sensor_type, value):
         """Inherited from ActivityWriter. Called for each sensor reading that is read from the input file."""
         found = False
         for sensor_analyzer in self.sensor_analyzers:
-            if sensor_analyzer.type == key:
+            if sensor_analyzer.type == sensor_type:
                 sensor_analyzer.append_sensor_value(date_time, value)
                 found = True
                 break
         if not found:
-            sensor_analyzer = SensorAnalyzerFactory.create(key)
+            sensor_analyzer = SensorAnalyzerFactory.create(sensor_type)
             if sensor_analyzer:
                 sensor_analyzer.append_sensor_value(date_time, value)
                 self.sensor_analyzers.append(sensor_analyzer)
+
+    def create_sensor_readings(self, activity_id, sensor_type, values):
+        """Inherited from ActivityWriter. Adds several sensor readings to the database. 'values' is an array of arrays in the form [time, value]."""
+        for value in values:
+            self.create_sensor_reading(activity_id, value[0], sensor_type, value[1]) 
 
     def finish_activity(self):
         """Inherited from ActivityWriter. Called for post-processing."""
@@ -100,6 +106,7 @@ class TestActivityWriter(Importer.ActivityWriter):
 
         print("Total Distance: {:.2f} meters".format(self.location_analyzer.total_distance))
         print("Vertical Ascent: {:.2f} meters".format(self.location_analyzer.total_vertical))
+
         if self.location_analyzer.start_time is not None and self.location_analyzer.last_time is not None:
             total_time = (self.location_analyzer.last_time - self.location_analyzer.start_time) / 1000
             print("Total Time: {:.2f} seconds".format(total_time))

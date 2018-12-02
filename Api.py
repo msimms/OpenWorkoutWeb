@@ -56,7 +56,7 @@ class Api(object):
                 key = item[0]
                 if not key in g_not_meta_data:
                     if key in [Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]:
-                        self.data_mgr.create_sensordata(activity_id, date_time, key, item[1])
+                        self.data_mgr.create_sensor_reading(activity_id, date_time, key, item[1])
                     elif key in [Keys.APP_CURRENT_SPEED_KEY, Keys.APP_CURRENT_PACE_KEY]:
                         self.data_mgr.create_metadata(activity_id, date_time, key, item[1], True)
         except ValueError, e:

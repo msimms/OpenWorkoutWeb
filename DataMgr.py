@@ -60,23 +60,29 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         return self.database.create_locations(device_str, activity_id, locations)
 
-    def create_accelerometer_reading(self, device_str, activity_id, accels):
-        """Adds several accelerometer readings to the database. 'accels' is an array of arrays in the form [time, x, y, z]."""
+    def create_sensor_reading(self, activity_id, date_time, sensor_type, value):
+        """Inherited from ActivityWriter. Create method for sensor data."""
         if self.database is None:
             raise Exception("No database.")
-        return self.database.create_accelerometer_reading(device_str, activity_id, accels)
+        return self.database.create_sensor_reading(activity_id, date_time, sensor_type, value)
 
-    def create_sensordata(self, activity_id, date_time, key, value):
-        """Create method for sensor data."""
+    def create_sensor_readings(self, activity_id, sensor_type, values):
+        """Inherited from ActivityWriter. Adds several sensor readings to the database. 'values' is an array of arrays in the form [time, value]."""
         if self.database is None:
             raise Exception("No database.")
-        return self.database.create_sensordata(activity_id, date_time, key, value)
+        return self.database.create_sensor_readings(activity_id, sensor_type, values)
 
     def create_metadata(self, activity_id, date_time, key, value, create_list):
         """Create method for activity metadata."""
         if self.database is None:
             raise Exception("No database.")
         return self.database.create_metadata(activity_id, date_time, key, value, create_list)
+
+    def create_accelerometer_reading(self, device_str, activity_id, accels):
+        """Adds several accelerometer readings to the database. 'accels' is an array of arrays in the form [time, x, y, z]."""
+        if self.database is None:
+            raise Exception("No database.")
+        return self.database.create_accelerometer_reading(device_str, activity_id, accels)
 
     def finish_activity(self):
         """Inherited from ActivityWriter. Called for post-processing."""
@@ -239,13 +245,23 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_locations(activity_id)
 
-    def retrieve_accelerometer_readings(self, activity_id):
-        """Returns the location list for the specified activity."""
+    def retrieve_most_recent_locations(self, activity_id, num):
+        """Returns the most recent 'num' locations for the specified device and activity."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_accelerometer_readings(activity_id)
+        return self.database.retrieve_most_recent_locations(activity_id, num)
+
+    def retrieve_sensor_readings(self, key, activity_id):
+        """Returns all the sensor data for the specified sensor for the given activity."""
+        if self.database is None:
+            raise Exception("No database.")
+        if key is None or len(key) == 0:
+            raise Exception("Bad parameter.")
+        if activity_id is None or len(activity_id) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_sensor_readings(key, activity_id)
 
     def retrieve_metadata(self, key, activity_id):
         """Returns all the sensordata for the specified sensor for the given activity."""
@@ -257,23 +273,13 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_metadata(key, activity_id)
 
-    def retrieve_sensordata(self, key, activity_id):
-        """Returns all the sensor data for the specified sensor for the given activity."""
-        if self.database is None:
-            raise Exception("No database.")
-        if key is None or len(key) == 0:
-            raise Exception("Bad parameter.")
-        if activity_id is None or len(activity_id) == 0:
-            raise Exception("Bad parameter.")
-        return self.database.retrieve_sensordata(key, activity_id)
-
-    def retrieve_most_recent_locations(self, activity_id, num):
-        """Returns the most recent 'num' locations for the specified device and activity."""
+    def retrieve_accelerometer_readings(self, activity_id):
+        """Returns the location list for the specified activity."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_most_recent_locations(activity_id, num)
+        return self.database.retrieve_accelerometer_readings(activity_id)
 
     def retrieve_most_recent_activity_id_for_device(self, device_str):
         """Returns the most recent activity id for the specified device."""

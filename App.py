@@ -192,7 +192,7 @@ class App(object):
             value = float(speed.values()[0])
             response += json.dumps({"name": Keys.APP_MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
 
-        heart_rates = self.data_mgr.retrieve_sensordata(Keys.APP_HEART_RATE_KEY, activity_id)
+        heart_rates = self.data_mgr.retrieve_sensor_readings(Keys.APP_HEART_RATE_KEY, activity_id)
         if heart_rates != None and len(heart_rates) > 0:
             if len(response) > 1:
                 response += ","
@@ -200,7 +200,7 @@ class App(object):
             value = float(heart_rate.values()[0])
             response += json.dumps({"name": Keys.APP_HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
 
-        cadences = self.data_mgr.retrieve_sensordata(Keys.APP_CADENCE_KEY, activity_id)
+        cadences = self.data_mgr.retrieve_sensor_readings(Keys.APP_CADENCE_KEY, activity_id)
         if cadences != None and len(cadences) > 0:
             if len(response) > 1:
                 response += ","
@@ -208,7 +208,7 @@ class App(object):
             value = float(cadence.values()[0])
             response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.2f}".format(value)})
 
-        powers = self.data_mgr.retrieve_sensordata(Keys.APP_POWER_KEY, activity_id)
+        powers = self.data_mgr.retrieve_sensor_readings(Keys.APP_POWER_KEY, activity_id)
         if powers != None and len(powers) > 0:
             if len(response) > 1:
                 response += ","
@@ -340,7 +340,7 @@ class App(object):
     def render_sensor_data_for_page(self, key, activity_id):
         """Helper function for processing sensor data and formatting it for display."""
         max_value = 0.0
-        data = self.data_mgr.retrieve_sensordata(key, activity_id)
+        data = self.data_mgr.retrieve_sensor_readings(key, activity_id)
         data_str = ""
         if data is not None and isinstance(data, list):
             for datum in data:

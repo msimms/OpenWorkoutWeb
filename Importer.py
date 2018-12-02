@@ -28,11 +28,15 @@ class ActivityWriter(object):
         pass
 
     def create_locations(self, device_str, activity_id, locations):
-        """Inherited from ActivityWriter. Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
+        """Pure virtual method for processing multiple location reads. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
         pass
 
-    def create_sensor_reading(self, device_str, activity_id, date_time, key, value):
+    def create_sensor_reading(self, activity_id, date_time, sensor_type, value):
         """Pure virtual method for processing a sensor reading from the importer."""
+        pass
+
+    def create_sensor_readings(self, activity_id, sensor_type, values):
+        """Pure virtual method for processing multiple sensor readings. 'values' is an array of arrays in the form [time, value]."""
         pass
 
     def finish_activity(self):
@@ -71,6 +75,12 @@ class Importer(object):
             # Indicate the start of the activity.
             device_str, activity_id = self.activity_writer.create_activity(username, user_id, gpx.name, gpx.description, 'Unknown', start_time_unix)
 
+            locations = []
+            cadences = []
+            heart_rate_readings = []
+            power_readings = []
+            temperature_readings = []
+
             for track in gpx.tracks:
                 self.activity_writer.create_track(device_str, activity_id, track.name, track.description)
                 for segment in track.segments:
@@ -83,20 +93,46 @@ class Importer(object):
                         dt_unix = calendar.timegm(dt_tuple) * 1000
 
                         # Store the location.
-                        self.activity_writer.create_location(device_str, activity_id, dt_unix, float(point.latitude), float(point.longitude), float(point.elevation))
+                        location = []
+                        location.append(dt_unix)
+                        location.append(float(point.latitude))
+                        location.append(float(point.longitude))
+                        location.append(float(point.elevation))
+                        locations.append(location)
 
                         # Look for other attributes.
                         extensions = point.extensions
                         if 'power' in extensions:
-                            self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_POWER_KEY, extensions['power'])
+                            reading = []
+                            reading.append(dt_unix)
+                            reading.append(float(extensions['power']))
+                            power_readings.append(reading)
                         if 'gpxtpx:TrackPointExtension' in extensions:
                             gpxtpx_extensions = extensions['gpxtpx:TrackPointExtension']
                             if 'gpxtpx:hr' in gpxtpx_extensions:
-                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_HEART_RATE_KEY, gpxtpx_extensions['gpxtpx:hr'])
+                                reading = []
+                                reading.append(dt_unix)
+                                reading.append(float(gpxtpx_extensions['gpxtpx:hr']))
+                                heart_rate_readings.append(reading)
                             if 'gpxtpx:cad' in gpxtpx_extensions:
-                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_CADENCE_KEY, gpxtpx_extensions['gpxtpx:cad'])
+                                reading = []
+                                reading.append(dt_unix)
+                                reading.append(float(gpxtpx_extensions['gpxtpx:cad']))
+                                cadences.append(reading)
                             if 'gpxtpx:atemp' in gpxtpx_extensions:
-                                self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_TEMP_KEY, gpxtpx_extensions['gpxtpx:atemp'])
+                                reading = []
+                                reading.append(dt_unix)
+                                reading.append(float(gpxtpx_extensions['gpxtpx:atemp']))
+                                temperature_readings.append(reading)
+
+            # Write all the locations at once.
+            self.activity_writer.create_locations(device_str, activity_id, locations)
+
+            # Write all the sensor readings at once.
+            self.activity_writer.create_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
+            self.activity_writer.create_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
+            self.activity_writer.create_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
+            self.activity_writer.create_sensor_readings(activity_id, Keys.APP_TEMP_KEY, temperature_readings)
 
             # Let it be known that we are finished with this activity.
             self.activity_writer.finish_activity()
@@ -133,6 +169,9 @@ class Importer(object):
         device_str, activity_id = self.activity_writer.create_activity(username, user_id, "", "", normalized_activity_type, start_time_unix)
 
         locations = []
+        cadences = []
+        heart_rate_readings = []
+        power_readings = []
 
         if hasattr(activity, 'Lap'):
             for lap in activity.Lap:
@@ -161,19 +200,33 @@ class Importer(object):
 
                                 # Look for other attributes.
                                 if hasattr(point, 'Cadence'):
-                                    self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_CADENCE_KEY, point.Cadence)
+                                    reading = []
+                                    reading.append(dt_unix)
+                                    reading.append(float(point.Cadence))
+                                    cadences.append(reading)
                                 if hasattr(point, 'HeartRateBpm'):
-                                    self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_HEART_RATE_KEY, point.HeartRateBpm.Value)
+                                    reading = []
+                                    reading.append(dt_unix)
+                                    reading.append(float(point.HeartRateBpm.Value))
+                                    heart_rate_readings.append(reading)
                                 if hasattr(point, 'Extensions'):
                                     elements = point.Extensions
                                     children = elements.getchildren()
                                     if len(children) > 0:
                                         subelement = children[0]
                                         if hasattr(subelement, 'Watts'):
-                                            self.activity_writer.create_sensor_reading(device_str, activity_id, dt_unix, Keys.APP_POWER_KEY, subelement.Watts)
+                                            reading = []
+                                            reading.append(dt_unix)
+                                            reading.append(float(subelement.Watts))
+                                            power_readings.append(reading)
 
         # Write all the locations at once.
         self.activity_writer.create_locations(device_str, activity_id, locations)
+
+        # Write all the sensor readings at once.
+        self.activity_writer.create_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
+        self.activity_writer.create_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
+        self.activity_writer.create_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
 
         # Let it be known that we are finished with this activity.
         self.activity_writer.finish_activity()
@@ -209,7 +262,7 @@ class Importer(object):
                 if row_count == 1:
                     device_str, activity_id = self.activity_writer.create_activity(username, user_id, "", "", "Lifting", ts)
 
-                self.activity_writer.create_sensor_reading(device_str, activity_id, ts, Keys.APP_ACCELEROMETER_KEY, accel_data)
+                self.activity_writer.create_sensor_reading(activity_id, ts, Keys.APP_ACCELEROMETER_KEY, accel_data)
                 row_count = row_count + 1
 
         # Let it be known that we are finished with this activity.
