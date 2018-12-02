@@ -925,6 +925,8 @@ class App(object):
         # Remove the local file.
         os.remove(local_file_name)
 
+        raise RedirectException(DEFAULT_LOGGED_IN_URL)
+
     @statistics
     def manual_entry(self, activity_type):
         """Called when the user selects an activity type, indicatig they want to make a manual data entry."""
