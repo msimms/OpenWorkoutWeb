@@ -19,6 +19,7 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Import from other services.
 * Better graphics.
 * Replace Google Maps with Open Street Map.
+* Equipment tracking.
 
 ## Version History
 
