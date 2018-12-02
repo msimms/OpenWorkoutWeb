@@ -72,6 +72,7 @@ ACCELEROMETER_TIME_KEY = "time"
 # Keys used exclusively by the web app.
 ACTIVITY_ID_KEY = "activity_id"
 ACTIVITY_TYPE_KEY = "activity_type"
+ACTIVITY_USER_ID_KEY = "user_id"
 ACTIVITY_DEVICE_STR_KEY = "device_str"
 ACTIVITY_LOCATIONS_KEY = "locations"
 ACTIVITY_NAME_KEY = "name"

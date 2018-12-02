@@ -15,7 +15,7 @@ import Keys
 class ActivityWriter(object):
     """Base class for any class that handles data read from the Importer."""
 
-    def create_activity(self, username, stream_name, stream_description, activity_type, start_time):
+    def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
         """Pure virtual method for starting a location stream - creates the activity ID for the specified user."""
         pass
 
@@ -51,7 +51,7 @@ class Importer(object):
             activity_type = 'Unknown'
         return activity_type
 
-    def import_gpx_file(self, username, file_name):
+    def import_gpx_file(self, username, user_id, file_name):
         """Imports the specified GPX file."""
 
         # The GPX parser requires a file handle and not a file name.
@@ -65,7 +65,7 @@ class Importer(object):
             start_time_unix = calendar.timegm(start_time_tuple)
 
             # Indicate the start of the activity.
-            device_str, activity_id = self.activity_writer.create_activity(username, gpx.name, gpx.description, 'Unknown', start_time_unix)
+            device_str, activity_id = self.activity_writer.create_activity(username, user_id, gpx.name, gpx.description, 'Unknown', start_time_unix)
 
             for track in gpx.tracks:
                 self.activity_writer.create_track(device_str, activity_id, track.name, track.description)
@@ -100,7 +100,7 @@ class Importer(object):
 
         return False, "", ""
 
-    def import_tcx_file(self, username, file_name):
+    def import_tcx_file(self, username, user_id, file_name):
         """Imports the specified TCX file."""
 
         # Parse the file.
@@ -126,7 +126,7 @@ class Importer(object):
 
         # Indicate the start of the activity.
         normalized_activity_type = Importer.normalize_activity_type(activity_type)
-        device_str, activity_id = self.activity_writer.create_activity(username, "", "", normalized_activity_type, start_time_unix)
+        device_str, activity_id = self.activity_writer.create_activity(username, user_id, "", "", normalized_activity_type, start_time_unix)
 
         if hasattr(activity, 'Lap'):
             for lap in activity.Lap:
@@ -166,7 +166,7 @@ class Importer(object):
         self.activity_writer.finish_activity()
         return True, device_str, activity_id
 
-    def import_accelerometer_csv_file(self, username, file_name):
+    def import_accelerometer_csv_file(self, username, user_id, file_name):
         """Imports a CSV file containing accelerometer data."""
 
         columns = []
@@ -194,7 +194,7 @@ class Importer(object):
 
                 # Indicate the start of the activity.
                 if row_count == 1:
-                    device_str, activity_id = self.activity_writer.create_activity(username, "", "", "Lifting", ts)
+                    device_str, activity_id = self.activity_writer.create_activity(username, user_id, "", "", "Lifting", ts)
 
                 self.activity_writer.create_sensor_reading(device_str, activity_id, ts, Keys.APP_ACCELEROMETER_KEY, accel_data)
                 row_count = row_count + 1
@@ -203,15 +203,15 @@ class Importer(object):
         self.activity_writer.finish_activity()
         return True, device_str, activity_id
 
-    def import_file(self, username, local_file_name, file_extension):
+    def import_file(self, username, user_id, local_file_name, file_extension):
         """Imports the specified file, parsing it based on the provided extension."""
         try:
             if file_extension == '.gpx':
-                return self.import_gpx_file(username, local_file_name)
+                return self.import_gpx_file(username, user_id, local_file_name)
             elif file_extension == '.tcx':
-                return self.import_tcx_file(username, local_file_name)
+                return self.import_tcx_file(username, user_id, local_file_name)
             elif file_extension == '.csv':
-                return self.import_accelerometer_csv_file(username, local_file_name)
+                return self.import_accelerometer_csv_file(username, user_id, local_file_name)
         except:
             traceback.print_exc(file=sys.stdout)
             logger = logging.getLogger()

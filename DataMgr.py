@@ -28,17 +28,20 @@ class DataMgr(Importer.ActivityWriter):
         """Generates a new activity ID."""
         return str(uuid.uuid4())
 
-    def create_activity(self, username, stream_name, stream_description, activity_type, start_time):
+    def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
         if self.database is None:
             raise Exception("No database.")
 
         device_str = ""
         activity_id = self.create_activity_id()
+
         if not self.database.create_activity(activity_id, stream_name, start_time, device_str):
             return None, None
         if activity_type is not None and len(activity_type) > 0:
             self.database.create_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
+        if user_id is not None:
+            self.database.create_metadata(activity_id, 0, Keys.ACTIVITY_USER_ID_KEY, user_id, False)
         return device_str, activity_id
 
     def create_track(self, device_str, activity_id, track_name, track_description):
@@ -79,10 +82,10 @@ class DataMgr(Importer.ActivityWriter):
         """Inherited from ActivityWriter. Called for post-processing."""
         pass
 
-    def import_file(self, username, local_file_name, file_extension):
+    def import_file(self, username, user_id, local_file_name, file_extension):
         """Imports the contents of a local file into the database."""
         importer = Importer.Importer(self)
-        return importer.import_file(username, local_file_name, file_extension)
+        return importer.import_file(username, user_id, local_file_name, file_extension)
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""

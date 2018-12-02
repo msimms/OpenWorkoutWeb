@@ -105,20 +105,36 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 continue
             self.do_record_check(Keys.BEST_10K, total_seconds, total_meters, 10000)
 
-            # Is this a new 15K record for this activity?
-            if total_meters < 15000:
-                continue
-            self.do_record_check(Keys.BEST_15K, total_seconds, total_meters, 15000)
+            # Running-specific records:
+            if self.activity_type == Keys.TYPE_RUNNING_KEY:
 
-            # Is this a new metric century record for this activity?
-            if total_meters < 100000:
-                continue
-            self.do_record_check(Keys.BEST_METRIC_CENTURY, total_seconds, total_meters, 100000)
+                # Is this a new 15K record for this activity?
+                if total_meters < 15000:
+                    continue
+                self.do_record_check(Keys.BEST_15K, total_seconds, total_meters, 15000)
 
-            # Is this a new century record for this activity?
-            if total_meters < Units.METERS_PER_MILE * 100.0:
-                continue
-            self.do_record_check(Keys.BEST_CENTURY, total_seconds, total_meters, Units.METERS_PER_MILE * 100.0)
+                # Is this a new half marathon record for this activity?
+                if total_meters < 13.1 * Units.METERS_PER_MILE:
+                    continue
+                self.do_record_check(Keys.BEST_HALF_MARATHON, total_seconds, total_meters, 13.1 * Units.METERS_PER_MILE)
+
+                # Is this a new marathon record for this activity?
+                if total_meters < 26.2 * Units.METERS_PER_MILE:
+                    continue
+                self.do_record_check(Keys.BEST_MARATHON, total_seconds, total_meters, 26.2 * Units.METERS_PER_MILE)
+
+            # Cycling-specific records:
+            if self.activity_type == Keys.TYPE_CYCLING_KEY:
+
+                # Is this a new metric century record for this activity?
+                if total_meters < 100000:
+                    continue
+                self.do_record_check(Keys.BEST_METRIC_CENTURY, total_seconds, total_meters, 100000)
+
+                # Is this a new century record for this activity?
+                if total_meters < Units.METERS_PER_MILE * 100.0:
+                    continue
+                self.do_record_check(Keys.BEST_CENTURY, total_seconds, total_meters, Units.METERS_PER_MILE * 100.0)
 
     def append_location(self, date_time, latitude, longitude, altitude):
         """Adds another location to the analyzer. Locations should be sent in order."""

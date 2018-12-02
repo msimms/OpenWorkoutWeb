@@ -916,7 +916,7 @@ class App(object):
                 local_file.write(data)
 
         # Parse the file and store it's contents in the database. Once imported, queue the activity for detailed analysis.
-        success, device_id, activity_id = self.data_mgr.import_file(username, local_file_name, uploaded_file_ext)
+        success, device_id, activity_id = self.data_mgr.import_file(username, user_id, local_file_name, uploaded_file_ext)
         if success:
             self.analysis_scheduler.add_to_queue(activity_id)
         else:
