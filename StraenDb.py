@@ -769,7 +769,7 @@ class MongoDatabase(Database.Database):
                 for value in values:
                     # Make sure time values are monotonically increasing.
                     if value_list and int(value_list[-1].keys()[0]) > value[0]:
-                        self.log_error(MongoDatabase.create_locations.__name__ + ": Received out-of-order time value.")
+                        self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Received out-of-order time value.")
                     else:
                         time_value_pair = {str(value[0]): float(value[1])}
                         value_list.append(time_value_pair)
@@ -816,7 +816,7 @@ class MongoDatabase(Database.Database):
             self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: value")
             return False
         if create_list is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: value")
+            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: create_list")
             return False
 
         try:
@@ -856,6 +856,39 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def create_metadata_list(self, activity_id, key, values):
+        """Create method for a list of of metaadata values."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if key is None:
+            self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Unexpected empty object: key")
+            return False
+        if values is None:
+            self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Unexpected empty object: values")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                value_list = []
+                if key in activity:
+                    value_list = activity[key]
+                for value in values:
+                    # Make sure time values are monotonically increasing.
+                    if value_list and int(value_list[-1].keys()[0]) > value[0]:
+                        self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Received out-of-order time value.")
+                    else:
+                        time_value_pair = {str(value[0]): float(value[1])}
+                        value_list.append(time_value_pair)
+                activity[key] = value_list
+                self.activities_collection.save(activity)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+        
     def retrieve_metadata(self, key, activity_id):
         """Returns all the metadata of the given type for the specified activity."""
         if key is None:

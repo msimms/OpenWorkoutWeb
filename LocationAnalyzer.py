@@ -1,6 +1,7 @@
 # Copyright 2018 Michael J Simms
 
 import inspect
+import itertools
 import os
 import sys
 import Keys
@@ -197,3 +198,14 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 last_peak_index = peak_index + 1
             self.check_pace_line(peak_list, last_peak_index, len(self.speed_graph) - 1)
         return results
+
+    def create_speed_graph(self):
+        """Returns a list of time, value pairs for speed."""
+        graph = []
+        if len(self.speed_graph) == len(self.speed_times):
+            for time_val, speed_val in itertools.izip(self.speed_times, self.speed_graph):
+                point = []
+                point.append(time_val)
+                point.append(float(speed_val))
+                graph.append(point)
+        return graph

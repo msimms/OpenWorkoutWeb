@@ -63,8 +63,13 @@ class AnalysisWorker(threading.Thread):
                     sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, activity[sensor_type])
                     summary_data.update(sensor_analyzer.analyze())
 
-            # Save the results.
+            # Save the summary results.
             self.data_mgr.create_activity_summary(self.activity_id, summary_data)
+
+            # Save the current speed graph.
+            if Keys.APP_CURRENT_SPEED_KEY not in activity:
+                speed_graph = location_analyzer.create_speed_graph()
+                self.data_mgr.create_metadata_list(self.activity_id, Keys.APP_CURRENT_SPEED_KEY, speed_graph)
 
 class AnalysisScheduler(threading.Thread):
     """Class for scheduling computationally expensive analysis tasks."""
