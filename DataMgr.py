@@ -141,6 +141,10 @@ class DataMgr(Importer.ActivityWriter):
                 activities.extend(device_activities)
 
         # List activities with no device that are associated with the user.
+        user_activities = self.database.retrieve_user_activity_list(user_id, start, None)
+        for user_activity in user_activities:
+            user_activity[Keys.REALNAME_KEY] = user_realname
+        activities.extend(user_activities)
 
         # Sort and limit the list.
         if len(activities) > 0:

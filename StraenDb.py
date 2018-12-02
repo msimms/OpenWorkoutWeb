@@ -431,6 +431,40 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def list_excluded_keys(self):
+        """This is the list of stuff we don't need to return when we're building an activity list. Helps with efficiency."""
+        exclude_keys = {}
+        exclude_keys[Keys.APP_CADENCE_KEY] = False
+        exclude_keys[Keys.APP_CURRENT_SPEED_KEY] = False
+        exclude_keys[Keys.APP_AVG_SPEED_KEY] = False
+        exclude_keys[Keys.APP_MOVING_SPEED_KEY] = False
+        exclude_keys[Keys.APP_HEART_RATE_KEY] = False
+        exclude_keys[Keys.APP_AVG_HEART_RATE_KEY] = False
+        exclude_keys[Keys.APP_CURRENT_PACE_KEY] = False
+        exclude_keys[Keys.APP_POWER_KEY] = False
+        exclude_keys[Keys.ACTIVITY_LOCATIONS_KEY] = False
+        return exclude_keys
+
+    def retrieve_user_activity_list(self, user_id, start, num_results):
+        """Retrieves the list of activities associated with the specified user."""
+        if num_results is not None and num_results <= 0:
+            return None
+
+        try:
+            # Things we don't need.
+            exclude_keys = self.list_excluded_keys()
+
+            if start is None and num_results is None:
+                return list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
+            elif num_results is None:
+                return list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start))
+            else:
+                return list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start).limit(num_results))
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
     def retrieve_device_activity_list(self, device_str, start, num_results):
         """Retrieves the list of activities associated with the specified device."""
         if device_str is None:
@@ -441,16 +475,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Things we don't need.
-            exclude_keys = {}
-            exclude_keys[Keys.APP_CADENCE_KEY] = False
-            exclude_keys[Keys.APP_CURRENT_SPEED_KEY] = False
-            exclude_keys[Keys.APP_AVG_SPEED_KEY] = False
-            exclude_keys[Keys.APP_MOVING_SPEED_KEY] = False
-            exclude_keys[Keys.APP_HEART_RATE_KEY] = False
-            exclude_keys[Keys.APP_AVG_HEART_RATE_KEY] = False
-            exclude_keys[Keys.APP_CURRENT_PACE_KEY] = False
-            exclude_keys[Keys.APP_POWER_KEY] = False
-            exclude_keys[Keys.ACTIVITY_LOCATIONS_KEY] = False
+            exclude_keys = self.list_excluded_keys()
 
             if start is None and num_results is None:
                 return list(self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
