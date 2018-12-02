@@ -3,10 +3,12 @@ Workout tracking website and companion to the Straen mobile app
 
 ## Rationale
 Why develop a workout tracker when there are so many closed-source options available?
+
 * I needed a companion website to the mobile app of the same name that I developed. I needed this to make the live tracking feature possible.
 * Other workout trackers do not support strength-based exercises, such as pull-ups and push-ups (press-ups).
 * I think users should have control over their own data and this is only possible with an open source application.
 * There are some analytical ideas that I have that none of the major activity tracking websites perform.
+* Education. For the experience in performing full-stack software development: dealing with website deployment and scalability, and security issues.
 
 ## Major Features
 * Enables the live tracking feature of the Straen mobile app.
