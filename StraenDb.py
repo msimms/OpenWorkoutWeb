@@ -2,6 +2,7 @@
 """Database implementation"""
 
 import json
+import re
 import sys
 import traceback
 from bson.objectid import ObjectId
@@ -430,6 +431,40 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def list_excluded_keys(self):
+        """This is the list of stuff we don't need to return when we're building an activity list. Helps with efficiency."""
+        exclude_keys = {}
+        exclude_keys[Keys.APP_CADENCE_KEY] = False
+        exclude_keys[Keys.APP_CURRENT_SPEED_KEY] = False
+        exclude_keys[Keys.APP_AVG_SPEED_KEY] = False
+        exclude_keys[Keys.APP_MOVING_SPEED_KEY] = False
+        exclude_keys[Keys.APP_HEART_RATE_KEY] = False
+        exclude_keys[Keys.APP_AVG_HEART_RATE_KEY] = False
+        exclude_keys[Keys.APP_CURRENT_PACE_KEY] = False
+        exclude_keys[Keys.APP_POWER_KEY] = False
+        exclude_keys[Keys.ACTIVITY_LOCATIONS_KEY] = False
+        return exclude_keys
+
+    def retrieve_user_activity_list(self, user_id, start, num_results):
+        """Retrieves the list of activities associated with the specified user."""
+        if num_results is not None and num_results <= 0:
+            return None
+
+        try:
+            # Things we don't need.
+            exclude_keys = self.list_excluded_keys()
+
+            if start is None and num_results is None:
+                return list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
+            elif num_results is None:
+                return list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start))
+            else:
+                return list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start).limit(num_results))
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
     def retrieve_device_activity_list(self, device_str, start, num_results):
         """Retrieves the list of activities associated with the specified device."""
         if device_str is None:
@@ -440,16 +475,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Things we don't need.
-            exclude_keys = {}
-            exclude_keys[Keys.APP_CADENCE_KEY] = False
-            exclude_keys[Keys.APP_CURRENT_SPEED_KEY] = False
-            exclude_keys[Keys.APP_AVG_SPEED_KEY] = False
-            exclude_keys[Keys.APP_MOVING_SPEED_KEY] = False
-            exclude_keys[Keys.APP_HEART_RATE_KEY] = False
-            exclude_keys[Keys.APP_AVG_HEART_RATE_KEY] = False
-            exclude_keys[Keys.APP_CURRENT_PACE_KEY] = False
-            exclude_keys[Keys.APP_POWER_KEY] = False
-            exclude_keys[Keys.ACTIVITY_LOCATIONS_KEY] = False
+            exclude_keys = self.list_excluded_keys()
 
             if start is None and num_results is None:
                 return list(self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
@@ -509,7 +535,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            return self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            return self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: re.compile(activity_id, re.IGNORECASE)})
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
@@ -566,191 +592,6 @@ class MongoDatabase(Database.Database):
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
         return False
-
-    def create_activity_summary(self, activity_id, summary_data):
-        """Create method for activity summary data. Summary data is data computed from the raw data."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_summary.__name__ + ": Unexpected empty object: activity_id")
-            return False
-
-        try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                activity[Keys.ACTIVITY_SUMMARY_KEY] = summary_data
-                self.activities_collection.save(activity)
-                return True
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return False
-
-    def retrieve_activity_summary(self, activity_id):
-        """Returns the activity summary data. Summary data is data computed from the raw data."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_activity_summary.__name__ + ": Unexpected empty object: activity_id")
-            return None
-
-        try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if Keys.ACTIVITY_SUMMARY_KEY in activity:
-                    summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
-                    return summary_data
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return None
-
-    def delete_activity_summary(self, activity_id):
-        """Delete method for activity summary data. Summary data is data computed from the raw data."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.delete_activity_summary.__name__ + ": Unexpected empty object: activity_id")
-            return False
-
-        try:
-            pass
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return False
-
-    def create_metadata(self, activity_id, date_time, key, value, create_list):
-        """Create method for a piece of metaadata."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: activity_id")
-            return False
-        if date_time is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: date_time")
-            return False
-        if key is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: key")
-            return False
-        if value is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: value")
-            return False
-        if create_list is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: value")
-            return False
-
-        try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-
-                # Make sure we're working with a number, if the value is supposed to be a number.
-                try:
-                    value = float(value)
-                except ValueError:
-                    pass
-
-                # The metadata is a list.
-                if create_list is True:
-                    data = []
-                    if key in activity:
-                        data = activity[key]
-
-                        # Make sure time values are monotonically increasing.
-                        if data and int(data[-1].keys()[0]) > date_time:
-                            self.log_error(MongoDatabase.create_metadata.__name__ + ": Received out-of-order time value.")
-                            return False
-
-                    time_value_pair = {str(date_time): value}
-                    data.append(time_value_pair)
-                    activity[key] = data
-                    self.activities_collection.save(activity)
-
-                # The metadata is a scalar, just make sure it hasn't changed before updating it.
-                elif key not in activity or activity[key] != value:
-                    activity[key] = value
-                    self.activities_collection.save(activity)
-                return True
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return False
-
-    def retrieve_metadata(self, key, activity_id):
-        """Returns all the metadata for the specified sensor for the given activity."""
-        if key is None:
-            self.log_error(MongoDatabase.retrieve_metadata.__name__ + ": Unexpected empty object: key")
-            return None
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_metadata.__name__ + ": Unexpected empty object: activity_id")
-            return None
-
-        try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if key in activity:
-                    metadata = activity[key]
-                    if isinstance(metadata, list):
-                        metadata.sort(key=retrieve_time_from_time_value_pair)
-                    return metadata
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return None
-
-    def create_sensordata(self, activity_id, date_time, sensor_type, value):
-        """Create method for a piece of sensor data, such as a heart rate or power meter reading."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.create_sensordata.__name__ + ": Unexpected empty object: activity_id")
-            return False
-        if date_time is None:
-            self.log_error(MongoDatabase.create_sensordata.__name__ + ": Unexpected empty object: date_time")
-            return False
-        if sensor_type is None:
-            self.log_error(MongoDatabase.create_sensordata.__name__ + ": Unexpected empty object: sensor_type")
-            return False
-        if value is None:
-            self.log_error(MongoDatabase.create_sensordata.__name__ + ": Unexpected empty object: value")
-            return False
-
-        try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-
-                # Make sure we're working with a number.
-                num_value = float(value)
-
-                data = []
-                if sensor_type in activity:
-                    data = activity[sensor_type]
-
-                    # Make sure time values are monotonically increasing.
-                    if data and int(data[-1].keys()[0]) > date_time:
-                        self.log_error(MongoDatabase.create_sensordata.__name__ + ": Received out-of-order time value.")
-                        return False
-
-                time_value_pair = {date_time: num_value}
-                data.append(time_value_pair)
-                activity[sensor_type] = data
-                self.activities_collection.save(activity)
-                return True
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return False
-
-    def retrieve_sensordata(self, sensor_type, activity_id):
-        """Returns all the sensor data for the specified sensor for the given activity."""
-        if sensor_type is None:
-            self.log_error(MongoDatabase.retrieve_sensordata.__name__ + ": Unexpected empty object: sensor_type")
-            return None
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_sensordata.__name__ + ": Unexpected empty object: activity_id")
-            return None
-
-        try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if sensor_type in activity:
-                    sensor_data = activity[sensor_type]
-                    sensor_data.sort(key=retrieve_time_from_time_value_pair)
-                    return sensor_data
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return None
 
     def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
         """Create method for a location."""
@@ -834,6 +675,242 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def retrieve_locations(self, activity_id):
+        """Returns all the locations for the specified activity."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.retrieve_locations.__name__ + ": Unexpected empty object: activity_id")
+            return None
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                if Keys.ACTIVITY_LOCATIONS_KEY in activity:
+                    locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
+                    locations.sort(key=retrieve_time_from_location)
+                    return locations
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def retrieve_most_recent_locations(self, activity_id, num):
+        """Returns the most recent 'num' locations for the specified activity."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.retrieve_most_recent_locations.__name__ + ": Unexpected empty object: activity_id")
+            return None
+        if num is None:
+            self.log_error(MongoDatabase.retrieve_most_recent_locations.__name__ + ": Unexpected empty object: num")
+            return None
+
+        try:
+            locations = self.retrieve_locations(activity_id)
+            locations.sort(key=retrieve_time_from_location)
+            return locations
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def create_sensor_reading(self, activity_id, date_time, sensor_type, value):
+        """Create method for a piece of sensor data, such as a heart rate or power meter reading."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if date_time is None:
+            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: date_time")
+            return False
+        if sensor_type is None:
+            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: sensor_type")
+            return False
+        if value is None:
+            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: value")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                data = []
+                if sensor_type in activity:
+                    data = activity[sensor_type]
+
+                    # Make sure time values are monotonically increasing.
+                    if data and int(data[-1].keys()[0]) > date_time:
+                        self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Received out-of-order time value.")
+                        return False
+
+                time_value_pair = {str(date_time): float(value)}
+                data.append(time_value_pair)
+                activity[sensor_type] = data
+                self.activities_collection.save(activity)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def create_sensor_readings(self, activity_id, sensor_type, values):
+        """Create method for several pieces of sensor data, such as a heart rate or power meter reading."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if sensor_type is None:
+            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: sensor_type")
+            return False
+        if values is None:
+            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: values")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                value_list = []
+                if sensor_type in activity:
+                    value_list = activity[sensor_type]
+                for value in values:
+                    # Make sure time values are monotonically increasing.
+                    if value_list and int(value_list[-1].keys()[0]) > value[0]:
+                        self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Received out-of-order time value.")
+                    else:
+                        time_value_pair = {str(value[0]): float(value[1])}
+                        value_list.append(time_value_pair)
+                activity[sensor_type] = value_list
+                self.activities_collection.save(activity)
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_sensor_readings(self, sensor_type, activity_id):
+        """Returns all the sensor data for the specified sensor for the given activity."""
+        if sensor_type is None:
+            self.log_error(MongoDatabase.retrieve_sensor_readings.__name__ + ": Unexpected empty object: sensor_type")
+            return None
+        if activity_id is None:
+            self.log_error(MongoDatabase.retrieve_sensor_readings.__name__ + ": Unexpected empty object: activity_id")
+            return None
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                if sensor_type in activity:
+                    sensor_data = activity[sensor_type]
+                    sensor_data.sort(key=retrieve_time_from_time_value_pair)
+                    return sensor_data
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def create_metadata(self, activity_id, date_time, key, value, create_list):
+        """Create method for a piece of metaadata."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if date_time is None:
+            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: date_time")
+            return False
+        if key is None:
+            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: key")
+            return False
+        if value is None:
+            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: value")
+            return False
+        if create_list is None:
+            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: create_list")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+
+                # Make sure we're working with a number, if the value is supposed to be a number.
+                try:
+                    value = float(value)
+                except ValueError:
+                    pass
+
+                # The metadata is a list.
+                if create_list is True:
+                    data = []
+
+                    if key in activity:
+                        data = activity[key]
+
+                        # Make sure time values are monotonically increasing.
+                        if data and int(data[-1].keys()[0]) > date_time:
+                            self.log_error(MongoDatabase.create_metadata.__name__ + ": Received out-of-order time value.")
+                            return False
+
+                    time_value_pair = {str(date_time): value}
+                    data.append(time_value_pair)
+                    activity[key] = data
+                    self.activities_collection.save(activity)
+
+                # The metadata is a scalar, just make sure it hasn't changed before updating it.
+                elif key not in activity or activity[key] != value:
+                    activity[key] = value
+                    self.activities_collection.save(activity)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def create_metadata_list(self, activity_id, key, values):
+        """Create method for a list of of metaadata values."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if key is None:
+            self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Unexpected empty object: key")
+            return False
+        if values is None:
+            self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Unexpected empty object: values")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                value_list = []
+                if key in activity:
+                    value_list = activity[key]
+                for value in values:
+                    # Make sure time values are monotonically increasing.
+                    if value_list and int(value_list[-1].keys()[0]) > value[0]:
+                        self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Received out-of-order time value.")
+                    else:
+                        time_value_pair = {str(value[0]): float(value[1])}
+                        value_list.append(time_value_pair)
+                activity[key] = value_list
+                self.activities_collection.save(activity)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+        
+    def retrieve_metadata(self, key, activity_id):
+        """Returns all the metadata of the given type for the specified activity."""
+        if key is None:
+            self.log_error(MongoDatabase.retrieve_metadata.__name__ + ": Unexpected empty object: key")
+            return None
+        if activity_id is None:
+            self.log_error(MongoDatabase.retrieve_metadata.__name__ + ": Unexpected empty object: activity_id")
+            return None
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                if key in activity:
+                    metadata = activity[key]
+                    if isinstance(metadata, list):
+                        metadata.sort(key=retrieve_time_from_time_value_pair)
+                    return metadata
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
     def create_accelerometer_reading(self, device_str, activity_id, accels):
         """Adds several accelerometer readings to the database. 'accels' is an array of arrays in the form [time, x, y, z]."""
         if device_str is None:
@@ -872,46 +949,6 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_sensor_reading(self, device_str, activity_id, date_time, key, value):
-        """Inherited from ActivityWriter. Processes a sensor reading from the importer."""
-        pass
-
-    def retrieve_locations(self, activity_id):
-        """Returns all the locations for the specified activity."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_locations.__name__ + ": Unexpected empty object: activity_id")
-            return None
-
-        try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if Keys.ACTIVITY_LOCATIONS_KEY in activity:
-                    locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
-                    locations.sort(key=retrieve_time_from_location)
-                    return locations
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return None
-
-    def retrieve_most_recent_locations(self, activity_id, num):
-        """Returns the most recent 'num' locations for the specified activity."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_most_recent_locations.__name__ + ": Unexpected empty object: activity_id")
-            return None
-        if num is None:
-            self.log_error(MongoDatabase.retrieve_most_recent_locations.__name__ + ": Unexpected empty object: num")
-            return None
-
-        try:
-            locations = self.retrieve_locations(activity_id)
-            locations.sort(key=retrieve_time_from_location)
-            return locations
-        except:
-            traceback.print_exc(file=sys.stdout)
-            self.log_error(sys.exc_info()[0])
-        return None
-
     def retrieve_accelerometer_readings(self, activity_id):
         """Returns all the locations for the specified activity."""
         if activity_id is None:
@@ -929,6 +966,55 @@ class MongoDatabase(Database.Database):
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
         return None
+
+    def create_activity_summary(self, activity_id, summary_data):
+        """Create method for activity summary data. Summary data is data computed from the raw data."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_activity_summary.__name__ + ": Unexpected empty object: activity_id")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                activity[Keys.ACTIVITY_SUMMARY_KEY] = summary_data
+                self.activities_collection.save(activity)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_activity_summary(self, activity_id):
+        """Returns the activity summary data. Summary data is data computed from the raw data."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.retrieve_activity_summary.__name__ + ": Unexpected empty object: activity_id")
+            return None
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                if Keys.ACTIVITY_SUMMARY_KEY in activity:
+                    summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
+                    return summary_data
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def delete_activity_summary(self, activity_id):
+        """Delete method for activity summary data. Summary data is data computed from the raw data."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.delete_activity_summary.__name__ + ": Unexpected empty object: activity_id")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                pass
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
 
     def create_tag(self, activity_id, tag):
         """Adds a tag to the specified activity."""

@@ -3,21 +3,25 @@ Workout tracking website and companion to the Straen mobile app
 
 ## Rationale
 Why develop a workout tracker when there are so many closed-source options available?
+
 * I needed a companion website to the mobile app of the same name that I developed. I needed this to make the live tracking feature possible.
 * Other workout trackers do not support strength-based exercises, such as pull-ups and push-ups (press-ups).
 * I think users should have control over their own data and this is only possible with an open source application.
+* There are some analytical ideas that I have that none of the major activity tracking websites perform.
+* Education. For the experience in performing full-stack software development: dealing with website deployment and scalability, and security issues.
 
 ## Major Features
 * Enables the live tracking feature of the Straen mobile app.
 * Supports strength (lifting) activities as well as distance (aerobic) activities.
 
 ## Major Todos
-* Support for strength-based activities.
+* Support for strength-based activities (this is partially implemented).
 * Activity export.
 * Continuous scrolling for the activity feed.
 * Import from other services.
 * Better graphics.
 * Replace Google Maps with Open Street Map.
+* Equipment tracking.
 
 ## Version History
 
@@ -46,6 +50,11 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Beginnings of statistical analysis.
 * Ability to switch between metric and imperial units.
 * Code refactoring to support multiple frameworks (cherrypy and flask).
+
+### 0.5
+* Automated data analysis, i.e. an activity is automatically analyzed when the upload is complete or when it has been updated by the mobile application. The results are cached for efficiency.
+* Automatic identification of different workout types, such as tempo and interval runs and bike rides.
+* Better support for the flask web application framework.
 
 ## Social
 Twitter: [@StraenApp](https://twitter.com/StraenApp)

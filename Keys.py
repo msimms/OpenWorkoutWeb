@@ -28,6 +28,10 @@ GENDER_KEY = "gender"
 GENDER_MALE_KEY = "male"
 GENDER_FEMALE_KEY = "female"
 
+# Keys associated with uploading data
+UPLOADED_FILE_NAME_KEY = "uploaded file name"
+UPLOADED_FILE_DATA_KEY = "uploaded file data"
+
 # Keys inherited from the mobile app.
 APP_NAME_KEY = "Name"
 APP_TIME_KEY = "Time"
@@ -41,6 +45,7 @@ APP_TEMP_KEY = "Temperature"
 APP_CURRENT_SPEED_KEY = "Current Speed"
 APP_AVG_SPEED_KEY = "Avgerage Speed"
 APP_MOVING_SPEED_KEY = "Moving Speed"
+APP_SPEED_VARIANCE_KEY = "Speed Variance"
 APP_HEART_RATE_KEY = "Heart Rate"
 APP_AVG_HEART_RATE_KEY = "Average Heart Rate"
 APP_CURRENT_PACE_KEY = "Current Pace"
@@ -68,6 +73,7 @@ ACCELEROMETER_TIME_KEY = "time"
 # Keys used exclusively by the web app.
 ACTIVITY_ID_KEY = "activity_id"
 ACTIVITY_TYPE_KEY = "activity_type"
+ACTIVITY_USER_ID_KEY = "user_id"
 ACTIVITY_DEVICE_STR_KEY = "device_str"
 ACTIVITY_LOCATIONS_KEY = "locations"
 ACTIVITY_NAME_KEY = "name"
@@ -105,6 +111,7 @@ NORMALIZED_POWER = "Normalized Power"
 CLUSTER = 'Cluster'
 
 # Activity types
+TYPE_UNSPECIFIED_ACTIVITY = "Unknown"
 TYPE_RUNNING_KEY = "Running"
 TYPE_CYCLING_KEY = "Cycling"
 TYPE_SWIMMING_KEY = "Swimming"

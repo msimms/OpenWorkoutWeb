@@ -110,6 +110,9 @@ def convert_to_preferred_speed_units(user_mgr, user_id, value, in_distance_units
 def meters_per_sec_to_minutes_per_mile(value):
     return 1.0 / convert_speed(value, UNITS_DISTANCE_METERS, UNITS_TIME_SECONDS, UNITS_DISTANCE_MILES, UNITS_TIME_MINUTES)
 
+def meters_per_sec_to_minutes_per_kilometers(value):
+    return 1.0 / convert_speed(value, UNITS_DISTANCE_METERS, UNITS_TIME_SECONDS, UNITS_DISTANCE_KILOMETERS, UNITS_TIME_MINUTES)
+
 def get_distance_units_str(distance_units):
     """Returns the units in which distance is displayed."""
     if distance_units == UNITS_DISTANCE_METERS:
@@ -153,6 +156,16 @@ def get_pace_units_str(distance_units, time_units):
     elif distance_units == UNITS_DISTANCE_MILES:
         units_str = units_str + "mile"
     return units_str
+
+def convert_seconds_to_hours_mins_secs(seconds_in):
+    """Converts seconds to HH:MM:SS format."""
+    temp_seconds = int(seconds_in)
+    seconds = temp_seconds % 60
+    minutes = temp_seconds / 60
+    hours = minutes / 60
+    minutes = minutes % 60
+    out_str = "{:0>2d}:{:0>2d}:{:0>2d}".format(hours, minutes, seconds)
+    return out_str
 
 def get_heart_rate_units_str():
     """Returns the units in which heart rate is displayed."""

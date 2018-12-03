@@ -12,6 +12,6 @@ class Exporter(object):
     def export(self, data_mgr, activity_id):
         data_mgr.retrieve_locations(activity_id)
         data_mgr.retrieve_metadata(key, activity_id)
-        data_mgr.retrieve_sensordata(key, activity_id)
+        data_mgr.retrieve_sensor_readings(key, activity_id)
 
         return ""

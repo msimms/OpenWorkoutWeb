@@ -15,10 +15,11 @@ g_not_meta_data = ["DeviceId", "ActivityId", "ActivityName", "User Name", "Latit
 class Api(object):
     """Class for managing API messages."""
 
-    def __init__(self, user_mgr, data_mgr, user_id):
+    def __init__(self, user_mgr, data_mgr, analysis_scheduler, user_id):
         super(Api, self).__init__()
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
+        self.analysis_scheduler = analysis_scheduler
         self.user_id = user_id
 
     def log_error(self, log_str):
@@ -55,7 +56,7 @@ class Api(object):
                 key = item[0]
                 if not key in g_not_meta_data:
                     if key in [Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]:
-                        self.data_mgr.create_sensordata(activity_id, date_time, key, item[1])
+                        self.data_mgr.create_sensor_reading(activity_id, date_time, key, item[1])
                     elif key in [Keys.APP_CURRENT_SPEED_KEY, Keys.APP_CURRENT_PACE_KEY]:
                         self.data_mgr.create_metadata(activity_id, date_time, key, item[1], True)
         except ValueError, e:
@@ -140,6 +141,10 @@ class Api(object):
             user_devices = self.user_mgr.retrieve_user_devices(user_id)
             if user_devices is not None and device_str not in user_devices:
                 self.user_mgr.create_user_device(user_id, device_str)
+
+        # Schedule for analysis.
+        self.analysis_scheduler.add_to_queue(activity_id)
+
         return True, ""
 
     def handle_login_submit(self, values):
@@ -323,7 +328,7 @@ class Api(object):
         if Keys.APP_DISTANCE_KEY not in values:
             raise Exception("Distance not specified.")
 
-        activity_id = str(uuid.uuid4())
+        activity_id = self.data_mgr.create_activity_id()
         return True, ""
 
     def handle_add_sets_and_reps_activity(self, values):
@@ -331,7 +336,7 @@ class Api(object):
         if Keys.APP_SETS_KEY not in values:
             raise Exception("Sets not specified.")
 
-        activity_id = str(uuid.uuid4())
+        activity_id = self.data_mgr.create_activity_id()
         sets = values[Keys.APP_SETS_KEY]
         print sets
         return True, ""
@@ -357,6 +362,33 @@ class Api(object):
         """Called when an API message to upload a file is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
+        if Keys.UPLOADED_FILE_NAME_KEY not in values:
+            raise Exception("File name not specified.")
+        if Keys.UPLOADED_FILE_DATA_KEY not in values:
+            raise Exception("File data not specified.")
+
+        # Generate a random name for the local file.
+        uploaded_file_name = values[Keys.UPLOADED_FILE_NAME_KEY]
+        upload_path = os.path.normpath(self.tempfile_dir)
+        uploaded_file_name, uploaded_file_ext = os.path.splitext(uploaded_file_name)
+        local_file_name = os.path.join(upload_path, str(uuid.uuid4()))
+        local_file_name = local_file_name + uploaded_file_ext
+
+        # Write the file.
+        with open(local_file_name, 'wb') as local_file:
+            local_file.write(values[Keys.UPLOADED_FILE_DATA_KEY])
+
+        # Parse the file and store it's contents in the database.
+        success, device_id, activity_id = self.data_mgr.import_file(username, self.user_id, local_file_name, uploaded_file_ext)
+        if not success:
+            raise Exception('Unhandled exception in upload when processing ' + uploaded_file_name)
+
+        # Schedule for analysis.
+        self.analysis_scheduler.add_to_queue(activity_id)
+
+        # Remove the local file.
+        os.remove(local_file_name)
+
         return True, ""
 
     def handle_add_tag_to_activity(self, values):
@@ -493,7 +525,7 @@ class Api(object):
             raise Exception("Invalid parameter.")
 
         tags = values[Keys.ACTIVITY_TAGS_KEY]
-        if not InputChecker.is_safe(tags):
+        if not InputChecker.is_valid(tags):
             raise Exception("Invalid parameter.")
 
         result = self.data_mgr.create_tag(values[Keys.ACTIVITY_ID_KEY], tags)
@@ -519,7 +551,7 @@ class Api(object):
             raise Exception("Invalid parameter.")
 
         comment = values[Keys.ACTIVITY_COMMENT_KEY]
-        if not InputChecker.is_safe(comment):
+        if not InputChecker.is_valid(comment):
             raise Exception("Invalid parameter.")
 
         result = self.data_mgr.create_activity_comment(values[Keys.ACTIVITY_ID_KEY], self.user_id, comment)
@@ -603,18 +635,14 @@ class Api(object):
         result = self.data_mgr.update_activity_visibility(values[Keys.ACTIVITY_ID_KEY], visibility)
         return result, ""
 
-    def handle_api_1_0_request(self, args, values):
+    def handle_api_1_0_request(self, request, values):
         """Called to parse a version 1.0 API message."""
-        if len(args) <= 0:
-            return False, ""
-
         if self.user_id is None:
             if Keys.SESSION_KEY in values:
                 username = self.user_mgr.get_logged_in_user_from_cookie(values[Keys.SESSION_KEY])
                 if username is not None:
                     self.user_id, _, _ = self.user_mgr.retrieve_user(username)
 
-        request = args[0]
         if request == 'update_status':
             return self.handle_update_status(values)
         elif request == 'login_submit':

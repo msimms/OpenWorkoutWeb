@@ -2,6 +2,7 @@
 """Main application, contains all web page handlers"""
 
 import argparse
+import json
 import logging
 import mako
 import os
@@ -32,7 +33,7 @@ g_app = None
 def signal_handler(signal, frame):
     global g_app
 
-    print "Exiting..."
+    print("Exiting...")
     if g_app is not None:
         g_app.terminate()
     sys.exit(0)
@@ -339,6 +340,44 @@ def status():
         result = g_app.error()
     return result
 
+@g_flask_app.route('/api/<version>/<method>', methods = ['GET','POST'])
+def api(version, method):
+    """Endpoint for API calls."""
+    response = ""
+    code = 200
+    try:
+        # Get the logged in user.
+        user_id = None
+        username = g_app.user_mgr.get_logged_in_user()
+        if username is not None:
+            user_id, _, _ = g_app.user_mgr.retrieve_user(username)
+
+        # The the API params.
+        if flask.request.method == 'GET':
+            params = ""
+        else:
+            params = json.loads(flask.request.data)
+
+        # Process the API request.
+        if version == '1.0':
+            api = Api.Api(g_app.user_mgr, g_app.data_mgr, g_app.analysis_scheduler, user_id)
+            handled, response = api.handle_api_1_0_request(method, params)
+            if not handled:
+                g_app.log_error("Failed to handle request: " + method)
+                code = 400
+            else:
+                code = 200
+        else:
+            g_app.log_error("Failed to handle request for api version " + version)
+            code = 400
+    except Exception as e:
+        response = str(e.args[0])
+        g_app.log_error(response)
+        code = 500
+    except:
+        code = 500
+    return response, code
+
 @g_flask_app.route('/')
 def index():
     """Renders the index page."""
@@ -375,12 +414,12 @@ def main():
             args.host = "127.0.0.1"
         else:
             args.host = "straen-app.com"
-        print "Hostname not provided, will use " + args.host
+        print("Hostname not provided, will use " + args.host)
 
     root_url = protocol + "://" + args.host
     if args.hostport > 0:
         root_url = root_url + ":" + str(args.hostport)
-    print "Root URL is " + root_url
+    print("Root URL is " + root_url)
 
     signal.signal(signal.SIGINT, signal_handler)
     mako.collection_size = 100

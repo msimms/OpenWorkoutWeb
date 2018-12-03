@@ -17,6 +17,7 @@ import SessionMgr
 import UserMgr
 
 from cherrypy import tools
+from cherrypy.process import plugins
 from cherrypy.process.plugins import Daemonizer
 
 
@@ -25,6 +26,18 @@ ERROR_LOG = 'error.log'
 LOGIN_URL = '/login'
 
 g_app = None
+
+
+class ReloadFeature(plugins.SimplePlugin):
+    """A feature that handles site reloading."""
+
+    def start(self):
+        print("ReloadFeature start")
+
+    def stop(self):
+        print("ReloadFeature stop")
+        if g_app is not None:
+            g_app.terminate()
 
 
 def signal_handler(signal, frame):
@@ -98,9 +111,10 @@ class StraenWeb(object):
 
     def terminate(self):
         """Destructor"""
-        print("Terminating")
-        self.app.terminate()
-        self.app = None
+        print("Terminating the cherrypy front end...")
+        if self.app is not None:
+            self.app.terminate()
+            self.app = None
 
     def log_error(self, log_str):
         """Writes an error message to the log file."""
@@ -435,10 +449,11 @@ class StraenWeb(object):
             if len(args) > 0:
                 api_version = args[0]
                 if api_version == '1.0':
-                    api = Api.Api(self.app.user_mgr, self.app.data_mgr, user_id)
-                    handled, response = api.handle_api_1_0_request(args[1:], params)
+                    api = Api.Api(self.app.user_mgr, self.app.data_mgr, self.app.analysis_scheduler, user_id)
+                    method = args[1:]
+                    handled, response = api.handle_api_1_0_request(method[0], params)
                     if not handled:
-                        self.log_error("Failed to handle request: " + args[1:])
+                        self.log_error("Failed to handle request: " + method)
                         cherrypy.response.status = 400
                     else:
                         cherrypy.response.status = 200
@@ -578,6 +593,9 @@ def main():
         'server.socket_port': args.bindport,
         'requests.show_tracebacks': False,
         'log.access_file': ACCESS_LOG})
+
+    reload_feature = ReloadFeature(cherrypy.engine)
+    reload_feature.subscribe()
 
     cherrypy.quickstart(g_app, config=conf)
 

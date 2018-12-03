@@ -1,6 +1,7 @@
 # Copyright 2018 Michael J Simms
 
 import inspect
+import itertools
 import os
 import sys
 import Keys
@@ -12,6 +13,7 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 libmathdir = os.path.join(currentdir, 'LibMath', 'python')
 sys.path.insert(0, libmathdir)
 import distance
+import kmeans
 import peaks
 import statistics
 
@@ -32,6 +34,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         self.distance_buf = [] # Holds the distance calculations; used for the current speed calcuations
         self.speed_times = [] # Holds the times associated with self.speed_graph
         self.speed_graph = [] # Holds the current speed calculations 
+        self.pace_blocks = [] # List of pace blocks, i.e. statistically significant times spent at a given pace
         self.total_distance = 0.0 # Distance traveled (in meters)
         self.total_vertical = 0.0 # Total ascent (in meters)
 
@@ -105,20 +108,36 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 continue
             self.do_record_check(Keys.BEST_10K, total_seconds, total_meters, 10000)
 
-            # Is this a new 15K record for this activity?
-            if total_meters < 15000:
-                continue
-            self.do_record_check(Keys.BEST_15K, total_seconds, total_meters, 15000)
+            # Running-specific records:
+            if self.activity_type == Keys.TYPE_RUNNING_KEY:
 
-            # Is this a new metric century record for this activity?
-            if total_meters < 100000:
-                continue
-            self.do_record_check(Keys.BEST_METRIC_CENTURY, total_seconds, total_meters, 100000)
+                # Is this a new 15K record for this activity?
+                if total_meters < 15000:
+                    continue
+                self.do_record_check(Keys.BEST_15K, total_seconds, total_meters, 15000)
 
-            # Is this a new century record for this activity?
-            if total_meters < Units.METERS_PER_MILE * 100.0:
-                continue
-            self.do_record_check(Keys.BEST_CENTURY, total_seconds, total_meters, Units.METERS_PER_MILE * 100.0)
+                # Is this a new half marathon record for this activity?
+                if total_meters < 13.1 * Units.METERS_PER_MILE:
+                    continue
+                self.do_record_check(Keys.BEST_HALF_MARATHON, total_seconds, total_meters, 13.1 * Units.METERS_PER_MILE)
+
+                # Is this a new marathon record for this activity?
+                if total_meters < 26.2 * Units.METERS_PER_MILE:
+                    continue
+                self.do_record_check(Keys.BEST_MARATHON, total_seconds, total_meters, 26.2 * Units.METERS_PER_MILE)
+
+            # Cycling-specific records:
+            if self.activity_type == Keys.TYPE_CYCLING_KEY:
+
+                # Is this a new metric century record for this activity?
+                if total_meters < 100000:
+                    continue
+                self.do_record_check(Keys.BEST_METRIC_CENTURY, total_seconds, total_meters, 100000)
+
+                # Is this a new century record for this activity?
+                if total_meters < Units.METERS_PER_MILE * 100.0:
+                    continue
+                self.do_record_check(Keys.BEST_CENTURY, total_seconds, total_meters, Units.METERS_PER_MILE * 100.0)
 
     def append_location(self, date_time, latitude, longitude, altitude):
         """Adds another location to the analyzer. Locations should be sent in order."""
@@ -150,7 +169,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             altitude = location[Keys.LOCATION_ALT_KEY]
             self.append_location(date_time, latitude, longitude, altitude)
     
-    def check_pace_line(self, peak_list, start_index, end_index):
+    def check_pace_block(self, peak_list, start_index, end_index):
         """Examines a line of near-constant pace/speed."""
         if start_index >= end_index:
             return
@@ -161,15 +180,19 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         if line_duration > 60000:
             speeds = self.speed_graph[start_index:end_index - 1]
             avg_speed = statistics.mean(speeds)
-            avg_pace = Units.meters_per_sec_to_minutes_per_mile(avg_speed)
-            print str(line_duration / 1000) + " seconds at " + str(avg_pace) + " minutes/mile"
+            avg_pace = Units.meters_per_sec_to_minutes_per_kilometers(avg_speed)
+            self.pace_blocks.append(avg_pace)
 
     def analyze(self):
-        """Called when all sensor readings have been processed."""
+        """Called when all location readings have been processed."""
         results = SensorAnalyzer.SensorAnalyzer.analyze(self)
 
         # Do pace analysis.
         if len(self.speed_graph) > 1:
+
+            # Compute the speed/pace variation. This will tell us how consistent the pace was.
+            speed_variance = statistics.variance(self.speed_graph, self.avg_speed)
+            results[Keys.APP_SPEED_VARIANCE_KEY] = speed_variance
 
             # Find peaks in the speed graph.
             peak_list = peaks.find_peaks_in_numeric_array(self.speed_graph, 2.0)
@@ -178,7 +201,22 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             last_peak_index = 0
             for peak in peak_list:
                 peak_index = peak.left_trough.x
-                self.check_pace_line(peak_list, last_peak_index, peak_index)
+                self.check_pace_block(peak_list, last_peak_index, peak_index)
                 last_peak_index = peak_index + 1
-            self.check_pace_line(peak_list, last_peak_index, len(self.speed_graph) - 1)
+            self.check_pace_block(peak_list, last_peak_index, len(self.speed_graph) - 1)
+
+            # Do a k-means analysis on the computed paces blocks.
+            tags = kmeans.kmeans_equally_space_centroids_1_d(self.pace_blocks, 3, 0.1, 3)
+
         return results
+
+    def create_speed_graph(self):
+        """Returns a list of time, value pairs for speed."""
+        graph = []
+        if len(self.speed_graph) == len(self.speed_times):
+            for time_val, speed_val in itertools.izip(self.speed_times, self.speed_graph):
+                point = []
+                point.append(time_val)
+                point.append(float(speed_val))
+                graph.append(point)
+        return graph

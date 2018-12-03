@@ -35,7 +35,7 @@ class TestActivityWriter(Importer.ActivityWriter):
         self.location_analyzer = None
         self.sensor_analyzers = []
 
-    def create_activity(self, username, stream_name, stream_description, activity_type, start_time):
+    def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
 
         self.location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type) # Need a fresh analyzer object for each activity
@@ -46,6 +46,7 @@ class TestActivityWriter(Importer.ActivityWriter):
         title_str = "Activity Type: " + activity_type
         print(title_str)
         print("-" * len(title_str))
+
         title_str = "ID: " + self.current_activity_id
         print(title_str)
         print("-" * len(title_str))
@@ -61,20 +62,29 @@ class TestActivityWriter(Importer.ActivityWriter):
         self.location_analyzer.append_location(date_time, latitude, longitude, altitude)
         self.location_analyzer.update_speeds()
 
-    def create_sensor_reading(self, device_str, activity_id, date_time, key, value):
+    def create_locations(self, device_str, activity_id, locations):
+        """Inherited from ActivityWriter. Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
+        for location in locations:
+            self.create_location(device_str, activity_id, location[0], location[1], location[2], location[3])
+
+    def create_sensor_reading(self, activity_id, date_time, sensor_type, value):
         """Inherited from ActivityWriter. Called for each sensor reading that is read from the input file."""
         found = False
         for sensor_analyzer in self.sensor_analyzers:
-            if sensor_analyzer.type == key:
+            if sensor_analyzer.type == sensor_type:
                 sensor_analyzer.append_sensor_value(date_time, value)
                 found = True
                 break
         if not found:
-            factory = SensorAnalyzerFactory.SensorAnalyzerFactory()
-            sensor_analyzer = factory.create(key)
+            sensor_analyzer = SensorAnalyzerFactory.create(sensor_type)
             if sensor_analyzer:
                 sensor_analyzer.append_sensor_value(date_time, value)
                 self.sensor_analyzers.append(sensor_analyzer)
+
+    def create_sensor_readings(self, activity_id, sensor_type, values):
+        """Inherited from ActivityWriter. Adds several sensor readings to the database. 'values' is an array of arrays in the form [time, value]."""
+        for value in values:
+            self.create_sensor_reading(activity_id, value[0], sensor_type, value[1]) 
 
     def finish_activity(self):
         """Inherited from ActivityWriter. Called for post-processing."""
@@ -96,6 +106,7 @@ class TestActivityWriter(Importer.ActivityWriter):
 
         print("Total Distance: {:.2f} meters".format(self.location_analyzer.total_distance))
         print("Vertical Ascent: {:.2f} meters".format(self.location_analyzer.total_vertical))
+
         if self.location_analyzer.start_time is not None and self.location_analyzer.last_time is not None:
             total_time = (self.location_analyzer.last_time - self.location_analyzer.start_time) / 1000
             print("Total Time: {:.2f} seconds".format(total_time))
@@ -193,18 +204,25 @@ def main():
     total_time = 0
     num_files_processed = 0
     for subdir, _, files in os.walk(test_dir):
+
         title_str = "Processing all files in " + test_dir + ":"
         print(title_str + "\n")
         for current_file in files:
+
+            # My test file repo has a description file that we should skip.
+            if current_file == "description.csv":
+                continue
+
             full_path = os.path.join(subdir, current_file)
             _, temp_file_ext = os.path.splitext(full_path)
-            if temp_file_ext in ['.gpx', '.tcx']:
+            if temp_file_ext in ['.gpx', '.tcx', '.csv']:
                 title_str = "Processing: " + full_path
                 print("=" * len(title_str))
                 print(title_str)
                 print("=" * len(title_str))
                 start_time = time.time()
-                if importer.import_file("test user", full_path, temp_file_ext):
+                success, device_id, activity_id = importer.import_file("test user", "", full_path, temp_file_ext)
+                if success:
                     elapsed_time = time.time() - start_time
                     total_time = total_time + elapsed_time
                     num_files_processed = num_files_processed + 1
@@ -230,7 +248,10 @@ def main():
         print("- " + failure)
 
     # Print the time summary.
-    print("Average time per sample: " + str(total_time / num_files_processed) + " seconds\n")
+    if num_files_processed > 0:
+        print("Average time per sample: " + str(total_time / num_files_processed) + " seconds\n")
+    else:
+        print("No files processed.\n")
 
 if __name__ == "__main__":
     main()
