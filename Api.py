@@ -525,7 +525,7 @@ class Api(object):
             raise Exception("Invalid parameter.")
 
         tags = values[Keys.ACTIVITY_TAGS_KEY]
-        if not InputChecker.is_safe(tags):
+        if not InputChecker.is_valid(tags):
             raise Exception("Invalid parameter.")
 
         result = self.data_mgr.create_tag(values[Keys.ACTIVITY_ID_KEY], tags)
@@ -551,7 +551,7 @@ class Api(object):
             raise Exception("Invalid parameter.")
 
         comment = values[Keys.ACTIVITY_COMMENT_KEY]
-        if not InputChecker.is_safe(comment):
+        if not InputChecker.is_valid(comment):
             raise Exception("Invalid parameter.")
 
         result = self.data_mgr.create_activity_comment(values[Keys.ACTIVITY_ID_KEY], self.user_id, comment)
