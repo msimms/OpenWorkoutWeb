@@ -110,6 +110,9 @@ def convert_to_preferred_speed_units(user_mgr, user_id, value, in_distance_units
 def meters_per_sec_to_minutes_per_mile(value):
     return 1.0 / convert_speed(value, UNITS_DISTANCE_METERS, UNITS_TIME_SECONDS, UNITS_DISTANCE_MILES, UNITS_TIME_MINUTES)
 
+def meters_per_sec_to_minutes_per_kilometers(value):
+    return 1.0 / convert_speed(value, UNITS_DISTANCE_METERS, UNITS_TIME_SECONDS, UNITS_DISTANCE_KILOMETERS, UNITS_TIME_MINUTES)
+
 def get_distance_units_str(distance_units):
     """Returns the units in which distance is displayed."""
     if distance_units == UNITS_DISTANCE_METERS:
