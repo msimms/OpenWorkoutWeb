@@ -49,3 +49,6 @@ Why develop a workout tracker when there are so many closed-source options avail
 
 ## Social
 Twitter: [@StraenApp](https://twitter.com/StraenApp)
+
+## License
+Currently proprietary (though there are some source files that are under the MIT license). However I am considering moving the source code to either an MIT or MPL license.
