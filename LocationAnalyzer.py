@@ -13,6 +13,7 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 libmathdir = os.path.join(currentdir, 'LibMath', 'python')
 sys.path.insert(0, libmathdir)
 import distance
+import kmeans
 import peaks
 import statistics
 
@@ -33,6 +34,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         self.distance_buf = [] # Holds the distance calculations; used for the current speed calcuations
         self.speed_times = [] # Holds the times associated with self.speed_graph
         self.speed_graph = [] # Holds the current speed calculations 
+        self.pace_blocks = [] # List of pace blocks, i.e. statistically significant times spent at a given pace
         self.total_distance = 0.0 # Distance traveled (in meters)
         self.total_vertical = 0.0 # Total ascent (in meters)
 
@@ -167,7 +169,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             altitude = location[Keys.LOCATION_ALT_KEY]
             self.append_location(date_time, latitude, longitude, altitude)
     
-    def check_pace_line(self, peak_list, start_index, end_index):
+    def check_pace_block(self, peak_list, start_index, end_index):
         """Examines a line of near-constant pace/speed."""
         if start_index >= end_index:
             return
@@ -178,14 +180,19 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         if line_duration > 60000:
             speeds = self.speed_graph[start_index:end_index - 1]
             avg_speed = statistics.mean(speeds)
-            avg_pace = Units.meters_per_sec_to_minutes_per_mile(avg_speed)
+            avg_pace = Units.meters_per_sec_to_minutes_per_kilometers(avg_speed)
+            self.pace_blocks.append(avg_pace)
 
     def analyze(self):
-        """Called when all sensor readings have been processed."""
+        """Called when all location readings have been processed."""
         results = SensorAnalyzer.SensorAnalyzer.analyze(self)
 
         # Do pace analysis.
         if len(self.speed_graph) > 1:
+
+            # Compute the speed/pace variation. This will tell us how consistent the pace was.
+            speed_variance = statistics.variance(self.speed_graph, self.avg_speed)
+            results[Keys.APP_SPEED_VARIANCE_KEY] = speed_variance
 
             # Find peaks in the speed graph.
             peak_list = peaks.find_peaks_in_numeric_array(self.speed_graph, 2.0)
@@ -194,9 +201,13 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             last_peak_index = 0
             for peak in peak_list:
                 peak_index = peak.left_trough.x
-                self.check_pace_line(peak_list, last_peak_index, peak_index)
+                self.check_pace_block(peak_list, last_peak_index, peak_index)
                 last_peak_index = peak_index + 1
-            self.check_pace_line(peak_list, last_peak_index, len(self.speed_graph) - 1)
+            self.check_pace_block(peak_list, last_peak_index, len(self.speed_graph) - 1)
+
+            # Do a k-means analysis on the computed paces blocks.
+            tags = kmeans.kmeans_equally_space_centroids_1_d(self.pace_blocks, 3, 0.1, 3)
+
         return results
 
     def create_speed_graph(self):
