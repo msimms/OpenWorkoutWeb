@@ -204,9 +204,15 @@ def main():
     total_time = 0
     num_files_processed = 0
     for subdir, _, files in os.walk(test_dir):
+
         title_str = "Processing all files in " + test_dir + ":"
         print(title_str + "\n")
         for current_file in files:
+
+            # My test file repo has a description file that we should skip.
+            if current_file == "description.csv":
+                continue
+
             full_path = os.path.join(subdir, current_file)
             _, temp_file_ext = os.path.splitext(full_path)
             if temp_file_ext in ['.gpx', '.tcx', '.csv']:
