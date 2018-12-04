@@ -1,5 +1,5 @@
 # StraenWeb
-Workout tracking website and companion to the Straen mobile app
+Workout tracking website and companion to the Straen mobile app. This is very much a work-in-progress, and is being done as a spare-time project, so set your expectations appropriately.
 
 ## Rationale
 Why develop a workout tracker when there are so many closed-source options available?
@@ -22,6 +22,7 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Better graphics.
 * Replace Google Maps with Open Street Map.
 * Equipment tracking.
+* More analytics.
 
 ## Version History
 
@@ -56,8 +57,14 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Automatic identification of different workout types, such as tempo and interval runs and bike rides.
 * Better support for the flask web application framework.
 
+### 0.6
+* Ability to import an entire directory of files.
+
 ## Social
 Twitter: [@StraenApp](https://twitter.com/StraenApp)
+
+## How To
+For instructional material, consult the [Wiki](https://github.com/msimms/StraenWeb/wiki)
 
 ## License
 Currently proprietary (though there are some source files that are under the MIT license). However I am considering moving the source code to either an MIT or MPL license.
