@@ -34,3 +34,6 @@ tempmod/*
 # Temp directories
 tempfile/
 tempmod/
+
+# Session management
+sessions/
