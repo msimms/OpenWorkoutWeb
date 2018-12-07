@@ -145,6 +145,28 @@
 		return false;
 	}
 
+	function upload_file(fileObj)
+	{
+		var the_url = "${root_url}/api/1.0/upload_activity_file";
+		var dict = [];
+		var result_text = {};
+		var reader = new FileReader();
+
+		reader.readAsText(fileObj);
+
+		dict.push({["uploaded_file_name"] : fileObj.name});
+		dict.push({["uploaded_file_data"] : reader.result});
+
+		if (send_post_request(the_url, dict, result_text))
+		{
+			window.location.replace("${root_url}/my_activities");
+		}
+		else
+		{
+			alert(result_text.value);
+		}
+	}
+
 </script>
 
 <section class="nav">
@@ -152,14 +174,46 @@ ${nav}
 </section>
 
 <div class="import" style="width: 600px">
-	<h2>Import From a File</h2>
+	<h2>Import a File</h2>
 	<form action="${root_url}/upload" method="post" enctype="multipart/form-data">
-		Select files: <input type="file" name="ufile" multiple><input type="submit">
+		Select files: <input type="file" name="ufile" multiple>
+		<input type="submit">
 	</form>
+
 	<hr>
+
 	<h2>Import an Entire Directory</h2>
-	<input name="dir" id="dir_input" type="file" webkitdirectory directory multiple/><br/>
+	<input type="file" id="picker" name="fileList" webkitdirectory multiple>
+	<button type="button" onclick="return upload_dir()">Upload</button>
+	<ul id="listing"></ul>
+
+	<script>
+		let picker = document.getElementById('picker');
+		let listing = document.getElementById('listing');
+		let file_list = [];
+
+		function upload_dir()
+		{
+			var arrayLength = file_list.length;
+			for (var i = 0; i < arrayLength; i++)
+			{
+				upload_file(file_list[i]);
+			}
+		}
+
+		picker.addEventListener('change', e => {
+			for (let file of Array.from(e.target.files))
+			{
+				let item = document.createElement('li');
+				item.textContent = file.webkitRelativePath;
+				listing.appendChild(item);
+				file_list.push(file);
+			};
+		});
+	</script>
+
 	<hr>
+
 	<h2>Manual Entry</h2>
 	<form onChange="return show_manual_entry_options()" method="post" enctype="multipart/form-data">
 		<select id="activity_type" name="activity_type">
@@ -167,53 +221,6 @@ ${activity_type_list}
 		</select>
 	</form>
 </div>
-
-<script type="text/javascript">
-	document.addEventListener('DOMContentLoaded', function(event)
-	{
-		document.getElementById('dir_input').addEventListener('change', function()
-		{
-			var uploadFile = function(file, path)
-			{
-			};
-
-			var iterateFilesAndDirs = function(filesAndDirs, path)
-			{
-				for (var i = 0; i < filesAndDirs.length; i++)
-				{
-					if (typeof filesAndDirs[i].getFilesAndDirectories === 'function')
-					{
-						var path = filesAndDirs[i].path;
-
-						// this recursion enables deep traversal of directories
-						filesAndDirs[i].getFilesAndDirectories().then(function(subFilesAndDirs)
-						{
-							// iterate through files and directories in sub-directory
-							iterateFilesAndDirs(subFilesAndDirs, path);
-						});
-					}
-					else
-					{
-						uploadFile(filesAndDirs[i], path);
-					}
-				}
-			};
-
-			// begin by traversing the chosen files and directories
-			if ('getFilesAndDirectories' in this)
-			{
-				this.getFilesAndDirectories().then(function(filesAndDirs)
-				{
-					iterateFilesAndDirs(filesAndDirs, '/');
-				});
-			}
-			else
-			{
-				alert("Directory upload not available with this browser.");
-			}
-		});
-	});
-</script>
 	
 <div class="block" id="block">
 </div>

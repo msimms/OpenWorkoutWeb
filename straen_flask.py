@@ -360,7 +360,7 @@ def api(version, method):
 
         # Process the API request.
         if version == '1.0':
-            api = Api.Api(g_app.user_mgr, g_app.data_mgr, g_app.analysis_scheduler, user_id)
+            api = Api.Api(g_app.user_mgr, g_app.data_mgr, g_app.analysis_scheduler, g_app.tempfile_dir, user_id)
             handled, response = api.handle_api_1_0_request(method, params)
             if not handled:
                 g_app.log_error("Failed to handle request: " + method)
@@ -424,10 +424,6 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
     mako.collection_size = 100
     mako.directories = "templates"
-
-    tempfile_dir = os.path.join(g_root_dir, 'tempfile')
-    if not os.path.exists(tempfile_dir):
-        os.makedirs(tempfile_dir)
 
     session_mgr = SessionMgr.FlaskSessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, g_root_dir)

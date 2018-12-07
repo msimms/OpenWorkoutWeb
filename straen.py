@@ -449,7 +449,7 @@ class StraenWeb(object):
             if len(args) > 0:
                 api_version = args[0]
                 if api_version == '1.0':
-                    api = Api.Api(self.app.user_mgr, self.app.data_mgr, self.app.analysis_scheduler, user_id)
+                    api = Api.Api(self.app.user_mgr, self.app.data_mgr, self.app.analysis_scheduler, self.app.tempfile_dir, user_id)
                     method = args[1:]
                     handled, response = api.handle_api_1_0_request(method[0], params)
                     if not handled:
@@ -527,10 +527,6 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
     mako.collection_size = 100
     mako.directories = "templates"
-
-    tempfile_dir = os.path.join(root_dir, 'tempfile')
-    if not os.path.exists(tempfile_dir):
-        os.makedirs(tempfile_dir)
 
     session_mgr = SessionMgr.CherryPySessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, root_dir)

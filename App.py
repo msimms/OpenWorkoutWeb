@@ -80,6 +80,11 @@ class App(object):
         self.error_logged_in_html_file = os.path.join(root_dir, HTML_DIR, 'error_logged_in.html')
         self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler(self.data_mgr, 2)
         self.analysis_scheduler.start()
+
+        self.tempfile_dir = os.path.join(root_dir, 'tempfile')
+        if not os.path.exists(self.tempfile_dir):
+            os.makedirs(self.tempfile_dir)
+
         super(App, self).__init__()
 
     def terminate(self):

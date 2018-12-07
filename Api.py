@@ -3,6 +3,7 @@
 
 import json
 import logging
+import os
 import time
 import urllib
 import uuid
@@ -15,11 +16,12 @@ g_not_meta_data = ["DeviceId", "ActivityId", "ActivityName", "User Name", "Latit
 class Api(object):
     """Class for managing API messages."""
 
-    def __init__(self, user_mgr, data_mgr, analysis_scheduler, user_id):
+    def __init__(self, user_mgr, data_mgr, analysis_scheduler, temp_dir, user_id):
         super(Api, self).__init__()
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
         self.analysis_scheduler = analysis_scheduler
+        self.temp_dir = temp_dir
         self.user_id = user_id
 
     def log_error(self, log_str):
@@ -358,7 +360,7 @@ class Api(object):
         func = switcher.get(values[Keys.ACTIVITY_TYPE_KEY], lambda: "Invalid activity type")
         return True, func(values)
 
-    def handle_upload_activity_file(self, values):
+    def handle_upload_activity_file(self, username, values):
         """Called when an API message to upload a file is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
@@ -367,27 +369,32 @@ class Api(object):
         if Keys.UPLOADED_FILE_DATA_KEY not in values:
             raise Exception("File data not specified.")
 
+        # Decode the parameters.
+        uploaded_file_name = urllib.unquote_plus(values[Keys.UPLOADED_FILE_NAME_KEY])
+        uploaded_file_data = urllib.unquote_plus(values[Keys.UPLOADED_FILE_DATA_KEY])
+
         # Generate a random name for the local file.
-        uploaded_file_name = values[Keys.UPLOADED_FILE_NAME_KEY]
-        upload_path = os.path.normpath(self.tempfile_dir)
+        upload_path = os.path.normpath(self.temp_dir)
         uploaded_file_name, uploaded_file_ext = os.path.splitext(uploaded_file_name)
         local_file_name = os.path.join(upload_path, str(uuid.uuid4()))
         local_file_name = local_file_name + uploaded_file_ext
 
-        # Write the file.
-        with open(local_file_name, 'wb') as local_file:
-            local_file.write(values[Keys.UPLOADED_FILE_DATA_KEY])
+        try:
+            # Write the file.
+            with open(local_file_name, 'wb') as local_file:
+                local_file.write(uploaded_file_data)
 
-        # Parse the file and store it's contents in the database.
-        success, device_id, activity_id = self.data_mgr.import_file(username, self.user_id, local_file_name, uploaded_file_ext)
-        if not success:
-            raise Exception('Unhandled exception in upload when processing ' + uploaded_file_name)
+            # Parse the file and store it's contents in the database.
+            success, device_id, activity_id = self.data_mgr.import_file(username, self.user_id, local_file_name, uploaded_file_ext)
+            if not success:
+                raise Exception('Unhandled exception in upload when processing ' + uploaded_file_name)
 
-        # Schedule for analysis.
-        self.analysis_scheduler.add_to_queue(activity_id)
+            # Schedule for analysis.
+            self.analysis_scheduler.add_to_queue(activity_id)
 
-        # Remove the local file.
-        os.remove(local_file_name)
+        finally:
+            # Remove the local file.
+            os.remove(local_file_name)
 
         return True, ""
 
@@ -637,6 +644,7 @@ class Api(object):
 
     def handle_api_1_0_request(self, request, values):
         """Called to parse a version 1.0 API message."""
+        username = None
         if self.user_id is None:
             if Keys.SESSION_KEY in values:
                 username = self.user_mgr.get_logged_in_user_from_cookie(values[Keys.SESSION_KEY])
@@ -662,7 +670,7 @@ class Api(object):
         elif request == 'add_activity':
             return self.handle_add_activity(values)
         elif request == 'upload_activity_file':
-            return self.handle_upload_activity_file(values)
+            return self.handle_upload_activity_file(username, values)
         elif request == 'add_tag_to_activity':
             return self.handle_add_tag_to_activity(values)
         elif request == 'delete_tag_from_activity':
