@@ -62,6 +62,15 @@ Why develop a workout tracker when there are so many closed-source options avail
 
 ### 0.6
 * Ability to import an entire directory of files.
+* Added a calendar view.
+
+## Tech
+This software uses two other source projects to work properly:
+
+* [LibMath](https://github.com/msimms/LibMath) - A collection of math utilities, including a peak finding algorithm.
+* [fullcalendar](https://fullcalendar.io/) - A Javascript calendar implementation.
+
+The app is written in a combination of Python and JavaScript.
 
 ## Social
 Twitter: [@StraenApp](https://twitter.com/StraenApp)
