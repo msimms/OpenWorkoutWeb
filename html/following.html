@@ -47,8 +47,8 @@
 		dict.push({["searchname"] : searchname});
 		if (send_post_request(the_url, dict, result_text))
 		{
-			var obj = JSON.parse(result_text.value);
 			var table = document.getElementById('search_results');
+			var obj = JSON.parse(result_text.value);
 			for (var i = 0; i < obj.length; i++)
 			{
 				var tr = document.createElement('tr');   

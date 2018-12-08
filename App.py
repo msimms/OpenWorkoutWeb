@@ -28,8 +28,6 @@ from mako.template import Template
 
 PRODUCT_NAME = 'Straen'
 
-UNNAMED_ACTIVITY_TITLE = "Unnamed"
-
 LOGIN_URL = '/login'
 DEFAULT_LOGGED_IN_URL = '/all_activities'
 HTML_DIR = 'html'
@@ -305,7 +303,7 @@ class App(object):
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
         name = self.data_mgr.retrieve_metadata(Keys.APP_NAME_KEY, activity_id)
         if name is None:
-            name = UNNAMED_ACTIVITY_TITLE
+            name = Keys.UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
         tags = self.data_mgr.retrieve_tags(activity_id)
         if tags is not None:
@@ -410,7 +408,7 @@ class App(object):
 
         # Add the activity name.
         if name is None:
-            name = UNNAMED_ACTIVITY_TITLE
+            name = Keys.UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
 
         if location_analyzer.total_distance is not None:
@@ -568,7 +566,7 @@ class App(object):
         if Keys.ACTIVITY_NAME_KEY in activity and len(activity[Keys.ACTIVITY_NAME_KEY]) > 0:
             activity_name = "<b>" + activity[Keys.ACTIVITY_NAME_KEY] + "</b>"
         else:
-            activity_name = "<b>" + UNNAMED_ACTIVITY_TITLE + "</b>"
+            activity_name = "<b>" + Keys.UNNAMED_ACTIVITY_TITLE + "</b>"
 
         # Activity time
         activity_time = "-"
@@ -743,24 +741,10 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        activities = self.data_mgr.retrieve_user_activity_list(user_id, user_realname, 0, 25)
-        row_id = 0
-        activities_list_str = "No activities."
-        if activities is not None and isinstance(activities, list):
-            if len(activities) > 0:
-                activities_list_str = "<table>\n"
-                for activity in activities:
-                    activity_str = self.render_activity_row(activity, row_id, True)
-                    if activity_str is not None and len(activity_str) > 0:
-                        row_id = row_id + 1
-                        activities_list_str += activity_str
-                        activities_list_str += "\n"
-                activities_list_str += "</table>\n"
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'my_activities.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activities_list=activities_list_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
     @statistics
     def all_activities(self):

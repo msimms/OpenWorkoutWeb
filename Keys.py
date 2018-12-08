@@ -116,3 +116,6 @@ TYPE_RUNNING_KEY = "Running"
 TYPE_CYCLING_KEY = "Cycling"
 TYPE_SWIMMING_KEY = "Swimming"
 TYPE_PULL_UPS_KEY = "Pull Ups"
+
+# Activity names
+UNNAMED_ACTIVITY_TITLE = "Unnamed"

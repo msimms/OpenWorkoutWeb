@@ -449,11 +449,12 @@ class StraenWeb(object):
             if len(args) > 0:
                 api_version = args[0]
                 if api_version == '1.0':
-                    api = Api.Api(self.app.user_mgr, self.app.data_mgr, self.app.analysis_scheduler, self.app.tempfile_dir, user_id)
+                    api = Api.Api(self.app.user_mgr, self.app.data_mgr, self.app.analysis_scheduler, self.app.tempfile_dir, user_id, self.app.root_url)
                     method = args[1:]
                     handled, response = api.handle_api_1_0_request(method[0], params)
                     if not handled:
-                        self.log_error("Failed to handle request: " + method)
+                        response = "Failed to handle request: " + str(method)
+                        self.log_error(response)
                         cherrypy.response.status = 400
                     else:
                         cherrypy.response.status = 200

@@ -16,13 +16,14 @@ g_not_meta_data = ["DeviceId", "ActivityId", "ActivityName", "User Name", "Latit
 class Api(object):
     """Class for managing API messages."""
 
-    def __init__(self, user_mgr, data_mgr, analysis_scheduler, temp_dir, user_id):
+    def __init__(self, user_mgr, data_mgr, analysis_scheduler, temp_dir, user_id, root_url):
         super(Api, self).__init__()
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
         self.analysis_scheduler = analysis_scheduler
         self.temp_dir = temp_dir
         self.user_id = user_id
+        self.root_url = root_url
 
     def log_error(self, log_str):
         """Writes an error message to the log file."""
@@ -296,6 +297,40 @@ class Api(object):
         # Delete the user.
         self.user_mgr.delete_user(self.user_id)
         return True, ""
+
+    def handle_list_activities(self, values):
+        """Removes the specified activity."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise Exception("Empty username.")
+
+        # Get the user details.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+
+        # Get the activiites that belong to the logged in user.
+        matched_activities = []
+        activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
+        if activities is not None and isinstance(activities, list):
+            for activity in activities:
+                if Keys.ACTIVITY_NAME_KEY in activity:
+                    activity_name = activity[Keys.ACTIVITY_NAME_KEY]
+                else:
+                    activity_name = Keys.TYPE_UNSPECIFIED_ACTIVITY
+                if Keys.ACTIVITY_TYPE_KEY in activity:
+                    activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
+                else:
+                    activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+
+                if Keys.ACTIVITY_TIME_KEY in activity and Keys.ACTIVITY_ID_KEY in activity:
+                    url = self.root_url + "/activity/" + activity[Keys.ACTIVITY_ID_KEY]
+                    temp_activity = {'name':activity_name, 'type':activity_type, 'url':url, 'time':int(activity[Keys.ACTIVITY_TIME_KEY])}
+                matched_activities.append(temp_activity)
+        json_result = json.dumps(matched_activities, ensure_ascii=False)
+        return True, json_result
 
     def handle_delete_activity(self, values):
         """Removes the specified activity."""
@@ -665,6 +700,8 @@ class Api(object):
             return self.handle_update_password(values)
         elif request == 'delete_user':
             return self.handle_delete_user(values)
+        elif request == 'list_activities':
+            return self.handle_list_activities(values)
         elif request == 'delete_activity':
             return self.handle_delete_activity(values)
         elif request == 'add_activity':
