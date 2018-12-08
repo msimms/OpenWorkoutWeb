@@ -58,6 +58,9 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Better support for the flask web application framework.
 
 ### 0.6
+* Ability to upload an entire directory.
+
+### 0.6
 * Ability to import an entire directory of files.
 
 ## Social
