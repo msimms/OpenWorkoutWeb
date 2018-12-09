@@ -19,7 +19,7 @@
 <body>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.print.min.css">
+<link rel="stylesheet" media="print" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.print.min.css">
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -100,9 +100,9 @@
 	{
 		$('#calendar').fullCalendar({
 			header: {
-				left: '',
+				left: 'prev,next,today',
 				center: 'title',
-				right: ''
+				right: 'month,agendaWeek,agendaDay,listWeek'
 			},
 			navLinks: true, // can click day/week names to navigate views
 			editable: false,
@@ -127,13 +127,6 @@ ${nav}
 
 <section>
 <div id='calendar'></div>
-</section>
-
-<section>
-<p align="center">
-	<button id='prev'>prev</button>
-	<button id='next'>next</button>
-</p>
 </section>
 
 </body>
