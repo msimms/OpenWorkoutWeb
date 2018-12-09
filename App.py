@@ -275,16 +275,16 @@ class App(object):
             comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>"
         return comments_str
 
-    def render_page_for_lifting_activity(self, email, user_realname, activity_id, accels, logged_in_username, is_live):
+    def render_page_for_lifting_activity(self, email, user_realname, activity_id, activity, logged_in_username, is_live):
         """Helper function for rendering the map corresonding to a specific device and activity."""
 
         # Is the user logged in?
         logged_in = logged_in_username is not None
 
-        # Read the accelerometer data.
-        if accels is None or len(accels) == 0:
-            my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
+        # Read the accelerometer data (if any).
+        accels = []
+        if Keys.APP_ACCELEROMETER_KEY in activity:
+            accels = activity[Keys.APP_ACCELEROMETER_KEY]
 
         # Format the accelerometer data.
         x_axis = ""
@@ -294,6 +294,21 @@ class App(object):
             x_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_X]) + " },\n"
             y_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Y]) + " },\n"
             z_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Z]) + " },\n"
+
+        # Build the details view.
+        details = ""
+        if Keys.APP_SETS_KEY in activity:
+            details = "<table>\n<td>Set</td><td>Rep Count</td><tr>"
+            sets = activity[Keys.APP_SETS_KEY]
+            set_num = 1
+            for current_set in sets:
+                details += "<td>"
+                details += str(set_num)
+                details += "</td><td>"
+                details += str(current_set)
+                details += "</td><tr>"
+                set_num = set_num + 1
+            details += "</table>\n"
 
         # Build the summary data view.
         summary = "<ul>\n"
@@ -324,7 +339,7 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.lifting_activity_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, comments=comments_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, comments=comments_str)
 
     def render_metadata_for_page(self, key, activity_id):
         """Helper function for processing meatadata and formatting it for display."""
@@ -488,8 +503,8 @@ class App(object):
         try:
             if Keys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[Keys.ACTIVITY_LOCATIONS_KEY]) > 0:
                 return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity[Keys.ACTIVITY_LOCATIONS_KEY], logged_in_userid, is_live)
-            elif Keys.APP_ACCELEROMETER_KEY in activity:
-                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity[Keys.APP_ACCELEROMETER_KEY], logged_in_userid, is_live)
+            elif Keys.APP_ACCELEROMETER_KEY in activity or Keys.APP_SETS_KEY in activity:
+                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity, logged_in_userid, is_live)
             else:
                 my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
                 return my_template.render(nav=self.create_navbar(logged_in_username is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
