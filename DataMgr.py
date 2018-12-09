@@ -84,6 +84,12 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         return self.database.create_metadata_list(activity_id, key, values)
 
+    def create_sets_and_reps_data(self, activity_id, sets):
+        """Create method for activity set and rep data."""
+        if self.database is None:
+            raise Exception("No database.")
+        return self.database.create_sets_and_reps_data(activity_id, sets)
+
     def create_accelerometer_reading(self, device_str, activity_id, accels):
         """Adds several accelerometer readings to the database. 'accels' is an array of arrays in the form [time, x, y, z]."""
         if self.database is None:

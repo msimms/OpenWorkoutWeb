@@ -321,18 +321,16 @@ class Api(object):
         # Convert the activities list to an array of JSON objects for return to the client.
         if activities is not None and isinstance(activities, list):
             for activity in activities:
-                if Keys.ACTIVITY_NAME_KEY in activity:
-                    activity_name = activity[Keys.ACTIVITY_NAME_KEY]
-                else:
-                    activity_name = Keys.TYPE_UNSPECIFIED_ACTIVITY
+                activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+                activity_name = Keys.UNNAMED_ACTIVITY_TITLE
                 if Keys.ACTIVITY_TYPE_KEY in activity:
                     activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
-                else:
-                    activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+                if Keys.ACTIVITY_NAME_KEY in activity:
+                    activity_name = activity[Keys.ACTIVITY_NAME_KEY]
 
                 if Keys.ACTIVITY_TIME_KEY in activity and Keys.ACTIVITY_ID_KEY in activity:
                     url = self.root_url + "/activity/" + activity[Keys.ACTIVITY_ID_KEY]
-                    temp_activity = {'name':activity_name, 'type':activity_type, 'url':url, 'time':int(activity[Keys.ACTIVITY_TIME_KEY])}
+                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time':int(activity[Keys.ACTIVITY_TIME_KEY])}
                 matched_activities.append(temp_activity)
         json_result = json.dumps(matched_activities, ensure_ascii=False)
         return True, json_result
@@ -365,23 +363,78 @@ class Api(object):
 
     def handle_add_time_and_distance_activity(self, values):
         """Called when an API message to add a new activity based on time and distance is received."""
-        if Keys.APP_TIME_KEY not in values:
-            raise Exception("Time not specified.")
+        if self.user_id is None:
+            raise Exception("Not logged in.")
         if Keys.APP_DISTANCE_KEY not in values:
             raise Exception("Distance not specified.")
+        if Keys.ACTIVITY_TIME_KEY not in values:
+            raise Exception("Activity start time not specified.")
+        if Keys.ACTIVITY_TYPE_KEY not in values:
+            raise Exception("Activity type not specified.")
 
-        activity_id = self.data_mgr.create_activity_id()
-        return True, ""
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise Exception("Empty username.")
+
+        # Validate the activity start time.
+        start_time = values[Keys.ACTIVITY_TIME_KEY]
+        if not InputChecker.is_integer(start_time):
+            raise Exception("Invalid start time.")
+
+        # Add the activity to the database.
+        activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
+        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time))
+
+        return ""
 
     def handle_add_sets_and_reps_activity(self, values):
         """Called when an API message to add a new activity based on sets and reps is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
         if Keys.APP_SETS_KEY not in values:
             raise Exception("Sets not specified.")
+        if Keys.ACTIVITY_TIME_KEY not in values:
+            raise Exception("Activity start time not specified.")
+        if Keys.ACTIVITY_TYPE_KEY not in values:
+            raise Exception("Activity type not specified.")
 
-        activity_id = self.data_mgr.create_activity_id()
-        sets = values[Keys.APP_SETS_KEY]
-        print sets
-        return True, ""
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise Exception("Empty username.")
+
+        # Convert the array string to an actual array (note: I realize I could use eval for this, but that seems dangerous)
+        sets = urllib.unquote_plus(values[Keys.APP_SETS_KEY])
+        if len(sets) <= 2:
+            raise Exception("Malformed set data.")
+        sets = sets[1:-1] # Remove the brackets
+        sets = sets.split(',')
+        if len(sets) == 0:
+            raise Exception("Set data was not specified.")
+
+        # Make sure everything is a number.
+        new_sets = []
+        for current_set in sets:
+            rep_count = int(current_set)
+            if rep_count > 0:
+                new_sets.append(rep_count)
+
+        # Make sure we got at least one valid set.
+        if len(new_sets) == 0:
+            raise Exception("Set data was not specified.")
+
+        # Validate the activity start time.
+        start_time = values[Keys.ACTIVITY_TIME_KEY]
+        if not InputChecker.is_integer(start_time):
+            raise Exception("Invalid start time.")
+
+        # Add the activity to the database.
+        activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
+        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time))
+        self.data_mgr.create_sets_and_reps_data(activity_id, new_sets)
+
+        return ""
 
     def handle_add_activity(self, values):
         """Called when an API message to add a new activity is received."""
@@ -390,14 +443,16 @@ class Api(object):
         if Keys.ACTIVITY_TYPE_KEY not in values:
             raise Exception("Activity type not specified.")
 
+        activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
         switcher = {
             Keys.TYPE_RUNNING_KEY : self.handle_add_time_and_distance_activity,
             Keys.TYPE_CYCLING_KEY : self.handle_add_time_and_distance_activity,
             Keys.TYPE_SWIMMING_KEY : self.handle_add_time_and_distance_activity,
-            Keys.TYPE_PULL_UPS_KEY : self.handle_add_sets_and_reps_activity
+            Keys.TYPE_PULL_UPS_KEY : self.handle_add_sets_and_reps_activity,
+            Keys.TYPE_PUSH_UPS_KEY : self.handle_add_sets_and_reps_activity
         }
 
-        func = switcher.get(values[Keys.ACTIVITY_TYPE_KEY], lambda: "Invalid activity type")
+        func = switcher.get(activity_type, lambda: "Invalid activity type")
         return True, func(values)
 
     def handle_upload_activity_file(self, username, values):

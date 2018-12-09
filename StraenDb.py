@@ -911,6 +911,26 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def create_sets_and_reps_data(self, activity_id, sets):
+        """Create method for a list of of metaadata values."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_sets_and_reps_data.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if sets is None:
+            self.log_error(MongoDatabase.create_sets_and_reps_data.__name__ + ": Unexpected empty object: sets")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                activity[Keys.APP_SETS_KEY] = sets
+                self.activities_collection.save(activity)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def create_accelerometer_reading(self, device_str, activity_id, accels):
         """Adds several accelerometer readings to the database. 'accels' is an array of arrays in the form [time, x, y, z]."""
         if device_str is None:

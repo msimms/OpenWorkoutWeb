@@ -34,22 +34,28 @@
 		var dict = [];
 		var sets = [];
 		var result_text = {};
-		var activityType = document.getElementById("activity_type").value;
 		var innerDiv = document.getElementById("manual_entry_div");
+		var startDate = document.getElementById("startDate").value;
+		var startTime = document.getElementById("startTime").value;
+		var activityStartObj = new Date(startDate + " " + startTime);
+		var activityStart = activityStartObj.getTime() / 1000;
+		var activityType = document.getElementById("activity_type").value;
 
 		for (var i = 0; i < innerDiv.children.length; i++)
 		{
 			var divChild = innerDiv.children[i];
+
 			if (divChild.name == "Repititions")
 			{
-				sets.push(divChild.value);
+				sets.push(parseInt(divChild.value));
 			}
 			else if ((divChild.name == "Time") || (divChild.name == "Distance"))
 			{
-				dict.push({[divChild.name] : divChild.value});
+				dict.push({[divChild.name] : parseFloat(divChild.value)});
 			}
 		}
 		dict.push({["Sets"] : JSON.stringify(sets)});
+		dict.push({["time"] : activityStart});
 		dict.push({["activity_type"] : activityType});
 
 		if (send_post_request(the_url, dict, result_text))
@@ -90,24 +96,24 @@
 		innerDiv.appendChild(dateLabel);
 
 		// Add the date picker.
-		var newDate = document.createElement('input');
-		newDate.type = "input";
-		newDate.id = "date";
-		newDate.className = "pickDate"; 
-		$(newDate).datepicker();
-		innerDiv.appendChild(newDate);
+		var startDate = document.createElement('input');
+		startDate.type = "input";
+		startDate.id = "startDate";
+		startDate.className = "pickDate"; 
+		$(startDate).datepicker();
+		innerDiv.appendChild(startDate);
 
 		// Add a label for the start time picker.
 		var dateLabel = document.createTextNode("Start Time: ");
 		innerDiv.appendChild(dateLabel);
 
 		// Add the start time picker.
-		var newStartTime = document.createElement('input');
-		newStartTime.type = "input";
-		newStartTime.id = "time";
-		newStartTime.className = "pickTime"; 
-		$(newStartTime).timepicker({ 'timeFormat': 'h:i A' });
-		innerDiv.appendChild(newStartTime);
+		var startTime = document.createElement('input');
+		startTime.type = "input";
+		startTime.id = "startTime";
+		startTime.className = "pickTime"; 
+		$(startTime).timepicker({ 'timeFormat': 'h:i A' });
+		innerDiv.appendChild(startTime);
 
 		// Add a line break.
 		var br = document.createElement("br");
