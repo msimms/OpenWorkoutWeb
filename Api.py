@@ -313,7 +313,12 @@ class Api(object):
 
         # Get the activiites that belong to the logged in user.
         matched_activities = []
-        activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
+        if Keys.FOLLOWING_KEY in values:
+            activities = self.data_mgr.retrieve_all_activities_visible_to_user(user_id, user_realname, None, None)
+        else:
+            activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
+
+        # Convert the activities list to an array of JSON objects for return to the client.
         if activities is not None and isinstance(activities, list):
             for activity in activities:
                 if Keys.ACTIVITY_NAME_KEY in activity:
