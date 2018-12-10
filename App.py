@@ -298,7 +298,7 @@ class App(object):
         # Build the details view.
         details = ""
         if Keys.APP_SETS_KEY in activity:
-            details = "<table>\n<td>Set</td><td>Rep Count</td><tr>"
+            details = "<table>\n<td><b>Set</b></td><td><b>Rep Count</b></td><tr>"
             sets = activity[Keys.APP_SETS_KEY]
             set_num = 1
             for current_set in sets:
