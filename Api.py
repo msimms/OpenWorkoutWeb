@@ -480,7 +480,7 @@ class Api(object):
                 local_file.write(uploaded_file_data)
 
             # Parse the file and store it's contents in the database.
-            success, device_id, activity_id = self.data_mgr.import_file(username, self.user_id, local_file_name, uploaded_file_ext)
+            success, device_id, activity_id = self.data_mgr.import_file(username, self.user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
             if not success:
                 raise Exception('Unhandled exception in upload when processing ' + uploaded_file_name)
 

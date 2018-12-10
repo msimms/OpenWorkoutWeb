@@ -316,7 +316,7 @@ class App(object):
         if activity_type is None:
             activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
-        name = self.data_mgr.retrieve_metadata(Keys.APP_NAME_KEY, activity_id)
+        name = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_NAME_KEY, activity_id)
         if name is None:
             name = Keys.UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
@@ -401,7 +401,7 @@ class App(object):
         heart_rates_str, max_heart_rate = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity_id)
         cadences_str, max_cadence = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity_id)
         powers_str, max_power = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity_id)
-        name = self.data_mgr.retrieve_metadata(Keys.APP_NAME_KEY, activity_id)
+        name = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_NAME_KEY, activity_id)
         activity_type = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
         if activity_type is None:
             activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
@@ -840,7 +840,7 @@ class App(object):
                 local_file.write(data)
 
         # Parse the file and store it's contents in the database. Once imported, queue the activity for detailed analysis.
-        success, device_id, activity_id = self.data_mgr.import_file(username, user_id, local_file_name, uploaded_file_ext)
+        success, device_id, activity_id = self.data_mgr.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
         if success:
             self.analysis_scheduler.add_to_queue(activity_id)
         else:

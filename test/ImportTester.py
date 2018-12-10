@@ -221,7 +221,7 @@ def main():
                 print(title_str)
                 print("=" * len(title_str))
                 start_time = time.time()
-                success, device_id, activity_id = importer.import_file("test user", "", full_path, temp_file_ext)
+                success, device_id, activity_id = importer.import_file("test user", "", full_path, current_file, temp_file_ext)
                 if success:
                     elapsed_time = time.time() - start_time
                     total_time = total_time + elapsed_time

@@ -100,10 +100,10 @@ class DataMgr(Importer.ActivityWriter):
         """Inherited from ActivityWriter. Called for post-processing."""
         pass
 
-    def import_file(self, username, user_id, local_file_name, file_extension):
+    def import_file(self, username, user_id, local_file_name, uploaded_file_name, file_extension):
         """Imports the contents of a local file into the database."""
         importer = Importer.Importer(self)
-        return importer.import_file(username, user_id, local_file_name, file_extension)
+        return importer.import_file(username, user_id, local_file_name, uploaded_file_name, file_extension)
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
