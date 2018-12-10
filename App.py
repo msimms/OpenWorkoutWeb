@@ -507,7 +507,7 @@ class App(object):
                 return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity, logged_in_userid, is_live)
             else:
                 my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
-                return my_template.render(nav=self.create_navbar(logged_in_username is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
+                return my_template.render(nav=self.create_navbar(logged_in_userid is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
