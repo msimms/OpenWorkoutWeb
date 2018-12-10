@@ -472,6 +472,12 @@ class Api(object):
         uploaded_file_name = urllib.unquote_plus(values[Keys.UPLOADED_FILE_NAME_KEY])
         uploaded_file_data = urllib.unquote_plus(values[Keys.UPLOADED_FILE_DATA_KEY])
 
+        # Check for empty.
+        if len(uploaded_file_name) == 0:
+            raise Exception('Empty file name.')
+        if len(uploaded_file_data) == 0:
+            raise Exception('Empty file data for ' + uploaded_file_name + '.')
+
         # Generate a random name for the local file.
         upload_path = os.path.normpath(self.temp_dir)
         uploaded_file_name, uploaded_file_ext = os.path.splitext(uploaded_file_name)
@@ -486,7 +492,7 @@ class Api(object):
             # Parse the file and store it's contents in the database.
             success, device_id, activity_id = self.data_mgr.import_file(username, self.user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
             if not success:
-                raise Exception('Unhandled exception in upload when processing ' + uploaded_file_name)
+                raise Exception('Unhandled exception in upload when processing ' + uploaded_file_name + '.')
 
             # Schedule for analysis.
             self.analysis_scheduler.add_to_queue(activity_id)

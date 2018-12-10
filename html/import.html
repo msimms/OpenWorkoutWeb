@@ -166,19 +166,23 @@
 		var result_text = {};
 		var reader = new FileReader();
 
+		reader.onload = function(e)
+		{
+			text = reader.result;
+
+			dict.push({["uploaded_file_name"] : fileObj.name});
+			dict.push({["uploaded_file_data"] : text});
+
+			if (send_post_request(the_url, dict, result_text))
+			{
+				window.location.replace("${root_url}/my_activities");
+			}
+			else
+			{
+				alert(result_text.value);
+			}
+		}
 		reader.readAsText(fileObj);
-
-		dict.push({["uploaded_file_name"] : fileObj.name});
-		dict.push({["uploaded_file_data"] : reader.result});
-
-		if (send_post_request(the_url, dict, result_text))
-		{
-			window.location.replace("${root_url}/my_activities");
-		}
-		else
-		{
-			alert(result_text.value);
-		}
 	}
 
 </script>
