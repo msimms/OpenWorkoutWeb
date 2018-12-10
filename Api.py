@@ -367,6 +367,8 @@ class Api(object):
             raise Exception("Not logged in.")
         if Keys.APP_DISTANCE_KEY not in values:
             raise Exception("Distance not specified.")
+        if Keys.APP_DURATION_KEY not in values:
+            raise Exception("Duration not specified.")
         if Keys.ACTIVITY_TIME_KEY not in values:
             raise Exception("Activity start time not specified.")
         if Keys.ACTIVITY_TYPE_KEY not in values:
@@ -385,6 +387,8 @@ class Api(object):
         # Add the activity to the database.
         activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
         device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time))
+        self.data_mgr.create_metadata(activity_id, 0, Keys.APP_DISTANCE_KEY, float(values[Keys.APP_DISTANCE_KEY]), False)
+        self.data_mgr.create_metadata(activity_id, 0, Keys.APP_DURATION_KEY, float(values[Keys.APP_DURATION_KEY]), False)
 
         return ""
 
