@@ -309,12 +309,12 @@ class Api(object):
             raise Exception("Empty username.")
 
         # Get the user details.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        _, _, user_realname = self.user_mgr.retrieve_user(username)
 
         # Get the activiites that belong to the logged in user.
         matched_activities = []
         if Keys.FOLLOWING_KEY in values:
-            activities = self.data_mgr.retrieve_all_activities_visible_to_user(user_id, user_realname, None, None)
+            activities = self.data_mgr.retrieve_all_activities_visible_to_user(self.user_id, user_realname, None, None)
         else:
             activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
 

@@ -969,6 +969,13 @@ class App(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, privacy_options=privacy_options, unit_options=unit_options)
 
+    @statistics
+    def api(self, user_id, method, params):
+        """Handles an API request."""
+        api = Api.Api(self.user_mgr, self.data_mgr, self.analysis_scheduler, self.tempfile_dir, user_id, self.root_url)
+        handled, response = api.handle_api_1_0_request(method, params)
+        return handled, response
+
     def submit_login(self, email, password):
         """Processes a login."""
         if email is None or password is None:

@@ -360,8 +360,7 @@ def api(version, method):
 
         # Process the API request.
         if version == '1.0':
-            api = Api.Api(g_app.user_mgr, g_app.data_mgr, g_app.analysis_scheduler, g_app.tempfile_dir, user_id, g_app.root_url)
-            handled, response = api.handle_api_1_0_request(method, params)
+            handled, response = g_app.api(user_id, method, params)
             if not handled:
                 response = "Failed to handle request: " + str(method)
                 g_app.log_error(response)
