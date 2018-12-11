@@ -86,6 +86,7 @@ class AnalysisScheduler(threading.Thread):
     def terminate(self):
         """Destructor"""
         print("Terminating the analysis scheduler...")
+        self.queue = []
         self.quitting = True
         print("Terminating analysis workers...")
         self.mutex.acquire()
