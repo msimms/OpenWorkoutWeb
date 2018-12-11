@@ -48,7 +48,8 @@ def statistics(function):
             g_stats[function.__name__] = g_stats[function.__name__] + 1
         except:
             g_stats[function.__name__] = 1
-        g_stats_lock.release()
+        finally:
+            g_stats_lock.release()
         return function(*args, **kwargs)
     return wrapper
 
@@ -120,14 +121,16 @@ class App(object):
 
         # Build a list of table rows from the device information.
         g_stats_lock.acquire()
-        stats_str = "<td><b>Page</b></td><td><b>Num Accesses</b></td><tr>\n"
-        for key, value in g_stats.iteritems():
-            stats_str += "\t\t<tr><td>"
-            stats_str += str(key)
-            stats_str += "</td><td>"
-            stats_str += str(value)
-            stats_str += "</td></tr>\n"
-        g_stats_lock.release()
+        try:
+            stats_str = "<td><b>Page</b></td><td><b>Num Accesses</b></td><tr>\n"
+            for key, value in g_stats.iteritems():
+                stats_str += "\t\t<tr><td>"
+                stats_str += str(key)
+                stats_str += "</td><td>"
+                stats_str += str(value)
+                stats_str += "</td></tr>\n"
+        finally:
+            g_stats_lock.release()
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'stats.html')
