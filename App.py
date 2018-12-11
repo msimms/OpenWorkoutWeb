@@ -571,12 +571,13 @@ class App(object):
         return row
 
     def error(self, error_str=None):
-        """Renders the errorpage."""
+        """Renders the error page."""
         try:
             error_html_file = os.path.join(self.root_dir, HTML_DIR, 'error.html')
             my_template = Template(filename=error_html_file, module_directory=self.tempmod_dir)
             if error_str is None:
                 error_str = "Internal Error."
+            return my_template.render(error=error_str)
         except:
             pass
         return ""
