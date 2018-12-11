@@ -613,8 +613,12 @@ class Api(object):
         if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
 
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
+
         exporter = Exporter.Exporter()
-        result = exporter.export(self.data_mgr, values[Keys.ACTIVITY_ID_KEY])
+        result = exporter.export(self.data_mgr, activity_id)
         return True, result
 
     def handle_claim_device(self, values):
