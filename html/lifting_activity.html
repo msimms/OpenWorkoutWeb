@@ -145,7 +145,7 @@ ${zAxis}
 		if (send_post_request(the_url, dict, result_text))
 			window.location.reload();
 		else
-			alert("An error occurred!");
+			alert(result_text.value);
 	}
 </script>
 

@@ -286,7 +286,7 @@ class Api(object):
             raise Exception("Empty username.")
 
         # Reauthenticate the user.
-        password = values[Keys.PASSWORD_KEY]
+        password = urllib.unquote_plus(values[Keys.PASSWORD_KEY])
         if not self.user_mgr.authenticate_user(username, password):
             raise Exception("Authentication failed.")
 
@@ -343,6 +343,8 @@ class Api(object):
 
         # Get the device and activity IDs from the push request.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
 
         # Get the activiites that belong to the logged in user.
         activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None)
@@ -633,7 +635,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise Exception("Invalid activity ID.")
 
-        tags = values[Keys.ACTIVITY_TAGS_KEY]
+        tags = urllib.unquote_plus(values[Keys.ACTIVITY_TAGS_KEY])
         if not InputChecker.is_valid(tags):
             raise Exception("Invalid parameter.")
 
@@ -667,7 +669,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise Exception("Invalid activity ID.")
 
-        comment = values[Keys.ACTIVITY_COMMENT_KEY]
+        comment = urllib.unquote_plus(values[Keys.ACTIVITY_COMMENT_KEY])
         if not InputChecker.is_valid(comment):
             raise Exception("Invalid parameter.")
 
