@@ -54,6 +54,22 @@ class MongoDatabase(Database.Database):
             self.log_error("Could not connect to MongoDB: %s" % e)
         return False
 
+    def total_users_count(self):
+        """Returns the number of users in the database."""
+        try:
+            return self.users_collection.count()
+        except:
+            pass
+        return 0
+
+    def total_activities_count(self):
+        """Returns the number of activities in the database."""
+        try:
+            return self.activities_collection.count()
+        except:
+            pass
+        return 0
+
     def create_user(self, username, realname, passhash):
         """Create method for a user."""
         if username is None:

@@ -38,6 +38,22 @@ class DataMgr(Importer.ActivityWriter):
         self.import_scheduler = None
         self.database = None
 
+    def total_users_count(self):
+        """Returns the number of users in the database."""
+        return self.database.total_users_count()
+
+    def total_activities_count(self):
+        """Returns the number of activities in the database."""
+        return self.database.total_activities_count()
+
+    def total_queued_for_analysis(self):
+        """Returns the number of activities queued for analysis."""
+        return self.analysis_scheduler.queue_depth()
+
+    def total_queued_for_import(self):
+        """Returns the number of activities queued for analysis."""
+        return self.import_scheduler.queue_depth()
+
     def create_activity_id(self):
         """Generates a new activity ID."""
         return str(uuid.uuid4())

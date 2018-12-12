@@ -99,6 +99,16 @@ class AnalysisScheduler(threading.Thread):
         finally:
             self.mutex.release()
 
+    def queue_depth(self):
+        """Returns the number of items in the queue."""
+        result = 0
+        self.mutex.acquire()
+        try:
+            result = len(self.workers)
+        finally:
+            self.mutex.release()
+        return result
+
     def add_to_queue(self, activity_id):
         """Adds the activity ID to the list of activities to be analyzed."""
         self.mutex.acquire()

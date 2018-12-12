@@ -115,20 +115,28 @@ class App(object):
         # Build a list of table rows from the device information.
         g_stats_lock.acquire()
         try:
-            stats_str = "<td><b>Page</b></td><td><b>Num Accesses</b></td><tr>\n"
+            page_stats_str = "<td><b>Page</b></td><td><b>Num Accesses</b></td><tr>\n"
             for key, value in g_stats.iteritems():
-                stats_str += "\t\t<tr><td>"
-                stats_str += str(key)
-                stats_str += "</td><td>"
-                stats_str += str(value)
-                stats_str += "</td></tr>\n"
+                page_stats_str += "\t\t<tr><td>"
+                page_stats_str += str(key)
+                page_stats_str += "</td><td>"
+                page_stats_str += str(value)
+                page_stats_str += "</td></tr>\n"
         finally:
             g_stats_lock.release()
+
+        # The number of users and activities.
+        total_users_str = str(self.data_mgr.total_users_count())
+        total_activities_str = str(self.data_mgr.total_activities_count())
+
+        # The number of things queued for processing.
+        total_queued_for_analysis_str = str(self.data_mgr.total_queued_for_analysis())
+        total_queued_for_import_str = str(self.data_mgr.total_queued_for_import())
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'stats.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, page_stats=stats_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, page_stats=page_stats_str, total_activities=total_activities_str, total_users=total_users_str, queued_for_analysis=total_queued_for_analysis_str, queued_for_import=total_queued_for_import_str)
 
     def update_track(self, activity_id=None, num=None):
         if activity_id is None:

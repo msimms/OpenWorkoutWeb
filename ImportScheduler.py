@@ -44,6 +44,16 @@ class ImportScheduler(threading.Thread):
         self.queue = []
         self.quitting = True
 
+    def queue_depth(self):
+        """Returns the number of items in the queue."""
+        result = 0
+        self.mutex.acquire()
+        try:
+            result = len(self.workers)
+        finally:
+            self.mutex.release()
+        return result
+
     def add_to_queue(self, username, user_id, local_file_name, uploaded_file_name, file_extension):
         """Adds the activity ID to the list of activities to be analyzed."""
         self.mutex.acquire()
