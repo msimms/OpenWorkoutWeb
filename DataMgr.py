@@ -2,9 +2,11 @@
 """Data store abstraction"""
 
 import uuid
+import AnalysisScheduler
+import Importer
+import ImportScheduler
 import Keys
 import StraenDb
-import Importer
 
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
@@ -18,15 +20,31 @@ class DataMgr(Importer.ActivityWriter):
     def __init__(self, root_dir):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
+        self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler(self, 2)
+        self.analysis_scheduler.start()
+        self.import_scheduler = ImportScheduler.ImportScheduler(self, 2)
+        self.import_scheduler.start()
         super(Importer.ActivityWriter, self).__init__()
 
     def terminate(self):
         """Destructor"""
+        print("Terminating data analysis...")
+        self.analysis_scheduler.terminate()
+        self.analysis_scheduler.join()
+        self.analysis_scheduler = None
+        print("Terminating file import...")
+        self.import_scheduler.terminate()
+        self.import_scheduler.join()
+        self.import_scheduler = None
         self.database = None
 
     def create_activity_id(self):
         """Generates a new activity ID."""
         return str(uuid.uuid4())
+
+    def analyze(self, activity_id):
+        """Schedules the specified activity for analysis."""
+        self.analysis_scheduler.add_to_queue(activity_id)
 
     def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
@@ -102,8 +120,7 @@ class DataMgr(Importer.ActivityWriter):
 
     def import_file(self, username, user_id, local_file_name, uploaded_file_name, file_extension):
         """Imports the contents of a local file into the database."""
-        importer = Importer.Importer(self)
-        return importer.import_file(username, user_id, local_file_name, uploaded_file_name, file_extension)
+        self.import_scheduler.add_to_queue(user_id, local_file_name, uploaded_file_name, file_extension)
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""

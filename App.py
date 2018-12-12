@@ -13,7 +13,6 @@ import threading
 import traceback
 import uuid
 
-import AnalysisScheduler
 import Keys
 import LocationAnalyzer
 import Api
@@ -77,8 +76,6 @@ class App(object):
         self.map_single_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
         self.map_multi_html_file = os.path.join(root_dir, HTML_DIR, 'map_multi_google.html')
         self.error_logged_in_html_file = os.path.join(root_dir, HTML_DIR, 'error_logged_in.html')
-        self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler(self.data_mgr, 2)
-        self.analysis_scheduler.start()
 
         self.tempfile_dir = os.path.join(root_dir, 'tempfile')
         if not os.path.exists(self.tempfile_dir):
@@ -89,10 +86,6 @@ class App(object):
     def terminate(self):
         """Destructor"""
         print("Terminating the application...")
-        print("Terminating data analysis...")
-        self.analysis_scheduler.terminate()
-        self.analysis_scheduler.join()
-        self.analysis_scheduler = None
         print("Terminating data management...")
         self.data_mgr.terminate()
         self.data_mgr = None
@@ -416,7 +409,7 @@ class App(object):
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None:
-            self.analysis_scheduler.add_to_queue(activity_id)
+            self.data_mgr.analyze(activity_id)
 
         # Build the summary data view.
         summary = "<ul>\n"
@@ -843,15 +836,8 @@ class App(object):
                     break
                 local_file.write(data)
 
-        # Parse the file and store it's contents in the database. Once imported, queue the activity for detailed analysis.
-        success, device_id, activity_id = self.data_mgr.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
-        if success:
-            self.analysis_scheduler.add_to_queue(activity_id)
-        else:
-            self.log_error('Unhandled exception in upload when processing ' + uploaded_file_name)
-
-        # Remove the local file.
-        os.remove(local_file_name)
+        # Parse the file and store it's contents in the database.
+        self.data_mgr.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
 
         raise RedirectException(DEFAULT_LOGGED_IN_URL)
 
@@ -976,7 +962,7 @@ class App(object):
     @statistics
     def api(self, user_id, method, params):
         """Handles an API request."""
-        api = Api.Api(self.user_mgr, self.data_mgr, self.analysis_scheduler, self.tempfile_dir, user_id, self.root_url)
+        api = Api.Api(self.user_mgr, self.data_mgr, self.tempfile_dir, user_id, self.root_url)
         handled, response = api.handle_api_1_0_request(method, params)
         return handled, response
 

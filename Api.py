@@ -16,11 +16,10 @@ g_not_meta_data = ["DeviceId", "ActivityId", "ActivityName", "User Name", "Latit
 class Api(object):
     """Class for managing API messages."""
 
-    def __init__(self, user_mgr, data_mgr, analysis_scheduler, temp_dir, user_id, root_url):
+    def __init__(self, user_mgr, data_mgr, temp_dir, user_id, root_url):
         super(Api, self).__init__()
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
-        self.analysis_scheduler = analysis_scheduler
         self.temp_dir = temp_dir
         self.user_id = user_id
         self.root_url = root_url
@@ -146,7 +145,7 @@ class Api(object):
                 self.user_mgr.create_user_device(user_id, device_str)
 
         # Schedule for analysis.
-        self.analysis_scheduler.add_to_queue(activity_id)
+        self.data_mgr.analyze(activity_id)
 
         return True, ""
 
@@ -484,22 +483,12 @@ class Api(object):
         local_file_name = os.path.join(upload_path, str(uuid.uuid4()))
         local_file_name = local_file_name + uploaded_file_ext
 
-        try:
-            # Write the file.
-            with open(local_file_name, 'wb') as local_file:
-                local_file.write(uploaded_file_data)
+        # Write the file.
+        with open(local_file_name, 'wb') as local_file:
+            local_file.write(uploaded_file_data)
 
-            # Parse the file and store it's contents in the database.
-            success, device_id, activity_id = self.data_mgr.import_file(username, self.user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
-            if not success:
-                raise Exception('Unhandled exception in upload when processing ' + uploaded_file_name + '.')
-
-            # Schedule for analysis.
-            self.analysis_scheduler.add_to_queue(activity_id)
-
-        finally:
-            # Remove the local file.
-            os.remove(local_file_name)
+        # Parse the file and store it's contents in the database.
+        self.data_mgr.import_file(username, self.user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
 
         return True, ""
 
@@ -640,11 +629,15 @@ class Api(object):
         if Keys.ACTIVITY_TAGS_KEY not in values:
             raise Exception("Invalid parameter.")
 
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
+
         tags = values[Keys.ACTIVITY_TAGS_KEY]
         if not InputChecker.is_valid(tags):
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.create_tag(values[Keys.ACTIVITY_ID_KEY], tags)
+        result = self.data_mgr.create_tag(activity_id, tags)
         return result, ""
 
     def handle_list_tags(self, values):
@@ -654,7 +647,11 @@ class Api(object):
         if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.retrieve_tags(values[Keys.ACTIVITY_ID_KEY])
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
+
+        result = self.data_mgr.retrieve_tags(activity_id)
         return result, ""
 
     def handle_create_comment(self, values):
@@ -666,11 +663,15 @@ class Api(object):
         if Keys.ACTIVITY_COMMENT_KEY not in values:
             raise Exception("Invalid parameter.")
 
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
+
         comment = values[Keys.ACTIVITY_COMMENT_KEY]
         if not InputChecker.is_valid(comment):
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.create_activity_comment(values[Keys.ACTIVITY_ID_KEY], self.user_id, comment)
+        result = self.data_mgr.create_activity_comment(activity_id, self.user_id, comment)
         return result, ""
 
     def handle_list_comments(self, values):
@@ -680,7 +681,11 @@ class Api(object):
         if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.retrieve_comments(values[Keys.ACTIVITY_ID_KEY])
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
+
+        result = self.data_mgr.retrieve_comments(activity_id)
         return result, ""
 
     def handle_update_settings(self, values):
