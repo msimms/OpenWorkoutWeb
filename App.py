@@ -248,6 +248,7 @@ class App(object):
             navbar_str += \
                 "\t\t<li><a href=\"" + self.root_url + "/my_activities/\">My Activities</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/all_activities/\">All Activities</a></li>\n" \
+                "\t\t<li><a href=\"" + self.root_url + "/workouts/\">Workouts</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/following/\">Following</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/followers/\">Followers</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/device_list/\">Devices</a></li>\n" \
@@ -717,6 +718,26 @@ class App(object):
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'all_activities.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+
+    @statistics
+    def workouts(self):
+        """Renders the list of all workouts the specified user is allowed to view."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 

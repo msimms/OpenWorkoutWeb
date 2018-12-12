@@ -225,6 +225,20 @@ class StraenWeb(object):
 
     @cherrypy.expose
     @require()
+    def workouts(self, *args, **kw):
+        """Renders the list of workouts the specified user is allowed to view."""
+        try:
+            return self.app.workouts()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error('Unhandled exception in ' + StraenWeb.workouts.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
     def following(self, *args, **kw):
         """Renders the list of users the specified user is following."""
         try:
