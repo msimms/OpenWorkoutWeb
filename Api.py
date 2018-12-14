@@ -528,13 +528,6 @@ class Api(object):
         """Called when an API message to list the users you are following is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if Keys.TARGET_EMAIL_KEY not in values:
-            raise Exception("Invalid parameter.")
-
-        target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
-        target_id, _, _ = self.user_mgr.retrieve_user(target_email)
-        if target_id is None:
-            raise Exception("Target user does not exist.")
 
         users_following = self.user_mgr.list_users_followed(self.user_id)
         users_list_str = ""
@@ -546,16 +539,6 @@ class Api(object):
         """Called when an API message to list the users who are following you is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if Keys.TARGET_EMAIL_KEY not in values:
-            raise Exception("Invalid parameter.")
-
-        target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
-        if not InputChecker.is_email_address(target_email):
-            raise Exception("Invalid email address.")
-
-        target_id, _, _ = self.user_mgr.retrieve_user(target_email)
-        if target_id is None:
-            raise Exception("Target user does not exist.")
 
         users_followed_by = self.user_mgr.list_followers(self.user_id)
         users_list_str = ""
