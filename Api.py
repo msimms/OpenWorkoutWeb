@@ -208,6 +208,12 @@ class Api(object):
         cookie = self.user_mgr.create_new_session(email)
         return True, str(cookie)
 
+    def handle_login_status(self, values):
+        """Called when an API message to check the login status in is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        return True, ""
+
     def handle_logout(self, values):
         """Ends the session for the specified user."""
         if self.user_id is None:
@@ -756,6 +762,8 @@ class Api(object):
             return self.handle_login_submit(values)
         elif request == 'create_login_submit':
             return self.handle_create_login_submit(values)
+        elif request == 'login_status':
+            return self.handle_login_status(values)
         elif request == 'logout':
             return self.handle_logout(values)
         elif request == 'update_email':
