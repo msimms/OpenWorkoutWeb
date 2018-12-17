@@ -617,18 +617,18 @@ class Api(object):
             raise Exception("Not logged in.")
         if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
-        if Keys.ACTIVITY_TAGS_KEY not in values:
+        if Keys.ACTIVITY_TAG_KEY not in values:
             raise Exception("Invalid parameter.")
 
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise Exception("Invalid activity ID.")
 
-        tags = urllib.unquote_plus(values[Keys.ACTIVITY_TAGS_KEY])
-        if not InputChecker.is_valid(tags):
+        tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
+        if not InputChecker.is_valid(tag):
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.create_tag(activity_id, tags)
+        result = self.data_mgr.create_tag(activity_id, tag)
         return result, ""
 
     def handle_list_tags(self, values):
