@@ -616,6 +616,16 @@ class App(object):
         # Render from template.
         return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, logged_in_userid, True)
 
+    def get_activity_user(self, activity):
+        """Returns the user record that corresponds with the given activity."""
+        if Keys.ACTIVITY_USER_ID_KEY in activity:
+            username, realname = self.user_mgr.retrieve_user_from_id(activity[Keys.ACTIVITY_USER_ID_KEY])
+            return activity[Keys.ACTIVITY_USER_ID_KEY], username, realname
+        if Keys.ACTIVITY_DEVICE_STR_KEY in activity and len(activity[Keys.ACTIVITY_DEVICE_STR_KEY]) > 0:
+            user = self.user_mgr.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
+            return user[Keys.DATABASE_ID_KEY], user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
+        return None, None, None
+
     @statistics
     def activity(self, activity_id):
         """Renders the map page for an activity."""
@@ -632,15 +642,12 @@ class App(object):
             return self.error("The requested activity does not exist.")
 
         # Determine who owns the device, and hence the activity.
-        username = ""
-        realname = ""
-        belongs_to_current_user = False
-        if Keys.ACTIVITY_DEVICE_STR_KEY in activity and len(activity[Keys.ACTIVITY_DEVICE_STR_KEY]) > 0:
-            device_user = self.user_mgr.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
-            device_user_id = device_user[Keys.DATABASE_ID_KEY]
-            username = device_user[Keys.USERNAME_KEY]
-            realname = device_user[Keys.REALNAME_KEY]
-            belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
+        device_user_id, username, realname = self.get_activity_user(activity)
+        belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
+        if username is None:
+            username = ""
+        if realname is None:
+            realname = ""
 
         # Determine if the current user can view the activity.
         if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):

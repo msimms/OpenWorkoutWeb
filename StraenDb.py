@@ -250,8 +250,6 @@ class MongoDatabase(Database.Database):
 
     def retrieve_user_from_device(self, device_str):
         """Finds the user associated with the device."""
-        if self.database is None:
-            raise Exception("No database.")
         if len(device_str) == 0:
             return False, "Device string not provided."
 
