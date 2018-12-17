@@ -489,6 +489,8 @@ class App(object):
                 else:
                     details_str += Units.convert_seconds_to_hours_mins_secs(value)
                 details_str += "</td><tr>"
+        if len(details_str) == 0:
+            details_str = "<td><b>No data</b></td><tr>"
 
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
