@@ -34,9 +34,7 @@ class AccelerometerAnalyzer(SensorAnalyzer.SensorAnalyzer):
         """Called when all sensor readings have been processed."""
         results = SensorAnalyzer.SensorAnalyzer.analyze(self)
         peak_list = peaks.find_peaks_in_numeric_array(self.x, 2.0)
-        print(len(peak_list))
-        peak_list = peaks.find_peaks_in_numeric_array(self.y, 2.0)
-        print(len(peak_list))
-        peak_list = peaks.find_peaks_in_numeric_array(self.z, 2.0)
-        print(len(peak_list))
+        results[Keys.REPS] = len(peak_list)
+#        peak_list = peaks.find_peaks_in_numeric_array(self.y, 2.0)
+#        peak_list = peaks.find_peaks_in_numeric_array(self.z, 2.0)
         return results
