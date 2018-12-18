@@ -631,6 +631,26 @@ class Api(object):
         result = self.data_mgr.create_tag(activity_id, tag)
         return result, ""
 
+    def handle_delete_tag(self, values):
+        """Called when an API message delete a tag is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.ACTIVITY_TAG_KEY not in values:
+            raise Exception("Invalid parameter.")
+
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
+
+        tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
+        if not InputChecker.is_valid(tag):
+            raise Exception("Invalid parameter.")
+
+        result = self.data_mgr.delete_tag(activity_id, tag)
+        return result, ""
+
     def handle_list_tags(self, values):
         """Called when an API message create list tags associated with an activity is received."""
         if self.user_id is None:
@@ -800,6 +820,8 @@ class Api(object):
             return self.handle_claim_device(values)
         elif request == 'create_tag':
             return self.handle_create_tag(values)
+        elif request == 'delete_tag':
+            return self.handle_delete_tag(values)
         elif request == 'list_tags':
             return self.handle_list_tags(values)
         elif request == 'create_comment':
