@@ -271,9 +271,9 @@ class App(object):
                 decoded_entry = json.loads(comment_entry)
                 commenter_id = decoded_entry[Keys.ACTIVITY_COMMENTER_ID_KEY]
                 _, commenter_name = self.user_mgr.retrieve_user_from_id(commenter_id)
-                comments_str += "<td>"
+                comments_str += "<td><b>"
                 comments_str += commenter_name
-                comments_str += " says \""
+                comments_str += "</b> says \""
                 comments_str += decoded_entry[Keys.ACTIVITY_COMMENT_KEY]
                 comments_str += "\"</td><tr>"
         if logged_in:
