@@ -176,6 +176,17 @@ def workouts():
         g_app.log_error('Unhandled exception in ' + workouts.__name__)
     return g_app.error()
 
+@g_flask_app.route('/gear')
+def gear():
+    """Renders the list of all gear belonging to the logged in user."""
+    try:
+        return g_app.gear()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error('Unhandled exception in ' + gear.__name__)
+    return g_app.error()
+
 @g_flask_app.route('/following')
 def following():
     """Renders the list of users the specified user is following."""

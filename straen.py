@@ -239,6 +239,20 @@ class StraenWeb(object):
 
     @cherrypy.expose
     @require()
+    def gear(self, *args, **kw):
+        """Renders the list of all gear belonging to the logged in user."""
+        try:
+            return self.app.gear()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error('Unhandled exception in ' + StraenWeb.gear.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
     def following(self, *args, **kw):
         """Renders the list of users the specified user is following."""
         try:
