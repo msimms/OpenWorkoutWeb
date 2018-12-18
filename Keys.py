@@ -111,8 +111,6 @@ AVG_HEART_RATE = "Average Heart Rate"
 AVG_CADENCE = "Average Cadence"
 NORMALIZED_POWER = "Normalized Power"
 CLUSTER = 'Cluster'
-SETS = 'Sets'
-REPS = 'Reps'
 
 # Activity types
 TYPE_UNSPECIFIED_ACTIVITY = "Unknown"
