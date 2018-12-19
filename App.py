@@ -301,18 +301,29 @@ class App(object):
             y_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Y]) + " },\n"
             z_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Z]) + " },\n"
 
+        # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
+        summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
+        if summary_data is None:
+            self.data_mgr.analyze(activity_id)
+
+        # Find the sets data.
+        sets = None
+        if Keys.APP_SETS_KEY in activity:
+            sets = activity[Keys.APP_SETS_KEY]
+        elif Keys.APP_SETS_KEY in summary_data:
+            sets = summary_data[Keys.APP_SETS_KEY]
+
         # Build the details view.
         details = ""
-        if Keys.APP_SETS_KEY in activity:
-            details = "<table>\n<td><b>Set</b></td><td><b>Rep Count</b></td><tr>"
-            sets = activity[Keys.APP_SETS_KEY]
+        if sets is not None:
+            details = "<table>\n<td><b>Set</b></td><td><b>Rep Count</b></td><tr>\n"
             set_num = 1
             for current_set in sets:
                 details += "<td>"
                 details += str(set_num)
                 details += "</td><td>"
                 details += str(current_set)
-                details += "</td><tr>"
+                details += "</td><tr>\n"
                 set_num = set_num + 1
             details += "</table>\n"
 
