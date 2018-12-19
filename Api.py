@@ -597,8 +597,27 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise Exception("Invalid activity ID.")
 
+        # Generate a random name for the local file.
+        local_file_name = os.path.join(os.path.normpath(self.temp_dir), str(uuid.uuid4()))
+
+        # Write the data to a temporary local file.
         exporter = Exporter.Exporter()
-        result = exporter.export(self.data_mgr, activity_id)
+        if not exporter.export(self.data_mgr, activity_id, local_file_name):
+            raise Exception("Invalid activity ID.")
+
+        # Read the file into memory.
+        result = ""
+        try:
+            with open(local_file_name, 'wb') as local_file:
+                while True:
+                    next_block = ufile.file.read(8192)
+                    if not next_block:
+                        break
+                    result = result + next_block
+        finally:
+            # Remove the local file.
+            os.remove(self.local_file_name)
+
         return True, result
 
     def handle_claim_device(self, values):

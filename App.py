@@ -281,6 +281,20 @@ class App(object):
             comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>"
         return comments_str
 
+    def render_export_control(self, logged_in, has_location_data):
+        """Helper function for building the comments string."""
+        exports_str = ""
+        if logged_in:
+            exports_str  = "Export Format:<br><br>"
+            exports_str += "<select id=\"format\" class=\"checkin\" >"
+            if has_location_data:
+                exports_str += "\t<option value=\"TCX\" selected\">TCX</option>\n"
+                exports_str += "\t<option value=\"GPX\">GPX</option>"
+            exports_str += "\t<option value=\"CSV\">CSV</option>"
+            exports_str += "</select><br><br>"
+            exports_str += "<button type=\"button\" onclick=\"return export_activity()\">Export</button>"
+        return exports_str
+
     def render_page_for_lifting_activity(self, email, user_realname, activity_id, activity, logged_in_username, is_live):
         """Helper function for rendering the map corresonding to a specific device and activity."""
 
@@ -297,9 +311,10 @@ class App(object):
         y_axis = ""
         z_axis = ""
         for accel in accels:
-            x_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_X]) + " },\n"
-            y_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Y]) + " },\n"
-            z_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Z]) + " },\n"
+            time_str = str(accel[Keys.ACCELEROMETER_TIME_KEY])
+            x_axis += "\t\t\t\t{ date: new Date(" + time_str + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_X]) + " },\n"
+            y_axis += "\t\t\t\t{ date: new Date(" + time_str + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Y]) + " },\n"
+            z_axis += "\t\t\t\t{ date: new Date(" + time_str + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Z]) + " },\n"
 
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
@@ -349,6 +364,9 @@ class App(object):
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
 
+        # List the export options.
+        exports_str = self.render_export_control(logged_in, False)
+
         # Build the page title.
         if is_live:
             page_title = "Live Tracking"
@@ -356,7 +374,7 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.lifting_activity_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, comments=comments_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, comments=comments_str, exports=exports_str)
 
     def render_metadata_for_page(self, key, activity_id):
         """Helper function for processing meatadata and formatting it for display."""
@@ -507,6 +525,9 @@ class App(object):
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
 
+        # List the export options.
+        exports_str = self.render_export_control(logged_in, True)
+
         # Build the page title.
         if is_live:
             page_title = "Live Tracking"
@@ -514,7 +535,7 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.map_single_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, comments=comments_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, comments=comments_str, exports=exports_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_id, logged_in_userid, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""

@@ -309,22 +309,47 @@ ${powers}
 		else
 			alert(result_text.value);
 	}
+
+	function export_activity()
+	{
+		var the_url = "${root_url}/api/1.0/export";
+		var format = document.getElementById("format").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["activity_id"] : "${activityId}"});
+		dict.push({["format"] : format});
+		if (send_post_request(the_url, dict, result_text))
+			window.location.reload();
+		else
+			alert(result_text.value);
+	}
 </script>
 
 <hr>
 
 <section class="analysis">
+<p>
 Detailed Analysis:
 <table>
 ${details}
 </table>
+</p>
 </section>
 
 <section class="comments">
+<p>
 Comments:
 <table>
 ${comments}
 </table>
+</p>
+</section>
+
+<section class="exports">
+<p>
+${exports}
+</p>
 </section>
 
 </body>
