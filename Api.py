@@ -592,31 +592,37 @@ class Api(object):
             raise Exception("Not logged in.")
         if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
+        if Keys.ACTIVITY_EXPORT_FORMAT_KEY not in values:
+            raise Exception("Invalid parameter.")
 
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise Exception("Invalid activity ID.")
+
+        export_format = urllib.unquote_plus(values[Keys.ACTIVITY_EXPORT_FORMAT_KEY])
+        if not export_format in ['csv', 'gpx', 'tcx']:
+            raise Exception("Invalid format.")
 
         # Generate a random name for the local file.
         local_file_name = os.path.join(os.path.normpath(self.temp_dir), str(uuid.uuid4()))
 
         # Write the data to a temporary local file.
         exporter = Exporter.Exporter()
-        if not exporter.export(self.data_mgr, activity_id, local_file_name):
-            raise Exception("Invalid activity ID.")
+        if not exporter.export(self.data_mgr, activity_id, local_file_name, export_format):
+            raise Exception("Export failed.")
 
         # Read the file into memory.
         result = ""
         try:
-            with open(local_file_name, 'wb') as local_file:
+            with open(local_file_name, 'rb') as local_file:
                 while True:
-                    next_block = ufile.file.read(8192)
+                    next_block = local_file.read(8192)
                     if not next_block:
                         break
                     result = result + next_block
         finally:
             # Remove the local file.
-            os.remove(self.local_file_name)
+            os.remove(local_file_name)
 
         return True, result
 

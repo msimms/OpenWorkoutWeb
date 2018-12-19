@@ -275,24 +275,24 @@ class App(object):
                 comments_str += commenter_name
                 comments_str += "</b> says \""
                 comments_str += decoded_entry[Keys.ACTIVITY_COMMENT_KEY]
-                comments_str += "\"</td><tr>"
+                comments_str += "\"</td><tr>\n"
         if logged_in:
-            comments_str += "<td><textarea rows=\"4\" cols=\"100\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>"
-            comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>"
+            comments_str += "<td><textarea rows=\"4\" cols=\"100\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>\n"
+            comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>\n"
         return comments_str
 
     def render_export_control(self, logged_in, has_location_data):
         """Helper function for building the comments string."""
         exports_str = ""
         if logged_in:
-            exports_str  = "Export Format:<br><br>"
-            exports_str += "<select id=\"format\" class=\"checkin\" >"
+            exports_str  = "<td>Export Format:</td><tr>\n"
+            exports_str += "<td><select id=\"format\" class=\"checkin\" >\n"
             if has_location_data:
-                exports_str += "\t<option value=\"TCX\" selected\">TCX</option>\n"
-                exports_str += "\t<option value=\"GPX\">GPX</option>"
-            exports_str += "\t<option value=\"CSV\">CSV</option>"
-            exports_str += "</select><br><br>"
-            exports_str += "<button type=\"button\" onclick=\"return export_activity()\">Export</button>"
+                exports_str += "\t<option value=\"tcx\" selected\">TCX</option>\n"
+                exports_str += "\t<option value=\"gpx\">GPX</option>\n"
+            exports_str += "\t<option value=\"csv\">CSV</option>\n"
+            exports_str += "</select>\n</td><tr>\n"
+            exports_str += "<td><button type=\"button\" onclick=\"return export_activity()\">Export</button></td><tr>\n"
         return exports_str
 
     def render_page_for_lifting_activity(self, email, user_realname, activity_id, activity, logged_in_username, is_live):
@@ -922,7 +922,7 @@ class App(object):
         # Write the file.
         with open(local_file_name, 'wb') as local_file:
             while True:
-                data = ufile.file.read(8192)
+                data = local_file.file.read(8192)
                 if not data:
                     break
                 local_file.write(data)
