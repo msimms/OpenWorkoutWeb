@@ -16,13 +16,14 @@ Why develop a workout tracker when there are so many closed-source options avail
 
 ## Major Todos
 * Support for strength-based activities (this is partially implemented).
-* Activity export.
 * Continuous scrolling for the activity feed.
 * Import from other services.
 * Better graphics.
 * Replace Google Maps with Open Street Map.
 * Equipment tracking.
 * More analytics.
+
+[Full bug and feature tracking](https://github.com/msimms/StraenWeb/issues).
 
 ## Version History
 
@@ -63,6 +64,7 @@ Why develop a workout tracker when there are so many closed-source options avail
 ### 0.6
 * Ability to import an entire directory of files.
 * Added a calendar view.
+* Activity export.
 
 ## Tech
 This software uses two other source projects to work properly:
