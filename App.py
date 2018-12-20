@@ -281,7 +281,7 @@ class App(object):
             comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>\n"
         return comments_str
 
-    def render_export_control(self, logged_in, has_location_data):
+    def render_export_control(self, logged_in, has_location_data, has_accel_data):
         """Helper function for building the comments string."""
         exports_str = ""
         if logged_in:
@@ -290,7 +290,8 @@ class App(object):
             if has_location_data:
                 exports_str += "\t<option value=\"tcx\" selected\">TCX</option>\n"
                 exports_str += "\t<option value=\"gpx\">GPX</option>\n"
-            exports_str += "\t<option value=\"csv\">CSV</option>\n"
+            if has_accel_data:
+                exports_str += "\t<option value=\"csv\">CSV</option>\n"
             exports_str += "</select>\n</td><tr>\n"
             exports_str += "<td><button type=\"button\" onclick=\"return export_activity()\">Export</button></td><tr>\n"
         return exports_str
@@ -365,7 +366,7 @@ class App(object):
         comments_str = self.render_comments(activity_id, logged_in)
 
         # List the export options.
-        exports_str = self.render_export_control(logged_in, False)
+        exports_str = self.render_export_control(logged_in, False, Keys.APP_ACCELEROMETER_KEY in activity)
 
         # Build the page title.
         if is_live:
@@ -404,12 +405,13 @@ class App(object):
                     max_value = value
         return data_str, max_value
 
-    def render_page_for_mapped_activity(self, email, user_realname, activity_id, locations, logged_in_userid, is_live):
+    def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, logged_in_userid, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
 
         # Is the user logged in?
         logged_in = logged_in_userid is not None
 
+        locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
         if locations is None or len(locations) == 0:
             my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
             return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
@@ -526,7 +528,7 @@ class App(object):
         comments_str = self.render_comments(activity_id, logged_in)
 
         # List the export options.
-        exports_str = self.render_export_control(logged_in, True)
+        exports_str = self.render_export_control(logged_in, True, Keys.APP_ACCELEROMETER_KEY in activity)
 
         # Build the page title.
         if is_live:
@@ -542,7 +544,7 @@ class App(object):
 
         try:
             if Keys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[Keys.ACTIVITY_LOCATIONS_KEY]) > 0:
-                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity[Keys.ACTIVITY_LOCATIONS_KEY], logged_in_userid, is_live)
+                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity, logged_in_userid, is_live)
             elif Keys.APP_ACCELEROMETER_KEY in activity or Keys.APP_SETS_KEY in activity:
                 return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity, logged_in_userid, is_live)
             else:
