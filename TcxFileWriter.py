@@ -45,6 +45,7 @@ TCX_TAG_NAME_MAX_SPEED = "MaximumSpeed"
 TCX_TAG_NAME_CALORIES = "Calories"
 TCX_TAG_NAME_ID = "Id"
 TCX_TAG_NAME_VALUE = "Value"
+TCX_TAG_NAME = "TCX"
 
 class TcxFileWriter(XmlFileWriter.XmlFileWriter):
     """Formats an TCX file."""
@@ -150,8 +151,16 @@ class TcxFileWriter(XmlFileWriter.XmlFileWriter):
 
     def start_trackpoint_extensions(self):
         self.open_tag(TCX_TAG_NAME_TRACKPOINT_EXTENSIONS)
+        attributes = []
+        attribute = {}
+        attribute["xmlns"] = "http://www.garmin.com/xmlschemas/ActivityExtension/v2"
+        attributes.append(attribute)
+        self.open_tag_with_attributes(TCX_TAG_NAME, attributes, False)
 
     def end_trackpoint_extensions(self):
+        if self.current_tag() is not TCX_TAG_NAME:
+            raise Exception("TCX tag error when ending a trackpoint extension.")
+        self.close_tag()
         if self.current_tag() is not TCX_TAG_NAME_TRACKPOINT_EXTENSIONS:
             raise Exception("TCX tag error when ending a trackpoint extension.")
         self.close_tag()
@@ -185,7 +194,7 @@ class TcxFileWriter(XmlFileWriter.XmlFileWriter):
         self.write_tag_and_value(TCX_TAG_NAME_CADENCE, cadence_rpm)		
 
     def store_power_in_watts(self, power_watts):
-        if self.current_tag() is not TCX_TAG_NAME_TRACKPOINT_EXTENSIONS:
+        if self.current_tag() is not TCX_TAG_NAME:
             raise Exception("TCX tag error when writing power data.")
         self.write_tag_and_value(TCX_TAG_NAME_POWER, power_watts)		
 
