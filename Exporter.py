@@ -30,100 +30,118 @@ class Exporter(object):
             if current_reading is None:
                 current_reading = sensor_iter.next()
             else:
-                while current_reading.keys()[0] < time_ms:
+                sensor_time = int(current_reading.keys()[0])
+                while sensor_time < time_ms:
                     current_reading = sensor_iter.next()
+                    sensor_time = int(current_reading.keys()[0])
         except StopIteration:
             return None
         return current_reading
 
     def export_as_gpx(self, file_name, activity):
         """Creates a GPX file."""
-        try:
-            locations = []
-            cadence_readings = []
-            temp_readings = []
-            power_readings = []
+        locations = []
+        cadence_readings = []
+        temp_readings = []
+        power_readings = []
 
-            if Keys.APP_LOCATIONS_KEY in activity:
-                locations = activity[Keys.APP_LOCATIONS_KEY]
-            if Keys.APP_CADENCE_KEY in activity:
-                cadence_readings = activity[Keys.APP_CADENCE_KEY]
-            if Keys.APP_TEMP_KEY in activity:
-                temp_readings = activity[Keys.APP_TEMP_KEY]
-            if Keys.APP_POWER_KEY in activity:
-                power_readings = activity[Keys.APP_POWER_KEY]
+        if Keys.APP_LOCATIONS_KEY in activity:
+            locations = activity[Keys.APP_LOCATIONS_KEY]
+        if Keys.APP_CADENCE_KEY in activity:
+            cadence_readings = activity[Keys.APP_CADENCE_KEY]
+        if Keys.APP_HEART_RATE_KEY in activity:
+            hr_readings = activity[Keys.APP_HEART_RATE_KEY]
+        if Keys.APP_TEMP_KEY in activity:
+            temp_readings = activity[Keys.APP_TEMP_KEY]
+        if Keys.APP_POWER_KEY in activity:
+            power_readings = activity[Keys.APP_POWER_KEY]
 
-            location_iter = iter(locations)
-            if len(locations) == 0:
-                raise Exception("No locations for this activity.")
+        location_iter = iter(locations)
+        if len(locations) == 0:
+            raise Exception("No locations for this activity.")
 
-            cadence_iter = iter(cadence_readings)
-            temp_iter = iter(temp_readings)
-            power_iter = iter(power_readings)
+        cadence_iter = iter(cadence_readings)
+        nearest_hr = iter(hr_readings)
+        temp_iter = iter(temp_readings)
+        power_iter = iter(power_readings)
 
-            nearest_cadence = None
-            nearest_temp = None
-            nearest_power = None
+        nearest_cadence = None
+        nearest_hr = None
+        nearest_temp = None
+        nearest_power = None
 
-            writer = GpxFileWriter.GpxFileWriter()
-            writer.create_gpx_file(file_name)
-            while True:
+        writer = GpxFileWriter.GpxFileWriter()
+        writer.create_gpx_file(file_name)
+
+        done = False
+        while not done:
+            try:
                 current_location = location_iter.next()
                 current_time = current_location[Keys.LOCATION_TIME_KEY]
+
                 nearest_cadence = self.nearest_sensor_reading(current_time, nearest_cadence, cadence_iter)
+                nearest_hr = self.nearest_sensor_reading(current_time, nearest_hr, hr_iter)
                 nearest_temp = self.nearest_sensor_reading(current_time, nearest_temp, temp_iter)
                 nearest_power = self.nearest_sensor_reading(current_time, nearest_power, power_iter)
-        except StopIteration:
-            pass
+            except StopIteration:
+                done = True
 
     def export_as_tcx(self, file_name, activity):
         """Creates a TCX file."""
-        try:
-            locations = []
-            cadence_readings = []
-            temp_readings = []
-            power_readings = []
+        locations = []
+        cadence_readings = []
+        hr_readings = []
+        temp_readings = []
+        power_readings = []
 
-            if Keys.APP_LOCATIONS_KEY in activity:
-                locations = activity[Keys.APP_LOCATIONS_KEY]
-            if Keys.APP_CADENCE_KEY in activity:
-                cadence_readings = activity[Keys.APP_CADENCE_KEY]
-            if Keys.APP_TEMP_KEY in activity:
-                temp_readings = activity[Keys.APP_TEMP_KEY]
-            if Keys.APP_POWER_KEY in activity:
-                power_readings = activity[Keys.APP_POWER_KEY]
+        if Keys.APP_LOCATIONS_KEY in activity:
+            locations = activity[Keys.APP_LOCATIONS_KEY]
+        if Keys.APP_CADENCE_KEY in activity:
+            cadence_readings = activity[Keys.APP_CADENCE_KEY]
+        if Keys.APP_HEART_RATE_KEY in activity:
+            hr_readings = activity[Keys.APP_HEART_RATE_KEY]
+        if Keys.APP_TEMP_KEY in activity:
+            temp_readings = activity[Keys.APP_TEMP_KEY]
+        if Keys.APP_POWER_KEY in activity:
+            power_readings = activity[Keys.APP_POWER_KEY]
 
-            location_iter = iter(locations)
-            if len(locations) == 0:
-                raise Exception("No locations for this activity.")
+        location_iter = iter(locations)
+        if len(locations) == 0:
+            raise Exception("No locations for this activity.")
 
-            cadence_iter = iter(cadence_readings)
-            temp_iter = iter(temp_readings)
-            power_iter = iter(power_readings)
+        cadence_iter = iter(cadence_readings)
+        temp_iter = iter(temp_readings)
+        power_iter = iter(power_readings)
+        hr_iter = iter(hr_readings)
 
-            nearest_cadence = None
-            nearest_temp = None
-            nearest_power = None
+        nearest_cadence = None
+        nearest_temp = None
+        nearest_power = None
+        nearest_hr = None
 
-            writer = TcxFileWriter.TcxFileWriter()
-            writer.create_tcx_file(file_name)
-            writer.start_activity(activity[Keys.ACTIVITY_TYPE_KEY])
+        writer = TcxFileWriter.TcxFileWriter()
+        writer.create_tcx_file(file_name)
+        writer.start_activity(activity[Keys.ACTIVITY_TYPE_KEY])
 
-            lap_start_time_ms = locations[0][Keys.LOCATION_TIME_KEY]
-            lap_end_time_ms = 0
+        lap_start_time_ms = locations[0][Keys.LOCATION_TIME_KEY]
+        lap_end_time_ms = 0
 
-            writer.write_id(lap_start_time_ms / 1000)
+        writer.write_id(lap_start_time_ms / 1000)
 
-            done = False
+        done = False
+        while not done:
+
+            writer.start_lap(lap_start_time_ms)
+            writer.start_track()
 
             while not done:
-                writer.start_lap(lap_start_time_ms)
-                writer.start_track()
 
-                while not done:
+                try:
                     current_location = location_iter.next()
                     current_time = current_location[Keys.LOCATION_TIME_KEY]
+
                     nearest_cadence = self.nearest_sensor_reading(current_time, nearest_cadence, cadence_iter)
+                    nearest_hr = self.nearest_sensor_reading(current_time, nearest_hr, hr_iter)
                     nearest_temp = self.nearest_sensor_reading(current_time, nearest_temp, temp_iter)
                     nearest_power = self.nearest_sensor_reading(current_time, nearest_power, power_iter)
 
@@ -131,14 +149,28 @@ class Exporter(object):
                     writer.store_time(current_time)
                     writer.store_position(current_location[Keys.LOCATION_LAT_KEY], current_location[Keys.LOCATION_LON_KEY])
                     writer.store_altitude_meters(current_location[Keys.LOCATION_ALT_KEY])
+
+                    if nearest_cadence is not None:
+                        writer.store_cadence_rpm(nearest_cadence.values()[0])
+                    if nearest_hr is not None:
+                        writer.store_heart_rate_bpm(nearest_hr.values()[0])
+
+                    if nearest_temp is not None or nearest_power is not None:
+                        writer.start_trackpoint_extensions()
+                        if nearest_temp is not None:
+                            pass
+                        if nearest_power is not None:
+                            writer.store_power_in_watts(nearest_power.values()[0])
+                        writer.end_trackpoint_extensions()
+
                     writer.end_trackpoint()
+                except StopIteration:
+                    done = True
 
-                writer.end_track()
+            writer.end_track()
 
-            writer.end_activity()
-            writer.close_file()
-        except StopIteration:
-            pass
+        writer.end_activity()
+        writer.close_file()
 
     def export(self, data_mgr, activity_id, file_name, file_type):
         activity = data_mgr.retrieve_activity(activity_id)

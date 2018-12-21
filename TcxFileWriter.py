@@ -30,11 +30,13 @@ TCX_TAG_NAME_ACTIVITY = "Activity"
 TCX_TAG_NAME_LAP = "Lap"
 TCX_TAG_NAME_TRACK = "Track"
 TCX_TAG_NAME_TRACKPOINT = "Trackpoint"
+TCX_TAG_NAME_TRACKPOINT_EXTENSIONS = "Extensions"
 TCX_TAG_NAME_TIME = "Time"
 TCX_TAG_NAME_ALTITUDE_METERS = "AltitudeMeters"
 TCX_TAG_NAME_DISTANCE_METERS = "DistanceMeters"
 TCX_TAG_NAME_HEART_RATE_BPM = "HeartRateBpm"
 TCX_TAG_NAME_CADENCE = "Cadence"
+TCX_TAG_NAME_POWER = "Watts"
 TCX_TAG_NAME_POSITION = "Position"
 TCX_TAG_NAME_LATITUDE = "LatitudeDegrees"
 TCX_TAG_NAME_LONGITUDE = "LongitudeDegrees"
@@ -109,22 +111,22 @@ class TcxFileWriter(XmlFileWriter.XmlFileWriter):
 
     def store_lap_seconds(self, time_ms):
         if self.current_tag() is not TCX_TAG_NAME_LAP:
-            raise Exception("TCX write error.")
+            raise Exception("TCX tag error when writing lap seconds.")
         self.write_tag_and_value(TCX_TAG_NAME_TOTAL_TIME_SECONDS, time_ms / 1000)
 
     def store_lap_distance(self, distance_meters):
         if self.current_tag() is not TCX_TAG_NAME_LAP:
-            raise Exception("TCX write error.")
+            raise Exception("TCX tag error when writing lap distance.")
         self.write_tag_and_value(TCX_TAG_NAME_DISTANCE_METERS, distance_meters)
 
     def store_lap_max_speed(self, max_speed):
         if self.current_tag() is not TCX_TAG_NAME_LAP:
-            raise Exception("TCX write error.")
+            raise Exception("TCX tag error when writing maximum lap speed.")
         self.write_tag_and_value(TCX_TAG_NAME_MAX_SPEED, max_speed)
 
     def store_lap_calories(self, calories):
         if self.current_tag() is not TCX_TAG_NAME_LAP:
-            raise Exception("TCX write error.")
+            raise Exception("TCX tag error when writing lap calories.")
         self.write_tag_and_value(TCX_TAG_NAME_CALORIES, calories)
 
     def end_lap(self):
@@ -135,51 +137,64 @@ class TcxFileWriter(XmlFileWriter.XmlFileWriter):
         self.open_tag(TCX_TAG_NAME_TRACK)
 
     def end_track(self):
-        if self.current_tag() is TCX_TAG_NAME_TRACK:
-            raise Exception("TCX write error.")
+        if self.current_tag() is not TCX_TAG_NAME_TRACK:
+            raise Exception("TCX tag error when ending a track.")
 
     def start_trackpoint(self):
         self.open_tag(TCX_TAG_NAME_TRACKPOINT)
 
+    def end_trackpoint(self):
+        if self.current_tag() is not TCX_TAG_NAME_TRACKPOINT:
+            raise Exception("TCX tag error when ending a trackpoint.")
+        self.close_tag()
+
+    def start_trackpoint_extensions(self):
+        self.open_tag(TCX_TAG_NAME_TRACKPOINT_EXTENSIONS)
+
+    def end_trackpoint_extensions(self):
+        if self.current_tag() is not TCX_TAG_NAME_TRACKPOINT_EXTENSIONS:
+            raise Exception("TCX tag error when ending a trackpoint extension.")
+        self.close_tag()
+
     def store_time(self, time_ms):
         if self.current_tag() is not TCX_TAG_NAME_TRACKPOINT:
-            raise Exception("TCX write error.")
+            raise Exception("TCX tag error when writing the time.")
         time_str = self.format_time_ms(time_ms)
         self.write_tag_and_value(TCX_TAG_NAME_TIME, time_str)
 
     def store_altitude_meters(self, altitude_meters):
         if self.current_tag() is not TCX_TAG_NAME_TRACKPOINT:
-            raise Exception("TCX write error.")
+            raise Exception("TCX tag error when writing altitude data.")
         self.write_tag_and_value(TCX_TAG_NAME_ALTITUDE_METERS, altitude_meters)
 
     def store_distance_meters(self, distance_meters):
         if self.current_tag() is not TCX_TAG_NAME_TRACKPOINT:
-            raise Exception("TCX write error.")
+            raise Exception("TCX tag error when writing distance data.")
         self.write_tag_and_value(TCX_TAG_NAME_DISTANCE_METERS, distance_meters)
 
     def store_heart_rate_bpm(self, heart_rate_bpm):
         if self.current_tag() is not TCX_TAG_NAME_TRACKPOINT:
-            raise Exception("TCX write error.")
+            raise Exception("TCX tag error when writing heart rate data.")
         self.open_tag(TCX_TAG_NAME_HEART_RATE_BPM)
         self.write_tag_and_value(TCX_TAG_NAME_VALUE, heart_rate_bpm)
         self.close_tag()
 
     def store_cadence_rpm(self, cadence_rpm):
         if self.current_tag() is not TCX_TAG_NAME_TRACKPOINT:
-            raise Exception("TCX write error.")
+            raise Exception("TCX tag error when writing cadence data.")
         self.write_tag_and_value(TCX_TAG_NAME_CADENCE, cadence_rpm)		
+
+    def store_power_in_watts(self, power_watts):
+        if self.current_tag() is not TCX_TAG_NAME_TRACKPOINT_EXTENSIONS:
+            raise Exception("TCX tag error when writing power data.")
+        self.write_tag_and_value(TCX_TAG_NAME_POWER, power_watts)		
 
     def store_position(self, lat, lon):
         if self.current_tag() is not TCX_TAG_NAME_TRACKPOINT:
-            raise Exception("TCX write error.")
+            raise Exception("TCX tag error when writing position.")
         self.open_tag(TCX_TAG_NAME_POSITION)
         self.write_tag_and_value(TCX_TAG_NAME_LATITUDE, lat)
         self.write_tag_and_value(TCX_TAG_NAME_LONGITUDE, lon)
-        self.close_tag()
-
-    def end_trackpoint(self):
-        if self.current_tag() is not TCX_TAG_NAME_TRACKPOINT:
-            raise Exception("TCX write error.")
         self.close_tag()
 
     def format_time_sec(self, t):
