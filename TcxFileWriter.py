@@ -12,7 +12,7 @@ class TcxFileWriter(XmlFileWriter.XmlFileWriter):
     def create_file(self, file_name):
         result = False
 
-        if self.create_file(file_name):
+        if super.create_file(file_name):
             attributes = []
 
             attribute = {}

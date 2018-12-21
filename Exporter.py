@@ -3,6 +3,7 @@
 
 import DataMgr
 import Keys
+import GpxFileWriter
 import TcxFileWriter
 
 class Exporter(object):
@@ -24,73 +25,84 @@ class Exporter(object):
                     local_file.write(str(accel_time) + "," + str(accel_x) + "," + str(accel_y) + "," + str(accel_z) + "\n")
         return True
 
-    def nearest_sensor_reading(self, time, sensor_iter):
+    def nearest_sensor_reading(self, time_ms, current_reading, sensor_iter):
         try:
-            pass
+            while current_reading.keys()[0] < time_ms:
+                current_reading = sensor_iter.next()
         except StopIteration:
-            pass
-        return None
+            return None
+        return current_reading
 
     def export_as_gpx(self, file_name, activity):
         """Creates a GPX file."""
-        locations = []
-        cadence_readings = []
-        temp_readings = []
-        power_readings = []
-
-        if Keys.APP_LOCATIONS_KEY in activity:
-            locations = activity[Keys.APP_LOCATIONS_KEY]
-        if Keys.APP_CADENCE_KEY in activity:
-            cadence_readings = activity[Keys.APP_CADENCE_KEY]
-        if Keys.APP_TEMP_KEY in activity:
-            temp_readings = activity[Keys.APP_TEMP_KEY]
-        if Keys.APP_POWER_KEY in activity:
-            power_readings = activity[Keys.APP_POWER_KEY]
-
-        location_iter = iter(locations)
-        cadence_iter = iter(cadence_readings)
-        temp_iter = iter(temp_readings)
-        power_iter = iter(power_readings)
-
         try:
+            locations = []
+            cadence_readings = []
+            temp_readings = []
+            power_readings = []
+
+            if Keys.APP_LOCATIONS_KEY in activity:
+                locations = activity[Keys.APP_LOCATIONS_KEY]
+            if Keys.APP_CADENCE_KEY in activity:
+                cadence_readings = activity[Keys.APP_CADENCE_KEY]
+            if Keys.APP_TEMP_KEY in activity:
+                temp_readings = activity[Keys.APP_TEMP_KEY]
+            if Keys.APP_POWER_KEY in activity:
+                power_readings = activity[Keys.APP_POWER_KEY]
+
+            location_iter = iter(locations)
+            cadence_iter = iter(cadence_readings)
+            temp_iter = iter(temp_readings)
+            power_iter = iter(power_readings)
+
+            nearest_cadence = cadence_iter.next()
+            nearest_temp = temp_iter.next()
+            nearest_power = power_iter.next()
+
             with open(file_name, 'wt') as local_file:
                 while True:
                     current_location = location_iter.next()
-                    nearest_cadence = self.nearest_sensor_reading(current_location[Keys.LOCATION_TIME_KEY], cadence_iter)
-                    nearest_temp = self.nearest_sensor_reading(current_location[Keys.LOCATION_TIME_KEY], temp_iter)
-                    nearest_power = self.nearest_sensor_reading(current_location[Keys.LOCATION_TIME_KEY], power_iter)
+                    nearest_cadence = self.nearest_sensor_reading(current_location[Keys.LOCATION_TIME_KEY], nearest_cadence, cadence_iter)
+                    nearest_temp = self.nearest_sensor_reading(current_location[Keys.LOCATION_TIME_KEY], nearest_temp, temp_iter)
+                    nearest_power = self.nearest_sensor_reading(current_location[Keys.LOCATION_TIME_KEY], nearest_power, power_iter)
         except StopIteration:
             pass
         return True
 
     def export_as_tcx(self, file_name, activity):
         """Creates a TCX file."""
-        locations = []
-        cadence_readings = []
-        temp_readings = []
-        power_readings = []
-
-        if Keys.APP_LOCATIONS_KEY in activity:
-            locations = activity[Keys.APP_LOCATIONS_KEY]
-        if Keys.APP_CADENCE_KEY in activity:
-            cadence_readings = activity[Keys.APP_CADENCE_KEY]
-        if Keys.APP_TEMP_KEY in activity:
-            temp_readings = activity[Keys.APP_TEMP_KEY]
-        if Keys.APP_POWER_KEY in activity:
-            power_readings = activity[Keys.APP_POWER_KEY]
-
-        location_iter = iter(locations)
-        cadence_iter = iter(cadence_readings)
-        temp_iter = iter(temp_readings)
-        power_iter = iter(power_readings)
-
         try:
-            with open(file_name, 'wt') as local_file:
-                while True:
-                    current_location = location_iter.next()
-                    nearest_cadence = self.nearest_sensor_reading(current_location[Keys.LOCATION_TIME_KEY], cadence_iter)
-                    nearest_temp = self.nearest_sensor_reading(current_location[Keys.LOCATION_TIME_KEY], temp_iter)
-                    nearest_power = self.nearest_sensor_reading(current_location[Keys.LOCATION_TIME_KEY], power_iter)
+            locations = []
+            cadence_readings = []
+            temp_readings = []
+            power_readings = []
+
+            if Keys.APP_LOCATIONS_KEY in activity:
+                locations = activity[Keys.APP_LOCATIONS_KEY]
+            if Keys.APP_CADENCE_KEY in activity:
+                cadence_readings = activity[Keys.APP_CADENCE_KEY]
+            if Keys.APP_TEMP_KEY in activity:
+                temp_readings = activity[Keys.APP_TEMP_KEY]
+            if Keys.APP_POWER_KEY in activity:
+                power_readings = activity[Keys.APP_POWER_KEY]
+
+            location_iter = iter(locations)
+            cadence_iter = iter(cadence_readings)
+            temp_iter = iter(temp_readings)
+            power_iter = iter(power_readings)
+
+            nearest_cadence = cadence_iter.next()
+            nearest_temp = temp_iter.next()
+            nearest_power = power_iter.next()
+
+            writer = TcxFileWriter.TcxFileWriter()
+            if writer.create_file(file_name):
+                if writer.start_activity(activity[Keys.ACTIVITY_TYPE_KEY]):
+                    while True:
+                        current_location = location_iter.next()
+                        nearest_cadence = self.nearest_sensor_reading(current_location[Keys.LOCATION_TIME_KEY], nearest_cadence, cadence_iter)
+                        nearest_temp = self.nearest_sensor_reading(current_location[Keys.LOCATION_TIME_KEY], nearest_temp, temp_iter)
+                        nearest_power = self.nearest_sensor_reading(current_location[Keys.LOCATION_TIME_KEY], nearest_power, power_iter)
         except StopIteration:
             pass
         return True
