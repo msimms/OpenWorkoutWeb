@@ -49,10 +49,28 @@ class MongoDatabase(Database.Database):
             self.database = self.conn['straendb']
             self.users_collection = self.database['users']
             self.activities_collection = self.database['activities']
+            self.workouts_collection = self.database['wokrouts']
+            self.gear_collection = self.database['gear']
             return True
         except pymongo.errors.ConnectionFailure, e:
             self.log_error("Could not connect to MongoDB: %s" % e)
         return False
+
+    def total_users_count(self):
+        """Returns the number of users in the database."""
+        try:
+            return self.users_collection.count()
+        except:
+            pass
+        return 0
+
+    def total_activities_count(self):
+        """Returns the number of activities in the database."""
+        try:
+            return self.activities_collection.count()
+        except:
+            pass
+        return 0
 
     def create_user(self, username, realname, passhash):
         """Create method for a user."""
@@ -234,8 +252,6 @@ class MongoDatabase(Database.Database):
 
     def retrieve_user_from_device(self, device_str):
         """Finds the user associated with the device."""
-        if self.database is None:
-            raise Exception("No database.")
         if len(device_str) == 0:
             return False, "Device string not provided."
 
@@ -911,6 +927,26 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def create_sets_and_reps_data(self, activity_id, sets):
+        """Create method for a list of of metaadata values."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_sets_and_reps_data.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if sets is None:
+            self.log_error(MongoDatabase.create_sets_and_reps_data.__name__ + ": Unexpected empty object: sets")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                activity[Keys.APP_SETS_KEY] = sets
+                self.activities_collection.save(activity)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def create_accelerometer_reading(self, device_str, activity_id, accels):
         """Adds several accelerometer readings to the database. 'accels' is an array of arrays in the form [time, x, y, z]."""
         if device_str is None:
@@ -1056,6 +1092,30 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def delete_tag(self, activity_id, tag):
+        """Deletes the specified tag from the activity with the given ID."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_tag.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if tag is None:
+            self.log_error(MongoDatabase.create_tag.__name__ + ": Unexpected empty object: tag")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            if activity is not None:
+                data = []
+                if Keys.ACTIVITY_TAGS_KEY in activity:
+                    data = activity[Keys.ACTIVITY_TAGS_KEY]
+                    data.remove(tag)
+                    activity[Keys.ACTIVITY_TAGS_KEY] = data
+                    self.activities_collection.save(activity)
+                    return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def create_activity_comment(self, activity_id, commenter_id, comment):
         """Create method for a comment on an activity."""
         if activity_id is None:
@@ -1100,3 +1160,87 @@ class MongoDatabase(Database.Database):
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
         return None
+
+    def create_workout(self, user_id):
+        """Create method for a workout."""
+        if user_id is None:
+            self.log_error(MongoDatabase.create_workout.__name__ + ": Unexpected empty object: user_id")
+            return False
+
+        try:
+            pass
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return True
+
+    def retrieve_workout(self, workout_id):
+        """Retrieve method for the workout with the specified ID."""
+        if workout_id is None:
+            self.log_error(MongoDatabase.retrieve_workout.__name__ + ": Unexpected empty object: workout_id")
+            return None
+
+        try:
+            pass
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def delete_workout(self, workout_id):
+        """Delete method for the workout with the specified ID."""
+        if workout_id is None:
+            self.log_error(MongoDatabase.delete_workout.__name__ + ": Unexpected empty object: workout_id")
+            return False
+
+        try:
+            workout_id_obj = ObjectId(workout_id)
+            workout = self.workouts_collection.delete_one({Keys.DATABASE_ID_KEY: workout_id_obj})
+            if workout is not None:
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def create_gear(self, user_id):
+        """Create method for gear."""
+        if user_id is None:
+            self.log_error(MongoDatabase.create_gear.__name__ + ": Unexpected empty object: user_id")
+            return False
+
+        try:
+            pass
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return True
+
+    def retrieve_gear(self, gear_id):
+        """Retrieve method for the gear with the specified ID."""
+        if gear_id is None:
+            self.log_error(MongoDatabase.retrieve_gear.__name__ + ": Unexpected empty object: gear_id")
+            return None
+
+        try:
+            pass
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def delete_gear(self, gear_id):
+        """Delete method for the gear with the specified ID."""
+        if gear_id is None:
+            self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: gear_id")
+            return False
+
+        try:
+            gear_id_obj = ObjectId(gear_id)
+            gear = self.gear_collection.delete_one({Keys.DATABASE_ID_KEY: gear_id_obj})
+            if gear is not None:
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False

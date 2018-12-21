@@ -29,8 +29,8 @@ GENDER_MALE_KEY = "male"
 GENDER_FEMALE_KEY = "female"
 
 # Keys associated with uploading data
-UPLOADED_FILE_NAME_KEY = "uploaded file name"
-UPLOADED_FILE_DATA_KEY = "uploaded file data"
+UPLOADED_FILE_NAME_KEY = "uploaded_file_name"
+UPLOADED_FILE_DATA_KEY = "uploaded_file_data"
 
 # Keys inherited from the mobile app.
 APP_NAME_KEY = "Name"
@@ -40,6 +40,7 @@ APP_DEVICE_ID_KEY = "DeviceId"
 APP_ID_KEY = "ActivityId"
 APP_TYPE_KEY = "ActivityType"
 APP_DISTANCE_KEY = "Distance"
+APP_DURATION_KEY = "Duration"
 APP_CADENCE_KEY = "Cadence"
 APP_TEMP_KEY = "Temperature"
 APP_CURRENT_SPEED_KEY = "Current Speed"
@@ -84,8 +85,10 @@ ACTIVITY_VISIBILITY_PRIVATE = "private"
 ACTIVITY_COMMENT_KEY = "comment"
 ACTIVITY_COMMENTS_KEY = "comments"
 ACTIVITY_COMMENTER_ID_KEY = "commenter_id"
+ACTIVITY_TAG_KEY = "tag"
 ACTIVITY_TAGS_KEY = "tags"
 ACTIVITY_SUMMARY_KEY = "summary_data"
+ACTIVITY_EXPORT_FORMAT_KEY = "export_format"
 
 # Keys used to summarize activity data.
 BEST_SPEED = "Best Speed"
@@ -116,3 +119,7 @@ TYPE_RUNNING_KEY = "Running"
 TYPE_CYCLING_KEY = "Cycling"
 TYPE_SWIMMING_KEY = "Swimming"
 TYPE_PULL_UPS_KEY = "Pull Ups"
+TYPE_PUSH_UPS_KEY = "Push Ups / Press Ups"
+
+# Activity names
+UNNAMED_ACTIVITY_TITLE = "Unnamed"

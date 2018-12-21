@@ -26,8 +26,12 @@ def create_with_data(sensor_type, data):
     """Creates a sensor analyzer object of the specified type and loads it with the given data."""
     sensor_analyzer = create(sensor_type)
     if sensor_analyzer is not None:
-        for datum in data:
-            time = int(datum.keys()[0])
-            value = float(datum.values()[0])
-            sensor_analyzer.append_sensor_value(time, value)
+        if sensor_type == Keys.APP_ACCELEROMETER_KEY:
+            for datum in data:
+                sensor_analyzer.append_sensor_value_from_dict(datum)
+        else:
+            for datum in data:
+                time = int(datum.keys()[0])
+                value = float(datum.values()[0])
+                sensor_analyzer.append_sensor_value(time, value)
     return sensor_analyzer

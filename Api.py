@@ -3,6 +3,7 @@
 
 import json
 import logging
+import os
 import time
 import urllib
 import uuid
@@ -15,12 +16,13 @@ g_not_meta_data = ["DeviceId", "ActivityId", "ActivityName", "User Name", "Latit
 class Api(object):
     """Class for managing API messages."""
 
-    def __init__(self, user_mgr, data_mgr, analysis_scheduler, user_id):
+    def __init__(self, user_mgr, data_mgr, temp_dir, user_id, root_url):
         super(Api, self).__init__()
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
-        self.analysis_scheduler = analysis_scheduler
+        self.temp_dir = temp_dir
         self.user_id = user_id
+        self.root_url = root_url
 
     def log_error(self, log_str):
         """Writes an error message to the log file."""
@@ -143,7 +145,7 @@ class Api(object):
                 self.user_mgr.create_user_device(user_id, device_str)
 
         # Schedule for analysis.
-        self.analysis_scheduler.add_to_queue(activity_id)
+        self.data_mgr.analyze(activity_id)
 
         return True, ""
 
@@ -205,6 +207,12 @@ class Api(object):
 
         cookie = self.user_mgr.create_new_session(email)
         return True, str(cookie)
+
+    def handle_login_status(self, values):
+        """Called when an API message to check the login status in is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        return True, ""
 
     def handle_logout(self, values):
         """Ends the session for the specified user."""
@@ -284,7 +292,7 @@ class Api(object):
             raise Exception("Empty username.")
 
         # Reauthenticate the user.
-        password = values[Keys.PASSWORD_KEY]
+        password = urllib.unquote_plus(values[Keys.PASSWORD_KEY])
         if not self.user_mgr.authenticate_user(username, password):
             raise Exception("Authentication failed.")
 
@@ -295,6 +303,43 @@ class Api(object):
         self.user_mgr.delete_user(self.user_id)
         return True, ""
 
+    def handle_list_activities(self, values):
+        """Removes the specified activity."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise Exception("Empty username.")
+
+        # Get the user details.
+        _, _, user_realname = self.user_mgr.retrieve_user(username)
+
+        # Get the activiites that belong to the logged in user.
+        matched_activities = []
+        if Keys.FOLLOWING_KEY in values:
+            activities = self.data_mgr.retrieve_all_activities_visible_to_user(self.user_id, user_realname, None, None)
+        else:
+            activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
+
+        # Convert the activities list to an array of JSON objects for return to the client.
+        if activities is not None and isinstance(activities, list):
+            for activity in activities:
+                activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+                activity_name = Keys.UNNAMED_ACTIVITY_TITLE
+                if Keys.ACTIVITY_TYPE_KEY in activity:
+                    activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
+                if Keys.ACTIVITY_NAME_KEY in activity:
+                    activity_name = activity[Keys.ACTIVITY_NAME_KEY]
+
+                if Keys.ACTIVITY_TIME_KEY in activity and Keys.ACTIVITY_ID_KEY in activity:
+                    url = self.root_url + "/activity/" + activity[Keys.ACTIVITY_ID_KEY]
+                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time':int(activity[Keys.ACTIVITY_TIME_KEY])}
+                matched_activities.append(temp_activity)
+        json_result = json.dumps(matched_activities, ensure_ascii=False)
+        return True, json_result
+
     def handle_delete_activity(self, values):
         """Removes the specified activity."""
         if self.user_id is None:
@@ -304,6 +349,8 @@ class Api(object):
 
         # Get the device and activity IDs from the push request.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
 
         # Get the activiites that belong to the logged in user.
         activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None)
@@ -323,23 +370,82 @@ class Api(object):
 
     def handle_add_time_and_distance_activity(self, values):
         """Called when an API message to add a new activity based on time and distance is received."""
-        if Keys.APP_TIME_KEY not in values:
-            raise Exception("Time not specified.")
+        if self.user_id is None:
+            raise Exception("Not logged in.")
         if Keys.APP_DISTANCE_KEY not in values:
             raise Exception("Distance not specified.")
+        if Keys.APP_DURATION_KEY not in values:
+            raise Exception("Duration not specified.")
+        if Keys.ACTIVITY_TIME_KEY not in values:
+            raise Exception("Activity start time not specified.")
+        if Keys.ACTIVITY_TYPE_KEY not in values:
+            raise Exception("Activity type not specified.")
 
-        activity_id = self.data_mgr.create_activity_id()
-        return True, ""
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise Exception("Empty username.")
+
+        # Validate the activity start time.
+        start_time = values[Keys.ACTIVITY_TIME_KEY]
+        if not InputChecker.is_integer(start_time):
+            raise Exception("Invalid start time.")
+
+        # Add the activity to the database.
+        activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
+        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time))
+        self.data_mgr.create_metadata(activity_id, 0, Keys.APP_DISTANCE_KEY, float(values[Keys.APP_DISTANCE_KEY]), False)
+        self.data_mgr.create_metadata(activity_id, 0, Keys.APP_DURATION_KEY, float(values[Keys.APP_DURATION_KEY]), False)
+
+        return ""
 
     def handle_add_sets_and_reps_activity(self, values):
         """Called when an API message to add a new activity based on sets and reps is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
         if Keys.APP_SETS_KEY not in values:
             raise Exception("Sets not specified.")
+        if Keys.ACTIVITY_TIME_KEY not in values:
+            raise Exception("Activity start time not specified.")
+        if Keys.ACTIVITY_TYPE_KEY not in values:
+            raise Exception("Activity type not specified.")
 
-        activity_id = self.data_mgr.create_activity_id()
-        sets = values[Keys.APP_SETS_KEY]
-        print sets
-        return True, ""
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise Exception("Empty username.")
+
+        # Convert the array string to an actual array (note: I realize I could use eval for this, but that seems dangerous)
+        sets = urllib.unquote_plus(values[Keys.APP_SETS_KEY])
+        if len(sets) <= 2:
+            raise Exception("Malformed set data.")
+        sets = sets[1:-1] # Remove the brackets
+        sets = sets.split(',')
+        if len(sets) == 0:
+            raise Exception("Set data was not specified.")
+
+        # Make sure everything is a number.
+        new_sets = []
+        for current_set in sets:
+            rep_count = int(current_set)
+            if rep_count > 0:
+                new_sets.append(rep_count)
+
+        # Make sure we got at least one valid set.
+        if len(new_sets) == 0:
+            raise Exception("Set data was not specified.")
+
+        # Validate the activity start time.
+        start_time = values[Keys.ACTIVITY_TIME_KEY]
+        if not InputChecker.is_integer(start_time):
+            raise Exception("Invalid start time.")
+
+        # Add the activity to the database.
+        activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
+        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time))
+        self.data_mgr.create_sets_and_reps_data(activity_id, new_sets)
+
+        return ""
 
     def handle_add_activity(self, values):
         """Called when an API message to add a new activity is received."""
@@ -348,17 +454,19 @@ class Api(object):
         if Keys.ACTIVITY_TYPE_KEY not in values:
             raise Exception("Activity type not specified.")
 
+        activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
         switcher = {
             Keys.TYPE_RUNNING_KEY : self.handle_add_time_and_distance_activity,
             Keys.TYPE_CYCLING_KEY : self.handle_add_time_and_distance_activity,
             Keys.TYPE_SWIMMING_KEY : self.handle_add_time_and_distance_activity,
-            Keys.TYPE_PULL_UPS_KEY : self.handle_add_sets_and_reps_activity
+            Keys.TYPE_PULL_UPS_KEY : self.handle_add_sets_and_reps_activity,
+            Keys.TYPE_PUSH_UPS_KEY : self.handle_add_sets_and_reps_activity
         }
 
-        func = switcher.get(values[Keys.ACTIVITY_TYPE_KEY], lambda: "Invalid activity type")
+        func = switcher.get(activity_type, lambda: "Invalid activity type")
         return True, func(values)
 
-    def handle_upload_activity_file(self, values):
+    def handle_upload_activity_file(self, username, values):
         """Called when an API message to upload a file is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
@@ -367,27 +475,28 @@ class Api(object):
         if Keys.UPLOADED_FILE_DATA_KEY not in values:
             raise Exception("File data not specified.")
 
+        # Decode the parameters.
+        uploaded_file_name = urllib.unquote_plus(values[Keys.UPLOADED_FILE_NAME_KEY])
+        uploaded_file_data = urllib.unquote_plus(values[Keys.UPLOADED_FILE_DATA_KEY])
+
+        # Check for empty.
+        if len(uploaded_file_name) == 0:
+            raise Exception('Empty file name.')
+        if len(uploaded_file_data) == 0:
+            raise Exception('Empty file data for ' + uploaded_file_name + '.')
+
         # Generate a random name for the local file.
-        uploaded_file_name = values[Keys.UPLOADED_FILE_NAME_KEY]
-        upload_path = os.path.normpath(self.tempfile_dir)
+        upload_path = os.path.normpath(self.temp_dir)
         uploaded_file_name, uploaded_file_ext = os.path.splitext(uploaded_file_name)
         local_file_name = os.path.join(upload_path, str(uuid.uuid4()))
         local_file_name = local_file_name + uploaded_file_ext
 
         # Write the file.
         with open(local_file_name, 'wb') as local_file:
-            local_file.write(values[Keys.UPLOADED_FILE_DATA_KEY])
+            local_file.write(uploaded_file_data)
 
         # Parse the file and store it's contents in the database.
-        success, device_id, activity_id = self.data_mgr.import_file(username, self.user_id, local_file_name, uploaded_file_ext)
-        if not success:
-            raise Exception('Unhandled exception in upload when processing ' + uploaded_file_name)
-
-        # Schedule for analysis.
-        self.analysis_scheduler.add_to_queue(activity_id)
-
-        # Remove the local file.
-        os.remove(local_file_name)
+        self.data_mgr.import_file(username, self.user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
 
         return True, ""
 
@@ -425,13 +534,6 @@ class Api(object):
         """Called when an API message to list the users you are following is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if Keys.TARGET_EMAIL_KEY not in values:
-            raise Exception("Invalid parameter.")
-
-        target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
-        target_id, _, _ = self.user_mgr.retrieve_user(target_email)
-        if target_id is None:
-            raise Exception("Target user does not exist.")
 
         users_following = self.user_mgr.list_users_followed(self.user_id)
         users_list_str = ""
@@ -443,16 +545,6 @@ class Api(object):
         """Called when an API message to list the users who are following you is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
-        if Keys.TARGET_EMAIL_KEY not in values:
-            raise Exception("Invalid parameter.")
-
-        target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
-        if not InputChecker.is_email_address(target_email):
-            raise Exception("Invalid email address.")
-
-        target_id, _, _ = self.user_mgr.retrieve_user(target_email)
-        if target_id is None:
-            raise Exception("Target user does not exist.")
 
         users_followed_by = self.user_mgr.list_followers(self.user_id)
         users_list_str = ""
@@ -500,9 +592,37 @@ class Api(object):
             raise Exception("Not logged in.")
         if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
+        if Keys.ACTIVITY_EXPORT_FORMAT_KEY not in values:
+            raise Exception("Invalid parameter.")
 
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
+
+        export_format = urllib.unquote_plus(values[Keys.ACTIVITY_EXPORT_FORMAT_KEY])
+        if not export_format in ['csv', 'gpx', 'tcx']:
+            raise Exception("Invalid format.")
+
+        # Generate a random name for the local file.
+        local_file_name = os.path.join(os.path.normpath(self.temp_dir), str(uuid.uuid4()))
+
+        # Write the data to a temporary local file.
         exporter = Exporter.Exporter()
-        result = exporter.export(self.data_mgr, values[Keys.ACTIVITY_ID_KEY])
+        exporter.export(self.data_mgr, activity_id, local_file_name, export_format)
+
+        # Read the file into memory.
+        result = ""
+        try:
+            with open(local_file_name, 'rb') as local_file:
+                while True:
+                    next_block = local_file.read(8192)
+                    if not next_block:
+                        break
+                    result = result + next_block
+        finally:
+            # Remove the local file.
+            os.remove(local_file_name)
+
         return True, result
 
     def handle_claim_device(self, values):
@@ -521,14 +641,38 @@ class Api(object):
             raise Exception("Not logged in.")
         if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
-        if Keys.ACTIVITY_TAGS_KEY not in values:
+        if Keys.ACTIVITY_TAG_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        tags = values[Keys.ACTIVITY_TAGS_KEY]
-        if not InputChecker.is_valid(tags):
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
+
+        tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
+        if not InputChecker.is_valid(tag):
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.create_tag(values[Keys.ACTIVITY_ID_KEY], tags)
+        result = self.data_mgr.create_tag(activity_id, tag)
+        return result, ""
+
+    def handle_delete_tag(self, values):
+        """Called when an API message delete a tag is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.ACTIVITY_TAG_KEY not in values:
+            raise Exception("Invalid parameter.")
+
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
+
+        tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
+        if not InputChecker.is_valid(tag):
+            raise Exception("Invalid parameter.")
+
+        result = self.data_mgr.delete_tag(activity_id, tag)
         return result, ""
 
     def handle_list_tags(self, values):
@@ -538,7 +682,11 @@ class Api(object):
         if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.retrieve_tags(values[Keys.ACTIVITY_ID_KEY])
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
+
+        result = self.data_mgr.retrieve_tags(activity_id)
         return result, ""
 
     def handle_create_comment(self, values):
@@ -550,11 +698,15 @@ class Api(object):
         if Keys.ACTIVITY_COMMENT_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        comment = values[Keys.ACTIVITY_COMMENT_KEY]
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
+
+        comment = urllib.unquote_plus(values[Keys.ACTIVITY_COMMENT_KEY])
         if not InputChecker.is_valid(comment):
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.create_activity_comment(values[Keys.ACTIVITY_ID_KEY], self.user_id, comment)
+        result = self.data_mgr.create_activity_comment(activity_id, self.user_id, comment)
         return result, ""
 
     def handle_list_comments(self, values):
@@ -564,7 +716,11 @@ class Api(object):
         if Keys.ACTIVITY_ID_KEY not in values:
             raise Exception("Invalid parameter.")
 
-        result = self.data_mgr.retrieve_comments(values[Keys.ACTIVITY_ID_KEY])
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
+
+        result = self.data_mgr.retrieve_comments(activity_id)
         return result, ""
 
     def handle_update_settings(self, values):
@@ -637,6 +793,7 @@ class Api(object):
 
     def handle_api_1_0_request(self, request, values):
         """Called to parse a version 1.0 API message."""
+        username = None
         if self.user_id is None:
             if Keys.SESSION_KEY in values:
                 username = self.user_mgr.get_logged_in_user_from_cookie(values[Keys.SESSION_KEY])
@@ -649,6 +806,8 @@ class Api(object):
             return self.handle_login_submit(values)
         elif request == 'create_login_submit':
             return self.handle_create_login_submit(values)
+        elif request == 'login_status':
+            return self.handle_login_status(values)
         elif request == 'logout':
             return self.handle_logout(values)
         elif request == 'update_email':
@@ -657,12 +816,14 @@ class Api(object):
             return self.handle_update_password(values)
         elif request == 'delete_user':
             return self.handle_delete_user(values)
+        elif request == 'list_activities':
+            return self.handle_list_activities(values)
         elif request == 'delete_activity':
             return self.handle_delete_activity(values)
         elif request == 'add_activity':
             return self.handle_add_activity(values)
         elif request == 'upload_activity_file':
-            return self.handle_upload_activity_file(values)
+            return self.handle_upload_activity_file(username, values)
         elif request == 'add_tag_to_activity':
             return self.handle_add_tag_to_activity(values)
         elif request == 'delete_tag_from_activity':
@@ -683,6 +844,8 @@ class Api(object):
             return self.handle_claim_device(values)
         elif request == 'create_tag':
             return self.handle_create_tag(values)
+        elif request == 'delete_tag':
+            return self.handle_delete_tag(values)
         elif request == 'list_tags':
             return self.handle_list_tags(values)
         elif request == 'create_comment':

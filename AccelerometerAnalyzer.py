@@ -22,21 +22,26 @@ class AccelerometerAnalyzer(SensorAnalyzer.SensorAnalyzer):
         self.y = []
         self.z = []
 
-    def append_sensor_value(self, date_time, value):
+    def append_sensor_value(self, date_time, values):
         """Adds another reading to the analyzer."""
-        if len(value) != 3:
+        if len(values) != 3:
             return
-        self.x.append(value[0])
-        self.y.append(value[1])
-        self.z.append(value[2])
+        self.x.append(values[0])
+        self.y.append(values[1])
+        self.z.append(values[2])
+
+    def append_sensor_value_from_dict(self, values):
+        """Adds another reading to the analyzer."""
+        self.x.append(float(values[Keys.ACCELEROMETER_AXIS_NAME_X]))
+        self.y.append(float(values[Keys.ACCELEROMETER_AXIS_NAME_Y]))
+        self.z.append(float(values[Keys.ACCELEROMETER_AXIS_NAME_Z]))
 
     def analyze(self):
         """Called when all sensor readings have been processed."""
         results = SensorAnalyzer.SensorAnalyzer.analyze(self)
-        peak_list = peaks.find_peaks_in_numeric_array(self.x, 2.0)
-        print(len(peak_list))
-        peak_list = peaks.find_peaks_in_numeric_array(self.y, 2.0)
-        print(len(peak_list))
-        peak_list = peaks.find_peaks_in_numeric_array(self.z, 2.0)
-        print(len(peak_list))
+        peak_list = peaks.find_peaks_in_numeric_array(self.x, 1.0)
+
+        sets = []
+        sets.append(len(peak_list))
+        results[Keys.APP_SETS_KEY] = sets
         return results

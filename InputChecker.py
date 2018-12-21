@@ -26,21 +26,32 @@
 import re
 from unidecode import unidecode
 
-alphanums = re.compile(r'[\w-]*$')
-safe = re.compile(r'[\w_ .-]*$')
+hex = "[a-fA-F0-9]"
+uuid = re.compile(hex + "{8}-" + hex + "{4}-" + hex + "{4}-" + hex + "{4}-" + hex + "{12}")
+alphanums = re.compile(r"[\w-]*$")
+safe = re.compile(r"[\w_ ',/.-]*$")
 email_addr = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 
 def is_alphanumeric(test_str):
     """Returns True if the string contains only alphanumeric characters. Otherwise, False."""
-    return re.match(alphanums, test_str)
+    return re.match(alphanums, test_str) is not None
 
 def is_email_address(test_str):
     """Returns True if the string is *mostly* RFC 5322 complaint."""
-    return re.match(email_addr, test_str)
+    return re.match(email_addr, test_str) is not None
 
 def is_timestamp(test_str):
     """Returns True if the string appears to be a valid timestamp."""
     return True
+
+def is_uuid(test_str):
+    """Returns True if the string appears to be a valid UUID."""
+    try:
+        if re.match(uuid, test_str) is not None:
+            return True
+    except:
+        pass
+    return False
 
 def is_integer(test_str):
     """Returns True if the string appears to be a valid integer."""
@@ -54,8 +65,13 @@ def is_integer(test_str):
 def is_valid(test_str):
     """Tests the input to see that it only contains safe characters."""
     try:
-        if re.match(safe, unidecode(test_str)): # Use unidecode to allow for diacritics
-            return True
+        if isinstance(test_str, str):
+            if re.match(safe, test_str) is not None:
+                return True
+        elif isinstance(test_str, unicode):
+            decoded_str = unidecode(test_str) # Use unidecode to allow for diacritics
+            if re.match(safe, decoded_str) is not None:
+                return True
     except:
         pass
     return False

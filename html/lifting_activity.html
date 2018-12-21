@@ -53,10 +53,6 @@
 ${nav}
 </section>
 
-<section class="summary">
-${summary}
-</section>
-
 <div id="charts"/>
 
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
@@ -141,15 +137,52 @@ ${zAxis}
 		if (send_post_request(the_url, dict, result_text))
 			window.location.reload();
 		else
-			alert("An error occurred!");
+			alert(result_text.value);
+	}
+
+	function export_activity()
+	{
+		var the_url = "${root_url}/api/1.0/export_activity";
+		var format = document.getElementById("format").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["activity_id"] : "${activityId}"});
+		dict.push({["export_format"] : format});
+		if (send_post_request(the_url, dict, result_text))
+			create_local_file(result_text.value, "${activityId}", "text/plain;charset=utf-8");
+		else
+			alert(result_text.value);
 	}
 </script>
 
+<section class="summary">
+<p>
+${summary}
+</p>
+</section>
+
+<section class="analysis">
+<p>
+${details}
+</p>
+</section>
+
 <section class="comments">
+<p>
 Comments:
 <table>
 ${comments}
 </table>
+</p>
+</section>
+
+<section class="export">
+<p>
+<table>
+${exports}
+</table>
+</p>
 </section>
 
 </body>

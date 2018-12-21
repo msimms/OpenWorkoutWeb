@@ -18,16 +18,75 @@
 
 <body>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css">
+<link rel="stylesheet" media="print" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.print.min.css">
+
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
+
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript">
+
+	function list_activities()
+	{
+		var activity_list = [];
+		var the_url = "${root_url}/api/1.0/list_activities";
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["following"] : 1});
+		if (send_post_request(the_url, dict, result_text))
+		{
+			var obj = JSON.parse(result_text.value);
+			for (var i = 0; i < obj.length; i++)
+			{
+				var activity_obj = obj[i];
+				activity_obj['start'] = unix_time_to_iso_time(activity_obj['time']);
+				activity_list.push(activity_obj);
+			}
+		}
+		else
+		{
+			alert(result_text.value);
+		}
+
+		return activity_list;
+	}
+
+	$(document).ready(function()
+	{
+		$('#calendar').fullCalendar({
+			header: {
+				left: 'prev,next,today',
+				center: 'title',
+				right: 'month,agendaWeek,agendaDay,listWeek'
+			},
+			navLinks: true, // can click day/week names to navigate views
+			editable: false,
+			eventLimit: true, // allow "more" link when too many events
+			timezone: 'local',
+			events: list_activities()
+		});
+
+		$('#prev').on('click', function() {
+			$('#calendar').fullCalendar('prev'); // call method
+		});
+
+		$('#next').on('click', function() {
+			$('#calendar').fullCalendar('next'); // call method
+		});
+	});
+
+</script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="activities_list" style="width: 600px">
-${activities_list}
-</div>
+<section>
+<div id='calendar'></div>
+</section>
 
 </body>
 </html>

@@ -6,6 +6,7 @@ import csv
 import datetime
 import gpxpy
 import logging
+import os
 import traceback
 import sys
 from lxml import objectify
@@ -140,7 +141,7 @@ class Importer(object):
 
         return False, "", ""
 
-    def import_tcx_file(self, username, user_id, file_name):
+    def import_tcx_file(self, username, user_id, file_name, original_file_name):
         """Imports the specified TCX file."""
 
         # Parse the file.
@@ -164,9 +165,12 @@ class Importer(object):
             start_time_tuple = start_time_obj.timetuple()
             start_time_unix = calendar.timegm(start_time_tuple)
 
+        # Since we don't have anything else, use the file name as the name of the activity.
+        activity_name = os.path.splitext(os.path.basename(original_file_name))[0]
+
         # Indicate the start of the activity.
         normalized_activity_type = Importer.normalize_activity_type(activity_type)
-        device_str, activity_id = self.activity_writer.create_activity(username, user_id, "", "", normalized_activity_type, start_time_unix)
+        device_str, activity_id = self.activity_writer.create_activity(username, user_id, activity_name, "", normalized_activity_type, start_time_unix)
 
         locations = []
         cadences = []
@@ -269,13 +273,13 @@ class Importer(object):
         self.activity_writer.finish_activity()
         return True, device_str, activity_id
 
-    def import_file(self, username, user_id, local_file_name, file_extension):
+    def import_file(self, username, user_id, local_file_name, original_file_name, file_extension):
         """Imports the specified file, parsing it based on the provided extension."""
         try:
             if file_extension == '.gpx':
                 return self.import_gpx_file(username, user_id, local_file_name)
             elif file_extension == '.tcx':
-                return self.import_tcx_file(username, user_id, local_file_name)
+                return self.import_tcx_file(username, user_id, local_file_name, original_file_name)
             elif file_extension == '.csv':
                 return self.import_accelerometer_csv_file(username, user_id, local_file_name)
         except:

@@ -165,6 +165,28 @@ def all_activities():
         g_app.log_error('Unhandled exception in ' + all_activities.__name__)
     return g_app.error()
 
+@g_flask_app.route('/workouts')
+def workouts():
+    """Renders the list of workouts the specified user is allowed to view."""
+    try:
+        return g_app.workouts()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error('Unhandled exception in ' + workouts.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/gear')
+def gear():
+    """Renders the list of all gear belonging to the logged in user."""
+    try:
+        return g_app.gear()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error('Unhandled exception in ' + gear.__name__)
+    return g_app.error()
+
 @g_flask_app.route('/following')
 def following():
     """Renders the list of users the specified user is following."""
@@ -360,10 +382,10 @@ def api(version, method):
 
         # Process the API request.
         if version == '1.0':
-            api = Api.Api(g_app.user_mgr, g_app.data_mgr, g_app.analysis_scheduler, user_id)
-            handled, response = api.handle_api_1_0_request(method, params)
+            handled, response = g_app.api(user_id, method, params)
             if not handled:
-                g_app.log_error("Failed to handle request: " + method)
+                response = "Failed to handle request: " + str(method)
+                g_app.log_error(response)
                 code = 400
             else:
                 code = 200
@@ -424,10 +446,6 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
     mako.collection_size = 100
     mako.directories = "templates"
-
-    tempfile_dir = os.path.join(g_root_dir, 'tempfile')
-    if not os.path.exists(tempfile_dir):
-        os.makedirs(tempfile_dir)
 
     session_mgr = SessionMgr.FlaskSessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, g_root_dir)

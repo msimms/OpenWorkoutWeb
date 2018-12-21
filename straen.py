@@ -225,6 +225,34 @@ class StraenWeb(object):
 
     @cherrypy.expose
     @require()
+    def workouts(self, *args, **kw):
+        """Renders the list of workouts the specified user is allowed to view."""
+        try:
+            return self.app.workouts()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error('Unhandled exception in ' + StraenWeb.workouts.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
+    def gear(self, *args, **kw):
+        """Renders the list of all gear belonging to the logged in user."""
+        try:
+            return self.app.gear()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error('Unhandled exception in ' + StraenWeb.gear.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
     def following(self, *args, **kw):
         """Renders the list of users the specified user is following."""
         try:
@@ -449,11 +477,11 @@ class StraenWeb(object):
             if len(args) > 0:
                 api_version = args[0]
                 if api_version == '1.0':
-                    api = Api.Api(self.app.user_mgr, self.app.data_mgr, self.app.analysis_scheduler, user_id)
                     method = args[1:]
-                    handled, response = api.handle_api_1_0_request(method[0], params)
+                    handled, response = self.app.api(user_id, method[0], params)
                     if not handled:
-                        self.log_error("Failed to handle request: " + method)
+                        response = "Failed to handle request: " + str(method)
+                        self.log_error(response)
                         cherrypy.response.status = 400
                     else:
                         cherrypy.response.status = 200
@@ -528,10 +556,6 @@ def main():
     mako.collection_size = 100
     mako.directories = "templates"
 
-    tempfile_dir = os.path.join(root_dir, 'tempfile')
-    if not os.path.exists(tempfile_dir):
-        os.makedirs(tempfile_dir)
-
     session_mgr = SessionMgr.CherryPySessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, root_dir)
     data_mgr = DataMgr.DataMgr(root_dir)
@@ -544,6 +568,11 @@ def main():
     markdown_logger = logging.getLogger("MARKDOWN")
     markdown_logger.setLevel(logging.ERROR)
 
+    # The direcory for session objects.
+    session_dir = os.path.join(root_dir, 'sessions')
+    if not os.path.exists(session_dir):
+        os.makedirs(session_dir)
+
     cherrypy.tools.straenweb_auth = cherrypy.Tool('before_handler', check_auth)
 
     conf = {
@@ -553,6 +582,8 @@ def main():
             'tools.straenweb_auth.on': True,
             'tools.sessions.on': True,
             'tools.sessions.name': 'straenweb_auth',
+            'tools.sessions.storage_type': 'file',
+            'tools.sessions.storage_path': session_dir,
             'tools.sessions.timeout': 129600,
             'tools.secureheaders.on': True
         },

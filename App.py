@@ -13,7 +13,6 @@ import threading
 import traceback
 import uuid
 
-import AnalysisScheduler
 import Keys
 import LocationAnalyzer
 import Api
@@ -27,8 +26,6 @@ from mako.template import Template
 
 
 PRODUCT_NAME = 'Straen'
-
-UNNAMED_ACTIVITY_TITLE = "Unnamed"
 
 LOGIN_URL = '/login'
 DEFAULT_LOGGED_IN_URL = '/all_activities'
@@ -50,7 +47,8 @@ def statistics(function):
             g_stats[function.__name__] = g_stats[function.__name__] + 1
         except:
             g_stats[function.__name__] = 1
-        g_stats_lock.release()
+        finally:
+            g_stats_lock.release()
         return function(*args, **kwargs)
     return wrapper
 
@@ -78,17 +76,16 @@ class App(object):
         self.map_single_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
         self.map_multi_html_file = os.path.join(root_dir, HTML_DIR, 'map_multi_google.html')
         self.error_logged_in_html_file = os.path.join(root_dir, HTML_DIR, 'error_logged_in.html')
-        self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler(self.data_mgr, 2)
-        self.analysis_scheduler.start()
+
+        self.tempfile_dir = os.path.join(root_dir, 'tempfile')
+        if not os.path.exists(self.tempfile_dir):
+            os.makedirs(self.tempfile_dir)
+
         super(App, self).__init__()
 
     def terminate(self):
         """Destructor"""
         print("Terminating the application...")
-        print("Terminating data analysis...")
-        self.analysis_scheduler.terminate()
-        self.analysis_scheduler.join()
-        self.analysis_scheduler = None
         print("Terminating data management...")
         self.data_mgr.terminate()
         self.data_mgr = None
@@ -117,19 +114,29 @@ class App(object):
 
         # Build a list of table rows from the device information.
         g_stats_lock.acquire()
-        stats_str = "<td><b>Page</b></td><td><b>Num Accesses</b></td><tr>\n"
-        for key, value in g_stats.iteritems():
-            stats_str += "\t\t<tr><td>"
-            stats_str += str(key)
-            stats_str += "</td><td>"
-            stats_str += str(value)
-            stats_str += "</td></tr>\n"
-        g_stats_lock.release()
+        try:
+            page_stats_str = "<td><b>Page</b></td><td><b>Num Accesses</b></td><tr>\n"
+            for key, value in g_stats.iteritems():
+                page_stats_str += "\t\t<tr><td>"
+                page_stats_str += str(key)
+                page_stats_str += "</td><td>"
+                page_stats_str += str(value)
+                page_stats_str += "</td></tr>\n"
+        finally:
+            g_stats_lock.release()
+
+        # The number of users and activities.
+        total_users_str = str(self.data_mgr.total_users_count())
+        total_activities_str = str(self.data_mgr.total_activities_count())
+
+        # The number of things queued for processing.
+        total_queued_for_analysis_str = str(self.data_mgr.total_queued_for_analysis())
+        total_queued_for_import_str = str(self.data_mgr.total_queued_for_import())
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'stats.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, page_stats=stats_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, page_stats=page_stats_str, total_activities=total_activities_str, total_users=total_users_str, queued_for_analysis=total_queued_for_analysis_str, queued_for_import=total_queued_for_import_str)
 
     def update_track(self, activity_id=None, num=None):
         if activity_id is None:
@@ -241,6 +248,8 @@ class App(object):
             navbar_str += \
                 "\t\t<li><a href=\"" + self.root_url + "/my_activities/\">My Activities</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/all_activities/\">All Activities</a></li>\n" \
+                "\t\t<li><a href=\"" + self.root_url + "/workouts/\">Workouts</a></li>\n" \
+                "\t\t<li><a href=\"" + self.root_url + "/gear/\">Gear</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/following/\">Following</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/followers/\">Followers</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/device_list/\">Devices</a></li>\n" \
@@ -262,35 +271,77 @@ class App(object):
                 decoded_entry = json.loads(comment_entry)
                 commenter_id = decoded_entry[Keys.ACTIVITY_COMMENTER_ID_KEY]
                 _, commenter_name = self.user_mgr.retrieve_user_from_id(commenter_id)
-                comments_str += "<td>"
+                comments_str += "<td><b>"
                 comments_str += commenter_name
-                comments_str += " says \""
+                comments_str += "</b> says \""
                 comments_str += decoded_entry[Keys.ACTIVITY_COMMENT_KEY]
-                comments_str += "\"</td><tr>"
+                comments_str += "\"</td><tr>\n"
         if logged_in:
-            comments_str += "<td><textarea rows=\"4\" cols=\"100\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>"
-            comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>"
+            comments_str += "<td><textarea rows=\"4\" cols=\"100\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>\n"
+            comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>\n"
         return comments_str
 
-    def render_page_for_lifting_activity(self, email, user_realname, activity_id, accels, logged_in_username, is_live):
+    def render_export_control(self, logged_in, has_location_data, has_accel_data):
+        """Helper function for building the comments string."""
+        exports_str = ""
+        if logged_in:
+            exports_str  = "<td>Export Format:</td><tr>\n"
+            exports_str += "<td><select id=\"format\" class=\"checkin\" >\n"
+            if has_location_data:
+                exports_str += "\t<option value=\"tcx\" selected\">TCX</option>\n"
+                exports_str += "\t<option value=\"gpx\">GPX</option>\n"
+            if has_accel_data:
+                exports_str += "\t<option value=\"csv\">CSV</option>\n"
+            exports_str += "</select>\n</td><tr>\n"
+            exports_str += "<td><button type=\"button\" onclick=\"return export_activity()\">Export</button></td><tr>\n"
+        return exports_str
+
+    def render_page_for_lifting_activity(self, email, user_realname, activity_id, activity, logged_in_username, is_live):
         """Helper function for rendering the map corresonding to a specific device and activity."""
 
         # Is the user logged in?
         logged_in = logged_in_username is not None
 
-        # Read the accelerometer data.
-        if accels is None or len(accels) == 0:
-            my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
+        # Read the accelerometer data (if any).
+        accels = []
+        if Keys.APP_ACCELEROMETER_KEY in activity:
+            accels = activity[Keys.APP_ACCELEROMETER_KEY]
 
         # Format the accelerometer data.
         x_axis = ""
         y_axis = ""
         z_axis = ""
         for accel in accels:
-            x_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_X]) + " },\n"
-            y_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Y]) + " },\n"
-            z_axis += "\t\t\t\t{ date: new Date(" + str(accel[Keys.ACCELEROMETER_TIME_KEY]) + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Z]) + " },\n"
+            time_str = str(accel[Keys.ACCELEROMETER_TIME_KEY])
+            x_axis += "\t\t\t\t{ date: new Date(" + time_str + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_X]) + " },\n"
+            y_axis += "\t\t\t\t{ date: new Date(" + time_str + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Y]) + " },\n"
+            z_axis += "\t\t\t\t{ date: new Date(" + time_str + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Z]) + " },\n"
+
+        # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
+        summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
+        if summary_data is None:
+            self.data_mgr.analyze(activity_id)
+
+        # Find the sets data.
+        sets = None
+        if Keys.APP_SETS_KEY in activity:
+            sets = activity[Keys.APP_SETS_KEY]
+        elif Keys.APP_SETS_KEY in summary_data:
+            sets = summary_data[Keys.APP_SETS_KEY]
+
+        # Build the details view.
+        details = ""
+        if sets is not None:
+            details = "<table>\n<td><b>Set</b></td><td><b>Rep Count</b></td><tr>\n"
+            set_num = 1
+            for current_set in sets:
+                details += "<td>"
+                details += str(set_num)
+                details += "</td><td>"
+                details += str(current_set)
+                details += "</td><tr>\n"
+                set_num = set_num + 1
+            details += "</table>\n"
 
         # Build the summary data view.
         summary = "<ul>\n"
@@ -298,9 +349,9 @@ class App(object):
         if activity_type is None:
             activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
-        name = self.data_mgr.retrieve_metadata(Keys.APP_NAME_KEY, activity_id)
+        name = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_NAME_KEY, activity_id)
         if name is None:
-            name = UNNAMED_ACTIVITY_TITLE
+            name = Keys.UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
         tags = self.data_mgr.retrieve_tags(activity_id)
         if tags is not None:
@@ -314,6 +365,9 @@ class App(object):
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
 
+        # List the export options.
+        exports_str = self.render_export_control(logged_in, False, Keys.APP_ACCELEROMETER_KEY in activity)
+
         # Build the page title.
         if is_live:
             page_title = "Live Tracking"
@@ -321,7 +375,7 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.lifting_activity_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, comments=comments_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, comments=comments_str, exports=exports_str)
 
     def render_metadata_for_page(self, key, activity_id):
         """Helper function for processing meatadata and formatting it for display."""
@@ -351,12 +405,13 @@ class App(object):
                     max_value = value
         return data_str, max_value
 
-    def render_page_for_mapped_activity(self, email, user_realname, activity_id, locations, logged_in_userid, is_live):
+    def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, logged_in_userid, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
 
         # Is the user logged in?
         logged_in = logged_in_userid is not None
 
+        locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
         if locations is None or len(locations) == 0:
             my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
             return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
@@ -383,7 +438,7 @@ class App(object):
         heart_rates_str, max_heart_rate = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity_id)
         cadences_str, max_cadence = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity_id)
         powers_str, max_power = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity_id)
-        name = self.data_mgr.retrieve_metadata(Keys.APP_NAME_KEY, activity_id)
+        name = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_NAME_KEY, activity_id)
         activity_type = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
         if activity_type is None:
             activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
@@ -395,7 +450,7 @@ class App(object):
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None:
-            self.analysis_scheduler.add_to_queue(activity_id)
+            self.data_mgr.analyze(activity_id)
 
         # Build the summary data view.
         summary = "<ul>\n"
@@ -405,7 +460,7 @@ class App(object):
 
         # Add the activity name.
         if name is None:
-            name = UNNAMED_ACTIVITY_TITLE
+            name = Keys.UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
 
         if location_analyzer.total_distance is not None:
@@ -466,9 +521,14 @@ class App(object):
                 else:
                     details_str += Units.convert_seconds_to_hours_mins_secs(value)
                 details_str += "</td><tr>"
+        if len(details_str) == 0:
+            details_str = "<td><b>No data</b></td><tr>"
 
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
+
+        # List the export options.
+        exports_str = self.render_export_control(logged_in, True, Keys.APP_ACCELEROMETER_KEY in activity)
 
         # Build the page title.
         if is_live:
@@ -477,19 +537,19 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.map_single_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, comments=comments_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, comments=comments_str, exports=exports_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_id, logged_in_userid, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
 
         try:
             if Keys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[Keys.ACTIVITY_LOCATIONS_KEY]) > 0:
-                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity[Keys.ACTIVITY_LOCATIONS_KEY], logged_in_userid, is_live)
-            elif Keys.APP_ACCELEROMETER_KEY in activity:
-                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity[Keys.APP_ACCELEROMETER_KEY], logged_in_userid, is_live)
+                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity, logged_in_userid, is_live)
+            elif Keys.APP_ACCELEROMETER_KEY in activity or Keys.APP_SETS_KEY in activity:
+                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity, logged_in_userid, is_live)
             else:
                 my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
-                return my_template.render(nav=self.create_navbar(logged_in_username is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
+                return my_template.render(nav=self.create_navbar(logged_in_userid is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
@@ -536,72 +596,6 @@ class App(object):
         my_template = Template(filename=self.map_multi_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, googleMapsKey=self.google_maps_key, centerLat=center_lat, centerLon=center_lon, lastLat=last_lat, lastLon=last_lon, routeCoordinates=route_coordinates, routeLen=len(locations), userId=str(user_id))
 
-    def render_activity_row(self, activity, row_id, show_my_options):
-        """Helper function for creating a table row describing an activity."""
-
-        # User's real name.
-        if Keys.REALNAME_KEY in activity:
-            user_realname = activity[Keys.REALNAME_KEY]
-        else:
-            user_realname = None
-
-        # Activity ID
-        if Keys.ACTIVITY_ID_KEY in activity:
-            activity_id = activity[Keys.ACTIVITY_ID_KEY]
-        else:
-            return None
-        if activity_id is None or len(activity_id) == 0:
-            return None
-
-        # Activity type
-        if Keys.ACTIVITY_TYPE_KEY in activity and len(activity[Keys.ACTIVITY_TYPE_KEY]) > 0:
-            activity_type = "<b>" + activity[Keys.ACTIVITY_TYPE_KEY] + "</b>"
-        else:
-            activity_type = "<b>" + Keys.TYPE_UNSPECIFIED_ACTIVITY + "</b>"
-
-        # Activity name
-        if Keys.ACTIVITY_NAME_KEY in activity and len(activity[Keys.ACTIVITY_NAME_KEY]) > 0:
-            activity_name = "<b>" + activity[Keys.ACTIVITY_NAME_KEY] + "</b>"
-        else:
-            activity_name = "<b>" + UNNAMED_ACTIVITY_TITLE + "</b>"
-
-        # Activity time
-        activity_time = "-"
-        if Keys.ACTIVITY_TIME_KEY in activity:
-            activity_time = "<script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script>"
-
-        # Activity visibility
-        checkbox_value = "checked"
-        checkbox_label = "Public"
-        if Keys.ACTIVITY_VISIBILITY_KEY in activity:
-            if activity[Keys.ACTIVITY_VISIBILITY_KEY] == "private":
-                checkbox_value = "unchecked"
-                checkbox_label = "Private"
-
-        row  = "<td>"
-        row += activity_type
-        row += "</td>"
-        row += "<td>"
-        row += activity_time
-        row += "</td>"
-        row += "<td>"
-        if user_realname is not None:
-            row += user_realname
-            row += "<br>"
-        row += "<a href=\"" + self.root_url + "/activity/" + activity_id + "\">"
-        row += activity_name
-        row += "</a></td>"
-        row += "<td>"
-        if show_my_options:
-            row += "<input type=\"checkbox\" value=\"\" " + checkbox_value + " id=\"" + str(row_id) + "\" onclick=\"handleVisibilityClick(this, '" + activity_id + "')\";>"
-            row += "<span>" + checkbox_label + "</span></label>"
-            row += "</td>"
-            row += "<td>"
-            row += "<button type=\"button\" onclick=\"return on_delete('" + activity_id + "')\">Delete</button>"
-            row += "</td>"
-        row += "<tr>"
-        return row
-
     @staticmethod
     def render_user_row(user):
         """Helper function for creating a table row describing a user."""
@@ -616,12 +610,13 @@ class App(object):
         return row
 
     def error(self, error_str=None):
-        """Renders the errorpage."""
+        """Renders the error page."""
         try:
             error_html_file = os.path.join(self.root_dir, HTML_DIR, 'error.html')
             my_template = Template(filename=error_html_file, module_directory=self.tempmod_dir)
             if error_str is None:
                 error_str = "Internal Error."
+            return my_template.render(error=error_str)
         except:
             pass
         return ""
@@ -656,6 +651,16 @@ class App(object):
         # Render from template.
         return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, logged_in_userid, True)
 
+    def get_activity_user(self, activity):
+        """Returns the user record that corresponds with the given activity."""
+        if Keys.ACTIVITY_USER_ID_KEY in activity:
+            username, realname = self.user_mgr.retrieve_user_from_id(activity[Keys.ACTIVITY_USER_ID_KEY])
+            return activity[Keys.ACTIVITY_USER_ID_KEY], username, realname
+        if Keys.ACTIVITY_DEVICE_STR_KEY in activity and len(activity[Keys.ACTIVITY_DEVICE_STR_KEY]) > 0:
+            user = self.user_mgr.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
+            return user[Keys.DATABASE_ID_KEY], user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
+        return None, None, None
+
     @statistics
     def activity(self, activity_id):
         """Renders the map page for an activity."""
@@ -672,15 +677,12 @@ class App(object):
             return self.error("The requested activity does not exist.")
 
         # Determine who owns the device, and hence the activity.
-        username = ""
-        realname = ""
-        belongs_to_current_user = False
-        if Keys.ACTIVITY_DEVICE_STR_KEY in activity and len(activity[Keys.ACTIVITY_DEVICE_STR_KEY]) > 0:
-            device_user = self.user_mgr.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
-            device_user_id = device_user[Keys.DATABASE_ID_KEY]
-            username = device_user[Keys.USERNAME_KEY]
-            realname = device_user[Keys.REALNAME_KEY]
-            belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
+        device_user_id, username, realname = self.get_activity_user(activity)
+        belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
+        if username is None:
+            username = ""
+        if realname is None:
+            realname = ""
 
         # Determine if the current user can view the activity.
         if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
@@ -738,24 +740,10 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        activities = self.data_mgr.retrieve_user_activity_list(user_id, user_realname, 0, 25)
-        row_id = 0
-        activities_list_str = "No activities."
-        if activities is not None and isinstance(activities, list):
-            if len(activities) > 0:
-                activities_list_str = "<table>\n"
-                for activity in activities:
-                    activity_str = self.render_activity_row(activity, row_id, True)
-                    if activity_str is not None and len(activity_str) > 0:
-                        row_id = row_id + 1
-                        activities_list_str += activity_str
-                        activities_list_str += "\n"
-                activities_list_str += "</table>\n"
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'my_activities.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activities_list=activities_list_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
     @statistics
     def all_activities(self):
@@ -772,24 +760,50 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        activities = self.data_mgr.retrieve_all_activities_visible_to_user(user_id, user_realname, 0, 25)
-        row_id = 0
-        activities_list_str = "No activities."
-        if activities is not None and isinstance(activities, list):
-            if len(activities) > 0:
-                activities_list_str = "<table>\n"
-                for activity in activities:
-                    activity_str = self.render_activity_row(activity, row_id, False)
-                    if activity_str is not None and len(activity_str) > 0:
-                        row_id = row_id + 1
-                        activities_list_str += activity_str
-                        activities_list_str += "\n"
-                activities_list_str += "</table>\n"
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'all_activities.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activities_list=activities_list_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+
+    @statistics
+    def workouts(self):
+        """Renders the list of all workouts the specified user is allowed to view."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+
+    @statistics
+    def gear(self):
+        """Renders the list of all gear belonging to the logged in user."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'gear.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
     @statistics
     def following(self):
@@ -910,20 +924,13 @@ class App(object):
         # Write the file.
         with open(local_file_name, 'wb') as local_file:
             while True:
-                data = ufile.file.read(8192)
+                data = local_file.file.read(8192)
                 if not data:
                     break
                 local_file.write(data)
 
-        # Parse the file and store it's contents in the database. Once imported, queue the activity for detailed analysis.
-        success, device_id, activity_id = self.data_mgr.import_file(username, user_id, local_file_name, uploaded_file_ext)
-        if success:
-            self.analysis_scheduler.add_to_queue(activity_id)
-        else:
-            self.log_error('Unhandled exception in upload when processing ' + uploaded_file_name)
-
-        # Remove the local file.
-        os.remove(local_file_name)
+        # Parse the file and store it's contents in the database.
+        self.data_mgr.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
 
         raise RedirectException(DEFAULT_LOGGED_IN_URL)
 
@@ -1044,6 +1051,13 @@ class App(object):
         html_file = os.path.join(self.root_dir, HTML_DIR, 'settings.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, privacy_options=privacy_options, unit_options=unit_options)
+
+    @statistics
+    def api(self, user_id, method, params):
+        """Handles an API request."""
+        api = Api.Api(self.user_mgr, self.data_mgr, self.tempfile_dir, user_id, self.root_url)
+        handled, response = api.handle_api_1_0_request(method, params)
+        return handled, response
 
     def submit_login(self, email, password):
         """Processes a login."""

@@ -6,6 +6,12 @@ function unix_time_to_local_string(unix_time)
 	return date.toString();
 }
 
+function unix_time_to_iso_time(unix_time)
+{
+	var date = new Date(unix_time * 1000);
+	return date.toISOString();
+}
+
 function serialize(list)
 {
 	var str = [];
@@ -36,4 +42,26 @@ function send_post_request(url, params, result_text)
 	}
 	xml_http.send(serialize(params));
 	return result;
+}
+
+function create_local_file(data, filename, type)
+{
+	var file = new Blob([data], {type: type});
+	if (window.navigator.msSaveOrOpenBlob)
+	{
+		window.navigator.msSaveOrOpenBlob(file, filename);
+	}
+	else
+	{
+		var a = document.createElement("a"),
+			url = URL.createObjectURL(file);
+		a.href = url;
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		setTimeout(function() {
+			document.body.removeChild(a);
+			window.URL.revokeObjectURL(url);  
+		}, 0); 
+	}
 }
