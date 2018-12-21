@@ -608,8 +608,7 @@ class Api(object):
 
         # Write the data to a temporary local file.
         exporter = Exporter.Exporter()
-        if not exporter.export(self.data_mgr, activity_id, local_file_name, export_format):
-            raise Exception("Export failed.")
+        exporter.export(self.data_mgr, activity_id, local_file_name, export_format)
 
         # Read the file into memory.
         result = ""

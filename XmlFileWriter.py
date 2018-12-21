@@ -1,18 +1,48 @@
-# Copyright 2018 Michael J Simms
+# -*- coding: utf-8 -*-
+# 
+# # MIT License
+# 
+# Copyright (c) 2018 Mike Simms
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 class XmlFileWriter(object):
-    """Base class for XMl-formatted file type writers, like TCX and GPX files."""
+    """Base class for XMl-formatted file generators, like TCX and GPX files."""
 
     def __init__(self):
         super(XmlFileWriter, self).__init__()
         self.file = None
+        self.tags = []
 
-    def create_file(file_name):
+    def create_file(self, file_name):
         self.file = open(file_name, 'wt')
-        if self.file is not None:
-            xml_str = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
-            return self.file.write(xml_str)
-        return False
+        if self.file is None:
+            raise Exception("Could not create the file.")
+        self.file.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n")
+
+    def close_file(self):
+        self.file = None
+
+    def current_tag(self):
+        if len(self.tags) is None:
+            return None
+        return self.tags[-1]
 
     def open_tag(self, tag_name):
         xml_str  = self.format_indent()
@@ -21,9 +51,9 @@ class XmlFileWriter(object):
         xml_str += ">\n"
 
         self.tags.append(tag_name)
-        return self.file.write(xml_str)
+        self.file.write(xml_str)
 
-    def open_tag(self, tag_name, key_values, values_on_individual_lines):
+    def open_tag_with_attributes(self, tag_name, key_values, values_on_individual_lines):
         indent = self.format_indent()
 
         xml_str = indent
@@ -47,8 +77,8 @@ class XmlFileWriter(object):
             first = False
         xml_str += ">\n"
 
-        self.tags.push(tag_name)
-        return self.file.write(xml_str)
+        self.tags.append(tag_name)
+        self.file.write(xml_str)
 
     def write_tag_and_value(self, tag_name, value):
         xml_str  = self.format_indent()
@@ -59,23 +89,19 @@ class XmlFileWriter(object):
         xml_str += "</"
         xml_str += tag_name
         xml_str += ">\n"
-        return self.file.write(xml_str)
+        self.file.write(xml_str)
 
     def close_tag(self):
-        tag_name = self.tags.top()
-        self.tags.pop()
-
+        tag = self.tags.pop()
         xml_str = self.format_indent()
         xml_str += "</"
-        xml_str += tag_name
+        xml_str += tag
         xml_str += ">\n"
-        return self.file.write(xml_str)		
+        self.file.write(xml_str)		
 
     def close_all_tags(self):
-        result = True
-        while len(self.tags) > 0 and result:
-            result = self.close_tag()
-        return True
+        while len(self.tags) > 0:
+            self.close_tag()
 
     def format_indent(self):
         xml_str = ""

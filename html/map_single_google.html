@@ -320,7 +320,7 @@ ${powers}
 		dict.push({["activity_id"] : "${activityId}"});
 		dict.push({["export_format"] : format});
 		if (send_post_request(the_url, dict, result_text))
-			window.location.reload();
+			create_local_file(result_text.value, "${activityId}", "text/plain;charset=utf-8");
 		else
 			alert(result_text.value);
 	}
