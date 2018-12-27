@@ -3,7 +3,6 @@
 
 import threading
 import time
-import DataMgr
 import Keys
 import LocationAnalyzer
 import SensorAnalyzerFactory
@@ -11,10 +10,12 @@ import SensorAnalyzerFactory
 class ActivityAnalyzer(threading.Thread):
     """Class for scheduling computationally expensive analysis tasks."""
 
-    def __init__(self, data_mgr, activity_id):
+    def __init__(self, activity, activity_id):
         threading.Thread.__init__(self)
-        self.data_mgr = data_mgr
+        self.activity = activity
         self.activity_id = activity_id
+        self.summary_data = None
+        self.speed_graph = None
         self.quitting = False
 
     def terminate(self):
@@ -25,12 +26,11 @@ class ActivityAnalyzer(threading.Thread):
         """Main run loop."""
 
         # Load the activity from the database.
-        activity = self.data_mgr.retrieve_activity(self.activity_id)
-        if activity is not None:
-            summary_data = {}
+        if self.activity is not None:
+            self.summary_data = {}
 
             # Determine the activity type.
-            if Keys.ACTIVITY_TYPE_KEY in activity:
+            if Keys.ACTIVITY_TYPE_KEY in self.activity:
                 activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
             else:
                 activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
@@ -40,9 +40,9 @@ class ActivityAnalyzer(threading.Thread):
                 return
 
             # Do the location analysis.
-            if Keys.ACTIVITY_LOCATIONS_KEY in activity:
+            if Keys.ACTIVITY_LOCATIONS_KEY in self.activity:
                 location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
-                locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
+                locations = self.activity[Keys.ACTIVITY_LOCATIONS_KEY]
                 for location in locations:
                     date_time = location[Keys.LOCATION_TIME_KEY]
                     latitude = location[Keys.LOCATION_LAT_KEY]
@@ -51,7 +51,7 @@ class ActivityAnalyzer(threading.Thread):
                     location_analyzer.append_location(date_time, latitude, longitude, altitude)
                     location_analyzer.update_speeds()
                     time.sleep(0)
-                summary_data.update(location_analyzer.analyze())
+                self.summary_data.update(location_analyzer.analyze())
 
             # Check for interrupt.
             if self.quitting:
@@ -60,19 +60,24 @@ class ActivityAnalyzer(threading.Thread):
             # Do the sensor analysis.
             sensor_types_to_analyze = SensorAnalyzerFactory.supported_sensor_types()
             for sensor_type in sensor_types_to_analyze:
-                if sensor_type in activity:
-                    sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, activity[sensor_type])
-                    summary_data.update(sensor_analyzer.analyze())
+                if sensor_type in self.activity:
+                    sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type])
+                    self.summary_data.update(sensor_analyzer.analyze())
                     time.sleep(0)
 
-            # Save the summary results.
-            self.data_mgr.create_activity_summary(self.activity_id, summary_data)
-
-            # Save the current speed graph.
-            if Keys.APP_CURRENT_SPEED_KEY not in activity:
-                speed_graph = location_analyzer.create_speed_graph()
-                self.data_mgr.create_metadata_list(self.activity_id, Keys.APP_CURRENT_SPEED_KEY, speed_graph)
+            # Create a current speed graph - if one has not already been created.
+            if Keys.APP_CURRENT_SPEED_KEY not in self.activity:
+                self.speed_graph = location_analyzer.create_speed_graph()
 
 def main():
     """Entry point for an analysis worker."""
-    pass
+
+    # Parse command line options.
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--msgqueue", default="", help="Address of the message queue", required=False)
+
+    try:
+        args = parser.parse_args()
+    except IOError as e:
+        parser.error(e)
+        sys.exit(1)

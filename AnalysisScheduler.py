@@ -29,10 +29,26 @@ class AnalysisScheduler(threading.Thread):
             self.max_worker_threads = 0
             for worker in self.workers:
                 worker.quitting = True
-                worker.join()
+                self.join_worker_thread(worker)
             self.workers = []
         finally:
             self.mutex.release()
+
+    def join_worker_thread(self, worker):
+        """Handles a completed thread."""
+
+        # Wait for the thread to finish.
+        worker.join()
+
+        # Save the summary results.
+        self.data_mgr.create_activity_summary(worker.activity_id, worker.summary_data)
+
+        # Save the current speed graph - if one has not already been created.
+        if Keys.APP_CURRENT_SPEED_KEY not in worker.activity:
+            self.data_mgr.create_metadata_list(worker.activity_id, Keys.APP_CURRENT_SPEED_KEY, worker.speed_graph)
+
+        # Done, remove it from the queue.
+        self.workers.remove(worker)
 
     def queue_depth(self):
         """Returns the number of items in the queue."""
@@ -67,13 +83,13 @@ class AnalysisScheduler(threading.Thread):
                 # Remove old worker threads.
                 for worker in self.workers:
                     if not worker.isAlive():
-                        worker.join()
-                        self.workers.remove(worker)
+                        self.join_worker_thread(worker)
 
                 # Assign more work.
                 if len(self.workers) < self.max_worker_threads and len(self.queue) > 0:
                     activity_id = self.queue.pop(0)
-                    worker = ActivityAnalyzer.ActivityAnalyzer(self.data_mgr, activity_id)
+                    activity = self.data_mgr.retrieve_activity(activity_id)
+                    worker = ActivityAnalyzer.ActivityAnalyzer(activity, activity_id)
                     self.workers.append(worker)
                     worker.start()
             finally:
