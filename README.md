@@ -66,6 +66,9 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Added a calendar view.
 * Activity export.
 
+### 0.7
+* Added celery and rabbitmq to distribute analysis tasks.
+
 ## Tech
 This software uses two other source projects to work properly:
 

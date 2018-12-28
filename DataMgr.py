@@ -20,7 +20,7 @@ class DataMgr(Importer.ActivityWriter):
     def __init__(self, root_dir):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
-        self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler(self, 2)
+        self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler(self)
         self.analysis_scheduler.start()
         self.import_scheduler = ImportScheduler.ImportScheduler(self, 2)
         self.import_scheduler.start()
@@ -60,7 +60,8 @@ class DataMgr(Importer.ActivityWriter):
 
     def analyze(self, activity_id):
         """Schedules the specified activity for analysis."""
-        self.analysis_scheduler.add_to_queue(activity_id)
+        activity = self.database.retrieve_activity(activity_id)
+        self.analysis_scheduler.add_to_queue(activity_id, activity)
 
     def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""

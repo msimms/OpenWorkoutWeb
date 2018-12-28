@@ -319,7 +319,7 @@ class App(object):
 
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
-        if summary_data is None:
+        if summary_data is None or len(summary_data) == 0:
             self.data_mgr.analyze(activity_id)
 
         # Find the sets data.
@@ -449,7 +449,7 @@ class App(object):
 
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
-        if summary_data is None:
+        if summary_data is None or len(summary_data) == 0:
             self.data_mgr.analyze(activity_id)
 
         # Build the summary data view.
