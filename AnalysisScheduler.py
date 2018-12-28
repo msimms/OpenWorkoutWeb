@@ -16,6 +16,7 @@ class AnalysisScheduler(threading.Thread):
         self.data_mgr = data_mgr
         self.mutex = threading.Lock()
         self.queue = []
+        self.enabled = True
         threading.Thread.__init__(self)
 
     def terminate(self):
@@ -36,6 +37,8 @@ class AnalysisScheduler(threading.Thread):
 
     def add_to_queue(self, activity_id, activity):
         """Adds the activity ID to the list of activities to be analyzed."""
+        if not self.enabled:
+            return
         analysis_obj = analyze_activity.delay(dumps(activity))
         self.mutex.acquire()
         try:

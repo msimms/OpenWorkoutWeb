@@ -17,10 +17,11 @@ def get_activities_sort_key(item):
 class DataMgr(Importer.ActivityWriter):
     """Data store abstraction"""
 
-    def __init__(self, root_dir):
+    def __init__(self, root_dir, analyze_activities):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
         self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler(self)
+        self.analysis_scheduler.enabled = analyze_activities
         self.analysis_scheduler.start()
         self.import_scheduler = ImportScheduler.ImportScheduler(self, 2)
         self.import_scheduler.start()
