@@ -62,7 +62,7 @@ def analyze_activity(activity_str):
     analyzer = ActivityAnalyzer(activity_obj)
     analyzer.perform_analysis()
     print("Activity analysis finished")
-    return analyzer.summary_data
+    return json.dumps(analyzer.summary_data)
 
 def main():
     """Entry point for an analysis worker."""

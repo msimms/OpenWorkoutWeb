@@ -69,7 +69,8 @@ class AnalysisScheduler(threading.Thread):
                 new_queue = []
                 for activity_id, analysis_obj in self.queue:
                     if analysis_obj.ready() is True:
-                        self.store_results(activity_id, analysis_obj.result)
+                        summary_data = json.loads(analysis_obj.result)
+                        self.store_results(activity_id, summary_data)
                     else:
                         analysis_pair = (activity_id, analysis_obj)
                         new_queue.append(analysis_pair)
