@@ -2,6 +2,7 @@
 """Schedules computationally expensive analysis tasks"""
 
 import json
+import logging
 import threading
 import time
 import DataMgr
@@ -25,6 +26,11 @@ class AnalysisScheduler(threading.Thread):
         self.queue = []
         self.quitting = True
 
+    def log_error(self, log_str):
+        """Writes an error message to the log file."""
+        logger = logging.getLogger()
+        logger.error(log_str)
+
     def queue_depth(self):
         """Returns the number of items in the queue."""
         result = 0
@@ -47,6 +53,14 @@ class AnalysisScheduler(threading.Thread):
         finally:
             self.mutex.release()
 
+    def store_results(self, activity_id, summary_data):
+        """Called after analysis is complete. Stores the summary data in the database."""
+        try:
+            if not self.data_mgr.create_activity_summary(activity_id, summary_data):
+                self.log_error("Error returned when saving activity summary data: " + str(summary_data))
+        except:
+            self.log_error("Exception when saving activity summary data: " + str(summary_data))
+
     def run(self):
         """Main run loop."""
         while not self.quitting:
@@ -55,11 +69,11 @@ class AnalysisScheduler(threading.Thread):
                 new_queue = []
                 for activity_id, analysis_obj in self.queue:
                     if analysis_obj.ready() is True:
-                        self.data_mgr.create_activity_summary(activity_id, analysis_obj.result)
+                        self.store_results(activity_id, analysis_obj.result)
                     else:
                         analysis_pair = (activity_id, analysis_obj)
                         new_queue.append(analysis_pair)
                 self.queue = new_queue
             finally:
                 self.mutex.release()
-            time.sleep(1)
+            time.sleep(3)
