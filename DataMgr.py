@@ -365,6 +365,14 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity_summary(activity_id)
 
+    def delete_activity_summary(self, activity_id):
+        """Delete method for activity summary data. Summary data is data computed from the raw data."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None or len(activity_id) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.delete_activity_summary(activity_id)
+
     def create_tag(self, activity_id, tag):
         """Returns the most recent 'num' locations for the specified device and activity."""
         if self.database is None:

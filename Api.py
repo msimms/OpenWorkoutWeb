@@ -145,7 +145,8 @@ class Api(object):
                 self.user_mgr.create_user_device(user_id, device_str)
 
         # Schedule for analysis.
-        self.data_mgr.analyze(activity_id)
+        #self.data_mgr.analyze(activity_id)
+        self.data_mgr.delete_activity_summary(activity_id)
 
         return True, ""
 
