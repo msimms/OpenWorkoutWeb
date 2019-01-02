@@ -296,7 +296,7 @@ class App(object):
             exports_str += "<td><button type=\"button\" onclick=\"return export_activity()\">Export</button></td><tr>\n"
         return exports_str
 
-    def render_page_for_lifting_activity(self, email, user_realname, activity_id, activity, logged_in_username, is_live):
+    def render_page_for_lifting_activity(self, email, user_realname, activity_id, activity, logged_in_username, belongs_to_current_user, is_live):
         """Helper function for rendering the map corresonding to a specific device and activity."""
 
         # Is the user logged in?
@@ -320,7 +320,7 @@ class App(object):
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None or len(summary_data) == 0:
-            self.data_mgr.analyze(activity_id)
+            self.data_mgr.analyze(activity_id, activity)
 
         # Find the sets data.
         sets = None
@@ -405,7 +405,7 @@ class App(object):
                     max_value = value
         return data_str, max_value
 
-    def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, logged_in_userid, is_live):
+    def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
 
         # Is the user logged in?
@@ -450,7 +450,7 @@ class App(object):
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None or len(summary_data) == 0:
-            self.data_mgr.analyze(activity_id)
+            self.data_mgr.analyze(activity_id, activity)
 
         # Build the summary data view.
         summary = "<ul>\n"
@@ -524,6 +524,11 @@ class App(object):
         if len(details_str) == 0:
             details_str = "<td><b>No data</b></td><tr>"
 
+        if belongs_to_current_user:
+            details_controls_str = "<td><button type=\"button\" onclick=\"return refresh_analysis()\">Refresh Analysis</button></td><tr>\n"
+        else:
+            details_controls_str = ""
+
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
 
@@ -537,16 +542,16 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.map_single_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, comments=comments_str, exports=exports_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, comments=comments_str, exports=exports_str)
 
-    def render_page_for_activity(self, activity, email, user_realname, activity_id, logged_in_userid, is_live):
+    def render_page_for_activity(self, activity, email, user_realname, activity_id, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
 
         try:
             if Keys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[Keys.ACTIVITY_LOCATIONS_KEY]) > 0:
-                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity, logged_in_userid, is_live)
+                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity, logged_in_userid, belongs_to_current_user, is_live)
             elif Keys.APP_ACCELEROMETER_KEY in activity or Keys.APP_SETS_KEY in activity:
-                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity, logged_in_userid, is_live)
+                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity, logged_in_userid, belongs_to_current_user, is_live)
             else:
                 my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
                 return my_template.render(nav=self.create_navbar(logged_in_userid is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
@@ -649,7 +654,7 @@ class App(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, logged_in_userid, True)
+        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, logged_in_userid, belongs_to_current_user, True)
 
     def get_activity_user(self, activity):
         """Returns the user record that corresponds with the given activity."""
@@ -689,7 +694,7 @@ class App(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, username, realname, activity_id, logged_in_userid, False)
+        return self.render_page_for_activity(activity, username, realname, activity_id, logged_in_userid, belongs_to_current_user, False)
 
     @statistics
     def device(self, device_str):
@@ -723,7 +728,7 @@ class App(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, logged_in_userid, False)
+        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, logged_in_userid, belongs_to_current_user, False)
 
     @statistics
     def my_activities(self):

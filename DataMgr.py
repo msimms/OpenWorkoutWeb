@@ -59,9 +59,8 @@ class DataMgr(Importer.ActivityWriter):
         """Generates a new activity ID."""
         return str(uuid.uuid4())
 
-    def analyze(self, activity_id):
+    def analyze(self, activity_id, activity):
         """Schedules the specified activity for analysis."""
-        activity = self.database.retrieve_activity(activity_id)
         self.analysis_scheduler.add_to_queue(activity_id, activity)
 
     def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
