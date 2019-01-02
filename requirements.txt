@@ -9,3 +9,4 @@ markdown
 unidecode
 scipy
 sklearn
+Celery

@@ -33,7 +33,8 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
         """Adds another reading to the analyzer."""
         SensorAnalyzer.SensorAnalyzer.append_sensor_value(self, date_time, value)
 
-        total = 0
+        sum_of_readings = 0
+        num_readings = 0
         duration = self.end_time - self.start_time
 
         # Update the buffers needed for the normalized power calculation.
@@ -47,20 +48,21 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
         # Search for best efforts.
         for reading in reversed(self.readings):
             reading_time = reading[0]
-            total = total + reading[1]
+            sum_of_readings = sum_of_readings + reading[1]
+            num_readings = num_readings + 1
             curr_time_diff = (self.end_time - reading_time) / 1000
             if curr_time_diff == 5:
-                average_power = total / curr_time_diff
+                average_power = sum_of_readings / num_readings
                 self.do_power_record_check(Keys.BEST_5_SEC_POWER, average_power)
                 if duration < 1200:
                     return
             elif curr_time_diff == 1200:
-                average_power = total / curr_time_diff
+                average_power = sum_of_readings / num_readings
                 self.do_power_record_check(Keys.BEST_20_MIN_POWER, average_power)
                 if duration < 3600:
                     return
             elif curr_time_diff == 3600:
-                average_power = total / curr_time_diff
+                average_power = sum_of_readings / num_readings
                 self.do_power_record_check(Keys.BEST_1_HOUR_POWER, average_power)
             elif curr_time_diff > 3600:
                 return

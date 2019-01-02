@@ -144,8 +144,8 @@ class Api(object):
             if user_devices is not None and device_str not in user_devices:
                 self.user_mgr.create_user_device(user_id, device_str)
 
-        # Schedule for analysis.
-        self.data_mgr.analyze(activity_id)
+        # Analysis is now obsolete, so delete it.
+        self.data_mgr.delete_activity_summary(activity_id)
 
         return True, ""
 
@@ -791,6 +791,24 @@ class Api(object):
         result = self.data_mgr.update_activity_visibility(values[Keys.ACTIVITY_ID_KEY], visibility)
         return result, ""
 
+    def handle_refresh_analysis(self, values):
+        """Called when the user wants to recalculate the summary data."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise Exception("Drink ID not specified.")
+
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise Exception("Invalid activity ID.")
+
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not activity:
+            raise Exception("Invalid activity.")
+
+        self.data_mgr.analyze(activity_id, activity)
+        return True, ""
+
     def handle_api_1_0_request(self, request, values):
         """Called to parse a version 1.0 API message."""
         username = None
@@ -858,4 +876,6 @@ class Api(object):
             return self.handle_update_profile(values)
         elif request == 'update_visibility':
             return self.handle_update_visibility(values)
+        elif request == 'refresh_analysis':
+            return self.handle_refresh_analysis(values)
         return False, ""

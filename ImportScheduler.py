@@ -82,7 +82,7 @@ class ImportScheduler(threading.Thread):
                 # Assign more work.
                 if len(self.workers) < self.max_worker_threads and len(self.queue) > 0:
                     params = self.queue.pop(0)
-                    worker = AnalysisWorker(self.data_mgr, params['username'], params['user_id'], params['local_file_name'], params['uploaded_file_name'], params['file_extension'])
+                    worker = ImportWorker(self.data_mgr, params['username'], params['user_id'], params['local_file_name'], params['uploaded_file_name'], params['file_extension'])
                     self.workers.append(worker)
                     worker.start()
             finally:

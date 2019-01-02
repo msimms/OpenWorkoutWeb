@@ -295,6 +295,19 @@ ${powers}
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
+	function refresh_analysis()
+	{
+		var the_url = "${root_url}/api/1.0/refresh_analysis";
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["activity_id"] : "${activityId}"});
+		if (send_post_request(the_url, dict, result_text))
+			window.location.reload();
+		else
+			alert(result_text.value);
+	}
+
 	function create_comment()
 	{
 		var the_url = "${root_url}/api/1.0/create_comment";
@@ -335,6 +348,12 @@ Detailed Analysis:
 ${details}
 </table>
 </p>
+</section>
+
+<section class="comments">
+<table>
+${details_controls}
+</table>
 </section>
 
 <section class="comments">

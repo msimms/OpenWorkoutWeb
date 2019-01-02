@@ -15,7 +15,7 @@ class Database(object):
     def log_error(self, log_str):
         """Writes an error message to the log file."""
         logger = logging.getLogger()
-        logger.debug(log_str)
+        logger.error(log_str)
 
     def is_quoted(self, log_str):
         """Determines if the provided string starts and ends with a double quote."""

@@ -8,7 +8,7 @@ import Keys
 import SensorAnalyzer
 import Units
 
-# Locate and load the distance module.
+# Locate and load the distance module as well as other LibMath modules.
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 libmathdir = os.path.join(currentdir, 'LibMath', 'python')
 sys.path.insert(0, libmathdir)
@@ -16,6 +16,9 @@ import distance
 import kmeans
 import peaks
 import statistics
+
+METERS_PER_HALF_MARATHON = 13.1 * Units.METERS_PER_MILE
+METERS_PER_MARATHON = 26.2 * Units.METERS_PER_MILE
 
 
 class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
@@ -117,14 +120,14 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 self.do_record_check(Keys.BEST_15K, total_seconds, total_meters, 15000)
 
                 # Is this a new half marathon record for this activity?
-                if total_meters < 13.1 * Units.METERS_PER_MILE:
+                if total_meters < METERS_PER_HALF_MARATHON:
                     continue
-                self.do_record_check(Keys.BEST_HALF_MARATHON, total_seconds, total_meters, 13.1 * Units.METERS_PER_MILE)
+                self.do_record_check(Keys.BEST_HALF_MARATHON, total_seconds, total_meters, METERS_PER_HALF_MARATHON)
 
                 # Is this a new marathon record for this activity?
-                if total_meters < 26.2 * Units.METERS_PER_MILE:
+                if total_meters < METERS_PER_MARATHON:
                     continue
-                self.do_record_check(Keys.BEST_MARATHON, total_seconds, total_meters, 26.2 * Units.METERS_PER_MILE)
+                self.do_record_check(Keys.BEST_MARATHON, total_seconds, total_meters, METERS_PER_MARATHON)
 
             # Cycling-specific records:
             if self.activity_type == Keys.TYPE_CYCLING_KEY:

@@ -1,10 +1,20 @@
 # Copyright 2018 Michael J Simms
 """Writes GPX and TCX files."""
 
+import inspect
+import os
+import sys
+
 import DataMgr
 import Keys
 import GpxFileWriter
 import TcxFileWriter
+
+# Locate and load the distance module.
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+libmathdir = os.path.join(currentdir, 'LibMath', 'python')
+sys.path.insert(0, libmathdir)
+import distance
 
 class Exporter(object):
     """Exporter for GPX and TCX location files."""
@@ -128,6 +138,7 @@ class Exporter(object):
 
         writer.write_id(lap_start_time_ms / 1000)
 
+        prev_location = None
         done = False
         while not done:
 
@@ -138,6 +149,9 @@ class Exporter(object):
 
                 try:
                     current_location = location_iter.next()
+                    current_lat = current_location[Keys.LOCATION_LAT_KEY]
+                    current_lon = current_location[Keys.LOCATION_LON_KEY]
+                    current_alt = current_location[Keys.LOCATION_ALT_KEY]
                     current_time = current_location[Keys.LOCATION_TIME_KEY]
 
                     nearest_cadence = self.nearest_sensor_reading(current_time, nearest_cadence, cadence_iter)
@@ -147,8 +161,15 @@ class Exporter(object):
 
                     writer.start_trackpoint()
                     writer.store_time(current_time)
-                    writer.store_position(current_location[Keys.LOCATION_LAT_KEY], current_location[Keys.LOCATION_LON_KEY])
-                    writer.store_altitude_meters(current_location[Keys.LOCATION_ALT_KEY])
+                    writer.store_position(current_lat, current_lon)
+                    writer.store_altitude_meters(current_alt)
+
+                    if prev_location is not None:
+                        prev_lat = prev_location[Keys.LOCATION_LAT_KEY]
+                        prev_lon = prev_location[Keys.LOCATION_LON_KEY]
+                        prev_alt = prev_location[Keys.LOCATION_ALT_KEY]
+                        meters_traveled = distance.haversine_distance(current_lat, current_lon, current_alt, prev_lat, prev_lon, prev_alt)
+                        writer.store_distance_meters(meters_traveled)
 
                     if nearest_cadence is not None:
                         writer.store_cadence_rpm(nearest_cadence.values()[0])
@@ -164,6 +185,8 @@ class Exporter(object):
                         writer.end_trackpoint_extensions()
 
                     writer.end_trackpoint()
+
+                    prev_location = current_location
                 except StopIteration:
                     done = True
 

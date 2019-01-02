@@ -17,10 +17,11 @@ def get_activities_sort_key(item):
 class DataMgr(Importer.ActivityWriter):
     """Data store abstraction"""
 
-    def __init__(self, root_dir):
+    def __init__(self, root_dir, analyze_activities):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
-        self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler(self, 2)
+        self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler(self)
+        self.analysis_scheduler.enabled = analyze_activities
         self.analysis_scheduler.start()
         self.import_scheduler = ImportScheduler.ImportScheduler(self, 2)
         self.import_scheduler.start()
@@ -58,9 +59,9 @@ class DataMgr(Importer.ActivityWriter):
         """Generates a new activity ID."""
         return str(uuid.uuid4())
 
-    def analyze(self, activity_id):
+    def analyze(self, activity_id, activity):
         """Schedules the specified activity for analysis."""
-        self.analysis_scheduler.add_to_queue(activity_id)
+        self.analysis_scheduler.add_to_queue(activity_id, activity)
 
     def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
@@ -362,6 +363,14 @@ class DataMgr(Importer.ActivityWriter):
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity_summary(activity_id)
+
+    def delete_activity_summary(self, activity_id):
+        """Delete method for activity summary data. Summary data is data computed from the raw data."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None or len(activity_id) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.delete_activity_summary(activity_id)
 
     def create_tag(self, activity_id, tag):
         """Returns the most recent 'num' locations for the specified device and activity."""
