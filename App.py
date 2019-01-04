@@ -10,6 +10,7 @@ import markdown
 import os
 import sys
 import threading
+import timeit
 import traceback
 import uuid
 
@@ -33,23 +34,35 @@ HTML_DIR = 'html'
 
 
 g_stats_lock = threading.Lock()
-g_stats = {}
+g_stats_count = {}
+g_stats_time = {}
 
 
 def statistics(function):
+    """Function decorator for usage and timing statistics."""
 
     def wrapper(*args, **kwargs):
         global g_stats_lock
-        global g_stats
+        global g_stats_count
+        global g_stats_time
+
+        start = timeit.default_timer()
+        result = function(*args, **kwargs)
+        end = timeit.default_timer()
+        execution_time = end - start
 
         g_stats_lock.acquire()
         try:
-            g_stats[function.__name__] = g_stats[function.__name__] + 1
+            g_stats_count[function.__name__] = g_stats_count[function.__name__] + 1
+            g_stats_time[function.__name__] = g_stats_time[function.__name__] + execution_time
         except:
-            g_stats[function.__name__] = 1
+            g_stats_count[function.__name__] = 1
+            g_stats_time[function.__name__] = execution_time
         finally:
             g_stats_lock.release()
-        return function(*args, **kwargs)
+
+        return result
+
     return wrapper
 
 
@@ -100,6 +113,9 @@ class App(object):
 
     def stats(self):
         """Renders the list of a user's devices."""
+        global g_stats_lock
+        global g_stats_count
+        global g_stats_time
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -113,14 +129,19 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Build a list of table rows from the device information.
+        page_stats_str = "<td><b>Page</b></td><td><b>Num Accesses</b></td><td><b>Avg Time (secs)</b></td><tr>\n"
         g_stats_lock.acquire()
         try:
-            page_stats_str = "<td><b>Page</b></td><td><b>Num Accesses</b></td><tr>\n"
-            for key, value in g_stats.iteritems():
+            for key, count_value in g_stats_count.iteritems():
                 page_stats_str += "\t\t<tr><td>"
                 page_stats_str += str(key)
                 page_stats_str += "</td><td>"
-                page_stats_str += str(value)
+                page_stats_str += str(count_value)
+                page_stats_str += "</td><td>"
+                if key in g_stats_time and count_value > 0:
+                    total_time = g_stats_time[key]
+                    avg_time = total_time / count_value
+                    page_stats_str += str(avg_time)
                 page_stats_str += "</td></tr>\n"
         finally:
             g_stats_lock.release()
