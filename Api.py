@@ -120,7 +120,8 @@ class Api(object):
                 locations.append(location)
 
             # Update the locations.
-            self.data_mgr.create_locations(device_str, activity_id, locations)
+            if locations:
+                self.data_mgr.create_locations(device_str, activity_id, locations)
 
         if Keys.APP_ACCELEROMETER_KEY in values:
 
@@ -131,7 +132,8 @@ class Api(object):
                 accels.append(accel)
 
             # Update the accelerometer readings.
-            self.data_mgr.create_accelerometer_reading(device_str, activity_id, accels)
+            if accels:
+                self.data_mgr.create_accelerometer_reading(device_str, activity_id, accels)
 
         # Udpate the activity type.
         if len(activity_type) > 0:

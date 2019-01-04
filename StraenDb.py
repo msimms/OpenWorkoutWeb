@@ -676,12 +676,14 @@ class MongoDatabase(Database.Database):
                 if Keys.ACTIVITY_LOCATIONS_KEY in activity:
                     location_list = activity[Keys.ACTIVITY_LOCATIONS_KEY]
                 for location in locations:
+
                     # Make sure time values are monotonically increasing.
                     if location_list and int(location_list[-1][Keys.LOCATION_TIME_KEY]) > location[0]:
                         self.log_error(MongoDatabase.create_locations.__name__ + ": Received out-of-order time value.")
-                    else:
-                        value = {Keys.LOCATION_TIME_KEY: location[0], Keys.LOCATION_LAT_KEY: location[1], Keys.LOCATION_LON_KEY: location[2], Keys.LOCATION_ALT_KEY: location[3]}
-                        location_list.append(value)
+                        return False
+
+                    value = {Keys.LOCATION_TIME_KEY: location[0], Keys.LOCATION_LAT_KEY: location[1], Keys.LOCATION_LON_KEY: location[2], Keys.LOCATION_ALT_KEY: location[3]}
+                    location_list.append(value)
 
                 activity[Keys.ACTIVITY_LOCATIONS_KEY] = location_list
                 self.activities_collection.save(activity)
@@ -783,14 +785,17 @@ class MongoDatabase(Database.Database):
                 if sensor_type in activity:
                     value_list = activity[sensor_type]
                 for value in values:
+
                     # Make sure time values are monotonically increasing.
                     if value_list and int(value_list[-1].keys()[0]) > value[0]:
                         self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Received out-of-order time value.")
-                    else:
-                        time_value_pair = {str(value[0]): float(value[1])}
-                        value_list.append(time_value_pair)
+                        return False
+                    time_value_pair = {str(value[0]): float(value[1])}
+                    value_list.append(time_value_pair)
+
                 activity[sensor_type] = value_list
                 self.activities_collection.save(activity)
+                return True
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
