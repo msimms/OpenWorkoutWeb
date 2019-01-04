@@ -56,14 +56,15 @@ class ImportScheduler(threading.Thread):
 
     def add_to_queue(self, username, user_id, local_file_name, uploaded_file_name, file_extension):
         """Adds the activity ID to the list of activities to be analyzed."""
+        params = {}
+        params['username'] = username
+        params['user_id'] = user_id
+        params['local_file_name'] = local_file_name
+        params['uploaded_file_name'] = uploaded_file_name
+        params['file_extension'] = file_extension
+
         self.mutex.acquire()
         try:
-            params = {}
-            params['username'] = username
-            params['user_id'] = user_id
-            params['local_file_name'] = local_file_name
-            params['uploaded_file_name'] = uploaded_file_name
-            params['file_extension'] = file_extension
             self.queue.append(params)
         finally:
             self.mutex.release()

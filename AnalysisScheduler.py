@@ -45,10 +45,12 @@ class AnalysisScheduler(threading.Thread):
         """Adds the activity ID to the list of activities to be analyzed."""
         if not self.enabled:
             return
+
         analysis_obj = analyze_activity.delay(dumps(activity))
+        analysis_pair = (activity_id, analysis_obj)
+
         self.mutex.acquire()
         try:
-            analysis_pair = (activity_id, analysis_obj)
             self.queue.append(analysis_pair)
         finally:
             self.mutex.release()
@@ -64,17 +66,30 @@ class AnalysisScheduler(threading.Thread):
     def run(self):
         """Main run loop."""
         while not self.quitting:
+            old_queue = []
+            new_queue = []
+
             self.mutex.acquire()
             try:
-                new_queue = []
-                for activity_id, analysis_obj in self.queue:
+                old_queue = self.queue
+            finally:
+                self.mutex.release()
+
+            try:
+                for activity_id, analysis_obj in old_queue:
                     if analysis_obj.ready() is True:
                         summary_data = json.loads(analysis_obj.result)
                         self.store_results(activity_id, summary_data)
                     else:
                         analysis_pair = (activity_id, analysis_obj)
                         new_queue.append(analysis_pair)
-                self.queue = new_queue
+            except:
+                self.log_error("Exception when checking analysis queue")
+
+            self.mutex.acquire()
+            try:
+                self.queue.extend(new_queue)
             finally:
                 self.mutex.release()
+
             time.sleep(3)
