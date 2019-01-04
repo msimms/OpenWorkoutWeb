@@ -61,7 +61,7 @@ class MongoDatabase(Database.Database):
         try:
             return self.users_collection.count()
         except:
-            pass
+            self.log_error(MongoDatabase.total_users_count.__name__ + ": Exception")
         return 0
 
     def total_activities_count(self):
@@ -69,7 +69,7 @@ class MongoDatabase(Database.Database):
         try:
             return self.activities_collection.count()
         except:
-            pass
+            self.log_error(MongoDatabase.total_activities_count.__name__ + ": Exception")
         return 0
 
     def create_user(self, username, realname, passhash):
