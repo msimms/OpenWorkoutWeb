@@ -1013,6 +1013,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_summary.__name__ + ": Unexpected empty object: activity_id")
             return False
+        if summary_data is None:
+            self.log_error(MongoDatabase.create_activity_summary.__name__ + ": Unexpected empty object: summary_data")
+            return False
 
         try:
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
