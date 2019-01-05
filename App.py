@@ -147,6 +147,8 @@ class App(object):
             g_stats_lock.release()
 
         # The number of users and activities.
+        total_users_str = ""
+        total_activities_str = ""
         try:
             total_users_str = str(self.data_mgr.total_users_count())
             total_activities_str = str(self.data_mgr.total_activities_count())
@@ -154,6 +156,8 @@ class App(object):
             self.log_error("Exception while getting counts.")
 
         # The number of things queued for processing.
+        total_queued_for_analysis_str = ""
+        total_queued_for_import_str = ""
         try:
             total_queued_for_analysis_str = str(self.data_mgr.total_queued_for_analysis())
             total_queued_for_import_str = str(self.data_mgr.total_queued_for_import())
