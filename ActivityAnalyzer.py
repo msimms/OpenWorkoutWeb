@@ -55,7 +55,7 @@ class ActivityAnalyzer(object):
         if Keys.APP_CURRENT_SPEED_KEY not in self.activity:
             self.speed_graph = location_analyzer.create_speed_graph()
 
-@celery_worker.task
+@celery_worker.task(track_started=True)
 def analyze_activity(activity_str):
     print("Activity analysis begins")
     activity_obj = json.loads(activity_str)
