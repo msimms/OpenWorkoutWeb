@@ -141,10 +141,11 @@ class Api(object):
 
         # Update the user device association.
         if len(username) > 0:
-            user_id, _, _ = self.user_mgr.retrieve_user(username)
-            user_devices = self.user_mgr.retrieve_user_devices(user_id)
-            if user_devices is not None and device_str not in user_devices:
-                self.user_mgr.create_user_device(user_id, device_str)
+            temp_user_id, _, _ = self.user_mgr.retrieve_user(username)
+            if temp_user_id == self.user_id:
+                user_devices = self.user_mgr.retrieve_user_devices(self.user_id)
+                if user_devices is not None and device_str not in user_devices:
+                    self.user_mgr.create_user_device_for_user_id(self.user_id, device_str)
 
         # Analysis is now obsolete, so delete it.
         self.data_mgr.delete_activity_summary(activity_id)
@@ -634,7 +635,7 @@ class Api(object):
         if 'device_id' not in values:
             raise Exception("Invalid parameter.")
 
-        result = self.user_mgr.create_user_device(self.user_id, values['device_id'])
+        result = self.user_mgr.create_user_device_for_user_id(self.user_id, values['device_id'])
         return result, ""
 
     def handle_create_tag(self, values):
