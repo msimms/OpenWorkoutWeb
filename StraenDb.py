@@ -638,13 +638,9 @@ class MongoDatabase(Database.Database):
                 if Keys.ACTIVITY_LOCATIONS_KEY in activity:
                     location_list = activity[Keys.ACTIVITY_LOCATIONS_KEY]
 
-                    # Make sure time values are monotonically increasing.
-                    if location_list and int(location_list[-1][Keys.LOCATION_TIME_KEY]) > date_time:
-                        self.log_error(MongoDatabase.create_location.__name__ + ": Received out-of-order time value.")
-                        return False
-
                 value = {Keys.LOCATION_TIME_KEY: date_time, Keys.LOCATION_LAT_KEY: latitude, Keys.LOCATION_LON_KEY: longitude, Keys.LOCATION_ALT_KEY: altitude}
                 location_list.append(value)
+                location_list.sort(key=retrieve_time_from_location)
                 activity[Keys.ACTIVITY_LOCATIONS_KEY] = location_list
                 self.activities_collection.save(activity)
                 return True
@@ -673,18 +669,15 @@ class MongoDatabase(Database.Database):
                     activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if activity is not None:
                 location_list = []
+
                 if Keys.ACTIVITY_LOCATIONS_KEY in activity:
                     location_list = activity[Keys.ACTIVITY_LOCATIONS_KEY]
+
                 for location in locations:
-
-                    # Make sure time values are monotonically increasing.
-                    if location_list and int(location_list[-1][Keys.LOCATION_TIME_KEY]) > location[0]:
-                        self.log_error(MongoDatabase.create_locations.__name__ + ": Received out-of-order time value.")
-                        return False
-
                     value = {Keys.LOCATION_TIME_KEY: location[0], Keys.LOCATION_LAT_KEY: location[1], Keys.LOCATION_LON_KEY: location[2], Keys.LOCATION_ALT_KEY: location[3]}
                     location_list.append(value)
 
+                location_list.sort(key=retrieve_time_from_location)
                 activity[Keys.ACTIVITY_LOCATIONS_KEY] = location_list
                 self.activities_collection.save(activity)
                 return True
@@ -747,18 +740,15 @@ class MongoDatabase(Database.Database):
         try:
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
             if activity is not None:
-                data = []
-                if sensor_type in activity:
-                    data = activity[sensor_type]
+                value_list = []
 
-                    # Make sure time values are monotonically increasing.
-                    if data and int(data[-1].keys()[0]) > date_time:
-                        self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Received out-of-order time value.")
-                        return False
+                if sensor_type in activity:
+                    value_list = activity[sensor_type]
 
                 time_value_pair = {str(date_time): float(value)}
-                data.append(time_value_pair)
-                activity[sensor_type] = data
+                value_list.append(time_value_pair)
+                value_list.sort(key=retrieve_time_from_time_value_pair)
+                activity[sensor_type] = value_list
                 self.activities_collection.save(activity)
                 return True
         except:
@@ -782,17 +772,15 @@ class MongoDatabase(Database.Database):
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
             if activity is not None:
                 value_list = []
+
                 if sensor_type in activity:
                     value_list = activity[sensor_type]
-                for value in values:
 
-                    # Make sure time values are monotonically increasing.
-                    if value_list and int(value_list[-1].keys()[0]) > value[0]:
-                        self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Received out-of-order time value.")
-                        return False
+                for value in values:
                     time_value_pair = {str(value[0]): float(value[1])}
                     value_list.append(time_value_pair)
 
+                value_list.sort(key=retrieve_time_from_time_value_pair)
                 activity[sensor_type] = value_list
                 self.activities_collection.save(activity)
                 return True
@@ -852,19 +840,15 @@ class MongoDatabase(Database.Database):
 
                 # The metadata is a list.
                 if create_list is True:
-                    data = []
+                    value_list = []
 
                     if key in activity:
-                        data = activity[key]
-
-                        # Make sure time values are monotonically increasing.
-                        if data and int(data[-1].keys()[0]) > date_time:
-                            self.log_error(MongoDatabase.create_metadata.__name__ + ": Received out-of-order time value.")
-                            return False
+                        value_list = activity[key]
 
                     time_value_pair = {str(date_time): value}
-                    data.append(time_value_pair)
-                    activity[key] = data
+                    value_list.append(time_value_pair)
+                    value_list.sort(key=retrieve_time_from_time_value_pair)
+                    activity[key] = value_list
                     self.activities_collection.save(activity)
 
                 # The metadata is a scalar, just make sure it hasn't changed before updating it.
@@ -893,15 +877,15 @@ class MongoDatabase(Database.Database):
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
             if activity is not None:
                 value_list = []
+
                 if key in activity:
                     value_list = activity[key]
+
                 for value in values:
-                    # Make sure time values are monotonically increasing.
-                    if value_list and int(value_list[-1].keys()[0]) > value[0]:
-                        self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Received out-of-order time value.")
-                    else:
-                        time_value_pair = {str(value[0]): float(value[1])}
-                        value_list.append(time_value_pair)
+                    time_value_pair = {str(value[0]): float(value[1])}
+                    value_list.append(time_value_pair)
+
+                value_list.sort(key=retrieve_time_from_time_value_pair)
                 activity[key] = value_list
                 self.activities_collection.save(activity)
                 return True
