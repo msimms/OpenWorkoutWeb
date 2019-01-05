@@ -69,6 +69,8 @@ class AnalysisScheduler(threading.Thread):
             old_queue = []
             new_queue = []
 
+            # Make a copy of the queue. Do this so that we don't have to hold the mutex while we
+            # check for the result of each task.
             self.mutex.acquire()
             try:
                 old_queue = self.queue
@@ -77,15 +79,24 @@ class AnalysisScheduler(threading.Thread):
 
             try:
                 for activity_id, analysis_obj in old_queue:
+                    # See if the results is ready. If so, decode and store the result. Otherwise, add the object
+                    # back to the list so we will check it again next time.
                     if analysis_obj.ready() is True:
                         summary_data = json.loads(analysis_obj.result)
                         self.store_results(activity_id, summary_data)
                     else:
                         analysis_pair = (activity_id, analysis_obj)
                         new_queue.append(analysis_pair)
+
+                    # Bug reports for celery state that the ready may not return the correct result until after get is called.
+                    analysis_obj.get(timeout=1)
+
+                    # Yield the GIL.
+                    time.sleep(1)
             except:
                 self.log_error("Exception when checking analysis queue")
 
+            # Add any unfinished items back to the queue so they don't get lost.
             self.mutex.acquire()
             try:
                 self.queue.extend(new_queue)
