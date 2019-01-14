@@ -17,7 +17,6 @@ import uuid
 import Keys
 import LocationAnalyzer
 import Api
-import DataMgr
 import Units
 import UserMgr
 
@@ -351,7 +350,7 @@ class App(object):
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None or len(summary_data) == 0:
-            self.data_mgr.analyze(activity_id, activity)
+            self.data_mgr.analyze(activity)
 
         # Find the sets data.
         sets = None
@@ -481,7 +480,7 @@ class App(object):
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None or len(summary_data) == 0:
-            self.data_mgr.analyze(activity_id, activity)
+            self.data_mgr.analyze(activity)
 
         # Build the summary data view.
         summary = "<ul>\n"

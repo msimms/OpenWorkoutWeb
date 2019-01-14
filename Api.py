@@ -809,7 +809,7 @@ class Api(object):
         if not activity:
             raise Exception("Invalid activity.")
 
-        self.data_mgr.analyze(activity_id, activity)
+        self.data_mgr.analyze(activity)
         return True, ""
 
     def handle_api_1_0_request(self, request, values):

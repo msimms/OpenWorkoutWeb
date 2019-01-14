@@ -20,9 +20,8 @@ class DataMgr(Importer.ActivityWriter):
     def __init__(self, root_dir, analyze_activities):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
-        self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler(self)
+        self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
         self.analysis_scheduler.enabled = analyze_activities
-        self.analysis_scheduler.start()
         self.import_scheduler = ImportScheduler.ImportScheduler(self, 2)
         self.import_scheduler.start()
         super(Importer.ActivityWriter, self).__init__()
@@ -30,8 +29,6 @@ class DataMgr(Importer.ActivityWriter):
     def terminate(self):
         """Destructor"""
         print("Terminating data analysis...")
-        self.analysis_scheduler.terminate()
-        self.analysis_scheduler.join()
         self.analysis_scheduler = None
         print("Terminating file import...")
         self.import_scheduler.terminate()
@@ -47,10 +44,6 @@ class DataMgr(Importer.ActivityWriter):
         """Returns the number of activities in the database."""
         return self.database.total_activities_count()
 
-    def total_queued_for_analysis(self):
-        """Returns the number of activities queued for analysis."""
-        return self.analysis_scheduler.queue_depth()
-
     def total_queued_for_import(self):
         """Returns the number of activities queued for analysis."""
         return self.import_scheduler.queue_depth()
@@ -59,9 +52,9 @@ class DataMgr(Importer.ActivityWriter):
         """Generates a new activity ID."""
         return str(uuid.uuid4())
 
-    def analyze(self, activity_id, activity):
+    def analyze(self, activity):
         """Schedules the specified activity for analysis."""
-        self.analysis_scheduler.add_to_queue(activity_id, activity)
+        self.analysis_scheduler.add_to_queue(activity)
 
     def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""

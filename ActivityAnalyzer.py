@@ -5,9 +5,12 @@ from __future__ import absolute_import
 from CeleryWorker import celery_worker
 import celery
 import json
+import logging
+import os
 import Keys
 import LocationAnalyzer
 import SensorAnalyzerFactory
+import StraenDb
 
 class ActivityAnalyzer(object):
     """Class for scheduling computationally expensive analysis tasks."""
@@ -16,7 +19,22 @@ class ActivityAnalyzer(object):
         self.activity = activity
         self.summary_data = {}
         self.speed_graph = None
+        self.database = StraenDb.MongoDatabase(os.path.dirname(os.path.abspath(__file__)))
+        self.database.connect()
         super(ActivityAnalyzer, self).__init__()
+
+    def log_error(self, log_str):
+        """Writes an error message to the log file."""
+        logger = logging.getLogger()
+        logger.debug(log_str)
+
+    def store_results(self):
+        """Called after analysis is complete. Stores the summary data in the database."""
+        try:
+            if not self.database.create_activity_summary(self.activity[Keys.ACTIVITY_ID_KEY], self.summary_data):
+                self.log_error("Error returned when saving activity summary data: " + str(self.summary_data))
+        except:
+            self.log_error("Exception when saving activity summary data: " + str(self.summary_data))
 
     def perform_analysis(self):
         """Main analysis routine."""
@@ -54,6 +72,9 @@ class ActivityAnalyzer(object):
         # Create a current speed graph - if one has not already been created.
         if Keys.APP_CURRENT_SPEED_KEY not in self.activity:
             self.speed_graph = location_analyzer.create_speed_graph()
+
+        # Store the results.
+        self.store_results()
 
 @celery_worker.task(track_started=True)
 def analyze_activity(activity_str):
