@@ -12,7 +12,6 @@ import sys
 import threading
 import timeit
 import traceback
-import uuid
 
 import Keys
 import LocationAnalyzer
@@ -942,22 +941,9 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # Generate a random name for the local file.
-        upload_path = os.path.normpath(self.tempfile_dir)
-        uploaded_file_name, uploaded_file_ext = os.path.splitext(ufile.filename)
-        local_file_name = os.path.join(upload_path, str(uuid.uuid4()))
-        local_file_name = local_file_name + uploaded_file_ext
-
-        # Write the file.
-        with open(local_file_name, 'wb') as local_file:
-            while True:
-                data = ufile.file.read(8192)
-                if not data:
-                    break
-                local_file.write(data)
-
         # Parse the file and store it's contents in the database.
-        self.data_mgr.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
+        file_data = ufile.file.read()
+        self.data_mgr.import_file(username, user_id, file_data, ufile.filename)
 
         raise RedirectException(DEFAULT_LOGGED_IN_URL)
 

@@ -488,18 +488,8 @@ class Api(object):
         if len(uploaded_file_data) == 0:
             raise Exception('Empty file data for ' + uploaded_file_name + '.')
 
-        # Generate a random name for the local file.
-        upload_path = os.path.normpath(self.temp_dir)
-        uploaded_file_name, uploaded_file_ext = os.path.splitext(uploaded_file_name)
-        local_file_name = os.path.join(upload_path, str(uuid.uuid4()))
-        local_file_name = local_file_name + uploaded_file_ext
-
-        # Write the file.
-        with open(local_file_name, 'wb') as local_file:
-            local_file.write(uploaded_file_data)
-
         # Parse the file and store it's contents in the database.
-        self.data_mgr.import_file(username, self.user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
+        self.data_mgr.import_file(username, self.user_id, uploaded_file_data, uploaded_file_name)
 
         return True, ""
 
