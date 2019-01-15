@@ -3,5 +3,5 @@
 
 from __future__ import absolute_import
 import celery
-celery_worker = celery.Celery('straen_worker', include=['ActivityAnalyzer'])
+celery_worker = celery.Celery('straen_worker', include=['ActivityAnalyzer', 'ImportWorker'])
 celery_worker.config_from_object('CeleryConfig')

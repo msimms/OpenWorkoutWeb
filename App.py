@@ -154,19 +154,10 @@ class App(object):
         except:
             self.log_error("Exception while getting counts.")
 
-        # The number of things queued for processing.
-        total_queued_for_analysis_str = ""
-        total_queued_for_import_str = ""
-        try:
-            total_queued_for_analysis_str = str(self.data_mgr.total_queued_for_analysis())
-            total_queued_for_import_str = str(self.data_mgr.total_queued_for_import())
-        except:
-            self.log_error("Exception while getting queue totals.")
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'stats.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, page_stats=page_stats_str, total_activities=total_activities_str, total_users=total_users_str, queued_for_analysis=total_queued_for_analysis_str, queued_for_import=total_queued_for_import_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, page_stats=page_stats_str, total_activities=total_activities_str, total_users=total_users_str)
 
     def update_track(self, activity_id=None, num=None):
         if activity_id is None:
@@ -960,7 +951,7 @@ class App(object):
         # Write the file.
         with open(local_file_name, 'wb') as local_file:
             while True:
-                data = local_file.file.read(8192)
+                data = ufile.file.read(8192)
                 if not data:
                     break
                 local_file.write(data)

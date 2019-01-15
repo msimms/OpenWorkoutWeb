@@ -1,7 +1,6 @@
 # Copyright 2018 Michael J Simms
 """Schedules computationally expensive analysis tasks"""
 
-import json
 from bson.json_util import dumps
 from ActivityAnalyzer import analyze_activity
 

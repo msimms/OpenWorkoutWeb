@@ -4,7 +4,6 @@
 import uuid
 import AnalysisScheduler
 import Importer
-import ImportScheduler
 import Keys
 import StraenDb
 
@@ -17,22 +16,16 @@ def get_activities_sort_key(item):
 class DataMgr(Importer.ActivityWriter):
     """Data store abstraction"""
 
-    def __init__(self, root_dir, analyze_activities):
+    def __init__(self, root_dir, analysis_scheduler, import_scheduler):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
-        self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
-        self.analysis_scheduler.enabled = analyze_activities
-        self.import_scheduler = ImportScheduler.ImportScheduler(self, 2)
-        self.import_scheduler.start()
+        self.analysis_scheduler = analysis_scheduler
+        self.import_scheduler = import_scheduler
         super(Importer.ActivityWriter, self).__init__()
 
     def terminate(self):
         """Destructor"""
-        print("Terminating data analysis...")
         self.analysis_scheduler = None
-        print("Terminating file import...")
-        self.import_scheduler.terminate()
-        self.import_scheduler.join()
         self.import_scheduler = None
         self.database = None
 
@@ -43,10 +36,6 @@ class DataMgr(Importer.ActivityWriter):
     def total_activities_count(self):
         """Returns the number of activities in the database."""
         return self.database.total_activities_count()
-
-    def total_queued_for_import(self):
-        """Returns the number of activities queued for analysis."""
-        return self.import_scheduler.queue_depth()
 
     def create_activity_id(self):
         """Generates a new activity ID."""
@@ -130,7 +119,7 @@ class DataMgr(Importer.ActivityWriter):
 
     def import_file(self, username, user_id, local_file_name, uploaded_file_name, file_extension):
         """Imports the contents of a local file into the database."""
-        self.import_scheduler.add_to_queue(user_id, local_file_name, uploaded_file_name, file_extension)
+        self.import_scheduler.add_to_queue(username, user_id, local_file_name, uploaded_file_name, file_extension)
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
