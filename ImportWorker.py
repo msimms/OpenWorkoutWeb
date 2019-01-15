@@ -23,6 +23,8 @@ def import_activity(import_str):
         # Generate a random name for the local file.
         root_dir = os.path.dirname(os.path.abspath(__file__))
         tempfile_dir = os.path.join(root_dir, 'tempfile')
+        if not os.path.exists(tempfile_dir):
+            os.makedirs(tempfile_dir)
         upload_path = os.path.normpath(tempfile_dir)
         uploaded_file_name, uploaded_file_ext = os.path.splitext(uploaded_file_name)
         local_file_name = os.path.join(upload_path, str(uuid.uuid4()))
