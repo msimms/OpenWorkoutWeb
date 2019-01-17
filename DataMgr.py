@@ -45,6 +45,17 @@ class DataMgr(Importer.ActivityWriter):
         """Schedules the specified activity for analysis."""
         self.analysis_scheduler.add_to_queue(activity)
 
+    def is_duplicate_activity(self, user_id, start_time):
+        """Inherited from ActivityWriter. Returns TRUE if the activity appears to be a duplicate of another activity. Returns FALSE otherwise."""
+        if self.database is None:
+            raise Exception("No database.")
+
+        activities = self.database.retrieve_user_activity_list(user_id, None, None)
+        for activity in activities:
+            if Keys.ACTIVITY_TIME_KEY in activity:
+                activity_time = activity[Keys.ACTIVITY_TIME_KEY]
+        return False
+
     def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
         if self.database is None:
