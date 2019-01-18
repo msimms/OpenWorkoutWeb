@@ -13,6 +13,7 @@ class HeartRateAnalyzer(SensorAnalyzer.SensorAnalyzer):
     def analyze(self):
         """Called when all sensor readings have been processed."""
         results = SensorAnalyzer.SensorAnalyzer.analyze(self)
-        results[Keys.MAX_HEART_RATE] = self.max
-        results[Keys.AVG_HEART_RATE] = self.avg
+        if len(self.readings) > 0:
+            results[Keys.MAX_HEART_RATE] = self.max
+            results[Keys.AVG_HEART_RATE] = self.avg
         return results

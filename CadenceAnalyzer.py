@@ -13,6 +13,7 @@ class CadenceAnalyzer(SensorAnalyzer.SensorAnalyzer):
     def analyze(self):
         """Called when all sensor readings have been processed."""
         results = SensorAnalyzer.SensorAnalyzer.analyze(self)
-        results[Keys.MAX_CADENCE] = self.max
-        results[Keys.AVG_CADENCE] = self.avg
+        if len(self.readings) > 0:
+            results[Keys.MAX_CADENCE] = self.max
+            results[Keys.AVG_CADENCE] = self.avg
         return results
