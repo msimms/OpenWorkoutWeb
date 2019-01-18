@@ -69,6 +69,10 @@ Why develop a workout tracker when there are so many closed-source options avail
 ### 0.7
 * Added celery and rabbitmq to distribute analysis tasks.
 
+### 0.8
+* Results from distributed tasks are now written direclty to the database for efficiency purposes.
+* File imports are now also distributed over rabbitmq and celery with the results being written directly to the database.
+
 ## Tech
 This software uses two other source projects to work properly:
 
