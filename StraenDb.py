@@ -1195,34 +1195,63 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_gear(self, user_id):
+    def create_gear(self, user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Create method for gear."""
         if user_id is None:
             self.log_error(MongoDatabase.create_gear.__name__ + ": Unexpected empty object: user_id")
             return False
 
         try:
-            pass
+            user_id_obj = ObjectId(user_id)
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+                gear_list = []
+                if Keys.GEAR_KEY in user:
+                    gear_list = user[Keys.GEAR_KEY]
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
         return True
 
-    def retrieve_gear(self, gear_id):
+    def retrieve_gear_for_user(self, user_id):
         """Retrieve method for the gear with the specified ID."""
-        if gear_id is None:
-            self.log_error(MongoDatabase.retrieve_gear.__name__ + ": Unexpected empty object: gear_id")
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_gear_for_user.__name__ + ": Unexpected empty object: user_id")
             return None
 
         try:
-            pass
+            user_id_obj = ObjectId(user_id)
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+                gear_list = []
+                if Keys.GEAR_KEY in user:
+                    pass
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
-        return None
+        return []
 
-    def delete_gear(self, gear_id):
+    def update_gear(self, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
+        """Retrieve method for the gear with the specified ID."""
+        if gear_id is None:
+            self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: gear_id")
+            return False
+
+        try:
+            gear_id_obj = ObjectId(gear_id)
+            gear = self.gear_collection.find_one({Keys.DATABASE_ID_KEY: gear_id_obj})
+            if gear is not None:
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def delete_gear(self, user_id, gear_id):
         """Delete method for the gear with the specified ID."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: user_id")
+            return None
         if gear_id is None:
             self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: gear_id")
             return False

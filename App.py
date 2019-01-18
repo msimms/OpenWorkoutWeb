@@ -826,10 +826,29 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        bikes = "<table>"
+        shoes = "<table>"
+        gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
+        for gear in gear_list:
+            if Keys.GEAR_TYPE_KEY in gear:
+                row_str = ""
+                if Keys.GEAR_NAME_KEY in gear:
+                    row_str += "<td>"
+                    row_str += gear[Keys.GEAR_NAME_KEY]
+                    row_str += "</td>"
+                row_str += "<tr>"
+                gear_type = gear[Keys.GEAR_TYPE_KEY]
+                if gear_type == GEAR_TYPE_BIKE:
+                    bikes += row_str
+                elif gear_type == GEAR_TYPE_SHOES:
+                    shoes += row_str
+        bikes += "</table>"
+        shoes == "</table>"
+
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'gear.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bikes=bikes, shoes=shoes)
 
     @statistics
     def following(self):

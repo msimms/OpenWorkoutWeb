@@ -703,7 +703,7 @@ class Api(object):
         return result, ""
 
     def handle_list_comments(self, values):
-        """Called when an API message create list comments associated with an activity is received."""
+        """Called when an API message to list comments associated with an activity is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -714,6 +714,92 @@ class Api(object):
             raise Exception("Invalid activity ID.")
 
         result = self.data_mgr.retrieve_comments(activity_id)
+        return result, ""
+
+    def handle_create_gear(self, values):
+        """Called when an API message to create gear for a user is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if Keys.GEAR_TYPE_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.GEAR_NAME_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.GEAR_DESCRIPTION_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.ADD_TIME_KEY not in values:
+            raise Exception("Invalid parameter.")
+
+        gear_type = urllib.unquote_plus(values[Keys.GEAR_TYPE_KEY])
+        if not InputChecker.is_valid(gear_type):
+            raise Exception("Invalid parameter.")
+        gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
+        if not InputChecker.is_valid(gear_name):
+            raise Exception("Invalid parameter.")
+        gear_description = urllib.unquote_plus(values[Keys.GEAR_DESCRIPTION_KEY])
+        if not InputChecker.is_valid(gear_description):
+            raise Exception("Invalid parameter.")
+        gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
+        if not InputChecker.is_integer(gear_add_time):
+            raise Exception("Invalid parameter.")
+        gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
+        if not InputChecker.is_integer(gear_retire_time):
+            raise Exception("Invalid parameter.")
+
+        result = self.data_mgr.create_gear(self.user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+        return result, ""
+
+    def handle_list_gear(self, values):
+        """Called when an API message to list gear associated with a user is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+
+        result = self.data_mgr.list_gear(self.user_id)
+        return result, ""
+
+    def handle_update_gear(self, values):
+        """Called when an API message to update gear for a user is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if Keys.GEAR_TYPE_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.GEAR_NAME_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.GEAR_DESCRIPTION_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.ADD_TIME_KEY not in values:
+            raise Exception("Invalid parameter.")
+
+        gear_type = urllib.unquote_plus(values[Keys.GEAR_TYPE_KEY])
+        if not InputChecker.is_valid(gear_type):
+            raise Exception("Invalid parameter.")
+        gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
+        if not InputChecker.is_valid(gear_name):
+            raise Exception("Invalid parameter.")
+        gear_description = urllib.unquote_plus(values[Keys.GEAR_DESCRIPTION_KEY])
+        if not InputChecker.is_valid(gear_description):
+            raise Exception("Invalid parameter.")
+        gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
+        if not InputChecker.is_integer(gear_add_time):
+            raise Exception("Invalid parameter.")
+        gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
+        if not InputChecker.is_integer(gear_retire_time):
+            raise Exception("Invalid parameter.")
+
+        result = self.data_mgr.update_gear(self.user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+        return result, ""
+
+    def handle_delete_gear(self, values):
+        """Called when an API message to delete gear for a user is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if Keys.GEAR_ID_KEY not in values:
+            raise Exception("Invalid parameter.")
+
+        gear_id = values[Keys.GEAR_ID_KEY]
+        if not InputChecker.is_uuid(gear_id):
+            raise Exception("Invalid gear ID.")
+
+        result = self.data_mgr.delete_gear(self.user_id, gear_id)
         return result, ""
 
     def handle_update_settings(self, values):
@@ -863,6 +949,14 @@ class Api(object):
             return self.handle_create_comment(values)
         elif request == 'list_comments':
             return self.handle_list_comments(values)
+        elif request == 'create_gear':
+            return self.handle_create_gear(values)
+        elif request == 'list_gear':
+            return self.handle_list_gear(values)
+        elif request == 'update_gear':
+            return self.handle_update_gear(values)
+        elif request == 'delete_gear':
+            return self.handle_delete_gear(values)
         elif request == 'update_settings':
             return self.handle_update_settings(values)
         elif request == 'update_profile':

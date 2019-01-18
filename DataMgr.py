@@ -53,7 +53,9 @@ class DataMgr(Importer.ActivityWriter):
         activities = self.database.retrieve_user_activity_list(user_id, None, None)
         for activity in activities:
             if Keys.ACTIVITY_TIME_KEY in activity:
-                activity_time = activity[Keys.ACTIVITY_TIME_KEY]
+                activity_start_time = activity[Keys.ACTIVITY_TIME_KEY]
+                if start_time > activity_start_time: # Need to incorporate check agains the activity end time, but in an efficient manner.
+                    pass
         return False
 
     def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
@@ -400,6 +402,52 @@ class DataMgr(Importer.ActivityWriter):
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity_comments(activity_id)
+
+    def create_gear(self, user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
+        """Create method for gear."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if gear_type is None:
+            raise Exception("Bad parameter.")
+        if gear_name is None:
+            raise Exception("Bad parameter.")
+        if gear_description is None:
+            raise Exception("Bad parameter.")
+        return self.database.create_gear(user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+
+    def retrieve_gear_for_user(self, user_id):
+        """Retrieve method for the gear with the specified ID."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_gear_for_user(user_id)
+
+    def update_gear(self, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
+        """Retrieve method for the gear with the specified ID."""
+        if self.database is None:
+            raise Exception("No database.")
+        if gear_id is None:
+            raise Exception("Bad parameter.")
+        if gear_type is None:
+            raise Exception("Bad parameter.")
+        if gear_name is None:
+            raise Exception("Bad parameter.")
+        if gear_description is None:
+            raise Exception("Bad parameter.")
+        return self.database.update_gear(gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+
+    def delete_gear(self, user_id, gear_id):
+        """Delete method for the gear with the specified ID."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if gear_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.delete_gear(user_id, gear_id)
 
     def retrieve_activity_types(self):
         """Returns a the list of activity types that the software understands."""
