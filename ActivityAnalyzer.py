@@ -66,7 +66,7 @@ class ActivityAnalyzer(object):
         sensor_types_to_analyze = SensorAnalyzerFactory.supported_sensor_types()
         for sensor_type in sensor_types_to_analyze:
             if sensor_type in self.activity:
-                sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type])
+                sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type], activity_type)
                 self.summary_data.update(sensor_analyzer.analyze())
 
         # Create a current speed graph - if one has not already been created.

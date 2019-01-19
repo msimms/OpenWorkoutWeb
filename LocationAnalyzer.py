@@ -25,7 +25,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on a location track."""
 
     def __init__(self, activity_type):
-        SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_DISTANCE_KEY, Units.get_speed_units_str(Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS))
+        SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_DISTANCE_KEY, Units.get_speed_units_str(Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS), activity_type)
 
         self.activity_type = activity_type
         self.start_time = None

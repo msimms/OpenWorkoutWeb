@@ -7,8 +7,9 @@ import Keys
 class SensorAnalyzer(object):
     """Class for performing calculations on basic sensor information (heart rate, power, etc.)."""
 
-    def __init__(self, sensor_type, units):
+    def __init__(self, sensor_type, units, activity_type):
         super(SensorAnalyzer, self).__init__()
+        self.activity_type = activity_type
         self.type = sensor_type
         self.units = units
         self.start_time = None

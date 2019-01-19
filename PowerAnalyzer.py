@@ -17,8 +17,8 @@ import statistics
 class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on power data."""
 
-    def __init__(self):
-        SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_POWER_KEY, Units.get_power_units_str())
+    def __init__(self, activity_type):
+        SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_POWER_KEY, Units.get_power_units_str(), activity_type)
         self.np_buf = []
         self.current_30_sec_buf = []
         self.current_30_sec_buf_start_time = 0
