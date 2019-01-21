@@ -885,7 +885,8 @@ class Api(object):
         if not activity:
             raise Exception("Invalid activity.")
 
-        self.data_mgr.analyze(activity)
+        activity_user_id = self.user_mgr.get_activity_user(activity)
+        self.data_mgr.analyze(activity, activity_user_id)
         return True, ""
 
     def handle_api_1_0_request(self, request, values):

@@ -2,10 +2,10 @@
 """Data store abstraction"""
 
 import uuid
-import AnalysisScheduler
 import Importer
 import Keys
 import StraenDb
+import Summarizer
 
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
@@ -41,9 +41,9 @@ class DataMgr(Importer.ActivityWriter):
         """Generates a new activity ID."""
         return str(uuid.uuid4())
 
-    def analyze(self, activity):
+    def analyze(self, activity, activity_user_id):
         """Schedules the specified activity for analysis."""
-        self.analysis_scheduler.add_to_queue(activity)
+        self.analysis_scheduler.add_to_queue(activity, activity_user_id)
 
     def is_duplicate_activity(self, user_id, start_time):
         """Inherited from ActivityWriter. Returns TRUE if the activity appears to be a duplicate of another activity. Returns FALSE otherwise."""
@@ -402,6 +402,35 @@ class DataMgr(Importer.ActivityWriter):
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity_comments(activity_id)
+
+    def insert_bests_from_activity(self, user_id, activity_id, activity_type, activity_time, bests):
+        """Update method for a user's personal record."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        summarizer = Summarizer.Summarizer()
+        all_personal_records = self.database.retrieve_user_personal_records(user_id)
+        for record_activity_type in all_personal_records.keys():
+            summarizer.set_record_dictionary(record_activity_type, all_personal_records[record_activity_type])
+
+        do_update = len(all_personal_records) > 0
+        summarizer.add_activity_data(activity_id, activity_type, activity_time, bests)
+        all_personal_records[activity_type] = summarizer.get_record_dictionary(activity_type)
+        if do_update:
+            self.database.update_user_personal_records(user_id, all_personal_records)
+        else:
+            self.database.create_user_personal_records(user_id, all_personal_records)
+        return self.database.create_activity_bests(user_id, activity_id, bests)
+
+    def retrieve_user_personal_records(self, user_id):
+        """Retrieve method for a user's personal record."""
+        if self.database is None:
+            raise Exception("No database.")
+        if self.user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_user_personal_records(user_id)
 
     def create_gear(self, user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Create method for gear."""

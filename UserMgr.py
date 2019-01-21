@@ -243,3 +243,14 @@ class UserMgr(object):
             else:
                 result = ""
         return result.lower()
+
+    def get_activity_user(self, activity):
+        """Returns the user record that corresponds with the given activity."""
+        if Keys.ACTIVITY_USER_ID_KEY in activity:
+            username, realname = self.retrieve_user_from_id(activity[Keys.ACTIVITY_USER_ID_KEY])
+            return activity[Keys.ACTIVITY_USER_ID_KEY], username, realname
+        if Keys.ACTIVITY_DEVICE_STR_KEY in activity and len(activity[Keys.ACTIVITY_DEVICE_STR_KEY]) > 0:
+            user = self.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
+            if user is not None:
+                return user[Keys.DATABASE_ID_KEY], user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
+        return None, None, None

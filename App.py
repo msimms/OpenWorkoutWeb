@@ -316,7 +316,7 @@ class App(object):
             exports_str += "<td><button type=\"button\" onclick=\"return export_activity()\">Export</button></td><tr>\n"
         return exports_str
 
-    def render_page_for_lifting_activity(self, email, user_realname, activity_id, activity, logged_in_username, belongs_to_current_user, is_live):
+    def render_page_for_lifting_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_username, belongs_to_current_user, is_live):
         """Helper function for rendering the map corresonding to a specific device and activity."""
 
         # Is the user logged in?
@@ -340,7 +340,7 @@ class App(object):
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None or len(summary_data) == 0:
-            self.data_mgr.analyze(activity)
+            self.data_mgr.analyze(activity, activity_user_id)
 
         # Find the sets data.
         sets = None
@@ -425,7 +425,7 @@ class App(object):
                     max_value = value
         return data_str, max_value
 
-    def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, logged_in_userid, belongs_to_current_user, is_live):
+    def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
 
         # Is the user logged in?
@@ -470,7 +470,7 @@ class App(object):
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None or len(summary_data) == 0:
-            self.data_mgr.analyze(activity)
+            self.data_mgr.analyze(activity, activity_user_id)
 
         # Build the summary data view.
         summary = "<ul>\n"
@@ -564,14 +564,14 @@ class App(object):
         my_template = Template(filename=self.map_single_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, comments=comments_str, exports=exports_str)
 
-    def render_page_for_activity(self, activity, email, user_realname, activity_id, logged_in_userid, belongs_to_current_user, is_live):
+    def render_page_for_activity(self, activity, email, user_realname, activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
 
         try:
             if Keys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[Keys.ACTIVITY_LOCATIONS_KEY]) > 0:
-                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity, logged_in_userid, belongs_to_current_user, is_live)
+                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity, activity_user_id, logged_in_userid, belongs_to_current_user, is_live)
             elif Keys.APP_ACCELEROMETER_KEY in activity or Keys.APP_SETS_KEY in activity:
-                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity, logged_in_userid, belongs_to_current_user, is_live)
+                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity, activity_user_id, logged_in_userid, belongs_to_current_user, is_live)
             else:
                 my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
                 return my_template.render(nav=self.create_navbar(logged_in_userid is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
@@ -663,8 +663,8 @@ class App(object):
 
         # Determine who owns the device.
         device_user = self.user_mgr.retrieve_user_from_device(device_str)
-        device_user_id = device_user[Keys.DATABASE_ID_KEY]
-        belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
+        activity_user_id = device_user[Keys.DATABASE_ID_KEY]
+        belongs_to_current_user = str(activity_user_id) == str(logged_in_userid)
 
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
@@ -674,18 +674,7 @@ class App(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, logged_in_userid, belongs_to_current_user, True)
-
-    def get_activity_user(self, activity):
-        """Returns the user record that corresponds with the given activity."""
-        if Keys.ACTIVITY_USER_ID_KEY in activity:
-            username, realname = self.user_mgr.retrieve_user_from_id(activity[Keys.ACTIVITY_USER_ID_KEY])
-            return activity[Keys.ACTIVITY_USER_ID_KEY], username, realname
-        if Keys.ACTIVITY_DEVICE_STR_KEY in activity and len(activity[Keys.ACTIVITY_DEVICE_STR_KEY]) > 0:
-            user = self.user_mgr.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
-            if user is not None:
-                return user[Keys.DATABASE_ID_KEY], user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
-        return None, None, None
+        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, True)
 
     @statistics
     def activity(self, activity_id):
@@ -703,19 +692,19 @@ class App(object):
             return self.error("The requested activity does not exist.")
 
         # Determine who owns the device, and hence the activity.
-        device_user_id, username, realname = self.get_activity_user(activity)
-        belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
-        if username is None:
-            username = ""
-        if realname is None:
-            realname = ""
+        activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
+        belongs_to_current_user = str(activity_user_id) == str(logged_in_userid)
+        if activity_username is None:
+            activity_username = ""
+        if activity_user_realname is None:
+            activity_user_realname = ""
 
         # Determine if the current user can view the activity.
         if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, username, realname, activity_id, logged_in_userid, belongs_to_current_user, False)
+        return self.render_page_for_activity(activity, activity_username, activity_user_realname, activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, False)
 
     @statistics
     def device(self, device_str):
@@ -736,8 +725,8 @@ class App(object):
 
         # Determine who owns the device.
         device_user = self.user_mgr.retrieve_user_from_device(device_str)
-        device_user_id = device_user[Keys.DATABASE_ID_KEY]
-        belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
+        activity_user_id = device_user[Keys.DATABASE_ID_KEY]
+        belongs_to_current_user = str(activity_user_id) == str(logged_in_userid)
 
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
@@ -749,7 +738,7 @@ class App(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, logged_in_userid, belongs_to_current_user, False)
+        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, False)
 
     @statistics
     def my_activities(self):

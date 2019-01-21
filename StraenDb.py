@@ -49,6 +49,7 @@ class MongoDatabase(Database.Database):
             self.database = self.conn['straendb']
             self.users_collection = self.database['users']
             self.activities_collection = self.database['activities']
+            self.records_collection = self.database['records']
             self.workouts_collection = self.database['wokrouts']
             self.gear_collection = self.database['gear']
             return True
@@ -386,66 +387,100 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_user_pr(self, user_id, record_name, record_value):
+    def create_user_personal_records(self, user_id, records):
         """Create method for a user's personal record."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_user_pr.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.create_user_personal_records.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if records is None:
+            self.log_error(MongoDatabase.create_user_personal_records.__name__ + ": Unexpected empty object: records")
             return False
 
         try:
             user_id_obj = ObjectId(user_id)
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
-            if user is not None:
-                pr_list = []
-                if Keys.PR_KEY in user:
-                    pr_list = user[Keys.PR_KEY]
-                pr_list.append({record_name, record_value})
-                user[Keys.PR_KEY] = pr_list
-                self.users_collection.save(user)
+            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id_obj})
+            if user_records is None:
+                post = {Keys.RECORDS_USER_ID: user_id, Keys.PERSONAL_RECORDS: records}
+                self.records_collection.insert(post)
                 return True
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
         return False
 
-    def update_user_pr(self, user_id, record_name, record_value):
-        """Update method for a user's personal record."""
+    def retrieve_user_personal_records(self, user_id):
+        """Retrieve method for a user's personal records."""
         if user_id is None:
-            self.log_error(MongoDatabase.update_user_pr.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.retrieve_user_personal_records.__name__ + ": Unexpected empty object: user_id")
+            return {}
+
+        try:
+            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            if user_records is not None:
+                if Keys.PERSONAL_RECORDS in user_records:
+                    return user_records[Keys.PERSONAL_RECORDS]
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return {}
+
+    def update_user_personal_records(self, user_id, records):
+        """Create method for a user's personal record."""
+        if user_id is None:
+            self.log_error(MongoDatabase.update_user_personal_records.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if records is None or len(records) == 0:
+            self.log_error(MongoDatabase.update_user_personal_records.__name__ + ": Unexpected empty object: records")
             return False
 
         try:
-            user_id_obj = ObjectId(user_id)
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
-            if user is not None:
-                pr_list = user[Keys.PR_KEY]
-                if record_name in pr_list:
-                    pr_list[record_name] = record_value
-                    user[Keys.PR_KEY] = pr_list
-                    self.users_collection.save(user)
-                    return True
+            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            if user_records is not None:
+                user_records[Keys.PERSONAL_RECORDS] = records
+                self.records_collection.save(user_records)
+                return True
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_user_personal_record(self, user_id, record_name):
-        """Retrieve method for a user's personal record."""
+    def create_activity_bests(self, user_id, activity_id, bests):
+        """Create method for a user's personal record."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_user_personal_record.__name__ + ": Unexpected empty object: user_id")
-            return None
+            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if bests is None:
+            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: bests")
+            return False
 
         try:
-            user_id_obj = ObjectId(user_id)
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
-            if user is not None:
-                pr_list = user[Keys.PR_KEY]
-                if record_name in pr_list:
-                    return pr_list[record_name]
+            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            if user_records is not None:
+                user_records[activity_id] = bests
+                self.records_collection.save(user_records)
+                return True
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
-        return None
+        return False
+
+    def retrieve_activity_bests():
+        """Create method for a user's personal record."""
+        if user_id is None:
+            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: user_id")
+            return False
+
+        try:
+            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            if user_records is not None:
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
 
     def list_excluded_keys(self):
         """This is the list of stuff we don't need to return when we're building an activity list. Helps with efficiency."""
