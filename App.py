@@ -365,14 +365,24 @@ class App(object):
 
         # Build the summary data view.
         summary = "<ul>\n"
+
+        # Add the activity type.
         activity_type = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
         if activity_type is None:
             activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
+
+        # Add the activity date.
         name = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_NAME_KEY, activity_id)
-        if name is None:
+        if name is None or len(name) == 0:
             name = Keys.UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
+
+        # Add the activity date.
+        if Keys.ACTIVITY_TIME_KEY in activity:
+            summary += "\t<li>Start Time: " + App.timestamp_code_to_str(activity[Keys.ACTIVITY_TIME_KEY]) + "</li>\n"
+
+        # Add tag data.
         tags = self.data_mgr.retrieve_tags(activity_id)
         if tags is not None:
             summary += "\t<li>Tags: "
@@ -478,8 +488,12 @@ class App(object):
         # Add the activity type.
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
 
+        # Add the activity date.
+        if Keys.ACTIVITY_TIME_KEY in activity:
+            summary += "\t<li>Start Time: " + App.timestamp_code_to_str(activity[Keys.ACTIVITY_TIME_KEY]) + "</li>\n"
+
         # Add the activity name.
-        if name is None:
+        if name is None or len(name) == 0:
             name = Keys.UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
 
