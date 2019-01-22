@@ -889,6 +889,13 @@ class Api(object):
         self.data_mgr.analyze(activity, activity_user_id)
         return True, ""
 
+    def handle_generate_workout_plan(self, values):
+        """Called when the user wants to recalculate the summary data."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        self.data_mgr.generate_workout_plan(self.user_id)
+        return True, ""
+
     def handle_api_1_0_request(self, request, values):
         """Called to parse a version 1.0 API message."""
         username = None
@@ -966,4 +973,6 @@ class Api(object):
             return self.handle_update_visibility(values)
         elif request == 'refresh_analysis':
             return self.handle_refresh_analysis(values)
+        elif request == 'generate_workout_plan':
+            return self.handle_generate_workout_plan(values)
         return False, ""

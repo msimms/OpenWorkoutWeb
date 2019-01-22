@@ -18,9 +18,27 @@
 
 <body>
 
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script>
+	function generate_workout_plan()
+	{
+		var the_url = "${root_url}/api/1.0/generate_workout_plan";
+		var dict = [];
+		var result_text = {};
+
+		if (send_post_request(the_url, dict, result_text))
+			window.location.reload();
+		else
+			alert(result_text.value);
+	}
+</script>
+
 <section class="nav">
 ${nav}
 </section>
+
+<h2>Plan</h2>
+<button type="button" onclick="return generate_workout_plan()">Generate Workout Plan</button>
 
 </body>
 

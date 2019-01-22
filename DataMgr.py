@@ -478,6 +478,14 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.delete_gear(user_id, gear_id)
 
+    def generate_workout_plan(self, user_id):
+        """Generates/updates a workout plan for the user with the specified ID."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        pass
+
     def retrieve_activity_types(self):
         """Returns a the list of activity types that the software understands."""
         types = []
