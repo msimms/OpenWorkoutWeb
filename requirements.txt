@@ -5,6 +5,8 @@ bson>=0.4.7
 pymongo>=3.4.0
 bcrypt
 fitparse
+flask
+lxml
 markdown
 unidecode
 scipy

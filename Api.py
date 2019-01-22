@@ -120,7 +120,8 @@ class Api(object):
                 locations.append(location)
 
             # Update the locations.
-            self.data_mgr.create_locations(device_str, activity_id, locations)
+            if locations:
+                self.data_mgr.create_locations(device_str, activity_id, locations)
 
         if Keys.APP_ACCELEROMETER_KEY in values:
 
@@ -131,7 +132,8 @@ class Api(object):
                 accels.append(accel)
 
             # Update the accelerometer readings.
-            self.data_mgr.create_accelerometer_reading(device_str, activity_id, accels)
+            if accels:
+                self.data_mgr.create_accelerometer_reading(device_str, activity_id, accels)
 
         # Udpate the activity type.
         if len(activity_type) > 0:
@@ -139,10 +141,11 @@ class Api(object):
 
         # Update the user device association.
         if len(username) > 0:
-            user_id, _, _ = self.user_mgr.retrieve_user(username)
-            user_devices = self.user_mgr.retrieve_user_devices(user_id)
-            if user_devices is not None and device_str not in user_devices:
-                self.user_mgr.create_user_device(user_id, device_str)
+            temp_user_id, _, _ = self.user_mgr.retrieve_user(username)
+            if temp_user_id == self.user_id:
+                user_devices = self.user_mgr.retrieve_user_devices(self.user_id)
+                if user_devices is not None and device_str not in user_devices:
+                    self.user_mgr.create_user_device_for_user_id(self.user_id, device_str)
 
         # Analysis is now obsolete, so delete it.
         self.data_mgr.delete_activity_summary(activity_id)
@@ -485,18 +488,8 @@ class Api(object):
         if len(uploaded_file_data) == 0:
             raise Exception('Empty file data for ' + uploaded_file_name + '.')
 
-        # Generate a random name for the local file.
-        upload_path = os.path.normpath(self.temp_dir)
-        uploaded_file_name, uploaded_file_ext = os.path.splitext(uploaded_file_name)
-        local_file_name = os.path.join(upload_path, str(uuid.uuid4()))
-        local_file_name = local_file_name + uploaded_file_ext
-
-        # Write the file.
-        with open(local_file_name, 'wb') as local_file:
-            local_file.write(uploaded_file_data)
-
         # Parse the file and store it's contents in the database.
-        self.data_mgr.import_file(username, self.user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
+        self.data_mgr.import_file(username, self.user_id, uploaded_file_data, uploaded_file_name)
 
         return True, ""
 
@@ -632,7 +625,7 @@ class Api(object):
         if 'device_id' not in values:
             raise Exception("Invalid parameter.")
 
-        result = self.user_mgr.create_user_device(self.user_id, values['device_id'])
+        result = self.user_mgr.create_user_device_for_user_id(self.user_id, values['device_id'])
         return result, ""
 
     def handle_create_tag(self, values):
@@ -710,7 +703,7 @@ class Api(object):
         return result, ""
 
     def handle_list_comments(self, values):
-        """Called when an API message create list comments associated with an activity is received."""
+        """Called when an API message to list comments associated with an activity is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -721,6 +714,92 @@ class Api(object):
             raise Exception("Invalid activity ID.")
 
         result = self.data_mgr.retrieve_comments(activity_id)
+        return result, ""
+
+    def handle_create_gear(self, values):
+        """Called when an API message to create gear for a user is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if Keys.GEAR_TYPE_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.GEAR_NAME_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.GEAR_DESCRIPTION_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.ADD_TIME_KEY not in values:
+            raise Exception("Invalid parameter.")
+
+        gear_type = urllib.unquote_plus(values[Keys.GEAR_TYPE_KEY])
+        if not InputChecker.is_valid(gear_type):
+            raise Exception("Invalid parameter.")
+        gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
+        if not InputChecker.is_valid(gear_name):
+            raise Exception("Invalid parameter.")
+        gear_description = urllib.unquote_plus(values[Keys.GEAR_DESCRIPTION_KEY])
+        if not InputChecker.is_valid(gear_description):
+            raise Exception("Invalid parameter.")
+        gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
+        if not InputChecker.is_integer(gear_add_time):
+            raise Exception("Invalid parameter.")
+        gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
+        if not InputChecker.is_integer(gear_retire_time):
+            raise Exception("Invalid parameter.")
+
+        result = self.data_mgr.create_gear(self.user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+        return result, ""
+
+    def handle_list_gear(self, values):
+        """Called when an API message to list gear associated with a user is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+
+        result = self.data_mgr.list_gear(self.user_id)
+        return result, ""
+
+    def handle_update_gear(self, values):
+        """Called when an API message to update gear for a user is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if Keys.GEAR_TYPE_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.GEAR_NAME_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.GEAR_DESCRIPTION_KEY not in values:
+            raise Exception("Invalid parameter.")
+        if Keys.ADD_TIME_KEY not in values:
+            raise Exception("Invalid parameter.")
+
+        gear_type = urllib.unquote_plus(values[Keys.GEAR_TYPE_KEY])
+        if not InputChecker.is_valid(gear_type):
+            raise Exception("Invalid parameter.")
+        gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
+        if not InputChecker.is_valid(gear_name):
+            raise Exception("Invalid parameter.")
+        gear_description = urllib.unquote_plus(values[Keys.GEAR_DESCRIPTION_KEY])
+        if not InputChecker.is_valid(gear_description):
+            raise Exception("Invalid parameter.")
+        gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
+        if not InputChecker.is_integer(gear_add_time):
+            raise Exception("Invalid parameter.")
+        gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
+        if not InputChecker.is_integer(gear_retire_time):
+            raise Exception("Invalid parameter.")
+
+        result = self.data_mgr.update_gear(self.user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+        return result, ""
+
+    def handle_delete_gear(self, values):
+        """Called when an API message to delete gear for a user is received."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        if Keys.GEAR_ID_KEY not in values:
+            raise Exception("Invalid parameter.")
+
+        gear_id = values[Keys.GEAR_ID_KEY]
+        if not InputChecker.is_uuid(gear_id):
+            raise Exception("Invalid gear ID.")
+
+        result = self.data_mgr.delete_gear(self.user_id, gear_id)
         return result, ""
 
     def handle_update_settings(self, values):
@@ -806,7 +885,15 @@ class Api(object):
         if not activity:
             raise Exception("Invalid activity.")
 
-        self.data_mgr.analyze(activity_id, activity)
+        activity_user_id = self.user_mgr.get_activity_user(activity)
+        self.data_mgr.analyze(activity, activity_user_id)
+        return True, ""
+
+    def handle_generate_workout_plan(self, values):
+        """Called when the user wants to recalculate the summary data."""
+        if self.user_id is None:
+            raise Exception("Not logged in.")
+        self.data_mgr.generate_workout_plan(self.user_id)
         return True, ""
 
     def handle_api_1_0_request(self, request, values):
@@ -870,6 +957,14 @@ class Api(object):
             return self.handle_create_comment(values)
         elif request == 'list_comments':
             return self.handle_list_comments(values)
+        elif request == 'create_gear':
+            return self.handle_create_gear(values)
+        elif request == 'list_gear':
+            return self.handle_list_gear(values)
+        elif request == 'update_gear':
+            return self.handle_update_gear(values)
+        elif request == 'delete_gear':
+            return self.handle_delete_gear(values)
         elif request == 'update_settings':
             return self.handle_update_settings(values)
         elif request == 'update_profile':
@@ -878,4 +973,6 @@ class Api(object):
             return self.handle_update_visibility(values)
         elif request == 'refresh_analysis':
             return self.handle_refresh_analysis(values)
+        elif request == 'generate_workout_plan':
+            return self.handle_generate_workout_plan(values)
         return False, ""

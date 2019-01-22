@@ -28,6 +28,10 @@ GENDER_KEY = "gender"
 GENDER_MALE_KEY = "male"
 GENDER_FEMALE_KEY = "female"
 
+# Personal records
+RECORDS_USER_ID = "user_id"
+PERSONAL_RECORDS = "records"
+
 # Keys associated with uploading data
 UPLOADED_FILE_NAME_KEY = "uploaded_file_name"
 UPLOADED_FILE_DATA_KEY = "uploaded_file_data"
@@ -111,7 +115,19 @@ AVG_POWER = "Average Power"
 AVG_HEART_RATE = "Average Heart Rate"
 AVG_CADENCE = "Average Cadence"
 NORMALIZED_POWER = "Normalized Power"
-CLUSTER = 'Cluster'
+CLUSTER = "Cluster"
+
+# Keys used to manage gear.
+GEAR_KEY = "gear"
+GEAR_ID_KEY = "gear_id"
+GEAR_TYPE_KEY = "type"
+GEAR_NAME_KEY = "name"
+GEAR_DESCRIPTION_KEY = "description"
+GEAR_ADD_TIME_KEY = "add_time"
+GEAR_RETIRE_TIME_KEY = "retire_time"
+GEAR_INITIAL_DISTANCE_KEY = "initial_distance"
+GEAR_TYPE_BIKE = "bike"
+GEAR_TYPE_SHOES = "shoes"
 
 # Activity types
 TYPE_UNSPECIFIED_ACTIVITY = "Unknown"

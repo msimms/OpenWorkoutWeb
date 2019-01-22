@@ -17,8 +17,8 @@ import statistics
 class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on power data."""
 
-    def __init__(self):
-        SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_POWER_KEY, Units.get_power_units_str())
+    def __init__(self, activity_type):
+        SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_POWER_KEY, Units.get_power_units_str(), activity_type)
         self.np_buf = []
         self.current_30_sec_buf = []
         self.current_30_sec_buf_start_time = 0
@@ -70,31 +70,33 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     def analyze(self):
         """Called when all sensor readings have been processed."""
         results = SensorAnalyzer.SensorAnalyzer.analyze(self)
-        results[Keys.MAX_POWER] = self.max
-        results[Keys.AVG_POWER] = self.avg
+        if len(self.readings) > 0:
+            
+            results[Keys.MAX_POWER] = self.max
+            results[Keys.AVG_POWER] = self.avg
 
-        #
-        # Compute normalized power.
-        #
+            #
+            # Compute normalized power.
+            #
 
-        if len(self.np_buf) > 0:
+            if len(self.np_buf) > 0:
 
-            # Throw away the first 30 second average.
-            self.np_buf.pop(0)
+                # Throw away the first 30 second average.
+                self.np_buf.pop(0)
 
-            # Raise all items to the fourth power.
-            for idx, item in enumerate(self.np_buf):
-                item = pow(item, 4)
-                self.np_buf[idx] = item
+                # Raise all items to the fourth power.
+                for idx, item in enumerate(self.np_buf):
+                    item = pow(item, 4)
+                    self.np_buf[idx] = item
 
-            # Average the values that were raised to the fourth.
-            np = statistics.mean(self.np_buf)
+                # Average the values that were raised to the fourth.
+                np = statistics.mean(self.np_buf)
 
-            # Take the fourth root.
-            results[Keys.NORMALIZED_POWER] = pow(np, 0.25)
+                # Take the fourth root.
+                results[Keys.NORMALIZED_POWER] = pow(np, 0.25)
 
-        #
-        # Compute the intensity factory (IF = NP / FTP).
-        #
+            #
+            # Compute the intensity factory (IF = NP / FTP).
+            #
 
         return results

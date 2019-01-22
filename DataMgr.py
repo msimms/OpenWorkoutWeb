@@ -2,11 +2,10 @@
 """Data store abstraction"""
 
 import uuid
-import AnalysisScheduler
 import Importer
-import ImportScheduler
 import Keys
 import StraenDb
+import Summarizer
 
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
@@ -17,25 +16,16 @@ def get_activities_sort_key(item):
 class DataMgr(Importer.ActivityWriter):
     """Data store abstraction"""
 
-    def __init__(self, root_dir, analyze_activities):
+    def __init__(self, root_dir, analysis_scheduler, import_scheduler):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
-        self.analysis_scheduler = AnalysisScheduler.AnalysisScheduler(self)
-        self.analysis_scheduler.enabled = analyze_activities
-        self.analysis_scheduler.start()
-        self.import_scheduler = ImportScheduler.ImportScheduler(self, 2)
-        self.import_scheduler.start()
+        self.analysis_scheduler = analysis_scheduler
+        self.import_scheduler = import_scheduler
         super(Importer.ActivityWriter, self).__init__()
 
     def terminate(self):
         """Destructor"""
-        print("Terminating data analysis...")
-        self.analysis_scheduler.terminate()
-        self.analysis_scheduler.join()
         self.analysis_scheduler = None
-        print("Terminating file import...")
-        self.import_scheduler.terminate()
-        self.import_scheduler.join()
         self.import_scheduler = None
         self.database = None
 
@@ -47,21 +37,26 @@ class DataMgr(Importer.ActivityWriter):
         """Returns the number of activities in the database."""
         return self.database.total_activities_count()
 
-    def total_queued_for_analysis(self):
-        """Returns the number of activities queued for analysis."""
-        return self.analysis_scheduler.queue_depth()
-
-    def total_queued_for_import(self):
-        """Returns the number of activities queued for analysis."""
-        return self.import_scheduler.queue_depth()
-
     def create_activity_id(self):
         """Generates a new activity ID."""
         return str(uuid.uuid4())
 
-    def analyze(self, activity_id, activity):
+    def analyze(self, activity, activity_user_id):
         """Schedules the specified activity for analysis."""
-        self.analysis_scheduler.add_to_queue(activity_id, activity)
+        self.analysis_scheduler.add_to_queue(activity, activity_user_id)
+
+    def is_duplicate_activity(self, user_id, start_time):
+        """Inherited from ActivityWriter. Returns TRUE if the activity appears to be a duplicate of another activity. Returns FALSE otherwise."""
+        if self.database is None:
+            raise Exception("No database.")
+
+        activities = self.database.retrieve_user_activity_list(user_id, None, None)
+        for activity in activities:
+            if Keys.ACTIVITY_TIME_KEY in activity:
+                activity_start_time = activity[Keys.ACTIVITY_TIME_KEY]
+                if start_time > activity_start_time: # Need to incorporate check agains the activity end time, but in an efficient manner.
+                    pass
+        return False
 
     def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
@@ -135,9 +130,9 @@ class DataMgr(Importer.ActivityWriter):
         """Inherited from ActivityWriter. Called for post-processing."""
         pass
 
-    def import_file(self, username, user_id, local_file_name, uploaded_file_name, file_extension):
+    def import_file(self, username, user_id, local_file_name, uploaded_file_name):
         """Imports the contents of a local file into the database."""
-        self.import_scheduler.add_to_queue(user_id, local_file_name, uploaded_file_name, file_extension)
+        self.import_scheduler.add_to_queue(username, user_id, local_file_name, uploaded_file_name)
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
@@ -407,6 +402,89 @@ class DataMgr(Importer.ActivityWriter):
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity_comments(activity_id)
+
+    def insert_bests_from_activity(self, user_id, activity_id, activity_type, activity_time, bests):
+        """Update method for a user's personal record."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        summarizer = Summarizer.Summarizer()
+        all_personal_records = self.database.retrieve_user_personal_records(user_id)
+        for record_activity_type in all_personal_records.keys():
+            summarizer.set_record_dictionary(record_activity_type, all_personal_records[record_activity_type])
+
+        do_update = len(all_personal_records) > 0
+        summarizer.add_activity_data(activity_id, activity_type, activity_time, bests)
+        all_personal_records[activity_type] = summarizer.get_record_dictionary(activity_type)
+        if do_update:
+            self.database.update_user_personal_records(user_id, all_personal_records)
+        else:
+            self.database.create_user_personal_records(user_id, all_personal_records)
+        return self.database.create_activity_bests(user_id, activity_id, bests)
+
+    def retrieve_user_personal_records(self, user_id):
+        """Retrieve method for a user's personal record."""
+        if self.database is None:
+            raise Exception("No database.")
+        if self.user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_user_personal_records(user_id)
+
+    def create_gear(self, user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
+        """Create method for gear."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if gear_type is None:
+            raise Exception("Bad parameter.")
+        if gear_name is None:
+            raise Exception("Bad parameter.")
+        if gear_description is None:
+            raise Exception("Bad parameter.")
+        return self.database.create_gear(user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+
+    def retrieve_gear_for_user(self, user_id):
+        """Retrieve method for the gear with the specified ID."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_gear_for_user(user_id)
+
+    def update_gear(self, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
+        """Retrieve method for the gear with the specified ID."""
+        if self.database is None:
+            raise Exception("No database.")
+        if gear_id is None:
+            raise Exception("Bad parameter.")
+        if gear_type is None:
+            raise Exception("Bad parameter.")
+        if gear_name is None:
+            raise Exception("Bad parameter.")
+        if gear_description is None:
+            raise Exception("Bad parameter.")
+        return self.database.update_gear(gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+
+    def delete_gear(self, user_id, gear_id):
+        """Delete method for the gear with the specified ID."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if gear_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.delete_gear(user_id, gear_id)
+
+    def generate_workout_plan(self, user_id):
+        """Generates/updates a workout plan for the user with the specified ID."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        pass
 
     def retrieve_activity_types(self):
         """Returns a the list of activity types that the software understands."""

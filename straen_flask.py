@@ -13,6 +13,8 @@ import flask
 import Api
 import App
 import DataMgr
+import AnalysisScheduler
+import ImportScheduler
 import SessionMgr
 import UserMgr
 
@@ -22,6 +24,7 @@ JS_DIR = 'js'
 IMAGES_DIR = 'images'
 MEDIA_DIR = 'media'
 ERROR_LOG = 'error.log'
+
 
 g_flask_app = flask.Flask(__name__)
 g_flask_app.secret_key = 'UB2s60qJrithXHt2w71f'
@@ -419,7 +422,6 @@ def main():
     parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS", required=False)
     parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS", required=False)
     parser.add_argument("--googlemapskey", default="", help="API key for Google Maps", required=False)
-    parser.add_argument("--analyze", action="store_true", default=True, help="Runs the activity analyzer", required=False)
 
     try:
         args = parser.parse_args()
@@ -450,7 +452,7 @@ def main():
 
     session_mgr = SessionMgr.FlaskSessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, g_root_dir)
-    data_mgr = DataMgr.DataMgr(g_root_dir, args.analyze)
+    data_mgr = DataMgr.DataMgr(g_root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler())
     g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, args.googlemapskey)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')

@@ -16,8 +16,8 @@ import peaks
 class AccelerometerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on bicycle cadence."""
 
-    def __init__(self):
-        SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_ACCELEROMETER_KEY, "")
+    def __init__(self, activity_type):
+        SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_ACCELEROMETER_KEY, "", activity_type)
         self.x = []
         self.y = []
         self.z = []

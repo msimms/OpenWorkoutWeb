@@ -16,6 +16,10 @@ import Keys
 class ActivityWriter(object):
     """Base class for any class that handles data read from the Importer."""
 
+    def is_duplicate_activity(self, user_id, start_time):
+        """Inherited from ActivityWriter. Returns TRUE if the activity appears to be a duplicate of another activity. Returns FALSE otherwise."""
+        return False
+
     def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
         """Pure virtual method for starting a location stream - creates the activity ID for the specified user."""
         pass
@@ -72,6 +76,10 @@ class Importer(object):
             # Find the start timestamp.
             start_time_tuple = gpx.time.timetuple()
             start_time_unix = calendar.timegm(start_time_tuple)
+
+            # Make sure this is not a duplicate activity.
+            if self.activity_writer.is_duplicate_activity(user_id, start_time_unix):
+                raise Exception("Duplicate activity.")
 
             # Indicate the start of the activity.
             device_str, activity_id = self.activity_writer.create_activity(username, user_id, gpx.name, gpx.description, 'Unknown', start_time_unix)
@@ -147,12 +155,12 @@ class Importer(object):
         # Parse the file.
         tree = objectify.parse(file_name)
         if tree is None:
-            return False, "", ""
+            raise Exception("Invalid TCX file (no tree node).")
 
         # Get the first node in the XML tree.
         root = tree.getroot()
         if root is None:
-            return False, "", ""
+            raise Exception("Invalid TCX file (no root node).")
 
         # The interesting stuff starts with an activity.
         activity = root.Activities.Activity
@@ -164,6 +172,10 @@ class Importer(object):
             start_time_obj = datetime.datetime.strptime(str(activity.Id), "%Y-%m-%dT%H:%M:%S.%fZ")
             start_time_tuple = start_time_obj.timetuple()
             start_time_unix = calendar.timegm(start_time_tuple)
+
+        # Make sure this is not a duplicate activity.
+        if self.activity_writer.is_duplicate_activity(user_id, start_time_unix):
+            raise Exception("Duplicate activity.")
 
         # Since we don't have anything else, use the file name as the name of the activity.
         activity_name = os.path.splitext(os.path.basename(original_file_name))[0]

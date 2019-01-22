@@ -8,23 +8,158 @@
 <link rel="stylesheet" href="${root_url}/css/normalize.css">
 <link rel="stylesheet" href="${root_url}/css/site.css">
 
-<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 <meta content="utf-8" http-equiv="encoding">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
-
 </head>
 
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+
 <body>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+
+<script type="text/javascript" src="${root_url}/jquery-timepicker/jquery.timepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="${root_url}/jquery-timepicker/jquery.timepicker.css" />
+
+<script>
+
+	function create_gear(target, gearType)
+	{
+		var the_url = "${root_url}/api/1.0/create_gear";
+		var dict = [];
+		var result_text = {};
+		var innerDiv = document.getElementById("new_gear_div");
+		var name = document.getElementById("name").value;
+		var description = document.getElementById("description").value;
+
+		dict.push({["type"] : gearType});
+		dict.push({["name"] : name});
+		dict.push({["description"] : description});
+
+		if (send_post_request(the_url, dict, result_text))
+		{
+			window.location.replace("${root_url}/gear");
+		}
+		else
+		{
+			alert(result_text.value);
+		}
+	}
+
+	function add_text_entry_node(div, name)
+	{
+		var label = document.createTextNode(name + ": ");
+		div.appendChild(label);
+
+		var value = document.createElement("input");
+		value.name = name;
+		value.setAttribute("type", "number");
+		value.setAttribute("value", 0.0);
+		div.appendChild(value);
+
+		var br = document.createElement("br");
+		div.appendChild(br);
+	}
+
+    function get_new_gear_info(gearType)
+    {
+		var outerDiv = document.getElementById("block");
+		var innerDiv = document.createElement('div');
+		innerDiv.id = "new_gear_div";
+
+		// Remove existing items, if any.
+		while (outerDiv.firstChild)
+		{
+			outerDiv.removeChild(outerDiv.firstChild);
+		}
+
+		// Determine which data fields are needed.
+		var fields = ["Name", "Description"];
+
+		// Add a label for the date picker.
+		var dateLabel = document.createTextNode("Date Added: ");
+		innerDiv.appendChild(dateLabel);
+
+		// Add the date picker.
+		var today = new Date();
+		var startDate = document.createElement('input');
+		startDate.type = "input";
+		startDate.id = "startDate";
+		startDate.className = "pickDate";
+		$(startDate).datepicker({showButtonPanel: true, defaultDate: today});
+		$(startDate).datepicker('setDate', today);
+		startDate.text = "foo";
+		innerDiv.appendChild(startDate);
+
+		// Add a label for the start time picker.
+		var dateLabel = document.createTextNode("Date Retired: ");
+		innerDiv.appendChild(dateLabel);
+
+		// Add the start time picker.
+		var startTime = document.createElement('input');
+		startTime.type = "input";
+		startTime.id = "startTime";
+		startTime.className = "pickTime"; 
+		$(startTime).timepicker({ 'timeFormat': 'h:i A' });
+		innerDiv.appendChild(startTime);
+
+		// Add a line break.
+		var br = document.createElement("br");
+		innerDiv.appendChild(br);
+
+		// Add the data fields.
+		for (i = 0, len = fields.length; i < len; i++)
+		{
+			add_text_entry_node(innerDiv, fields[i]);
+		}
+
+		// Add to the div.
+		outerDiv.appendChild(innerDiv);
+
+		// Create a save button.
+		var saveBtn = document.createElement('button');
+		var saveBtnText = document.createTextNode('Save');
+		saveBtn.appendChild(saveBtnText);
+		saveBtn.title = "Save";
+		saveBtn.addEventListener('click', function() { create_gear(this, gearType); });
+
+		// Add the save button to the screen.
+		outerDiv.appendChild(saveBtn);
+
+		return false;
+	}
+
+    function get_new_bike_info()
+    {
+        get_new_gear_info("bike");
+    }
+
+    function get_new_shoes_info()
+    {
+        get_new_gear_info("shoes");
+    }
+
+</script>
 
 <section class="nav">
 ${nav}
 </section>
 
+<div class="block" id="block">
+</div>
+
 <h2>Bikes</h2>
+${bikes}
+<button type="button" onclick="return get_new_bike_info()">Add New Bike</button>
 
 <h2>Shoes</h2>
+${shoes}
+<button type="button" onclick="return get_new_shoes_info()">Add New Shoes</button>
 
 </body>
 

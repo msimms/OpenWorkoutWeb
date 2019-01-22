@@ -10,13 +10,12 @@ import markdown
 import os
 import sys
 import threading
+import timeit
 import traceback
-import uuid
 
 import Keys
 import LocationAnalyzer
 import Api
-import DataMgr
 import Units
 import UserMgr
 
@@ -33,23 +32,35 @@ HTML_DIR = 'html'
 
 
 g_stats_lock = threading.Lock()
-g_stats = {}
+g_stats_count = {}
+g_stats_time = {}
 
 
 def statistics(function):
+    """Function decorator for usage and timing statistics."""
 
     def wrapper(*args, **kwargs):
         global g_stats_lock
-        global g_stats
+        global g_stats_count
+        global g_stats_time
+
+        start = timeit.default_timer()
+        result = function(*args, **kwargs)
+        end = timeit.default_timer()
+        execution_time = end - start
 
         g_stats_lock.acquire()
         try:
-            g_stats[function.__name__] = g_stats[function.__name__] + 1
+            g_stats_count[function.__name__] = g_stats_count[function.__name__] + 1
+            g_stats_time[function.__name__] = g_stats_time[function.__name__] + execution_time
         except:
-            g_stats[function.__name__] = 1
+            g_stats_count[function.__name__] = 1
+            g_stats_time[function.__name__] = execution_time
         finally:
             g_stats_lock.release()
-        return function(*args, **kwargs)
+
+        return result
+
     return wrapper
 
 
@@ -100,6 +111,9 @@ class App(object):
 
     def stats(self):
         """Renders the list of a user's devices."""
+        global g_stats_lock
+        global g_stats_count
+        global g_stats_time
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -113,30 +127,36 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Build a list of table rows from the device information.
+        page_stats_str = "<td><b>Page</b></td><td><b>Num Accesses</b></td><td><b>Avg Time (secs)</b></td><tr>\n"
         g_stats_lock.acquire()
         try:
-            page_stats_str = "<td><b>Page</b></td><td><b>Num Accesses</b></td><tr>\n"
-            for key, value in g_stats.iteritems():
+            for key, count_value in g_stats_count.iteritems():
                 page_stats_str += "\t\t<tr><td>"
                 page_stats_str += str(key)
                 page_stats_str += "</td><td>"
-                page_stats_str += str(value)
+                page_stats_str += str(count_value)
+                page_stats_str += "</td><td>"
+                if key in g_stats_time and count_value > 0:
+                    total_time = g_stats_time[key]
+                    avg_time = total_time / count_value
+                    page_stats_str += str(avg_time)
                 page_stats_str += "</td></tr>\n"
         finally:
             g_stats_lock.release()
 
         # The number of users and activities.
-        total_users_str = str(self.data_mgr.total_users_count())
-        total_activities_str = str(self.data_mgr.total_activities_count())
-
-        # The number of things queued for processing.
-        total_queued_for_analysis_str = str(self.data_mgr.total_queued_for_analysis())
-        total_queued_for_import_str = str(self.data_mgr.total_queued_for_import())
+        total_users_str = ""
+        total_activities_str = ""
+        try:
+            total_users_str = str(self.data_mgr.total_users_count())
+            total_activities_str = str(self.data_mgr.total_activities_count())
+        except:
+            self.log_error("Exception while getting counts.")
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'stats.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, page_stats=page_stats_str, total_activities=total_activities_str, total_users=total_users_str, queued_for_analysis=total_queued_for_analysis_str, queued_for_import=total_queued_for_import_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, page_stats=page_stats_str, total_activities=total_activities_str, total_users=total_users_str)
 
     def update_track(self, activity_id=None, num=None):
         if activity_id is None:
@@ -296,7 +316,7 @@ class App(object):
             exports_str += "<td><button type=\"button\" onclick=\"return export_activity()\">Export</button></td><tr>\n"
         return exports_str
 
-    def render_page_for_lifting_activity(self, email, user_realname, activity_id, activity, logged_in_username, belongs_to_current_user, is_live):
+    def render_page_for_lifting_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_username, belongs_to_current_user, is_live):
         """Helper function for rendering the map corresonding to a specific device and activity."""
 
         # Is the user logged in?
@@ -320,7 +340,7 @@ class App(object):
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None or len(summary_data) == 0:
-            self.data_mgr.analyze(activity_id, activity)
+            self.data_mgr.analyze(activity, activity_user_id)
 
         # Find the sets data.
         sets = None
@@ -345,14 +365,24 @@ class App(object):
 
         # Build the summary data view.
         summary = "<ul>\n"
+
+        # Add the activity type.
         activity_type = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
         if activity_type is None:
             activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
+
+        # Add the activity date.
         name = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_NAME_KEY, activity_id)
-        if name is None:
+        if name is None or len(name) == 0:
             name = Keys.UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
+
+        # Add the activity date.
+        if Keys.ACTIVITY_TIME_KEY in activity:
+            summary += "\t<li>Start Time: " + App.timestamp_code_to_str(activity[Keys.ACTIVITY_TIME_KEY]) + "</li>\n"
+
+        # Add tag data.
         tags = self.data_mgr.retrieve_tags(activity_id)
         if tags is not None:
             summary += "\t<li>Tags: "
@@ -405,7 +435,7 @@ class App(object):
                     max_value = value
         return data_str, max_value
 
-    def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, logged_in_userid, belongs_to_current_user, is_live):
+    def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
 
         # Is the user logged in?
@@ -450,7 +480,7 @@ class App(object):
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None or len(summary_data) == 0:
-            self.data_mgr.analyze(activity_id, activity)
+            self.data_mgr.analyze(activity, activity_user_id)
 
         # Build the summary data view.
         summary = "<ul>\n"
@@ -458,8 +488,12 @@ class App(object):
         # Add the activity type.
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
 
+        # Add the activity date.
+        if Keys.ACTIVITY_TIME_KEY in activity:
+            summary += "\t<li>Start Time: " + App.timestamp_code_to_str(activity[Keys.ACTIVITY_TIME_KEY]) + "</li>\n"
+
         # Add the activity name.
-        if name is None:
+        if name is None or len(name) == 0:
             name = Keys.UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
 
@@ -544,14 +578,14 @@ class App(object):
         my_template = Template(filename=self.map_single_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, comments=comments_str, exports=exports_str)
 
-    def render_page_for_activity(self, activity, email, user_realname, activity_id, logged_in_userid, belongs_to_current_user, is_live):
+    def render_page_for_activity(self, activity, email, user_realname, activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
 
         try:
             if Keys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[Keys.ACTIVITY_LOCATIONS_KEY]) > 0:
-                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity, logged_in_userid, belongs_to_current_user, is_live)
+                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity, activity_user_id, logged_in_userid, belongs_to_current_user, is_live)
             elif Keys.APP_ACCELEROMETER_KEY in activity or Keys.APP_SETS_KEY in activity:
-                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity, logged_in_userid, belongs_to_current_user, is_live)
+                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity, activity_user_id, logged_in_userid, belongs_to_current_user, is_live)
             else:
                 my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
                 return my_template.render(nav=self.create_navbar(logged_in_userid is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
@@ -643,8 +677,8 @@ class App(object):
 
         # Determine who owns the device.
         device_user = self.user_mgr.retrieve_user_from_device(device_str)
-        device_user_id = device_user[Keys.DATABASE_ID_KEY]
-        belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
+        activity_user_id = device_user[Keys.DATABASE_ID_KEY]
+        belongs_to_current_user = str(activity_user_id) == str(logged_in_userid)
 
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
@@ -654,17 +688,7 @@ class App(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, logged_in_userid, belongs_to_current_user, True)
-
-    def get_activity_user(self, activity):
-        """Returns the user record that corresponds with the given activity."""
-        if Keys.ACTIVITY_USER_ID_KEY in activity:
-            username, realname = self.user_mgr.retrieve_user_from_id(activity[Keys.ACTIVITY_USER_ID_KEY])
-            return activity[Keys.ACTIVITY_USER_ID_KEY], username, realname
-        if Keys.ACTIVITY_DEVICE_STR_KEY in activity and len(activity[Keys.ACTIVITY_DEVICE_STR_KEY]) > 0:
-            user = self.user_mgr.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
-            return user[Keys.DATABASE_ID_KEY], user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
-        return None, None, None
+        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, True)
 
     @statistics
     def activity(self, activity_id):
@@ -682,19 +706,19 @@ class App(object):
             return self.error("The requested activity does not exist.")
 
         # Determine who owns the device, and hence the activity.
-        device_user_id, username, realname = self.get_activity_user(activity)
-        belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
-        if username is None:
-            username = ""
-        if realname is None:
-            realname = ""
+        activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
+        belongs_to_current_user = str(activity_user_id) == str(logged_in_userid)
+        if activity_username is None:
+            activity_username = ""
+        if activity_user_realname is None:
+            activity_user_realname = ""
 
         # Determine if the current user can view the activity.
         if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, username, realname, activity_id, logged_in_userid, belongs_to_current_user, False)
+        return self.render_page_for_activity(activity, activity_username, activity_user_realname, activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, False)
 
     @statistics
     def device(self, device_str):
@@ -715,8 +739,8 @@ class App(object):
 
         # Determine who owns the device.
         device_user = self.user_mgr.retrieve_user_from_device(device_str)
-        device_user_id = device_user[Keys.DATABASE_ID_KEY]
-        belongs_to_current_user = str(device_user_id) == str(logged_in_userid)
+        activity_user_id = device_user[Keys.DATABASE_ID_KEY]
+        belongs_to_current_user = str(activity_user_id) == str(logged_in_userid)
 
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
@@ -728,7 +752,7 @@ class App(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, logged_in_userid, belongs_to_current_user, False)
+        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, False)
 
     @statistics
     def my_activities(self):
@@ -805,10 +829,29 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        bikes = "<table>"
+        shoes = "<table>"
+        gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
+        for gear in gear_list:
+            if Keys.GEAR_TYPE_KEY in gear:
+                row_str = ""
+                if Keys.GEAR_NAME_KEY in gear:
+                    row_str += "<td>"
+                    row_str += gear[Keys.GEAR_NAME_KEY]
+                    row_str += "</td>"
+                row_str += "<tr>"
+                gear_type = gear[Keys.GEAR_TYPE_KEY]
+                if gear_type == GEAR_TYPE_BIKE:
+                    bikes += row_str
+                elif gear_type == GEAR_TYPE_SHOES:
+                    shoes += row_str
+        bikes += "</table>"
+        shoes == "</table>"
+
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'gear.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bikes=bikes, shoes=shoes)
 
     @statistics
     def following(self):
@@ -920,22 +963,9 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # Generate a random name for the local file.
-        upload_path = os.path.normpath(self.tempfile_dir)
-        uploaded_file_name, uploaded_file_ext = os.path.splitext(ufile.filename)
-        local_file_name = os.path.join(upload_path, str(uuid.uuid4()))
-        local_file_name = local_file_name + uploaded_file_ext
-
-        # Write the file.
-        with open(local_file_name, 'wb') as local_file:
-            while True:
-                data = local_file.file.read(8192)
-                if not data:
-                    break
-                local_file.write(data)
-
         # Parse the file and store it's contents in the database.
-        self.data_mgr.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
+        file_data = ufile.file.read()
+        self.data_mgr.import_file(username, user_id, file_data, ufile.filename)
 
         raise RedirectException(DEFAULT_LOGGED_IN_URL)
 

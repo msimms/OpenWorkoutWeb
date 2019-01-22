@@ -151,11 +151,21 @@ class UserMgr(object):
         """Associates a device with a user."""
         if self.database is None:
             raise Exception("No database.")
-        if len(email) == 0:
-            return False, "Email address not provided."
-        if len(device_str) == 0:
-            return False, "Device string not provided."
+        if email is None or len(email) == 0:
+            raise Exception("Email address not provided.")
+        if device_str is None or len(device_str) == 0:
+            raise Exception("Device string not provided.")
         user_id, _, _ = self.database.retrieve_user(email)
+        return self.database.create_user_device(user_id, device_str)
+
+    def create_user_device_for_user_id(self, user_id, device_str):
+        """Associates a device with a user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("User ID not provided.")
+        if device_str is None or len(device_str) == 0:
+            raise Exception("Device string not provided.")
         return self.database.create_user_device(user_id, device_str)
 
     def retrieve_user_devices(self, user_id):
@@ -172,8 +182,8 @@ class UserMgr(object):
         """Finds the user associated with the device."""
         if self.database is None:
             raise Exception("No database.")
-        if len(device_str) == 0:
-            return False, "Device string not provided."
+        if device_str is None or len(device_str) == 0:
+            raise Exception("Device string not provided.")
         return self.database.retrieve_user_from_device(device_str)
 
     def list_users_followed(self, user_id):
@@ -233,3 +243,14 @@ class UserMgr(object):
             else:
                 result = ""
         return result.lower()
+
+    def get_activity_user(self, activity):
+        """Returns the user record that corresponds with the given activity."""
+        if Keys.ACTIVITY_USER_ID_KEY in activity:
+            username, realname = self.retrieve_user_from_id(activity[Keys.ACTIVITY_USER_ID_KEY])
+            return activity[Keys.ACTIVITY_USER_ID_KEY], username, realname
+        if Keys.ACTIVITY_DEVICE_STR_KEY in activity and len(activity[Keys.ACTIVITY_DEVICE_STR_KEY]) > 0:
+            user = self.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
+            if user is not None:
+                return user[Keys.DATABASE_ID_KEY], user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
+        return None, None, None

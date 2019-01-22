@@ -13,6 +13,8 @@ import sys
 import Api
 import App
 import DataMgr
+import AnalysisScheduler
+import ImportScheduler
 import SessionMgr
 import UserMgr
 
@@ -24,6 +26,7 @@ from cherrypy.process.plugins import Daemonizer
 ACCESS_LOG = 'access.log'
 ERROR_LOG = 'error.log'
 LOGIN_URL = '/login'
+
 
 g_app = None
 
@@ -518,7 +521,6 @@ def main():
     parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS", required=False)
     parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS", required=False)
     parser.add_argument("--googlemapskey", default="", help="API key for Google Maps", required=False)
-    parser.add_argument("--analyze", action="store_true", default=True, help="Runs the activity analyzer", required=False)
 
     try:
         args = parser.parse_args()
@@ -559,7 +561,7 @@ def main():
 
     session_mgr = SessionMgr.CherryPySessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, root_dir)
-    data_mgr = DataMgr.DataMgr(root_dir, args.analyze)
+    data_mgr = DataMgr.DataMgr(root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler())
     backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey)
     g_app = StraenWeb(backend)
 

@@ -27,6 +27,15 @@ class Summarizer(object):
             return self.swimming_bests
         return {}
 
+    def set_record_dictionary(self, activity_type, bests):
+        """Sets the record dictionary that corresponds to the given activity type."""
+        if activity_type == Keys.TYPE_RUNNING_KEY:
+            self.running_bests = bests
+        elif activity_type == Keys.TYPE_CYCLING_KEY:
+            self.cycling_bests = bests
+        elif activity_type == Keys.TYPE_SWIMMING_KEY:
+            self.swimming_bests = bests
+
     def get_annual_record_dictionary(self, activity_type, year):
         """Returns the record dictionary that corresponds to the given activity type."""
         if activity_type == Keys.TYPE_RUNNING_KEY:
@@ -101,7 +110,7 @@ class Summarizer(object):
 
         # If the old record is not set or this is better, then update.
         if old_value is None or Summarizer.is_better(summary_data_key, summary_data_value, old_value):
-            record_set[summary_data_key] = { summary_data_value, activity_id }
+            record_set[summary_data_key] = [ summary_data_value, activity_id ]
 
         # In what year was this activity?
         ts = time.gmtime(start_time)
@@ -114,7 +123,7 @@ class Summarizer(object):
 
         # If the old record is not set or this is better, then update.
         if old_value is None or Summarizer.is_better(summary_data_key, summary_data_value, old_value):
-            record_set[summary_data_key] = { summary_data_value, activity_id }
+            record_set[summary_data_key] = [ summary_data_value, activity_id ]
 
     def add_activity_data(self, activity_id, activity_type, start_time, summary_data):
         """Submits an activity's metadata for summary analysis."""
