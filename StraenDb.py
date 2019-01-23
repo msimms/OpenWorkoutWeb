@@ -496,21 +496,29 @@ class MongoDatabase(Database.Database):
         exclude_keys[Keys.ACTIVITY_LOCATIONS_KEY] = False
         return exclude_keys
 
-    def retrieve_user_activity_list(self, user_id, start, num_results):
+    def retrieve_user_activity_list(self, user_id, start, num_results, exclude_keys):
         """Retrieves the list of activities associated with the specified user."""
         if num_results is not None and num_results <= 0:
             return None
 
         try:
-            # Things we don't need.
-            exclude_keys = self.list_excluded_keys()
-
             if start is None and num_results is None:
                 return list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
             elif num_results is None:
                 return list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start))
             else:
                 return list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start).limit(num_results))
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def retrieve_each_user_activity(self, context, user_id, callback_func):
+        """Retrieves each user activity and calls the callback function for each one."""
+        try:
+            activities = self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id})
+            for activity in activities:
+                callback_func(context, activity, user_id)
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])

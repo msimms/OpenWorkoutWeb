@@ -50,7 +50,8 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
 
-        activities = self.database.retrieve_user_activity_list(user_id, None, None)
+        exclude_keys = self.database.list_excluded_keys() # Things we don't need.
+        activities = self.database.retrieve_user_activity_list(user_id, None, None, exclude_keys)
         for activity in activities:
             if Keys.ACTIVITY_TIME_KEY in activity:
                 activity_start_time = activity[Keys.ACTIVITY_TIME_KEY]
@@ -188,7 +189,8 @@ class DataMgr(Importer.ActivityWriter):
                 activities.extend(device_activities)
 
         # List activities with no device that are associated with the user.
-        user_activities = self.database.retrieve_user_activity_list(user_id, start, None)
+        exclude_keys = self.database.list_excluded_keys() # Things we don't need.
+        user_activities = self.database.retrieve_user_activity_list(user_id, start, None, exclude_keys)
         for user_activity in user_activities:
             user_activity[Keys.REALNAME_KEY] = user_realname
         activities.extend(user_activities)
@@ -478,13 +480,26 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.delete_gear(user_id, gear_id)
 
+    @staticmethod
+    def update_summary_data_cb(context, activity, user_id):
+        """Callback function for update_summary_data."""
+        if Keys.ACTIVITY_SUMMARY_KEY not in activity:
+            context.analyze(activity, user_id)
+
+    def update_summary_data(self, user_id):
+        """Makes sure that summary data exists for all of the user's activities."""
+        if self.database is None:
+            raise Exception("No database.")
+
+        self.database.retrieve_each_user_activity(self, user_id, DataMgr.update_summary_data_cb)
+
     def generate_workout_plan(self, user_id):
         """Generates/updates a workout plan for the user with the specified ID."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        pass
+        self.update_summary_data(user_id)
 
     def retrieve_activity_types(self):
         """Returns a the list of activity types that the software understands."""
