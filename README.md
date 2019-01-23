@@ -73,6 +73,9 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Results from distributed tasks are now written direclty to the database for efficiency purposes.
 * File imports are now also distributed over rabbitmq and celery with the results being written directly to the database.
 
+### 0.9
+* Beginnings of automated workout plan generation. Still plenty of work to do.
+
 ## Tech
 This software uses two other source projects to work properly:
 
