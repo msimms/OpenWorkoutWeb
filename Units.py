@@ -130,6 +130,20 @@ def convert_to_preferred_speed_units(user_mgr, user_id, value, in_distance_units
         out_distance_units = UNITS_DISTANCE_MILES
     return convert_speed(value, in_distance_units, in_time_units, out_distance_units, out_time_units), out_distance_units, out_time_units
 
+def convert_to_preferred_units(user_mgr, user_id, in_value, in_distance_units, in_time_units, label):
+    """Generic unit conversion routine."""
+    out_value = in_value
+    out_distance_units = None
+    out_time_units = None
+    if label in Keys.TIME_KEYS:
+        out_distance_units = UNITS_TIME_MINUTES
+        out_value = convert_time(in_value, in_time_units, out_distance_units)
+    elif label in Keys.TIME_KEYS:
+        out_value, out_distance_units = convert_to_preferred_distance_units(user_mgr, user_id, in_value, in_distance_units)
+    elif label in Keys.SPEED_KEYS:
+        out_value, out_distance_units, out_time_units = convert_to_preferred_speed_units(user_mgr, user_id, in_value, in_distance_units, in_time_units)        
+    return out_value, out_distance_units, out_time_units
+
 def meters_per_sec_to_minutes_per_mile(value):
     return 1.0 / convert_speed(value, UNITS_DISTANCE_METERS, UNITS_TIME_SECONDS, UNITS_DISTANCE_MILES, UNITS_TIME_MINUTES)
 

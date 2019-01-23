@@ -430,7 +430,7 @@ class DataMgr(Importer.ActivityWriter):
         """Retrieve method for a user's personal record."""
         if self.database is None:
             raise Exception("No database.")
-        if self.user_id is None:
+        if user_id is None:
             raise Exception("Bad parameter.")
         return self.database.retrieve_user_personal_records(user_id)
 

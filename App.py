@@ -1038,10 +1038,36 @@ class App(object):
             gender_options += " selected"
         gender_options += ">Female</option>"
 
+        # Get the user's BMI.
+        bmi = ""
+
+        # Get the user's VO2Max.
+        vo2max = ""
+
+        # Get the user's personal recorsd.
+        prs = ""
+        record_groups = self.data_mgr.retrieve_user_personal_records(user_id)
+        for record_group in record_groups:
+            prs += "<h3>" + record_group + "</h3>"
+            prs += "<table>"
+            record_dict = record_groups[record_group]
+            for record_name in record_dict:
+                record = record_dict[record_name]
+                print record[0]
+                activity_id = record[1]
+
+                prs += "<td>"
+                prs += record_name
+                prs += "</td><td>"
+                prs += "<a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + str(record[0]) + "</a>"
+                prs += "</td>"
+                prs += "</td><tr>"
+            prs += "</table>"
+
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, weight=selected_weight, height=selected_height, gender_options=gender_options)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, weight=selected_weight, height=selected_height, gender_options=gender_options, bmi=bmi, vo2max=vo2max, prs=prs)
 
     @statistics
     def settings(self):
