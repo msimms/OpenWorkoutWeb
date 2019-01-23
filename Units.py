@@ -130,20 +130,6 @@ def convert_to_preferred_speed_units(user_mgr, user_id, value, in_distance_units
         out_distance_units = UNITS_DISTANCE_MILES
     return convert_speed(value, in_distance_units, in_time_units, out_distance_units, out_time_units), out_distance_units, out_time_units
 
-def convert_to_preferred_units(user_mgr, user_id, in_value, in_distance_units, in_time_units, label):
-    """Generic unit conversion routine."""
-    out_value = in_value
-    out_distance_units = None
-    out_time_units = None
-    if label in Keys.TIME_KEYS:
-        out_distance_units = UNITS_TIME_MINUTES
-        out_value = convert_time(in_value, in_time_units, out_distance_units)
-    elif label in Keys.TIME_KEYS:
-        out_value, out_distance_units = convert_to_preferred_distance_units(user_mgr, user_id, in_value, in_distance_units)
-    elif label in Keys.SPEED_KEYS:
-        out_value, out_distance_units, out_time_units = convert_to_preferred_speed_units(user_mgr, user_id, in_value, in_distance_units, in_time_units)        
-    return out_value, out_distance_units, out_time_units
-
 def meters_per_sec_to_minutes_per_mile(value):
     return 1.0 / convert_speed(value, UNITS_DISTANCE_METERS, UNITS_TIME_SECONDS, UNITS_DISTANCE_MILES, UNITS_TIME_MINUTES)
 
@@ -215,3 +201,21 @@ def get_cadence_units_str():
 def get_power_units_str():
     """Returns the units in which power is displayed."""
     return "watts"
+
+def convert_to_preferred_units_str(user_mgr, user_id, in_value, in_distance_units, in_time_units, label):
+    """Generic unit conversion routine."""
+    out_value = in_value
+    if label in Keys.TIME_KEYS:
+        out_value = convert_seconds_to_hours_mins_secs(in_value)
+    elif label in Keys.SPEED_KEYS:
+        out_value, out_distance_units, out_time_units = convert_to_preferred_speed_units(user_mgr, user_id, in_value, in_distance_units, in_time_units)        
+        out_value = "{:.2f} ".format(out_value) + get_speed_units_str(out_distance_units, out_time_units)
+    elif label in Keys.HEART_RATE_KEYS:
+        out_value = "{:.2f} ".format(in_value) + get_heart_rate_units_str()
+    elif label in Keys.CADENCE_KEYS:
+        out_value = "{:.2f} ".format(in_value) + get_heart_rate_units_str()
+    elif label in Keys.POWER_KEYS:
+        out_value = "{:.2f} ".format(in_value) + get_power_units_str()
+    else:
+        out_value = str(in_value)
+    return out_value
