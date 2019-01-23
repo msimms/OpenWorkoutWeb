@@ -67,13 +67,21 @@ class ActivityAnalyzer(object):
                 self.speed_graph = location_analyzer.create_speed_graph()
 
             # Store the results.
-            user_id = self.activity[Keys.ACTIVITY_USER_ID_KEY]
-            activity_id = self.activity[Keys.ACTIVITY_ID_KEY]
-            activity_time = self.activity[Keys.ACTIVITY_TIME_KEY]
-            if not self.data_mgr.create_activity_summary(activity_id, self.summary_data):
-                self.log_error("Error returned when saving activity summary data: " + str(self.summary_data))
-            if not self.data_mgr.insert_bests_from_activity(user_id, activity_id, activity_type, activity_time, self.summary_data):
-                self.log_error("Error returned when updating personal records.")
+            if Keys.ACTIVITY_ID_KEY in self.activity:
+                activity_id = self.activity[Keys.ACTIVITY_ID_KEY]
+                if not self.data_mgr.create_activity_summary(activity_id, self.summary_data):
+                    self.log_error("Error returned when saving activity summary data: " + str(self.summary_data))
+            else:
+                self.log_error("Activity ID not provided. Cannot create activity summary.")
+
+            # Update personal bests
+            if Keys.ACTIVITY_USER_ID_KEY in self.activity:
+                user_id = self.activity[Keys.ACTIVITY_USER_ID_KEY]
+                activity_time = self.activity[Keys.ACTIVITY_TIME_KEY]
+                if not self.data_mgr.insert_bests_from_activity(user_id, activity_id, activity_type, activity_time, self.summary_data):
+                    self.log_error("Error returned when updating personal records.")
+            else:
+                self.log_error("User ID not provided. Cannot update personal records.")
         except:
             self.log_error("Exception when analyzing activity data: " + str(self.summary_data))
 
@@ -84,7 +92,6 @@ def analyze_activity(activity_str):
     analyzer = ActivityAnalyzer(activity_obj)
     analyzer.perform_analysis()
     print("Activity analysis finished")
-    return json.dumps(analyzer.summary_data)
 
 def main():
     """Entry point for an analysis worker."""
