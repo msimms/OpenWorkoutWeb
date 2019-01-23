@@ -8,6 +8,7 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Other workout trackers do not support strength-based exercises, such as pull-ups and push-ups (press-ups).
 * I think users should have control over their own data and this is only possible with an open source application.
 * There are some analytical ideas that I have that none of the major activity tracking websites perform.
+* I want to do some experiments with automatically generating workout plans. This will serve as the platform for this idea.
 * Education. For the experience in performing full-stack software development: dealing with website deployment and scalability, and security issues.
 
 ## Major Features
@@ -74,6 +75,7 @@ Why develop a workout tracker when there are so many closed-source options avail
 * File imports are now also distributed over rabbitmq and celery with the results being written directly to the database.
 
 ### 0.9
+* API documentation in RAML.
 * Beginnings of automated workout plan generation. Still plenty of work to do.
 
 ## Tech
