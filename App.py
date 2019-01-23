@@ -1053,15 +1053,13 @@ class App(object):
             record_dict = record_groups[record_group]
             for record_name in record_dict:
                 record = record_dict[record_name]
-                print record[0]
+                record_value = record[0]
                 activity_id = record[1]
+                record_value, distance_units, time_units = Units.convert_to_preferred_units(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
 
                 prs += "<td>"
                 prs += record_name
-                prs += "</td><td>"
-                prs += "<a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + str(record[0]) + "</a>"
-                prs += "</td>"
-                prs += "</td><tr>"
+                prs += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + str(record_value) + "</a></td><tr>"
             prs += "</table>"
 
         # Render from the template.
