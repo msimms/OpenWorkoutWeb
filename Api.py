@@ -250,7 +250,7 @@ class Api(object):
         return True, ""
 
     def handle_update_password(self, values):
-        """Updates the user's email password."""
+        """Updates the user's password."""
         if self.user_id is None:
             raise Exception("Not logged in.")
         if 'old_password' not in values:
@@ -283,7 +283,7 @@ class Api(object):
         return True, ""
 
     def handle_delete_user(self, values):
-        """Removes the user and all associated data."""
+        """Removes the current user and all associated data."""
         if self.user_id is None:
             raise Exception("Not logged in.")
         if Keys.PASSWORD_KEY not in values:
@@ -307,7 +307,7 @@ class Api(object):
         return True, ""
 
     def handle_list_activities(self, values):
-        """Removes the specified activity."""
+        """Returns a list of JSON objects describing all of the user's activities."""
         if self.user_id is None:
             raise Exception("Not logged in.")
 
@@ -470,7 +470,7 @@ class Api(object):
         return True, func(values)
 
     def handle_upload_activity_file(self, username, values):
-        """Called when an API message to upload a file is received."""
+        """Called when an API message to create a new activity from data within a file is received."""
         if self.user_id is None:
             raise Exception("Not logged in.")
         if Keys.UPLOADED_FILE_NAME_KEY not in values:
