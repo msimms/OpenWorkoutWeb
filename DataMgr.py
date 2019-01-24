@@ -412,19 +412,27 @@ class DataMgr(Importer.ActivityWriter):
         if user_id is None:
             raise Exception("Bad parameter.")
 
+        # This object will keep track of the PRs.
         summarizer = Summarizer.Summarizer()
+
+        # Load existing PRs.
         all_personal_records = self.database.retrieve_user_personal_records(user_id)
         for record_activity_type in all_personal_records.keys():
             summarizer.set_record_dictionary(record_activity_type, all_personal_records[record_activity_type])
-
         do_update = len(all_personal_records) > 0
+
+        # Add data from the new activity.
         summarizer.add_activity_data(activity_id, activity_type, activity_time, bests)
+ 
+        # Create or update the PR list.
         all_personal_records[activity_type] = summarizer.get_record_dictionary(activity_type)
         if do_update:
             self.database.update_user_personal_records(user_id, all_personal_records)
         else:
             self.database.create_user_personal_records(user_id, all_personal_records)
-        return self.database.create_activity_bests(user_id, activity_id, bests)
+
+        # Cache the summary data from this activity so we don't have to recompute everything again.
+        return self.database.create_activity_bests(user_id, activity_id, activity_time, bests)
 
     def retrieve_user_personal_records(self, user_id):
         """Retrieve method for a user's personal record."""

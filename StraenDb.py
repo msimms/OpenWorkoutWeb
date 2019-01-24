@@ -444,13 +444,16 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_activity_bests(self, user_id, activity_id, bests):
+    def create_activity_bests(self, user_id, activity_id, activity_time, bests):
         """Create method for a user's personal record."""
         if user_id is None:
             self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: user_id")
             return False
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if activity_time is None:
+            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: activity_time")
             return False
         if bests is None:
             self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: bests")
@@ -459,6 +462,7 @@ class MongoDatabase(Database.Database):
         try:
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
             if user_records is not None:
+                bests[Keys.ACTIVITY_TIME_KEY] = activity_time
                 user_records[activity_id] = bests
                 self.records_collection.save(user_records)
                 return True
@@ -470,7 +474,7 @@ class MongoDatabase(Database.Database):
     def retrieve_activity_bests():
         """Create method for a user's personal record."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.retrieve_activity_bests.__name__ + ": Unexpected empty object: user_id")
             return False
 
         try:
