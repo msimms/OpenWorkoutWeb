@@ -203,7 +203,7 @@ def get_power_units_str():
     return "watts"
 
 def convert_to_preferred_units_str(user_mgr, user_id, in_value, in_distance_units, in_time_units, label):
-    """Generic unit conversion routine."""
+    """Generic unit conversion routine. Returns a string with the converted number and units."""
     out_value = in_value
     if label in Keys.TIME_KEYS:
         out_value = convert_seconds_to_hours_mins_secs(in_value)

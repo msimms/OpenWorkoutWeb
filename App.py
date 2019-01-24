@@ -508,14 +508,11 @@ class App(object):
         if summary_data is not None:
 
             if Keys.BEST_SPEED in summary_data:
-                value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_userid, summary_data[Keys.BEST_SPEED], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
-                summary += "\t<li>Max. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(value_distance_units, value_time_units) + "</li>\n"
+                summary += "\t<li>Max. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, summary_data[Keys.BEST_SPEED], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_SPEED) + "</li>\n"
             if Keys.BEST_1K in summary_data:
-                value = Units.convert_speed(1.0 / summary_data[Keys.BEST_1K], Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS)
-                summary += "\t<li>Best KM: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS) + "</li>\n"
+                summary += "\t<li>Best KM: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, summary_data[Keys.BEST_1K], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_1K) + "</li>\n"
             if Keys.BEST_MILE in summary_data:
-                value = Units.convert_speed(1.0 / summary_data[Keys.BEST_MILE], Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
-                summary += "\t<li>Best Mile: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
+                summary += "\t<li>Best Mile: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, summary_data[Keys.BEST_MILE], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_MILE) + "</li>\n"
 
         if max_heart_rate > 1:
             summary += "\t<li>Max. Heart Rate: {:.2f} ".format(max_heart_rate) + Units.get_heart_rate_units_str() + "</li>\n"
@@ -542,18 +539,7 @@ class App(object):
                 details_str += key
                 details_str += "</b></td><td>"
                 value = summary_data[key]
-
-                if key.find("Heart Rate") > 0:
-                    details_str += "{:.2f}".format(value) + " " + Units.get_heart_rate_units_str()
-                elif key.find("Cadence") > 0:
-                    details_str += "{:.2f}".format(value) + " " + Units.get_cadence_units_str()
-                elif key.find("Power") > 0:
-                    details_str += "{:.2f}".format(value) + " " + Units.get_power_units_str()
-                elif key.find("Speed") > 0:
-                    value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_userid, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
-                    details_str += "{:.2f}".format(value) + " " + Units.get_speed_units_str(value_distance_units, value_time_units)
-                else:
-                    details_str += Units.convert_seconds_to_hours_mins_secs(value)
+                details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
                 details_str += "</td><tr>"
         if len(details_str) == 0:
             details_str = "<td><b>No data</b></td><tr>"

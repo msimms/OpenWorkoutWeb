@@ -87,11 +87,9 @@ class Summarizer(object):
 
     @staticmethod
     def is_better(key, lhs, rhs):
-        # Lower is better
-        if key in Keys.TIME_KEYS:
+        if key in Keys.TIME_KEYS: # Lower is better
             return lhs < rhs
-        # Higher is better
-        elif key in Keys.SPEED_KEYS or keys in Keys.POWER_KEYS:
+        elif key in Keys.SPEED_KEYS or keys in Keys.POWER_KEYS: # Higher is better
             return rhs > lhs
         return False
 
