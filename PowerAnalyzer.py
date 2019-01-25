@@ -54,6 +54,11 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
             if curr_time_diff == 5:
                 average_power = sum_of_readings / num_readings
                 self.do_power_record_check(Keys.BEST_5_SEC_POWER, average_power)
+                if duration < 720:
+                    return
+            elif curr_time_diff == 720:
+                average_power = sum_of_readings / num_readings
+                self.do_power_record_check(Keys.BEST_12_MIN_POWER, average_power)
                 if duration < 1200:
                     return
             elif curr_time_diff == 1200:

@@ -1,6 +1,7 @@
 # Copyright 2018 Michael J Simms
 
 import time
+import FtpCalculator
 import Keys
 import Units
 
@@ -16,6 +17,8 @@ class Summarizer(object):
         self.annual_running_bests = {} # Best times for each year (best mile, best 20 minute power, etc.)
         self.annual_cycling_bests = {} # Best times for each year (best mile, best 20 minute power, etc.)
         self.annual_swimming_bests = {} # Best times for each year (best mile, etc.)
+
+        self.ftp_calc = FtpCalculator.FtpCalculator()
 
     def get_record_dictionary(self, activity_type):
         """Returns the record dictionary that corresponds to the given activity type."""
@@ -99,6 +102,8 @@ class Summarizer(object):
         # Ignore these ones.
         if summary_data_key.find(Keys.CLUSTER) > 0:
             return
+        if summary_data_key.find(Keys.ACTIVITY_TIME_KEY) > 0:
+            return
 
         # Get the record set that corresponds with the activity type.
         record_set = self.get_record_dictionary(activity_type)
@@ -127,3 +132,4 @@ class Summarizer(object):
         """Submits an activity's metadata for summary analysis."""
         for key in summary_data:
             self.add_activity_datum(activity_id, activity_type, start_time, key, summary_data[key])
+        self.ftp_calc.add_activity_data(activity_id, activity_type, start_time, summary_data)

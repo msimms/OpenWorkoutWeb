@@ -405,6 +405,22 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity_comments(activity_id)
 
+    def store_user_estimated_ftp(self, user_id, estimated_ftp):
+        """Creates or updates the user's estimated FTP in the database."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        pass
+
+    def retrieve_user_estimated_ftp(self, user_id, estimated_ftp):
+        """Retrieves the user's estimated FTP in the database."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        pass
+
     def insert_bests_from_activity(self, user_id, activity_id, activity_type, activity_time, bests):
         """Update method for a user's personal record."""
         if self.database is None:

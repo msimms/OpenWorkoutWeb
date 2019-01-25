@@ -183,6 +183,13 @@ def print_records(store, activity_type):
             print("none")
         print("\n")
 
+    # Print the estimated FTP.
+    if activity_type == Keys.TYPE_CYCLING_KEY:
+        estimated_ftp = store.summarizer.ftp_calc.estimate()
+        print("Estimated FTP: {:.2f} watts".format(estimated_ftp))
+        print("\n")
+
+
 def main():
     """Starts the tests."""
 
