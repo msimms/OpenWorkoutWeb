@@ -60,7 +60,7 @@ class ActivityAnalyzer(object):
                     location_analyzer.append_location(date_time, latitude, longitude, altitude)
                     location_analyzer.update_speeds()
                 self.summary_data.update(location_analyzer.analyze())
-            time.sleep(1) # Filty hack that stops Celery from crashing because of timeout errors when overloaded
+            time.sleep(1) # Yield the GIL. Filty hack that stops Celery from crashing because of timeout errors when overloaded
 
             # Do the sensor analysis.
             print("Performing sensor analysis...")
@@ -69,13 +69,13 @@ class ActivityAnalyzer(object):
                 if sensor_type in self.activity:
                     sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type], activity_type)
                     self.summary_data.update(sensor_analyzer.analyze())
-            time.sleep(1)
+            time.sleep(1) # Yield the GIL. 
 
             # Create a current speed graph - if one has not already been created.
             print("Creating speed graph...")
             if Keys.APP_CURRENT_SPEED_KEY not in self.activity:
                 self.speed_graph = location_analyzer.create_speed_graph()
-            time.sleep(1)
+            time.sleep(1) # Yield the GIL. 
 
             # Store the results.
             print("Storing results...")
@@ -85,7 +85,6 @@ class ActivityAnalyzer(object):
                     self.log_error("Error returned when saving activity summary data: " + str(self.summary_data))
             else:
                 self.log_error("Activity ID not provided. Cannot create activity summary.")
-            time.sleep(1)
 
             # Update personal bests
             print("Updating personal bests...")
@@ -96,7 +95,6 @@ class ActivityAnalyzer(object):
                     self.log_error("Error returned when updating personal records.")
             else:
                 self.log_error("User ID or activity time not provided. Cannot update personal records.")
-            time.sleep(1)
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error("Exception when analyzing activity data: " + str(self.summary_data))
