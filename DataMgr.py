@@ -411,7 +411,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        pass
+        return self.database.store_user_setting(user_id, Keys.ESTIMATED_FTP_KEY, estimated_ftp)
 
     def retrieve_user_estimated_ftp(self, user_id, estimated_ftp):
         """Retrieves the user's estimated FTP in the database."""
@@ -419,7 +419,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        pass
+        return self.database.retrieve_user_setting(user_id, Keys.ESTIMATED_FTP_KEY)
 
     def insert_bests_from_activity(self, user_id, activity_id, activity_type, activity_time, bests):
         """Update method for a user's personal record."""
@@ -436,6 +436,11 @@ class DataMgr(Importer.ActivityWriter):
         for record_activity_type in all_personal_records.keys():
             summarizer.set_record_dictionary(record_activity_type, all_personal_records[record_activity_type])
         do_update = len(all_personal_records) > 0
+
+        # Load cached summary data from all previous activities.
+        cached_activity_bests = self.database.retrieve_activity_bests(user_id)
+        for cached_activity_data in cached_activity_bests:
+            pass
 
         # Add data from the new activity.
         summarizer.add_activity_data(activity_id, activity_type, activity_time, bests)
@@ -514,7 +519,6 @@ class DataMgr(Importer.ActivityWriter):
         """Makes sure that summary data exists for all of the user's activities."""
         if self.database is None:
             raise Exception("No database.")
-
         self.database.retrieve_each_user_activity(self, user_id, DataMgr.update_summary_data_cb)
 
     def generate_workout_plan(self, user_id):

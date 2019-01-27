@@ -8,6 +8,7 @@ import traceback
 from bson.objectid import ObjectId
 import pymongo
 import Database
+import InputChecker
 import Keys
 
 
@@ -471,20 +472,24 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_activity_bests():
+    def retrieve_activity_bests(self, user_id):
         """Create method for a user's personal record."""
         if user_id is None:
             self.log_error(MongoDatabase.retrieve_activity_bests.__name__ + ": Unexpected empty object: user_id")
-            return False
+            return {}
 
         try:
+            bests = {}
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
             if user_records is not None:
-                return True
+                for record in user_records:
+                    if InputChecker.is_uuid(record):
+                        bests[record] = user_records[record]
+                return bests
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
-        return False
+        return {}
 
     def list_excluded_keys(self):
         """This is the list of stuff we don't need to return when we're building an activity list. Helps with efficiency."""

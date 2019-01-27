@@ -26,6 +26,22 @@ class FtpCalculator(object):
             return max_1hr
         return max_20min_adjusted
 
+    def power_training_zones(self, ftp):
+        """Returns the power training zones as a function of FTP."""
+        #Zone 1 - Active Recovery - Less than 55% of FTP
+        #Zone 2 - Endurance - 55% to 74% of FTP
+        #Zone 3 - Tempo - 75% to 89% of FTP
+        #Zone 4 - Lactate Threshold - 90% to 104% of FTP
+        #Zone 5 - VO2 Max - 105% to 120% of FTP
+        #Zone 6 - Anaerobic Capacity - More than 120% of FTP
+        zones = []
+        zones.append(ftp * 0.54)
+        zones.append(ftp * 0.74)
+        zones.append(ftp * 0.89)
+        zones.append(ftp * 0.104)
+        zones.append(ftp * 0.120)
+        return zones
+
     def add_activity_data(self, activity_id, activity_type, start_time, summary_data):
         """Looks for data that will help us determine the user's FTP."""
 
