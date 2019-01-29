@@ -10,6 +10,7 @@ import uuid
 import Exporter
 import InputChecker
 import Keys
+import Units
 
 g_not_meta_data = ["DeviceId", "ActivityId", "ActivityName", "User Name", "Latitude", "Longitude", "Altitude", "Horizontal Accuracy", "Vertical Accuracy"]
 
@@ -815,14 +816,14 @@ class Api(object):
 
             # Default privacy/visibility.
             if decoded_key == Keys.DEFAULT_PRIVACY:
-                default_privacy = urllib.unquote_plus(values[key]).lower()
+                default_privacy = urllib.unquote_plus(values[decoded_key]).lower()
                 if not (default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE):
                     raise Exception("Invalid visibility value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY, default_privacy)
             
             # Metric or imperial?
             elif decoded_key == Keys.PREFERRED_UNITS_KEY:
-                preferred_units = urllib.unquote_plus(values[key]).lower()
+                preferred_units = urllib.unquote_plus(values[decoded_key]).lower()
                 if not (preferred_units == Keys.UNITS_METRIC_KEY or preferred_units == Keys.UNITS_STANDARD_KEY):
                     raise Exception("Invalid units value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY, preferred_units)
@@ -842,16 +843,26 @@ class Api(object):
 
             # Gender
             if decoded_key == Keys.HEIGHT_KEY:
-                height = urllib.unquote_plus(values[key]).lower()
+                height = urllib.unquote_plus(values[decoded_key]).lower()
+                if not InputChecker.is_float(height):
+                    raise Exception("Invalid height.")
+                height, _ = Units.convert_from_preferred_distance_units(self.user_mgr, self.user_id, float(height))
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.HEIGHT_KEY, height)
             elif decoded_key == Keys.WEIGHT_KEY:
-                weight = urllib.unquote_plus(values[key]).lower()
+                weight = urllib.unquote_plus(values[decoded_key]).lower()
+                if not InputChecker.is_float(weight):
+                    raise Exception("Invalid weight.")
+                weight, _ = Units.convert_from_preferred_mass_units(self.user_mgr, self.user_id, float(weight))
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.WEIGHT_KEY, weight)
             elif decoded_key == Keys.GENDER_KEY:
-                gender = urllib.unquote_plus(values[key]).lower()
+                gender = urllib.unquote_plus(values[decoded_key]).lower()
                 if not (gender == Keys.GENDER_MALE_KEY or gender == Keys.GENDER_FEMALE_KEY):
                     raise Exception("Invalid gender value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GENDER_KEY, gender)
             elif decoded_key == Keys.RESTING_HEART_RATE_KEY:
-                resting_hr = urllib.unquote_plus(values[key]).lower()
+                resting_hr = urllib.unquote_plus(values[decoded_key]).lower()
+                if not InputChecker.is_float(resting_hr):
+                    raise Exception("Invalid resting heart rate.")
 
         return result, ""
 

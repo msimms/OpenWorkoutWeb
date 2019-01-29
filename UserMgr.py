@@ -220,7 +220,7 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         if key is None or len(key) == 0:
             raise Exception("Bad parameter.")
-        if value is None or len(value) == 0:
+        if value is None:
             raise Exception("Bad parameter.")
         return self.database.update_user_setting(user_id, key, value)
 
@@ -232,6 +232,7 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         if key is None or len(key) == 0:
             raise Exception("Bad parameter.")
+
         result = self.database.retrieve_user_setting(user_id, key)
         if result is None:
             if key == Keys.DEFAULT_PRIVACY:
