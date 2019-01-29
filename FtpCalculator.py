@@ -1,4 +1,4 @@
-# Copyright 2018 Michael J Simms
+# Copyright 2019 Michael J Simms
 """Estimates the user's Functional Threshold Power based on activity summary data."""
 
 import time

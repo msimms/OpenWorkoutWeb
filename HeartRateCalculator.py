@@ -1,4 +1,4 @@
-# Copyright 2018 Michael J Simms
+# Copyright 2019 Michael J Simms
 """Estimates the user's maximum heart rate and heart rate zones based on activity summary data."""
 
 import inspect
