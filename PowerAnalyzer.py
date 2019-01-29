@@ -8,7 +8,7 @@ import Keys
 import SensorAnalyzer
 import Units
 
-# Locate and load the statistics module.
+# Locate and load the statistics module (the functions we're using in are made obsolete in Python 3, but we want to work in Python 2, also)
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 libmathdir = os.path.join(currentdir, 'LibMath', 'python')
 sys.path.insert(0, libmathdir)

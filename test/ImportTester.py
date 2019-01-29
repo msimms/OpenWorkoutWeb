@@ -183,12 +183,24 @@ def print_records(store, activity_type):
             print("none")
         print("\n")
 
-    # Print the estimated FTP.
+    # Print cycling specific data.
     if activity_type == Keys.TYPE_CYCLING_KEY:
+
+        # Print the estimated FTP.
         estimated_ftp = store.summarizer.ftp_calc.estimate()
         print("Estimated FTP: {:.2f} watts".format(estimated_ftp))
-        print("\n")
 
+        # Print the training zones.
+        zones = store.summarizer.ftp_calc.power_training_zones(estimated_ftp)
+        zone_index = 1
+        for zone in zones:
+            print("Zone " + str(zone_index) + ": "),
+            if zone_index == 1:
+                print("0 watts to {:.2f} watts").format(zone)
+            else:
+                print("{:.2f} watts to {:.2f} watts").format(zones[zone_index - 1], zone)
+            zone_index = zone_index + 1
+        print("\n")
 
 def main():
     """Starts the tests."""
@@ -244,6 +256,10 @@ def main():
     print_records(store, Keys.TYPE_RUNNING_KEY)
     print_records(store, Keys.TYPE_CYCLING_KEY)
     print_records(store, Keys.TYPE_SWIMMING_KEY)
+
+    # Print the maximum heart rate and heart rate zone calculators.
+    max_hr = store.summarizer.hr_calc.estimate_max_hr(45)
+    print("Estimated Maximum Heart Rate: {:.2f} bpm\n".format(max_hr))
 
     # Print the success and failure summary.
     title_str = "Summary:"

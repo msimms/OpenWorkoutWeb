@@ -850,6 +850,8 @@ class Api(object):
                 if not (gender == Keys.GENDER_MALE_KEY or gender == Keys.GENDER_FEMALE_KEY):
                     raise Exception("Invalid gender value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GENDER_KEY, gender)
+            elif decoded_key == Keys.RESTING_HEART_RATE_KEY:
+                resting_hr = urllib.unquote_plus(values[key]).lower()
 
         return result, ""
 

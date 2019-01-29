@@ -413,7 +413,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.store_user_setting(user_id, Keys.ESTIMATED_FTP_KEY, estimated_ftp)
 
-    def retrieve_user_estimated_ftp(self, user_id, estimated_ftp):
+    def retrieve_user_estimated_ftp(self, user_id):
         """Retrieves the user's estimated FTP in the database."""
         if self.database is None:
             raise Exception("No database.")
@@ -538,3 +538,9 @@ class DataMgr(Importer.ActivityWriter):
         types.append("Push Ups / Press Ups")
         types.append("Pull Ups")
         return types
+
+    def retrieve_heart_rate_zones(self, user_id):
+        return []
+
+    def retrieve_power_training_zones(self, user_id):
+        return []

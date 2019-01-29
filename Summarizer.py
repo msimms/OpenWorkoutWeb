@@ -2,6 +2,7 @@
 
 import time
 import FtpCalculator
+import HeartRateCalculator
 import Keys
 import Units
 
@@ -19,6 +20,7 @@ class Summarizer(object):
         self.annual_swimming_bests = {} # Best times for each year (best mile, etc.)
 
         self.ftp_calc = FtpCalculator.FtpCalculator()
+        self.hr_calc = HeartRateCalculator.HeartRateCalculator()
 
     def get_record_dictionary(self, activity_type):
         """Returns the record dictionary that corresponds to the given activity type."""
@@ -133,3 +135,4 @@ class Summarizer(object):
         for key in summary_data:
             self.add_activity_datum(activity_id, activity_type, start_time, key, summary_data[key])
         self.ftp_calc.add_activity_data(activity_id, activity_type, start_time, summary_data)
+        self.hr_calc.add_activity_data(activity_id, activity_type, start_time, summary_data)

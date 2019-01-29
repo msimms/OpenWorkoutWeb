@@ -17,7 +17,6 @@ Why develop a workout tracker when there are so many closed-source options avail
 
 ## Major Todos
 * Support for strength-based activities (this is partially implemented).
-* Continuous scrolling for the activity feed.
 * Import from other services.
 * Better graphics.
 * Replace Google Maps with Open Street Map.

@@ -1005,6 +1005,7 @@ class App(object):
         selected_height = self.user_mgr.retrieve_user_setting(user_id, Keys.HEIGHT_KEY)
         selected_weight = self.user_mgr.retrieve_user_setting(user_id, Keys.WEIGHT_KEY)
         selected_gender = self.user_mgr.retrieve_user_setting(user_id, Keys.GENDER_KEY)
+        selected_resting_hr = self.user_mgr.retrieve_user_setting(user_id, Keys.RESTING_HEART_RATE_KEY)
 
         # Render the user's height.
         if selected_height is None:
@@ -1014,7 +1015,7 @@ class App(object):
         if selected_weight is None:
             selected_weight = ""
 
-        # Render the privacy option.
+        # Render the gender option.
         gender_options = "\t\t<option value=\"Male\""
         if selected_gender == Keys.GENDER_MALE_KEY:
             gender_options += " selected"
@@ -1024,11 +1025,47 @@ class App(object):
             gender_options += " selected"
         gender_options += ">Female</option>"
 
+        # Render the user's resting heart rate.
+        if selected_resting_hr is None:
+            selected_resting_hr = ""
+
         # Get the user's BMI.
-        bmi = ""
+        bmi = "Not calculated."
 
         # Get the user's VO2Max.
-        vo2max = ""
+        vo2max = "Not calculated."
+
+        # Get the user's FTP.
+        ftp = self.data_mgr.retrieve_user_estimated_ftp(user_id)
+        if ftp is None:
+            ftp_str = "Cycling activities with power data that was recorded in the last six months must be uploaded before your FTP can be calculated."
+        else:
+            ftp_str = str(ftp)
+
+        # Get the user's heart rate zones.
+        zones = self.data_mgr.retrieve_heart_rate_zones(user_id)
+        if len(zones) > 0:
+            hr_zones = "<table>"
+            hr_zones += "</table>"
+        else:
+            hr_zones = "No heart rate data exist."
+
+        # Get the user's cycling power training zones.
+        zones = self.data_mgr.retrieve_power_training_zones(user_id)
+        if len(zones) > 0:
+            power_zones = "<table>"
+            zone_index = 1
+            for zone in zones:
+                power_zones += "<td>" + str(zone_index) + "</td><td>"
+                if zone_index == 1:
+                    power_zones += ("0 watts to {:.2f} watts").format(zone[zone_index])
+                else:
+                    power_zones += ("{:.2f} watts to {:.2f} watts").format(zone[zone_index - 1], zone[zone_index])
+                power_zones += "</td><tr>"
+                zone_index = zone_index + 1
+            power_zones += "</table>"
+        else:
+            power_zones = "Cycling power zones cannot be calculated until the user's FTP (functional threshold power) is set."
 
         # Get the user's personal recorsd.
         prs = ""
@@ -1051,7 +1088,7 @@ class App(object):
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, weight=selected_weight, height=selected_height, gender_options=gender_options, bmi=bmi, vo2max=vo2max, prs=prs)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, weight=selected_weight, height=selected_height, gender_options=gender_options, resting_hr=selected_resting_hr, bmi=bmi, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones, prs=prs)
 
     @statistics
     def settings(self):

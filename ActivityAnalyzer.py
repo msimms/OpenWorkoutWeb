@@ -1,5 +1,5 @@
 # Copyright 2018 Michael J Simms
-"""Handles computationally expensive analysis tasks"""
+"""Handles computationally expensive analysis tasks. Implements a celery worker."""
 
 from __future__ import absolute_import
 from CeleryWorker import celery_worker

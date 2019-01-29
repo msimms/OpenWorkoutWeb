@@ -5,7 +5,7 @@ import time
 import Keys
 
 class FtpCalculator(object):
-    """Data store abstraction"""
+    """Estimates functional threshold power and power training zones"""
 
     def __init__(self):
         self.best_20min = []
@@ -38,8 +38,8 @@ class FtpCalculator(object):
         zones.append(ftp * 0.54)
         zones.append(ftp * 0.74)
         zones.append(ftp * 0.89)
-        zones.append(ftp * 0.104)
-        zones.append(ftp * 0.120)
+        zones.append(ftp * 1.04)
+        zones.append(ftp * 1.20)
         return zones
 
     def add_activity_data(self, activity_id, activity_type, start_time, summary_data):
