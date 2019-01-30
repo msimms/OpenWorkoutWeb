@@ -863,6 +863,7 @@ class Api(object):
                 resting_hr = urllib.unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(resting_hr):
                     raise Exception("Invalid resting heart rate.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.RESTING_HEART_RATE_KEY, float(resting_hr))
 
         return result, ""
 
