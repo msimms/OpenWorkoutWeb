@@ -846,7 +846,7 @@ class Api(object):
                 height = urllib.unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(height):
                     raise Exception("Invalid height.")
-                height, _ = Units.convert_from_preferred_distance_units(self.user_mgr, self.user_id, float(height))
+                height, _ = Units.convert_from_preferred_height_units(self.user_mgr, self.user_id, float(height))
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.HEIGHT_KEY, height)
             elif decoded_key == Keys.WEIGHT_KEY:
                 weight = urllib.unquote_plus(values[key]).lower()

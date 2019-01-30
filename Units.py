@@ -41,6 +41,9 @@ UNITS_TIME_HOURS = 3
 
 METERS_PER_MILE = 1609.34
 FEET_PER_MILE = 5280.0
+FEET_PER_METER = 3.28084
+INCHES_PER_METER = 39.3701
+INCHES_PER_FOOT = 12.0
 KGS_PER_POUND = 2.2
 
 def convert_mass(value, in_units, out_units):
@@ -86,6 +89,8 @@ def convert_distance(value, in_units, out_units):
             return value / METERS_PER_MILE
         elif out_units == UNITS_DISTANCE_FEET:
             return value / METERS_PER_MILE / FEET_PER_MILE
+        elif out_units == UNITS_DISTANCE_INCHES:
+            return value * INCHES_PER_METER
     elif in_units == UNITS_DISTANCE_KILOMETERS:
         if out_units == UNITS_DISTANCE_METERS:
             return value * 1000.0
@@ -93,13 +98,27 @@ def convert_distance(value, in_units, out_units):
             return value * (METERS_PER_MILE / 1000.0)
         elif out_units == UNITS_DISTANCE_FEET:
             return value * (METERS_PER_MILE / 1000.0 / FEET_PER_MILE)
+        elif out_units == UNITS_DISTANCE_INCHES:
+            return value * 1000.0 * INCHES_PER_METER
     elif in_units == UNITS_DISTANCE_MILES:
         if out_units == UNITS_DISTANCE_METERS:
             return value * METERS_PER_MILE
         elif out_units == UNITS_DISTANCE_KILOMETERS:
             return value / (METERS_PER_MILE / 1000.0)
         elif out_units == UNITS_DISTANCE_FEET:
-            return value / (METERS_PER_MILE / 1000.0 / FEET_PER_MILE)
+            return value * FEET_PER_MILE
+        elif out_units == UNITS_DISTANCE_INCHES:
+            return value * FEET_PER_MILE * INCHES_PER_FOOT
+    elif in_units == UNITS_DISTANCE_FEET:
+        if out_units == UNITS_DISTANCE_METERS:
+            return value / FEET_PER_METER
+        elif out_units == UNITS_DISTANCE_INCHES:
+            return value * INCHES_PER_FOOT
+    elif in_units == UNITS_DISTANCE_INCHES:
+        if out_units == UNITS_DISTANCE_METERS:
+            return value / INCHES_PER_METER
+        elif out_units == UNITS_DISTANCE_FEET:
+            return value / INCHES_PER_FOOT
     return value
 
 def convert_to_preferred_distance_units(user_mgr, user_id, value, in_units):
@@ -117,6 +136,18 @@ def convert_to_preferred_distance_units(user_mgr, user_id, value, in_units):
         out_units = UNITS_DISTANCE_MILES
     return convert_distance(value, in_units, out_units), out_units
 
+def convert_to_preferred_height_units(user_mgr, user_id, value, in_units):
+    """Unit conversion for height values. Converts to either metric or standard, depending on the user's preferences."""
+    if user_id is not None:
+        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+        if selected_units == Keys.UNITS_METRIC_KEY:
+            out_units = UNITS_DISTANCE_METERS
+        else:
+            out_units = UNITS_DISTANCE_INCHES
+    else:
+        out_units = UNITS_DISTANCE_METERS
+    return convert_distance(value, in_units, out_units), out_units
+
 def convert_from_preferred_height_units(user_mgr, user_id, value):
     """Unit conversion for height values. Converts from either metric or standard, depending on the user's preferences, to metric."""
     if user_id is not None:
@@ -124,7 +155,7 @@ def convert_from_preferred_height_units(user_mgr, user_id, value):
         if selected_units == Keys.UNITS_METRIC_KEY:
             in_units = UNITS_DISTANCE_METERS
         else:
-            in_units = UNITS_DISTANCE_FEET
+            in_units = UNITS_DISTANCE_INCHES
     else:
         in_units = UNITS_MASS_KG
     return convert_distance(value, in_units, UNITS_DISTANCE_METERS), UNITS_DISTANCE_METERS
@@ -216,6 +247,14 @@ def get_distance_units_str(distance_units):
     elif distance_units == UNITS_DISTANCE_INCHES:
         return "inches"
     return ""
+
+def get_preferred_height_units_str(user_mgr, user_id):
+    """Returns the units in which height is displayed."""
+    if user_id is not None:
+        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+        if selected_units is not Keys.UNITS_METRIC_KEY:
+            return get_distance_units_str(UNITS_DISTANCE_INCHES)
+    return get_distance_units_str(UNITS_DISTANCE_METERS)
 
 def get_speed_units_str(distance_units, time_units):
     """Returns the units in which speed is displayed."""
