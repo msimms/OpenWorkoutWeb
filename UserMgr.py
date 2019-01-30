@@ -243,6 +243,11 @@ class UserMgr(object):
                 result = Keys.GENDER_MALE_KEY
             else:
                 result = ""
+
+        if isinstance(result, float):
+            return result
+        if isinstance(result, int):
+            return result        
         return result.lower()
 
     def get_activity_user(self, activity):

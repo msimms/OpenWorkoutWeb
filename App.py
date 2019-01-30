@@ -16,8 +16,10 @@ import traceback
 import Keys
 import LocationAnalyzer
 import Api
+import BmiCalculator
 import Units
 import UserMgr
+import VO2MaxCalculator
 
 from dateutil.tz import tzlocal
 from mako.lookup import TemplateLookup
@@ -1008,12 +1010,24 @@ class App(object):
         selected_resting_hr = self.user_mgr.retrieve_user_setting(user_id, Keys.RESTING_HEART_RATE_KEY)
 
         # Render the user's height.
-        if selected_height is None:
-            selected_height = ""
+        if isinstance(selected_height, float):
+            selected_height, height_units = Units.convert_to_preferred_height_units(self.user_mgr, user_id, selected_height, Units.UNITS_DISTANCE_METERS)
+            selected_height_str = "{:.2f}".format(selected_height)
+            height_units_str = Units.get_distance_units_str(height_units)
+        else:
+            selected_height = None
+            selected_height_str = ""
+            height_units_str = ""
 
         # Render the user's weight.
-        if selected_weight is None:
-            selected_weight = ""
+        if isinstance(selected_weight, float):
+            selected_weight, weight_units = Units.convert_to_preferred_mass_units(self.user_mgr, user_id, selected_weight, Units.UNITS_MASS_KG)
+            selected_weight_str = "{:.2f}".format(selected_weight)
+            weight_units_str = Units.get_mass_units_str(weight_units)
+        else:
+            selected_weight = None
+            selected_weight_str = ""
+            weight_units_str = Units.get_preferred_mass_units_str(self.user_mgr, user_id)
 
         # Render the gender option.
         gender_options = "\t\t<option value=\"Male\""
@@ -1030,8 +1044,12 @@ class App(object):
             selected_resting_hr = ""
 
         # Get the user's BMI.
-        bmi = "Not calculated."
-
+        if selected_height and selected_weight:
+            calc = BmiCalculator.BmiCalculator()
+            bmi = calc.estimate_bmi(selected_weight, selected_height)
+        else:
+            bmi = "Not calculated."
+    
         # Get the user's VO2Max.
         vo2max = "Not calculated."
 
@@ -1088,7 +1106,7 @@ class App(object):
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, weight=selected_weight, height=selected_height, gender_options=gender_options, resting_hr=selected_resting_hr, bmi=bmi, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones, prs=prs)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, weight=selected_weight_str, weight_units=weight_units_str, height=selected_height_str, height_units=height_units_str, gender_options=gender_options, resting_hr=selected_resting_hr, bmi=bmi, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones, prs=prs)
 
     @statistics
     def settings(self):
