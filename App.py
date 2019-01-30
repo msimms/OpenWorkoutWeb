@@ -1059,7 +1059,7 @@ class App(object):
         if selected_resting_hr and isinstance(estimated_max_hr, float):
             calc = VO2MaxCalculator.VO2MaxCalculator()
             vo2max_str = calc.estimate_vo2max(estimated_max_hr, selected_resting_hr)
-            vo2max = "{:.2f}".format(selected_weight_pref)
+            vo2max = "{:.2f}".format(vo2max_str)
         else:
             vo2max = "Not calculated."
 
