@@ -1008,6 +1008,7 @@ class App(object):
         selected_weight_metric = self.user_mgr.retrieve_user_setting(user_id, Keys.WEIGHT_KEY)
         selected_gender = self.user_mgr.retrieve_user_setting(user_id, Keys.GENDER_KEY)
         selected_resting_hr = self.user_mgr.retrieve_user_setting(user_id, Keys.RESTING_HEART_RATE_KEY)
+        estimated_max_hr = self.user_mgr.retrieve_user_setting(user_id, Keys.ESTIMATED_MAX_HEART_RATE_KEY)
 
         # Render the user's height.
         if isinstance(selected_height_metric, float):
@@ -1040,8 +1041,11 @@ class App(object):
         gender_options += ">Female</option>"
 
         # Render the user's resting heart rate.
-        if selected_resting_hr is None:
-            selected_resting_hr = ""
+        if isinstance(selected_resting_hr, float):
+            resting_hr_str = "{:.2f}".format(selected_resting_hr)
+        else:
+            resting_hr_str = ""
+            selected_resting_hr = None
 
         # Get the user's BMI.
         if selected_height_metric and selected_weight_metric:
@@ -1052,7 +1056,12 @@ class App(object):
             bmi_str = "Not calculated."
     
         # Get the user's VO2Max.
-        vo2max = "Not calculated."
+        if selected_resting_hr and isinstance(estimated_max_hr, float):
+            calc = VO2MaxCalculator.VO2MaxCalculator()
+            vo2max_str = calc.estimate_vo2max(estimated_max_hr, selected_resting_hr)
+            vo2max = "{:.2f}".format(selected_weight_pref)
+        else:
+            vo2max = "Not calculated."
 
         # Get the user's FTP.
         ftp = self.data_mgr.retrieve_user_estimated_ftp(user_id)
@@ -1107,7 +1116,7 @@ class App(object):
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, weight=selected_weight_str, weight_units=weight_units_str, height=selected_height_str, height_units=height_units_str, gender_options=gender_options, resting_hr=selected_resting_hr, bmi=bmi_str, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones, prs=prs)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, weight=selected_weight_str, weight_units=weight_units_str, height=selected_height_str, height_units=height_units_str, gender_options=gender_options, resting_hr=resting_hr_str, bmi=bmi_str, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones, prs=prs)
 
     @statistics
     def settings(self):

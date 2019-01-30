@@ -28,6 +28,7 @@ GENDER_KEY = "gender"
 GENDER_MALE_KEY = "male"
 GENDER_FEMALE_KEY = "female"
 RESTING_HEART_RATE_KEY = "resting heart rate"
+ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate"
 ESTIMATED_FTP_KEY = "estimated ftp"
 
 # Personal records
