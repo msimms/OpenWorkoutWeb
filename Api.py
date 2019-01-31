@@ -7,6 +7,7 @@ import os
 import time
 import urllib
 import uuid
+import ApiException
 import Exporter
 import InputChecker
 import Keys
@@ -159,17 +160,17 @@ class Api(object):
             return True, self.user_mgr.get_logged_in_user()
 
         if Keys.USERNAME_KEY not in values:
-            raise Exception("Username not specified.")
+            raise ApiException.ApiAuthenticationException("Username not specified.")
         if Keys.PASSWORD_KEY not in values:
-            raise Exception("Password not specified.")
+            raise ApiException.ApiAuthenticationException("Password not specified.")
 
         email = urllib.unquote_plus(values[Keys.USERNAME_KEY])
         if not InputChecker.is_email_address(email):
-            raise Exception("Invalid email address.")
+            raise ApiException.ApiAuthenticationException("Invalid email address.")
         password = urllib.unquote_plus(values[Keys.PASSWORD_KEY])
 
         if not self.user_mgr.authenticate_user(email, password):
-            raise Exception("Authentication failed.")
+            raise ApiException.ApiAuthenticationException("Authentication failed.")
 
         if Keys.DEVICE_KEY in values:
             device_str = urllib.unquote_plus(values[Keys.DEVICE_KEY])
@@ -186,17 +187,17 @@ class Api(object):
             raise Exception("Already logged in.")
 
         if Keys.USERNAME_KEY not in values:
-            raise Exception("Username not specified.")
+            raise ApiException.ApiAuthenticationException("Username not specified.")
         if Keys.REALNAME_KEY not in values:
-            raise Exception("Real name not specified.")
+            raise ApiException.ApiAuthenticationException("Real name not specified.")
         if Keys.PASSWORD1_KEY not in values:
-            raise Exception("Password not specified.")
+            raise ApiException.ApiAuthenticationException("Password not specified.")
         if Keys.PASSWORD2_KEY not in values:
-            raise Exception("Password confirmation not specified.")
+            raise ApiException.ApiAuthenticationException("Password confirmation not specified.")
 
         email = urllib.unquote_plus(values[Keys.USERNAME_KEY])
         if not InputChecker.is_email_address(email):
-            raise Exception("Invalid email address.")
+            raise ApiException.ApiMalformedRequestException("Invalid email address.")
         realname = urllib.unquote_plus(values[Keys.REALNAME_KEY])
         password1 = urllib.unquote_plus(values[Keys.PASSWORD1_KEY])
         password2 = urllib.unquote_plus(values[Keys.PASSWORD2_KEY])
@@ -215,13 +216,13 @@ class Api(object):
     def handle_login_status(self, values):
         """Called when an API message to check the login status in is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         return True, ""
 
     def handle_logout(self, values):
         """Ends the session for the specified user."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
 
         # End the session
         self.user_mgr.clear_session()
@@ -230,14 +231,14 @@ class Api(object):
     def handle_update_email(self, values):
         """Updates the user's email address."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if 'email' not in values:
-            raise Exception("Email not specified.")
+            raise ApiException.ApiMalformedRequestException("Email not specified.")
 
         # Get the logged in user.
         current_username = self.user_mgr.get_logged_in_user()
         if current_username is None:
-            raise Exception("Empty username.")
+            raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Decode the parameter.
         new_username = urllib.unquote_plus(values['email'])
@@ -253,18 +254,18 @@ class Api(object):
     def handle_update_password(self, values):
         """Updates the user's password."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if 'old_password' not in values:
-            raise Exception("Old password not specified.")
+            raise ApiException.ApiMalformedRequestException("Old password not specified.")
         if 'new_password1' not in values:
-            raise Exception("New password not specified.")
+            raise ApiException.ApiMalformedRequestException("New password not specified.")
         if 'new_password2' not in values:
-            raise Exception("New password confirmation not specified.")
+            raise ApiException.ApiMalformedRequestException("New password confirmation not specified.")
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
         if username is None:
-            raise Exception("Empty username.")
+            raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Get the user details.
         user_id, _, user_realname = self.user_mgr.retrieve_user(username)
@@ -286,14 +287,14 @@ class Api(object):
     def handle_delete_user(self, values):
         """Removes the current user and all associated data."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.PASSWORD_KEY not in values:
-            raise Exception("Password not specified.")
+            raise ApiException.ApiMalformedRequestException("Password not specified.")
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
         if username is None:
-            raise Exception("Empty username.")
+            raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Reauthenticate the user.
         password = urllib.unquote_plus(values[Keys.PASSWORD_KEY])
@@ -310,12 +311,12 @@ class Api(object):
     def handle_list_activities(self, values):
         """Returns a list of JSON objects describing all of the user's activities."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
         if username is None:
-            raise Exception("Empty username.")
+            raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Get the user details.
         _, _, user_realname = self.user_mgr.retrieve_user(username)
@@ -347,14 +348,14 @@ class Api(object):
     def handle_delete_activity(self, values):
         """Removes the specified activity."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise Exception("Activity ID not specified.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
         # Get the device and activity IDs from the push request.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
-            raise Exception("Invalid activity ID.")
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         # Get the activiites that belong to the logged in user.
         activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None)
@@ -375,25 +376,25 @@ class Api(object):
     def handle_add_time_and_distance_activity(self, values):
         """Called when an API message to add a new activity based on time and distance is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.APP_DISTANCE_KEY not in values:
-            raise Exception("Distance not specified.")
+            raise ApiException.ApiMalformedRequestException("Distance not specified.")
         if Keys.APP_DURATION_KEY not in values:
-            raise Exception("Duration not specified.")
+            raise ApiException.ApiMalformedRequestException("Duration not specified.")
         if Keys.ACTIVITY_TIME_KEY not in values:
-            raise Exception("Activity start time not specified.")
+            raise ApiException.ApiMalformedRequestException("Activity start time not specified.")
         if Keys.ACTIVITY_TYPE_KEY not in values:
-            raise Exception("Activity type not specified.")
+            raise ApiException.ApiMalformedRequestException("Activity type not specified.")
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
         if username is None:
-            raise Exception("Empty username.")
+            raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Validate the activity start time.
         start_time = values[Keys.ACTIVITY_TIME_KEY]
         if not InputChecker.is_integer(start_time):
-            raise Exception("Invalid start time.")
+            raise ApiException.ApiMalformedRequestException("Invalid start time.")
 
         # Add the activity to the database.
         activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
@@ -406,27 +407,27 @@ class Api(object):
     def handle_add_sets_and_reps_activity(self, values):
         """Called when an API message to add a new activity based on sets and reps is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.APP_SETS_KEY not in values:
-            raise Exception("Sets not specified.")
+            raise ApiException.ApiMalformedRequestException("Sets not specified.")
         if Keys.ACTIVITY_TIME_KEY not in values:
-            raise Exception("Activity start time not specified.")
+            raise ApiException.ApiMalformedRequestException("Activity start time not specified.")
         if Keys.ACTIVITY_TYPE_KEY not in values:
-            raise Exception("Activity type not specified.")
+            raise ApiException.ApiMalformedRequestException("Activity type not specified.")
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
         if username is None:
-            raise Exception("Empty username.")
+            raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Convert the array string to an actual array (note: I realize I could use eval for this, but that seems dangerous)
         sets = urllib.unquote_plus(values[Keys.APP_SETS_KEY])
         if len(sets) <= 2:
-            raise Exception("Malformed set data.")
+            raise ApiException.ApiMalformedRequestException("Malformed set data.")
         sets = sets[1:-1] # Remove the brackets
         sets = sets.split(',')
         if len(sets) == 0:
-            raise Exception("Set data was not specified.")
+            raise ApiException.ApiMalformedRequestException("Set data was not specified.")
 
         # Make sure everything is a number.
         new_sets = []
@@ -437,12 +438,12 @@ class Api(object):
 
         # Make sure we got at least one valid set.
         if len(new_sets) == 0:
-            raise Exception("Set data was not specified.")
+            raise ApiException.ApiMalformedRequestException("Set data was not specified.")
 
         # Validate the activity start time.
         start_time = values[Keys.ACTIVITY_TIME_KEY]
         if not InputChecker.is_integer(start_time):
-            raise Exception("Invalid start time.")
+            raise ApiException.ApiMalformedRequestException("Invalid start time.")
 
         # Add the activity to the database.
         activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
@@ -454,9 +455,9 @@ class Api(object):
     def handle_add_activity(self, values):
         """Called when an API message to add a new activity is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_TYPE_KEY not in values:
-            raise Exception("Activity type not specified.")
+            raise ApiException.ApiMalformedRequestException("Activity type not specified.")
 
         activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
         switcher = {
@@ -473,11 +474,11 @@ class Api(object):
     def handle_upload_activity_file(self, username, values):
         """Called when an API message to create a new activity from data within a file is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.UPLOADED_FILE_NAME_KEY not in values:
-            raise Exception("File name not specified.")
+            raise ApiException.ApiMalformedRequestException("File name not specified.")
         if Keys.UPLOADED_FILE_DATA_KEY not in values:
-            raise Exception("File data not specified.")
+            raise ApiException.ApiMalformedRequestException("File data not specified.")
 
         # Decode the parameters.
         uploaded_file_name = urllib.unquote_plus(values[Keys.UPLOADED_FILE_NAME_KEY])
@@ -485,9 +486,9 @@ class Api(object):
 
         # Check for empty.
         if len(uploaded_file_name) == 0:
-            raise Exception('Empty file name.')
+            raise ApiException.ApiMalformedRequestException('Empty file name.')
         if len(uploaded_file_data) == 0:
-            raise Exception('Empty file data for ' + uploaded_file_name + '.')
+            raise ApiException.ApiMalformedRequestException('Empty file data for ' + uploaded_file_name + '.')
 
         # Parse the file and store it's contents in the database.
         self.data_mgr.import_file(username, self.user_id, uploaded_file_data, uploaded_file_name)
@@ -497,28 +498,28 @@ class Api(object):
     def handle_add_tag_to_activity(self, values):
         """Called when an API message to add a tag to an activity is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         return True, ""
 
     def handle_delete_tag_from_activity(self, values):
         """Called when an API message to delete a tag from an activity is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         return True, ""
 
     def handle_list_matched_users(self, values):
         """Called when an API message to list users is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if 'searchname' not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         search_name = urllib.unquote_plus(values['searchname'])
         search_name_len = len(search_name)
         if search_name_len < 3:
-            raise Exception("Search name is too short.")
+            raise ApiException.ApiMalformedRequestException("Search name is too short.")
         if search_name_len > 100:
-            raise Exception("Search name is too long.")
+            raise ApiException.ApiMalformedRequestException("Search name is too long.")
 
         matched_users = self.user_mgr.retrieve_matched_users(search_name)[:100] # Limit the number of results
         json_result = json.dumps(matched_users, ensure_ascii=False)
@@ -527,7 +528,7 @@ class Api(object):
     def list_users_following(self, values):
         """Called when an API message to list the users you are following is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
 
         users_following = self.user_mgr.list_users_followed(self.user_id)
         users_list_str = ""
@@ -538,7 +539,7 @@ class Api(object):
     def list_users_followed_by(self, values):
         """Called when an API message to list the users who are following you is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
 
         users_followed_by = self.user_mgr.list_followers(self.user_id)
         users_list_str = ""
@@ -549,53 +550,53 @@ class Api(object):
     def handle_request_to_follow(self, values):
         """Called when an API message request to follow another user is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.TARGET_EMAIL_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
         if not InputChecker.is_email_address(target_email):
-            raise Exception("Invalid email address.")
+            raise ApiException.ApiMalformedRequestException("Invalid email address.")
 
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
-            raise Exception("Target user does not exist.")
+            raise ApiException.ApiMalformedRequestException("Target user does not exist.")
         if not self.user_mgr.request_to_follow(self.user_id, target_id):
-            raise Exception("Request failed.")
+            raise ApiException.ApiMalformedRequestException("Request failed.")
         return True, ""
 
     def handle_unfollow(self, values):
         """Called when an API message request to unfollow another user is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.TARGET_EMAIL_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
         if not InputChecker.is_email_address(target_email):
-            raise Exception("Invalid email address.")
+            raise ApiException.ApiMalformedRequestException("Invalid email address.")
 
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
-            raise Exception("Target user does not exist.")
+            raise ApiException.ApiMalformedRequestException("Target user does not exist.")
         return False, ""
 
     def handle_export_activity(self, values):
         """Called when an API message request to export an activity."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.ACTIVITY_EXPORT_FORMAT_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
-            raise Exception("Invalid activity ID.")
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         export_format = urllib.unquote_plus(values[Keys.ACTIVITY_EXPORT_FORMAT_KEY])
         if not export_format in ['csv', 'gpx', 'tcx']:
-            raise Exception("Invalid format.")
+            raise ApiException.ApiMalformedRequestException("Invalid format.")
 
         # Generate a random name for the local file.
         local_file_name = os.path.join(os.path.normpath(self.temp_dir), str(uuid.uuid4()))
@@ -622,9 +623,9 @@ class Api(object):
     def handle_claim_device(self, values):
         """Called when an API message request to associate a device with the logged in user is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if 'device_id' not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         result = self.user_mgr.create_user_device_for_user_id(self.user_id, values['device_id'])
         return result, ""
@@ -632,19 +633,19 @@ class Api(object):
     def handle_create_tag(self, values):
         """Called when an API message create a tag is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.ACTIVITY_TAG_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
-            raise Exception("Invalid activity ID.")
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
         if not InputChecker.is_valid(tag):
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         result = self.data_mgr.create_tag(activity_id, tag)
         return result, ""
@@ -652,19 +653,19 @@ class Api(object):
     def handle_delete_tag(self, values):
         """Called when an API message delete a tag is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.ACTIVITY_TAG_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
-            raise Exception("Invalid activity ID.")
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
         if not InputChecker.is_valid(tag):
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         result = self.data_mgr.delete_tag(activity_id, tag)
         return result, ""
@@ -672,13 +673,13 @@ class Api(object):
     def handle_list_tags(self, values):
         """Called when an API message create list tags associated with an activity is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
-            raise Exception("Invalid activity ID.")
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         result = self.data_mgr.retrieve_tags(activity_id)
         return result, ""
@@ -686,19 +687,19 @@ class Api(object):
     def handle_create_comment(self, values):
         """Called when an API message create a comment is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.ACTIVITY_COMMENT_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
-            raise Exception("Invalid activity ID.")
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         comment = urllib.unquote_plus(values[Keys.ACTIVITY_COMMENT_KEY])
         if not InputChecker.is_valid(comment):
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         result = self.data_mgr.create_activity_comment(activity_id, self.user_id, comment)
         return result, ""
@@ -706,13 +707,13 @@ class Api(object):
     def handle_list_comments(self, values):
         """Called when an API message to list comments associated with an activity is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
-            raise Exception("Invalid activity ID.")
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         result = self.data_mgr.retrieve_comments(activity_id)
         return result, ""
@@ -720,31 +721,31 @@ class Api(object):
     def handle_create_gear(self, values):
         """Called when an API message to create gear for a user is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.GEAR_TYPE_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.GEAR_NAME_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.GEAR_DESCRIPTION_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.ADD_TIME_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         gear_type = urllib.unquote_plus(values[Keys.GEAR_TYPE_KEY])
         if not InputChecker.is_valid(gear_type):
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
         if not InputChecker.is_valid(gear_name):
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_description = urllib.unquote_plus(values[Keys.GEAR_DESCRIPTION_KEY])
         if not InputChecker.is_valid(gear_description):
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
         if not InputChecker.is_integer(gear_add_time):
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
         if not InputChecker.is_integer(gear_retire_time):
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         result = self.data_mgr.create_gear(self.user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
         return result, ""
@@ -752,7 +753,7 @@ class Api(object):
     def handle_list_gear(self, values):
         """Called when an API message to list gear associated with a user is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
 
         result = self.data_mgr.list_gear(self.user_id)
         return result, ""
@@ -760,31 +761,31 @@ class Api(object):
     def handle_update_gear(self, values):
         """Called when an API message to update gear for a user is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.GEAR_TYPE_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.GEAR_NAME_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.GEAR_DESCRIPTION_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.ADD_TIME_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         gear_type = urllib.unquote_plus(values[Keys.GEAR_TYPE_KEY])
         if not InputChecker.is_valid(gear_type):
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
         if not InputChecker.is_valid(gear_name):
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_description = urllib.unquote_plus(values[Keys.GEAR_DESCRIPTION_KEY])
         if not InputChecker.is_valid(gear_description):
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
         if not InputChecker.is_integer(gear_add_time):
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
         if not InputChecker.is_integer(gear_retire_time):
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         result = self.data_mgr.update_gear(self.user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
         return result, ""
@@ -792,13 +793,13 @@ class Api(object):
     def handle_delete_gear(self, values):
         """Called when an API message to delete gear for a user is received."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.GEAR_ID_KEY not in values:
-            raise Exception("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         gear_id = values[Keys.GEAR_ID_KEY]
         if not InputChecker.is_uuid(gear_id):
-            raise Exception("Invalid gear ID.")
+            raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
 
         result = self.data_mgr.delete_gear(self.user_id, gear_id)
         return result, ""
@@ -806,7 +807,7 @@ class Api(object):
     def handle_update_settings(self, values):
         """Called when the user submits a setting change."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
 
         result = True
 
@@ -818,14 +819,14 @@ class Api(object):
             if decoded_key == Keys.DEFAULT_PRIVACY:
                 default_privacy = urllib.unquote_plus(values[key]).lower()
                 if not (default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE):
-                    raise Exception("Invalid visibility value.")
+                    raise ApiException.ApiMalformedRequestException("Invalid visibility value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY, default_privacy)
             
             # Metric or imperial?
             elif decoded_key == Keys.PREFERRED_UNITS_KEY:
                 preferred_units = urllib.unquote_plus(values[key]).lower()
                 if not (preferred_units == Keys.UNITS_METRIC_KEY or preferred_units == Keys.UNITS_STANDARD_KEY):
-                    raise Exception("Invalid units value.")
+                    raise ApiException.ApiMalformedRequestException("Invalid units value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY, preferred_units)
 
         return result, ""
@@ -833,7 +834,7 @@ class Api(object):
     def handle_update_profile(self, values):
         """Called when the user submits a profile change."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
 
         result = True
 
@@ -845,24 +846,24 @@ class Api(object):
             if decoded_key == Keys.HEIGHT_KEY:
                 height = urllib.unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(height):
-                    raise Exception("Invalid height.")
+                    raise ApiException.ApiMalformedRequestException("Invalid height.")
                 height, _ = Units.convert_from_preferred_height_units(self.user_mgr, self.user_id, float(height))
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.HEIGHT_KEY, height)
             elif decoded_key == Keys.WEIGHT_KEY:
                 weight = urllib.unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(weight):
-                    raise Exception("Invalid weight.")
+                    raise ApiException.ApiMalformedRequestException("Invalid weight.")
                 weight, _ = Units.convert_from_preferred_mass_units(self.user_mgr, self.user_id, float(weight))
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.WEIGHT_KEY, weight)
             elif decoded_key == Keys.GENDER_KEY:
                 gender = urllib.unquote_plus(values[key]).lower()
                 if not (gender == Keys.GENDER_MALE_KEY or gender == Keys.GENDER_FEMALE_KEY):
-                    raise Exception("Invalid gender value.")
+                    raise ApiException.ApiMalformedRequestException("Invalid gender value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GENDER_KEY, gender)
             elif decoded_key == Keys.RESTING_HEART_RATE_KEY:
                 resting_hr = urllib.unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(resting_hr):
-                    raise Exception("Invalid resting heart rate.")
+                    raise ApiException.ApiMalformedRequestException("Invalid resting heart rate.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.RESTING_HEART_RATE_KEY, float(resting_hr))
 
         return result, ""
@@ -870,16 +871,16 @@ class Api(object):
     def handle_update_visibility(self, values):
         """Called when the user updates the visibility of an activity."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise Exception("Drink ID not specified.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
         if Keys.ACTIVITY_VISIBILITY_KEY not in values:
-            raise Exception("Visibility not specified.")
+            raise ApiException.ApiMalformedRequestException("Visibility not specified.")
 
         visibility = urllib.unquote_plus(values[Keys.ACTIVITY_VISIBILITY_KEY])
         visibility = visibility.lower()
         if not (visibility == Keys.ACTIVITY_VISIBILITY_PUBLIC or visibility == Keys.ACTIVITY_VISIBILITY_PRIVATE):
-            raise Exception("Invalid visibility value.")
+            raise ApiException.ApiMalformedRequestException("Invalid visibility value.")
 
         result = self.data_mgr.update_activity_visibility(values[Keys.ACTIVITY_ID_KEY], visibility)
         return result, ""
@@ -887,17 +888,17 @@ class Api(object):
     def handle_refresh_analysis(self, values):
         """Called when the user wants to recalculate the summary data."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise Exception("Drink ID not specified.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
-            raise Exception("Invalid activity ID.")
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         activity = self.data_mgr.retrieve_activity(activity_id)
         if not activity:
-            raise Exception("Invalid activity.")
+            raise ApiException.ApiMalformedRequestException("Invalid activity.")
 
         activity_user_id = self.user_mgr.get_activity_user(activity)
         self.data_mgr.analyze(activity, activity_user_id)
@@ -906,7 +907,7 @@ class Api(object):
     def handle_generate_workout_plan(self, values):
         """Called when the user wants to recalculate the summary data."""
         if self.user_id is None:
-            raise Exception("Not logged in.")
+            raise ApiException.ApiNotLoggedInException()
         self.data_mgr.generate_workout_plan(self.user_id)
         return True, ""
 

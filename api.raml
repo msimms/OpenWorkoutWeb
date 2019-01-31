@@ -2,144 +2,407 @@
 ---
 title: StraenWeb API
 baseUri: http://straen-app.com/api/{version}
+mediaType: application/json
 version: v1
 /update_status:
     description:Used by the mobile application to update it's status.
     get:
     post:
+        responses:
+            200:
+        responses:
+            500:
 /login_submit:
     description:Authenticates a username and password.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            500:
 /create_login_submit:
     description:Creates a new account.
     get:
     post:
+        responses:
+            200:
+        responses:
+            400:
+        responses:
+            401:
+        responses:
+            500:
 /login_status:
-    description:Determines if a user session is open.
+    description:Determines if the current user has a valid session token.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
 /logout:
     description:Terminates the current user's session.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
 /update_email:
     description:Updates the user's email address.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /update_password:
     description:Updates the user's password.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /delete_user:
     description:Removes the current user and all associated data.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /list_activities:
     description:Returns a list of JSON objects describing all of the user's activities.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /delete_activity:
     description:Removes the specified activity.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /add_activity:
     description:
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /upload_activity_file:
-    description:Creates a new activity from data within a file is received.
+    description:Creates a new activity from data contained with the appended file.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /add_tag_to_activity:
     description:Adds a tag to an activity.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /delete_tag_from_activity:
     description:Deletes a tqg from an activity.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /list_matched_users:
     description:
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /list_users_following:
     description:Lists the users you are following.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /list_users_followed_by:
     description:Lists the users who are following you.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /request_to_follow:
-    description:
+    description:Sends a request to follow another user.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /unfollow:
-    description:
+    description:Removes a user from the list of users being followed by the logged in user.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /export_activity:
-    description:
+    description:Returns the activity in the specified format.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /claim_device:
-    description:
+    description:Associates the device specified by the unique identifier with the logged in user's account.
     get:
     post:
+        responses:
+            200:
+        responses:
+            500:
 /create_tag:
-    description:
+    description:Creates a tag for the specified activity.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /delete_tag:
-    description:
+    description:Deletes a tag from the specified activity.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /list_tags:
-    description:
+    description:Lists the tags for the specified activity.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /create_comment:
-    description:
+    description:Adds a comment to the specified activity.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /list_comments:
-    description:
+    description:Lists comments for the specified activity.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /create_gear:
     description:
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /list_gear:
-    description:
+    description:Lists gear associated with the current user.
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /update_gear:
     description:
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /delete_gear:
     description:
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /update_settings:
     description:
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /update_profile:
     description:
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /update_visibility:
     description:
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /refresh_analysis:
     description:
     get:
     post:
+        responses:
+            200:
+        responses:
+            401:
+        responses:
+            403:
+        responses:
+            500:
 /generate_workout_plan:
     description:
     get:
     post:
+        responses:
+            200:
+        responses:
+            403:
