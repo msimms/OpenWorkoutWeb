@@ -11,6 +11,7 @@ import sys
 import flask
 
 import Api
+import ApiException
 import App
 import DataMgr
 import AnalysisScheduler
@@ -395,6 +396,9 @@ def api(version, method):
         else:
             g_app.log_error("Failed to handle request for api version " + version)
             code = 400
+    except ApiException as e:
+        g_app.log_error(e.message)
+        code = e.code
     except Exception as e:
         response = str(e.args[0])
         g_app.log_error(response)

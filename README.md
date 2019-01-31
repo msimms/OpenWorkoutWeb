@@ -1,3 +1,6 @@
+[![API Docs](https://img.shields.io/badge/api-raml-green.svg)](https://raw.githubusercontent.com/msimms/StraenWeb/master/api.raml)
+[![API Docs](https://img.shields.io/badge/api-html-green.svg)](https://mikesimms.net/straen/api/api.html)
+
 # StraenWeb
 Workout tracking website and companion to the Straen mobile app. This is very much a work-in-progress, and is being done as a spare-time project, so set your expectations appropriately.
 
@@ -8,6 +11,7 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Other workout trackers do not support strength-based exercises, such as pull-ups and push-ups (press-ups).
 * I think users should have control over their own data and this is only possible with an open source application.
 * There are some analytical ideas that I have that none of the major activity tracking websites perform.
+* I want to do some experiments with automatically generating workout plans. This will serve as the platform for this idea.
 * Education. For the experience in performing full-stack software development: dealing with website deployment and scalability, and security issues.
 
 ## Major Features
@@ -16,7 +20,6 @@ Why develop a workout tracker when there are so many closed-source options avail
 
 ## Major Todos
 * Support for strength-based activities (this is partially implemented).
-* Continuous scrolling for the activity feed.
 * Import from other services.
 * Better graphics.
 * Replace Google Maps with Open Street Map.
@@ -72,6 +75,12 @@ Why develop a workout tracker when there are so many closed-source options avail
 ### 0.8
 * Results from distributed tasks are now written direclty to the database for efficiency purposes.
 * File imports are now also distributed over rabbitmq and celery with the results being written directly to the database.
+
+### 0.9
+* API documentation in RAML.
+* Added profile option for resting heart rate.
+* Added VO2Max, BMI, and estimated FTP calculations.
+* Beginnings of automated workout plan generation. Still plenty of work to do.
 
 ## Tech
 This software uses two other source projects to work properly:

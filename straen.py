@@ -11,6 +11,7 @@ import signal
 import sys
 
 import Api
+import ApiException
 import App
 import DataMgr
 import AnalysisScheduler
@@ -493,6 +494,9 @@ class StraenWeb(object):
                     cherrypy.response.status = 400
             else:
                 cherrypy.response.status = 400
+        except ApiException as e:
+            self.log_error(e.message)
+            cherrypy.response.status = e.code
         except Exception as e:
             response = str(e.args[0])
             self.log_error(response)

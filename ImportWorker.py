@@ -1,5 +1,5 @@
 # Copyright 2019 Michael J Simms
-"""Schedules computationally expensive import tasks"""
+"""Performs the computationally expensive import tasks. Implements a celery worker."""
 
 from __future__ import absolute_import
 from CeleryWorker import celery_worker

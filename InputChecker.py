@@ -62,6 +62,15 @@ def is_integer(test_str):
         pass
     return False
 
+def is_float(test_str):
+    """Returns True if the string appears to be a valid float."""
+    try: 
+        float(test_str)
+        return True
+    except ValueError:
+        pass
+    return False
+
 def is_valid(test_str):
     """Tests the input to see that it only contains safe characters."""
     try:

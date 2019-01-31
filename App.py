@@ -16,8 +16,10 @@ import traceback
 import Keys
 import LocationAnalyzer
 import Api
+import BmiCalculator
 import Units
 import UserMgr
+import VO2MaxCalculator
 
 from dateutil.tz import tzlocal
 from mako.lookup import TemplateLookup
@@ -508,14 +510,11 @@ class App(object):
         if summary_data is not None:
 
             if Keys.BEST_SPEED in summary_data:
-                value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_userid, summary_data[Keys.BEST_SPEED], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
-                summary += "\t<li>Max. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(value_distance_units, value_time_units) + "</li>\n"
+                summary += "\t<li>Max. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, summary_data[Keys.BEST_SPEED], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_SPEED) + "</li>\n"
             if Keys.BEST_1K in summary_data:
-                value = Units.convert_speed(1.0 / summary_data[Keys.BEST_1K], Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS)
-                summary += "\t<li>Best KM: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_KILOMETERS, Units.UNITS_TIME_HOURS) + "</li>\n"
+                summary += "\t<li>Best KM: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, summary_data[Keys.BEST_1K], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_1K) + "</li>\n"
             if Keys.BEST_MILE in summary_data:
-                value = Units.convert_speed(1.0 / summary_data[Keys.BEST_MILE], Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_SECONDS, Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS)
-                summary += "\t<li>Best Mile: {:.2f} ".format(value) + Units.get_speed_units_str(Units.UNITS_DISTANCE_MILES, Units.UNITS_TIME_HOURS) + "</li>\n"
+                summary += "\t<li>Best Mile: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, summary_data[Keys.BEST_MILE], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_MILE) + "</li>\n"
 
         if max_heart_rate > 1:
             summary += "\t<li>Max. Heart Rate: {:.2f} ".format(max_heart_rate) + Units.get_heart_rate_units_str() + "</li>\n"
@@ -542,18 +541,7 @@ class App(object):
                 details_str += key
                 details_str += "</b></td><td>"
                 value = summary_data[key]
-
-                if key.find("Heart Rate") > 0:
-                    details_str += "{:.2f}".format(value) + " " + Units.get_heart_rate_units_str()
-                elif key.find("Cadence") > 0:
-                    details_str += "{:.2f}".format(value) + " " + Units.get_cadence_units_str()
-                elif key.find("Power") > 0:
-                    details_str += "{:.2f}".format(value) + " " + Units.get_power_units_str()
-                elif key.find("Speed") > 0:
-                    value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_userid, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
-                    details_str += "{:.2f}".format(value) + " " + Units.get_speed_units_str(value_distance_units, value_time_units)
-                else:
-                    details_str += Units.convert_seconds_to_hours_mins_secs(value)
+                details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
                 details_str += "</td><tr>"
         if len(details_str) == 0:
             details_str = "<td><b>No data</b></td><tr>"
@@ -1016,19 +1004,33 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Get the current settings.
-        selected_height = self.user_mgr.retrieve_user_setting(user_id, Keys.HEIGHT_KEY)
-        selected_weight = self.user_mgr.retrieve_user_setting(user_id, Keys.WEIGHT_KEY)
+        selected_height_metric = self.user_mgr.retrieve_user_setting(user_id, Keys.HEIGHT_KEY)
+        selected_weight_metric = self.user_mgr.retrieve_user_setting(user_id, Keys.WEIGHT_KEY)
         selected_gender = self.user_mgr.retrieve_user_setting(user_id, Keys.GENDER_KEY)
+        selected_resting_hr = self.user_mgr.retrieve_user_setting(user_id, Keys.RESTING_HEART_RATE_KEY)
+        estimated_max_hr = self.user_mgr.retrieve_user_setting(user_id, Keys.ESTIMATED_MAX_HEART_RATE_KEY)
 
         # Render the user's height.
-        if selected_height is None:
-            selected_height = ""
+        if isinstance(selected_height_metric, float):
+            selected_height_pref, height_units = Units.convert_to_preferred_height_units(self.user_mgr, user_id, selected_height_metric, Units.UNITS_DISTANCE_METERS)
+            selected_height_str = "{:.2f}".format(selected_height_pref)
+            height_units_str = Units.get_distance_units_str(height_units)
+        else:
+            selected_height_metric = None
+            selected_height_str = ""
+            height_units_str = Units.get_preferred_height_units_str(self.user_mgr, user_id)
 
         # Render the user's weight.
-        if selected_weight is None:
-            selected_weight = ""
+        if isinstance(selected_weight_metric, float):
+            selected_weight_pref, weight_units = Units.convert_to_preferred_mass_units(self.user_mgr, user_id, selected_weight_metric, Units.UNITS_MASS_KG)
+            selected_weight_str = "{:.2f}".format(selected_weight_pref)
+            weight_units_str = Units.get_mass_units_str(weight_units)
+        else:
+            selected_weight_metric = None
+            selected_weight_str = ""
+            weight_units_str = Units.get_preferred_mass_units_str(self.user_mgr, user_id)
 
-        # Render the privacy option.
+        # Render the gender option.
         gender_options = "\t\t<option value=\"Male\""
         if selected_gender == Keys.GENDER_MALE_KEY:
             gender_options += " selected"
@@ -1038,10 +1040,91 @@ class App(object):
             gender_options += " selected"
         gender_options += ">Female</option>"
 
+        # Render the user's resting heart rate.
+        if isinstance(selected_resting_hr, float):
+            resting_hr_str = "{:.2f}".format(selected_resting_hr)
+        else:
+            resting_hr_str = ""
+            selected_resting_hr = None
+
+        # Get the user's BMI.
+        if selected_height_metric and selected_weight_metric:
+            calc = BmiCalculator.BmiCalculator()
+            bmi = calc.estimate_bmi(selected_weight_metric, selected_height_metric)
+            bmi_str = "{:.2f}".format(bmi)
+        else:
+            bmi_str = "Not calculated."
+    
+        # Get the user's VO2Max.
+        if selected_resting_hr and isinstance(estimated_max_hr, float):
+            calc = VO2MaxCalculator.VO2MaxCalculator()
+            vo2max_str = calc.estimate_vo2max(estimated_max_hr, selected_resting_hr)
+            vo2max = "{:.2f}".format(vo2max_str)
+        else:
+            vo2max = "Not calculated."
+
+        # Get the user's FTP.
+        ftp = self.data_mgr.retrieve_user_estimated_ftp(user_id)
+        if ftp is None:
+            ftp_str = "Cycling activities with power data that was recorded in the last six months must be uploaded before your FTP can be calculated."
+        else:
+            ftp_str = str(ftp)
+
+        # Get the user's heart rate zones.
+        hr_zones = "No heart rate data exist."
+        if isinstance(estimated_max_hr, float):
+            zones = self.data_mgr.retrieve_heart_rate_zones(estimated_max_hr)
+            if len(zones) > 0:
+                hr_zones = "<table>"
+                zone_index = 0
+                for zone in zones:
+                    hr_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
+                    if zone_index == 0:
+                        hr_zones += "0 bpm to {:.2f} bpm</td><tr>".format(zone)
+                    else:
+                        hr_zones += "{:.2f} bpm to {:.2f} bpm</td><tr>".format(zones[zone_index - 1], zone)
+                    hr_zones += "</td><tr>"
+                    zone_index = zone_index + 1
+                hr_zones += "</table>"
+
+        # Get the user's cycling power training zones.
+        power_zones = "Cycling power zones cannot be calculated until the user's FTP (functional threshold power) is set."
+        if isinstance(ftp, float):
+            zones = self.data_mgr.retrieve_power_training_zones(ftp)
+            if len(zones) > 0:
+                power_zones = "<table>"
+                zone_index = 0
+                for zone in zones:
+                    power_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
+                    if zone_index == 0:
+                        power_zones += "0 watts to {:.2f} watts</td><tr>".format(zone)
+                    else:
+                        power_zones += "{:.2f} watts to {:.2f} watts</td><tr>".format(zones[zone_index - 1], zone)
+                    zone_index = zone_index + 1
+                power_zones += "</table>"
+
+        # Get the user's personal recorsd.
+        prs = ""
+        record_groups = self.data_mgr.retrieve_user_personal_records(user_id)
+        for record_group in record_groups:
+            prs += "<h3>" + record_group + "</h3>"
+            prs += "<table>"
+            record_dict = record_groups[record_group]
+            for record_name in record_dict:
+                record = record_dict[record_name]
+                record_value = record[0]
+                activity_id = record[1]
+                record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+
+                prs += "<td>"
+                prs += record_name
+                prs += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>"
+            prs += "</table>"
+
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, weight=selected_weight, height=selected_height, gender_options=gender_options)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, weight=selected_weight_str, weight_units=weight_units_str, height=selected_height_str, height_units=height_units_str, gender_options=gender_options, resting_hr=resting_hr_str, bmi=bmi_str, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones, prs=prs)
 
     @statistics
     def settings(self):

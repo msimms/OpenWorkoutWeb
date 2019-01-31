@@ -62,6 +62,20 @@
 			alert("An error occurred!");
 	}
 
+	function update_resting_hr()
+	{
+		var the_url = "${root_url}/api/1.0/update_profile";
+		var weight = document.getElementById("resting_hr").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["resting heart rate"] : weight});
+		if (send_post_request(the_url, dict, result_text))
+			alert("Resting heart rate updated!");
+		else
+			alert("An error occurred!");
+	}
+
 </script>
 
 <section class="nav">
@@ -70,11 +84,11 @@ ${nav}
 
 <div class="profile" style="width: 600px">
 	<h2>Height</h2>
-	<input type="text" id="height" value="${height}">
+	<input type="text" id="height" value="${height}"> ${height_units}
 	<button type="button" onclick="return update_height()">Update</button>
 	<hr>
 	<h2>Weight</h2>
-	<input type="text" id="weight" value="${weight}">
+	<input type="text" id="weight" value="${weight}"> ${weight_units}
 	<button type="button" onclick="return update_weight()">Update</button>
 	<hr>
 	<h2>Gender</h2>
@@ -83,13 +97,27 @@ ${gender_options}
 	</select>
 	<button type="button" onclick="return update_gender()">Update</button>
 	<hr>
+	<h2>Resting Heart Rate</h2>
+	<input type="text" id="resting_hr" value="${resting_hr}"> bpm
+	<button type="button" onclick="return update_resting_hr()">Update</button>
+	<hr>
 	<h2>BMI</h2>
+${bmi}
 	<hr>
 	<h2>VO2 Max</h2>
+${vo2max}
+	<hr>
+	<h2>Functional Threshold Power (FTP)</h2>
+${ftp}
+	<hr>
+	<h2>Heart Rate Zones</h2>
+${hr_zones}
+	<hr>
+	<h2>Power Training Zones</h2>
+${power_zones}
 	<hr>
 	<h2>Personal Records</h2>
-	<table>
-	</table>
+${prs}
 </div>
 
 </body>

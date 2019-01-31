@@ -1,6 +1,8 @@
 # Copyright 2018 Michael J Simms
 
 import time
+import FtpCalculator
+import HeartRateCalculator
 import Keys
 import Units
 
@@ -16,6 +18,9 @@ class Summarizer(object):
         self.annual_running_bests = {} # Best times for each year (best mile, best 20 minute power, etc.)
         self.annual_cycling_bests = {} # Best times for each year (best mile, best 20 minute power, etc.)
         self.annual_swimming_bests = {} # Best times for each year (best mile, etc.)
+
+        self.ftp_calc = FtpCalculator.FtpCalculator()
+        self.hr_calc = HeartRateCalculator.HeartRateCalculator()
 
     def get_record_dictionary(self, activity_type):
         """Returns the record dictionary that corresponds to the given activity type."""
@@ -87,11 +92,9 @@ class Summarizer(object):
 
     @staticmethod
     def is_better(key, lhs, rhs):
-        # Lower is better
-        if key in [ Keys.BEST_1K, Keys.BEST_MILE, Keys.BEST_10K, Keys.BEST_15K, Keys.BEST_HALF_MARATHON, Keys.BEST_MARATHON, Keys.BEST_METRIC_CENTURY, Keys.BEST_CENTURY ]:
+        if key in Keys.TIME_KEYS: # Lower is better
             return lhs < rhs
-        # Higher is better
-        elif key in [ Keys.BEST_SPEED, Keys.APP_AVG_SPEED_KEY, Keys.BEST_5_SEC_POWER, Keys.BEST_20_MIN_POWER, Keys.BEST_1_HOUR_POWER, Keys.NORMALIZED_POWER ]:
+        elif key in Keys.SPEED_KEYS or key in Keys.POWER_KEYS: # Higher is better
             return rhs > lhs
         return False
 
@@ -100,6 +103,8 @@ class Summarizer(object):
 
         # Ignore these ones.
         if summary_data_key.find(Keys.CLUSTER) > 0:
+            return
+        if summary_data_key.find(Keys.ACTIVITY_TIME_KEY) > 0:
             return
 
         # Get the record set that corresponds with the activity type.
@@ -129,3 +134,5 @@ class Summarizer(object):
         """Submits an activity's metadata for summary analysis."""
         for key in summary_data:
             self.add_activity_datum(activity_id, activity_type, start_time, key, summary_data[key])
+        self.ftp_calc.add_activity_data(activity_id, activity_type, start_time, summary_data)
+        self.hr_calc.add_activity_data(activity_id, activity_type, start_time, summary_data)

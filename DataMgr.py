@@ -2,6 +2,8 @@
 """Data store abstraction"""
 
 import uuid
+import FtpCalculator
+import HeartRateCalculator
 import Importer
 import Keys
 import StraenDb
@@ -50,7 +52,8 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
 
-        activities = self.database.retrieve_user_activity_list(user_id, None, None)
+        exclude_keys = self.database.list_excluded_keys() # Things we don't need.
+        activities = self.database.retrieve_user_activity_list(user_id, None, None, exclude_keys)
         for activity in activities:
             if Keys.ACTIVITY_TIME_KEY in activity:
                 activity_start_time = activity[Keys.ACTIVITY_TIME_KEY]
@@ -188,7 +191,8 @@ class DataMgr(Importer.ActivityWriter):
                 activities.extend(device_activities)
 
         # List activities with no device that are associated with the user.
-        user_activities = self.database.retrieve_user_activity_list(user_id, start, None)
+        exclude_keys = self.database.list_excluded_keys() # Things we don't need.
+        user_activities = self.database.retrieve_user_activity_list(user_id, start, None, exclude_keys)
         for user_activity in user_activities:
             user_activity[Keys.REALNAME_KEY] = user_realname
         activities.extend(user_activities)
@@ -403,6 +407,22 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity_comments(activity_id)
 
+    def store_user_estimated_ftp(self, user_id, estimated_ftp):
+        """Creates or updates the user's estimated FTP in the database."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.store_user_setting(user_id, Keys.ESTIMATED_FTP_KEY, estimated_ftp)
+
+    def retrieve_user_estimated_ftp(self, user_id):
+        """Retrieves the user's estimated FTP in the database."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_user_setting(user_id, Keys.ESTIMATED_FTP_KEY)
+
     def insert_bests_from_activity(self, user_id, activity_id, activity_type, activity_time, bests):
         """Update method for a user's personal record."""
         if self.database is None:
@@ -410,25 +430,38 @@ class DataMgr(Importer.ActivityWriter):
         if user_id is None:
             raise Exception("Bad parameter.")
 
+        # This object will keep track of the PRs.
         summarizer = Summarizer.Summarizer()
+
+        # Load existing PRs.
         all_personal_records = self.database.retrieve_user_personal_records(user_id)
         for record_activity_type in all_personal_records.keys():
             summarizer.set_record_dictionary(record_activity_type, all_personal_records[record_activity_type])
-
         do_update = len(all_personal_records) > 0
+
+        # Load cached summary data from all previous activities.
+        cached_activity_bests = self.database.retrieve_activity_bests(user_id)
+        for cached_activity_data in cached_activity_bests:
+            pass
+
+        # Add data from the new activity.
         summarizer.add_activity_data(activity_id, activity_type, activity_time, bests)
+ 
+        # Create or update the PR list.
         all_personal_records[activity_type] = summarizer.get_record_dictionary(activity_type)
         if do_update:
             self.database.update_user_personal_records(user_id, all_personal_records)
         else:
             self.database.create_user_personal_records(user_id, all_personal_records)
-        return self.database.create_activity_bests(user_id, activity_id, bests)
+
+        # Cache the summary data from this activity so we don't have to recompute everything again.
+        return self.database.create_activity_bests(user_id, activity_id, activity_time, bests)
 
     def retrieve_user_personal_records(self, user_id):
         """Retrieve method for a user's personal record."""
         if self.database is None:
             raise Exception("No database.")
-        if self.user_id is None:
+        if user_id is None:
             raise Exception("Bad parameter.")
         return self.database.retrieve_user_personal_records(user_id)
 
@@ -478,13 +511,25 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.delete_gear(user_id, gear_id)
 
+    @staticmethod
+    def update_summary_data_cb(context, activity, user_id):
+        """Callback function for update_summary_data."""
+        if Keys.ACTIVITY_SUMMARY_KEY not in activity:
+            context.analyze(activity, user_id)
+
+    def update_summary_data(self, user_id):
+        """Makes sure that summary data exists for all of the user's activities."""
+        if self.database is None:
+            raise Exception("No database.")
+        self.database.retrieve_each_user_activity(self, user_id, DataMgr.update_summary_data_cb)
+
     def generate_workout_plan(self, user_id):
         """Generates/updates a workout plan for the user with the specified ID."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        pass
+        self.update_summary_data(user_id)
 
     def retrieve_activity_types(self):
         """Returns a the list of activity types that the software understands."""
@@ -495,3 +540,13 @@ class DataMgr(Importer.ActivityWriter):
         types.append("Push Ups / Press Ups")
         types.append("Pull Ups")
         return types
+
+    def retrieve_heart_rate_zones(self, max_hr):
+        """Returns an array containing the maximum heart rate for each training zone."""
+        calc = HeartRateCalculator.HeartRateCalculator()
+        return calc.training_zones(max_hr)
+
+    def retrieve_power_training_zones(self, ftp):
+        """Returns an array containing the maximum power rate for each training zone."""
+        calc = FtpCalculator.FtpCalculator()
+        return calc.power_training_zones(ftp)

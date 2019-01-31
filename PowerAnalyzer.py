@@ -8,7 +8,7 @@ import Keys
 import SensorAnalyzer
 import Units
 
-# Locate and load the statistics module.
+# Locate and load the statistics module (the functions we're using in are made obsolete in Python 3, but we want to work in Python 2, also)
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 libmathdir = os.path.join(currentdir, 'LibMath', 'python')
 sys.path.insert(0, libmathdir)
@@ -54,6 +54,11 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
             if curr_time_diff == 5:
                 average_power = sum_of_readings / num_readings
                 self.do_power_record_check(Keys.BEST_5_SEC_POWER, average_power)
+                if duration < 720:
+                    return
+            elif curr_time_diff == 720:
+                average_power = sum_of_readings / num_readings
+                self.do_power_record_check(Keys.BEST_12_MIN_POWER, average_power)
                 if duration < 1200:
                     return
             elif curr_time_diff == 1200:
