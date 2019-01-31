@@ -5,7 +5,7 @@ baseUri: http://straen-app.com/api/{version}
 mediaType: application/json
 version: v1
 /update_status:
-    description:Used by the mobile application to update it's status.
+    description: Used by the mobile application to update it's status.
     get:
     post:
         responses:
@@ -13,7 +13,7 @@ version: v1
         responses:
             500:
 /login_submit:
-    description:Authenticates a username and password.
+    description: Authenticates a username and password.
     get:
     post:
         responses:
@@ -23,7 +23,7 @@ version: v1
         responses:
             500:
 /create_login_submit:
-    description:Creates a new account.
+    description: Creates a new account.
     get:
     post:
         responses:
@@ -35,7 +35,7 @@ version: v1
         responses:
             500:
 /login_status:
-    description:Determines if the current user has a valid session token.
+    description: Determines if the current user has a valid session token.
     get:
     post:
         responses:
@@ -45,7 +45,7 @@ version: v1
         responses:
             403:
 /logout:
-    description:Terminates the current user's session.
+    description: Terminates the current user's session.
     get:
     post:
         responses:
@@ -55,7 +55,7 @@ version: v1
         responses:
             403:
 /update_email:
-    description:Updates the user's email address.
+    description: Updates the user's email address.
     get:
     post:
         responses:
@@ -67,7 +67,7 @@ version: v1
         responses:
             500:
 /update_password:
-    description:Updates the user's password.
+    description: Updates the user's password.
     get:
     post:
         responses:
@@ -79,7 +79,7 @@ version: v1
         responses:
             500:
 /delete_user:
-    description:Removes the current user and all associated data.
+    description: Removes the current user and all associated data.
     get:
     post:
         responses:
@@ -91,7 +91,7 @@ version: v1
         responses:
             500:
 /list_activities:
-    description:Returns a list of JSON objects describing all of the user's activities.
+    description: Returns a list of JSON objects describing all of the user's activities.
     get:
     post:
         responses:
@@ -103,7 +103,7 @@ version: v1
         responses:
             500:
 /delete_activity:
-    description:Removes the specified activity.
+    description: Removes the specified activity.
     get:
     post:
         responses:
@@ -127,7 +127,7 @@ version: v1
         responses:
             500:
 /upload_activity_file:
-    description:Creates a new activity from data contained with the appended file.
+    description: Creates a new activity from data contained with the appended file.
     get:
     post:
         responses:
@@ -139,7 +139,7 @@ version: v1
         responses:
             500:
 /add_tag_to_activity:
-    description:Adds a tag to an activity.
+    description: Adds a tag to an activity.
     get:
     post:
         responses:
@@ -151,7 +151,7 @@ version: v1
         responses:
             500:
 /delete_tag_from_activity:
-    description:Deletes a tqg from an activity.
+    description: Deletes a tqg from an activity.
     get:
     post:
         responses:
@@ -175,7 +175,7 @@ version: v1
         responses:
             500:
 /list_users_following:
-    description:Lists the users you are following.
+    description: Lists the users you are following.
     get:
     post:
         responses:
@@ -187,7 +187,7 @@ version: v1
         responses:
             500:
 /list_users_followed_by:
-    description:Lists the users who are following you.
+    description: Lists the users who are following you.
     get:
     post:
         responses:
@@ -199,7 +199,7 @@ version: v1
         responses:
             500:
 /request_to_follow:
-    description:Sends a request to follow another user.
+    description: Sends a request to follow another user.
     get:
     post:
         responses:
@@ -211,7 +211,7 @@ version: v1
         responses:
             500:
 /unfollow:
-    description:Removes a user from the list of users being followed by the logged in user.
+    description: Removes a user from the list of users being followed by the logged in user.
     get:
     post:
         responses:
@@ -223,7 +223,7 @@ version: v1
         responses:
             500:
 /export_activity:
-    description:Returns the activity in the specified format.
+    description: Returns the activity in the specified format.
     get:
     post:
         responses:
@@ -235,7 +235,7 @@ version: v1
         responses:
             500:
 /claim_device:
-    description:Associates the device specified by the unique identifier with the logged in user's account.
+    description: Associates the device specified by the unique identifier with the logged in user's account.
     get:
     post:
         responses:
@@ -243,7 +243,7 @@ version: v1
         responses:
             500:
 /create_tag:
-    description:Creates a tag for the specified activity.
+    description: Creates a tag for the specified activity.
     get:
     post:
         responses:
@@ -255,7 +255,7 @@ version: v1
         responses:
             500:
 /delete_tag:
-    description:Deletes a tag from the specified activity.
+    description: Deletes a tag from the specified activity.
     get:
     post:
         responses:
@@ -267,7 +267,7 @@ version: v1
         responses:
             500:
 /list_tags:
-    description:Lists the tags for the specified activity.
+    description: Lists the tags for the specified activity.
     get:
     post:
         responses:
@@ -279,7 +279,7 @@ version: v1
         responses:
             500:
 /create_comment:
-    description:Adds a comment to the specified activity.
+    description: Adds a comment to the specified activity.
     get:
     post:
         responses:
@@ -291,7 +291,7 @@ version: v1
         responses:
             500:
 /list_comments:
-    description:Lists comments for the specified activity.
+    description: Lists comments for the specified activity.
     get:
     post:
         responses:
@@ -315,7 +315,7 @@ version: v1
         responses:
             500:
 /list_gear:
-    description:Lists gear associated with the current user.
+    description: Lists gear associated with the current user.
     get:
     post:
         responses:
