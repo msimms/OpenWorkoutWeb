@@ -2,6 +2,8 @@
 """Data store abstraction"""
 
 import uuid
+import FtpCalculator
+import HeartRateCalculator
 import Importer
 import Keys
 import StraenDb
@@ -539,8 +541,12 @@ class DataMgr(Importer.ActivityWriter):
         types.append("Pull Ups")
         return types
 
-    def retrieve_heart_rate_zones(self, user_id):
-        return []
+    def retrieve_heart_rate_zones(self, max_hr):
+        """Returns an array containing the maximum heart rate for each training zone."""
+        calc = HeartRateCalculator.HeartRateCalculator()
+        return calc.training_zones(max_hr)
 
-    def retrieve_power_training_zones(self, user_id):
-        return []
+    def retrieve_power_training_zones(self, ftp):
+        """Returns an array containing the maximum power rate for each training zone."""
+        calc = FtpCalculator.FtpCalculator()
+        return calc.power_training_zones(ftp)
