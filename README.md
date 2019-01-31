@@ -1,3 +1,6 @@
+[![API Docs](https://img.shields.io/badge/api-raml-green.svg)](https://raw.githubusercontent.com/msimms/StraenWeb/master/api.raml)
+[![API Docs](https://img.shields.io/badge/api-html-green.svg)](https://mikesimms.net/straen/api/api.html)
+
 # StraenWeb
 Workout tracking website and companion to the Straen mobile app. This is very much a work-in-progress, and is being done as a spare-time project, so set your expectations appropriately.
 
