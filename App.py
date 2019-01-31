@@ -1074,6 +1074,15 @@ class App(object):
         zones = self.data_mgr.retrieve_heart_rate_zones(user_id)
         if len(zones) > 0:
             hr_zones = "<table>"
+            zone_index = 0
+            for zone in zones:
+                hr_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
+                if zone_index == 0:
+                    hr_zones += "0 bpm to {:.2f} bpm</td><tr>".format(zone)
+                else:
+                    hr_zones += "{:.2f} bpm to {:.2f} bpm</td><tr>".format(zones[zone_index - 1], zone)
+                hr_zones += "</td><tr>"
+                zone_index = zone_index + 1
             hr_zones += "</table>"
         else:
             hr_zones = "No heart rate data exist."
@@ -1082,14 +1091,13 @@ class App(object):
         zones = self.data_mgr.retrieve_power_training_zones(user_id)
         if len(zones) > 0:
             power_zones = "<table>"
-            zone_index = 1
+            zone_index = 0
             for zone in zones:
-                power_zones += "<td>" + str(zone_index) + "</td><td>"
-                if zone_index == 1:
-                    power_zones += ("0 watts to {:.2f} watts").format(zone[zone_index])
+                power_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
+                if zone_index == 0:
+                    power_zones += "0 watts to {:.2f} watts</td><tr>".format(zone)
                 else:
-                    power_zones += ("{:.2f} watts to {:.2f} watts").format(zone[zone_index - 1], zone[zone_index])
-                power_zones += "</td><tr>"
+                    power_zones += "{:.2f} watts to {:.2f} watts</td><tr>".format(zones[zone_index - 1], zone)
                 zone_index = zone_index + 1
             power_zones += "</table>"
         else:
