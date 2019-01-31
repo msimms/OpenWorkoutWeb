@@ -75,6 +75,8 @@ Why develop a workout tracker when there are so many closed-source options avail
 
 ### 0.9
 * API documentation in RAML.
+* Added profile option for resting heart rate.
+* Added VO2Max, BMI, and estimated FTP calculations.
 * Beginnings of automated workout plan generation. Still plenty of work to do.
 
 ## Tech
