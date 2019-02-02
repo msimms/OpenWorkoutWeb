@@ -199,6 +199,8 @@ class Api(object):
         if not InputChecker.is_email_address(email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
         realname = urllib.unquote_plus(values[Keys.REALNAME_KEY])
+        if not InputChecker.is_valid(realname):
+            raise ApiException.ApiMalformedRequestException("Invalid name.")
         password1 = urllib.unquote_plus(values[Keys.PASSWORD1_KEY])
         password2 = urllib.unquote_plus(values[Keys.PASSWORD2_KEY])
 
