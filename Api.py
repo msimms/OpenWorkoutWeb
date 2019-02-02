@@ -902,7 +902,7 @@ class Api(object):
         if not activity:
             raise ApiException.ApiMalformedRequestException("Invalid activity.")
 
-        activity_user_id = self.user_mgr.get_activity_user(activity)
+        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
         self.data_mgr.analyze(activity, activity_user_id)
         return True, ""
 

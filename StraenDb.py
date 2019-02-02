@@ -398,8 +398,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            user_id_obj = ObjectId(user_id)
-            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id_obj})
+            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
             if user_records is None:
                 post = {Keys.RECORDS_USER_ID: user_id, Keys.PERSONAL_RECORDS: records}
                 self.records_collection.insert(post)
