@@ -87,6 +87,7 @@ This software uses two other source projects to work properly:
 
 * [LibMath](https://github.com/msimms/LibMath) - A collection of math utilities, including a peak finding algorithm.
 * [fullcalendar](https://fullcalendar.io/) - A Javascript calendar implementation.
+* [chosen](https://github.com/harvesthq/chosen) - A select box implementation that is used for the tag user interface.
 
 The app is written in a combination of Python and JavaScript.
 
