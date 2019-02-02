@@ -5,8 +5,9 @@
 
 <title>${product} - ${name} - ${pagetitle}</title>
 
-<link rel="stylesheet" href="${root_url}/css/normalize.css">
-<link rel="stylesheet" href="${root_url}/css/site.css">
+<link rel="stylesheet" type="text/css" href="${root_url}/css/normalize.css">
+<link rel="stylesheet" type="text/css" href="${root_url}/css/site.css">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css" />
 
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
@@ -55,7 +56,8 @@ ${nav}
 
 <div class="map_canvas" id="map_canvas">
 
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js"></script>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}"></script>
 <script type="text/javascript">
 	var contentString
@@ -337,6 +339,12 @@ ${powers}
 		else
 			alert(result_text.value);
 	}
+
+	jQuery(document).ready(function()
+	{
+		jQuery(".chosen").data("placeholder", "Specify tags...").chosen();
+	});
+
 </script>
 
 <hr>
@@ -351,9 +359,19 @@ ${details}
 </section>
 
 <section class="comments">
+<p>
 <table>
 ${details_controls}
 </table>
+</p>
+</section>
+
+<section class="comments">
+<p>
+<select name="tags" id="tags" class="chosen" multiple="true" style="width:50%;">
+${tags}
+</select>
+</p>
 </section>
 
 <section class="comments">
@@ -366,11 +384,9 @@ ${comments}
 </section>
 
 <section class="export">
-<p>
 <table>
 ${exports}
 </table>
-</p>
 </section>
 
 </body>

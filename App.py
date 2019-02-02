@@ -284,6 +284,17 @@ class App(object):
         navbar_str += "\t</ul>\n</nav>"
         return navbar_str
 
+    def render_tags(self, activity_id, logged_in):
+        """Helper function for building the tags string."""
+        tags = self.data_mgr.retrieve_tags(activity_id)
+        tags_str = ""
+        if tags is not None:
+            for tag in tags:
+                tags_str += "<option>"
+                tags_str += tag
+                tags_str += "</option>\n"
+        return tags_str
+
     def render_comments(self, activity_id, logged_in):
         """Helper function for building the comments string."""
         comments = self.data_mgr.retrieve_activity_comments(activity_id)
@@ -299,7 +310,7 @@ class App(object):
                 comments_str += decoded_entry[Keys.ACTIVITY_COMMENT_KEY]
                 comments_str += "\"</td><tr>\n"
         if logged_in:
-            comments_str += "<td><textarea rows=\"4\" cols=\"100\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>\n"
+            comments_str += "<td><textarea rows=\"4\" style=\"width:50%;\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>\n"
             comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>\n"
         return comments_str
 
@@ -394,6 +405,14 @@ class App(object):
             summary += "</li>\n"
         summary += "</ul>\n"
 
+        if belongs_to_current_user:
+            details_controls_str = "<td><button type=\"button\" onclick=\"return refresh_analysis()\">Refresh Analysis</button></td><tr>\n"
+        else:
+            details_controls_str = ""
+
+        # List the tags.
+        tags_str = self.render_tags(activity_id, logged_in)
+
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
 
@@ -407,7 +426,7 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.lifting_activity_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, comments=comments_str, exports=exports_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, tags=tags_str, comments=comments_str, exports=exports_str)
 
     def render_metadata_for_page(self, key, activity_id):
         """Helper function for processing meatadata and formatting it for display."""
@@ -551,6 +570,9 @@ class App(object):
         else:
             details_controls_str = ""
 
+        # List the tags.
+        tags_str = self.render_tags(activity_id, logged_in)
+
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
 
@@ -564,7 +586,7 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.map_single_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, comments=comments_str, exports=exports_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports=exports_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
