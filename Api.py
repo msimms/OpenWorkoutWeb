@@ -649,7 +649,7 @@ class Api(object):
         if not InputChecker.is_valid(tag):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        result = self.data_mgr.create_tag(activity_id, tag)
+        result = self.data_mgr.create_activity_tag(activity_id, tag)
         return result, ""
 
     def handle_delete_tag(self, values):
@@ -683,7 +683,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        result = self.data_mgr.retrieve_tags(activity_id)
+        result = self.data_mgr.retrieve_activity_tags(activity_id)
         return result, ""
 
     def handle_create_comment(self, values):

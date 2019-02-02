@@ -371,7 +371,17 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.delete_activity_summary(activity_id)
 
-    def create_tag(self, activity_id, tag):
+    def list_default_tags(self):
+        """Returns a list of tags that can be used for any activity."""
+        tags = []
+        tags.append('Race')
+        tags.append('Virtual')
+        tags.append('Hot')
+        tags.append('Humid')
+        tags.append('Cold')
+        return tags
+
+    def create_activity_tag(self, activity_id, tag):
         """Returns the most recent 'num' locations for the specified device and activity."""
         if self.database is None:
             raise Exception("No database.")
@@ -381,7 +391,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.create_tag(activity_id, tag)
 
-    def retrieve_tags(self, activity_id):
+    def retrieve_activity_tags(self, activity_id):
         """Returns the most recent 'num' locations for the specified device and activity."""
         if self.database is None:
             raise Exception("No database.")

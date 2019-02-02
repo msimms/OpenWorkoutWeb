@@ -286,11 +286,19 @@ class App(object):
 
     def render_tags(self, activity_id, logged_in):
         """Helper function for building the tags string."""
-        tags = self.data_mgr.retrieve_tags(activity_id)
+        activity_tags = self.data_mgr.retrieve_activity_tags(activity_id)
+        default_tags = self.data_mgr.list_default_tags()
+        all_tags = []
+        all_tags.extend(activity_tags)
+        all_tags.extend(default_tags)
+        all_tags = list(set(all_tags))
         tags_str = ""
-        if tags is not None:
-            for tag in tags:
-                tags_str += "<option>"
+        if all_tags is not None:
+            for tag in all_tags:
+                if tag in activity_tags:
+                    tags_str += "<option selected=true>"
+                else:
+                    tags_str += "<option>"
                 tags_str += tag
                 tags_str += "</option>\n"
         return tags_str
@@ -395,16 +403,7 @@ class App(object):
         if Keys.ACTIVITY_TIME_KEY in activity:
             summary += "\t<li>Start Time: " + App.timestamp_code_to_str(activity[Keys.ACTIVITY_TIME_KEY]) + "</li>\n"
 
-        # Add tag data.
-        tags = self.data_mgr.retrieve_tags(activity_id)
-        if tags is not None:
-            summary += "\t<li>Tags: "
-            for tag in tags:
-                summary += tag
-                summary += " "
-            summary += "</li>\n"
-        summary += "</ul>\n"
-
+        # Controls are only allowed if the user viewing the activity owns it.
         if belongs_to_current_user:
             details_controls_str = "<td><button type=\"button\" onclick=\"return refresh_analysis()\">Refresh Analysis</button></td><tr>\n"
         else:
@@ -542,16 +541,6 @@ class App(object):
         if max_power:
             summary += "\t<li>Max. Power: {:.2f} ".format(max_power) + Units.get_power_units_str() + "</li>\n"
 
-        # Add tag data.
-        tags = self.data_mgr.retrieve_tags(activity_id)
-        if tags is not None:
-            summary += "\t<li>Tags: "
-            for tag in tags:
-                summary += tag
-                summary += " "
-            summary += "</li>\n"
-        summary += "</ul>\n"
-
         # Build the detailed analysis table.
         details_str = ""
         if summary_data is not None:
@@ -565,6 +554,7 @@ class App(object):
         if len(details_str) == 0:
             details_str = "<td><b>No data</b></td><tr>"
 
+        # Controls are only allowed if the user viewing the activity owns it.
         if belongs_to_current_user:
             details_controls_str = "<td><button type=\"button\" onclick=\"return refresh_analysis()\">Refresh Analysis</button></td><tr>\n"
         else:

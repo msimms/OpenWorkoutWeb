@@ -1123,7 +1123,7 @@ class MongoDatabase(Database.Database):
         """Retrieves all the tags for the specified activity."""
         if activity_id is None:
             self.log_error(MongoDatabase.retrieve_tags.__name__ + ": Unexpected empty object: activity_id")
-            return None
+            return []
 
         try:
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
@@ -1133,7 +1133,7 @@ class MongoDatabase(Database.Database):
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
-        return None
+        return []
 
     def delete_tag(self, activity_id, tag):
         """Deletes the specified tag from the activity with the given ID."""
