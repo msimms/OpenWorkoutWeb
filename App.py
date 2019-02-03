@@ -86,7 +86,8 @@ class App(object):
         self.tempmod_dir = os.path.join(self.root_dir, 'tempmod')
         self.google_maps_key = google_maps_key
         self.lifting_activity_html_file = os.path.join(root_dir, HTML_DIR, 'lifting_activity.html')
-        self.map_single_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
+        self.map_single_osm_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_osm.html')
+        self.map_single_google_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
         self.map_multi_html_file = os.path.join(root_dir, HTML_DIR, 'map_multi_google.html')
         self.error_logged_in_html_file = os.path.join(root_dir, HTML_DIR, 'error_logged_in.html')
 
@@ -575,8 +576,13 @@ class App(object):
         else:
             page_title = "Activity"
 
-        my_template = Template(filename=self.map_single_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports=exports_str)
+        # If a google maps key was provided then use google maps, otherwise use open street map.
+        if self.google_maps_key:
+            my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports=exports_str)
+        else:
+            my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports=exports_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""

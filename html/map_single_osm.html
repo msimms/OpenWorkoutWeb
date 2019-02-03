@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+<title>${product} - ${name} - ${pagetitle}</title>
+
+<link rel="stylesheet" type="text/css" href="${root_url}/css/normalize.css">
+<link rel="stylesheet" type="text/css" href="${root_url}/css/site.css">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css" />
+
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+
+</head>
+
+<style type="text/css">
+	html { height: 100% }
+	body { height: 100%; margin: 0; padding: 0 }
+	div { margin: 0px }
+	#map_canvas { height: 75% }
+
+	div.bar
+	{
+		display: inline-block;
+		width: 20px;
+		height: 75px;	/* Gets overriden by D3-assigned height below */
+		background-color: teal;
+	}
+
+	path
+	{
+		stroke: steelblue;
+		stroke-width: 2;
+		fill: none;
+	}
+
+	.axis path,
+	.axis line
+	{
+		fill: none;
+		stroke: #000;
+		stroke-width: 1;
+		shape-rendering: crispEdges;
+	}
+</style>
+
+<body>
+
+<section class="nav">
+${nav}
+</section>
+
+<div class="map_canvas" id="map_canvas">
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js"></script>
+<script type="text/javascript" src="https://openlayers.org/api/OpenLayers.js"></script>
+<script type="text/javascript" src="https://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
+<script type="text/javascript">
+	var contentString
+	var routePath
+	var map
+	var marker = null
+	var infoWindow = null
+	var lastLat = ${lastLat}
+	var lastLon = ${lastLon}
+
+	function escapeRegExp(str)
+	{
+		return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+	}
+
+	function replaceAll(str, find, replace)
+	{
+		return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+	}
+
+	function newCoord(x, y)
+	{
+		return new OpenLayers.LonLat(x, y);
+	}
+
+	function initialize()
+	{
+		map = new OpenLayers.Map("map_canvas", {
+			controls:[
+				new OpenLayers.Control.Navigation(),
+				new OpenLayers.Control.PanZoomBar(),
+				new OpenLayers.Control.LayerSwitcher(),
+				new OpenLayers.Control.Attribution()],
+			maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+			maxResolution: 156543.0399,
+			numZoomLevels: 19,
+			units: 'm',
+			projection: new OpenLayers.Projection("EPSG:900913"),
+			displayProjection: new OpenLayers.Projection("EPSG:4326")
+		} );
+
+		// Define the map layer
+		// Here we use a predefined layer that will be kept up to date with URL changes
+		layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
+		map.addLayer(layerMapnik);
+		layerCycleMap = new OpenLayers.Layer.OSM.CycleMap("CycleMap");
+		map.addLayer(layerCycleMap);
+		layerMarkers = new OpenLayers.Layer.Markers("Markers");
+		map.addLayer(layerMarkers);
+
+		// Start position for the map (hardcoded here for simplicity,
+		// but maybe you want to get this from the URL params)
+		var lat = lastLat;
+		var lon = lastLon;
+		var zoom = 13;
+		var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
+		map.setCenter(lonLat, zoom);
+	}
+
+	var appendToTrack = function(response)
+	{
+		if (response == null)
+			return;
+		if (response.length < 3)
+			return;
+		if (routePath == null)
+			return;
+
+		var objList = JSON.parse(response);
+		if (objList == null)
+			return;
+		if (objList.length == 0)
+			return;
+
+		for (var i = 0; i < objList.length; ++i)
+		{
+			var path = routePath.getPath();
+			routeCoordinates.push(new OpenLayers.LonLat(objList[i].latitude, objList[i].longitude));
+			routePath.setPath(routeCoordinates);
+			routePath.setMap(map);
+		}
+
+		lastLat = objList[objList.length - 1].latitude;
+		lastLon = objList[objList.length - 1].longitude;
+	};
+
+	var updateMetadata = function(response)
+	{
+		if (response == null)
+			return;
+		if (response.length < 3)
+			return;
+
+		response2 = response.substring(1, response.length - 1);
+		response3 = replaceAll(response2, "\\\"", "\"");
+		var objList = JSON.parse(response3);
+		if (objList == null)
+			return;
+
+		contentString = '<div id="content">' +
+			'<div id="siteNotice">' +
+			'</div>' +
+			'<h2 id="firstHeading" class="firstHeading">Last Known Position</h2>' +
+			'<div id="bodyContent">' +
+			'<p>';
+		for (var i = 0; i < objList.length; ++i)
+		{
+			if ((objList[i].name != "Name") && (objList[i].name != "Avg. Speed"))
+			{
+				contentString += objList[i].name;
+				contentString += " = ";
+				contentString += objList[i].value;
+				contentString += "<br>";
+			}
+		}
+		contentString +=
+			'</p>' +
+			'</div>' +
+			'</div>';
+
+		if (infoWindow)
+		{
+			infoWindow.close();
+			infoWindow = null;
+		}
+		if (marker)
+		{
+			marker.setMap(null);
+			marker = null;
+		}
+
+		infoWindow = new google.maps.InfoWindow
+		({
+			content: contentString
+		});
+
+		marker = new google.maps.Marker
+		({
+			position: new google.maps.LatLng(lastLat, lastLon),
+			map: map,
+			title: 'Current Position'
+		});
+
+		google.maps.event.addListener(marker, 'click', function()
+		{
+			infoWindow.open(map, marker);
+		});
+
+		infoWindow.open(map, marker);
+	};
+
+	var checkForUpdates = function()
+	{
+		$.ajax({ type: 'POST', url: "${root_url}/update_track/${activityId}/${routeLen}", success: appendToTrack, dataType: "application/json" });
+		$.ajax({ type: 'POST', url: "${root_url}/update_metadata/${activityId}", success: updateMetadata, dataType: "application/json" });
+	};
+
+	initialize();
+	//setInterval(checkForUpdates, 15000);
+</script>
+
+</div>
+
+<section class="summary">
+${summary}
+</section>
+
+<div id="charts"/>
+
+<script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript">
+	function drawChart(data, title, color)
+	{
+		var margin = {top: 20, right: 20, bottom: 20, left: 50},
+			width = $("#charts").width() - margin.left - margin.right,
+			height = 200 - margin.top - margin.bottom;
+
+		var x = d3.time.scale().range([0, width]);
+		var y = d3.scale.linear().range([height, 0]);
+
+		var xAxis = d3.svg.axis().scale(x).orient("bottom");
+		var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
+
+		var valueline = d3.svg.line()
+			.x(function(d) { return x(d.date); })
+			.y(function(d) { return y(d.value); });
+
+		var svg = d3.select("#charts")
+			.append("svg:svg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		x.domain(d3.extent(data, function(d) { return d.date; }));
+		y.domain(d3.extent(data, function(d) { return d.value; }));
+
+		svg.append("path")
+			.attr("class", "line")
+			.attr("d", valueline(data))
+			.style("stroke", color);
+		svg.append("g")
+			.attr("class", "x axis")
+			.attr("transform", "translate(0," + height + ")")
+			.call(xAxis);
+		svg.append("g")
+			.attr("class", "y axis")
+			.call(yAxis)
+			.append("text")
+			.attr("transform", "rotate(-90)")
+			.attr("y", 6)
+			.attr("dy", ".71em")
+			.style("text-anchor", "end")
+			.text(title);
+	}
+
+	var speeds = [
+${currentSpeeds}
+	];
+	var heartRates = [
+${heartRates}
+	];
+	var cadences = [
+${cadences}
+	];
+	var powers = [
+${powers}
+	];
+
+	if (speeds.length > 0)
+		$(function() { drawChart(speeds, "Speed", "DodgerBlue") });
+	if (heartRates.length > 0)
+		$(function() { drawChart(heartRates, "BPM", "FireBrick") });
+	if (cadences.length > 0)
+		$(function() { drawChart(cadences, "RPM", "ForestGreen") });
+	if (powers.length > 0)
+		$(function() { drawChart(powers, "Watts", "ForestGreen") });
+</script>
+
+</div>
+
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script>
+	function refresh_analysis()
+	{
+		var the_url = "${root_url}/api/1.0/refresh_analysis";
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["activity_id"] : "${activityId}"});
+		if (send_post_request(the_url, dict, result_text))
+			window.location.reload();
+		else
+			alert(result_text.value);
+	}
+
+	function create_comment()
+	{
+		var the_url = "${root_url}/api/1.0/create_comment";
+		var comment = document.getElementById("comment").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["activity_id"] : "${activityId}"});
+		dict.push({["comment"] : comment});
+		if (send_post_request(the_url, dict, result_text))
+			window.location.reload();
+		else
+			alert(result_text.value);
+	}
+
+	function export_activity()
+	{
+		var the_url = "${root_url}/api/1.0/export_activity";
+		var format = document.getElementById("format").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["activity_id"] : "${activityId}"});
+		dict.push({["export_format"] : format});
+		if (send_post_request(the_url, dict, result_text))
+			create_local_file(result_text.value, "${activityId}", "text/plain;charset=utf-8");
+		else
+			alert(result_text.value);
+	}
+
+	jQuery(document).ready(function()
+	{
+		jQuery(".chosen").data("placeholder", "Specify tags...").chosen();
+	});
+
+</script>
+
+<hr>
+
+<section class="analysis">
+<p>
+Detailed Analysis:
+<table>
+${details}
+</table>
+</p>
+</section>
+
+<section class="comments">
+<p>
+<table>
+${details_controls}
+</table>
+</p>
+</section>
+
+<section class="comments">
+<p>
+<select name="tags" id="tags" class="chosen" multiple="true" style="width:50%;">
+${tags}
+</select>
+</p>
+</section>
+
+<section class="comments">
+<p>
+Comments:
+<table>
+${comments}
+</table>
+</p>
+</section>
+
+<section class="export">
+<table>
+${exports}
+</table>
+</section>
+
+</body>
+
+</html>
