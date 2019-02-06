@@ -1,11 +1,10 @@
 # Copyright 2018 Michael J Simms
-"""Writes GPX and TCX files."""
+"""Writes CSV, GPX and TCX data."""
 
 import inspect
 import os
 import sys
 
-import DataMgr
 import Keys
 import GpxWriter
 import TcxWriter
@@ -17,7 +16,7 @@ sys.path.insert(0, libmathdir)
 import distance
 
 class Exporter(object):
-    """Exporter for GPX and TCX location files."""
+    """Exporter for GPX and TCX data as well as CSV accelerometer data."""
 
     def __init__(self):
         super(Exporter, self).__init__()
@@ -36,7 +35,7 @@ class Exporter(object):
         return current_reading
 
     def export_as_csv(self, file_name, activity):
-        """Creates a CSV file for accelerometer data."""
+        """Formats the accelerometer data as CSV."""
         buf = ""
         with open(file_name, 'wt') as local_file:
             if Keys.APP_ACCELEROMETER_KEY in activity:
@@ -54,7 +53,7 @@ class Exporter(object):
         return buf
 
     def export_as_gpx(self, file_name, activity):
-        """Creates a GPX file."""
+        """Exports the activity in GPX format."""
         locations = []
         cadence_readings = []
         hr_readings = []
@@ -131,7 +130,7 @@ class Exporter(object):
         return writer.buf
 
     def export_as_tcx(self, file_name, activity):
-        """Creates a TCX file."""
+        """Exports the activity in TCX format."""
         locations = []
         cadence_readings = []
         hr_readings = []
@@ -231,9 +230,9 @@ class Exporter(object):
 
         return writer.buf
 
-    def export(self, data_mgr, activity_id, file_name, file_type):
+    def export(self, activity, file_name, file_type):
+        """Exports the activity in the specified format."""
         buf = ""
-        activity = data_mgr.retrieve_activity(activity_id)
         if file_type == 'csv':
             buf = self.export_as_csv(file_name, activity)
         elif file_type == 'gpx':

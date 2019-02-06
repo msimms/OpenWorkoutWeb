@@ -31,6 +31,12 @@ class Api(object):
         logger = logging.getLogger()
         logger.debug(log_str)
 
+    def activity_belongs_to_logged_in_user(self, activity):
+        """Returns True if the specified activity belongs to the logged in user."""
+        activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
+        belongs_to_current_user = str(activity_user_id) == str(self.user_id)
+        return belongs_to_current_user
+
     def parse_json_loc_obj(self, activity_id, json_obj):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
         location = []
@@ -600,8 +606,12 @@ class Api(object):
         if not export_format in ['csv', 'gpx', 'tcx']:
             raise ApiException.ApiMalformedRequestException("Invalid format.")
 
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
+
         exporter = Exporter.Exporter()
-        result = exporter.export(self.data_mgr, activity_id, None, export_format)
+        result = exporter.export(activity, None, export_format)
 
         return True, result
 
