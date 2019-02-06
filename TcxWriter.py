@@ -84,7 +84,7 @@ class TcxWriter(XmlWriter.XmlWriter):
 
     def start_lap(self, time_ms):
         attributes = {}
-        attribute["StartTime"] = self.format_time_ms(time_ms)
+        attributes["StartTime"] = self.format_time_ms(time_ms)
         self.open_tag_with_attributes(TCX_TAG_NAME_LAP, attributes, False)
 
     def store_lap_seconds(self, time_ms):
