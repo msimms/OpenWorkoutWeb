@@ -107,7 +107,7 @@ ${nav}
 				url: "${root_url}/api/1.0/export_activity?activity_id=${activityId}&export_format=gpx",
 				format: new OpenLayers.Format.GPX()
 			}),
-			style: {strokeColor: "green", strokeWidth: 5, strokeOpacity: 0.5},
+			style: {strokeColor: "red", strokeWidth: 3, strokeOpacity: 0.75},
 			projection: new OpenLayers.Projection("EPSG:4326")
 		});
 		map.addLayer(lgpx);
