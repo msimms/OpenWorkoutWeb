@@ -82,6 +82,10 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Added VO2Max, BMI, and estimated FTP calculations.
 * Beginnings of automated workout plan generation. Still plenty of work to do.
 
+### 0.10
+* Support for OpenStreetMaps (support for Google Maps is still available).
+* Activity export in GPX format.
+
 ## Tech
 This software uses several other source projects to work properly:
 
