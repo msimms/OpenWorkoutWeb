@@ -100,14 +100,22 @@ ${nav}
 			displayProjection: new OpenLayers.Projection("EPSG:4326")
 		} );
 
+		// Add the Layer with the GPX Track
+		var lgpx = new OpenLayers.Layer.Vector("", {
+			strategies: [new OpenLayers.Strategy.Fixed()],
+			protocol: new OpenLayers.Protocol.HTTP({
+				url: "${root_url}/api/1.0/export_activity?activity_id=${activityId}&export_format=gpx",
+				format: new OpenLayers.Format.GPX()
+			}),
+			style: {strokeColor: "green", strokeWidth: 5, strokeOpacity: 0.5},
+			projection: new OpenLayers.Projection("EPSG:4326")
+		});
+		map.addLayer(lgpx);
+
 		// Define the map layer
-		// Here we use a predefined layer that will be kept up to date with URL changes
-		layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
-		map.addLayer(layerMapnik);
-		layerCycleMap = new OpenLayers.Layer.OSM.CycleMap("CycleMap");
-		map.addLayer(layerCycleMap);
-		layerMarkers = new OpenLayers.Layer.Markers("Markers");
-		map.addLayer(layerMarkers);
+		map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));
+		map.addLayer(new OpenLayers.Layer.OSM.CycleMap("CycleMap"));
+		map.addLayer(new OpenLayers.Layer.Markers("Markers"));
 
 		// Start position for the map (hardcoded here for simplicity,
 		// but maybe you want to get this from the URL params)
