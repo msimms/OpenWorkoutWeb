@@ -58,7 +58,7 @@ ${nav}
 
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js"></script>
-<script type="text/javascript" src="https://openlayers.org/api/OpenLayers.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js"></script>
 <script type="text/javascript" src="https://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
 <script type="text/javascript">
 	var contentString
@@ -114,8 +114,6 @@ ${nav}
 
 		// Define the map layer
 		map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));
-		map.addLayer(new OpenLayers.Layer.OSM.CycleMap("CycleMap"));
-		map.addLayer(new OpenLayers.Layer.Markers("Markers"));
 
 		// Start position for the map (hardcoded here for simplicity,
 		// but maybe you want to get this from the URL params)
