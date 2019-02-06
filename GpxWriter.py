@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 import datetime
-import XmlFileWriter
+import XmlWriter
 
 GPX_TAG_NAME = "gpx"
 GPX_TAG_NAME_METADATA = "metadata"
@@ -43,11 +43,11 @@ GPX_TPX_HR = "gpxtpx:hr"
 GPX_TPX_CADENCE = "gpxtpx:cad"
 GPX_TPX_POWER = "power"
 
-class GpxFileWriter(XmlFileWriter.XmlFileWriter):
+class GpxWriter(XmlWriter.XmlWriter):
     """Formats an GPX file."""
 
     def __init__(self):
-        GpxFileWriter.GpxFileWriter.__init__(self)
+        GpxWriter.GpxWriter.__init__(self)
 
     def create_gpx_file(self, file_name, creator):
         self.create_file(file_name)

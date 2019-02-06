@@ -7,8 +7,8 @@ import sys
 
 import DataMgr
 import Keys
-import GpxFileWriter
-import TcxFileWriter
+import GpxWriter
+import TcxWriter
 
 # Locate and load the distance module.
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -80,7 +80,7 @@ class Exporter(object):
         nearest_temp = None
         nearest_power = None
 
-        writer = GpxFileWriter.GpxFileWriter()
+        writer = GpxWriter.GpxWriter()
         writer.create_gpx_file(file_name)
 
         done = False
@@ -129,7 +129,7 @@ class Exporter(object):
         nearest_power = None
         nearest_hr = None
 
-        writer = TcxFileWriter.TcxFileWriter()
+        writer = TcxWriter.TcxWriter()
         writer.create_tcx_file(file_name)
         writer.start_activity(activity[Keys.ACTIVITY_TYPE_KEY])
 

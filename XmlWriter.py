@@ -22,11 +22,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class XmlFileWriter(object):
+class XmlWriter(object):
     """Base class for XMl-formatted file generators, like TCX and GPX files."""
 
     def __init__(self):
-        super(XmlFileWriter, self).__init__()
+        super(XmlWriter, self).__init__()
         self.file = None
         self.tags = []
 

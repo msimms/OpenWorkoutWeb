@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 import datetime
-import XmlFileWriter
+import XmlWriter
 
 TCX_TAG_NAME_ACTIVITIES = "Activities"
 TCX_TAG_NAME_ACTIVITY = "Activity"
@@ -47,11 +47,11 @@ TCX_TAG_NAME_ID = "Id"
 TCX_TAG_NAME_VALUE = "Value"
 TCX_TAG_NAME = "TCX"
 
-class TcxFileWriter(XmlFileWriter.XmlFileWriter):
+class TcxWriter(XmlWriter.XmlWriter):
     """Formats an TCX file."""
 
     def __init__(self):
-        XmlFileWriter.XmlFileWriter.__init__(self)
+        XmlWriter.XmlWriter.__init__(self)
 
     def create_tcx_file(self, file_name):
         self.create_file(file_name)
