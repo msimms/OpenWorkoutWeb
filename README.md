@@ -85,6 +85,7 @@ Why develop a workout tracker when there are so many closed-source options avail
 ### 0.10
 * Support for OpenStreetMaps (support for Google Maps is still available).
 * Activity export in GPX format.
+* Fetch six month records, to use as the basis for workout plan generation.
 
 ## Tech
 This software uses several other source projects to work properly:
