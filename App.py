@@ -818,8 +818,8 @@ class App(object):
         bests_str = ""
         cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id)
         if cycling_bests is not None and len(cycling_bests) > 0:
-            bests_str = "<h3>Best Cycling Efforts (Last Six Months)</h3>"
-            bests_str = "<table>"
+            bests_str = "<h3>Best Cycling Efforts (Last Six Months)</h3>\n"
+            bests_str = "<table>\n"
             for record_name in cycling_bests:
                 record = running_bests[record_name]
                 record_value = record[0]
@@ -830,11 +830,11 @@ class App(object):
                 bests_str += record_name
                 bests_str += "</td><td>"
                 bests_str += record_str
-                bests_str += "</td><tr>"
-            bests_str += "</table>"
+                bests_str += "</td><tr>\n"
+            bests_str += "</table>\n"
         if running_bests is not None and len(running_bests) > 0:
-            bests_str += "<h3>Best Running Efforts (Last Six Months)</h3>"
-            bests_str += "<table>"
+            bests_str += "<h3>Best Running Efforts (Last Six Months)</h3>\n"
+            bests_str += "<table>\n"
             for record_name in running_bests:
                 record = running_bests[record_name]
                 record_value = record[0]
@@ -845,8 +845,8 @@ class App(object):
                 bests_str += record_name
                 bests_str += "</td><td>"
                 bests_str += record_str
-                bests_str += "</td><tr>"
-            bests_str += "</table>"
+                bests_str += "</td><tr>\n"
+            bests_str += "</table>\n"
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
@@ -1126,40 +1126,40 @@ class App(object):
         if isinstance(estimated_max_hr, float):
             zones = self.data_mgr.retrieve_heart_rate_zones(estimated_max_hr)
             if len(zones) > 0:
-                hr_zones = "<table>"
+                hr_zones = "<table>\n"
                 zone_index = 0
                 for zone in zones:
                     hr_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
                     if zone_index == 0:
-                        hr_zones += "0 bpm to {:.2f} bpm</td><tr>".format(zone)
+                        hr_zones += "0 bpm to {:.2f} bpm</td><tr>\n".format(zone)
                     else:
-                        hr_zones += "{:.2f} bpm to {:.2f} bpm</td><tr>".format(zones[zone_index - 1], zone)
-                    hr_zones += "</td><tr>"
+                        hr_zones += "{:.2f} bpm to {:.2f} bpm</td><tr>\n".format(zones[zone_index - 1], zone)
+                    hr_zones += "</td><tr>\n"
                     zone_index = zone_index + 1
-                hr_zones += "</table>"
+                hr_zones += "</table>\n"
 
         # Get the user's cycling power training zones.
         power_zones = "Cycling power zones cannot be calculated until the user's FTP (functional threshold power) is set."
         if isinstance(ftp, float):
             zones = self.data_mgr.retrieve_power_training_zones(ftp)
             if len(zones) > 0:
-                power_zones = "<table>"
+                power_zones = "<table>\n"
                 zone_index = 0
                 for zone in zones:
                     power_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
                     if zone_index == 0:
                         power_zones += "0 watts to {:.2f} watts</td><tr>".format(zone)
                     else:
-                        power_zones += "{:.2f} watts to {:.2f} watts</td><tr>".format(zones[zone_index - 1], zone)
+                        power_zones += "{:.2f} watts to {:.2f} watts</td><tr>\n".format(zones[zone_index - 1], zone)
                     zone_index = zone_index + 1
-                power_zones += "</table>"
+                power_zones += "</table>\n"
 
         # Get the user's personal recorsd.
         prs = ""
         record_groups = self.data_mgr.retrieve_user_personal_records(user_id)
         for record_group in record_groups:
-            prs += "<h3>" + record_group + "</h3>"
-            prs += "<table>"
+            prs += "<h3>" + record_group + "</h3>\n"
+            prs += "<table>\n"
             record_dict = record_groups[record_group]
             for record_name in record_dict:
                 record = record_dict[record_name]
@@ -1169,8 +1169,8 @@ class App(object):
 
                 prs += "<td>"
                 prs += record_name
-                prs += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>"
-            prs += "</table>"
+                prs += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
+            prs += "</table>\n"
 
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
