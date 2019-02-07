@@ -1,6 +1,7 @@
 # Copyright 2017 Michael J Simms
 """Data store abstraction"""
 
+import time
 import uuid
 import FtpCalculator
 import HeartRateCalculator
@@ -449,11 +450,6 @@ class DataMgr(Importer.ActivityWriter):
             summarizer.set_record_dictionary(record_activity_type, all_personal_records[record_activity_type])
         do_update = len(all_personal_records) > 0
 
-        # Load cached summary data from all previous activities.
-        cached_activity_bests = self.database.retrieve_activity_bests(user_id)
-        for cached_activity_data in cached_activity_bests:
-            pass
-
         # Add data from the new activity.
         summarizer.add_activity_data(activity_id, activity_type, activity_time, bests)
  
@@ -465,7 +461,7 @@ class DataMgr(Importer.ActivityWriter):
             self.database.create_user_personal_records(user_id, all_personal_records)
 
         # Cache the summary data from this activity so we don't have to recompute everything again.
-        return self.database.create_activity_bests(user_id, activity_id, activity_time, bests)
+        return self.database.create_activity_bests(user_id, activity_id, activity_type, activity_time, bests)
 
     def retrieve_user_personal_records(self, user_id):
         """Retrieve method for a user's personal record."""
@@ -541,15 +537,26 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         self.update_summary_data(user_id)
 
-    def retrieve_activity_types(self):
-        """Returns a the list of activity types that the software understands."""
-        types = []
-        types.append("Running")
-        types.append("Cycling")
-        types.append("Swimming")
-        types.append("Push Ups / Press Ups")
-        types.append("Pull Ups")
-        return types
+    def compute_recent_bests(self, user_id):
+        """Return a dictionary of all best performances in the last six months."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        summarizer = Summarizer.Summarizer()
+
+        # Load cached summary data from all previous activities.
+        cutoff_time = time.time() - ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
+        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
+        if all_activity_bests is not None:
+            for activity_id in all_activity_bests:
+                activity_bests = all_activity_bests[activity_id]
+                summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
+
+        cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
+        running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
+        return cycling_bests, running_bests
 
     def retrieve_heart_rate_zones(self, max_hr):
         """Returns an array containing the maximum heart rate for each training zone."""
@@ -560,3 +567,13 @@ class DataMgr(Importer.ActivityWriter):
         """Returns an array containing the maximum power rate for each training zone."""
         calc = FtpCalculator.FtpCalculator()
         return calc.power_training_zones(ftp)
+
+    def retrieve_activity_types(self):
+        """Returns a the list of activity types that the software understands."""
+        types = []
+        types.append("Running")
+        types.append("Cycling")
+        types.append("Swimming")
+        types.append("Push Ups / Press Ups")
+        types.append("Pull Ups")
+        return types

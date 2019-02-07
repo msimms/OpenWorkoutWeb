@@ -815,10 +815,43 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        bests_str = ""
+        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id)
+        if cycling_bests is not None and len(cycling_bests) > 0:
+            bests_str = "<h3>Best Cycling Efforts (Last Six Months)</h3>"
+            bests_str = "<table>"
+            for record_name in cycling_bests:
+                record = running_bests[record_name]
+                record_value = record[0]
+                activity_id = record[1]
+                record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+
+                bests_str += "<td>"
+                bests_str += record_name
+                bests_str += "</td><td>"
+                bests_str += record_str
+                bests_str += "</td><tr>"
+            bests_str += "</table>"
+        if running_bests is not None and len(running_bests) > 0:
+            bests_str += "<h3>Best Running Efforts (Last Six Months)</h3>"
+            bests_str += "<table>"
+            for record_name in running_bests:
+                record = running_bests[record_name]
+                record_value = record[0]
+                activity_id = record[1]
+                record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+
+                bests_str += "<td>"
+                bests_str += record_name
+                bests_str += "</td><td>"
+                bests_str += record_str
+                bests_str += "</td><tr>"
+            bests_str += "</table>"
+
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str)
 
     @statistics
     def gear(self):
