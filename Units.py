@@ -323,7 +323,7 @@ def convert_to_preferred_units_str(user_mgr, user_id, in_value, in_distance_unit
     elif label in Keys.HEART_RATE_KEYS:
         out_value = "{:.2f} ".format(in_value) + get_heart_rate_units_str()
     elif label in Keys.CADENCE_KEYS:
-        out_value = "{:.2f} ".format(in_value) + get_heart_rate_units_str()
+        out_value = "{:.2f} ".format(in_value) + get_cadence_units_str()
     elif label in Keys.POWER_KEYS:
         out_value = "{:.2f} ".format(in_value) + get_power_units_str()
     else:

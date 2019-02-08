@@ -89,7 +89,7 @@ class ActivityAnalyzer(object):
             # Update personal bests
             print("Updating personal bests...")
             if Keys.ACTIVITY_USER_ID_KEY in self.activity and Keys.ACTIVITY_TIME_KEY in self.activity:
-                user_id = self.activity[Keys.ACTIVITY_USER_ID_KEY]
+                user_id = str(self.activity[Keys.ACTIVITY_USER_ID_KEY])
                 activity_time = self.activity[Keys.ACTIVITY_TIME_KEY]
                 if not self.data_mgr.insert_bests_from_activity(user_id, activity_id, activity_type, activity_time, self.summary_data):
                     self.log_error("Error returned when updating personal records.")

@@ -5,8 +5,9 @@
 
 <title>${product} - ${name} - ${pagetitle}</title>
 
-<link rel="stylesheet" href="${root_url}/css/normalize.css">
-<link rel="stylesheet" href="${root_url}/css/site.css">
+<link rel="stylesheet" type="text/css" href="${root_url}/css/normalize.css">
+<link rel="stylesheet" type="text/css" href="${root_url}/css/site.css">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css" />
 
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
@@ -55,8 +56,9 @@ ${nav}
 
 <div id="charts"/>
 
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-<script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.js" integrity="sha256-tA8y0XqiwnpwmOIl3SGAcFl2RvxHjA8qp0+1uCGmRmg=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
 <script type="text/javascript">
 	function drawChart(data, title, color)
 	{
@@ -154,6 +156,12 @@ ${zAxis}
 		else
 			alert(result_text.value);
 	}
+
+	jQuery(document).ready(function()
+	{
+		jQuery(".chosen").data("placeholder", "Specify tags...").chosen();
+	});
+
 </script>
 
 <section class="summary">
@@ -164,7 +172,26 @@ ${summary}
 
 <section class="analysis">
 <p>
+Detailed Analysis:
+<table>
 ${details}
+</table>
+</p>
+</section>
+
+<section class="comments">
+<p>
+<table>
+${details_controls}
+</table>
+</p>
+</section>
+
+<section class="comments">
+<p>
+<select name="tags" id="tags" class="chosen" multiple="true" style="width:50%;">
+${tags}
+</select>
 </p>
 </section>
 

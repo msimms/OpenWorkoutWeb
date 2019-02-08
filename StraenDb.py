@@ -398,8 +398,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            user_id_obj = ObjectId(user_id)
-            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id_obj})
+            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
             if user_records is None:
                 post = {Keys.RECORDS_USER_ID: user_id, Keys.PERSONAL_RECORDS: records}
                 self.records_collection.insert(post)
@@ -445,13 +444,16 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_activity_bests(self, user_id, activity_id, activity_time, bests):
-        """Create method for a user's personal record."""
+    def create_activity_bests(self, user_id, activity_id, activity_type, activity_time, bests):
+        """Create method for a user's personal records for a given activity."""
         if user_id is None:
             self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: user_id")
             return False
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if activity_type is None:
+            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: activity_type")
             return False
         if activity_time is None:
             self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: activity_time")
@@ -463,6 +465,7 @@ class MongoDatabase(Database.Database):
         try:
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
             if user_records is not None:
+                bests[Keys.ACTIVITY_TYPE_KEY] = activity_type
                 bests[Keys.ACTIVITY_TIME_KEY] = activity_time
                 user_records[activity_id] = bests
                 self.records_collection.save(user_records)
@@ -472,10 +475,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_activity_bests(self, user_id):
-        """Create method for a user's personal record."""
+    def retrieve_activity_bests_for_user(self, user_id):
+        """Retrieve method for a user's activity records."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_activity_bests.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.retrieve_activity_bests_for_user.__name__ + ": Unexpected empty object: user_id")
             return {}
 
         try:
@@ -485,6 +488,27 @@ class MongoDatabase(Database.Database):
                 for record in user_records:
                     if InputChecker.is_uuid(record):
                         bests[record] = user_records[record]
+                return bests
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return {}
+
+    def retrieve_recent_activity_bests_for_user(self, user_id, cutoff_time):
+        """Retrieve method for a user's activity records. Only activities more recent than the specified cutoff time will be returned."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_recent_activity_bests_for_user.__name__ + ": Unexpected empty object: user_id")
+            return {}
+
+        try:
+            bests = {}
+            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            if user_records is not None:
+                for record in user_records:
+                    if InputChecker.is_uuid(record):
+                        records = user_records[record]
+                        if records[Keys.ACTIVITY_TIME_KEY] > cutoff_time:
+                            bests[record] = records
                 return bests
         except:
             traceback.print_exc(file=sys.stdout)
@@ -1124,7 +1148,7 @@ class MongoDatabase(Database.Database):
         """Retrieves all the tags for the specified activity."""
         if activity_id is None:
             self.log_error(MongoDatabase.retrieve_tags.__name__ + ": Unexpected empty object: activity_id")
-            return None
+            return []
 
         try:
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
@@ -1134,7 +1158,7 @@ class MongoDatabase(Database.Database):
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
-        return None
+        return []
 
     def delete_tag(self, activity_id, tag):
         """Deletes the specified tag from the activity with the given ID."""

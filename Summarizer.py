@@ -104,7 +104,9 @@ class Summarizer(object):
         # Ignore these ones.
         if summary_data_key.find(Keys.CLUSTER) > 0:
             return
-        if summary_data_key.find(Keys.ACTIVITY_TIME_KEY) > 0:
+        if summary_data_key == Keys.ACTIVITY_TIME_KEY:
+            return
+        if summary_data_key == Keys.ACTIVITY_TYPE_KEY:
             return
 
         # Get the record set that corresponds with the activity type.

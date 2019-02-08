@@ -1,14 +1,13 @@
 # Copyright 2018 Michael J Simms
-"""Writes GPX and TCX files."""
+"""Writes CSV, GPX and TCX data."""
 
 import inspect
 import os
 import sys
 
-import DataMgr
 import Keys
-import GpxFileWriter
-import TcxFileWriter
+import GpxWriter
+import TcxWriter
 
 # Locate and load the distance module.
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -17,23 +16,10 @@ sys.path.insert(0, libmathdir)
 import distance
 
 class Exporter(object):
-    """Exporter for GPX and TCX location files."""
+    """Exporter for GPX and TCX data as well as CSV accelerometer data."""
 
     def __init__(self):
         super(Exporter, self).__init__()
-
-    def export_as_csv(self, file_name, activity):
-        """Creates a CSV file for accelerometer data."""
-        with open(file_name, 'wt') as local_file:
-            if Keys.APP_ACCELEROMETER_KEY in activity:
-                accel_readings = activity[Keys.APP_ACCELEROMETER_KEY]
-                for reading in accel_readings:
-                    accel_time = reading[Keys.ACCELEROMETER_TIME_KEY]
-                    accel_x = reading[Keys.ACCELEROMETER_AXIS_NAME_X]
-                    accel_y = reading[Keys.ACCELEROMETER_AXIS_NAME_Y]
-                    accel_z = reading[Keys.ACCELEROMETER_AXIS_NAME_Z]
-                    local_file.write(str(accel_time) + "," + str(accel_x) + "," + str(accel_y) + "," + str(accel_z) + "\n")
-        return True
 
     def nearest_sensor_reading(self, time_ms, current_reading, sensor_iter):
         try:
@@ -48,10 +34,29 @@ class Exporter(object):
             return None
         return current_reading
 
+    def export_as_csv(self, file_name, activity):
+        """Formats the accelerometer data as CSV."""
+        buf = ""
+        with open(file_name, 'wt') as local_file:
+            if Keys.APP_ACCELEROMETER_KEY in activity:
+                accel_readings = activity[Keys.APP_ACCELEROMETER_KEY]
+                for reading in accel_readings:
+                    accel_time = reading[Keys.ACCELEROMETER_TIME_KEY]
+                    accel_x = reading[Keys.ACCELEROMETER_AXIS_NAME_X]
+                    accel_y = reading[Keys.ACCELEROMETER_AXIS_NAME_Y]
+                    accel_z = reading[Keys.ACCELEROMETER_AXIS_NAME_Z]
+                    row = str(accel_time) + "," + str(accel_x) + "," + str(accel_y) + "," + str(accel_z) + "\n"
+                    if file_name is not None:
+                        local_file.write(row)
+                    else:
+                        buf += row
+        return buf
+
     def export_as_gpx(self, file_name, activity):
-        """Creates a GPX file."""
+        """Exports the activity in GPX format."""
         locations = []
         cadence_readings = []
+        hr_readings = []
         temp_readings = []
         power_readings = []
 
@@ -71,7 +76,7 @@ class Exporter(object):
             raise Exception("No locations for this activity.")
 
         cadence_iter = iter(cadence_readings)
-        nearest_hr = iter(hr_readings)
+        hr_iter = iter(hr_readings)
         temp_iter = iter(temp_readings)
         power_iter = iter(power_readings)
 
@@ -80,24 +85,52 @@ class Exporter(object):
         nearest_temp = None
         nearest_power = None
 
-        writer = GpxFileWriter.GpxFileWriter()
-        writer.create_gpx_file(file_name)
+        writer = GpxWriter.GpxWriter()
+        writer.create_gpx(file_name, "")
+
+        writer.start_track()
+        writer.start_track_segment()
 
         done = False
         while not done:
             try:
                 current_location = location_iter.next()
+                current_lat = current_location[Keys.LOCATION_LAT_KEY]
+                current_lon = current_location[Keys.LOCATION_LON_KEY]
+                current_alt = current_location[Keys.LOCATION_ALT_KEY]
                 current_time = current_location[Keys.LOCATION_TIME_KEY]
 
                 nearest_cadence = self.nearest_sensor_reading(current_time, nearest_cadence, cadence_iter)
                 nearest_hr = self.nearest_sensor_reading(current_time, nearest_hr, hr_iter)
                 nearest_temp = self.nearest_sensor_reading(current_time, nearest_temp, temp_iter)
                 nearest_power = self.nearest_sensor_reading(current_time, nearest_power, power_iter)
+
+                writer.start_trackpoint(current_lat, current_lon, current_alt, current_time)
+
+                if nearest_cadence or nearest_hr:
+                    writer.start_extensions()
+                    writer.start_trackpoint_extensions()
+
+                    if nearest_cadence is not None:
+                        writer.store_cadence_rpm(nearest_cadence.values()[0])
+                    if nearest_hr is not None:
+                        writer.store_heart_rate_bpm(nearest_hr.values()[0])
+
+                    writer.end_trackpoint_extensions()
+                    writer.end_extensions()
+
+                writer.end_trackpoint()
             except StopIteration:
                 done = True
 
+        writer.end_track_segment()
+        writer.end_track()
+        writer.close()
+
+        return writer.buf
+
     def export_as_tcx(self, file_name, activity):
-        """Creates a TCX file."""
+        """Exports the activity in TCX format."""
         locations = []
         cadence_readings = []
         hr_readings = []
@@ -129,8 +162,8 @@ class Exporter(object):
         nearest_power = None
         nearest_hr = None
 
-        writer = TcxFileWriter.TcxFileWriter()
-        writer.create_tcx_file(file_name)
+        writer = TcxWriter.TcxWriter()
+        writer.create_tcx(file_name)
         writer.start_activity(activity[Keys.ACTIVITY_TYPE_KEY])
 
         lap_start_time_ms = locations[0][Keys.LOCATION_TIME_KEY]
@@ -193,15 +226,19 @@ class Exporter(object):
             writer.end_track()
 
         writer.end_activity()
-        writer.close_file()
+        writer.close()
 
-    def export(self, data_mgr, activity_id, file_name, file_type):
-        activity = data_mgr.retrieve_activity(activity_id)
+        return writer.buf
+
+    def export(self, activity, file_name, file_type):
+        """Exports the activity in the specified format."""
+        buf = ""
         if file_type == 'csv':
-            self.export_as_csv(file_name, activity)
+            buf = self.export_as_csv(file_name, activity)
         elif file_type == 'gpx':
-            self.export_as_gpx(file_name, activity)
+            buf = self.export_as_gpx(file_name, activity)
         elif file_type == 'tcx':
-            self.export_as_tcx(file_name, activity)
+            buf = self.export_as_tcx(file_name, activity)
         else:
             raise Exception("Invalid file type specified.")
+        return buf

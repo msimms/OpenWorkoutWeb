@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 import datetime
-import XmlFileWriter
+import XmlWriter
 
 GPX_TAG_NAME = "gpx"
 GPX_TAG_NAME_METADATA = "metadata"
@@ -43,42 +43,26 @@ GPX_TPX_HR = "gpxtpx:hr"
 GPX_TPX_CADENCE = "gpxtpx:cad"
 GPX_TPX_POWER = "power"
 
-class GpxFileWriter(XmlFileWriter.XmlFileWriter):
+class GpxWriter(XmlWriter.XmlWriter):
     """Formats an GPX file."""
 
     def __init__(self):
-        GpxFileWriter.GpxFileWriter.__init__(self)
+        XmlWriter.XmlWriter.__init__(self)
 
-    def create_gpx_file(self, file_name, creator):
-        self.create_file(file_name)
+    def create_gpx(self, file_name, creator):
+        self.create(file_name)
 
-        attributes = []
-
-        attribute = {}
-        attribute[GPX_ATTR_NAME_VERSION] = "1.1"
-        attributes.append(attribute)
-
-        attribute[GPX_ATTR_NAME_CREATOR] = creator
-        attributes.append(attribute)
-
-        attribute["xsi:schemaLocation"] = "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd"
-        attributes.append(attribute)
-
-        attribute["xmlns"] = "http://www.topografix.com/GPX/1/1"
-        attributes.append(attribute)
-
-        attribute["xmlns:gpxtpx"] = "http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
-        attributes.append(attribute)
-
-        attribute["xmlns:gpxx"] = "http://www.garmin.com/xmlschemas/GpxExtensions/v3"
-        attributes.append(attribute)
-
-        attribute["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
-        attributes.append(attribute)
-
+        attributes = {}
+        attributes[GPX_ATTR_NAME_VERSION] = "1.1"
+        attributes[GPX_ATTR_NAME_CREATOR] = creator
+        attributes["xsi:schemaLocation"] = "http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd"
+        attributes["xmlns"] = "http://www.topografix.com/GPX/1/1"
+        attributes["xmlns:gpxtpx"] = "http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
+        attributes["xmlns:gpxx"] = "http://www.garmin.com/xmlschemas/GpxExtensions/v3"
+        attributes["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
         self.open_tag_with_attributes(GPX_TAG_NAME, attributes, True)
 
-    def close_file(self):
+    def close(self):
         self.close_all_tags()
 
     def write_metadata(self, start_time):
@@ -104,40 +88,34 @@ class GpxFileWriter(XmlFileWriter.XmlFileWriter):
         if self.current_tag() is GPX_TAG_NAME_TRACKSEGMENT:
             self.close_tag()
 
-    def start_track_point(self, lat, lon, alt, time_ms):
+    def start_trackpoint(self, lat, lon, alt, time_ms):
         if self.current_tag() is not GPX_TAG_NAME_TRACKSEGMENT:
             raise Exception("GPX write error.")
 
-        attributes = []
-
-        attribute = {}
-        attribute[GPX_ATTR_NAME_LONGITUDE] = str(lon)
-        attributes.append(attribute)
-
-        attribute = {}
-        attribute[GPX_ATTR_NAME_LATITUDE] = str(lat)
-        attributes.append(attribute)
+        attributes = {}
+        attributes[GPX_ATTR_NAME_LONGITUDE] = str(lon)
+        attributes[GPX_ATTR_NAME_LATITUDE] = str(lat)
         
         time_str = self.format_time_ms(time_ms)
         self.open_tag_with_attributes(GPX_TAG_NAME_TRACKPOINT, attributes, False)
         self.write_tag_and_value(GPX_TAG_NAME_ELEVATION, str(alt))
         self.write_tag_and_value(GPX_TAG_NAME_TIME, time_str)
 
-    def end_track_point(self):
+    def end_trackpoint(self):
         if self.current_tag() is GPX_TAG_NAME_TRACKPOINT:
             self.close_tag()
 
-    def start_etensions(self):
+    def start_extensions(self):
         self.open_tag(GPX_TAG_NAME_EXTENSIONS)
 
     def end_extensions(self):
         if self.current_tag() is GPX_TAG_NAME_EXTENSIONS:
             self.close_tag()
 
-    def start_track_point_extensions(self):
+    def start_trackpoint_extensions(self):
         self.open_tag(GPX_TPX)
     
-    def end_track_point_extensions(self):
+    def end_trackpoint_extensions(self):
         if self.current_tag() is GPX_TPX:
             self.close_tag()
 

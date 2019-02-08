@@ -56,9 +56,10 @@ ${nav}
 
 <div class="map_canvas" id="map_canvas">
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.js" integrity="sha256-tA8y0XqiwnpwmOIl3SGAcFl2RvxHjA8qp0+1uCGmRmg=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
 <script type="text/javascript">
 	var contentString
 	var routePath
@@ -80,39 +81,48 @@ ${nav}
 
 	function newCoord(x, y)
 	{
-		return new google.maps.LatLng(x, y);
+		return new OpenLayers.LonLat(x, y);
 	}
 
 	function initialize()
 	{
-		var mapOptions =
-		{
-			center: newCoord(${centerLat}, ${centerLon}),
-			zoom: 12
-		};
+		map = new OpenLayers.Map("map_canvas", {
+			controls:[
+				new OpenLayers.Control.Navigation(),
+				new OpenLayers.Control.PanZoomBar(),
+				new OpenLayers.Control.LayerSwitcher(),
+				new OpenLayers.Control.Attribution()],
+			maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+			maxResolution: 156543.0399,
+			numZoomLevels: 19,
+			units: 'm',
+			projection: new OpenLayers.Projection("EPSG:900913"),
+			displayProjection: new OpenLayers.Projection("EPSG:4326")
+		} );
 
-		map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-
-		var routeCoordinates =
-		[
-${route}
-		];
-
-		routePath = new google.maps.Polyline
-		({
-			path: routeCoordinates,
-			geodesic: true,
-			strokeColor: '#FF0000',
-			strokeOpacity: 1.0,
-			strokeWeight: 2
+		// Add the Layer with the GPX Track
+		var lgpx = new OpenLayers.Layer.Vector("", {
+			strategies: [new OpenLayers.Strategy.Fixed()],
+			protocol: new OpenLayers.Protocol.HTTP({
+				url: "${root_url}/api/1.0/export_activity?activity_id=${activityId}&export_format=gpx",
+				format: new OpenLayers.Format.GPX()
+			}),
+			style: {strokeColor: "red", strokeWidth: 3, strokeOpacity: 0.75},
+			projection: new OpenLayers.Projection("EPSG:4326")
 		});
+		map.addLayer(lgpx);
 
-		routePath.setMap(map);
+		// Define the map layer
+		map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));
 
-		$.ajax({ type: 'POST', url: "${root_url}/update_metadata/${activityId}", success: updateMetadata, dataType: "application/json" });
+		// Start position for the map (hardcoded here for simplicity,
+		// but maybe you want to get this from the URL params)
+		var lat = lastLat;
+		var lon = lastLon;
+		var zoom = 13;
+		var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
+		map.setCenter(lonLat, zoom);
 	}
-
-	google.maps.event.addDomListener(window, 'load', initialize);
 
 	var appendToTrack = function(response)
 	{
@@ -132,7 +142,7 @@ ${route}
 		for (var i = 0; i < objList.length; ++i)
 		{
 			var path = routePath.getPath();
-			routeCoordinates.push(new google.maps.LatLng(objList[i].latitude, objList[i].longitude));
+			routeCoordinates.push(new OpenLayers.LonLat(objList[i].latitude, objList[i].longitude));
 			routePath.setPath(routeCoordinates);
 			routePath.setMap(map);
 		}
@@ -212,6 +222,7 @@ ${route}
 		$.ajax({ type: 'POST', url: "${root_url}/update_metadata/${activityId}", success: updateMetadata, dataType: "application/json" });
 	};
 
+	initialize();
 	//setInterval(checkForUpdates, 15000);
 </script>
 

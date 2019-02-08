@@ -86,7 +86,8 @@ class App(object):
         self.tempmod_dir = os.path.join(self.root_dir, 'tempmod')
         self.google_maps_key = google_maps_key
         self.lifting_activity_html_file = os.path.join(root_dir, HTML_DIR, 'lifting_activity.html')
-        self.map_single_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
+        self.map_single_osm_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_osm.html')
+        self.map_single_google_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
         self.map_multi_html_file = os.path.join(root_dir, HTML_DIR, 'map_multi_google.html')
         self.error_logged_in_html_file = os.path.join(root_dir, HTML_DIR, 'error_logged_in.html')
 
@@ -284,6 +285,25 @@ class App(object):
         navbar_str += "\t</ul>\n</nav>"
         return navbar_str
 
+    def render_tags(self, activity_id, logged_in):
+        """Helper function for building the tags string."""
+        activity_tags = self.data_mgr.retrieve_activity_tags(activity_id)
+        default_tags = self.data_mgr.list_default_tags()
+        all_tags = []
+        all_tags.extend(activity_tags)
+        all_tags.extend(default_tags)
+        all_tags = list(set(all_tags))
+        tags_str = ""
+        if all_tags is not None:
+            for tag in all_tags:
+                if tag in activity_tags:
+                    tags_str += "<option selected=true>"
+                else:
+                    tags_str += "<option>"
+                tags_str += tag
+                tags_str += "</option>\n"
+        return tags_str
+
     def render_comments(self, activity_id, logged_in):
         """Helper function for building the comments string."""
         comments = self.data_mgr.retrieve_activity_comments(activity_id)
@@ -299,7 +319,7 @@ class App(object):
                 comments_str += decoded_entry[Keys.ACTIVITY_COMMENT_KEY]
                 comments_str += "\"</td><tr>\n"
         if logged_in:
-            comments_str += "<td><textarea rows=\"4\" cols=\"100\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>\n"
+            comments_str += "<td><textarea rows=\"4\" style=\"width:50%;\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>\n"
             comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>\n"
         return comments_str
 
@@ -310,7 +330,7 @@ class App(object):
             exports_str  = "<td>Export Format:</td><tr>\n"
             exports_str += "<td><select id=\"format\" class=\"checkin\" >\n"
             if has_location_data:
-                exports_str += "\t<option value=\"tcx\" selected\">TCX</option>\n"
+                exports_str += "\t<option value=\"tcx\" selected>TCX</option>\n"
                 exports_str += "\t<option value=\"gpx\">GPX</option>\n"
             if has_accel_data:
                 exports_str += "\t<option value=\"csv\">CSV</option>\n"
@@ -384,15 +404,14 @@ class App(object):
         if Keys.ACTIVITY_TIME_KEY in activity:
             summary += "\t<li>Start Time: " + App.timestamp_code_to_str(activity[Keys.ACTIVITY_TIME_KEY]) + "</li>\n"
 
-        # Add tag data.
-        tags = self.data_mgr.retrieve_tags(activity_id)
-        if tags is not None:
-            summary += "\t<li>Tags: "
-            for tag in tags:
-                summary += tag
-                summary += " "
-            summary += "</li>\n"
-        summary += "</ul>\n"
+        # Controls are only allowed if the user viewing the activity owns it.
+        if belongs_to_current_user:
+            details_controls_str = "<td><button type=\"button\" onclick=\"return refresh_analysis()\">Refresh Analysis</button></td><tr>\n"
+        else:
+            details_controls_str = ""
+
+        # List the tags.
+        tags_str = self.render_tags(activity_id, logged_in)
 
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
@@ -407,7 +426,7 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.lifting_activity_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, comments=comments_str, exports=exports_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, tags=tags_str, comments=comments_str, exports=exports_str)
 
     def render_metadata_for_page(self, key, activity_id):
         """Helper function for processing meatadata and formatting it for display."""
@@ -523,16 +542,6 @@ class App(object):
         if max_power:
             summary += "\t<li>Max. Power: {:.2f} ".format(max_power) + Units.get_power_units_str() + "</li>\n"
 
-        # Add tag data.
-        tags = self.data_mgr.retrieve_tags(activity_id)
-        if tags is not None:
-            summary += "\t<li>Tags: "
-            for tag in tags:
-                summary += tag
-                summary += " "
-            summary += "</li>\n"
-        summary += "</ul>\n"
-
         # Build the detailed analysis table.
         details_str = ""
         if summary_data is not None:
@@ -546,10 +555,14 @@ class App(object):
         if len(details_str) == 0:
             details_str = "<td><b>No data</b></td><tr>"
 
+        # Controls are only allowed if the user viewing the activity owns it.
         if belongs_to_current_user:
             details_controls_str = "<td><button type=\"button\" onclick=\"return refresh_analysis()\">Refresh Analysis</button></td><tr>\n"
         else:
             details_controls_str = ""
+
+        # List the tags.
+        tags_str = self.render_tags(activity_id, logged_in)
 
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
@@ -563,8 +576,13 @@ class App(object):
         else:
             page_title = "Activity"
 
-        my_template = Template(filename=self.map_single_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, comments=comments_str, exports=exports_str)
+        # If a google maps key was provided then use google maps, otherwise use open street map.
+        if self.google_maps_key:
+            my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports=exports_str)
+        else:
+            my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports=exports_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
@@ -797,10 +815,43 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        bests_str = ""
+        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id)
+        if cycling_bests is not None and len(cycling_bests) > 0:
+            bests_str = "<h3>Best Cycling Efforts (Last Six Months)</h3>\n"
+            bests_str = "<table>\n"
+            for record_name in cycling_bests:
+                record = running_bests[record_name]
+                record_value = record[0]
+                activity_id = record[1]
+                record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+
+                bests_str += "<td>"
+                bests_str += record_name
+                bests_str += "</td><td>"
+                bests_str += record_str
+                bests_str += "</td><tr>\n"
+            bests_str += "</table>\n"
+        if running_bests is not None and len(running_bests) > 0:
+            bests_str += "<h3>Best Running Efforts (Last Six Months)</h3>\n"
+            bests_str += "<table>\n"
+            for record_name in running_bests:
+                record = running_bests[record_name]
+                record_value = record[0]
+                activity_id = record[1]
+                record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+
+                bests_str += "<td>"
+                bests_str += record_name
+                bests_str += "</td><td>"
+                bests_str += record_str
+                bests_str += "</td><tr>\n"
+            bests_str += "</table>\n"
+
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str)
 
     @statistics
     def gear(self):
@@ -1075,40 +1126,40 @@ class App(object):
         if isinstance(estimated_max_hr, float):
             zones = self.data_mgr.retrieve_heart_rate_zones(estimated_max_hr)
             if len(zones) > 0:
-                hr_zones = "<table>"
+                hr_zones = "<table>\n"
                 zone_index = 0
                 for zone in zones:
                     hr_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
                     if zone_index == 0:
-                        hr_zones += "0 bpm to {:.2f} bpm</td><tr>".format(zone)
+                        hr_zones += "0 bpm to {:.2f} bpm</td><tr>\n".format(zone)
                     else:
-                        hr_zones += "{:.2f} bpm to {:.2f} bpm</td><tr>".format(zones[zone_index - 1], zone)
-                    hr_zones += "</td><tr>"
+                        hr_zones += "{:.2f} bpm to {:.2f} bpm</td><tr>\n".format(zones[zone_index - 1], zone)
+                    hr_zones += "</td><tr>\n"
                     zone_index = zone_index + 1
-                hr_zones += "</table>"
+                hr_zones += "</table>\n"
 
         # Get the user's cycling power training zones.
         power_zones = "Cycling power zones cannot be calculated until the user's FTP (functional threshold power) is set."
         if isinstance(ftp, float):
             zones = self.data_mgr.retrieve_power_training_zones(ftp)
             if len(zones) > 0:
-                power_zones = "<table>"
+                power_zones = "<table>\n"
                 zone_index = 0
                 for zone in zones:
                     power_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
                     if zone_index == 0:
                         power_zones += "0 watts to {:.2f} watts</td><tr>".format(zone)
                     else:
-                        power_zones += "{:.2f} watts to {:.2f} watts</td><tr>".format(zones[zone_index - 1], zone)
+                        power_zones += "{:.2f} watts to {:.2f} watts</td><tr>\n".format(zones[zone_index - 1], zone)
                     zone_index = zone_index + 1
-                power_zones += "</table>"
+                power_zones += "</table>\n"
 
         # Get the user's personal recorsd.
         prs = ""
         record_groups = self.data_mgr.retrieve_user_personal_records(user_id)
         for record_group in record_groups:
-            prs += "<h3>" + record_group + "</h3>"
-            prs += "<table>"
+            prs += "<h3>" + record_group + "</h3>\n"
+            prs += "<table>\n"
             record_dict = record_groups[record_group]
             for record_name in record_dict:
                 record = record_dict[record_name]
@@ -1118,8 +1169,8 @@ class App(object):
 
                 prs += "<td>"
                 prs += record_name
-                prs += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>"
-            prs += "</table>"
+                prs += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
+            prs += "</table>\n"
 
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')

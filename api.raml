@@ -1,6 +1,6 @@
 #%RAML 1.0
 ---
-title: StraenWeb API
+title: StraenWeb
 baseUri: http://straen-app.com/api/{version}
 mediaType: application/json
 version: v1
@@ -10,7 +10,6 @@ version: v1
     post:
         responses:
             200:
-        responses:
             500:
 /login_submit:
     description: Authenticates a username and password.
@@ -18,9 +17,7 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             500:
 /create_login_submit:
     description: Creates a new account.
@@ -28,11 +25,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             400:
-        responses:
             401:
-        responses:
             500:
 /login_status:
     description: Determines if the current user has a valid session token.
@@ -40,9 +34,7 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
 /logout:
     description: Terminates the current user's session.
@@ -50,9 +42,7 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
 /update_email:
     description: Updates the user's email address.
@@ -60,11 +50,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /update_password:
     description: Updates the user's password.
@@ -72,11 +59,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /delete_user:
     description: Removes the current user and all associated data.
@@ -84,11 +68,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /list_activities:
     description: Returns a list of JSON objects describing all of the user's activities.
@@ -96,11 +77,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /delete_activity:
     description: Removes the specified activity.
@@ -108,11 +86,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /add_activity:
     description:
@@ -120,11 +95,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /upload_activity_file:
     description: Creates a new activity from data contained with the appended file.
@@ -132,11 +104,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /add_tag_to_activity:
     description: Adds a tag to an activity.
@@ -144,11 +113,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /delete_tag_from_activity:
     description: Deletes a tqg from an activity.
@@ -156,11 +122,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /list_matched_users:
     description:
@@ -168,11 +131,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /list_users_following:
     description: Lists the users you are following.
@@ -180,11 +140,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /list_users_followed_by:
     description: Lists the users who are following you.
@@ -192,11 +149,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /request_to_follow:
     description: Sends a request to follow another user.
@@ -204,11 +158,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /unfollow:
     description: Removes a user from the list of users being followed by the logged in user.
@@ -216,11 +167,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /export_activity:
     description: Returns the activity in the specified format.
@@ -228,11 +176,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /claim_device:
     description: Associates the device specified by the unique identifier with the logged in user's account.
@@ -240,7 +185,6 @@ version: v1
     post:
         responses:
             200:
-        responses:
             500:
 /create_tag:
     description: Creates a tag for the specified activity.
@@ -248,11 +192,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /delete_tag:
     description: Deletes a tag from the specified activity.
@@ -260,11 +201,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /list_tags:
     description: Lists the tags for the specified activity.
@@ -272,11 +210,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /create_comment:
     description: Adds a comment to the specified activity.
@@ -284,11 +219,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /list_comments:
     description: Lists comments for the specified activity.
@@ -296,11 +228,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /create_gear:
     description:
@@ -308,11 +237,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /list_gear:
     description: Lists gear associated with the current user.
@@ -320,11 +246,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /update_gear:
     description:
@@ -332,11 +255,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /delete_gear:
     description:
@@ -344,11 +264,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /update_settings:
     description:
@@ -356,11 +273,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /update_profile:
     description:
@@ -368,11 +282,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /update_visibility:
     description:
@@ -380,11 +291,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /refresh_analysis:
     description:
@@ -392,11 +300,8 @@ version: v1
     post:
         responses:
             200:
-        responses:
             401:
-        responses:
             403:
-        responses:
             500:
 /generate_workout_plan:
     description:
@@ -404,5 +309,4 @@ version: v1
     post:
         responses:
             200:
-        responses:
             403:

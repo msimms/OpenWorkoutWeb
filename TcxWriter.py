@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 import datetime
-import XmlFileWriter
+import XmlWriter
 
 TCX_TAG_NAME_ACTIVITIES = "Activities"
 TCX_TAG_NAME_ACTIVITY = "Activity"
@@ -47,45 +47,26 @@ TCX_TAG_NAME_ID = "Id"
 TCX_TAG_NAME_VALUE = "Value"
 TCX_TAG_NAME = "TCX"
 
-class TcxFileWriter(XmlFileWriter.XmlFileWriter):
+class TcxWriter(XmlWriter.XmlWriter):
     """Formats an TCX file."""
 
     def __init__(self):
-        XmlFileWriter.XmlFileWriter.__init__(self)
+        XmlWriter.XmlWriter.__init__(self)
 
-    def create_tcx_file(self, file_name):
-        self.create_file(file_name)
+    def create_tcx(self, file_name):
+        self.create(file_name)
 
-        attributes = []
-
-        attribute = {}
-        attribute["xmlns"] = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
-        attributes.append(attribute)
-
-        attribute = {}
-        attribute["xmlns:xsd"] = "http://www.w3.org/2001/XMLSchema"
-        attributes.append(attribute)
-        
-        attribute = {}
-        attribute["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
-        attributes.append(attribute)
-        
-        attribute = {}
-        attribute["xmlns:tc2"] = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
-        attributes.append(attribute)
-
-        attribute = {}
-        attribute["targetNamespace"] = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
-        attributes.append(attribute)
-
-        attribute = {}
-        attribute["elementFormDefault"] = "qualified"
-        attributes.append(attribute)
-        
+        attributes = {}
+        attributes["xmlns"] = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
+        attributes["xmlns:xsd"] = "http://www.w3.org/2001/XMLSchema"
+        attributes["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
+        attributes["xmlns:tc2"] = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
+        attributes["targetNamespace"] = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
+        attributes["elementFormDefault"] = "qualified"        
         self.open_tag_with_attributes("TrainingCenterDatabase", attributes, True)
         self.open_tag(TCX_TAG_NAME_ACTIVITIES)
 
-    def close_file(self):
+    def close(self):
         self.close_all_tags()
 
     def write_id(self, start_time):
@@ -93,10 +74,8 @@ class TcxFileWriter(XmlFileWriter.XmlFileWriter):
         self.write_tag_and_value(TCX_TAG_NAME_ID, buf)
 
     def start_activity(self, description):
-        attributes = []
-        attribute = {}
-        attribute["Sport"] = description
-        attributes.append(attribute)
+        attributes = {}
+        attributes["Sport"] = description
         self.open_tag_with_attributes(TCX_TAG_NAME_ACTIVITY, attributes, False)
 
     def end_activity(self):
@@ -104,10 +83,8 @@ class TcxFileWriter(XmlFileWriter.XmlFileWriter):
             self.close_tag()
 
     def start_lap(self, time_ms):
-        attributes = []
-        attribute = {}
-        attribute["StartTime"] = self.format_time_ms(time_ms)
-        attributes.append(attribute)
+        attributes = {}
+        attributes["StartTime"] = self.format_time_ms(time_ms)
         self.open_tag_with_attributes(TCX_TAG_NAME_LAP, attributes, False)
 
     def store_lap_seconds(self, time_ms):
@@ -151,10 +128,8 @@ class TcxFileWriter(XmlFileWriter.XmlFileWriter):
 
     def start_trackpoint_extensions(self):
         self.open_tag(TCX_TAG_NAME_TRACKPOINT_EXTENSIONS)
-        attributes = []
-        attribute = {}
-        attribute["xmlns"] = "http://www.garmin.com/xmlschemas/ActivityExtension/v2"
-        attributes.append(attribute)
+        attributes = {}
+        attributes["xmlns"] = "http://www.garmin.com/xmlschemas/ActivityExtension/v2"
         self.open_tag_with_attributes(TCX_TAG_NAME, attributes, False)
 
     def end_trackpoint_extensions(self):

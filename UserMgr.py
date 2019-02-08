@@ -258,5 +258,5 @@ class UserMgr(object):
         if Keys.ACTIVITY_DEVICE_STR_KEY in activity and len(activity[Keys.ACTIVITY_DEVICE_STR_KEY]) > 0:
             user = self.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
             if user is not None:
-                return user[Keys.DATABASE_ID_KEY], user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
+                return str(user[Keys.DATABASE_ID_KEY]), user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
         return None, None, None

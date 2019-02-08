@@ -31,6 +31,12 @@ class Api(object):
         logger = logging.getLogger()
         logger.debug(log_str)
 
+    def activity_belongs_to_logged_in_user(self, activity):
+        """Returns True if the specified activity belongs to the logged in user."""
+        activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
+        belongs_to_current_user = str(activity_user_id) == str(self.user_id)
+        return belongs_to_current_user
+
     def parse_json_loc_obj(self, activity_id, json_obj):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
         location = []
@@ -199,6 +205,8 @@ class Api(object):
         if not InputChecker.is_email_address(email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
         realname = urllib.unquote_plus(values[Keys.REALNAME_KEY])
+        if not InputChecker.is_valid(realname):
+            raise ApiException.ApiMalformedRequestException("Invalid name.")
         password1 = urllib.unquote_plus(values[Keys.PASSWORD1_KEY])
         password2 = urllib.unquote_plus(values[Keys.PASSWORD2_KEY])
 
@@ -586,9 +594,9 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Missing activity ID parameter.")
         if Keys.ACTIVITY_EXPORT_FORMAT_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Missing format parameter.")
 
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
@@ -598,25 +606,12 @@ class Api(object):
         if not export_format in ['csv', 'gpx', 'tcx']:
             raise ApiException.ApiMalformedRequestException("Invalid format.")
 
-        # Generate a random name for the local file.
-        local_file_name = os.path.join(os.path.normpath(self.temp_dir), str(uuid.uuid4()))
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
 
-        # Write the data to a temporary local file.
         exporter = Exporter.Exporter()
-        exporter.export(self.data_mgr, activity_id, local_file_name, export_format)
-
-        # Read the file into memory.
-        result = ""
-        try:
-            with open(local_file_name, 'rb') as local_file:
-                while True:
-                    next_block = local_file.read(8192)
-                    if not next_block:
-                        break
-                    result = result + next_block
-        finally:
-            # Remove the local file.
-            os.remove(local_file_name)
+        result = exporter.export(activity, None, export_format)
 
         return True, result
 
@@ -647,7 +642,7 @@ class Api(object):
         if not InputChecker.is_valid(tag):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        result = self.data_mgr.create_tag(activity_id, tag)
+        result = self.data_mgr.create_activity_tag(activity_id, tag)
         return result, ""
 
     def handle_delete_tag(self, values):
@@ -681,7 +676,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        result = self.data_mgr.retrieve_tags(activity_id)
+        result = self.data_mgr.retrieve_activity_tags(activity_id)
         return result, ""
 
     def handle_create_comment(self, values):
@@ -900,7 +895,7 @@ class Api(object):
         if not activity:
             raise ApiException.ApiMalformedRequestException("Invalid activity.")
 
-        activity_user_id = self.user_mgr.get_activity_user(activity)
+        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
         self.data_mgr.analyze(activity, activity_user_id)
         return True, ""
 
