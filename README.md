@@ -14,6 +14,9 @@ Why develop a workout tracker when there are so many closed-source options avail
 * I want to do some experiments with automatically generating workout plans. This will serve as the platform for this idea.
 * Education. For the experience in performing full-stack software development: dealing with website deployment and scalability, and security issues.
 
+## Origin of the Name
+Straen is the Welsh word for stress and exercise is a (positive) form of stress. Also, it was the only thing I could think of where I could register a decent domain name.
+
 ## Major Features
 * Enables the live tracking feature of the Straen mobile app.
 * Supports strength (lifting) activities as well as distance (aerobic) activities.
