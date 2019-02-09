@@ -16,7 +16,7 @@ import LocationAnalyzer
 import SensorAnalyzerFactory
 
 class ActivityAnalyzer(object):
-    """Class for scheduling computationally expensive analysis tasks."""
+    """Class for performing the computationally expensive activity analysis task."""
 
     def __init__(self, activity):
         self.activity = activity
