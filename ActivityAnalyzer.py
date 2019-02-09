@@ -23,7 +23,7 @@ class ActivityAnalyzer(object):
         self.summary_data = {}
         self.speed_graph = None
         root_dir = os.path.dirname(os.path.abspath(__file__))
-        self.data_mgr = DataMgr.DataMgr(root_dir, None, None)
+        self.data_mgr = DataMgr.DataMgr(root_dir, None, None, None)
         super(ActivityAnalyzer, self).__init__()
 
     def log_error(self, log_str):

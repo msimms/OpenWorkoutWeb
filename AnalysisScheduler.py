@@ -19,4 +19,4 @@ class AnalysisScheduler(object):
 
         if Keys.ACTIVITY_USER_ID_KEY not in activity:
             activity[Keys.ACTIVITY_USER_ID_KEY] = activity_user_id
-        analyze_activity.delay(dumps(activity))
+        return analyze_activity.delay(dumps(activity))

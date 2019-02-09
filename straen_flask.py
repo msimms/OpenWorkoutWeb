@@ -18,6 +18,7 @@ import AnalysisScheduler
 import ImportScheduler
 import SessionMgr
 import UserMgr
+import WorkoutPlanGeneratorScheduler
 
 
 CSS_DIR = 'css'
@@ -456,7 +457,7 @@ def main():
 
     session_mgr = SessionMgr.FlaskSessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, g_root_dir)
-    data_mgr = DataMgr.DataMgr(g_root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler())
+    data_mgr = DataMgr.DataMgr(g_root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
     g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, args.googlemapskey)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')

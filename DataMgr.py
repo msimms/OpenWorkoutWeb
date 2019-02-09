@@ -1,4 +1,4 @@
-# Copyright 2017 Michael J Simms
+# Copyright 2017-2019 Michael J Simms
 """Data store abstraction"""
 
 import time
@@ -19,11 +19,12 @@ def get_activities_sort_key(item):
 class DataMgr(Importer.ActivityWriter):
     """Data store abstraction"""
 
-    def __init__(self, root_dir, analysis_scheduler, import_scheduler):
+    def __init__(self, root_dir, analysis_scheduler, import_scheduler, workout_plan_gen_scheduler):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
         self.analysis_scheduler = analysis_scheduler
         self.import_scheduler = import_scheduler
+        self.workout_plan_gen_scheduler = workout_plan_gen_scheduler
         super(Importer.ActivityWriter, self).__init__()
 
     def terminate(self):
@@ -517,17 +518,17 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.delete_gear(user_id, gear_id)
 
-    @staticmethod
-    def update_summary_data_cb(context, activity, user_id):
-        """Callback function for update_summary_data."""
-        if Keys.ACTIVITY_SUMMARY_KEY not in activity:
-            context.analyze(activity, user_id)
-
-    def update_summary_data(self, user_id):
+    def retrieve_each_user_activity(self, context, user_id, cb=None):
         """Makes sure that summary data exists for all of the user's activities."""
         if self.database is None:
             raise Exception("No database.")
-        self.database.retrieve_each_user_activity(self, user_id, DataMgr.update_summary_data_cb)
+        if context is None:
+            raise Exception("Bad parameter.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if cb is None:
+            raise Exception("Bad parameter.")
+        self.database.retrieve_each_user_activity(context, user_id, cb)
 
     def generate_workout_plan(self, user_id):
         """Generates/updates a workout plan for the user with the specified ID."""
@@ -535,7 +536,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        self.update_summary_data(user_id)
+        self.workout_plan_gen_scheduler.add_to_queue(user_id)
 
     def compute_recent_bests(self, user_id):
         """Return a dictionary of all best performances in the last six months."""

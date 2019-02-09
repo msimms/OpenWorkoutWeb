@@ -18,6 +18,7 @@ import AnalysisScheduler
 import ImportScheduler
 import SessionMgr
 import UserMgr
+import WorkoutPlanGeneratorScheduler
 
 from cherrypy import tools
 from cherrypy.process import plugins
@@ -565,7 +566,7 @@ def main():
 
     session_mgr = SessionMgr.CherryPySessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, root_dir)
-    data_mgr = DataMgr.DataMgr(root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler())
+    data_mgr = DataMgr.DataMgr(root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
     backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey)
     g_app = StraenWeb(backend)
 
