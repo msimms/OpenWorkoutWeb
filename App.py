@@ -544,14 +544,16 @@ class App(object):
 
         # Build the detailed analysis table.
         details_str = ""
+        excluded_keys = [ Keys.LONGEST_DISTANCE ]
         if summary_data is not None:
             for key in sorted(summary_data):
-                details_str += "<td><b>"
-                details_str += key
-                details_str += "</b></td><td>"
-                value = summary_data[key]
-                details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
-                details_str += "</td><tr>"
+                if key not in excluded_keys:
+                    details_str += "<td><b>"
+                    details_str += key
+                    details_str += "</b></td><td>"
+                    value = summary_data[key]
+                    details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
+                    details_str += "</td><tr>"
         if len(details_str) == 0:
             details_str = "<td><b>No data</b></td><tr>"
 
@@ -818,10 +820,10 @@ class App(object):
         bests_str = ""
         cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id)
         if cycling_bests is not None and len(cycling_bests) > 0:
-            bests_str = "<h3>Best Cycling Efforts (Last Six Months)</h3>\n"
-            bests_str = "<table>\n"
+            bests_str += "<h3>Cycling Efforts</h3>\n"
+            bests_str += "<table>\n"
             for record_name in cycling_bests:
-                record = running_bests[record_name]
+                record = cycling_bests[record_name]
                 record_value = record[0]
                 activity_id = record[1]
                 record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
@@ -829,11 +831,11 @@ class App(object):
                 bests_str += "<td>"
                 bests_str += record_name
                 bests_str += "</td><td>"
-                bests_str += record_str
+                bests_str += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
                 bests_str += "</td><tr>\n"
             bests_str += "</table>\n"
         if running_bests is not None and len(running_bests) > 0:
-            bests_str += "<h3>Best Running Efforts (Last Six Months)</h3>\n"
+            bests_str += "<h3>Running Efforts</h3>\n"
             bests_str += "<table>\n"
             for record_name in running_bests:
                 record = running_bests[record_name]
@@ -844,7 +846,7 @@ class App(object):
                 bests_str += "<td>"
                 bests_str += record_name
                 bests_str += "</td><td>"
-                bests_str += record_str
+                bests_str += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
                 bests_str += "</td><tr>\n"
             bests_str += "</table>\n"
 

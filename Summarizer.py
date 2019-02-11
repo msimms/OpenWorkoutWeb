@@ -94,7 +94,7 @@ class Summarizer(object):
     def is_better(key, lhs, rhs):
         if key in Keys.TIME_KEYS: # Lower is better
             return lhs < rhs
-        elif key in Keys.SPEED_KEYS or key in Keys.POWER_KEYS: # Higher is better
+        elif key in Keys.SPEED_KEYS or key in Keys.POWER_KEYS or key in Keys.DISTANCE_KEYS: # Higher is better
             return rhs > lhs
         return False
 

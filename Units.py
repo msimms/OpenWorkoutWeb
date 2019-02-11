@@ -317,6 +317,9 @@ def convert_to_preferred_units_str(user_mgr, user_id, in_value, in_distance_unit
     out_value = in_value
     if label in Keys.TIME_KEYS:
         out_value = convert_seconds_to_hours_mins_secs(in_value)
+    elif label in Keys.DISTANCE_KEYS:
+        out_value, out_distance_units = convert_to_preferred_distance_units(user_mgr, user_id, in_value, in_distance_units)
+        out_value = "{:.2f} ".format(out_value) + get_distance_units_str(out_distance_units)
     elif label in Keys.SPEED_KEYS:
         out_value, out_distance_units, out_time_units = convert_to_preferred_speed_units(user_mgr, user_id, in_value, in_distance_units, in_time_units)        
         out_value = "{:.2f} ".format(out_value) + get_speed_units_str(out_distance_units, out_time_units)

@@ -211,6 +211,9 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             # Do a k-means analysis on the computed paces blocks.
             tags = kmeans.kmeans_equally_space_centroids_1_d(self.pace_blocks, 3, 0.1, 3)
 
+        # Insert the location into the analysis dictionary so that it gets cached.
+        results[Keys.LONGEST_DISTANCE] = self.total_distance
+
         return results
 
     def create_speed_graph(self):
