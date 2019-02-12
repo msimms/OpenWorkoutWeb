@@ -34,10 +34,16 @@
 		var dict = [];
 		var result_text = {};
 		var innerDiv = document.getElementById("new_gear_div");
-		var name = document.getElementById("name").value;
-		var description = document.getElementById("description").value;
+		var addTimeObj = new Date(document.getElementById("startDate").value);
+		var addTime = addTimeObj.getTime() / 1000;
+		var retiredTimeObj = new Date(document.getElementById("retiredDate").value);
+		var retiredTime = retiredTimeObj.getTime() / 1000;
+		var name = document.getElementById("Name").value;
+		var description = document.getElementById("Description").value;
 
 		dict.push({["type"] : gearType});
+		dict.push({["add_time"] : addTime});
+		dict.push({["retire_time"] : retiredTime});
 		dict.push({["name"] : name});
 		dict.push({["description"] : description});
 
@@ -49,21 +55,6 @@
 		{
 			alert(result_text.value);
 		}
-	}
-
-	function add_text_entry_node(div, name)
-	{
-		var label = document.createTextNode(name + ": ");
-		div.appendChild(label);
-
-		var value = document.createElement("input");
-		value.name = name;
-		value.setAttribute("type", "text");
-		value.setAttribute("value", "");
-		div.appendChild(value);
-
-		var br = document.createElement("br");
-		div.appendChild(br);
 	}
 
     function get_new_gear_info(gearType)
@@ -153,11 +144,15 @@ ${nav}
 </div>
 
 <h2>Bikes</h2>
+<div class="profile" style="width: 600px">
 ${bikes}
+</div>
 <button type="button" onclick="return get_new_bike_info()">Add New Bike</button>
 
 <h2>Shoes</h2>
+<div class="profile" style="width: 600px">
 ${shoes}
+</div>
 <button type="button" onclick="return get_new_shoes_info()">Add New Shoes</button>
 
 </body>

@@ -879,15 +879,19 @@ class App(object):
                 if Keys.GEAR_NAME_KEY in gear:
                     row_str += "<td>"
                     row_str += gear[Keys.GEAR_NAME_KEY]
+                    row_str += "</td><td>"
+                    row_str += gear[Keys.GEAR_DESCRIPTION_KEY]
+                    row_str += "</td><td>"
+                    row_str += "<script>document.write(new Date(" + str(gear[Keys.GEAR_ADD_TIME_KEY]) + " * 1000))</script>"
                     row_str += "</td>"
                 row_str += "<tr>"
                 gear_type = gear[Keys.GEAR_TYPE_KEY]
-                if gear_type == GEAR_TYPE_BIKE:
+                if gear_type == Keys.GEAR_TYPE_BIKE:
                     bikes += row_str
-                elif gear_type == GEAR_TYPE_SHOES:
+                elif gear_type == Keys.GEAR_TYPE_SHOES:
                     shoes += row_str
         bikes += "</table>"
-        shoes == "</table>"
+        shoes += "</table>"
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'gear.html')

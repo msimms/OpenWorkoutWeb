@@ -68,21 +68,6 @@
 		}
 	}
 
-	function add_text_entry_node(div, name)
-	{
-		var label = document.createTextNode(name + ": ");
-		div.appendChild(label);
-
-		var value = document.createElement("input");
-		value.name = name;
-		value.setAttribute("type", "number");
-		value.setAttribute("value", 0.0);
-		div.appendChild(value);
-
-		var br = document.createElement("br");
-		div.appendChild(br);
-	}
-
 	function show_manual_entry_options()
 	{
 		var activityType = document.getElementById("activity_type").value;
@@ -139,7 +124,7 @@
 		// Add the data fields.
 		for (i = 0, len = fields.length; i < len; i++)
 		{
-			add_text_entry_node(innerDiv, fields[i]);
+			add_number_entry_node(innerDiv, fields[i]);
 		}
 
 		// Add to the div.

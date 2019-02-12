@@ -1276,6 +1276,12 @@ class MongoDatabase(Database.Database):
         if user_id is None:
             self.log_error(MongoDatabase.create_gear.__name__ + ": Unexpected empty object: user_id")
             return False
+        if gear_type is None:
+            self.log_error(MongoDatabase.create_gear.__name__ + ": Unexpected empty object: gear_type")
+            return False
+        if gear_name is None:
+            self.log_error(MongoDatabase.create_gear.__name__ + ": Unexpected empty object: gear_name")
+            return False
 
         try:
             user_id_obj = ObjectId(user_id)
@@ -1284,10 +1290,20 @@ class MongoDatabase(Database.Database):
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
+                new_gear = {}
+                new_gear[Keys.GEAR_TYPE_KEY] = gear_type
+                new_gear[Keys.GEAR_NAME_KEY] = gear_name
+                new_gear[Keys.GEAR_DESCRIPTION_KEY] = gear_description
+                new_gear[Keys.GEAR_ADD_TIME_KEY] = gear_add_time
+                new_gear[Keys.GEAR_RETIRE_TIME_KEY] = gear_retire_time
+                gear_list.append(new_gear)
+                user[Keys.GEAR_KEY] = gear_list
+                self.users_collection.save(user)
+                return True
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
-        return True
+        return False
 
     def retrieve_gear_for_user(self, user_id):
         """Retrieve method for the gear with the specified ID."""
@@ -1301,7 +1317,8 @@ class MongoDatabase(Database.Database):
             if user is not None:
                 gear_list = []
                 if Keys.GEAR_KEY in user:
-                    pass
+                    gear_list = user[Keys.GEAR_KEY]
+                return gear_list
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error(sys.exc_info()[0])
@@ -1311,6 +1328,12 @@ class MongoDatabase(Database.Database):
         """Retrieve method for the gear with the specified ID."""
         if gear_id is None:
             self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: gear_id")
+            return False
+        if gear_type is None:
+            self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: gear_type")
+            return False
+        if gear_name is None:
+            self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: gear_name")
             return False
 
         try:
