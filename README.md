@@ -31,6 +31,27 @@ Straen is the Welsh word for stress and exercise is a (positive) form of stress.
 
 [Full bug and feature tracking](https://github.com/msimms/StraenWeb/issues).
 
+## Installation
+To install the dependencies:
+```
+python setup.py
+```
+
+## Execution
+The software is designed to work within multiple frameworks. Currently, cherrypy and flask are supported.
+
+To run the web service under the cherrypy framework:
+```
+python start_cherrpy.py [--debug] [--host <hostname>] [--hostport <hostport>] [--googlemapskey <key>]
+```
+
+To run the web service under the flask framework:
+```
+python start_flask.py [--debug] [--host <hostname>] [--hostport <hostport>] [--googlemapskey <key>]
+```
+
+*If a Google Maps key is not provided, OpenStreetMap will be used instead.*
+
 ## Version History
 
 ### 0.1
@@ -97,8 +118,9 @@ This software uses several other source projects to work properly:
 * [fullcalendar](https://fullcalendar.io/) - A Javascript calendar implementation.
 * [chosen](https://github.com/harvesthq/chosen) - A select box implementation that is used for the tag user interface.
 * [pymongo](https://github.com/mongodb/mongo-python-driver) - Python interface to mongodb.
+* [flask](http://flask.pocoo.org) - A microframework for developing python-based web apps (optional).
 
-The app is written in a combination of Python and JavaScript.
+The app is written in a combination of Python, HTML, and JavaScript.
 
 ## Social
 Twitter: [@StraenApp](https://twitter.com/StraenApp)

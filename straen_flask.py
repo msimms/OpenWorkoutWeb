@@ -420,13 +420,11 @@ def main():
 
     # Parse command line options.
     parser = argparse.ArgumentParser()
-    parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background", required=False)
-    parser.add_argument("--host", default="", help="Host name on which users will access this website", required=False)
-    parser.add_argument("--hostport", type=int, default=5000, help="Port on which users will access this website", required=False)
-    parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS", required=False)
-    parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS", required=False)
-    parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS", required=False)
-    parser.add_argument("--googlemapskey", default="", help="API key for Google Maps", required=False)
+    parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background.", required=False)
+    parser.add_argument("--host", default="", help="Host name on which users will access this website.", required=False)
+    parser.add_argument("--hostport", type=int, default=5000, help="Port on which users will access this website.", required=False)
+    parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS.", required=False)
+    parser.add_argument("--googlemapskey", default="", help="API key for Google Maps. If not provided OpenStreetMap will be used.", required=False)
 
     try:
         args = parser.parse_args()
