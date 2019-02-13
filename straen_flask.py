@@ -411,7 +411,7 @@ def api(version, method):
 @g_flask_app.route('/')
 def index():
     """Renders the index page."""
-    return g_app.login()
+    return login()
 
 def main():
     """Entry point for the flask version of the app."""
