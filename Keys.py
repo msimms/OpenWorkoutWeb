@@ -138,6 +138,7 @@ GEAR_TYPE_SHOES = "shoes"
 # Activity types
 TYPE_UNSPECIFIED_ACTIVITY = "Unknown"
 TYPE_RUNNING_KEY = "Running"
+TYPE_HIKING_KEY = "Hiking"
 TYPE_CYCLING_KEY = "Cycling"
 TYPE_SWIMMING_KEY = "Swimming"
 TYPE_PULL_UPS_KEY = "Pull Ups"

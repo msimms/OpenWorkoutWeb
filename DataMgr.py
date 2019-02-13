@@ -494,6 +494,23 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_gear_for_user(user_id)
 
+    def retrieve_gear_of_specified_type_for_user(self, user_id, gear_type):
+        """Retrieve method for the gear with the specified ID."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if gear_type is None:
+            raise Exception("Bad parameter.")
+
+        final_gear_list = []
+        gear_list = self.database.retrieve_gear_for_user(user_id)
+        for gear in gear_list:
+            if Keys.GEAR_TYPE_KEY in gear:
+                if gear_type == gear[Keys.GEAR_TYPE_KEY]:
+                    final_gear_list.append(gear)
+        return final_gear_list
+
     def update_gear(self, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Retrieve method for the gear with the specified ID."""
         if self.database is None:

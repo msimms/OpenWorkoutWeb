@@ -304,6 +304,25 @@ class App(object):
                 tags_str += "</option>\n"
         return tags_str
 
+    def render_gear(self, activity_user_id, activity_type, logged_in):
+        """Helper function for building the gear string."""
+        if activity_type == Keys.TYPE_RUNNING_KEY or activity_type == Keys.TYPE_HIKING_KEY:
+            gear_type = Keys.GEAR_TYPE_SHOES
+        elif activity_type == Keys.TYPE_CYCLING_KEY:
+            gear_type = Keys.GEAR_TYPE_BIKE
+        else:
+            return ""
+        all_gear = self.data_mgr.retrieve_gear_of_specified_type_for_user(activity_user_id, gear_type)
+        gear_str = ""
+        if all_gear is not None:
+            for gear in all_gear:
+                if Keys.GEAR_NAME_KEY in gear:
+                    gear_name = gear[Keys.GEAR_NAME_KEY]
+                    gear_str += "<option>"
+                    gear_str += gear_name
+                    gear_str += "</option>\n"
+        return gear_str
+
     def render_comments(self, activity_id, logged_in):
         """Helper function for building the comments string."""
         comments = self.data_mgr.retrieve_activity_comments(activity_id)
@@ -566,6 +585,9 @@ class App(object):
         # List the tags.
         tags_str = self.render_tags(activity_id, logged_in)
 
+        # List the gear.
+        gear_str = self.render_gear(activity_user_id, activity_type, logged_in)
+
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
 
@@ -581,10 +603,10 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports=exports_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports=exports_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
