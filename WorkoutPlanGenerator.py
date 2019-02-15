@@ -44,7 +44,10 @@ class WorkoutPlanGenerator(object):
         try:
             user_id = self.user_obj[Keys.RECORDS_USER_ID]
             self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb)
-            cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id)
+            cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.SIX_MONTHS)
+            if running_bests is not None:
+                print running_bests
+            cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.FOUR_WEEKS)
             if running_bests is not None:
                 print running_bests
         except:

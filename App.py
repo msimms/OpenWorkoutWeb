@@ -17,6 +17,7 @@ import Keys
 import LocationAnalyzer
 import Api
 import BmiCalculator
+import DataMgr
 import Units
 import UserMgr
 import VO2MaxCalculator
@@ -824,6 +825,39 @@ class App(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
+    def render_personal_records(self, user_id, cycling_bests, running_bests):
+        """Helper function that renders the table rows used to show personal bests."""
+        bests_str = ""
+        if cycling_bests is not None and len(cycling_bests) > 0:
+            bests_str += "<h3>Cycling Efforts</h3>\n"
+            bests_str += "<table>\n"
+            for record_name in cycling_bests:
+                record = cycling_bests[record_name]
+                record_value = record[0]
+                activity_id = record[1]
+                record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+
+                bests_str += "<td>"
+                bests_str += record_name
+                bests_str += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
+                bests_str += "</td><tr>\n"
+            bests_str += "</table>\n"
+        if running_bests is not None and len(running_bests) > 0:
+            bests_str += "<h3>Running Efforts</h3>\n"
+            bests_str += "<table>\n"
+            for record_name in running_bests:
+                record = running_bests[record_name]
+                record_value = record[0]
+                activity_id = record[1]
+                record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+
+                bests_str += "<td>"
+                bests_str += record_name
+                bests_str += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
+                bests_str += "</td><tr>\n"
+            bests_str += "</table>\n"
+        return bests_str
+
     @statistics
     def workouts(self):
         """Renders the list of all workouts the specified user is allowed to view."""
@@ -839,38 +873,8 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        bests_str = ""
-        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id)
-        if cycling_bests is not None and len(cycling_bests) > 0:
-            bests_str += "<h3>Cycling Efforts</h3>\n"
-            bests_str += "<table>\n"
-            for record_name in cycling_bests:
-                record = cycling_bests[record_name]
-                record_value = record[0]
-                activity_id = record[1]
-                record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
-
-                bests_str += "<td>"
-                bests_str += record_name
-                bests_str += "</td><td>"
-                bests_str += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
-                bests_str += "</td><tr>\n"
-            bests_str += "</table>\n"
-        if running_bests is not None and len(running_bests) > 0:
-            bests_str += "<h3>Running Efforts</h3>\n"
-            bests_str += "<table>\n"
-            for record_name in running_bests:
-                record = running_bests[record_name]
-                record_value = record[0]
-                activity_id = record[1]
-                record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
-
-                bests_str += "<td>"
-                bests_str += record_name
-                bests_str += "</td><td>"
-                bests_str += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
-                bests_str += "</td><tr>\n"
-            bests_str += "</table>\n"
+        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.SIX_MONTHS)
+        bests_str = self.render_personal_records(user_id, cycling_bests, running_bests)
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')

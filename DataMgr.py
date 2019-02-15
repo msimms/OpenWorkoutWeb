@@ -10,6 +10,9 @@ import Keys
 import StraenDb
 import Summarizer
 
+SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
+FOUR_WEEKS = (14.0 * 24.0 * 60.0 * 60.0)
+
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
     if Keys.ACTIVITY_TIME_KEY in item:
@@ -555,7 +558,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         self.workout_plan_gen_scheduler.add_to_queue(user_id)
 
-    def compute_recent_bests(self, user_id):
+    def compute_recent_bests(self, user_id, timeframe):
         """Return a dictionary of all best performances in the last six months."""
         if self.database is None:
             raise Exception("No database.")
@@ -565,7 +568,7 @@ class DataMgr(Importer.ActivityWriter):
         summarizer = Summarizer.Summarizer()
 
         # Load cached summary data from all previous activities.
-        cutoff_time = time.time() - ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
+        cutoff_time = time.time() - timeframe
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
         if all_activity_bests is not None:
             for activity_id in all_activity_bests:
