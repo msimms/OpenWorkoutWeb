@@ -13,8 +13,6 @@ import InputChecker
 import Keys
 import Units
 
-g_not_meta_data = ["DeviceId", "ActivityId", "ActivityName", "User Name", "Latitude", "Longitude", "Altitude", "Horizontal Accuracy", "Vertical Accuracy"]
-
 class Api(object):
     """Class for managing API messages."""
 
@@ -37,7 +35,7 @@ class Api(object):
         belongs_to_current_user = str(activity_user_id) == str(self.user_id)
         return belongs_to_current_user
 
-    def parse_json_loc_obj(self, activity_id, json_obj):
+    def parse_json_loc_obj(self, json_obj, sensor_readings_dict, metadata_list_dict):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
         location = []
 
@@ -64,11 +62,17 @@ class Api(object):
             # Parse the rest of the data, which will be a combination of metadata and sensor data.
             for item in json_obj.iteritems():
                 key = item[0]
-                if not key in g_not_meta_data:
-                    if key in [Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]:
-                        self.data_mgr.create_sensor_reading(activity_id, date_time, key, item[1])
-                    elif key in [Keys.APP_CURRENT_SPEED_KEY, Keys.APP_CURRENT_PACE_KEY]:
-                        self.data_mgr.create_metadata(activity_id, date_time, key, item[1], True)
+                time_value_pair = { date_time, item[1] }
+                if key in [Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]:
+                    if key not in sensor_readings_dict:
+                        sensor_readings_dict[key] = []
+                    value_list = sensor_readings_dict[key]
+                    value_list.append(time_value_pair)
+                elif key in [Keys.APP_CURRENT_SPEED_KEY, Keys.APP_CURRENT_PACE_KEY]:
+                    if key not in metadata_list_dict:
+                        metadata_list_dict[key] = []
+                    value_list = metadata_list_dict[key]
+                    value_list.append(time_value_pair)
         except ValueError, e:
             self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except KeyError, e:
@@ -77,7 +81,7 @@ class Api(object):
             self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
         return location
 
-    def parse_json_accel_obj(self, activity_id, json_obj):
+    def parse_json_accel_obj(self, json_obj):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
         accel = []
 
@@ -121,22 +125,31 @@ class Api(object):
 
         if Keys.APP_LOCATIONS_KEY in values:
 
+            sensor_readings_dict = {}
+            metadata_list_dict = {}
+
             # Parse each of the location objects.
             encoded_locations = values[Keys.APP_LOCATIONS_KEY]
             for location_obj in encoded_locations:
-                location = self.parse_json_loc_obj(activity_id, location_obj)
+                location = self.parse_json_loc_obj(location_obj, sensor_readings_dict, metadata_list_dict)
                 locations.append(location)
 
             # Update the locations.
             if locations:
                 self.data_mgr.create_locations(device_str, activity_id, locations)
 
+            # Update the database with new sensor and metadata.
+            for sensor_type in sensor_readings_dict:
+                self.data_mgr.create_sensor_readings(activity_id, sensor_type, sensor_readings_dict[sensor_type])
+            for metadata_type in metadata_list_dict:
+                self.data_mgr.create_metadata_list(activity_id, metadata_type, metadata_list_dict[metadata_type])
+
         if Keys.APP_ACCELEROMETER_KEY in values:
 
             # Parse each of the accelerometer objects.
             encoded_accel = values[Keys.APP_ACCELEROMETER_KEY]
             for accel_obj in encoded_accel:
-                accel = self.parse_json_accel_obj(activity_id, accel_obj)
+                accel = self.parse_json_accel_obj(accel_obj)
                 accels.append(accel)
 
             # Update the accelerometer readings.
