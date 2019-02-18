@@ -62,7 +62,9 @@ class Api(object):
             # Parse the rest of the data, which will be a combination of metadata and sensor data.
             for item in json_obj.iteritems():
                 key = item[0]
-                time_value_pair = { date_time, item[1] }
+                time_value_pair = []
+                time_value_pair.append(date_time)
+                time_value_pair.append(float(item[1]))
                 if key in [Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]:
                     if key not in sensor_readings_dict:
                         sensor_readings_dict[key] = []
