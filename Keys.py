@@ -35,6 +35,9 @@ ESTIMATED_FTP_KEY = "estimated ftp"
 RECORDS_USER_ID = "user_id"
 PERSONAL_RECORDS = "records"
 
+# Workout plans
+WORKOUT_PLAN_USER_ID = "user_id"
+
 # Keys associated with uploading data
 UPLOADED_FILE_NAME_KEY = "uploaded_file_name"
 UPLOADED_FILE_DATA_KEY = "uploaded_file_data"

@@ -18,5 +18,5 @@ class WorkoutPlanGeneratorScheduler(object):
             return
 
         user_obj = {}
-        user_obj[Keys.RECORDS_USER_ID] = user_id
+        user_obj[Keys.WORKOUT_PLAN_USER_ID] = user_id
         generate_workout_plan.delay(dumps(user_obj))

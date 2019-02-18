@@ -34,22 +34,45 @@ class WorkoutPlanGenerator(object):
         if Keys.ACTIVITY_SUMMARY_KEY not in activity:
             analysis_obj = context.data_mgr.analyze(activity, user_id)
 
+    def calculate_inputs(self, user_id):
+        """Looks through the user's data and calculates the neural net inputs."""
+
+        tempo_pace = None   # Tempo pace is ~30 secs/mile slower than 5K race pace.
+        longest_run = None  # Longest run in the last four weeks
+
+        self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb)
+
+        # Look through the user's six month records.
+        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.SIX_MONTHS)
+        if running_bests is not None:
+            if Keys.BEST_5K in running_bests:
+                best_5K = running_bests[Keys.BEST_5K]
+                tempo_pace = (best_5K - (30.0 * 3.1)) / 5000.0 # Tempo pace per km
+
+        # Look through the user's four week records.
+        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.FOUR_WEEKS)
+        if running_bests is not None:
+            if Keys.LONGEST_DISTANCE in running_bests:
+                longest_run = running_bests[Keys.LONGEST_DISTANCE]
+
+        inputs = [ tempo_pace, longest_run ]
+        return inputs
+
+    def organize_schedule(self, user_id, plan):
+        """Arranges the user's workouts into days/weeks, etc."""
+        pass
+
     def generate_plan(self):
-        """Main plan generation routine."""
+        """Entry point for workout plan generation."""
 
         # Sanity check.
         if self.user_obj is None:
+            self.log_error("User information not provided.")
             return
 
         try:
-            user_id = self.user_obj[Keys.RECORDS_USER_ID]
-            self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb)
-            cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.SIX_MONTHS)
-            if running_bests is not None:
-                print running_bests
-            cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.FOUR_WEEKS)
-            if running_bests is not None:
-                print running_bests
+            user_id = user_obj[Keys.WORKOUT_PLAN_USER_ID]
+            inputs = self.calculate_inputs(user_id)
         except:
             traceback.print_exc(file=sys.stdout)
             self.log_error("Exception when generating a workout plan.")
