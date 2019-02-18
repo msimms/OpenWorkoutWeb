@@ -633,6 +633,72 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def update_activity(self, device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict):
+        """Updates locations, sensor readings, and metadata associated with a moving activity. Provided as a performance improvement over making several database updates."""
+        if device_str is None:
+            self.log_error(MongoDatabase.update_activity.__name__ + ": Unexpected empty object: device_str")
+            return False
+        if activity_id is None:
+            self.log_error(MongoDatabase.update_activity.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not locations:
+            self.log_error(MongoDatabase.update_activity.__name__ + ": Unexpected empty object: locations")
+            return False
+        if not sensor_readings_dict:
+            self.log_error(MongoDatabase.update_activity.__name__ + ": Unexpected empty object: sensor_readings_dict")
+            return False
+        if not metadata_list_dict:
+            self.log_error(MongoDatabase.update_activity.__name__ + ": Unexpected empty object: metadata_list_dict")
+            return False
+
+        try:
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            if activity is None:
+                first_location = locations[0]
+                if self.create_activity(activity_id, "", first_location[0] / 1000, device_str):
+                    activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            if activity is not None:
+
+                # Update the locations.
+                location_list = []
+                if Keys.ACTIVITY_LOCATIONS_KEY in activity:
+                    location_list = activity[Keys.ACTIVITY_LOCATIONS_KEY]
+                for location in locations:
+                    value = {Keys.LOCATION_TIME_KEY: location[0], Keys.LOCATION_LAT_KEY: location[1], Keys.LOCATION_LON_KEY: location[2], Keys.LOCATION_ALT_KEY: location[3]}
+                    location_list.append(value)
+                location_list.sort(key=retrieve_time_from_location)
+                activity[Keys.ACTIVITY_LOCATIONS_KEY] = location_list
+
+                # Update the sensor readings.
+                for sensor_type in sensor_readings_dict:
+                    value_list = []
+                    if sensor_type in activity:
+                        value_list = activity[sensor_type]
+                    for value in sensor_readings_dict[sensor_type]:
+                        time_value_pair = {str(value[0]): float(value[1])}
+                        value_list.append(time_value_pair)
+                    value_list.sort(key=retrieve_time_from_time_value_pair)
+                    activity[sensor_type] = value_list
+
+                # Update the metadata readings.
+                for metadata_type in metadata_list_dict:
+                    value_list = []
+                    if metadata_type in activity:
+                        value_list = activity[metadata_type]
+                    for value in metadata_list_dict[metadata_type]:
+                        time_value_pair = {str(value[0]): float(value[1])}
+                        value_list.append(time_value_pair)
+                    value_list.sort(key=retrieve_time_from_time_value_pair)
+                    activity[metadata_type] = value_list
+
+                # Write out the changes.
+                self.activities_collection.save(activity)
+                return True
+        except:
+            traceback.print_exc(file=sys.stdout)
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def delete_activity(self, object_id):
         """Delete method for an activity, specified by the database object ID."""
         if object_id is None:

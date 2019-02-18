@@ -114,6 +114,8 @@ class Api(object):
         username = ""
         locations = []
         accels = []
+        sensor_readings_dict = {}
+        metadata_list_dict = {}
 
         # Parse required identifiers.
         device_str = values[Keys.APP_DEVICE_ID_KEY]
@@ -127,24 +129,14 @@ class Api(object):
 
         if Keys.APP_LOCATIONS_KEY in values:
 
-            sensor_readings_dict = {}
-            metadata_list_dict = {}
-
             # Parse each of the location objects.
             encoded_locations = values[Keys.APP_LOCATIONS_KEY]
             for location_obj in encoded_locations:
                 location = self.parse_json_loc_obj(location_obj, sensor_readings_dict, metadata_list_dict)
                 locations.append(location)
 
-            # Update the locations.
-            if locations:
-                self.data_mgr.create_locations(device_str, activity_id, locations)
-
-            # Update the database with new sensor and metadata.
-            for sensor_type in sensor_readings_dict:
-                self.data_mgr.create_sensor_readings(activity_id, sensor_type, sensor_readings_dict[sensor_type])
-            for metadata_type in metadata_list_dict:
-                self.data_mgr.create_metadata_list(activity_id, metadata_type, metadata_list_dict[metadata_type])
+            # Update the activity.
+            self.data_mgr.update_moving_activity(device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict)
 
         if Keys.APP_ACCELEROMETER_KEY in values:
 

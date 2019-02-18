@@ -160,6 +160,12 @@ class DataMgr(Importer.ActivityWriter):
                 activity[Keys.ACTIVITY_TIME_KEY] = time_num
                 self.create_metadata(activity_id, time_num, Keys.ACTIVITY_TIME_KEY, time_num, False)
 
+    def update_moving_activity(self, device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict):
+        """Updates locations, sensor readings, and metadata associated with a moving activity. Provided as a performance improvement over making several database updates."""
+        if self.database is None:
+            raise Exception("No database.")
+        return self.database.update_activity(device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict)
+
     def is_activity_public(self, activity):
         """Helper function for returning whether or not an activity is publically visible."""
         if Keys.ACTIVITY_VISIBILITY_KEY in activity:
