@@ -48,13 +48,20 @@ class MapSearch(object):
         self.last_us_state = None
         super(MapSearch, self).__init__()
 
+    def is_in_region(self, region, lat, lon):
+        """Returns True if the specified lat and lon is within the bounds of the given polygon."""
+        if isinstance(region, list):
+            if graphics.is_point_in_poly_array(lat, lon, region):
+                return True
+            for subregion in region:
+                if self.is_in_region(subregion, lat, lon):
+                    return True
+        return False
+
     def is_in_country(self, country_name, lat, lon):
         """Returns True if the specified lat and lon is within the bounds of the given country."""
         coordinate_list = self.world_coordinates[country_name]
-        for coordinates in coordinate_list:
-            if graphics.is_point_in_poly_array(lat, lon, coordinates):
-                return True
-        return False
+        return self.is_in_region(coordinate_list, lat, lon)
 
     def which_country(self, lat, lon):
         """Given a lat/lon, returns the name of the country in which it falls, or empty string if not found."""
@@ -69,15 +76,12 @@ class MapSearch(object):
             if self.is_in_country(country_name, lat, lon):
                 self.last_country = country_name
                 return country_name
-        return ""
+        return None
 
     def is_in_us_state(self, state_name, lat, lon):
         """Returns True if the specified lat and lon is within the bounds of the given US state."""
         coordinate_list = self.us_coordinates[state_name]
-        for coordinates in coordinate_list:
-            if graphics.is_point_in_poly_array(lat, lon, coordinates):
-                return True
-        return False
+        return self.is_in_region(coordinate_list, lat, lon)
 
     def which_us_state(self, lat, lon):
         """Given a lat/lon, returns the name of the US state in which it falls, or empty string if not found."""
@@ -88,8 +92,21 @@ class MapSearch(object):
                 return self.last_us_state
 
         # Loop through each state until we find a match.
-        for state_name in self.last_us_state.keys():
+        for state_name in self.us_coordinates.keys():
             if self.is_in_us_state(state_name, lat, lon):
                 self.last_us_state = state_name
                 return state_name
-        return ""
+        return None
+
+    def search_map(self, lat, lon):
+        """Given a lat/lon, returns an array containing the place description, from most significant to least significant, i.e. ['United States', 'Florida']"""
+        description = []
+        country = self.which_country(lat, lon)
+        if country:
+            description.append(country)
+            if country == 'United States':
+                state = self.which_us_state(lat, lon)
+                if state:
+                    description.append(state)
+        return description
+        
