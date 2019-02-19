@@ -1096,7 +1096,7 @@ class App(object):
         # Render the user's height.
         if isinstance(selected_height_metric, float):
             selected_height_pref, height_units = Units.convert_to_preferred_height_units(self.user_mgr, user_id, selected_height_metric, Units.UNITS_DISTANCE_METERS)
-            selected_height_str = "{:.2f}".format(selected_height_pref)
+            selected_height_str = "{:.1f}".format(selected_height_pref)
             height_units_str = Units.get_distance_units_str(height_units)
         else:
             selected_height_metric = None
@@ -1106,7 +1106,7 @@ class App(object):
         # Render the user's weight.
         if isinstance(selected_weight_metric, float):
             selected_weight_pref, weight_units = Units.convert_to_preferred_mass_units(self.user_mgr, user_id, selected_weight_metric, Units.UNITS_MASS_KG)
-            selected_weight_str = "{:.2f}".format(selected_weight_pref)
+            selected_weight_str = "{:.1f}".format(selected_weight_pref)
             weight_units_str = Units.get_mass_units_str(weight_units)
         else:
             selected_weight_metric = None
@@ -1125,7 +1125,7 @@ class App(object):
 
         # Render the user's resting heart rate.
         if isinstance(selected_resting_hr, float):
-            resting_hr_str = "{:.2f}".format(selected_resting_hr)
+            resting_hr_str = "{:.1f}".format(selected_resting_hr)
         else:
             resting_hr_str = ""
             selected_resting_hr = None
@@ -1134,7 +1134,7 @@ class App(object):
         if selected_height_metric and selected_weight_metric:
             calc = BmiCalculator.BmiCalculator()
             bmi = calc.estimate_bmi(selected_weight_metric, selected_height_metric)
-            bmi_str = "{:.2f}".format(bmi)
+            bmi_str = "{:.1f}".format(bmi)
         else:
             bmi_str = "Not calculated."
     
@@ -1142,7 +1142,7 @@ class App(object):
         if selected_resting_hr and isinstance(estimated_max_hr, float):
             calc = VO2MaxCalculator.VO2MaxCalculator()
             vo2max_str = calc.estimate_vo2max(estimated_max_hr, selected_resting_hr)
-            vo2max = "{:.2f}".format(vo2max_str)
+            vo2max = "{:.1f}".format(vo2max_str)
         else:
             vo2max = "Not calculated."
 
@@ -1163,9 +1163,9 @@ class App(object):
                 for zone in zones:
                     hr_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
                     if zone_index == 0:
-                        hr_zones += "0 bpm to {:.2f} bpm</td><tr>\n".format(zone)
+                        hr_zones += "0 bpm to {:.1f} bpm</td><tr>\n".format(zone)
                     else:
-                        hr_zones += "{:.2f} bpm to {:.2f} bpm</td><tr>\n".format(zones[zone_index - 1], zone)
+                        hr_zones += "{:.1f} bpm to {:.1f} bpm</td><tr>\n".format(zones[zone_index - 1], zone)
                     hr_zones += "</td><tr>\n"
                     zone_index = zone_index + 1
                 hr_zones += "</table>\n"
@@ -1180,9 +1180,9 @@ class App(object):
                 for zone in zones:
                     power_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
                     if zone_index == 0:
-                        power_zones += "0 watts to {:.2f} watts</td><tr>".format(zone)
+                        power_zones += "0 watts to {:.1f} watts</td><tr>".format(zone)
                     else:
-                        power_zones += "{:.2f} watts to {:.2f} watts</td><tr>\n".format(zones[zone_index - 1], zone)
+                        power_zones += "{:.1f} watts to {:.1f} watts</td><tr>\n".format(zones[zone_index - 1], zone)
                     zone_index = zone_index + 1
                 power_zones += "</table>\n"
 
