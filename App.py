@@ -1190,19 +1190,20 @@ class App(object):
         prs = ""
         record_groups = self.data_mgr.retrieve_user_personal_records(user_id)
         for record_group in record_groups:
-            prs += "<h3>" + record_group + "</h3>\n"
-            prs += "<table>\n"
             record_dict = record_groups[record_group]
-            for record_name in record_dict:
-                record = record_dict[record_name]
-                record_value = record[0]
-                activity_id = record[1]
-                record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+            if len(record_dict) > 0:
+                prs += "<h3>" + record_group + "</h3>\n"
+                prs += "<table>\n"
+                for record_name in record_dict:
+                    record = record_dict[record_name]
+                    record_value = record[0]
+                    activity_id = record[1]
+                    record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
 
-                prs += "<td>"
-                prs += record_name
-                prs += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
-            prs += "</table>\n"
+                    prs += "<td>"
+                    prs += record_name
+                    prs += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
+                prs += "</table>\n"
 
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
