@@ -52,7 +52,8 @@ class MapSearch(object):
         """Returns True if the specified lat and lon is within the bounds of the given country."""
         coordinate_list = self.world_coordinates[country_name]
         for coordinates in coordinate_list:
-            print coordinates
+            if graphics.is_point_in_poly_array(lat, lon, coordinates):
+                return True
         return False
 
     def which_country(self, lat, lon):
@@ -72,6 +73,10 @@ class MapSearch(object):
 
     def is_in_us_state(self, state_name, lat, lon):
         """Returns True if the specified lat and lon is within the bounds of the given US state."""
+        coordinate_list = self.us_coordinates[state_name]
+        for coordinates in coordinate_list:
+            if graphics.is_point_in_poly_array(lat, lon, coordinates):
+                return True
         return False
 
     def which_us_state(self, lat, lon):
