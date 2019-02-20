@@ -9,6 +9,7 @@ import mako
 import os
 import signal
 import sys
+import traceback
 
 import Api
 import ApiException
@@ -160,6 +161,8 @@ class StraenWeb(object):
             cherrypy.response.headers['Content-Type'] = 'application/json'
             return self.app.update_metadata(activity_id)
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in update_metadata')
         return ""
 
@@ -179,6 +182,8 @@ class StraenWeb(object):
         try:
             return self.app.live(device_str)
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.live.__name__)
         return self.error()
 
@@ -188,6 +193,8 @@ class StraenWeb(object):
         try:
             return self.app.activity(activity_id)
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.activity.__name__)
         return self.error()
 
@@ -197,6 +204,8 @@ class StraenWeb(object):
         try:
             return self.app.device(device_str)
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.device.__name__)
         return self.error()
 
@@ -211,6 +220,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.my_activities.__name__)
         return self.error()
 
@@ -225,6 +236,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.all_activities.__name__)
         return self.error()
 
@@ -239,6 +252,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.workouts.__name__)
         return self.error()
 
@@ -253,6 +268,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.gear.__name__)
         return self.error()
 
@@ -267,6 +284,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.following.__name__)
         return self.error()
 
@@ -281,6 +300,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.followers.__name__)
         return self.error()
 
@@ -295,6 +316,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.device_list.__name__)
         return self.error()
 
@@ -309,6 +332,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.upload.__name__)
         return self.error()
 
@@ -323,6 +348,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.manual_entry.__name__)
         return self.error()
 
@@ -337,6 +364,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.import_activity.__name__)
         return self.error()
 
@@ -351,6 +380,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.profile.__name__)
         return self.error()
 
@@ -365,6 +396,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.settings.__name__)
         return self.error()
 
@@ -384,6 +417,8 @@ class StraenWeb(object):
             self.log_error(error_msg)
             return self.error(error_msg)
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.submit_login.__name__)
         return self.error()
 
@@ -401,6 +436,8 @@ class StraenWeb(object):
             self.log_error(error_msg)
             return self.error(error_msg)
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.submit_new_login.__name__)
         return self.error()
 
