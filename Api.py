@@ -859,7 +859,12 @@ class Api(object):
             decoded_key = urllib.unquote_plus(key)
 
             # Gender
-            if decoded_key == Keys.HEIGHT_KEY:
+            if decoded_key == Keys.BIRTHDAY_KEY:
+                birthday = urllib.unquote_plus(values[key]).lower()
+                if not InputChecker.is_integer(birthday):
+                    raise ApiException.ApiMalformedRequestException("Invalid birthday.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.BIRTHDAY_KEY, birthday)
+            elif decoded_key == Keys.HEIGHT_KEY:
                 height = urllib.unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(height):
                     raise ApiException.ApiMalformedRequestException("Invalid height.")

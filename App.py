@@ -1087,6 +1087,7 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Get the current settings.
+        selected_birthday = self.user_mgr.retrieve_user_setting(user_id, Keys.BIRTHDAY_KEY)
         selected_height_metric = self.user_mgr.retrieve_user_setting(user_id, Keys.HEIGHT_KEY)
         selected_weight_metric = self.user_mgr.retrieve_user_setting(user_id, Keys.WEIGHT_KEY)
         selected_gender = self.user_mgr.retrieve_user_setting(user_id, Keys.GENDER_KEY)
@@ -1208,7 +1209,7 @@ class App(object):
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, weight=selected_weight_str, weight_units=weight_units_str, height=selected_height_str, height_units=height_units_str, gender_options=gender_options, resting_hr=resting_hr_str, bmi=bmi_str, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones, prs=prs)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, birthday=selected_birthday, weight=selected_weight_str, weight_units=weight_units_str, height=selected_height_str, height_units=height_units_str, gender_options=gender_options, resting_hr=resting_hr_str, bmi=bmi_str, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones, prs=prs)
 
     @statistics
     def settings(self):
