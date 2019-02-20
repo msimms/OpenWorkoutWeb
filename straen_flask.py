@@ -8,6 +8,7 @@ import mako
 import os
 import signal
 import sys
+import traceback
 import flask
 
 import Api
@@ -49,6 +50,8 @@ def css(file_name):
     try:
         return flask.send_from_directory(CSS_DIR, file_name)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + css.__name__)
     return g_app.error()
 
@@ -58,6 +61,8 @@ def js(file_name):
     try:
         return flask.send_from_directory(JS_DIR, file_name)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + js.__name__)
     return g_app.error()
 
@@ -67,6 +72,8 @@ def images(file_name):
     try:
         return flask.send_from_directory(IMAGES_DIR, file_name)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + images.__name__)
     return g_app.error()
 
@@ -76,6 +83,8 @@ def media(file_name):
     try:
         return flask.send_from_directory(MEDIA_DIR, file_name)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + media.__name__)
     return g_app.error()
 
@@ -85,6 +94,8 @@ def stats():
     try:
         return g_app.stats()
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + stats.__name__)
     return g_app.error()
 
@@ -109,6 +120,8 @@ def update_metadata(activity_id=None):
     try:
         return g_app.update_metadata(activity_id)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in update_metadata')
     return ""
 
@@ -127,6 +140,8 @@ def live(device_str):
     try:
         return g_app.live(device_str)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + live.__name__)
     return g_app.error()
 
@@ -136,6 +151,8 @@ def activity(activity_id):
     try:
         return g_app.activity(activity_id)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + activity.__name__)
     return g_app.error()
 
@@ -145,6 +162,8 @@ def device(device_str):
     try:
         return g_app.device(device_str)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + device.__name__)
     return g_app.error()
 
@@ -156,6 +175,8 @@ def my_activities():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + my_activities.__name__)
     return g_app.error()
 
@@ -167,6 +188,8 @@ def all_activities():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + all_activities.__name__)
     return g_app.error()
 
@@ -178,6 +201,8 @@ def workouts():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + workouts.__name__)
     return g_app.error()
 
@@ -189,6 +214,8 @@ def gear():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + gear.__name__)
     return g_app.error()
 
@@ -200,6 +227,8 @@ def following():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + following.__name__)
     return g_app.error()
 
@@ -211,6 +240,8 @@ def followers():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + followers.__name__)
     return g_app.error()
 
@@ -222,6 +253,8 @@ def device_list():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + device_list.__name__)
     return g_app.error()
 
@@ -233,6 +266,8 @@ def upload(ufile):
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + upload.__name__)
     return g_app.error()
 
@@ -244,6 +279,8 @@ def manual_entry(activity_type):
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + manual_entry.__name__)
     return g_app.error()
 
@@ -255,6 +292,8 @@ def import_activity():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + import_activity.__name__)
     return g_app.error()
 
@@ -266,6 +305,8 @@ def profile():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + profile.__name__)
     return g_app.error()
 
@@ -277,6 +318,8 @@ def settings():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + settings.__name__)
     return g_app.error()
 
@@ -294,6 +337,8 @@ def submit_login():
         g_app.log_error(error_msg)
         return self.error(error_msg)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + submit_login.__name__)
     return g_app.error()
 
@@ -313,6 +358,8 @@ def submit_new_login():
         g_app.log_error(error_msg)
         return self.error(error_msg)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + submit_new_login.__name__)
     return g_app.error()
 
