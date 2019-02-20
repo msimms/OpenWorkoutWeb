@@ -622,9 +622,10 @@ class DataMgr(Importer.ActivityWriter):
     def retrieve_activity_types(self):
         """Returns a the list of activity types that the software understands."""
         types = []
-        types.append("Running")
-        types.append("Cycling")
-        types.append("Swimming")
-        types.append("Push Ups / Press Ups")
-        types.append("Pull Ups")
+        types.append(Keys.TYPE_RUNNING_KEY)
+        types.append(Keys.TYPE_HIKING_KEY)
+        types.append(Keys.TYPE_CYCLING_KEY)
+        types.append(Keys.TYPE_SWIMMING_KEY)
+        types.append(Keys.TYPE_PULL_UPS_KEY)
+        types.append(Keys.TYPE_PUSH_UPS_KEY)
         return types
