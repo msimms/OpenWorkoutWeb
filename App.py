@@ -621,7 +621,7 @@ class App(object):
                 my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
                 return my_template.render(nav=self.create_navbar(logged_in_userid is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
         except:
-            traceback.print_exc(file=sys.stdout)
+            self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + App.activity.__name__)
         return self.error()
