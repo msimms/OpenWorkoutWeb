@@ -896,6 +896,8 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        num_bikes = 0
+        num_shoes = 0
         bikes = "<table>"
         shoes = "<table>"
         gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
@@ -913,11 +915,21 @@ class App(object):
                 row_str += "<tr>"
                 gear_type = gear[Keys.GEAR_TYPE_KEY]
                 if gear_type == Keys.GEAR_TYPE_BIKE:
+                    if num_bikes == 0:
+                        bikes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><tr>"
                     bikes += row_str
+                    num_bikes = num_bikes + 1
                 elif gear_type == Keys.GEAR_TYPE_SHOES:
+                    if num_shoes == 0:
+                        shoes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><tr>"
                     shoes += row_str
+                    num_shoes = num_shoes + 1
         bikes += "</table>"
         shoes += "</table>"
+        if num_bikes == 0:
+            bikes = "<b>None</b>"
+        if num_shoes == 0:
+            shoes = "<b>None</b>"
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'gear.html')
