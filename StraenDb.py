@@ -102,7 +102,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def retrieve_user(self, username):
@@ -122,7 +121,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return None, None, None
 
     def retrieve_user_from_id(self, user_id):
@@ -139,7 +137,6 @@ class MongoDatabase(Database.Database):
             return None, None
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return None, None
 
@@ -174,7 +171,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def delete_user(self, user_id):
@@ -190,7 +186,6 @@ class MongoDatabase(Database.Database):
                 return True
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return False
 
@@ -212,7 +207,6 @@ class MongoDatabase(Database.Database):
                     user_list.append(matched_user[Keys.USERNAME_KEY])
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return user_list
 
@@ -239,7 +233,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return True
 
     def retrieve_user_devices(self, user_id):
@@ -257,7 +250,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return None
 
     def retrieve_user_from_device(self, device_str):
@@ -269,7 +261,6 @@ class MongoDatabase(Database.Database):
             return self.users_collection.find_one({Keys.DEVICES_KEY: device_str})
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return None
 
@@ -284,7 +275,6 @@ class MongoDatabase(Database.Database):
             return True
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return False
 
@@ -312,7 +302,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return None
 
     def retrieve_followers(self, user_id):
@@ -326,7 +315,6 @@ class MongoDatabase(Database.Database):
             return list(followers)
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return None
 
@@ -354,7 +342,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def update_user_setting(self, user_id, key, value):
@@ -379,7 +366,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def retrieve_user_setting(self, user_id, key):
@@ -399,7 +385,6 @@ class MongoDatabase(Database.Database):
                     return user[key]
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return None
 
@@ -421,7 +406,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def retrieve_user_personal_records(self, user_id):
@@ -437,7 +421,6 @@ class MongoDatabase(Database.Database):
                     return user_records[Keys.PERSONAL_RECORDS]
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return {}
 
@@ -458,7 +441,6 @@ class MongoDatabase(Database.Database):
                 return True
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return False
 
@@ -491,7 +473,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def retrieve_activity_bests_for_user(self, user_id):
@@ -510,7 +491,6 @@ class MongoDatabase(Database.Database):
                 return bests
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return {}
 
@@ -532,7 +512,6 @@ class MongoDatabase(Database.Database):
                 return bests
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return {}
 
@@ -565,7 +544,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return None
 
     def retrieve_each_user_activity(self, context, user_id, callback_func):
@@ -576,7 +554,6 @@ class MongoDatabase(Database.Database):
                 callback_func(context, activity, user_id)
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return None
 
@@ -601,7 +578,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return None
 
     def retrieve_most_recent_activity_for_device(self, device_str):
@@ -617,7 +593,6 @@ class MongoDatabase(Database.Database):
                 return activity
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return None
 
@@ -643,7 +618,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def retrieve_activity(self, activity_id):
@@ -656,7 +630,6 @@ class MongoDatabase(Database.Database):
             return self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: re.compile(activity_id, re.IGNORECASE)})
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return None
 
@@ -724,7 +697,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def delete_activity(self, object_id):
@@ -739,7 +711,6 @@ class MongoDatabase(Database.Database):
             return True
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return False
 
@@ -757,7 +728,6 @@ class MongoDatabase(Database.Database):
                     return visibility
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return None
 
@@ -778,7 +748,6 @@ class MongoDatabase(Database.Database):
                 return True
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return False
 
@@ -820,7 +789,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def create_locations(self, device_str, activity_id, locations):
@@ -858,7 +826,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def retrieve_locations(self, activity_id):
@@ -877,7 +844,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return None
 
     def retrieve_most_recent_locations(self, activity_id, num):
@@ -895,7 +861,6 @@ class MongoDatabase(Database.Database):
             return locations
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return None
 
@@ -931,7 +896,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def create_sensor_readings(self, activity_id, sensor_type, values):
@@ -965,7 +929,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def retrieve_sensor_readings(self, sensor_type, activity_id):
@@ -986,7 +949,6 @@ class MongoDatabase(Database.Database):
                     return sensor_data
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return None
 
@@ -1039,7 +1001,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def create_metadata_list(self, activity_id, key, values):
@@ -1073,7 +1034,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
         
     def retrieve_metadata(self, key, activity_id):
@@ -1096,7 +1056,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return None
 
     def create_sets_and_reps_data(self, activity_id, sets):
@@ -1116,7 +1075,6 @@ class MongoDatabase(Database.Database):
                 return True
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return False
 
@@ -1156,7 +1114,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def retrieve_accelerometer_readings(self, activity_id):
@@ -1174,7 +1131,6 @@ class MongoDatabase(Database.Database):
                     return accels
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return None
 
@@ -1196,7 +1152,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def retrieve_activity_summary(self, activity_id):
@@ -1214,7 +1169,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return None
 
     def delete_activity_summary(self, activity_id):
@@ -1229,7 +1183,6 @@ class MongoDatabase(Database.Database):
                 pass
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return False
 
@@ -1255,7 +1208,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def retrieve_tags(self, activity_id):
@@ -1271,7 +1223,6 @@ class MongoDatabase(Database.Database):
                     return activity[Keys.ACTIVITY_TAGS_KEY]
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return []
 
@@ -1296,7 +1247,6 @@ class MongoDatabase(Database.Database):
                     return True
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return False
 
@@ -1327,7 +1277,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def retrieve_activity_comments(self, activity_id):
@@ -1344,7 +1293,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return None
 
     def create_workout(self, user_id):
@@ -1358,7 +1306,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return True
 
     def retrieve_workout(self, workout_id):
@@ -1371,7 +1318,6 @@ class MongoDatabase(Database.Database):
             pass
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return None
 
@@ -1388,7 +1334,6 @@ class MongoDatabase(Database.Database):
                 return True
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return False
 
@@ -1424,7 +1369,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def retrieve_gear_for_user(self, user_id):
@@ -1443,7 +1387,6 @@ class MongoDatabase(Database.Database):
                 return gear_list
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return []
 
@@ -1467,7 +1410,6 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error(sys.exc_info()[0])
         return False
 
     def delete_gear(self, user_id, gear_id):
@@ -1486,6 +1428,5 @@ class MongoDatabase(Database.Database):
                 return True
         except:
             self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
             self.log_error(sys.exc_info()[0])
         return False
