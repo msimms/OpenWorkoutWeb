@@ -34,7 +34,7 @@ def import_activity(import_str):
         with open(local_file_name, 'wb') as local_file:
             local_file.write(uploaded_file_data)
             
-        data_mgr = DataMgr.DataMgr(root_dir, None, None, None)
+        data_mgr = DataMgr.DataMgr("", root_dir, None, None, None)
         importer = Importer.Importer(data_mgr)
         importer.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
     finally:

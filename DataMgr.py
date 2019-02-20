@@ -7,6 +7,7 @@ import FtpCalculator
 import HeartRateCalculator
 import Importer
 import Keys
+import MapSearch
 import StraenDb
 import Summarizer
 
@@ -22,12 +23,14 @@ def get_activities_sort_key(item):
 class DataMgr(Importer.ActivityWriter):
     """Data store abstraction"""
 
-    def __init__(self, root_dir, analysis_scheduler, import_scheduler, workout_plan_gen_scheduler):
+    def __init__(self, root_url, root_dir, analysis_scheduler, import_scheduler, workout_plan_gen_scheduler):
         self.database = StraenDb.MongoDatabase(root_dir)
         self.database.connect()
+        self.root_url = root_url
         self.analysis_scheduler = analysis_scheduler
         self.import_scheduler = import_scheduler
         self.workout_plan_gen_scheduler = workout_plan_gen_scheduler
+        self.map_search = None
         super(Importer.ActivityWriter, self).__init__()
 
     def terminate(self):
@@ -563,6 +566,26 @@ class DataMgr(Importer.ActivityWriter):
         if user_id is None:
             raise Exception("Bad parameter.")
         self.workout_plan_gen_scheduler.add_to_queue(user_id)
+
+    def get_location_description(self, activity_id):
+        """Returns the political location that corresponds to an activity."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("Bad parameter.")
+
+        if self.map_search is None:
+            self.map_search = MapSearch.MapSearch(self.root_url + '/data/world.geo.json', self.root_url + '/data/us_states.geo.json')
+
+        if self.map_search is None:
+            raise Exception("Internal error.")
+
+        location_description = []
+        locations = self.retrieve_locations(activity_id)
+        if locations and len(locations) > 0:
+            first_loc = locations[0]
+            location_description = self.map_search.search_map(float(first_loc[Keys.LOCATION_LAT_KEY]), float(first_loc[Keys.LOCATION_LON_KEY]))
+        return location_description
 
     def compute_recent_bests(self, user_id, timeframe):
         """Return a dictionary of all best performances in the last six months."""

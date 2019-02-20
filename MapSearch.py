@@ -51,7 +51,7 @@ class MapSearch(object):
     def is_in_region(self, region, lat, lon):
         """Returns True if the specified lat and lon is within the bounds of the given polygon."""
         if isinstance(region, list):
-            if graphics.is_point_in_poly_array(lat, lon, region):
+            if graphics.is_point_in_poly_array(lon, lat, region):
                 return True
             for subregion in region:
                 if self.is_in_region(subregion, lat, lon):

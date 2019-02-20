@@ -603,7 +603,7 @@ def main():
 
     session_mgr = SessionMgr.CherryPySessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, root_dir)
-    data_mgr = DataMgr.DataMgr(root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
+    data_mgr = DataMgr.DataMgr(root_url, root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
     backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey)
     g_app = StraenWeb(backend)
 
@@ -636,6 +636,11 @@ def main():
         {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': 'css'
+        },
+        '/data':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'data'
         },
         '/js':
         {

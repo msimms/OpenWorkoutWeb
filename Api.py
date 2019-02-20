@@ -926,11 +926,25 @@ class Api(object):
         return True, ""
 
     def handle_generate_workout_plan(self, values):
-        """Called when the user wants to recalculate the summary data."""
+        """Called when the user wants to generate a workout plan."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         self.data_mgr.generate_workout_plan(self.user_id)
         return True, ""
+
+    def handle_get_location_description(self, values):
+        """Called when the user wants get the political location that corresponds to an activity."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        location_description = self.data_mgr.get_location_description(activity_id)
+        return True, str(location_description)
 
     def handle_api_1_0_request(self, request, values):
         """Called to parse a version 1.0 API message."""
@@ -1011,4 +1025,6 @@ class Api(object):
             return self.handle_refresh_analysis(values)
         elif request == 'generate_workout_plan':
             return self.handle_generate_workout_plan(values)
+        elif request == 'get_location_description':
+            return self.handle_get_location_description(values)
         return False, ""
