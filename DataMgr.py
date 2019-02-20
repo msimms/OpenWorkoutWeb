@@ -579,7 +579,8 @@ class DataMgr(Importer.ActivityWriter):
         if all_activity_bests is not None:
             for activity_id in all_activity_bests:
                 activity_bests = all_activity_bests[activity_id]
-                summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
+                if Keys.ACTIVITY_TYPE_KEY in activity_bests:
+                    summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
 
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
         running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
