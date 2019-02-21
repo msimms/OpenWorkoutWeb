@@ -24,6 +24,7 @@ class ActivityAnalyzer(object):
         self.speed_graph = None
         root_dir = os.path.dirname(os.path.abspath(__file__))
         self.data_mgr = DataMgr.DataMgr("", root_dir, None, None, None)
+        self.last_yield = time.time()
         super(ActivityAnalyzer, self).__init__()
 
     def log_error(self, log_str):
@@ -32,6 +33,12 @@ class ActivityAnalyzer(object):
         logger = logging.getLogger()
         if logger is not None:
             logger.debug(log_str)
+
+    def should_yield(self):
+        """Used to periodically yeild the GIL, because python sucks."""
+        if time.time() - self.last_yield > 3:
+            time.sleep(1)
+            self.last_yield = time.time()
 
     def perform_analysis(self):
         """Main analysis routine."""
@@ -59,8 +66,9 @@ class ActivityAnalyzer(object):
                     altitude = location[Keys.LOCATION_ALT_KEY]
                     location_analyzer.append_location(date_time, latitude, longitude, altitude)
                     location_analyzer.update_speeds()
+                    self.should_yield()
                 self.summary_data.update(location_analyzer.analyze())
-            time.sleep(1) # Yield the GIL. Filty hack that stops Celery from crashing because of timeout errors when overloaded
+            self.should_yield()
 
             # Do the sensor analysis.
             print("Performing sensor analysis...")
@@ -69,13 +77,14 @@ class ActivityAnalyzer(object):
                 if sensor_type in self.activity:
                     sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type], activity_type)
                     self.summary_data.update(sensor_analyzer.analyze())
-            time.sleep(1) # Yield the GIL. 
+                    self.should_yield()
+            self.should_yield()
 
             # Create a current speed graph - if one has not already been created.
             print("Creating speed graph...")
             if Keys.APP_CURRENT_SPEED_KEY not in self.activity:
                 self.speed_graph = location_analyzer.create_speed_graph()
-            time.sleep(1) # Yield the GIL. 
+            self.should_yield()
 
             # Store the results.
             print("Storing results...")
@@ -85,6 +94,7 @@ class ActivityAnalyzer(object):
                     self.log_error("Error returned when saving activity summary data: " + str(self.summary_data))
             else:
                 self.log_error("Activity ID not provided. Cannot create activity summary.")
+            self.should_yield()
 
             # Update personal bests
             print("Updating personal bests...")
