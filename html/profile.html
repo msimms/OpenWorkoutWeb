@@ -102,7 +102,7 @@
             changeYear: true,
             changeMonth: true
         });
-		var n = new Date(${birthday});
+		var n = new Date(${birthday} * 1000);
 		document.getElementsByName('birthday')[0].placeholder=n.toLocaleDateString();
 	});
 

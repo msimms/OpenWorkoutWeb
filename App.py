@@ -237,7 +237,7 @@ class App(object):
                 response += ","
             cadence = cadences[len(cadences) - 1]
             value = float(cadence.values()[0])
-            response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.2f}".format(value)})
+            response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f}".format(value)})
 
         powers = self.data_mgr.retrieve_sensor_readings(Keys.APP_POWER_KEY, activity_id)
         if powers != None and len(powers) > 0:
@@ -558,7 +558,7 @@ class App(object):
         if max_heart_rate > 1:
             summary += "\t<li>Max. Heart Rate: {:.2f} ".format(max_heart_rate) + Units.get_heart_rate_units_str() + "</li>\n"
         if max_cadence:
-            summary += "\t<li>Max. Cadence: {:.2f} ".format(max_cadence) + Units.get_cadence_units_str() + "</li>\n"
+            summary += "\t<li>Max. Cadence: {:.1f} ".format(max_cadence) + Units.get_cadence_units_str() + "</li>\n"
         if max_power:
             summary += "\t<li>Max. Power: {:.2f} ".format(max_power) + Units.get_power_units_str() + "</li>\n"
 
@@ -840,7 +840,6 @@ class App(object):
                 bests_str += "<td>"
                 bests_str += record_name
                 bests_str += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
-                bests_str += "</td><tr>\n"
             bests_str += "</table>\n"
         if running_bests is not None and len(running_bests) > 0:
             bests_str += "<h3>Running Efforts</h3>\n"
@@ -854,7 +853,6 @@ class App(object):
                 bests_str += "<td>"
                 bests_str += record_name
                 bests_str += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
-                bests_str += "</td><tr>\n"
             bests_str += "</table>\n"
         return bests_str
 
@@ -876,10 +874,19 @@ class App(object):
         cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.SIX_MONTHS)
         bests_str = self.render_personal_records(user_id, cycling_bests, running_bests)
 
+        goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
+        goal_date = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY)
+        goals_str = ""
+        for possible_goal in Keys.GOALS:
+            goals_str += "\t\t\t<option value=\"" + possible_goal + "\""
+            if possible_goal.lower() == goal.lower():
+                goals_str += " selected"
+            goals_str += ">" + possible_goal + "</option>\n"
+
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, goals=goals_str, goal_date=goal_date)
 
     @statistics
     def gear(self):

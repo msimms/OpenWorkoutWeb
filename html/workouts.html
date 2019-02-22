@@ -19,18 +19,44 @@
 <body>
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
+
 <script>
 	function generate_workout_plan()
 	{
 		var the_url = "${root_url}/api/1.0/generate_workout_plan";
+		var goal = document.getElementById("goals").value;
+        var goalDateObj = document.getElementById("goalDate");
+        if (goalDateObj.value == "")
+        {
+			alert("A goal date was not specified.");
+            return;
+        }
+		var goalDate = Date.parse(goalDateObj.value) / 1000;
 		var dict = [];
 		var result_text = {};
 
+		dict.push({["goal"] : goal});
+		dict.push({["goal_date"] : goalDate});
 		if (send_post_request(the_url, dict, result_text))
 			window.location.reload();
 		else
 			alert(result_text.value);
 	}
+
+	$(function()
+	{
+		$('#goalDate').datepicker({
+            changeYear: true,
+            changeMonth: true
+        });
+		var n = new Date(${goal_date} * 1000);
+		document.getElementsByName('goalDate')[0].placeholder=n.toLocaleDateString();
+	});
 </script>
 
 <section class="nav">
@@ -41,20 +67,27 @@ ${nav}
 
     <h2>6 Month Bests</h2>
     <p>
-    ${bests}
+${bests}
     </p>
 
 	<hr>
 
     <h2>Goal</h2>
     <p>
+		<select id="goals" name="goals">
+${goals}
+		</select> on 
+    	<input type="text" name="goalDate" id="goalDate">
     </p>
 
 	<hr>
 
     <h2>Plan</h2>
     <p>
-    <button type="button" onclick="return generate_workout_plan()">Generate Workout Plan</button>
+        Workout plan generation is highly experimental. Consult your doctor and use common sense before following any exercise plan.
+    </p>
+    <p>
+        <button type="button" onclick="return generate_workout_plan()">Generate Workout Plan</button>
     </p>
 
 </div>

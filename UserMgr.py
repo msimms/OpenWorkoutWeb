@@ -1,6 +1,7 @@
 # Copyright 2017 Michael J Simms
 
 import bcrypt
+import time
 import Keys
 import SessionMgr
 import StraenDb
@@ -247,6 +248,8 @@ class UserMgr(object):
                 result = Keys.DEFAULT_WEIGHT
             elif key == Keys.BIRTHDAY_KEY:
                 result = Keys.DEFAULT_BIRTHDAY
+            elif key == Keys.GOAL_DATE_KEY:
+                result = int(time.time())
             else:
                 result = ""
 
