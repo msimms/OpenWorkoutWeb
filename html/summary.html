@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+<title>${product} - ${name} - Summary</title>
+
+<link rel="stylesheet" type="text/css" href="${root_url}/css/normalize.css">
+<link rel="stylesheet" type="text/css" href="${root_url}/css/site.css">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css" />
+
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+
+</head>
+
+<style type="text/css">
+	html { height: 100% }
+	body { height: 100%; margin: 0; padding: 0 }
+	div { margin: 0px }
+	#map_canvas { height: 75% }
+
+	div.bar
+	{
+		display: inline-block;
+		width: 20px;
+		height: 75px;	/* Gets overriden by D3-assigned height below */
+		background-color: teal;
+	}
+
+	path
+	{
+		stroke: steelblue;
+		stroke-width: 2;
+		fill: none;
+	}
+
+	.axis path,
+	.axis line
+	{
+		fill: none;
+		stroke: #000;
+		stroke-width: 1;
+		shape-rendering: crispEdges;
+	}
+</style>
+
+<body>
+
+<section class="nav">
+${nav}
+</section>
+
+<div class="map_canvas" id="map_canvas">
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.js" integrity="sha256-tA8y0XqiwnpwmOIl3SGAcFl2RvxHjA8qp0+1uCGmRmg=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
+<script type="text/javascript">
+	var contentString
+	var routePath
+	var map
+	var marker = null
+	var infoWindow = null
+
+	function escapeRegExp(str)
+	{
+		return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+	}
+
+	function replaceAll(str, find, replace)
+	{
+		return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
+	}
+
+	function newCoord(x, y)
+	{
+		return new OpenLayers.LonLat(x, y);
+	}
+
+	function initialize()
+	{
+		map = new OpenLayers.Map("map_canvas", {
+			controls:[
+				new OpenLayers.Control.Navigation(),
+				new OpenLayers.Control.PanZoomBar(),
+				new OpenLayers.Control.LayerSwitcher(),
+				new OpenLayers.Control.Attribution()],
+			maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+			maxResolution: 156543.0399,
+			numZoomLevels: 19,
+			units: 'm',
+			projection: new OpenLayers.Projection("EPSG:900913"),
+			displayProjection: new OpenLayers.Projection("EPSG:4326")
+		} );
+
+		// Define the map layer
+		map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));
+
+		// Start position for the map (hardcoded here for simplicity,
+		// but maybe you want to get this from the URL params)
+		var lonLat = new OpenLayers.LonLat(0.0, 0.0).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
+		map.setCenter(lonLat, 1);
+	}
+
+	initialize();
+</script>
+
+</div>
+
+</body>
+
+</html>
