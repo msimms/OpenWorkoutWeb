@@ -930,12 +930,13 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.GOAL_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Goal not specified.")
+            raise ApiException.ApiMalformedRequestException("A goal was not specified.")
         if Keys.GOAL_DATE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("A goal date not specified.")
+            raise ApiException.ApiMalformedRequestException("A goal date was not specified.")
 
         goal = urllib.unquote_plus(values[Keys.GOAL_KEY])
         goal_date = urllib.unquote_plus(values[Keys.GOAL_DATE_KEY])
+
         self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
         self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
         self.data_mgr.generate_workout_plan(self.user_id)

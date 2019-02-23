@@ -106,8 +106,8 @@ class ActivityAnalyzer(object):
             else:
                 self.log_error("User ID or activity time not provided. Cannot update personal records.")
         except:
-            traceback.print_exc(file=sys.stdout)
             self.log_error("Exception when analyzing activity data: " + str(self.summary_data))
+            self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
 
 @celery_worker.task()

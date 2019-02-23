@@ -71,11 +71,11 @@ class WorkoutPlanGenerator(object):
             return
 
         try:
-            user_id = user_obj[Keys.WORKOUT_PLAN_USER_ID]
+            user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID]
             inputs = self.calculate_inputs(user_id)
         except:
-            traceback.print_exc(file=sys.stdout)
             self.log_error("Exception when generating a workout plan.")
+            self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
 
 @celery_worker.task()
