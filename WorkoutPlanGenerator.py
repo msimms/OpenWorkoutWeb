@@ -8,8 +8,10 @@ import json
 import logging
 import os
 import sys
+import time
 import traceback
 import DataMgr
+import UserMgr
 import Keys
 
 class WorkoutPlanGenerator(object):
@@ -19,6 +21,7 @@ class WorkoutPlanGenerator(object):
         self.user_obj = user_obj
         root_dir = os.path.dirname(os.path.abspath(__file__))
         self.data_mgr = DataMgr.DataMgr("", root_dir, None, None, None)
+        self.user_mgr = UserMgr.UserMgr(None, root_dir)
         super(WorkoutPlanGenerator, self).__init__()
 
     def log_error(self, log_str):
@@ -55,8 +58,21 @@ class WorkoutPlanGenerator(object):
             if Keys.LONGEST_DISTANCE in running_bests:
                 longest_run = running_bests[Keys.LONGEST_DISTANCE]
 
-        inputs = [ tempo_pace, longest_run ]
+        # Compute the user's age in years.
+        birthday = self.user_mgr.retrieve_user_setting(user_id, Keys.BIRTHDAY_KEY)
+        age_years = (time.time() - birthday) / (365.25 * 24 * 60 * 60)
+
+        # Fetch the detail of the user's goal.
+        goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
+        goal_date = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY)
+        goal_date = (goal_date - time.time()) / (7 * 24 * 60 * 60) # Convert to weeks
+
+        inputs = [ tempo_pace, longest_run, age_years, 0, goal, goal_date ]
         return inputs
+
+    def generate_outputs(self, user_id, inputs):
+        """Runs the neural network."""
+        return []
 
     def organize_schedule(self, user_id, plan):
         """Arranges the user's workouts into days/weeks, etc."""
@@ -73,6 +89,8 @@ class WorkoutPlanGenerator(object):
         try:
             user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID]
             inputs = self.calculate_inputs(user_id)
+            outputs = self.generate_outputs(user_id, inputs)
+            self.organize_schedule(user_id, outputs)
         except:
             self.log_error("Exception when generating a workout plan.")
             self.log_error(traceback.format_exc())

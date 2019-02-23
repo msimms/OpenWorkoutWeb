@@ -1321,6 +1321,20 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def retrieve_workouts_for_user(self, user_id):
+        """Retrieve method for all workouts pertaining to the user with the specified ID."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
+            return None
+
+        try:
+            workouts = self.users_collection.find({Keys.WORKOUT_PLAN_USER_ID: user_id})
+            return list(workouts)
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return None
+
     def delete_workout(self, workout_id):
         """Delete method for the workout with the specified ID."""
         if workout_id is None:

@@ -871,9 +871,11 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        # Show the relevant PRs.
         cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.SIX_MONTHS)
         bests_str = self.render_personal_records(user_id, cycling_bests, running_bests)
 
+        # Set the default goals based on previous selections.
         goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
         goal_date = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY)
         goals_str = ""
@@ -883,10 +885,19 @@ class App(object):
                 goals_str += " selected"
             goals_str += ">" + possible_goal + "</option>\n"
 
+        # Show plans that have already been generated.
+        plans_str = ""
+        workouts = self.data_mgr.retrieve_workouts_for_user(user_id)
+        if workouts is not None:
+            plans_str = "<table>"
+            for workout in workouts:
+                plans_str += "<td></td><tr>"
+            plans_str += "</table>"
+
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, goals=goals_str, goal_date=goal_date)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, plans=plans_str, goals=goals_str, goal_date=goal_date)
 
     @statistics
     def gear(self):
