@@ -28,13 +28,13 @@ class XmlWriter(object):
     def __init__(self):
         super(XmlWriter, self).__init__()
         self.file = None
-        self.buf = ""
+        self.strs = []
         self.tags = []
 
     def write(self, data):
         """Writes to either the file or the internal buffer, depending on whether or not a file was opened."""
         if self.file is None:
-            self.buf += data
+            self.strs.append(data)
         else:
             self.file.write(data)
 
@@ -46,9 +46,12 @@ class XmlWriter(object):
                 raise Exception("Could not create the file.")
             self.file.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n")
 
+    def buffer(self):
+        return ''.join(self.strs)
+
     def close(self):
         self.file = None
-        self.buf = ""
+        self.strs = []
         self.tags = []
 
     def current_tag(self):
@@ -57,22 +60,13 @@ class XmlWriter(object):
         return self.tags[-1]
 
     def open_tag(self, tag_name):
-        xml_str  = self.format_indent()
-        xml_str += "<"
-        xml_str += tag_name
-        xml_str += ">\n"
-
+        xml_str = self.format_indent() + "<" + tag_name + ">\n"
         self.tags.append(tag_name)
         self.write(xml_str)
 
     def open_tag_with_attributes(self, tag_name, key_values, values_on_individual_lines):
         indent = self.format_indent()
-
-        xml_str = indent
-        xml_str += "<"
-        xml_str += tag_name
-        xml_str += " "
-
+        xml_str = indent + "<" + tag_name + " "
         first = True
         for key in key_values:
             if values_on_individual_lines:
@@ -92,22 +86,12 @@ class XmlWriter(object):
         self.write(xml_str)
 
     def write_tag_and_value(self, tag_name, value):
-        xml_str  = self.format_indent()
-        xml_str += "<"
-        xml_str += tag_name
-        xml_str += ">"
-        xml_str += str(value)
-        xml_str += "</"
-        xml_str += tag_name
-        xml_str += ">\n"
+        xml_str = self.format_indent() + "<" + tag_name + ">" + str(value) + "</" + tag_name + ">\n"
         self.write(xml_str)
 
     def close_tag(self):
         tag = self.tags.pop()
-        xml_str = self.format_indent()
-        xml_str += "</"
-        xml_str += tag
-        xml_str += ">\n"
+        xml_str = self.format_indent() + "</" + tag + ">\n"
         self.write(xml_str)		
 
     def close_all_tags(self):
@@ -115,7 +99,5 @@ class XmlWriter(object):
             self.close_tag()
 
     def format_indent(self):
-        xml_str = ""
-        for i in range(0, len(self.tags)):
-            xml_str += "  "
+        xml_str = "  " * len(self.tags)
         return xml_str
