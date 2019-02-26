@@ -590,7 +590,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         if self.map_search is None:
-            self.map_search = MapSearch.MapSearch(self.root_url + '/data/world.geo.json', self.root_url + '/data/us_states.geo.json')
+            self.map_search = MapSearch.MapSearch(self.root_url + '/data/world.geo.json', self.root_url + '/data/us_states.geo.json', self.root_url + '/data/canada.geo.json')
 
         if self.map_search is None:
             raise Exception("Internal error.")
