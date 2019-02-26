@@ -167,6 +167,112 @@ class Api(object):
 
         return True, ""
 
+    def handle_activity_track(self, values):
+        """Called when an API message to get the activity track is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+        if Keys.ACTIVITY_NUM_POINTS not in values:
+            raise ApiException.ApiMalformedRequestException("Number of datapoints not specified.")
+
+        # Get the device and activity IDs from the request.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # Validate the number of points to retrieve.
+        num_points = values[Keys.ACTIVITY_NUM_POINTS]
+        if not InputChecker.is_integer(num_points):
+            raise ApiException.ApiMalformedRequestException("Invalid number of points.")
+
+        locations = self.data_mgr.retrieve_most_recent_locations(activity_id, int(num_points))
+
+        response = "["
+
+        for location in locations:
+            if len(response) > 1:
+                response += ","
+            response += json.dumps({"latitude": location.latitude, "longitude": location.longitude})
+
+        response += "]"
+
+        return True, response
+
+    def handle_activity_metadata(self, values):
+        """Called when an API message to get the activity metadata."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+
+        # Get the device and activity IDs from the request.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        response = "["
+
+        times = self.data_mgr.retrieve_metadata(Keys.APP_TIME_KEY, activity_id)
+        if times is not None and len(times) > 0:
+            if len(response) > 1:
+                response += ","
+            localtimezone = tzlocal()
+            value_str = datetime.datetime.fromtimestamp(times[-1][1] / 1000, localtimezone).strftime('%Y-%m-%d %H:%M:%S')
+            response += json.dumps({"name": Keys.APP_TIME_KEY, "value": value_str})
+
+        distances = self.data_mgr.retrieve_metadata(Keys.APP_DISTANCE_KEY, activity_id)
+        if distances is not None and len(distances) > 0:
+            if len(response) > 1:
+                response += ","
+            distance = distances[-1]
+            value = float(distance.values()[0])
+            response += json.dumps({"name": Keys.APP_DISTANCE_KEY, "value": "{:.2f}".format(value)})
+
+        avg_speeds = self.data_mgr.retrieve_metadata(Keys.APP_AVG_SPEED_KEY, activity_id)
+        if avg_speeds is not None and len(avg_speeds) > 0:
+            if len(response) > 1:
+                response += ","
+            speed = avg_speeds[-1]
+            value = float(speed.values()[0])
+            response += json.dumps({"name": Keys.APP_AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
+
+        moving_speeds = self.data_mgr.retrieve_metadata(Keys.APP_MOVING_SPEED_KEY, activity_id)
+        if moving_speeds is not None and len(moving_speeds) > 0:
+            if len(response) > 1:
+                response += ","
+            speed = moving_speeds[-1]
+            value = float(speed.values()[0])
+            response += json.dumps({"name": Keys.APP_MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
+
+        heart_rates = self.data_mgr.retrieve_sensor_readings(Keys.APP_HEART_RATE_KEY, activity_id)
+        if heart_rates is not None and len(heart_rates) > 0:
+            if len(response) > 1:
+                response += ","
+            heart_rate = heart_rates[-1]
+            value = float(heart_rate.values()[0])
+            response += json.dumps({"name": Keys.APP_HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
+
+        cadences = self.data_mgr.retrieve_sensor_readings(Keys.APP_CADENCE_KEY, activity_id)
+        if cadences is not None and len(cadences) > 0:
+            if len(response) > 1:
+                response += ","
+            cadence = cadences[-1]
+            value = float(cadence.values()[0])
+            response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} rpm".format(value)})
+
+        powers = self.data_mgr.retrieve_sensor_readings(Keys.APP_POWER_KEY, activity_id)
+        if powers is not None and len(powers) > 0:
+            if len(response) > 1:
+                response += ","
+            power = powers[-1]
+            value = float(power.values()[0])
+            response += json.dumps({"name": Keys.APP_POWER_KEY, "value": "{:.2f} watts".format(value)})
+
+        response += "]"
+
+        return True, response
+
     def handle_login_submit(self, values):
         """Called when an API message to log in is received."""
         if self.user_id is not None:
@@ -367,7 +473,7 @@ class Api(object):
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
-        # Get the device and activity IDs from the push request.
+        # Get the device and activity IDs from the request.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
@@ -967,6 +1073,10 @@ class Api(object):
 
         if request == 'update_status':
             return self.handle_update_status(values)
+        elif request == 'activity_track':
+            return self.handle_activity_track(values)
+        elif request == 'activity_metadata':
+            return self.handle_activity_metadata(values)
         elif request == 'login_submit':
             return self.handle_login_submit(values)
         elif request == 'create_login_submit':

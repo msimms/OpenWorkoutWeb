@@ -111,32 +111,6 @@ def stats():
         g_app.log_error('Unhandled exception in ' + stats.__name__)
     return g_app.error()
 
-@g_flask_app.route('/update_track')
-def update_track(activity_id=None, num=None):
-    if activity_id is None:
-        return ""
-    if num is None:
-        return ""
-
-    try:
-        return g_app.update_track(activity_id)
-    except:
-        pass
-    return ""
-
-@g_flask_app.route('/update_metadata')
-def update_metadata(activity_id=None):
-    if activity_id is None:
-        return ""
-
-    try:
-        return g_app.update_metadata(activity_id)
-    except:
-        g_app.log_error(traceback.format_exc())
-        g_app.log_error(sys.exc_info()[0])
-        g_app.log_error('Unhandled exception in update_metadata')
-    return ""
-
 @g_flask_app.route('/error')
 def error(error_str=None):
     """Renders the error page."""

@@ -136,36 +136,6 @@ class StraenWeb(object):
             pass
         return self.app.error("")
 
-    @cherrypy.tools.json_out()
-    @cherrypy.expose
-    def update_track(self, activity_id=None, num=None, *args, **kw):
-        if activity_id is None:
-            return ""
-        if num is None:
-            return ""
-
-        try:
-            cherrypy.response.headers['Content-Type'] = 'application/json'
-            return self.app.update_track(activity_id)
-        except:
-            pass
-        return ""
-
-    @cherrypy.tools.json_out()
-    @cherrypy.expose
-    def update_metadata(self, activity_id=None, *args, **kw):
-        if activity_id is None:
-            return ""
-
-        try:
-            cherrypy.response.headers['Content-Type'] = 'application/json'
-            return self.app.update_metadata(activity_id)
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in update_metadata')
-        return ""
-
     @cherrypy.expose
     def error(self, error_str=None):
         """Renders the error page."""

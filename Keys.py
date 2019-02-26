@@ -103,6 +103,7 @@ ACTIVITY_TAG_KEY = "tag"
 ACTIVITY_TAGS_KEY = "tags"
 ACTIVITY_SUMMARY_KEY = "summary_data"
 ACTIVITY_EXPORT_FORMAT_KEY = "export_format"
+ACTIVITY_NUM_POINTS = "num_points"
 
 # Keys used to summarize activity data.
 BEST_SPEED = "Best Speed"
