@@ -7,7 +7,6 @@
 
 <link rel="stylesheet" type="text/css" href="${root_url}/css/normalize.css">
 <link rel="stylesheet" type="text/css" href="${root_url}/css/site.css">
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css" />
 
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
@@ -22,30 +21,6 @@
 	body { height: 100%; margin: 0; padding: 0 }
 	div { margin: 0px }
 	#map_canvas { height: 75% }
-
-	div.bar
-	{
-		display: inline-block;
-		width: 20px;
-		height: 75px;	/* Gets overriden by D3-assigned height below */
-		background-color: teal;
-	}
-
-	path
-	{
-		stroke: steelblue;
-		stroke-width: 2;
-		fill: none;
-	}
-
-	.axis path,
-	.axis line
-	{
-		fill: none;
-		stroke: #000;
-		stroke-width: 1;
-		shape-rendering: crispEdges;
-	}
 </style>
 
 <body>
@@ -55,17 +30,13 @@ ${nav}
 </section>
 
 <div class="map_canvas" id="map_canvas">
+</div>
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.js" integrity="sha256-tA8y0XqiwnpwmOIl3SGAcFl2RvxHjA8qp0+1uCGmRmg=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/4.6.5/ol.js" integrity="sha256-77IKwU93jwIX7zmgEBfYGHcmeO0Fx2MoWB/ooh9QkBA=" crossorigin="anonymous"></script>
+
 <script type="text/javascript">
-	var contentString
-	var routePath
 	var map
-	var marker = null
-	var infoWindow = null
 
 	function escapeRegExp(str)
 	{
@@ -84,33 +55,57 @@ ${nav}
 
 	function initialize()
 	{
-		map = new OpenLayers.Map("map_canvas", {
-			controls:[
-				new OpenLayers.Control.Navigation(),
-				new OpenLayers.Control.PanZoomBar(),
-				new OpenLayers.Control.LayerSwitcher(),
-				new OpenLayers.Control.Attribution()],
-			maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
-			maxResolution: 156543.0399,
-			numZoomLevels: 19,
-			units: 'm',
-			projection: new OpenLayers.Projection("EPSG:900913"),
-			displayProjection: new OpenLayers.Projection("EPSG:4326")
-		} );
-
-		// Define the map layer
-		map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));
-
-		// Start position for the map (hardcoded here for simplicity,
-		// but maybe you want to get this from the URL params)
-		var lonLat = new OpenLayers.LonLat(0.0, 0.0).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
-		map.setCenter(lonLat, 1);
+        var source = new ol.source.Vector({
+            url: '${root_url}/data/us_states.geo.json',
+            format: new ol.format.GeoJSON()
+        });
+        var clusterSource = new ol.source.Cluster({
+            distance: 40,
+            source: source
+        });
+        var styleCache = {};
+        var clusters = new ol.layer.Vector({
+            source: clusterSource,
+            style: function(feature, resolution) {
+                var size = feature.get('features').length;
+                var style = styleCache[size];
+                if (!style)
+                {
+                    style = [new ol.style.Style({
+                        image: new ol.style.Circle({
+                            radius: 10,
+                            stroke: new ol.style.Stroke({
+                                color: '#fff'
+                            }),
+                            fill: new ol.style.Fill({
+                                color: '#3399CC'
+                            })
+                        }),
+                    })];
+                    styleCache[size] = style;
+                }
+                return style;
+            }
+        });
+        var raster = new ol.layer.Tile({
+            source: new ol.source.OSM()
+        });
+        var raw = new ol.layer.Vector({
+            source: source
+        });
+        var map = new ol.Map({
+            layers: [raster, clusters],
+            renderer: 'canvas',
+            target: 'map_canvas',
+            view: new ol.View({
+                center: [0, 0],
+                zoom: 2
+            })
+        });
 	}
 
 	initialize();
 </script>
-
-</div>
 
 </body>
 
