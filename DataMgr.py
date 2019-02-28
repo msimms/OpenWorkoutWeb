@@ -55,18 +55,52 @@ class DataMgr(Importer.ActivityWriter):
         """Schedules the specified activity for analysis."""
         self.analysis_scheduler.add_to_queue(activity, activity_user_id)
 
+    def compute_and_store_end_time(self, activity):
+        """Examines the activity and computes the time at which the activity ended, storing it so we don't have to do this again."""
+        if self.database is None:
+            raise Exception("No database.")
+
+        end_time = None
+
+        search_keys = []
+        search_keys.append(Keys.APP_LOCATIONS_KEY)
+        search_keys.append(Keys.APP_ACCELEROMETER_KEY)
+        for search_key in search_keys:
+            if search_key in activity and isinstance(activity[search_key], list) and len(activity[search_key]) > 0:
+                last_entry = (activity[search_key])[-1]
+                if "time" in last_entry:
+                    possible_end_time = last_entry["time"]
+                    if end_time is None or possible_end_time > end_time:
+                        end_time = possible_end_time
+
+        if end_time is not None:
+            activity_id = activity[Keys.ACTIVITY_ID_KEY]
+            self.database.create_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
+
+        return end_time
+
     def is_duplicate_activity(self, user_id, start_time):
         """Inherited from ActivityWriter. Returns TRUE if the activity appears to be a duplicate of another activity. Returns FALSE otherwise."""
         if self.database is None:
             raise Exception("No database.")
 
-        exclude_keys = self.database.list_excluded_keys() # Things we don't need.
-        activities = self.database.retrieve_user_activity_list(user_id, None, None, exclude_keys)
+        activities = self.database.retrieve_user_activity_list(user_id, None, None, None)
         for activity in activities:
             if Keys.ACTIVITY_TIME_KEY in activity:
+
+                # We're looking for activities that start within the bounds of another activity.
                 activity_start_time = activity[Keys.ACTIVITY_TIME_KEY]
-                if start_time > activity_start_time: # Need to incorporate check agains the activity end time, but in an efficient manner.
-                    pass
+                if start_time == activity_start_time:
+                    return True
+                if start_time > activity_start_time:
+                    if Keys.ACTIVITY_END_TIME_KEY not in activity:
+                        activity_end_time = self.compute_and_store_end_time(activity)
+                    else:
+                        activity_end_time = activity[Keys.ACTIVITY_END_TIME_KEY]
+
+                    if activity_end_time and start_time < activity_end_time:
+                        return True
+
         return False
 
     def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
@@ -137,12 +171,16 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         return self.database.create_accelerometer_reading(device_str, activity_id, accels)
 
-    def finish_activity(self):
+    def finish_activity(self, activity_id, end_time):
         """Inherited from ActivityWriter. Called for post-processing."""
-        pass
+        if self.database is None:
+            raise Exception("No database.")
+        return self.database.create_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
 
     def import_file(self, username, user_id, local_file_name, uploaded_file_name):
         """Imports the contents of a local file into the database."""
+        if self.import_scheduler is None:
+            raise Exception("No importer.")
         self.import_scheduler.add_to_queue(username, user_id, local_file_name, uploaded_file_name)
 
     def update_activity_start_time(self, activity):

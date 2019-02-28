@@ -44,7 +44,7 @@ class ActivityWriter(object):
         """Pure virtual method for processing multiple sensor readings. 'values' is an array of arrays in the form [time, value]."""
         pass
 
-    def finish_activity(self):
+    def finish_activity(self, activity_id, end_time):
         """Pure virtual method for any post-processing."""
         pass
 
@@ -84,6 +84,9 @@ class Importer(object):
             # Indicate the start of the activity.
             device_str, activity_id = self.activity_writer.create_activity(username, user_id, gpx.name, gpx.description, 'Unknown', start_time_unix)
 
+            # We'll store the most recent timecode here.
+            end_time_unix = 0
+
             locations = []
             cadences = []
             heart_rate_readings = []
@@ -100,6 +103,10 @@ class Importer(object):
                         dt_obj = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S %Z")
                         dt_tuple = dt_obj.timetuple()
                         dt_unix = calendar.timegm(dt_tuple) * 1000
+
+                        # Is this the most recent timestamp we've seen?
+                        if dt_unix > end_time_unix:
+                            end_time_unix = dt_unix
 
                         # Store the location.
                         location = []
@@ -144,7 +151,7 @@ class Importer(object):
             self.activity_writer.create_sensor_readings(activity_id, Keys.APP_TEMP_KEY, temperature_readings)
 
             # Let it be known that we are finished with this activity.
-            self.activity_writer.finish_activity()
+            self.activity_writer.finish_activity(activity_id, end_time_unix)
             return True, device_str, activity_id
 
         return False, "", ""
@@ -184,6 +191,9 @@ class Importer(object):
         normalized_activity_type = Importer.normalize_activity_type(activity_type)
         device_str, activity_id = self.activity_writer.create_activity(username, user_id, activity_name, "", normalized_activity_type, start_time_unix)
 
+        # We'll store the most recent timecode here.
+        end_time_unix = 0
+
         locations = []
         cadences = []
         heart_rate_readings = []
@@ -201,6 +211,10 @@ class Importer(object):
                                 dt_tuple = dt_obj.timetuple()
                                 dt_unix = calendar.timegm(dt_tuple) * 1000
                                 dt_unix = dt_unix + dt_obj.microsecond / 1000
+
+                                # Is this the most recent timestamp we've seen?
+                                if dt_unix > end_time_unix:
+                                    end_time_unix = dt_unix
 
                                 # Store the location.
                                 if hasattr(point, 'Position'):
@@ -245,7 +259,7 @@ class Importer(object):
         self.activity_writer.create_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
 
         # Let it be known that we are finished with this activity.
-        self.activity_writer.finish_activity()
+        self.activity_writer.finish_activity(activity_id, end_time_unix)
         return True, device_str, activity_id
 
     def import_accelerometer_csv_file(self, username, user_id, file_name):
@@ -256,6 +270,7 @@ class Importer(object):
         x_list = []
         y_list = []
         z_list = []
+        end_time_unix = 0
         row_count = 0
         device_str = ""
         activity_id = ""
@@ -274,6 +289,10 @@ class Importer(object):
                 z = float(row[3])
                 accel_data = [ x, y, z ]
 
+                # Is this the most recent timestamp we've seen?
+                if ts > end_time_unix:
+                    end_time_unix = ts
+
                 # Indicate the start of the activity.
                 if row_count == 1:
                     device_str, activity_id = self.activity_writer.create_activity(username, user_id, "", "", "Lifting", ts)
@@ -282,7 +301,7 @@ class Importer(object):
                 row_count = row_count + 1
 
         # Let it be known that we are finished with this activity.
-        self.activity_writer.finish_activity()
+        self.activity_writer.finish_activity(activity_id, end_time_unix)
         return True, device_str, activity_id
 
     def import_file(self, username, user_id, local_file_name, original_file_name, file_extension):

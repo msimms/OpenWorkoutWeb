@@ -86,7 +86,7 @@ class TestActivityWriter(Importer.ActivityWriter):
         for value in values:
             self.create_sensor_reading(activity_id, value[0], sensor_type, value[1]) 
 
-    def finish_activity(self):
+    def finish_activity(self, activity_id, end_time):
         """Inherited from ActivityWriter. Called for post-processing."""
 
         # Do location-based analysis.
