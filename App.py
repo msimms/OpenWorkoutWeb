@@ -597,7 +597,7 @@ class App(object):
             my_template = Template(filename=error_html_file, module_directory=self.tempmod_dir)
             if error_str is None:
                 error_str = "Internal Error."
-            return my_template.render(error=error_str)
+            return my_template.render(product=PRODUCT_NAME, root_url=self.root_url, error=error_str)
         except:
             pass
         return ""
