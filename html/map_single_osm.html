@@ -335,6 +335,23 @@ ${powers}
 			alert(result_text.value);
 	}
 
+	function delete_activity()
+	{
+		if (confirm('Are you sure you want to do this?'))
+		{
+            var the_url = "${root_url}/api/1.0/delete_activity";
+            var format = document.getElementById("format").value;
+            var dict = [];
+            var result_text = {};
+
+            dict.push({["activity_id"] : "${activityId}"});
+            if (send_post_request(the_url, dict, result_text))
+                window.location.replace("${root_url}");
+            else
+                alert(result_text.value);
+        }
+	}
+
 	jQuery(document).ready(function()
 	{
 		jQuery(".chosen").data("placeholder", "Specify tags...").chosen();
@@ -391,6 +408,7 @@ ${comments}
 <section class="export">
 <table>
 ${exports}
+${delete}
 </table>
 </section>
 

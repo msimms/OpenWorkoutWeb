@@ -255,7 +255,7 @@ class App(object):
         return comments_str
 
     def render_export_control(self, logged_in, has_location_data, has_accel_data):
-        """Helper function for building the comments string."""
+        """Helper function for building the exports string."""
         exports_str = ""
         if logged_in:
             exports_str  = "<td>Export Format:</td><tr>\n"
@@ -268,6 +268,13 @@ class App(object):
             exports_str += "</select>\n</td><tr>\n"
             exports_str += "<td><button type=\"button\" onclick=\"return export_activity()\">Export</button></td><tr>\n"
         return exports_str
+
+    def render_delete_control(self, logged_in):
+        """Helper function for building the delete string."""
+        delete_str = ""
+        if logged_in:
+            delete_str += "<td><button type=\"button\" onclick=\"return delete_activity()\">Delete</button></td><tr>\n"
+        return delete_str
 
     def render_page_for_lifting_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_username, belongs_to_current_user, is_live):
         """Helper function for rendering the map corresonding to a specific device and activity."""
@@ -350,6 +357,9 @@ class App(object):
         # List the export options.
         exports_str = self.render_export_control(logged_in, False, Keys.APP_ACCELEROMETER_KEY in activity)
 
+        # Render the delete control.
+        delete_str = self.render_delete_control(logged_in)
+
         # Build the page title.
         if is_live:
             page_title = "Live Tracking"
@@ -357,7 +367,7 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.lifting_activity_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, tags=tags_str, comments=comments_str, exports=exports_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, tags=tags_str, comments=comments_str, exports=exports_str, delete=delete_str)
 
     def render_metadata_for_page(self, key, activity_id):
         """Helper function for processing meatadata and formatting it for display."""
@@ -506,6 +516,9 @@ class App(object):
         # List the export options.
         exports_str = self.render_export_control(logged_in, True, Keys.APP_ACCELEROMETER_KEY in activity)
 
+        # Render the delete control.
+        delete_str = self.render_delete_control(logged_in)
+
         # Build the page title.
         if is_live:
             page_title = "Live Tracking"
@@ -515,10 +528,10 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str, delete=delete_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str, delete=delete_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
