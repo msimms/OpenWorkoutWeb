@@ -62,6 +62,7 @@ class DataMgr(Importer.ActivityWriter):
 
         end_time = None
 
+        # Look through activity attributes that have a "time".
         search_keys = []
         search_keys.append(Keys.APP_LOCATIONS_KEY)
         search_keys.append(Keys.APP_ACCELEROMETER_KEY)
@@ -73,6 +74,11 @@ class DataMgr(Importer.ActivityWriter):
                     if end_time is None or possible_end_time > end_time:
                         end_time = possible_end_time
 
+        # If we couldn't find anything with a time then just duplicate the start time, assuming it's a manually entered workout or something.
+        if end_time is None:
+            end_time = activity[Keys.ACTIVITY_TIME_KEY]
+
+        # Store the end time, so we don't have to go through this again.
         if end_time is not None:
             activity_id = activity[Keys.ACTIVITY_ID_KEY]
             self.database.create_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
