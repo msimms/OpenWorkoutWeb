@@ -1124,7 +1124,7 @@ class App(object):
         # Get the user's FTP.
         ftp = self.data_mgr.retrieve_user_estimated_ftp(user_id)
         if ftp is None:
-            ftp_str = "Cycling activities with power data that was recorded in the last six months must be uploaded before your FTP can be calculated."
+            ftp_str = "Cycling activities with power data that was recorded in the last six months must be uploaded before your FTP can be estimated."
         else:
             ftp_str = str(ftp)
 
