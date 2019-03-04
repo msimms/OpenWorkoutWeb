@@ -635,7 +635,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if gear_name is None:
             raise Exception("Bad parameter.")
-        pass
+        return self.database.create_gear_on_activity(activity, gear_name)
 
     def generate_workout_plan(self, user_id):
         """Generates/updates a workout plan for the user with the specified ID."""

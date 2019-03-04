@@ -1407,6 +1407,28 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def create_gear_on_activity(self, activity, gear):
+        """Adds a tag to the specified activity."""
+        if activity is None:
+            self.log_error(MongoDatabase.create_tag_on_activity.__name__ + ": Unexpected empty object: activity")
+            return False
+        if gear is None:
+            self.log_error(MongoDatabase.create_tag_on_activity.__name__ + ": Unexpected empty object: gear")
+            return False
+
+        try:
+            data = []
+            if Keys.GEAR_KEY in activity:
+                data = activity[Keys.GEAR_KEY]
+            data.append(gear)
+            activity[Keys.GEAR_KEY] = data
+            self.activities_collection.save(activity)
+            return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def retrieve_gear_for_user(self, user_id):
         """Retrieve method for the gear with the specified ID."""
         if user_id is None:

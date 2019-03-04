@@ -369,7 +369,7 @@ ${powers}
         var result_text = {};
 
         dict.push({["activity_id"] : "${activityId}"});
-        dict.push({["gear"] : gear});
+        dict.push({["name"] : gear});
         if (!send_post_request(the_url, dict, result_text))
             alert(result_text.value);
     }
@@ -383,7 +383,7 @@ ${powers}
         });
 
         jQuery('#gear').on('change', function(e) {
-            add_gear(jQuery("#tags").val());
+            add_gear(jQuery("#gear").val());
         });
 	});
 

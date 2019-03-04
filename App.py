@@ -218,7 +218,7 @@ class App(object):
                 tags_str += "</option>\n"
         return tags_str
 
-    def render_gear(self, activity_user_id, activity_type, logged_in):
+    def render_gear(self, activity_user_id, activity_type, activity, logged_in):
         """Helper function for building the gear string."""
         if activity_type == Keys.TYPE_RUNNING_KEY or activity_type == Keys.TYPE_HIKING_KEY:
             gear_type = Keys.GEAR_TYPE_SHOES
@@ -226,13 +226,21 @@ class App(object):
             gear_type = Keys.GEAR_TYPE_BIKE
         else:
             return ""
+
+        activity_gear = []
+        if Keys.GEAR_KEY in activity:
+            activity_gear = activity[Keys.GEAR_KEY]
+
         all_gear = self.data_mgr.retrieve_gear_of_specified_type_for_user(activity_user_id, gear_type)
         gear_str = ""
         if all_gear is not None:
             for gear in all_gear:
                 if Keys.GEAR_NAME_KEY in gear:
                     gear_name = gear[Keys.GEAR_NAME_KEY]
-                    gear_str += "<option>"
+                    if gear_name in activity_gear:
+                        gear_str += "<option selected=true>"
+                    else:
+                        gear_str += "<option>"
                     gear_str += gear_name
                     gear_str += "</option>\n"
         return gear_str
@@ -526,7 +534,7 @@ class App(object):
         tags_str = self.render_tags(activity, logged_in)
 
         # List the gear.
-        gear_str = self.render_gear(activity_user_id, activity_type, logged_in)
+        gear_str = self.render_gear(activity_user_id, activity_type, activity, logged_in)
 
         # List the comments.
         comments_str = self.render_comments(activity, logged_in)
