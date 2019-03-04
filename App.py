@@ -330,15 +330,11 @@ class App(object):
         summary = "<ul>\n"
 
         # Add the activity type.
-        activity_type = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
-        if activity_type is None:
-            activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+        activity_type = self.render_activity_type(activity)
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
 
         # Add the activity date.
-        name = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_NAME_KEY, activity_id)
-        if name is None or len(name) == 0:
-            name = Keys.UNNAMED_ACTIVITY_TITLE
+        name = self.render_activity_name(activity)
         summary += "\t<li>Name: " + name + "</li>\n"
 
         # Add the activity date.
@@ -400,6 +396,22 @@ class App(object):
                     max_value = value
         return data_str, max_value
 
+    def render_activity_name(self, activity):
+        """Helper function for getting the activity name."""
+        if Keys.ACTIVITY_NAME_KEY in activity:
+            activity_name = activity[Keys.ACTIVITY_NAME_KEY]
+        else:
+            activity_name = Keys.UNNAMED_ACTIVITY_TITLE
+        return activity_name
+
+    def render_activity_type(self, activity):
+        """Helper function for getting the activity type."""
+        if Keys.ACTIVITY_TYPE_KEY in activity:
+            activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
+        else:
+            activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+        return activity_type
+
     def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
 
@@ -433,10 +445,8 @@ class App(object):
         heart_rates_str, max_heart_rate = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity_id)
         cadences_str, max_cadence = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity_id)
         powers_str, max_power = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity_id)
-        name = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_NAME_KEY, activity_id)
-        activity_type = self.data_mgr.retrieve_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
-        if activity_type is None:
-            activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+        name = self.render_activity_name(activity)
+        activity_type = self.render_activity_type(activity)
 
         # Compute location-based things.
         location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
@@ -458,8 +468,6 @@ class App(object):
             summary += "\t<li>Start Time: " + App.timestamp_code_to_str(activity[Keys.ACTIVITY_TIME_KEY]) + "</li>\n"
 
         # Add the activity name.
-        if name is None or len(name) == 0:
-            name = Keys.UNNAMED_ACTIVITY_TITLE
         summary += "\t<li>Name: " + name + "</li>\n"
 
         if location_analyzer.total_distance is not None:
