@@ -368,11 +368,13 @@ class App(object):
         my_template = Template(filename=self.lifting_activity_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, tags=tags_str, comments=comments_str, exports=exports_str, delete=delete_str)
 
-    def render_metadata_for_page(self, key, activity_id):
+    def render_metadata_for_page(self, key, activity):
         """Helper function for processing meatadata and formatting it for display."""
         max_value = 0.0
-        data = self.data_mgr.retrieve_metadata(key, activity_id)
         data_str = ""
+        data = []
+        if key in activity:
+            data = activity[key]
         if data is not None and isinstance(data, list):
             for datum in data:
                 time = datum.keys()[0]
@@ -446,7 +448,7 @@ class App(object):
             last_lon = last_loc[Keys.LOCATION_LON_KEY]
 
         # Get all the things.
-        current_speeds_str, _ = self.render_metadata_for_page(Keys.APP_CURRENT_SPEED_KEY, activity_id)
+        current_speeds_str, _ = self.render_metadata_for_page(Keys.APP_CURRENT_SPEED_KEY, activity)
         heart_rates_str, max_heart_rate = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity)
         cadences_str, max_cadence = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity)
         powers_str, max_power = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity)
