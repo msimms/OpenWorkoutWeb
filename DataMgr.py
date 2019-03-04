@@ -457,6 +457,16 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_tags(activity_id)
 
+    def associate_tag_with_activity(self, activity, tag):
+        """Adds a tag to an activity."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity is None:
+            raise Exception("Bad parameter.")
+        if tag is None:
+            raise Exception("Bad parameter.")
+        return self.database.create_tag_on_activity(activity, tag)
+
     def create_activity_comment(self, activity_id, commenter_id, comment):
         """Create method for a comment on an activity."""
         if self.database is None:
@@ -617,6 +627,14 @@ class DataMgr(Importer.ActivityWriter):
         if cb is None:
             raise Exception("Bad parameter.")
         self.database.retrieve_each_user_activity(context, user_id, cb)
+
+    def associate_gear_with_activity(self, activity, gear_name):
+        """Adds gear to an activity."""
+        if self.database is None:
+            raise Exception("No database.")
+        if gear_name is None:
+            raise Exception("Bad parameter.")
+        pass
 
     def generate_workout_plan(self, user_id):
         """Generates/updates a workout plan for the user with the specified ID."""

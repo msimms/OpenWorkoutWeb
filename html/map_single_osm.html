@@ -358,9 +358,7 @@ ${powers}
 
         dict.push({["activity_id"] : "${activityId}"});
         dict.push({["tag"] : tag});
-        if (send_post_request(the_url, dict, result_text))
-            window.location.replace("${root_url}");
-        else
+        if (!send_post_request(the_url, dict, result_text))
             alert(result_text.value);
     }
 
@@ -372,9 +370,7 @@ ${powers}
 
         dict.push({["activity_id"] : "${activityId}"});
         dict.push({["gear"] : gear});
-        if (send_post_request(the_url, dict, result_text))
-            window.location.replace("${root_url}");
-        else
+        if (!send_post_request(the_url, dict, result_text))
             alert(result_text.value);
     }
 

@@ -620,7 +620,26 @@ class Api(object):
         """Called when an API message to add a tag to an activity is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        return True, ""
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.ACTIVITY_TAG_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
+        if not InputChecker.is_valid(tag):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Only the activity's owner should be able to do this.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
+
+        result = self.data_mgr.associate_tag_with_activity(activity, tag)
+        return result, ""
 
     def handle_delete_tag_from_activity(self, values):
         """Called when an API message to delete a tag from an activity is received."""
@@ -926,6 +945,30 @@ class Api(object):
         result = self.data_mgr.delete_gear(self.user_id, gear_id)
         return result, ""
 
+    def handle_add_gear_to_activity(self, values):
+        """Called when an API message to associate gear with an activity is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.GEAR_NAME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+        gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
+        if not InputChecker.is_valid(gear_name):
+            raise ApiException.ApiMalformedRequestException("Invalid gear name.")
+
+        # Only the activity's owner should be able to do this.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
+
+        result = self.data_mgr.associate_gear_with_activity(activity, gear_name)
+        return result, ""
+
     def handle_update_settings(self, values):
         """Called when the user submits a setting change."""
         if self.user_id is None:
@@ -1135,6 +1178,8 @@ class Api(object):
             return self.handle_update_gear(values)
         elif request == 'delete_gear':
             return self.handle_delete_gear(values)
+        elif request == 'add_gear_to_activity':
+            return self.handle_add_gear_to_activity(values)
         elif request == 'update_settings':
             return self.handle_update_settings(values)
         elif request == 'update_profile':
