@@ -437,6 +437,7 @@ class DataMgr(Importer.ActivityWriter):
         tags.append('Hot')
         tags.append('Humid')
         tags.append('Cold')
+        tags.append('Virtual')
         return tags
 
     def create_activity_tag(self, activity_id, tag):
