@@ -177,6 +177,10 @@ ${zAxis}
 	jQuery(document).ready(function()
 	{
 		jQuery(".chosen").data("placeholder", "Specify tags...").chosen();
+
+        jQuery('#tags').on('change', function(e) {
+            add_tag(jQuery("#tags").val());
+        });
 	});
 
 </script>
@@ -206,7 +210,7 @@ ${details_controls}
 
 <section class="comments">
 <p>
-<select name="tags" id="tags" class="chosen" multiple="true" style="width:50%;">
+<select name="tags" id="tags" class="chosen" multiple="true" style="width:30%;" data-placeholder="Specify tags...">
 ${tags}
 </select>
 </p>
