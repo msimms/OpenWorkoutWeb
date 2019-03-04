@@ -237,20 +237,21 @@ class App(object):
                     gear_str += "</option>\n"
         return gear_str
 
-    def render_comments(self, activity_id, logged_in):
+    def render_comments(self, activity, logged_in):
         """Helper function for building the comments string."""
-        comments = self.data_mgr.retrieve_activity_comments(activity_id)
         comments_str = ""
-        if comments is not None:
-            for comment_entry in comments:
-                decoded_entry = json.loads(comment_entry)
-                commenter_id = decoded_entry[Keys.ACTIVITY_COMMENTER_ID_KEY]
-                _, commenter_name = self.user_mgr.retrieve_user_from_id(commenter_id)
-                comments_str += "<td><b>"
-                comments_str += commenter_name
-                comments_str += "</b> says \""
-                comments_str += decoded_entry[Keys.ACTIVITY_COMMENT_KEY]
-                comments_str += "\"</td><tr>\n"
+        comments = []
+        if Keys.ACTIVITY_COMMENTS_KEY in activity:
+            comments = activity[Keys.ACTIVITY_COMMENTS_KEY]
+        for comment_entry in comments:
+            decoded_entry = json.loads(comment_entry)
+            commenter_id = decoded_entry[Keys.ACTIVITY_COMMENTER_ID_KEY]
+            _, commenter_name = self.user_mgr.retrieve_user_from_id(commenter_id)
+            comments_str += "<td><b>"
+            comments_str += commenter_name
+            comments_str += "</b> says \""
+            comments_str += decoded_entry[Keys.ACTIVITY_COMMENT_KEY]
+            comments_str += "\"</td><tr>\n"
         if logged_in:
             comments_str += "<td><textarea rows=\"4\" style=\"width:50%;\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>\n"
             comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>\n"
@@ -354,7 +355,7 @@ class App(object):
         tags_str = self.render_tags(activity, logged_in)
 
         # List the comments.
-        comments_str = self.render_comments(activity_id, logged_in)
+        comments_str = self.render_comments(activity, logged_in)
 
         # List the export options.
         exports_str = self.render_export_control(logged_in, False, Keys.APP_ACCELEROMETER_KEY in activity)
@@ -513,7 +514,7 @@ class App(object):
         gear_str = self.render_gear(activity_user_id, activity_type, logged_in)
 
         # List the comments.
-        comments_str = self.render_comments(activity_id, logged_in)
+        comments_str = self.render_comments(activity, logged_in)
 
         # List the export options.
         exports_str = self.render_export_control(logged_in, True, Keys.APP_ACCELEROMETER_KEY in activity)
