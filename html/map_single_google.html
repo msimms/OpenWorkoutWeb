@@ -344,7 +344,6 @@ ${powers}
 		if (confirm('Are you sure you want to do this?'))
 		{
             var the_url = "${root_url}/api/1.0/delete_activity";
-            var format = document.getElementById("format").value;
             var dict = [];
             var result_text = {};
 
@@ -356,9 +355,45 @@ ${powers}
         }
 	}
 
+    function add_tag(tag)
+    {
+        var the_url = "${root_url}/api/1.0/add_tag_to_activity";
+        var dict = [];
+        var result_text = {};
+
+        dict.push({["activity_id"] : "${activityId}"});
+        dict.push({["tag"] : tag});
+        if (send_post_request(the_url, dict, result_text))
+            window.location.replace("${root_url}");
+        else
+            alert(result_text.value);
+    }
+
+    function add_gear(gear)
+    {
+        var the_url = "${root_url}/api/1.0/add_gear_to_activity";
+        var dict = [];
+        var result_text = {};
+
+        dict.push({["activity_id"] : "${activityId}"});
+        dict.push({["gear"] : gear});
+        if (send_post_request(the_url, dict, result_text))
+            window.location.replace("${root_url}");
+        else
+            alert(result_text.value);
+    }
+
 	jQuery(document).ready(function()
 	{
 		jQuery(".chosen").data("placeholder", "Specify tags...").chosen();
+
+        jQuery('#tags').on('change', function(e) {
+            add_tag(jQuery("#tags").val());
+        });
+
+        jQuery('#gear').on('change', function(e) {
+            add_gear(jQuery("#tags").val());
+        });
 	});
 
 </script>
@@ -385,7 +420,7 @@ ${details_controls}
 <section class="comments">
 <p>
 Tags:
-<select name="tags" id="tags" class="chosen" multiple="true" style="width:30%;">
+<select name="tags" id="tags" class="chosen" multiple="true" style="width:30%;" data-placeholder="Specify tags...">
 ${tags}
 </select>
 </p>
@@ -394,7 +429,7 @@ ${tags}
 <section class="comments">
 <p>
 Gear:
-<select name="gear" id="gear" class="chosen" multiple="true" style="width:30%;">
+<select name="gear" id="gear" class="chosen" multiple="true" style="width:30%;" data-placeholder="Specify gear...">
 ${gear}
 </select>
 </p>
