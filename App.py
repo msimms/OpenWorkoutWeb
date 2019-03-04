@@ -197,9 +197,11 @@ class App(object):
         navbar_str += "\t</ul>\n</nav>"
         return navbar_str
 
-    def render_tags(self, activity_id, logged_in):
+    def render_tags(self, activity, logged_in):
         """Helper function for building the tags string."""
-        activity_tags = self.data_mgr.retrieve_activity_tags(activity_id)
+        activity_tags = []
+        if Keys.ACTIVITY_TAGS_KEY in activity:
+            activity_tags = activity[Keys.ACTIVITY_TAGS_KEY]
         default_tags = self.data_mgr.list_default_tags()
         all_tags = []
         all_tags.extend(activity_tags)
@@ -349,7 +351,7 @@ class App(object):
             details_controls_str = ""
 
         # List the tags.
-        tags_str = self.render_tags(activity_id, logged_in)
+        tags_str = self.render_tags(activity, logged_in)
 
         # List the comments.
         comments_str = self.render_comments(activity_id, logged_in)
@@ -505,7 +507,7 @@ class App(object):
             details_controls_str = ""
 
         # List the tags.
-        tags_str = self.render_tags(activity_id, logged_in)
+        tags_str = self.render_tags(activity, logged_in)
 
         # List the gear.
         gear_str = self.render_gear(activity_user_id, activity_type, logged_in)
