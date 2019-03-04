@@ -382,18 +382,19 @@ class App(object):
                     max_value = value
         return data_str, max_value
 
-    def render_sensor_data_for_page(self, key, activity_id):
+    def render_sensor_data_for_page(self, key, activity):
         """Helper function for processing sensor data and formatting it for display."""
         max_value = 0.0
-        data = self.data_mgr.retrieve_sensor_readings(key, activity_id)
         data_str = ""
-        if data is not None and isinstance(data, list):
-            for datum in data:
-                time = datum.keys()[0]
-                value = float(datum.values()[0])
-                data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
-                if value > max_value:
-                    max_value = value
+        data = []
+        if key in activity:
+            data = activity[key]
+        for datum in data:
+            time = datum.keys()[0]
+            value = float(datum.values()[0])
+            data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
+            if value > max_value:
+                max_value = value
         return data_str, max_value
 
     def render_activity_name(self, activity):
@@ -402,6 +403,8 @@ class App(object):
             activity_name = activity[Keys.ACTIVITY_NAME_KEY]
         else:
             activity_name = Keys.UNNAMED_ACTIVITY_TITLE
+        if len(activity_name) == 0:
+            activity_name = Keys.UNNAMED_ACTIVITY_TITLE
         return activity_name
 
     def render_activity_type(self, activity):
@@ -409,6 +412,8 @@ class App(object):
         if Keys.ACTIVITY_TYPE_KEY in activity:
             activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
         else:
+            activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+        if len(activity_type) == 0:
             activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
         return activity_type
 
@@ -442,9 +447,9 @@ class App(object):
 
         # Get all the things.
         current_speeds_str, _ = self.render_metadata_for_page(Keys.APP_CURRENT_SPEED_KEY, activity_id)
-        heart_rates_str, max_heart_rate = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity_id)
-        cadences_str, max_cadence = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity_id)
-        powers_str, max_power = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity_id)
+        heart_rates_str, max_heart_rate = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity)
+        cadences_str, max_cadence = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity)
+        powers_str, max_power = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity)
         name = self.render_activity_name(activity)
         activity_type = self.render_activity_type(activity)
 
