@@ -111,6 +111,10 @@ python start_flask.py [--debug] [--host <hostname>] [--hostport <hostport>] [--g
 * Activity export in GPX format.
 * Fetch six month records, to use as the basis for workout plan generation.
 
+### 0.11
+* Fixes to adding tags and gear to activities.
+* Too many optimizations to list.
+
 ## Tech
 This software uses several other source projects to work properly:
 
