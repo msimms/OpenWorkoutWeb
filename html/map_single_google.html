@@ -56,7 +56,8 @@ ${nav}
 
 <div class="map_canvas" id="map_canvas">
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}"></script>
 <script type="text/javascript">
@@ -82,37 +83,6 @@ ${nav}
 	{
 		return new google.maps.LatLng(x, y);
 	}
-
-	function initialize()
-	{
-		var mapOptions =
-		{
-			center: newCoord(${centerLat}, ${centerLon}),
-			zoom: 12
-		};
-
-		map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
-
-		var routeCoordinates =
-		[
-${route}
-		];
-
-		routePath = new google.maps.Polyline
-		({
-			path: routeCoordinates,
-			geodesic: true,
-			strokeColor: '#FF0000',
-			strokeOpacity: 1.0,
-			strokeWeight: 2
-		});
-
-		routePath.setMap(map);
-
-		$.ajax({ type: 'POST', url: "${root_url}/update_metadata/${activityId}", success: updateMetadata, dataType: "application/json" });
-	}
-
-	google.maps.event.addDomListener(window, 'load', initialize);
 
 	var appendToTrack = function(response)
 	{
@@ -206,12 +176,42 @@ ${route}
 		infoWindow.open(map, marker);
 	};
 
+	function initialize()
+	{
+		var mapOptions =
+		{
+			center: newCoord(${centerLat}, ${centerLon}),
+			zoom: 12
+		};
+
+		map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+
+		var routeCoordinates =
+		[
+${route}
+		];
+
+		routePath = new google.maps.Polyline
+		({
+			path: routeCoordinates,
+			geodesic: true,
+			strokeColor: '#FF0000',
+			strokeOpacity: 1.0,
+			strokeWeight: 2
+		});
+
+		routePath.setMap(map);
+
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "application/json" });
+	}
+
 	var checkForUpdates = function()
 	{
-		$.ajax({ type: 'POST', url: "${root_url}/update_track/${activityId}/${routeLen}", success: appendToTrack, dataType: "application/json" });
-		$.ajax({ type: 'POST', url: "${root_url}/update_metadata/${activityId}", success: updateMetadata, dataType: "application/json" });
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=${routeLen}", success: appendToTrack, dataType: "application/json" });
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "application/json" });
 	};
 
+	google.maps.event.addDomListener(window, 'load', initialize);
 	//setInterval(checkForUpdates, 15000);
 </script>
 
@@ -225,11 +225,11 @@ ${summary}
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
 <script type="text/javascript">
-	function drawChart(data, title, color)
+	function drawGraph(data, title, color)
 	{
 		var margin = {top: 20, right: 20, bottom: 20, left: 50},
 			width = $("#charts").width() - margin.left - margin.right,
-			height = 200 - margin.top - margin.bottom;
+			height = 250 - margin.top - margin.bottom;
 
 		var x = d3.time.scale().range([0, width]);
 		var y = d3.scale.linear().range([height, 0]);
@@ -270,6 +270,55 @@ ${summary}
 			.text(title);
 	}
 
+	function drawBarChart(data, title, color)
+	{
+		var margin = {top: 20, right: 20, bottom: 55, left: 50},
+			width = $("#charts").width() - margin.left - margin.right,
+			height = 250 - margin.top - margin.bottom;
+
+        var x = d3.scale.ordinal().domain([0,1,2,3,4,5]).rangeBands([0, width]);
+        var y = d3.scale.linear().domain([0, d3.max(data)]).range([height, 0]);
+
+		var xAxis = d3.svg.axis().scale(x).orient("bottom");
+		var yAxis = d3.svg.axis().scale(y).orient("left").ticks(0);
+
+		var svg = d3.select("#charts")
+			.append("svg:svg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", "-.55em")
+            .attr("transform", "rotate(-90)" );
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("dy", ".71em")
+			.style("text-anchor", "end");
+        svg.append("text")
+            .attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 20) + ")")
+            .style("text-anchor", "middle")
+            .text(title);
+        svg.selectAll("bar")
+            .data(data)
+            .enter().append("rect")
+            .style("fill", color)
+            .attr("width", x.rangeBand())
+            .attr("height", function(d) { return height - y(d); })
+            .attr("x", function(d, i) { return x(i); })
+            .attr("y", function(d) { return y(d); });
+    }
+
 	var speeds = [
 ${currentSpeeds}
 	];
@@ -282,20 +331,24 @@ ${cadences}
 	var powers = [
 ${powers}
 	];
+    var powerZones = [
+${powerZones}
+    ];
 
 	if (speeds.length > 0)
-		$(function() { drawChart(speeds, "Speed", "DodgerBlue") });
+		$(function() { drawGraph(speeds, "Speed", "DodgerBlue") });
 	if (heartRates.length > 0)
-		$(function() { drawChart(heartRates, "BPM", "FireBrick") });
+		$(function() { drawGraph(heartRates, "BPM", "FireBrick") });
 	if (cadences.length > 0)
-		$(function() { drawChart(cadences, "RPM", "ForestGreen") });
+		$(function() { drawGraph(cadences, "RPM", "ForestGreen") });
 	if (powers.length > 0)
-		$(function() { drawChart(powers, "Watts", "ForestGreen") });
+		$(function() { drawGraph(powers, "Watts", "ForestGreen") });
+	if (powerZones.length > 0)
+		$(function() { drawBarChart(powerZones, "Power Zone Distribution", "ForestGreen") });
 </script>
 
 </div>
 
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
 	function refresh_analysis()
 	{
@@ -340,9 +393,57 @@ ${powers}
 			alert(result_text.value);
 	}
 
+	function delete_activity()
+	{
+		if (confirm('Are you sure you want to do this?'))
+		{
+            var the_url = "${root_url}/api/1.0/delete_activity";
+            var dict = [];
+            var result_text = {};
+
+            dict.push({["activity_id"] : "${activityId}"});
+            if (send_post_request(the_url, dict, result_text))
+                window.location.replace("${root_url}");
+            else
+                alert(result_text.value);
+        }
+	}
+
+    function add_tag(tag)
+    {
+        var the_url = "${root_url}/api/1.0/add_tag_to_activity";
+        var dict = [];
+        var result_text = {};
+
+        dict.push({["activity_id"] : "${activityId}"});
+        dict.push({["tag"] : tag});
+        if (!send_post_request(the_url, dict, result_text))
+            alert(result_text.value);
+    }
+
+    function add_gear(gear)
+    {
+        var the_url = "${root_url}/api/1.0/add_gear_to_activity";
+        var dict = [];
+        var result_text = {};
+
+        dict.push({["activity_id"] : "${activityId}"});
+        dict.push({["name"] : gear});
+        if (!send_post_request(the_url, dict, result_text))
+            alert(result_text.value);
+    }
+
 	jQuery(document).ready(function()
 	{
 		jQuery(".chosen").data("placeholder", "Specify tags...").chosen();
+
+        jQuery('#tags').on('change', function(e) {
+            add_tag(jQuery("#tags").val());
+        });
+
+        jQuery('#gear').on('change', function(e) {
+            add_gear(jQuery("#gear").val());
+        });
 	});
 
 </script>
@@ -368,8 +469,18 @@ ${details_controls}
 
 <section class="comments">
 <p>
-<select name="tags" id="tags" class="chosen" multiple="true" style="width:50%;">
+Tags:
+<select name="tags" id="tags" class="chosen" multiple="true" style="width:30%;" data-placeholder="Specify tags...">
 ${tags}
+</select>
+</p>
+</section>
+
+<section class="comments">
+<p>
+Gear:
+<select name="gear" id="gear" class="chosen" multiple="true" style="width:30%;" data-placeholder="Specify gear...">
+${gear}
 </select>
 </p>
 </section>
@@ -386,6 +497,7 @@ ${comments}
 <section class="export">
 <table>
 ${exports}
+${delete}
 </table>
 </section>
 

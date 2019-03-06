@@ -1,6 +1,7 @@
 # Copyright 2017 Michael J Simms
 
 import bcrypt
+import time
 import Keys
 import SessionMgr
 import StraenDb
@@ -241,6 +242,14 @@ class UserMgr(object):
                 result = Keys.UNITS_STANDARD_KEY
             elif key == Keys.GENDER_KEY:
                 result = Keys.GENDER_MALE_KEY
+            elif key == Keys.HEIGHT_KEY:
+                result = Keys.DEFAULT_HEIGHT
+            elif key == Keys.WEIGHT_KEY:
+                result = Keys.DEFAULT_WEIGHT
+            elif key == Keys.BIRTHDAY_KEY:
+                result = Keys.DEFAULT_BIRTHDAY
+            elif key == Keys.GOAL_DATE_KEY:
+                result = int(time.time())
             else:
                 result = ""
 

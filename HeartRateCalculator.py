@@ -37,7 +37,7 @@ class HeartRateCalculator(object):
         zones.append(max_hr)
         return zones
 
-    def add_activity_data(self, activity_id, activity_type, start_time, summary_data):
+    def add_activity_data(self, activity_type, start_time, summary_data):
         """Looks for data that will help us determine the user's maximum heart rate."""
 
         # Not interested in activities older than six months.

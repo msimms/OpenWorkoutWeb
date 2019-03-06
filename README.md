@@ -14,6 +14,9 @@ Why develop a workout tracker when there are so many closed-source options avail
 * I want to do some experiments with automatically generating workout plans. This will serve as the platform for this idea.
 * Education. For the experience in performing full-stack software development: dealing with website deployment and scalability, and security issues.
 
+## Origin of the Name
+Straen is the Welsh word for stress and exercise is a (positive) form of stress. Also, it was the only thing I could think of where I could register a decent domain name.
+
 ## Major Features
 * Enables the live tracking feature of the Straen mobile app.
 * Supports strength (lifting) activities as well as distance (aerobic) activities.
@@ -27,6 +30,27 @@ Why develop a workout tracker when there are so many closed-source options avail
 * More analytics.
 
 [Full bug and feature tracking](https://github.com/msimms/StraenWeb/issues).
+
+## Installation
+To install the dependencies:
+```
+python setup.py
+```
+
+## Execution
+The software is designed to work within multiple frameworks. Currently, cherrypy and flask are supported.
+
+To run the web service under the cherrypy framework:
+```
+python start_cherrpy.py [--debug] [--host <hostname>] [--hostport <hostport>] [--googlemapskey <key>]
+```
+
+To run the web service under the flask framework:
+```
+python start_flask.py [--debug] [--host <hostname>] [--hostport <hostport>] [--googlemapskey <key>]
+```
+
+*If a Google Maps key is not provided, OpenStreetMap will be used instead.*
 
 ## Version History
 
@@ -87,6 +111,13 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Activity export in GPX format.
 * Fetch six month records, to use as the basis for workout plan generation.
 
+### 0.11
+* Fixes to adding tags and gear to activities.
+* Added cycling power distribution graph.
+* Too many optimizations to list.
+* Too many small bug fixes to list.
+* Generation of feature list prior to automated workout plan generation.
+
 ## Tech
 This software uses several other source projects to work properly:
 
@@ -94,8 +125,9 @@ This software uses several other source projects to work properly:
 * [fullcalendar](https://fullcalendar.io/) - A Javascript calendar implementation.
 * [chosen](https://github.com/harvesthq/chosen) - A select box implementation that is used for the tag user interface.
 * [pymongo](https://github.com/mongodb/mongo-python-driver) - Python interface to mongodb.
+* [flask](http://flask.pocoo.org) - A microframework for developing python-based web apps (optional).
 
-The app is written in a combination of Python and JavaScript.
+The app is written in a combination of Python, HTML, and JavaScript.
 
 ## Social
 Twitter: [@StraenApp](https://twitter.com/StraenApp)

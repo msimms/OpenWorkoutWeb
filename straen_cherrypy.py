@@ -9,6 +9,7 @@ import mako
 import os
 import signal
 import sys
+import traceback
 
 import Api
 import ApiException
@@ -18,6 +19,7 @@ import AnalysisScheduler
 import ImportScheduler
 import SessionMgr
 import UserMgr
+import WorkoutPlanGeneratorScheduler
 
 from cherrypy import tools
 from cherrypy.process import plugins
@@ -134,34 +136,6 @@ class StraenWeb(object):
             pass
         return self.app.error("")
 
-    @cherrypy.tools.json_out()
-    @cherrypy.expose
-    def update_track(self, activity_id=None, num=None, *args, **kw):
-        if activity_id is None:
-            return ""
-        if num is None:
-            return ""
-
-        try:
-            cherrypy.response.headers['Content-Type'] = 'application/json'
-            return self.app.update_track(activity_id)
-        except:
-            pass
-        return ""
-
-    @cherrypy.tools.json_out()
-    @cherrypy.expose
-    def update_metadata(self, activity_id=None, *args, **kw):
-        if activity_id is None:
-            return ""
-
-        try:
-            cherrypy.response.headers['Content-Type'] = 'application/json'
-            return self.app.update_metadata(activity_id)
-        except:
-            self.log_error('Unhandled exception in update_metadata')
-        return ""
-
     @cherrypy.expose
     def error(self, error_str=None):
         """Renders the error page."""
@@ -178,6 +152,8 @@ class StraenWeb(object):
         try:
             return self.app.live(device_str)
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.live.__name__)
         return self.error()
 
@@ -187,6 +163,8 @@ class StraenWeb(object):
         try:
             return self.app.activity(activity_id)
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.activity.__name__)
         return self.error()
 
@@ -196,6 +174,8 @@ class StraenWeb(object):
         try:
             return self.app.device(device_str)
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.device.__name__)
         return self.error()
 
@@ -210,6 +190,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.my_activities.__name__)
         return self.error()
 
@@ -224,6 +206,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.all_activities.__name__)
         return self.error()
 
@@ -238,6 +222,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.workouts.__name__)
         return self.error()
 
@@ -252,6 +238,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.gear.__name__)
         return self.error()
 
@@ -266,6 +254,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.following.__name__)
         return self.error()
 
@@ -280,6 +270,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.followers.__name__)
         return self.error()
 
@@ -294,6 +286,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.device_list.__name__)
         return self.error()
 
@@ -308,6 +302,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.upload.__name__)
         return self.error()
 
@@ -322,6 +318,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.manual_entry.__name__)
         return self.error()
 
@@ -336,7 +334,25 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.import_activity.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
+    def summary(self, *args, **kw):
+        """Renders the user's summary page."""
+        try:
+            return self.app.summary()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.summary.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -350,6 +366,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.profile.__name__)
         return self.error()
 
@@ -364,6 +382,8 @@ class StraenWeb(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.settings.__name__)
         return self.error()
 
@@ -383,6 +403,8 @@ class StraenWeb(object):
             self.log_error(error_msg)
             return self.error(error_msg)
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.submit_login.__name__)
         return self.error()
 
@@ -400,6 +422,8 @@ class StraenWeb(object):
             self.log_error(error_msg)
             return self.error(error_msg)
         except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.submit_new_login.__name__)
         return self.error()
 
@@ -516,15 +540,15 @@ def main():
 
     # Parse command line options.
     parser = argparse.ArgumentParser()
-    parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background", required=False)
-    parser.add_argument("--host", default="", help="Host name on which users will access this website", required=False)
-    parser.add_argument("--hostport", type=int, default=0, help="Port on which users will access this website", required=False)
-    parser.add_argument("--bind", default="127.0.0.1", help="Host name on which to bind", required=False)
-    parser.add_argument("--bindport", type=int, default=8080, help="Port on which to bind", required=False)
-    parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS", required=False)
-    parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS", required=False)
-    parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS", required=False)
-    parser.add_argument("--googlemapskey", default="", help="API key for Google Maps", required=False)
+    parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background.", required=False)
+    parser.add_argument("--host", default="", help="Host name on which users will access this website.", required=False)
+    parser.add_argument("--hostport", type=int, default=0, help="Port on which users will access this website.", required=False)
+    parser.add_argument("--bind", default="127.0.0.1", help="Host name on which to bind.", required=False)
+    parser.add_argument("--bindport", type=int, default=8080, help="Port on which to bind.", required=False)
+    parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS.", required=False)
+    parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS.", required=False)
+    parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS.", required=False)
+    parser.add_argument("--googlemapskey", default="", help="API key for Google Maps. If not provided OpenStreetMap will be used.", required=False)
 
     try:
         args = parser.parse_args()
@@ -565,7 +589,7 @@ def main():
 
     session_mgr = SessionMgr.CherryPySessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, root_dir)
-    data_mgr = DataMgr.DataMgr(root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler())
+    data_mgr = DataMgr.DataMgr(root_url, root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
     backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey)
     g_app = StraenWeb(backend)
 
@@ -598,6 +622,11 @@ def main():
         {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': 'css'
+        },
+        '/data':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'data'
         },
         '/js':
         {

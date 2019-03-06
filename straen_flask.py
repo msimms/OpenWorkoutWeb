@@ -8,6 +8,7 @@ import mako
 import os
 import signal
 import sys
+import traceback
 import flask
 
 import Api
@@ -18,9 +19,11 @@ import AnalysisScheduler
 import ImportScheduler
 import SessionMgr
 import UserMgr
+import WorkoutPlanGeneratorScheduler
 
 
 CSS_DIR = 'css'
+DATA_DIR = 'data'
 JS_DIR = 'js'
 IMAGES_DIR = 'images'
 MEDIA_DIR = 'media'
@@ -48,7 +51,20 @@ def css(file_name):
     try:
         return flask.send_from_directory(CSS_DIR, file_name)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + css.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/data/<file_name>')
+def data(file_name):
+    """Returns the data page."""
+    try:
+        return flask.send_from_directory(DATA_DIR, file_name)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + data.__name__)
     return g_app.error()
 
 @g_flask_app.route('/js/<file_name>')
@@ -57,6 +73,8 @@ def js(file_name):
     try:
         return flask.send_from_directory(JS_DIR, file_name)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + js.__name__)
     return g_app.error()
 
@@ -66,6 +84,8 @@ def images(file_name):
     try:
         return flask.send_from_directory(IMAGES_DIR, file_name)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + images.__name__)
     return g_app.error()
 
@@ -75,6 +95,8 @@ def media(file_name):
     try:
         return flask.send_from_directory(MEDIA_DIR, file_name)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + media.__name__)
     return g_app.error()
 
@@ -84,32 +106,10 @@ def stats():
     try:
         return g_app.stats()
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + stats.__name__)
     return g_app.error()
-
-@g_flask_app.route('/update_track')
-def update_track(activity_id=None, num=None):
-    if activity_id is None:
-        return ""
-    if num is None:
-        return ""
-
-    try:
-        return g_app.update_track(activity_id)
-    except:
-        pass
-    return ""
-
-@g_flask_app.route('/update_metadata')
-def update_metadata(activity_id=None):
-    if activity_id is None:
-        return ""
-
-    try:
-        return g_app.update_metadata(activity_id)
-    except:
-        g_app.log_error('Unhandled exception in update_metadata')
-    return ""
 
 @g_flask_app.route('/error')
 def error(error_str=None):
@@ -126,6 +126,8 @@ def live(device_str):
     try:
         return g_app.live(device_str)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + live.__name__)
     return g_app.error()
 
@@ -135,6 +137,8 @@ def activity(activity_id):
     try:
         return g_app.activity(activity_id)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + activity.__name__)
     return g_app.error()
 
@@ -144,6 +148,8 @@ def device(device_str):
     try:
         return g_app.device(device_str)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + device.__name__)
     return g_app.error()
 
@@ -155,6 +161,8 @@ def my_activities():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + my_activities.__name__)
     return g_app.error()
 
@@ -166,6 +174,8 @@ def all_activities():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + all_activities.__name__)
     return g_app.error()
 
@@ -177,6 +187,8 @@ def workouts():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + workouts.__name__)
     return g_app.error()
 
@@ -188,6 +200,8 @@ def gear():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + gear.__name__)
     return g_app.error()
 
@@ -199,6 +213,8 @@ def following():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + following.__name__)
     return g_app.error()
 
@@ -210,6 +226,8 @@ def followers():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + followers.__name__)
     return g_app.error()
 
@@ -221,6 +239,8 @@ def device_list():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + device_list.__name__)
     return g_app.error()
 
@@ -232,6 +252,8 @@ def upload(ufile):
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + upload.__name__)
     return g_app.error()
 
@@ -243,6 +265,8 @@ def manual_entry(activity_type):
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + manual_entry.__name__)
     return g_app.error()
 
@@ -254,7 +278,22 @@ def import_activity():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + import_activity.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/summary')
+def summary():
+    """Renders the user's summary page."""
+    try:
+        return g_app.summary()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + summary.__name__)
     return g_app.error()
 
 @g_flask_app.route('/profile')
@@ -265,6 +304,8 @@ def profile():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + profile.__name__)
     return g_app.error()
 
@@ -276,6 +317,8 @@ def settings():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + settings.__name__)
     return g_app.error()
 
@@ -293,6 +336,8 @@ def submit_login():
         g_app.log_error(error_msg)
         return self.error(error_msg)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + submit_login.__name__)
     return g_app.error()
 
@@ -312,6 +357,8 @@ def submit_new_login():
         g_app.log_error(error_msg)
         return self.error(error_msg)
     except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + submit_new_login.__name__)
     return g_app.error()
 
@@ -410,7 +457,7 @@ def api(version, method):
 @g_flask_app.route('/')
 def index():
     """Renders the index page."""
-    return g_app.login()
+    return login()
 
 def main():
     """Entry point for the flask version of the app."""
@@ -419,13 +466,11 @@ def main():
 
     # Parse command line options.
     parser = argparse.ArgumentParser()
-    parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background", required=False)
-    parser.add_argument("--host", default="", help="Host name on which users will access this website", required=False)
-    parser.add_argument("--hostport", type=int, default=5000, help="Port on which users will access this website", required=False)
-    parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS", required=False)
-    parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS", required=False)
-    parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS", required=False)
-    parser.add_argument("--googlemapskey", default="", help="API key for Google Maps", required=False)
+    parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background.", required=False)
+    parser.add_argument("--host", default="", help="Host name on which users will access this website.", required=False)
+    parser.add_argument("--hostport", type=int, default=5000, help="Port on which users will access this website.", required=False)
+    parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS.", required=False)
+    parser.add_argument("--googlemapskey", default="", help="API key for Google Maps. If not provided OpenStreetMap will be used.", required=False)
 
     try:
         args = parser.parse_args()
@@ -456,7 +501,7 @@ def main():
 
     session_mgr = SessionMgr.FlaskSessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, g_root_dir)
-    data_mgr = DataMgr.DataMgr(g_root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler())
+    data_mgr = DataMgr.DataMgr(root_url, g_root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
     g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, args.googlemapskey)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')

@@ -18,4 +18,4 @@ class ImportScheduler(object):
         params['user_id'] = user_id
         params['uploaded_file_data'] = uploaded_file_data
         params['uploaded_file_name'] = uploaded_file_name
-        import_obj = import_activity.delay(dumps(params))
+        import_activity.delay(dumps(params))

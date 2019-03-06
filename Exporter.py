@@ -125,9 +125,10 @@ class Exporter(object):
 
         writer.end_track_segment()
         writer.end_track()
+        result = writer.buffer()
         writer.close()
 
-        return writer.buf
+        return result
 
     def export_as_tcx(self, file_name, activity):
         """Exports the activity in TCX format."""
@@ -226,9 +227,10 @@ class Exporter(object):
             writer.end_track()
 
         writer.end_activity()
+        result = writer.buffer()
         writer.close()
 
-        return writer.buf
+        return result
 
     def export(self, activity, file_name, file_type):
         """Exports the activity in the specified format."""

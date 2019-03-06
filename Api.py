@@ -13,8 +13,6 @@ import InputChecker
 import Keys
 import Units
 
-g_not_meta_data = ["DeviceId", "ActivityId", "ActivityName", "User Name", "Latitude", "Longitude", "Altitude", "Horizontal Accuracy", "Vertical Accuracy"]
-
 class Api(object):
     """Class for managing API messages."""
 
@@ -37,7 +35,7 @@ class Api(object):
         belongs_to_current_user = str(activity_user_id) == str(self.user_id)
         return belongs_to_current_user
 
-    def parse_json_loc_obj(self, activity_id, json_obj):
+    def parse_json_loc_obj(self, json_obj, sensor_readings_dict, metadata_list_dict):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
         location = []
 
@@ -54,9 +52,9 @@ class Api(object):
                 lon = json_obj[Keys.APP_LOCATION_LON_KEY]
                 alt = json_obj[Keys.APP_LOCATION_ALT_KEY]
                 location = [date_time, lat, lon, alt]
-            except ValueError, e:
+            except ValueError as e:
                 self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
-            except KeyError, e:
+            except KeyError as e:
                 self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
             except:
                 self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
@@ -64,20 +62,28 @@ class Api(object):
             # Parse the rest of the data, which will be a combination of metadata and sensor data.
             for item in json_obj.iteritems():
                 key = item[0]
-                if not key in g_not_meta_data:
-                    if key in [Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]:
-                        self.data_mgr.create_sensor_reading(activity_id, date_time, key, item[1])
-                    elif key in [Keys.APP_CURRENT_SPEED_KEY, Keys.APP_CURRENT_PACE_KEY]:
-                        self.data_mgr.create_metadata(activity_id, date_time, key, item[1], True)
-        except ValueError, e:
+                time_value_pair = []
+                time_value_pair.append(date_time)
+                time_value_pair.append(float(item[1]))
+                if key in [Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]:
+                    if key not in sensor_readings_dict:
+                        sensor_readings_dict[key] = []
+                    value_list = sensor_readings_dict[key]
+                    value_list.append(time_value_pair)
+                elif key in [Keys.APP_CURRENT_SPEED_KEY, Keys.APP_CURRENT_PACE_KEY]:
+                    if key not in metadata_list_dict:
+                        metadata_list_dict[key] = []
+                    value_list = metadata_list_dict[key]
+                    value_list.append(time_value_pair)
+        except ValueError as e:
             self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
-        except KeyError, e:
+        except KeyError as e:
             self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except:
             self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
         return location
 
-    def parse_json_accel_obj(self, activity_id, json_obj):
+    def parse_json_accel_obj(self, json_obj):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
         accel = []
 
@@ -92,9 +98,9 @@ class Api(object):
             y = json_obj[Keys.APP_AXIS_NAME_Y]
             z = json_obj[Keys.APP_AXIS_NAME_Z]
             accel = [date_time, x, y, z]
-        except ValueError, e:
+        except ValueError as e:
             self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
-        except KeyError, e:
+        except KeyError as e:
             self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except:
             self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
@@ -108,6 +114,8 @@ class Api(object):
         username = ""
         locations = []
         accels = []
+        sensor_readings_dict = {}
+        metadata_list_dict = {}
 
         # Parse required identifiers.
         device_str = values[Keys.APP_DEVICE_ID_KEY]
@@ -124,19 +132,18 @@ class Api(object):
             # Parse each of the location objects.
             encoded_locations = values[Keys.APP_LOCATIONS_KEY]
             for location_obj in encoded_locations:
-                location = self.parse_json_loc_obj(activity_id, location_obj)
+                location = self.parse_json_loc_obj(location_obj, sensor_readings_dict, metadata_list_dict)
                 locations.append(location)
 
-            # Update the locations.
-            if locations:
-                self.data_mgr.create_locations(device_str, activity_id, locations)
+            # Update the activity.
+            self.data_mgr.update_moving_activity(device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict)
 
         if Keys.APP_ACCELEROMETER_KEY in values:
 
             # Parse each of the accelerometer objects.
             encoded_accel = values[Keys.APP_ACCELEROMETER_KEY]
             for accel_obj in encoded_accel:
-                accel = self.parse_json_accel_obj(activity_id, accel_obj)
+                accel = self.parse_json_accel_obj(accel_obj)
                 accels.append(accel)
 
             # Update the accelerometer readings.
@@ -159,6 +166,112 @@ class Api(object):
         self.data_mgr.delete_activity_summary(activity_id)
 
         return True, ""
+
+    def handle_activity_track(self, values):
+        """Called when an API message to get the activity track is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+        if Keys.ACTIVITY_NUM_POINTS not in values:
+            raise ApiException.ApiMalformedRequestException("Number of datapoints not specified.")
+
+        # Get the device and activity IDs from the request.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # Validate the number of points to retrieve.
+        num_points = values[Keys.ACTIVITY_NUM_POINTS]
+        if not InputChecker.is_integer(num_points):
+            raise ApiException.ApiMalformedRequestException("Invalid number of points.")
+
+        locations = self.data_mgr.retrieve_most_recent_locations(activity_id, int(num_points))
+
+        response = "["
+
+        for location in locations:
+            if len(response) > 1:
+                response += ","
+            response += json.dumps({"latitude": location.latitude, "longitude": location.longitude})
+
+        response += "]"
+
+        return True, response
+
+    def handle_activity_metadata(self, values):
+        """Called when an API message to get the activity metadata."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+
+        # Get the device and activity IDs from the request.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        response = "["
+
+        times = self.data_mgr.retrieve_metadata(Keys.APP_TIME_KEY, activity_id)
+        if times is not None and len(times) > 0:
+            if len(response) > 1:
+                response += ","
+            localtimezone = tzlocal()
+            value_str = datetime.datetime.fromtimestamp(times[-1][1] / 1000, localtimezone).strftime('%Y-%m-%d %H:%M:%S')
+            response += json.dumps({"name": Keys.APP_TIME_KEY, "value": value_str})
+
+        distances = self.data_mgr.retrieve_metadata(Keys.APP_DISTANCE_KEY, activity_id)
+        if distances is not None and len(distances) > 0:
+            if len(response) > 1:
+                response += ","
+            distance = distances[-1]
+            value = float(distance.values()[0])
+            response += json.dumps({"name": Keys.APP_DISTANCE_KEY, "value": "{:.2f}".format(value)})
+
+        avg_speeds = self.data_mgr.retrieve_metadata(Keys.APP_AVG_SPEED_KEY, activity_id)
+        if avg_speeds is not None and len(avg_speeds) > 0:
+            if len(response) > 1:
+                response += ","
+            speed = avg_speeds[-1]
+            value = float(speed.values()[0])
+            response += json.dumps({"name": Keys.APP_AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
+
+        moving_speeds = self.data_mgr.retrieve_metadata(Keys.APP_MOVING_SPEED_KEY, activity_id)
+        if moving_speeds is not None and len(moving_speeds) > 0:
+            if len(response) > 1:
+                response += ","
+            speed = moving_speeds[-1]
+            value = float(speed.values()[0])
+            response += json.dumps({"name": Keys.APP_MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
+
+        heart_rates = self.data_mgr.retrieve_sensor_readings(Keys.APP_HEART_RATE_KEY, activity_id)
+        if heart_rates is not None and len(heart_rates) > 0:
+            if len(response) > 1:
+                response += ","
+            heart_rate = heart_rates[-1]
+            value = float(heart_rate.values()[0])
+            response += json.dumps({"name": Keys.APP_HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
+
+        cadences = self.data_mgr.retrieve_sensor_readings(Keys.APP_CADENCE_KEY, activity_id)
+        if cadences is not None and len(cadences) > 0:
+            if len(response) > 1:
+                response += ","
+            cadence = cadences[-1]
+            value = float(cadence.values()[0])
+            response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} rpm".format(value)})
+
+        powers = self.data_mgr.retrieve_sensor_readings(Keys.APP_POWER_KEY, activity_id)
+        if powers is not None and len(powers) > 0:
+            if len(response) > 1:
+                response += ","
+            power = powers[-1]
+            value = float(power.values()[0])
+            response += json.dumps({"name": Keys.APP_POWER_KEY, "value": "{:.2f} watts".format(value)})
+
+        response += "]"
+
+        return True, response
 
     def handle_login_submit(self, values):
         """Called when an API message to log in is received."""
@@ -360,7 +473,7 @@ class Api(object):
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
-        # Get the device and activity IDs from the push request.
+        # Get the device and activity IDs from the request.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
@@ -507,7 +620,26 @@ class Api(object):
         """Called when an API message to add a tag to an activity is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        return True, ""
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.ACTIVITY_TAG_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
+        if not InputChecker.is_valid(tag):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Only the activity's owner should be able to do this.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
+
+        result = self.data_mgr.associate_tag_with_activity(activity, tag)
+        return result, ""
 
     def handle_delete_tag_from_activity(self, values):
         """Called when an API message to delete a tag from an activity is received."""
@@ -723,7 +855,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.GEAR_DESCRIPTION_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.ADD_TIME_KEY not in values:
+        if Keys.GEAR_ADD_TIME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         gear_type = urllib.unquote_plus(values[Keys.GEAR_TYPE_KEY])
@@ -738,11 +870,18 @@ class Api(object):
         gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
         if not InputChecker.is_integer(gear_add_time):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
-        if not InputChecker.is_integer(gear_retire_time):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        result = self.data_mgr.create_gear(self.user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+        # Retired date is optional.
+        if Keys.GEAR_RETIRE_TIME_KEY in values and len(values[Keys.GEAR_RETIRE_TIME_KEY]) > 0:
+            gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
+            if gear_retire_time == 'NaN':
+                gear_retire_time = 0
+            elif not InputChecker.is_integer(gear_retire_time):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        else:
+            gear_retire_time = 0
+
+        result = self.data_mgr.create_gear(self.user_id, gear_type, gear_name, gear_description, int(gear_add_time), int(gear_retire_time))
         return result, ""
 
     def handle_list_gear(self, values):
@@ -763,7 +902,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.GEAR_DESCRIPTION_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.ADD_TIME_KEY not in values:
+        if Keys.GEAR_ADD_TIME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         gear_type = urllib.unquote_plus(values[Keys.GEAR_TYPE_KEY])
@@ -778,11 +917,18 @@ class Api(object):
         gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
         if not InputChecker.is_integer(gear_add_time):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
-        if not InputChecker.is_integer(gear_retire_time):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        result = self.data_mgr.update_gear(self.user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+        # Retired date is optional.
+        if Keys.GEAR_RETIRE_TIME_KEY in values and len(values[Keys.GEAR_RETIRE_TIME_KEY]) > 0:
+            gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
+            if gear_retire_time == 'NaN':
+                gear_retire_time = 0
+            elif not InputChecker.is_integer(gear_retire_time):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        else:
+            gear_retire_time = 0
+
+        result = self.data_mgr.update_gear(self.user_id, gear_type, gear_name, gear_description, int(gear_add_time), int(gear_retire_time))
         return result, ""
 
     def handle_delete_gear(self, values):
@@ -797,6 +943,30 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
 
         result = self.data_mgr.delete_gear(self.user_id, gear_id)
+        return result, ""
+
+    def handle_add_gear_to_activity(self, values):
+        """Called when an API message to associate gear with an activity is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.GEAR_NAME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+        gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
+        if not InputChecker.is_valid(gear_name):
+            raise ApiException.ApiMalformedRequestException("Invalid gear name.")
+
+        # Only the activity's owner should be able to do this.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
+
+        result = self.data_mgr.associate_gear_with_activity(activity, gear_name)
         return result, ""
 
     def handle_update_settings(self, values):
@@ -838,7 +1008,12 @@ class Api(object):
             decoded_key = urllib.unquote_plus(key)
 
             # Gender
-            if decoded_key == Keys.HEIGHT_KEY:
+            if decoded_key == Keys.BIRTHDAY_KEY:
+                birthday = urllib.unquote_plus(values[key]).lower()
+                if not InputChecker.is_integer(birthday):
+                    raise ApiException.ApiMalformedRequestException("Invalid birthday.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.BIRTHDAY_KEY, birthday)
+            elif decoded_key == Keys.HEIGHT_KEY:
                 height = urllib.unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(height):
                     raise ApiException.ApiMalformedRequestException("Invalid height.")
@@ -900,11 +1075,35 @@ class Api(object):
         return True, ""
 
     def handle_generate_workout_plan(self, values):
-        """Called when the user wants to recalculate the summary data."""
+        """Called when the user wants to generate a workout plan."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+        if Keys.GOAL_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("A goal was not specified.")
+        if Keys.GOAL_DATE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("A goal date was not specified.")
+
+        goal = urllib.unquote_plus(values[Keys.GOAL_KEY])
+        goal_date = urllib.unquote_plus(values[Keys.GOAL_DATE_KEY])
+
+        self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
+        self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
         self.data_mgr.generate_workout_plan(self.user_id)
         return True, ""
+
+    def handle_get_location_description(self, values):
+        """Called when the user wants get the political location that corresponds to an activity."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        location_description = self.data_mgr.get_location_description(activity_id)
+        return True, str(location_description)
 
     def handle_api_1_0_request(self, request, values):
         """Called to parse a version 1.0 API message."""
@@ -917,6 +1116,10 @@ class Api(object):
 
         if request == 'update_status':
             return self.handle_update_status(values)
+        elif request == 'activity_track':
+            return self.handle_activity_track(values)
+        elif request == 'activity_metadata':
+            return self.handle_activity_metadata(values)
         elif request == 'login_submit':
             return self.handle_login_submit(values)
         elif request == 'create_login_submit':
@@ -975,6 +1178,8 @@ class Api(object):
             return self.handle_update_gear(values)
         elif request == 'delete_gear':
             return self.handle_delete_gear(values)
+        elif request == 'add_gear_to_activity':
+            return self.handle_add_gear_to_activity(values)
         elif request == 'update_settings':
             return self.handle_update_settings(values)
         elif request == 'update_profile':
@@ -985,4 +1190,6 @@ class Api(object):
             return self.handle_refresh_analysis(values)
         elif request == 'generate_workout_plan':
             return self.handle_generate_workout_plan(values)
+        elif request == 'get_location_description':
+            return self.handle_get_location_description(values)
         return False, ""

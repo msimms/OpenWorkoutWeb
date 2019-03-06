@@ -17,8 +17,29 @@
 
 <body>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous" />
+
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+
 <script>
+
+    function update_birthday()
+    {
+		var the_url = "${root_url}/api/1.0/update_profile";
+		var birthday = document.getElementById("birthday").value;
+		var dict = [];
+		var result_text = {};
+		var timestamp = Date.parse(birthday) / 1000;
+
+		dict.push({["birthday"] : timestamp});
+		if (send_post_request(the_url, dict, result_text))
+			alert("Birthday updated!");
+		else
+			alert("An error occurred!");
+    }
 
 	function update_height()
 	{
@@ -76,6 +97,17 @@
 			alert("An error occurred!");
 	}
 
+	$(function()
+	{
+		$('#birthday').datepicker({
+            yearRange: '1910:2010',
+            changeYear: true,
+            changeMonth: true
+        });
+		var n = new Date(${birthday} * 1000);
+		document.getElementsByName('birthday')[0].placeholder=n.toLocaleDateString();
+	});
+
 </script>
 
 <section class="nav">
@@ -83,6 +115,10 @@ ${nav}
 </section>
 
 <div class="profile" style="width: 600px">
+	<h2>Birthday</h2>
+	<input type="text" name="birthday" id="birthday">
+	<button type="button" onclick="return update_birthday()">Update</button>
+	<hr>
 	<h2>Height</h2>
 	<input type="text" id="height" value="${height}"> ${height_units}
 	<button type="button" onclick="return update_height()">Update</button>
@@ -107,7 +143,7 @@ ${bmi}
 	<h2>VO2 Max</h2>
 ${vo2max}
 	<hr>
-	<h2>Functional Threshold Power (FTP)</h2>
+	<h2>Estimated Functional Threshold Power (FTP)</h2>
 ${ftp}
 	<hr>
 	<h2>Heart Rate Zones</h2>

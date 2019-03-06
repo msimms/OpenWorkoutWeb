@@ -65,3 +65,35 @@ function create_local_file(data, filename, type)
 		}, 0); 
 	}
 }
+
+function add_number_entry_node(div, name)
+{
+	var label = document.createTextNode(name + ": ");
+	div.appendChild(label);
+
+	var value = document.createElement("input");
+	value.name = name;
+	value.setAttribute("id", name);
+	value.setAttribute("type", "number");
+	value.setAttribute("value", 0.0);
+	div.appendChild(value);
+
+	var br = document.createElement("br");
+	div.appendChild(br);
+}
+
+function add_text_entry_node(div, name)
+{
+	var label = document.createTextNode(name + ": ");
+	div.appendChild(label);
+
+	var value = document.createElement("input");
+	value.name = name;
+	value.setAttribute("id", name);
+	value.setAttribute("type", "text");
+	value.setAttribute("value", "");
+	div.appendChild(value);
+
+	var br = document.createElement("br");
+	div.appendChild(br);
+}
