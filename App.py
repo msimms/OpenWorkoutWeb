@@ -427,6 +427,15 @@ class App(object):
             activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
         return activity_type
 
+    def render_array(self, array):
+        """Helper function for converting an array (list) to a comma-separated string."""
+        result = ""
+        for item in array:
+            if len(result) > 0:
+                result += ","
+            result += str(item)
+        return result
+
     def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
 
@@ -466,6 +475,13 @@ class App(object):
         # Compute location-based things.
         location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
         location_analyzer.append_locations(locations)
+
+        # Compute the power zones.
+        power_zones_str = ""
+        ftp = self.data_mgr.retrieve_user_estimated_ftp(activity_user_id)
+        if ftp is not None and Keys.APP_POWER_KEY in activity:
+            power_zone_distribution = self.data_mgr.compute_power_zone_distribution(ftp[0], activity[Keys.APP_POWER_KEY])
+            power_zones_str = "\t\t" + self.render_array(power_zone_distribution)
 
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
@@ -554,10 +570,10 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str, delete=delete_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str, delete=delete_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
@@ -1023,7 +1039,7 @@ class App(object):
     @statistics
     def manual_entry(self, activity_type):
         """Called when the user selects an activity type, indicatig they want to make a manual data entry."""
-        print activity_type
+        print(activity_type)
 
     @statistics
     def import_activity(self):
@@ -1152,10 +1168,10 @@ class App(object):
         if ftp is None:
             ftp_str = "Cycling activities with power data that was recorded in the last six months must be uploaded before your FTP can be estimated."
         else:
-            ftp_str = str(ftp)
+            ftp_str = "{:.1f} watts".format(ftp[0])
 
         # Get the user's heart rate zones.
-        hr_zones = "No heart rate data exist."
+        hr_zones = "No heart rate data exists."
         if isinstance(estimated_max_hr, float):
             zones = self.data_mgr.retrieve_heart_rate_zones(estimated_max_hr)
             if len(zones) > 0:

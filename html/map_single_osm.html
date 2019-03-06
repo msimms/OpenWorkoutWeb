@@ -220,9 +220,9 @@ ${summary}
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
 <script type="text/javascript">
-	function drawChart(data, title, color)
+	function drawGraph(data, title, color)
 	{
-		var margin = {top: 20, right: 20, bottom: 20, left: 50},
+		var margin = {top: 20, right: 20, bottom: 25, left: 50},
 			width = $("#charts").width() - margin.left - margin.right,
 			height = 200 - margin.top - margin.bottom;
 
@@ -265,6 +265,52 @@ ${summary}
 			.text(title);
 	}
 
+	function drawBarChart(data, title, color)
+	{
+		var margin = {top: 20, right: 20, bottom: 25, left: 50},
+			width = $("#charts").width() - margin.left - margin.right,
+			height = 200 - margin.top - margin.bottom;
+
+        var x = d3.scale.ordinal().domain([0,1,2,3,4,5]).rangeBands([0, width]);
+        var y = d3.scale.linear().domain([0, d3.max(data)]).range([height, 0]);
+
+		var xAxis = d3.svg.axis().scale(x).orient("bottom");
+		var yAxis = d3.svg.axis().scale(y).orient("left").ticks(0);
+
+		var svg = d3.select("#charts")
+			.append("svg:svg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", "-.55em")
+            .attr("transform", "rotate(-90)" );
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("dy", ".71em")
+			.style("text-anchor", "end");
+        svg.selectAll("bar")
+            .data(data)
+            .enter().append("rect")
+            .style("fill", color)
+            .attr("width", x.rangeBand())
+            .attr("height", function(d) { return height - y(d); })
+            .attr("x", function(d, i) { return x(i); })
+            .attr("y", function(d) { return y(d); })
+			.text(title);
+    }
+
 	var speeds = [
 ${currentSpeeds}
 	];
@@ -277,15 +323,20 @@ ${cadences}
 	var powers = [
 ${powers}
 	];
+    var powerZones = [
+${powerZones}
+    ];
 
 	if (speeds.length > 0)
-		$(function() { drawChart(speeds, "Speed", "DodgerBlue") });
+		$(function() { drawGraph(speeds, "Speed", "DodgerBlue") });
 	if (heartRates.length > 0)
-		$(function() { drawChart(heartRates, "BPM", "FireBrick") });
+		$(function() { drawGraph(heartRates, "BPM", "FireBrick") });
 	if (cadences.length > 0)
-		$(function() { drawChart(cadences, "RPM", "ForestGreen") });
+		$(function() { drawGraph(cadences, "RPM", "ForestGreen") });
 	if (powers.length > 0)
-		$(function() { drawChart(powers, "Watts", "ForestGreen") });
+		$(function() { drawGraph(powers, "Watts", "ForestGreen") });
+	if (powerZones.length > 0)
+		$(function() { drawBarChart(powerZones, "Power Zone Distribution", "ForestGreen") });
 </script>
 
 </div>

@@ -54,7 +54,7 @@ class MongoDatabase(Database.Database):
             self.workouts_collection = self.database['wokrouts']
             self.gear_collection = self.database['gear']
             return True
-        except pymongo.errors.ConnectionFailure, e:
+        except pymongo.errors.ConnectionFailure as e:
             self.log_error("Could not connect to MongoDB: %s" % e)
         return False
 

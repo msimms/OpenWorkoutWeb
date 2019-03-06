@@ -4,6 +4,7 @@ import inspect
 import os
 import sys
 
+import FtpCalculator
 import Keys
 import SensorAnalyzer
 import Units
@@ -103,5 +104,17 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
             #
             # Compute the intensity factory (IF = NP / FTP).
             #
+
+            # todo
+
+            #
+            # Compute the threshold power from this workout. Maybe we have a new estimated FTP?
+            #
+
+            ftp_calc = FtpCalculator.FtpCalculator()
+            ftp_calc.add_activity_data(self.activity_type, self.start_time, self.bests)
+            estimated_ftp = ftp_calc.estimate()
+            if estimated_ftp:
+                results[Keys.THRESHOLD_POWER] = estimated_ftp
 
         return results

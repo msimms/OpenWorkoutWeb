@@ -37,7 +37,7 @@ class ActivityAnalyzer(object):
     def should_yield(self):
         """Used to periodically yeild the GIL, because python sucks."""
         if time.time() - self.last_yield > 3:
-            time.sleep(1)
+            time.sleep(0)
             self.last_yield = time.time()
 
     def perform_analysis(self):

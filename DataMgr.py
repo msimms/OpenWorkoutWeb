@@ -139,53 +139,77 @@ class DataMgr(Importer.ActivityWriter):
         """Inherited from ActivityWriter. Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
         if self.database is None:
             raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No importer.")
         return self.database.create_locations(device_str, activity_id, locations)
 
     def create_sensor_reading(self, activity_id, date_time, sensor_type, value):
         """Inherited from ActivityWriter. Create method for sensor data."""
         if self.database is None:
             raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No importer.")
         return self.database.create_sensor_reading(activity_id, date_time, sensor_type, value)
 
     def create_sensor_readings(self, activity_id, sensor_type, values):
         """Inherited from ActivityWriter. Adds several sensor readings to the database. 'values' is an array of arrays in the form [time, value]."""
         if self.database is None:
             raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No importer.")
         return self.database.create_sensor_readings(activity_id, sensor_type, values)
 
     def create_metadata(self, activity_id, date_time, key, value, create_list):
         """Create method for activity metadata."""
         if self.database is None:
             raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No importer.")
         return self.database.create_metadata(activity_id, date_time, key, value, create_list)
 
     def create_metadata_list(self, activity_id, key, values):
         """Create method for activity metadata."""
         if self.database is None:
             raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No importer.")
         return self.database.create_metadata_list(activity_id, key, values)
 
     def create_sets_and_reps_data(self, activity_id, sets):
         """Create method for activity set and rep data."""
         if self.database is None:
             raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No importer.")
         return self.database.create_sets_and_reps_data(activity_id, sets)
 
     def create_accelerometer_reading(self, device_str, activity_id, accels):
         """Adds several accelerometer readings to the database. 'accels' is an array of arrays in the form [time, x, y, z]."""
         if self.database is None:
             raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No importer.")
         return self.database.create_accelerometer_reading(device_str, activity_id, accels)
 
     def finish_activity(self, activity_id, end_time):
         """Inherited from ActivityWriter. Called for post-processing."""
         if self.database is None:
             raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No importer.")
         return self.database.create_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
 
     def import_file(self, username, user_id, local_file_name, uploaded_file_name):
         """Imports the contents of a local file into the database."""
         if self.import_scheduler is None:
+            raise Exception("No importer.")
+        if username is None:
+            raise Exception("No importer.")
+        if user_id is None:
+            raise Exception("No importer.")
+        if local_file_name is None:
+            raise Exception("No importer.")
+        if uploaded_file_name is None:
             raise Exception("No importer.")
         self.import_scheduler.add_to_queue(username, user_id, local_file_name, uploaded_file_name)
 
@@ -289,7 +313,6 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if device_id is None or len(device_id) == 0:
             raise Exception("Bad parameter.")
-
         return self.database.retrieve_device_activity_list(device_id, start, num_results)
 
     def delete_user_activities(self, user_id):
@@ -472,6 +495,8 @@ class DataMgr(Importer.ActivityWriter):
         """Create method for a comment on an activity."""
         if self.database is None:
             raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("Bad parameter.")
         if commenter_id is None:
             raise Exception("Bad parameter.")
         if comment is None or len(comment) == 0:
@@ -492,7 +517,9 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        return self.database.store_user_setting(user_id, Keys.ESTIMATED_FTP_KEY, estimated_ftp)
+        if estimated_ftp is None:
+            raise Exception("Bad parameter.")
+        return self.database.update_user_setting(user_id, Keys.ESTIMATED_FTP_KEY, estimated_ftp)
 
     def retrieve_user_estimated_ftp(self, user_id):
         """Retrieves the user's estimated FTP in the database."""
@@ -507,6 +534,14 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
+            raise Exception("Bad parameter.")
+        if activity_id is None:
+            raise Exception("Bad parameter.")
+        if activity_type is None:
+            raise Exception("Bad parameter.")
+        if activity_time is None:
+            raise Exception("Bad parameter.")
+        if bests is None:
             raise Exception("Bad parameter.")
 
         # This object will keep track of the PRs.
@@ -633,6 +668,8 @@ class DataMgr(Importer.ActivityWriter):
         """Adds gear to an activity."""
         if self.database is None:
             raise Exception("No database.")
+        if activity is None:
+            raise Exception("Bad parameter.")
         if gear_name is None:
             raise Exception("Bad parameter.")
         return self.database.create_gear_on_activity(activity, gear_name)
@@ -654,7 +691,6 @@ class DataMgr(Importer.ActivityWriter):
 
         if self.map_search is None:
             self.map_search = MapSearch.MapSearch(self.root_url + '/data/world.geo.json', self.root_url + '/data/us_states.geo.json', self.root_url + '/data/canada.geo.json')
-
         if self.map_search is None:
             raise Exception("Internal error.")
 
@@ -671,6 +707,8 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
+        if timeframe is None:
+            raise Exception("Bad parameter.")
 
         summarizer = Summarizer.Summarizer()
 
@@ -686,6 +724,11 @@ class DataMgr(Importer.ActivityWriter):
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
         running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
         return cycling_bests, running_bests
+
+    def compute_power_zone_distribution(self, ftp, powers):
+        """Takes the list of power readings and determines how many belong in each power zone, based on the user's FTP."""
+        calc = FtpCalculator.FtpCalculator()
+        return calc.compute_power_zone_distribution(ftp, powers)
 
     def retrieve_heart_rate_zones(self, max_hr):
         """Returns an array containing the maximum heart rate for each training zone."""

@@ -95,7 +95,7 @@ class Summarizer(object):
         if key in Keys.TIME_KEYS: # Lower is better
             return lhs < rhs
         elif key in Keys.SPEED_KEYS or key in Keys.POWER_KEYS or key in Keys.DISTANCE_KEYS: # Higher is better
-            return rhs > lhs
+            return lhs > rhs
         return False
 
     def add_activity_datum(self, activity_id, activity_type, start_time, summary_data_key, summary_data_value):
@@ -138,5 +138,5 @@ class Summarizer(object):
         """Submits an activity's metadata for summary analysis."""
         for key in summary_data:
             self.add_activity_datum(activity_id, activity_type, start_time, key, summary_data[key])
-        self.ftp_calc.add_activity_data(activity_id, activity_type, start_time, summary_data)
-        self.hr_calc.add_activity_data(activity_id, activity_type, start_time, summary_data)
+        self.ftp_calc.add_activity_data(activity_type, start_time, summary_data)
+        self.hr_calc.add_activity_data(activity_type, start_time, summary_data)

@@ -19,6 +19,9 @@ MANIFEST
 dist/
 build/
 
+# Python egg
+*egg-info
+
 # Backup files
 *~.nib
 

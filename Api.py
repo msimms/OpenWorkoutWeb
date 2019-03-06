@@ -52,9 +52,9 @@ class Api(object):
                 lon = json_obj[Keys.APP_LOCATION_LON_KEY]
                 alt = json_obj[Keys.APP_LOCATION_ALT_KEY]
                 location = [date_time, lat, lon, alt]
-            except ValueError, e:
+            except ValueError as e:
                 self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
-            except KeyError, e:
+            except KeyError as e:
                 self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
             except:
                 self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
@@ -75,9 +75,9 @@ class Api(object):
                         metadata_list_dict[key] = []
                     value_list = metadata_list_dict[key]
                     value_list.append(time_value_pair)
-        except ValueError, e:
+        except ValueError as e:
             self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
-        except KeyError, e:
+        except KeyError as e:
             self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except:
             self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
@@ -98,9 +98,9 @@ class Api(object):
             y = json_obj[Keys.APP_AXIS_NAME_Y]
             z = json_obj[Keys.APP_AXIS_NAME_Z]
             accel = [date_time, x, y, z]
-        except ValueError, e:
+        except ValueError as e:
             self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
-        except KeyError, e:
+        except KeyError as e:
             self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except:
             self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
