@@ -267,7 +267,7 @@ ${summary}
 
 	function drawBarChart(data, title, color)
 	{
-		var margin = {top: 20, right: 20, bottom: 25, left: 50},
+		var margin = {top: 20, right: 20, bottom: 55, left: 50},
 			width = $("#charts").width() - margin.left - margin.right,
 			height = 200 - margin.top - margin.bottom;
 
@@ -300,6 +300,10 @@ ${summary}
             .attr("transform", "rotate(-90)")
             .attr("dy", ".71em")
 			.style("text-anchor", "end");
+        svg.append("text")
+            .attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 20) + ")")
+            .style("text-anchor", "middle")
+            .text(title);
         svg.selectAll("bar")
             .data(data)
             .enter().append("rect")
@@ -307,8 +311,7 @@ ${summary}
             .attr("width", x.rangeBand())
             .attr("height", function(d) { return height - y(d); })
             .attr("x", function(d, i) { return x(i); })
-            .attr("y", function(d) { return y(d); })
-			.text(title);
+            .attr("y", function(d) { return y(d); });
     }
 
 	var speeds = [
