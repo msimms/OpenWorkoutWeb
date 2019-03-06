@@ -229,7 +229,7 @@ ${summary}
 	{
 		var margin = {top: 20, right: 20, bottom: 20, left: 50},
 			width = $("#charts").width() - margin.left - margin.right,
-			height = 200 - margin.top - margin.bottom;
+			height = 250 - margin.top - margin.bottom;
 
 		var x = d3.time.scale().range([0, width]);
 		var y = d3.scale.linear().range([height, 0]);
@@ -274,7 +274,7 @@ ${summary}
 	{
 		var margin = {top: 20, right: 20, bottom: 55, left: 50},
 			width = $("#charts").width() - margin.left - margin.right,
-			height = 200 - margin.top - margin.bottom;
+			height = 250 - margin.top - margin.bottom;
 
         var x = d3.scale.ordinal().domain([0,1,2,3,4,5]).rangeBands([0, width]);
         var y = d3.scale.linear().domain([0, d3.max(data)]).range([height, 0]);
