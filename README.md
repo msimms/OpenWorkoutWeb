@@ -113,7 +113,10 @@ python start_flask.py [--debug] [--host <hostname>] [--hostport <hostport>] [--g
 
 ### 0.11
 * Fixes to adding tags and gear to activities.
+* Added cycling power distribution graph.
 * Too many optimizations to list.
+* Too many small bug fixes to list.
+* Generation of feature list prior to automated workout plan generation.
 
 ## Tech
 This software uses several other source projects to work properly:
