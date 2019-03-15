@@ -35,6 +35,7 @@ g_flask_app.secret_key = 'UB2s60qJrithXHt2w71f'
 g_flask_app.url_map.strict_slashes = False
 g_root_dir = os.path.dirname(os.path.abspath(__file__))
 g_app = None
+g_session_mgr = None
 
 
 def signal_handler(signal, frame):
@@ -44,6 +45,16 @@ def signal_handler(signal, frame):
     if g_app is not None:
         g_app.terminate()
     sys.exit(0)
+
+def login_requred(function_to_protect):
+    @functools.wraps(function_to_protect)
+    def wrapper(*args, **kwargs):
+        global g_session_mgr
+        user = g_session_mgr.get_logged_in_user()
+        if user:
+            return function_to_protect(*args, **kwargs)
+        return flask.redirect(flask.url_for('login'))
+    return wrapper
 
 @g_flask_app.route('/css/<file_name>')
 def css(file_name):
@@ -154,6 +165,7 @@ def device(device_str):
     return g_app.error()
 
 @g_flask_app.route('/my_activities')
+@login_requred
 def my_activities():
     """Renders the list of the specified user's activities."""
     try:
@@ -167,6 +179,7 @@ def my_activities():
     return g_app.error()
 
 @g_flask_app.route('/all_activities')
+@login_requred
 def all_activities():
     """Renders the list of all activities the specified user is allowed to view."""
     try:
@@ -180,6 +193,7 @@ def all_activities():
     return g_app.error()
 
 @g_flask_app.route('/workouts')
+@login_requred
 def workouts():
     """Renders the list of workouts the specified user is allowed to view."""
     try:
@@ -193,6 +207,7 @@ def workouts():
     return g_app.error()
 
 @g_flask_app.route('/gear')
+@login_requred
 def gear():
     """Renders the list of all gear belonging to the logged in user."""
     try:
@@ -206,6 +221,7 @@ def gear():
     return g_app.error()
 
 @g_flask_app.route('/following')
+@login_requred
 def following():
     """Renders the list of users the specified user is following."""
     try:
@@ -219,6 +235,7 @@ def following():
     return g_app.error()
 
 @g_flask_app.route('/followers')
+@login_requred
 def followers():
     """Renders the list of users that are following the specified user."""
     try:
@@ -232,6 +249,7 @@ def followers():
     return g_app.error()
 
 @g_flask_app.route('/device_list')
+@login_requred
 def device_list():
     """Renders the list of a user's devices."""
     try:
@@ -245,6 +263,7 @@ def device_list():
     return g_app.error()
 
 @g_flask_app.route('/upload')
+@login_requred
 def upload(ufile):
     """Processes an upload request."""
     try:
@@ -258,6 +277,7 @@ def upload(ufile):
     return g_app.error()
 
 @g_flask_app.route('/manual_entry')
+@login_requred
 def manual_entry(activity_type):
     """Called when the user selects an activity type, indicating they want to make a manual data entry."""
     try:
@@ -271,6 +291,7 @@ def manual_entry(activity_type):
     return g_app.error()
 
 @g_flask_app.route('/import_activity')
+@login_requred
 def import_activity():
     """Renders the import page."""
     try:
@@ -284,6 +305,7 @@ def import_activity():
     return g_app.error()
 
 @g_flask_app.route('/summary')
+@login_requred
 def summary():
     """Renders the user's summary page."""
     try:
@@ -297,6 +319,7 @@ def summary():
     return g_app.error()
 
 @g_flask_app.route('/profile')
+@login_requred
 def profile():
     """Renders the user's profile page."""
     try:
@@ -310,6 +333,7 @@ def profile():
     return g_app.error()
 
 @g_flask_app.route('/settings')
+@login_requred
 def settings():
     """Renders the user's settings page."""
     try:
