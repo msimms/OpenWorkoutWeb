@@ -36,7 +36,6 @@ class WorkoutPlanGenerator(object):
     def update_summary_data_cb(context, activity, user_id):
         """Callback function for update_summary_data."""
         if Keys.ACTIVITY_SUMMARY_KEY not in activity:
-            print "Queueing activity for analysis..."
             analysis_obj = context.data_mgr.analyze(activity, user_id)
 
     def calculate_inputs(self, user_id):
