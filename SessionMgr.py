@@ -83,4 +83,4 @@ class FlaskSessionMgr(SessionMgr):
 
     def clear_session(self):
         """Ends the current session."""
-        pass
+        flask.session.clear()

@@ -438,6 +438,7 @@ def status():
     return result
 
 @g_flask_app.route('/api/<version>/<method>', methods = ['GET','POST'])
+@login_requred
 def api(version, method):
     """Endpoint for API calls."""
     response = ""
