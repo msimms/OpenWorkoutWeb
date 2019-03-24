@@ -438,7 +438,6 @@ def status():
     return result
 
 @g_flask_app.route('/api/<version>/<method>', methods = ['GET','POST'])
-@login_requred
 def api(version, method):
     """Endpoint for API calls."""
     response = ""
@@ -453,8 +452,10 @@ def api(version, method):
         # The the API params.
         if flask.request.method == 'GET':
             params = ""
-        else:
+        elif flask.request.data:
             params = json.loads(flask.request.data)
+        else:
+            params = ""
 
         # Process the API request.
         if version == '1.0':
