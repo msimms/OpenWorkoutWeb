@@ -62,6 +62,7 @@ ${nav}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="${root_url}/js/OpenStreetMap.js"></script>
+<script type="text/javascript" src="${root_url}/js/khtml_all.js"></script>
 <script type="text/javascript">
 	var contentString
 	var routePath
@@ -119,9 +120,7 @@ ${nav}
 		if (response.length < 3)
 			return;
 
-		response2 = response.substring(1, response.length - 1);
-		response3 = replaceAll(response2, "\\\"", "\"");
-		var objList = JSON.parse(response3);
+		var objList = JSON.parse(response);
 		if (objList == null)
 			return;
 
@@ -198,13 +197,13 @@ ${nav}
 		var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
 		map.setCenter(lonLat, zoom);
 
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "application/json" });
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "text" });
 	}
 
 	var checkForUpdates = function()
 	{
 		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=${routeLen}", success: appendToTrack, dataType: "application/json" });
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "application/json" });
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "text" });
 	};
 
 	initialize();

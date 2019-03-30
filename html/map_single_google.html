@@ -119,9 +119,7 @@ ${nav}
 		if (response.length < 3)
 			return;
 
-		response2 = response.substring(1, response.length - 1);
-		response3 = replaceAll(response2, "\\\"", "\"");
-		var objList = JSON.parse(response3);
+		var objList = JSON.parse(response);
 		if (objList == null)
 			return;
 
@@ -203,13 +201,13 @@ ${route}
 
 		routePath.setMap(map);
 
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "application/json" });
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "text" });
 	}
 
 	var checkForUpdates = function()
 	{
 		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=${routeLen}", success: appendToTrack, dataType: "application/json" });
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "application/json" });
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "text" });
 	};
 
 	google.maps.event.addDomListener(window, 'load', initialize);
