@@ -62,12 +62,10 @@ ${nav}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="${root_url}/js/OpenStreetMap.js"></script>
-<script type="text/javascript" src="${root_url}/js/khtml_all.js"></script>
 <script type="text/javascript">
 	var contentString
 	var routePath
 	var map
-	var marker = null
 	var lastLat = ${lastLat}
 	var lastLon = ${lastLon}
 
@@ -145,17 +143,10 @@ ${nav}
 			'</div>' +
 			'</div>';
 
-		if (marker)
-		{
-			marker.setMap(null);
-			marker = null;
-		}
-
-        var marker = new khtml.maplib.overlay.Marker({
-                position: new khtml.maplib.LatLng(lastLat, lastLon), 
-                map: map,
-                title: "Last Known Position"
-        });
+		var lonLat = new OpenLayers.LonLat(lastLon, lastLat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
+        var markers = new OpenLayers.Layer.Markers("Markers");
+        map.addLayer(markers);    
+        markers.addMarker(new OpenLayers.Marker(lonLat));
 	};
     
 	function initialize()
