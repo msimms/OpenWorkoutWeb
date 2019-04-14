@@ -17,34 +17,55 @@
 <link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
 
 <body>
-	<section class="loginbackground">
-		<section class="loginform cf" style="width: 480px">
-			<form name="login" action="${root_url}/submit_login" method="post" accept-charset="utf-8">
-				<ul>
-					<li>
-						<label for="username" style="width: 440px">Email</label>
-						<input type="email" name="email" style="width: 440px" placeholder="yourname@email.com" required>
-					</li>
-					<li>
-						<label for="password" style="width: 440px">Password</label>
-						<input type="password" name="password"  style="width: 440px" placeholder="password" required>
-					</li>
-					<li>
-						<input type="submit" value="Login">
-						<a href="${root_url}/create_login">Create Login</a>
-					</li>
-				</ul>
-			</form>
-		</section>
-	</section>
 
-	<section>
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script>
+    function submit_login()
+    {
+        var the_url = "/api/1.0/login";
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+        var dict = [];
+        var result_text = {};
+
+        dict.push({["username"] : username});
+        dict.push({["password"] : password});
+        if (send_post_request(the_url, dict, result_text))
+            window.location.replace("${root_url}/all_activities");
+        else
+            alert("Authentication failed!");
+    }
+</script>
+
+<section class="loginbackground">
+    <section class="loginform cf" style="width: 480px">
+        <form name="create_login" action="javascript:submit_login()" accept-charset="utf-8">
+            <ul>
+                <li>
+                    <label for="username" style="width: 440px">Email</label>
+                    <input type="email" name="username" id="username" style="width: 440px"placeholder="yourname@email.com" required>
+                </li>
+                <li>
+                    <label for="password" style="width: 440px">Password</label>
+                    <input type="password" name="password" id="password" style="width: 440px" placeholder="password" required>
+                </li>
+                <li>
+                    <input type="submit" value="Login">
+                    <a href="${root_url}/create_login">Create Login</a>
+                </li>
+            </ul>
+        </form>
+    </section>
+</section>
+
+<section>
 ${readme}
-		<h2>Source Code</h2>
-		<p>
-			The source code is stored on <a href="https://github.com">GitHub</a> at <a href="https://github.com/msimms/StraenWeb">this</a> location.
-		</p>
-	</section>
+    <h2>Source Code</h2>
+    <p>
+        The source code is stored on <a href="https://github.com">GitHub</a> at <a href="https://github.com/msimms/StraenWeb">this</a> location.
+    </p>
+</section>
+
 </body>
 
 </html>

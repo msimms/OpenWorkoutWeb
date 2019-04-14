@@ -346,46 +346,6 @@ def settings():
         g_app.log_error('Unhandled exception in ' + settings.__name__)
     return g_app.error()
 
-@g_flask_app.route('/submit_login', methods = ['POST'])
-def submit_login():
-    """Processes a login."""
-    try:
-        email = flask.request.form.get('email')
-        password = flask.request.form.get('password')
-        return g_app.submit_login(email, password)
-    except App.RedirectException as e:
-        return flask.redirect(e.url, code=302)
-    except Exception as e:
-        error_msg = 'Unable to authenticate the user. ' + str(e.args[0])
-        g_app.log_error(error_msg)
-        return self.error(error_msg)
-    except:
-        g_app.log_error(traceback.format_exc())
-        g_app.log_error(sys.exc_info()[0])
-        g_app.log_error('Unhandled exception in ' + submit_login.__name__)
-    return g_app.error()
-
-@g_flask_app.route('/submit_new_login', methods = ['POST'])
-def submit_new_login():
-    """Creates a new login."""
-    try:
-        email = flask.request.form.get('email')
-        realname = flask.request.form.get('realname')
-        password1 = flask.request.form.get('password1')
-        password2 = flask.request.form.get('password2')
-        return g_app.submit_new_login(email, realname, password1, password2)
-    except App.RedirectException as e:
-        return flask.redirect(e.url, code=302)
-    except Exception as e:
-        error_msg = 'Unable to create the user. ' + str(e.args[0])
-        g_app.log_error(error_msg)
-        return self.error(error_msg)
-    except:
-        g_app.log_error(traceback.format_exc())
-        g_app.log_error(sys.exc_info()[0])
-        g_app.log_error('Unhandled exception in ' + submit_new_login.__name__)
-    return g_app.error()
-
 @g_flask_app.route('/login')
 def login():
     """Renders the login page."""

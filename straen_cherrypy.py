@@ -388,46 +388,6 @@ class StraenWeb(object):
         return self.error()
 
     @cherrypy.expose
-    def submit_login(self, *args, **kw):
-        """Processes a login."""
-        try:
-            email = cherrypy.request.params.get("email")
-            password = cherrypy.request.params.get("password")
-            return self.app.submit_login(email, password)
-        except App.RedirectException as e:
-            raise cherrypy.HTTPRedirect(e.url)
-        except cherrypy.HTTPRedirect as e:
-            raise e
-        except Exception as e:
-            error_msg = 'Unable to authenticate the user. ' + str(e.args[0])
-            self.log_error(error_msg)
-            return self.error(error_msg)
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.submit_login.__name__)
-        return self.error()
-
-    @cherrypy.expose
-    def submit_new_login(self, email, realname, password1, password2, *args, **kw):
-        """Creates a new login."""
-        try:
-            return self.app.submit_new_login(email, realname, password1, password2)
-        except App.RedirectException as e:
-            raise cherrypy.HTTPRedirect(e.url)
-        except cherrypy.HTTPRedirect as e:
-            raise e
-        except Exception as e:
-            error_msg = 'Unable to create the user. ' + str(e.args[0])
-            self.log_error(error_msg)
-            return self.error(error_msg)
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.submit_new_login.__name__)
-        return self.error()
-
-    @cherrypy.expose
     def login(self):
         """Renders the login page."""
         try:
