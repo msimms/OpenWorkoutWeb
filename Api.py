@@ -347,6 +347,7 @@ class Api(object):
 
         # End the session
         self.user_mgr.clear_session()
+        self.user_id = None
         return True, ""
 
     def handle_update_email(self, values):
