@@ -2,6 +2,7 @@
 """Main application, contains all web page handlers"""
 
 import argparse
+import functools
 import json
 import logging
 import mako
@@ -17,6 +18,7 @@ import App
 import DataMgr
 import AnalysisScheduler
 import ImportScheduler
+import SessionException
 import SessionMgr
 import UserMgr
 import WorkoutPlanGeneratorScheduler
@@ -373,6 +375,11 @@ def logout():
         return g_app.logout()
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
+    except SessionException.SessionTerminatedException as e:
+        response = flask.redirect(e.url, code=302)
+        response.set_cookie(Keys.SESSION_KEY, '', expires=0)
+        response.delete_cookie(username)
+        return response
     except:
         return g_app.error()
     return g_app.error()
@@ -429,9 +436,14 @@ def api(version, method):
         else:
             g_app.log_error("Failed to handle request for api version " + version)
             code = 400
-    except ApiException as e:
+    except ApiException.ApiException as e:
         g_app.log_error(e.message)
         code = e.code
+    except SessionException.SessionTerminatedException as e:
+        response = flask.redirect("/", code=302)
+        response.set_cookie(Keys.SESSION_KEY, '', expires=0)
+        response.delete_cookie(username)
+        return response
     except Exception as e:
         response = str(e.args[0])
         g_app.log_error(response)

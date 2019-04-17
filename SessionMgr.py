@@ -3,6 +3,7 @@
 import cherrypy
 import flask
 import Keys
+import SessionException
 
 
 class SessionMgr(object):
@@ -83,4 +84,6 @@ class FlaskSessionMgr(SessionMgr):
 
     def clear_session(self):
         """Ends the current session."""
+        flask.session.pop(Keys.SESSION_KEY, None)
         flask.session.clear()
+        raise SessionException.SessionTerminatedException()
