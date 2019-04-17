@@ -440,9 +440,9 @@ def api(version, method):
         g_app.log_error(e.message)
         code = e.code
     except SessionException.SessionTerminatedException as e:
-        response = flask.redirect("/", code=302)
+        response = g_app.make_response("")
         response.set_cookie(Keys.SESSION_KEY, '', expires=0)
-        response.delete_cookie(username)
+        response.delete_cookie(Keys.SESSION_KEY)
         return response
     except Exception as e:
         response = str(e.args[0])
