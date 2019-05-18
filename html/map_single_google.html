@@ -9,9 +9,10 @@
 <link rel="stylesheet" type="text/css" href="${root_url}/css/site.css">
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css" />
 
+<meta charset="UTF-8">
+<meta name="description" content="Activity summary, showing the a map of the activity along with summary statistics">
+<meta name="keywords" content="activity summary">
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-<meta content="utf-8" http-equiv="encoding">
 
 <link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
 
@@ -118,9 +119,7 @@ ${nav}
 		if (response.length < 3)
 			return;
 
-		response2 = response.substring(1, response.length - 1);
-		response3 = replaceAll(response2, "\\\"", "\"");
-		var objList = JSON.parse(response3);
+		var objList = JSON.parse(response);
 		if (objList == null)
 			return;
 
@@ -202,13 +201,13 @@ ${route}
 
 		routePath.setMap(map);
 
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "application/json" });
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "text" });
 	}
 
 	var checkForUpdates = function()
 	{
 		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=${routeLen}", success: appendToTrack, dataType: "application/json" });
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "application/json" });
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "text" });
 	};
 
 	google.maps.event.addDomListener(window, 'load', initialize);

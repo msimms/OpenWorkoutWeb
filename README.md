@@ -118,6 +118,10 @@ python start_flask.py [--debug] [--host <hostname>] [--hostport <hostport>] [--g
 * Too many small bug fixes to list.
 * Generation of feature list prior to automated workout plan generation.
 
+### 0.12
+* Updates to the flask front end.
+* Updates to the OpenStreetMap option.
+
 ## Tech
 This software uses several other source projects to work properly:
 

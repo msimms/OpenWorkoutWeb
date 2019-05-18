@@ -1278,22 +1278,6 @@ class App(object):
         handled, response = api.handle_api_1_0_request(method, params)
         return handled, response
 
-    def submit_login(self, email, password):
-        """Processes a login."""
-        if email is None or password is None:
-            raise Exception("An email address and password were not provided.")
-        elif self.user_mgr.authenticate_user(email, password):
-            self.user_mgr.create_new_session(email)
-            raise RedirectException(DEFAULT_LOGGED_IN_URL)
-        raise Exception("Unknown error.")
-
-    def submit_new_login(self, email, realname, password1, password2):
-        """Creates a new login."""
-        if self.user_mgr.create_user(email, realname, password1, password2, ""):
-            self.user_mgr.create_new_session(email)
-            raise RedirectException(DEFAULT_LOGGED_IN_URL)
-        raise Exception("Unknown error.")
-
     @statistics
     def login(self):
         """Renders the login page."""

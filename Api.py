@@ -273,7 +273,7 @@ class Api(object):
 
         return True, response
 
-    def handle_login_submit(self, values):
+    def handle_login(self, values):
         """Called when an API message to log in is received."""
         if self.user_id is not None:
             return True, self.user_mgr.get_logged_in_user()
@@ -300,7 +300,7 @@ class Api(object):
         cookie = self.user_mgr.create_new_session(email)
         return result, str(cookie)
 
-    def handle_create_login_submit(self, values):
+    def handle_create_login(self, values):
         """Called when an API message to create an account is received."""
         if self.user_id is not None:
             raise Exception("Already logged in.")
@@ -347,6 +347,7 @@ class Api(object):
 
         # End the session
         self.user_mgr.clear_session()
+        self.user_id = None
         return True, ""
 
     def handle_update_email(self, values):
@@ -1120,10 +1121,10 @@ class Api(object):
             return self.handle_activity_track(values)
         elif request == 'activity_metadata':
             return self.handle_activity_metadata(values)
-        elif request == 'login_submit':
-            return self.handle_login_submit(values)
-        elif request == 'create_login_submit':
-            return self.handle_create_login_submit(values)
+        elif request == 'login':
+            return self.handle_login(values)
+        elif request == 'create_login':
+            return self.handle_create_login(values)
         elif request == 'login_status':
             return self.handle_login_status(values)
         elif request == 'logout':

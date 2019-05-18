@@ -2,6 +2,7 @@
 """Database base classes"""
 
 import logging
+import os
 import sqlite3
 
 
@@ -36,7 +37,9 @@ class Database(object):
 
 class SqliteDatabase(Database):
     """Abstract Sqlite database implementation."""
-    def __init__(self, root_dir):
+
+    def __init__(self, root_dir, file_name):
+        self.db_file_name = os.path.join(root_dir, file_name)
         Database.__init__(self, root_dir)
 
     def connect(self):
@@ -46,13 +49,13 @@ class SqliteDatabase(Database):
     def execute(self, sql):
         """Executes the specified SQL query."""
         try:
-            con = sqlite3.connect(self.db_file)
+            con = sqlite3.connect(self.db_file_name)
             with con:
                 cur = con.cursor()
                 cur.execute(sql)
                 return cur.fetchall()
         except:
-            self.log_error("Database error:\n\tfile = " + self.db_file + "\n\tsql = " + self.quote_identifier(sql))
+            self.log_error("Database error:\n\tfile = " + self.db_file_name + "\n\tsql = " + self.quote_identifier(sql))
         finally:
             if con:
                 con.close()
