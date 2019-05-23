@@ -10,6 +10,7 @@ import Keys
 import MapSearch
 import StraenDb
 import Summarizer
+import TrainingPaceCalculator
 
 SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
 FOUR_WEEKS = (14.0 * 24.0 * 60.0 * 60.0)
@@ -724,6 +725,15 @@ class DataMgr(Importer.ActivityWriter):
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
         running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
         return cycling_bests, running_bests
+
+    def compute_run_training_paces(self, user_id, running_bests):
+        run_paces = []
+        calc = TrainingPaceCalculator.TrainingPaceCalculator()
+        if Keys.BEST_5K in running_bests:
+            best_time = running_bests[Keys.BEST_5K]
+            best_time_secs = best_time[0] / 60
+            run_paces = calc.calc_from_race_distance_in_meters(5000, best_time_secs)
+        return run_paces
 
     def compute_power_zone_distribution(self, ftp, powers):
         """Takes the list of power readings and determines how many belong in each power zone, based on the user's FTP."""

@@ -841,6 +841,20 @@ class App(object):
         cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.SIX_MONTHS)
         bests_str = self.render_personal_records(user_id, cycling_bests, running_bests)
 
+        # Show the running training paces.
+        run_paces = self.data_mgr.compute_run_training_paces(user_id, running_bests)
+        if run_paces:
+            run_paces_str = "<table>"
+            for run_pace in run_paces:
+                run_paces_str += "<td>"
+                run_paces_str += run_pace
+                run_paces_str += "</td><td>"
+                run_paces_str += Units.convert_to_preferred_units_str(self.user_mgr, user_id, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
+                run_paces_str += "</td><tr>"
+            run_paces_str += "</table>"
+        else:
+            run_paces_str = "Not calculated."
+
         # Set the default goals based on previous selections.
         goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
         goal_date = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY)
@@ -857,13 +871,14 @@ class App(object):
         if workouts is not None:
             plans_str = "<table>"
             for workout in workouts:
-                plans_str += "<td></td><tr>"
+                plans_str += "<td>"
+                plans_str += "</td><tr>"
             plans_str += "</table>"
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, plans=plans_str, goals=goals_str, goal_date=goal_date)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, runpaces=run_paces_str, plans=plans_str, goals=goals_str, goal_date=goal_date)
 
     @statistics
     def gear(self):

@@ -23,16 +23,21 @@ class TrainingPaceCalculator(object):
         easy_pace = self.convert_to_speed(easy_pace)
         tempo_pace = self.convert_to_speed(tempo_pace)
         speed_pace = self.convert_to_speed(speed_pace)
-        return [long_run_pace, easy_pace, tempo_pace, speed_pace]
+        paces = {}
+        paces[Keys.LONG_RUN_PACE] = long_run_pace
+        paces[Keys.EASY_RUN_PACE] = easy_pace
+        paces[Keys.TEMPO_RUN_PACE] = tempo_pace
+        paces[Keys.SPEED_RUN_PACE] = speed_pace
+        return paces
 
     def calc_from_hr(self, max_hr, resting_hr):
         """Give the athlete's maximum and resting heart rates, returns the suggested long run, easy run, tempo run, and speed run paces."""
-        v02maxCalc = VO2MaxCalculator()
+        v02maxCalc = VO2MaxCalculator.VO2MaxCalculator()
         vo2max = v02maxCalc.estimate_vo2max_from_heart_rate(max_hr, resting_hr)
-        return self.calc_from_vo2max(v02max)
+        return self.calc_from_vo2max(vo2max)
 
     def calc_from_race_distance_in_meters(self, race_distance_meters, race_time_minutes):
         """Give the an athlete's recent race result, returns the suggested long run, easy run, tempo run, and speed run paces."""
-        v02maxCalc = VO2MaxCalculator()
+        v02maxCalc = VO2MaxCalculator.VO2MaxCalculator()
         vo2max = v02maxCalc.estimate_vo2max_from_race_distance_in_meters(race_distance_meters, race_time_minutes)
-        return self.calc_from_vo2max(v02max)
+        return self.calc_from_vo2max(vo2max)
