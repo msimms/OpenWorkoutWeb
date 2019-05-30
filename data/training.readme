@@ -1,0 +1,15 @@
+# Input Format:
+# * Tempo Pace, based 6 month 5K PR
+# * Avg Number of Days Running / Week (Last 4 Weeks)
+# * Avg Longest Run / Week (Last 4 Weeks)
+# * Athlete age in years
+# * Skill level (0 = beginner, 1 = intermediate, 2 = advanced)
+# * Goal
+# * Weeks until goal
+# 
+# Outputs (one training block):
+# * Length of the training block (either 3 or 4 weeks)
+# ** Long run distance (km)
+# ** Tempo run distance (km)
+# ** Interval workout (minute easy/minute hard, k-repeats)
+# ** Number of cross-training days

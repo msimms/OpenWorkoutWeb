@@ -3,17 +3,20 @@
 
 from __future__ import absolute_import
 from CeleryWorker import celery_worker
+import argparse
 import celery
 import json
 import logging
 import os
 import sys
+import tensorflow as tf
 import time
 import traceback
 import AnalysisScheduler
 import DataMgr
 import UserMgr
 import Keys
+
 
 class WorkoutPlanGenerator(object):
     """Class for performing the computationally expensive workout plan generation tasks."""
@@ -80,6 +83,11 @@ class WorkoutPlanGenerator(object):
         inputs = [ tempo_pace, longest_run, age_years, 0, goal, weeks_until_goal ]
         return inputs
 
+    def neural_net(self, x):
+        layer_1 = tf.add(tf.matmul(x, weights['h1']), biases['b1'])
+        layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
+        return tf.matmul(layer_2, weights['out']) + biases['out']
+
     def generate_outputs(self, user_id, inputs):
         """Runs the neural network."""
         return []
@@ -106,6 +114,42 @@ class WorkoutPlanGenerator(object):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
 
+def generate_and_train_neural_net(training_file_name):
+    """Creates the neural network, based on training data from the supplied JSON file."""
+
+    sess = None
+
+    with open(training_file_name, 'r') as f:
+
+        # Load the training data from the file.
+        datastore = json.load(f)
+        # This should give us an array for each piece of training data.
+        data = datastore['data']
+        if len(data) > 0:
+
+            # Parameters.
+            learning_rate = 0.1
+            num_steps = 500
+            batch_size = 128
+            display_step = 100
+
+            # Network parameters.
+            n_hidden_1 = 256 # 1st layer number of neurons
+            n_hidden_2 = 256 # 2nd layer number of neurons
+            num_input = len(data)
+            num_classes = 0
+
+            init = tf.global_variables_initializer()
+            sess = tf.Session()
+
+            # Run the initializer.
+            sess.run(init)
+
+            for step in range(1, num_steps + 1):
+                pass
+
+    return sess
+
 @celery_worker.task()
 def generate_workout_plan(user_str):
     print("Starting workout plan generation...")
@@ -116,7 +160,24 @@ def generate_workout_plan(user_str):
 
 def main():
     """Entry point for a workout plan generator."""
-    pass
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--user_id", default="", help="The user ID for whom we are to generate a workout plan.", required=False)
+    parser.add_argument("--train", default="", help="The path to the training plan.", required=False)
+
+    try:
+        args = parser.parse_args()
+    except IOError as e:
+        parser.error(e)
+        sys.exit(1)
+
+    if len(args.train) > 0:
+        generate_and_train_neural_net(args.train)        
+
+    if len(args.user_id) > 0:
+        data = {}
+        data['user_id'] = args.user_id
+        generate_workout_plan(json.dumps(data))
+
 
 if __name__ == "__main__":
     main()
