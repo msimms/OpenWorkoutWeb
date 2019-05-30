@@ -17,6 +17,8 @@ import DataMgr
 import UserMgr
 import Keys
 
+g_sess = None
+
 
 class WorkoutPlanGenerator(object):
     """Class for performing the computationally expensive workout plan generation tasks."""
@@ -83,20 +85,15 @@ class WorkoutPlanGenerator(object):
         inputs = [ tempo_pace, longest_run, age_years, 0, goal, weeks_until_goal ]
         return inputs
 
-    def neural_net(self, x):
-        layer_1 = tf.add(tf.matmul(x, weights['h1']), biases['b1'])
-        layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
-        return tf.matmul(layer_2, weights['out']) + biases['out']
-
-    def generate_outputs(self, user_id, inputs):
-        """Runs the neural network."""
+    def generate_outputs(self, user_id, inputs, sess):
+        """Runs the neural network specified by 'sess' to generate the workout plan."""
         return []
 
     def organize_schedule(self, user_id, plan):
-        """Arranges the user's workouts into days/weeks, etc."""
+        """Arranges the user's workouts into days/weeks, etc. To be called after the outputs are generated, but need cleaning up."""
         pass
 
-    def generate_plan(self):
+    def generate_plan(self, sess):
         """Entry point for workout plan generation."""
 
         # Sanity check.
@@ -107,7 +104,7 @@ class WorkoutPlanGenerator(object):
         try:
             user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID]
             inputs = self.calculate_inputs(user_id)
-            outputs = self.generate_outputs(user_id, inputs)
+            outputs = self.generate_outputs(user_id, inputs, sess)
             self.organize_schedule(user_id, outputs)
         except:
             self.log_error("Exception when generating a workout plan.")
@@ -123,9 +120,13 @@ def generate_and_train_neural_net(training_file_name):
 
         # Load the training data from the file.
         datastore = json.load(f)
+
         # This should give us an array for each piece of training data.
-        data = datastore['data']
-        if len(data) > 0:
+        input_data = datastore['input_data']
+        output_data = datastore['output_data']
+        num_inputs = len(input_data)
+        num_classes = len(output_data)
+        if num_inputs > 0 and num_classes > 0:
 
             # Parameters.
             learning_rate = 0.1
@@ -136,10 +137,46 @@ def generate_and_train_neural_net(training_file_name):
             # Network parameters.
             n_hidden_1 = 256 # 1st layer number of neurons
             n_hidden_2 = 256 # 2nd layer number of neurons
-            num_input = len(data)
-            num_classes = 0
 
+            # tf Graph input.
+            X = tf.placeholder("float", [None, num_inputs])
+            Y = tf.placeholder("float", [None, num_classes])
+
+            # Store layers weight and bias.
+            weights = {
+                'h1': tf.Variable(tf.random_normal([num_inputs, n_hidden_1])),
+                'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
+                'out': tf.Variable(tf.random_normal([n_hidden_2, num_classes]))
+            }
+            biases = {
+                'b1': tf.Variable(tf.random_normal([n_hidden_1])),
+                'b2': tf.Variable(tf.random_normal([n_hidden_2])),
+                'out': tf.Variable(tf.random_normal([num_classes]))
+            }
+
+            def neural_net(x):
+                layer_1 = tf.add(tf.matmul(x, weights['h1']), biases['b1'])
+                layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
+                return tf.matmul(layer_2, weights['out']) + biases['out']
+
+            # Construct model.
+            logits = neural_net(X)
+            prediction = tf.nn.softmax(logits)
+
+            # Define loss and optimizer.
+            loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
+                logits=logits, labels=Y))
+            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+            train_op = optimizer.minimize(loss_op)
+
+            # Evaluate model.
+            correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
+            accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+
+            # Initialize variables.
             init = tf.global_variables_initializer()
+
+            # Start training.
             sess = tf.Session()
 
             # Run the initializer.
@@ -148,18 +185,26 @@ def generate_and_train_neural_net(training_file_name):
             for step in range(1, num_steps + 1):
                 pass
 
+        else:
+            print("Incomplete training data.")
+
     return sess
 
 @celery_worker.task()
 def generate_workout_plan(user_str):
+    """Entry point for the celery worker."""
+    global g_sess
+
     print("Starting workout plan generation...")
     user_obj = json.loads(user_str)
     generator = WorkoutPlanGenerator(user_obj)
-    generator.generate_plan()
+    generator.generate_plan(g_sess)
     print("Workout plan generation finished")
 
 def main():
     """Entry point for a workout plan generator."""
+    global g_sess
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--user_id", default="", help="The user ID for whom we are to generate a workout plan.", required=False)
     parser.add_argument("--train", default="", help="The path to the training plan.", required=False)
@@ -171,7 +216,7 @@ def main():
         sys.exit(1)
 
     if len(args.train) > 0:
-        generate_and_train_neural_net(args.train)        
+       g_sess = generate_and_train_neural_net(args.train)        
 
     if len(args.user_id) > 0:
         data = {}
