@@ -8,6 +8,7 @@ import celery
 import json
 import logging
 import os
+import numpy as np
 import sys
 import tensorflow as tf
 import time
@@ -17,7 +18,7 @@ import DataMgr
 import UserMgr
 import Keys
 
-g_sess = None
+g_model = None
 
 
 class WorkoutPlanGenerator(object):
@@ -85,15 +86,15 @@ class WorkoutPlanGenerator(object):
         inputs = [ tempo_pace, longest_run, age_years, 0, goal, weeks_until_goal ]
         return inputs
 
-    def generate_outputs(self, user_id, inputs, sess):
-        """Runs the neural network specified by 'sess' to generate the workout plan."""
+    def generate_outputs(self, user_id, inputs, model):
+        """Runs the neural network specified by 'model' to generate the workout plan."""
         return []
 
     def organize_schedule(self, user_id, plan):
         """Arranges the user's workouts into days/weeks, etc. To be called after the outputs are generated, but need cleaning up."""
         pass
 
-    def generate_plan(self, sess):
+    def generate_plan(self, model):
         """Entry point for workout plan generation."""
 
         # Sanity check.
@@ -104,17 +105,17 @@ class WorkoutPlanGenerator(object):
         try:
             user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID]
             inputs = self.calculate_inputs(user_id)
-            outputs = self.generate_outputs(user_id, inputs, sess)
+            outputs = self.generate_outputs(user_id, inputs, model)
             self.organize_schedule(user_id, outputs)
         except:
             self.log_error("Exception when generating a workout plan.")
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
 
-def generate_and_train_neural_net(training_file_name):
+def generate_model(training_file_name):
     """Creates the neural network, based on training data from the supplied JSON file."""
 
-    sess = None
+    model = None
 
     with open(training_file_name, 'r') as f:
 
@@ -122,88 +123,58 @@ def generate_and_train_neural_net(training_file_name):
         datastore = json.load(f)
 
         # This should give us an array for each piece of training data.
+        input_headers = datastore['input_headers']
         input_data = datastore['input_data']
         output_data = datastore['output_data']
         num_inputs = len(input_data)
-        num_classes = len(output_data)
-        if num_inputs > 0 and num_classes > 0:
+        num_outputs = len(output_data)
+        if num_inputs > 0 and num_outputs > 0:
 
-            # Parameters.
-            learning_rate = 0.1
-            num_steps = 500
-            batch_size = 128
-            display_step = 100
+            # Transform the input JSON into something we can use in the model.
+            model_inputs = []
+            for item in input_data:
+                x = np.asarray(item['in'])
+                model_inputs.append(x)
 
-            # Network parameters.
-            n_hidden_1 = 256 # 1st layer number of neurons
-            n_hidden_2 = 256 # 2nd layer number of neurons
+            # Transform the output JSON into something we can use in the model.
+            model_outputs = []
+            for item in output_data:
+                model_outputs.append(item['training_block'])
 
-            # tf Graph input.
-            X = tf.placeholder("float", [None, num_inputs])
-            Y = tf.placeholder("float", [None, num_classes])
+            # Incorporate the column names for the input data.
+            input_columns = []
+            for header in input_headers:
+                input_columns.append(tf.feature_column.numeric_column(header))
 
-            # Store layers weight and bias.
-            weights = {
-                'h1': tf.Variable(tf.random_normal([num_inputs, n_hidden_1])),
-                'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
-                'out': tf.Variable(tf.random_normal([n_hidden_2, num_classes]))
-            }
-            biases = {
-                'b1': tf.Variable(tf.random_normal([n_hidden_1])),
-                'b2': tf.Variable(tf.random_normal([n_hidden_2])),
-                'out': tf.Variable(tf.random_normal([num_classes]))
-            }
+            feature_layer = tf.keras.layers.DenseFeatures(input_columns)
+            model = tf.keras.Sequential([
+                feature_layer,
+                tf.keras.layers.Dense(512, activation='relu'),
+                tf.keras.layers.Dense(num_outputs, activation='softmax')
+            ])
 
-            def neural_net(x):
-                layer_1 = tf.add(tf.matmul(x, weights['h1']), biases['b1'])
-                layer_2 = tf.add(tf.matmul(layer_1, weights['h2']), biases['b2'])
-                return tf.matmul(layer_2, weights['out']) + biases['out']
-
-            # Construct model.
-            logits = neural_net(X)
-            prediction = tf.nn.softmax(logits)
-
-            # Define loss and optimizer.
-            loss_op = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
-                logits=logits, labels=Y))
-            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-            train_op = optimizer.minimize(loss_op)
-
-            # Evaluate model.
-            correct_pred = tf.equal(tf.argmax(prediction, 1), tf.argmax(Y, 1))
-            accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
-
-            # Initialize variables.
-            init = tf.global_variables_initializer()
-
-            # Start training.
-            sess = tf.Session()
-
-            # Run the initializer.
-            sess.run(init)
-
-            for step in range(1, num_steps + 1):
-                pass
+            model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
+            model.fit(model_inputs, model_outputs, epochs=10)
 
         else:
             print("Incomplete training data.")
 
-    return sess
+    return model
 
 @celery_worker.task()
 def generate_workout_plan(user_str):
     """Entry point for the celery worker."""
-    global g_sess
+    global g_model
 
     print("Starting workout plan generation...")
     user_obj = json.loads(user_str)
     generator = WorkoutPlanGenerator(user_obj)
-    generator.generate_plan(g_sess)
+    generator.generate_plan(g_model)
     print("Workout plan generation finished")
 
 def main():
     """Entry point for a workout plan generator."""
-    global g_sess
+    global g_model
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--user_id", default="", help="The user ID for whom we are to generate a workout plan.", required=False)
@@ -216,7 +187,7 @@ def main():
         sys.exit(1)
 
     if len(args.train) > 0:
-       g_sess = generate_and_train_neural_net(args.train)        
+       g_model = generate_model(args.train)        
 
     if len(args.user_id) > 0:
         data = {}

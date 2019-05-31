@@ -2,10 +2,10 @@
 # * Tempo Pace, based 6 month 5K PR
 # * Avg Number of Days Running / Week (Last 4 Weeks)
 # * Avg Longest Run / Week (Last 4 Weeks)
-# * Athlete age in years
-# * Skill level (0 = beginner, 1 = intermediate, 2 = advanced)
-# * Goal
-# * Weeks until goal
+# * Athlete Age (Years)
+# * Skill Level (0 = beginner, 1 = intermediate, 2 = advanced)
+# * Goal Distance
+# * Weeks Until Goal
 # 
 # Outputs (one training block):
 # * Length of the training block (either 3 or 4 weeks)
