@@ -133,28 +133,30 @@ def generate_model(training_file_name):
             # Transform the input JSON into something we can use in the model.
             model_inputs = []
             for item in input_data:
-                x = np.asarray(item['in'])
-                model_inputs.append(x)
+                model_inputs.append(np.asarray(item['in']))
+            train_ds_in = tf.data.Dataset.from_tensor_slices(model_inputs)
 
             # Transform the output JSON into something we can use in the model.
             model_outputs = []
             for item in output_data:
                 model_outputs.append(item['training_block'])
+            train_ds_out = tf.data.Dataset.from_tensor_slices(model_outputs)
 
             # Incorporate the column names for the input data.
             input_columns = []
             for header in input_headers:
                 input_columns.append(tf.feature_column.numeric_column(header))
 
-            feature_layer = tf.keras.layers.DenseFeatures(input_columns)
+            # Build the model.
             model = tf.keras.Sequential([
-                feature_layer,
-                tf.keras.layers.Dense(512, activation='relu'),
+                tf.keras.layers.DenseFeatures(input_columns),
+                tf.keras.layers.Dense(128, activation='relu'),
+                tf.keras.layers.Dense(128, activation='relu'),
                 tf.keras.layers.Dense(num_outputs, activation='softmax')
             ])
 
-            model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
-            model.fit(model_inputs, model_outputs, epochs=10)
+            model.compile(optimizer='adam', loss='binary_crossentropy')
+            model.fit(train_ds_in, train_ds_out, epochs=5, validation_split=0.1)
 
         else:
             print("Incomplete training data.")
