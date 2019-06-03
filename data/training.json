@@ -1,11 +1,15 @@
 {
-   "input_headers": [ "Tempo Pace", "Avg Number of Days Running / Week", "Avg Longest Run / Week", "Athlete Age (Years)", "Skill Level", "Goal Distance", "Weeks Until Goal" ],
+   "input_headers": [ "Tempo Pace", "Avg Number of Days Running / Week", "Avg Longest Run / Week", "Athlete Age (Years)", "Skill Level", "Goal Distance", "Weeks Until Goal", "Week Number" ],
    "output_headers": [ "Long Run Distance (KM)", "Tempo Run Distance (KM)", "Interval Workout", "Number Of Cross-Training Days" ],
    "input_data": [
-      { "in": [0, 0, 0, 30, 0, 5000, 8], "plan_name": "plan1" },
-      { "in": [0, 0, 0, 40, 0, 5000, 8], "plan_name": "plan1" }
+      { "metrics": [0, 0, 0, 20, 0, 5000, 8, 0], "plan_number": 0 },
+      { "metrics": [0, 0, 0, 30, 0, 5000, 8, 0], "plan_number": 1 },
+      { "metrics": [0, 0, 0, 40, 0, 5000, 8, 0], "plan_number": 1 },
+      { "metrics": [0, 0, 0, 50, 0, 5000, 8, 0], "plan_number": 2 }
    ],
    "output_data": [
-      { "plan_name": "plan1", "training_block": [ [2.5, 1.5, 0, 0], [3, 2, 0, 1], [3, 2, 0, 1] ] }
+      { "plan_number": 0, "plan_name": "5K_plan1", "training_block": [ [2.5, 1.5, 0, 0], [3.0, 2, 0, 1], [3.5, 2, 0, 1] ] },
+      { "plan_number": 1, "plan_name": "5K_plan2", "training_block": [ [2.5, 1.5, 0, 0], [3.0, 2, 0, 1], [3.0, 2, 0, 1] ] },
+      { "plan_number": 2, "plan_name": "5K_plan3", "training_block": [ [2.0, 1.5, 0, 0], [2.5, 2, 0, 1], [3.0, 2, 0, 1] ] }
    ]
 }

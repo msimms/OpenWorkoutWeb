@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import numpy as np
+import pandas
 import sys
 import tensorflow as tf
 import time
@@ -130,33 +131,26 @@ def generate_model(training_file_name):
         num_outputs = len(output_data)
         if num_inputs > 0 and num_outputs > 0:
 
-            # Transform the input JSON into something we can use in the model.
-            model_inputs = []
-            for item in input_data:
-                model_inputs.append(np.asarray(item['in']))
-            train_ds_in = tf.data.Dataset.from_tensor_slices(model_inputs)
-
-            # Transform the output JSON into something we can use in the model.
-            model_outputs = []
-            for item in output_data:
-                model_outputs.append(item['training_block'])
-            train_ds_out = tf.data.Dataset.from_tensor_slices(model_outputs)
-
             # Incorporate the column names for the input data.
             input_columns = []
-            for header in input_headers:
-                input_columns.append(tf.feature_column.numeric_column(header))
+            input_columns.append(tf.feature_column.numeric_column('metrics'))
+
+            # Transform the input JSON into something we can use in the model.
+            dataframe = pandas.DataFrame(input_data)
+            train_labels = dataframe.pop('plan_number')
+            dataset = tf.data.Dataset.from_tensor_slices((dict(dataframe), train_labels))
+            dataset = dataset.shuffle(buffer_size=len(dataframe))
 
             # Build the model.
             model = tf.keras.Sequential([
                 tf.keras.layers.DenseFeatures(input_columns),
                 tf.keras.layers.Dense(128, activation='relu'),
                 tf.keras.layers.Dense(128, activation='relu'),
-                tf.keras.layers.Dense(num_outputs, activation='softmax')
+                tf.keras.layers.Dense(1, activation='sigmoid')
             ])
 
             model.compile(optimizer='adam', loss='binary_crossentropy')
-            model.fit(train_ds_in, train_ds_out, epochs=5, validation_split=0.1)
+            model.fit(dataset, epochs=5)
 
         else:
             print("Incomplete training data.")
