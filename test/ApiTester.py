@@ -8,15 +8,15 @@ import sys
 
 def print_test_title(title):
     """Utility function for print a string followed by a line of equal lenth."""
-    print title
-    print '-' * len(title)
+    print(title)
+    print('-' * len(title))
 
 def send_post_request(url, payload):
     """Utility function for sending an HTTP POST and returning the status code and response text."""
-    print "URL: " + url
+    print("URL: " + url)
     response = requests.post(url, json=payload)
-    print "Response code: " + str(response.status_code)
-    print "Response text: " + response.text
+    print("Response code: " + str(response.status_code))
+    print("Response text: " + response.text)
     return response.status_code, response.text
 
 def login(root_url, username, password):
@@ -51,17 +51,17 @@ def main():
     print_test_title("Login")
     code, cookie = login(api_url, args.username, args.password)
     if code == 200:
-        print "Test passed!\n"
+        print("Test passed!\n")
     else:
-        print "Test failed!\n"
+        print("Test failed!\n")
 
     # Logout.
     print_test_title("Logout")
     code, result = logout(api_url, cookie)
     if code == 200:
-        print "Test passed!\n"
+        print("Test passed!\n")
     else:
-        print "Test failed!\n"
+        print("Test failed!\n")
 
 if __name__ == "__main__":
     main()
