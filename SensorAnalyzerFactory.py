@@ -1,5 +1,6 @@
 # Copyright 2018 Michael J Simms
 
+import sys
 import Keys
 import AccelerometerAnalyzer
 import CadenceAnalyzer
@@ -31,7 +32,11 @@ def create_with_data(sensor_type, data, activity_type):
                 sensor_analyzer.append_sensor_value_from_dict(datum)
         else:
             for datum in data:
-                time = int(datum.keys()[0])
-                value = float(datum.values()[0])
+                if sys.version_info[0] < 3:
+                    time = int(datum.keys()[0])
+                    value = int(datum.values()[0])
+                else:
+                    time = int(list(datum.keys())[0])
+                    value = float(list(datum.values())[0])
                 sensor_analyzer.append_sensor_value(time, value)
     return sensor_analyzer
