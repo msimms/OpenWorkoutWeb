@@ -146,13 +146,14 @@
 
 	function upload_file(fileObj)
 	{
-		var the_url = "${root_url}/api/1.0/upload_activity_file";
-		var dict = [];
-		var result_text = {};
 		var reader = new FileReader();
 
 		reader.onload = function(e)
 		{
+            var the_url = "${root_url}/api/1.0/upload_activity_file";
+            var dict = [];
+            var result_text = {};
+
 			text = reader.result;
 
 			dict.push({["uploaded_file_name"] : fileObj.name});

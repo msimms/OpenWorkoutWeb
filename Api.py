@@ -593,7 +593,7 @@ class Api(object):
         func = switcher.get(activity_type, lambda: "Invalid activity type")
         return True, func(values)
 
-    def handle_upload_activity_file(self, username, values):
+    def handle_upload_activity_file(self, values):
         """Called when an API message to create a new activity from data within a file is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -601,6 +601,11 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("File name not specified.")
         if Keys.UPLOADED_FILE_DATA_KEY not in values:
             raise ApiException.ApiMalformedRequestException("File data not specified.")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise ApiException.ApiNotLoggedInException()
 
         # Decode the parameters.
         uploaded_file_name = urllib.unquote_plus(values[Keys.UPLOADED_FILE_NAME_KEY])
@@ -1108,7 +1113,6 @@ class Api(object):
 
     def handle_api_1_0_request(self, request, values):
         """Called to parse a version 1.0 API message."""
-        username = None
         if self.user_id is None:
             if Keys.SESSION_KEY in values:
                 username = self.user_mgr.get_logged_in_user_from_cookie(values[Keys.SESSION_KEY])
@@ -1142,7 +1146,7 @@ class Api(object):
         elif request == 'add_activity':
             return self.handle_add_activity(values)
         elif request == 'upload_activity_file':
-            return self.handle_upload_activity_file(username, values)
+            return self.handle_upload_activity_file(values)
         elif request == 'add_tag_to_activity':
             return self.handle_add_tag_to_activity(values)
         elif request == 'delete_tag_from_activity':
