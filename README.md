@@ -122,6 +122,9 @@ python start_flask.py [--debug] [--host <hostname>] [--hostport <hostport>] [--g
 * Updates to the flask front end.
 * Updates to the OpenStreetMap option.
 
+### 0.13
+* Bug fixes.
+
 ## Tech
 This software uses several other source projects to work properly:
 
