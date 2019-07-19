@@ -10,6 +10,7 @@ import Keys
 import MapSearch
 import StraenDb
 import Summarizer
+import TrainingPaceCalculator
 
 SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
 FOUR_WEEKS = (14.0 * 24.0 * 60.0 * 60.0)
@@ -140,7 +141,7 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
-            raise Exception("No importer.")
+            raise Exception("No activity ID.")
         return self.database.create_locations(device_str, activity_id, locations)
 
     def create_sensor_reading(self, activity_id, date_time, sensor_type, value):
@@ -148,7 +149,7 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
-            raise Exception("No importer.")
+            raise Exception("No activity ID.")
         return self.database.create_sensor_reading(activity_id, date_time, sensor_type, value)
 
     def create_sensor_readings(self, activity_id, sensor_type, values):
@@ -156,7 +157,7 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
-            raise Exception("No importer.")
+            raise Exception("No activity ID.")
         return self.database.create_sensor_readings(activity_id, sensor_type, values)
 
     def create_metadata(self, activity_id, date_time, key, value, create_list):
@@ -164,7 +165,7 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
-            raise Exception("No importer.")
+            raise Exception("No activity ID.")
         return self.database.create_metadata(activity_id, date_time, key, value, create_list)
 
     def create_metadata_list(self, activity_id, key, values):
@@ -172,7 +173,7 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
-            raise Exception("No importer.")
+            raise Exception("No activity ID.")
         return self.database.create_metadata_list(activity_id, key, values)
 
     def create_sets_and_reps_data(self, activity_id, sets):
@@ -180,7 +181,7 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
-            raise Exception("No importer.")
+            raise Exception("No activity ID.")
         return self.database.create_sets_and_reps_data(activity_id, sets)
 
     def create_accelerometer_reading(self, device_str, activity_id, accels):
@@ -188,7 +189,7 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
-            raise Exception("No importer.")
+            raise Exception("No activity ID.")
         return self.database.create_accelerometer_reading(device_str, activity_id, accels)
 
     def finish_activity(self, activity_id, end_time):
@@ -196,7 +197,7 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
-            raise Exception("No importer.")
+            raise Exception("No activity ID.")
         return self.database.create_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
 
     def import_file(self, username, user_id, local_file_name, uploaded_file_name):
@@ -204,13 +205,13 @@ class DataMgr(Importer.ActivityWriter):
         if self.import_scheduler is None:
             raise Exception("No importer.")
         if username is None:
-            raise Exception("No importer.")
+            raise Exception("No username.")
         if user_id is None:
-            raise Exception("No importer.")
+            raise Exception("No user ID.")
         if local_file_name is None:
-            raise Exception("No importer.")
+            raise Exception("No local file name.")
         if uploaded_file_name is None:
-            raise Exception("No importer.")
+            raise Exception("No uploaded file name.")
         self.import_scheduler.add_to_queue(username, user_id, local_file_name, uploaded_file_name)
 
     def update_activity_start_time(self, activity):
@@ -724,6 +725,15 @@ class DataMgr(Importer.ActivityWriter):
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
         running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
         return cycling_bests, running_bests
+
+    def compute_run_training_paces(self, user_id, running_bests):
+        run_paces = []
+        calc = TrainingPaceCalculator.TrainingPaceCalculator()
+        if Keys.BEST_5K in running_bests:
+            best_time = running_bests[Keys.BEST_5K]
+            best_time_secs = best_time[0] / 60
+            run_paces = calc.calc_from_race_distance_in_meters(5000, best_time_secs)
+        return run_paces
 
     def compute_power_zone_distribution(self, ftp, powers):
         """Takes the list of power readings and determines how many belong in each power zone, based on the user's FTP."""

@@ -3,17 +3,24 @@
 
 from __future__ import absolute_import
 from CeleryWorker import celery_worker
+import argparse
 import celery
 import json
 import logging
 import os
+import numpy as np
+import pandas
 import sys
+import tensorflow as tf
 import time
 import traceback
 import AnalysisScheduler
 import DataMgr
 import UserMgr
 import Keys
+
+g_model = None
+
 
 class WorkoutPlanGenerator(object):
     """Class for performing the computationally expensive workout plan generation tasks."""
@@ -80,15 +87,15 @@ class WorkoutPlanGenerator(object):
         inputs = [ tempo_pace, longest_run, age_years, 0, goal, weeks_until_goal ]
         return inputs
 
-    def generate_outputs(self, user_id, inputs):
-        """Runs the neural network."""
+    def generate_outputs(self, user_id, inputs, model):
+        """Runs the neural network specified by 'model' to generate the workout plan."""
         return []
 
     def organize_schedule(self, user_id, plan):
-        """Arranges the user's workouts into days/weeks, etc."""
+        """Arranges the user's workouts into days/weeks, etc. To be called after the outputs are generated, but need cleaning up."""
         pass
 
-    def generate_plan(self):
+    def generate_plan(self, model):
         """Entry point for workout plan generation."""
 
         # Sanity check.
@@ -99,24 +106,91 @@ class WorkoutPlanGenerator(object):
         try:
             user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID]
             inputs = self.calculate_inputs(user_id)
-            outputs = self.generate_outputs(user_id, inputs)
+            outputs = self.generate_outputs(user_id, inputs, model)
             self.organize_schedule(user_id, outputs)
         except:
             self.log_error("Exception when generating a workout plan.")
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
 
+def generate_model(training_file_name):
+    """Creates the neural network, based on training data from the supplied JSON file."""
+
+    model = None
+
+    with open(training_file_name, 'r') as f:
+
+        # Load the training data from the file.
+        datastore = json.load(f)
+
+        # This should give us an array for each piece of training data.
+        input_headers = datastore['input_headers']
+        input_data = datastore['input_data']
+        output_data = datastore['output_data']
+        num_inputs = len(input_data)
+        num_outputs = len(output_data)
+        if num_inputs > 0 and num_outputs > 0:
+
+            # Incorporate the column names for the input data.
+            input_columns = []
+            input_columns.append(tf.feature_column.numeric_column('metrics'))
+
+            # Transform the input JSON into something we can use in the model.
+            dataframe = pandas.DataFrame(input_data)
+            train_labels = dataframe.pop('plan_number')
+            print("Number of training samples: " + str(len(dataframe)))
+            dataset = tf.data.Dataset.from_tensor_slices((dict(dataframe), train_labels))
+            dataset = dataset.shuffle(buffer_size=len(dataframe))
+
+            # Build the model.
+            model = tf.keras.Sequential([
+                tf.keras.layers.DenseFeatures(input_columns),
+                tf.keras.layers.Dense(128, activation='relu'),
+                tf.keras.layers.Dense(128, activation='relu'),
+                tf.keras.layers.Dense(1, activation='sigmoid')
+            ])
+
+            model.compile(optimizer='adam', loss='binary_crossentropy')
+            model.fit(dataset, epochs=5)
+
+        else:
+            print("Incomplete training data.")
+
+    return model
+
 @celery_worker.task()
 def generate_workout_plan(user_str):
+    """Entry point for the celery worker."""
+    global g_model
+
     print("Starting workout plan generation...")
     user_obj = json.loads(user_str)
     generator = WorkoutPlanGenerator(user_obj)
-    generator.generate_plan()
+    generator.generate_plan(g_model)
     print("Workout plan generation finished")
 
 def main():
     """Entry point for a workout plan generator."""
-    pass
+    global g_model
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--user_id", default="", help="The user ID for whom we are to generate a workout plan.", required=False)
+    parser.add_argument("--train", default="", help="The path to the training plan.", required=False)
+
+    try:
+        args = parser.parse_args()
+    except IOError as e:
+        parser.error(e)
+        sys.exit(1)
+
+    if len(args.train) > 0:
+       g_model = generate_model(args.train)        
+
+    if len(args.user_id) > 0:
+        data = {}
+        data['user_id'] = args.user_id
+        generate_workout_plan(json.dumps(data))
+
 
 if __name__ == "__main__":
     main()

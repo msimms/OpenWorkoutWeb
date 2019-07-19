@@ -1,4 +1,26 @@
-# Copyright 2017 Michael J Simms
+# -*- coding: utf-8 -*-
+# 
+# # MIT License
+# 
+# Copyright (c) 2019 Mike Simms
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 """Key strings for all key/value pairs used in the app"""
 
 # Keys associated with user management.
@@ -129,9 +151,17 @@ AVG_HEART_RATE = "Average Heart Rate"
 AVG_CADENCE = "Average Cadence"
 NORMALIZED_POWER = "Normalized Power"
 THRESHOLD_POWER = "Threshold Power"
+INTENSITY_FACTOR = "Intensity Factor"
+VARIABILITY_INDEX = "Variability Index"
 CLUSTER = "Cluster"
 TOTAL_DISTANCE = "Total Distance"
 LONGEST_DISTANCE = "Longest Distance"
+
+# Running paces.
+LONG_RUN_PACE = "Long Run Pace"
+EASY_RUN_PACE = "Easy Run Pace"
+TEMPO_RUN_PACE = "Tempo Run Pace"
+SPEED_RUN_PACE = "Speed Run Pace"
 
 # Keys used to manage gear.
 GEAR_KEY = "gear"
@@ -169,6 +199,7 @@ GOAL_MARATHON_RUN_KEY = "Marathon"
 TIME_KEYS = [ BEST_1K, BEST_MILE, BEST_5K, BEST_10K, BEST_15K, BEST_HALF_MARATHON, BEST_MARATHON, BEST_METRIC_CENTURY, BEST_CENTURY ]
 DISTANCE_KEYS = [ TOTAL_DISTANCE, LONGEST_DISTANCE ]
 SPEED_KEYS = [ APP_CURRENT_SPEED_KEY, APP_AVG_SPEED_KEY, APP_MOVING_SPEED_KEY, APP_SPEED_VARIANCE_KEY, BEST_SPEED, APP_AVG_SPEED_KEY ]
+PACE_KEYS = [ LONG_RUN_PACE, EASY_RUN_PACE, TEMPO_RUN_PACE, SPEED_RUN_PACE ]
 POWER_KEYS = [ AVG_POWER, MAX_POWER, BEST_5_SEC_POWER, BEST_12_MIN_POWER, BEST_20_MIN_POWER, BEST_1_HOUR_POWER, NORMALIZED_POWER, THRESHOLD_POWER ]
 HEART_RATE_KEYS = [ AVG_HEART_RATE, MAX_HEART_RATE ]
 CADENCE_KEYS = [ AVG_CADENCE, MAX_CADENCE ]

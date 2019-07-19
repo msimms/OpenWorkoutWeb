@@ -96,13 +96,17 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
                     self.np_buf[idx] = item
 
                 # Average the values that were raised to the fourth.
-                np = statistics.mean(self.np_buf)
+                ap = statistics.mean(self.np_buf)
 
                 # Take the fourth root.
-                results[Keys.NORMALIZED_POWER] = pow(np, 0.25)
+                np = pow(ap, 0.25)
+                results[Keys.NORMALIZED_POWER] = np
+
+                # Compute the variability index (VI = NP / AP).
+                results[Keys.INTENSITY_FACTOR]  = np / ap
 
             #
-            # Compute the intensity factory (IF = NP / FTP).
+            # Compute the intensity factor (IF = NP / FTP).
             #
 
             # todo

@@ -644,12 +644,6 @@ class MongoDatabase(Database.Database):
         if not locations:
             self.log_error(MongoDatabase.update_activity.__name__ + ": Unexpected empty object: locations")
             return False
-        if not sensor_readings_dict:
-            self.log_error(MongoDatabase.update_activity.__name__ + ": Unexpected empty object: sensor_readings_dict")
-            return False
-        if not metadata_list_dict:
-            self.log_error(MongoDatabase.update_activity.__name__ + ": Unexpected empty object: metadata_list_dict")
-            return False
 
         try:
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
@@ -670,26 +664,28 @@ class MongoDatabase(Database.Database):
                 activity[Keys.ACTIVITY_LOCATIONS_KEY] = location_list
 
                 # Update the sensor readings.
-                for sensor_type in sensor_readings_dict:
-                    value_list = []
-                    if sensor_type in activity:
-                        value_list = activity[sensor_type]
-                    for value in sensor_readings_dict[sensor_type]:
-                        time_value_pair = {str(value[0]): float(value[1])}
-                        value_list.append(time_value_pair)
-                    value_list.sort(key=retrieve_time_from_time_value_pair)
-                    activity[sensor_type] = value_list
+                if sensor_readings_dict:
+                    for sensor_type in sensor_readings_dict:
+                        value_list = []
+                        if sensor_type in activity:
+                            value_list = activity[sensor_type]
+                        for value in sensor_readings_dict[sensor_type]:
+                            time_value_pair = {str(value[0]): float(value[1])}
+                            value_list.append(time_value_pair)
+                        value_list.sort(key=retrieve_time_from_time_value_pair)
+                        activity[sensor_type] = value_list
 
                 # Update the metadata readings.
-                for metadata_type in metadata_list_dict:
-                    value_list = []
-                    if metadata_type in activity:
-                        value_list = activity[metadata_type]
-                    for value in metadata_list_dict[metadata_type]:
-                        time_value_pair = {str(value[0]): float(value[1])}
-                        value_list.append(time_value_pair)
-                    value_list.sort(key=retrieve_time_from_time_value_pair)
-                    activity[metadata_type] = value_list
+                if metadata_list_dict:
+                    for metadata_type in metadata_list_dict:
+                        value_list = []
+                        if metadata_type in activity:
+                            value_list = activity[metadata_type]
+                        for value in metadata_list_dict[metadata_type]:
+                            time_value_pair = {str(value[0]): float(value[1])}
+                            value_list.append(time_value_pair)
+                        value_list.sort(key=retrieve_time_from_time_value_pair)
+                        activity[metadata_type] = value_list
 
                 # Write out the changes.
                 self.activities_collection.save(activity)

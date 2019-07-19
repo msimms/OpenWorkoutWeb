@@ -1,4 +1,26 @@
-# Copyright 2019 Michael J Simms
+# -*- coding: utf-8 -*-
+# 
+# # MIT License
+# 
+# Copyright (c) 2019 Mike Simms
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 """Estimates VO2Max."""
 
 class VO2MaxCalculator(object):
@@ -7,5 +29,9 @@ class VO2MaxCalculator(object):
     def __init__(self):
         super(VO2MaxCalculator, self).__init__()
 
-    def estimate_vo2max(self, max_hr, resting_hr):
+    def estimate_vo2max_from_heart_rate(self, max_hr, resting_hr):
         return 15.3 * (max_hr / resting_hr)
+
+    def estimate_vo2max_from_race_distance_in_meters(self, race_distance_meters, race_time_minutes):
+        speed = race_distance_meters / race_time_minutes
+        return -4.60 + 0.182258 * speed + 0.000104 * speed * speed

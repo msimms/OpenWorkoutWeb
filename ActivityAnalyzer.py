@@ -10,6 +10,7 @@ import os
 import sys
 import time
 import traceback
+import ActivityHasher
 import DataMgr
 import Keys
 import LocationAnalyzer
@@ -53,6 +54,12 @@ class ActivityAnalyzer(object):
                 activity_type = self.activity[Keys.ACTIVITY_TYPE_KEY]
             else:
                 activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+
+            # Hash the activity.
+            print("Hashing the activity...")
+            hasher = ActivityHasher.ActivityHasher(self.activity)
+            hash_str = hasher.hash()
+            print(hash_str)
 
             # Do the location analysis.
             print("Performing location analysis...")
