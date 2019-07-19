@@ -138,6 +138,7 @@ def generate_model(training_file_name):
             # Transform the input JSON into something we can use in the model.
             dataframe = pandas.DataFrame(input_data)
             train_labels = dataframe.pop('plan_number')
+            print("Number of training samples: " + str(len(dataframe)))
             dataset = tf.data.Dataset.from_tensor_slices((dict(dataframe), train_labels))
             dataset = dataset.shuffle(buffer_size=len(dataframe))
 
