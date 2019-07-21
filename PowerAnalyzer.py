@@ -90,20 +90,24 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 # Throw away the first 30 second average.
                 self.np_buf.pop(0)
 
+                # Needs this for the variability index calculation.
+                ap = statistics.mean(self.np_buf)
+
                 # Raise all items to the fourth power.
                 for idx, item in enumerate(self.np_buf):
                     item = pow(item, 4)
                     self.np_buf[idx] = item
 
                 # Average the values that were raised to the fourth.
-                ap = statistics.mean(self.np_buf)
+                ap2 = statistics.mean(self.np_buf)
 
                 # Take the fourth root.
-                np = pow(ap, 0.25)
+                np = pow(ap2, 0.25)
                 results[Keys.NORMALIZED_POWER] = np
 
                 # Compute the variability index (VI = NP / AP).
-                results[Keys.INTENSITY_FACTOR]  = np / ap
+                vi  = np / ap
+                results[Keys.VARIABILITY_INDEX] = vi
 
             #
             # Compute the intensity factor (IF = NP / FTP).
