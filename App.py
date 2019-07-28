@@ -530,9 +530,6 @@ class App(object):
             if Keys.NORMALIZED_POWER in summary_data:
                 normalized_power = summary_data[Keys.NORMALIZED_POWER]
                 summary += "\t<li>Normalized Power: {:.2f} ".format(normalized_power) + Units.get_power_units_str() + "</li>\n"
-            if Keys.VARIABILITY_INDEX in summary_data:
-                variability_index = summary_data[Keys.VARIABILITY_INDEX]
-                summary += "\t<li>Variability Index: {:.2f} ".format(variability_index) + "</li>\n"
 
         # Build the detailed analysis table.
         details_str = ""
