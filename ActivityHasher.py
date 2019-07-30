@@ -41,7 +41,7 @@ class ActivityHasher(object):
         sensor_types_to_analyze = SensorAnalyzerFactory.supported_sensor_types()
         for sensor_type in sensor_types_to_analyze:
             if sensor_type in self.activity:
-                h.update(sensor_type)
+                h.update(sensor_type.encode('utf-8'))
                 for datum in self.activity[sensor_type]:
                     time = str(datum.keys()[0]).encode('utf-8')
                     value = str(datum.values()[0]).encode('utf-8')
