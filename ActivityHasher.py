@@ -2,6 +2,7 @@
 """Computes the hash of an activity. Used to determine uniqueness."""
 
 import hashlib
+import sys
 import Keys
 import SensorAnalyzerFactory
 
@@ -43,8 +44,12 @@ class ActivityHasher(object):
             if sensor_type in self.activity:
                 h.update(sensor_type.encode('utf-8'))
                 for datum in self.activity[sensor_type]:
-                    time = str(datum.keys()[0]).encode('utf-8')
-                    value = str(datum.values()[0]).encode('utf-8')
+                    if sys.version_info[0] < 3:
+                        time = str(datum.keys()[0]).encode('utf-8')
+                        value = str(datum.values()[0]).encode('utf-8')
+                    else:
+                        time = str(list(datum.keys())[0]).encode('utf-8')
+                        value = str(list(datum.values())[0]).encode('utf-8')
                     h.update(time)
                     h.update(value)
 
