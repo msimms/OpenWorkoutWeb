@@ -31,10 +31,10 @@ class ActivityHasher(object):
                 latitude = location[Keys.LOCATION_LAT_KEY]
                 longitude = location[Keys.LOCATION_LON_KEY]
                 altitude = location[Keys.LOCATION_ALT_KEY]
-                h.update(str(date_time))
-                h.update(str(latitude))
-                h.update(str(longitude))
-                h.update(str(altitude))
+                h.update(str(date_time).encode('utf-8'))
+                h.update(str(latitude).encode('utf-8'))
+                h.update(str(longitude).encode('utf-8'))
+                h.update(str(altitude).encode('utf-8'))
 
         # Hash the sensor data.
         print("Hashing sensor data...")
@@ -43,8 +43,8 @@ class ActivityHasher(object):
             if sensor_type in self.activity:
                 h.update(sensor_type)
                 for datum in self.activity[sensor_type]:
-                    time = str(datum.keys()[0])
-                    value = str(datum.values()[0])
+                    time = str(datum.keys()[0]).encode('utf-8')
+                    value = str(datum.values()[0]).encode('utf-8')
                     h.update(time)
                     h.update(value)
 
