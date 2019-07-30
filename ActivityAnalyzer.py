@@ -60,6 +60,8 @@ class ActivityAnalyzer(object):
             hasher = ActivityHasher.ActivityHasher(self.activity)
             hash_str = hasher.hash()
             print(hash_str)
+            self.summary_data[Keys.ACTIVITY_HASH_KEY] = hash_str
+            self.should_yield()
 
             # Do the location analysis.
             print("Performing location analysis...")

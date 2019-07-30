@@ -22,7 +22,7 @@ class ActivityHasher(object):
         # We're going to hash the activity so we'll know if it's been modified.
         h = hashlib.sha512()
 
-        # Hash locations.
+        # Hash the locations.
         print("Hashing locations...")
         if Keys.ACTIVITY_LOCATIONS_KEY in self.activity:
             locations = self.activity[Keys.ACTIVITY_LOCATIONS_KEY]
@@ -36,7 +36,7 @@ class ActivityHasher(object):
                 h.update(str(longitude))
                 h.update(str(altitude))
 
-        # Do the sensor analysis.
+        # Hash the sensor data.
         print("Hashing sensor data...")
         sensor_types_to_analyze = SensorAnalyzerFactory.supported_sensor_types()
         for sensor_type in sensor_types_to_analyze:
