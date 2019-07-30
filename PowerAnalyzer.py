@@ -4,6 +4,7 @@ import inspect
 import os
 import sys
 
+import DataMgr
 import FtpCalculator
 import Keys
 import SensorAnalyzer
@@ -18,11 +19,13 @@ import statistics
 class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on power data."""
 
-    def __init__(self, activity_type):
+    def __init__(self, activity_type, activity_user_id, data_mgr):
         SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_POWER_KEY, Units.get_power_units_str(), activity_type)
+        self.data_mgr = data_mgr
         self.np_buf = []
         self.current_30_sec_buf = []
         self.current_30_sec_buf_start_time = 0
+        self.activity_user_id = activity_user_id
 
     def do_power_record_check(self, record_name, watts):
         """Looks up the existing record and, if necessary, updates it."""
@@ -109,11 +112,12 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 vi  = np / ap
                 results[Keys.VARIABILITY_INDEX] = vi
 
-            #
-            # Compute the intensity factor (IF = NP / FTP).
-            #
-
-            # todo
+                # Compute the intensity factor (IF = NP / FTP).
+                if self.activity_user_id and self.data_mgr:
+                    ftp = self.data_mgr.retrieve_user_estimated_ftp(self.activity_user_id)
+                    if ftp is not None:
+                        intfac = np / ftp[0]
+                        results[Keys.INTENSITY_FACTOR] = intfac
 
             #
             # Compute the threshold power from this workout. Maybe we have a new estimated FTP?

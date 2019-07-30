@@ -32,7 +32,7 @@ import PowerAnalyzer
 def supported_sensor_types():
     return [Keys.APP_ACCELEROMETER_KEY, Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]
 
-def create(sensor_type, activity_type):
+def create(sensor_type, activity_type, activity_user_id, data_mgr):
     """Creates a sensor analyzer object of the specified type."""
     sensor_analyzer = None
     if sensor_type == Keys.APP_ACCELEROMETER_KEY:
@@ -42,19 +42,20 @@ def create(sensor_type, activity_type):
     elif sensor_type == Keys.APP_HEART_RATE_KEY:
         sensor_analyzer = HeartRateAnalyzer.HeartRateAnalyzer(activity_type)
     elif sensor_type == Keys.APP_POWER_KEY:
-        sensor_analyzer = PowerAnalyzer.PowerAnalyzer(activity_type)
+        sensor_analyzer = PowerAnalyzer.PowerAnalyzer(activity_type, activity_user_id, data_mgr)
     return sensor_analyzer
 
-def create_with_data(sensor_type, data, activity_type):
+def create_with_data(sensor_type, data, activity_type, activity_user_id, data_mgr):
     """Creates a sensor analyzer object of the specified type and loads it with the given data."""
-    sensor_analyzer = create(sensor_type, activity_type)
+    sensor_analyzer = create(sensor_type, activity_type, activity_user_id, data_mgr)
     if sensor_analyzer is not None:
         if sensor_type == Keys.APP_ACCELEROMETER_KEY:
             for datum in data:
                 sensor_analyzer.append_sensor_value_from_dict(datum)
         else:
+            py_version = sys.version_info[0]
             for datum in data:
-                if sys.version_info[0] < 3:
+                if py_version < 3:
                     time = int(datum.keys()[0])
                     value = int(datum.values()[0])
                 else:
