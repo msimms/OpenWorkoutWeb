@@ -56,11 +56,8 @@ class DataMgr(Importer.ActivityWriter):
         """Schedules the specified activity for analysis."""
         self.analysis_scheduler.add_to_queue(activity, activity_user_id)
 
-    def compute_and_store_end_time(self, activity):
-        """Examines the activity and computes the time at which the activity ended, storing it so we don't have to do this again."""
-        if self.database is None:
-            raise Exception("No database.")
-
+    def compute_end_time(self, activity):
+        """Examines the activity and computes the time at which the activity ended."""
         end_time = None
 
         # Look through activity attributes that have a "time".
@@ -74,6 +71,15 @@ class DataMgr(Importer.ActivityWriter):
                     possible_end_time = last_entry["time"]
                     if end_time is None or possible_end_time > end_time:
                         end_time = possible_end_time
+
+        return end_time
+
+    def compute_and_store_end_time(self, activity):
+        """Examines the activity and computes the time at which the activity ended, storing it so we don't have to do this again."""
+        if self.database is None:
+            raise Exception("No database.")
+
+        end_time = self.compute_end_time(activity)
 
         # If we couldn't find anything with a time then just duplicate the start time, assuming it's a manually entered workout or something.
         if end_time is None:

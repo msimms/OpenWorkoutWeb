@@ -10,6 +10,7 @@ import markdown
 import os
 import sys
 import threading
+import time
 import timeit
 import traceback
 
@@ -685,6 +686,15 @@ class App(object):
 
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
+
+        # Is the activity still live? After one day, the activity is no longer considered live.
+        end_time = self.data_mgr.compute_end_time(activity) / 1000
+        now = time.time()
+        diff = now - end_time
+        diff_hours = diff / 60 / 60
+        diff_days = diff_hours / 24
+        if diff_days >= 1.0:
+            return self.error("The user has not posted any data in over 24 hours.")
 
         # Determine if the current user can view the activity.
         if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
