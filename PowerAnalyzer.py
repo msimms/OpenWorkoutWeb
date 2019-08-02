@@ -112,12 +112,18 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 vi  = np / ap
                 results[Keys.VARIABILITY_INDEX] = vi
 
-                # Compute the intensity factor (IF = NP / FTP).
+                # Additional calculations if we have the user's FTP.
                 if self.activity_user_id and self.data_mgr:
                     ftp = self.data_mgr.retrieve_user_estimated_ftp(self.activity_user_id)
                     if ftp is not None:
+                        # Compute the intensity factor (IF = NP / FTP).
                         intfac = np / ftp[0]
                         results[Keys.INTENSITY_FACTOR] = intfac
+
+                        # Compute the training stress score (TSS = (t * NP * IF) / (FTP * 36)).
+                        t = (self.end_time - self.start_time) / 1000.0
+                        tss = (t * np * intfac) / (ftp[0] * 36)
+                        results[Keys.TSS] = tss
 
             #
             # Compute the threshold power from this workout. Maybe we have a new estimated FTP?
