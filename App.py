@@ -13,6 +13,9 @@ import threading
 import time
 import timeit
 import traceback
+import cProfile
+import StringIO
+import pstats
 
 import Keys
 import LocationAnalyzer
@@ -79,7 +82,7 @@ class RedirectException(Exception):
 class App(object):
     """Class containing the URL handlers."""
 
-    def __init__(self, user_mgr, data_mgr, root_dir, root_url, google_maps_key):
+    def __init__(self, user_mgr, data_mgr, root_dir, root_url, google_maps_key, enable_profiling):
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
         self.root_dir = root_dir
@@ -97,6 +100,13 @@ class App(object):
         if not os.path.exists(self.tempfile_dir):
             os.makedirs(self.tempfile_dir)
 
+        if enable_profiling:
+            print("Start profiling...")
+            self.pr = cProfile.Profile()
+            self.pr.enable()
+        else:
+            self.pr = None
+
         super(App, self).__init__()
 
     def terminate(self):
@@ -108,6 +118,14 @@ class App(object):
         print("Terminating session management...")
         self.user_mgr.terminate()
         self.user_mgr = None
+        if self.pr is not None:
+            print("Stop profiling...")
+            self.pr.disable()
+            s = StringIO.StringIO()
+            sortby = 'cumulative'
+            ps = pstats.Stats(self.pr, stream=s).sort_stats(sortby)
+            ps.print_stats()
+            print(s.getvalue())
 
     def log_error(self, log_str):
         """Writes an error message to the log file."""

@@ -501,6 +501,7 @@ def main():
     # Parse command line options.
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background.", required=False)
+    parser.add_argument("--profile", action="store_true", default=False, help="Enables application profiling.", required=False)
     parser.add_argument("--host", default="", help="Host name on which users will access this website.", required=False)
     parser.add_argument("--hostport", type=int, default=0, help="Port on which users will access this website.", required=False)
     parser.add_argument("--bind", default="127.0.0.1", help="Host name on which to bind.", required=False)
@@ -550,7 +551,7 @@ def main():
     session_mgr = SessionMgr.CherryPySessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, root_dir)
     data_mgr = DataMgr.DataMgr(root_url, root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
-    backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey)
+    backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey, args.profile)
     g_app = StraenWeb(backend)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')

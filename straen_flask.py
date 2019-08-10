@@ -465,6 +465,7 @@ def main():
     # Parse command line options.
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background.", required=False)
+    parser.add_argument("--profile", action="store_true", default=False, help="Enables application profiling.", required=False)
     parser.add_argument("--host", default="", help="Host name on which users will access this website.", required=False)
     parser.add_argument("--hostport", type=int, default=5000, help="Port on which users will access this website.", required=False)
     parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS.", required=False)
@@ -500,7 +501,7 @@ def main():
     session_mgr = SessionMgr.FlaskSessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, g_root_dir)
     data_mgr = DataMgr.DataMgr(root_url, g_root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
-    g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, args.googlemapskey)
+    g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, args.googlemapskey, args.profile)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
