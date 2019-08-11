@@ -457,9 +457,12 @@ class StraenWeb(object):
             if cherrypy.request.method == "GET":
                 params = kw
             else:
-                cl = cherrypy.request.headers['Content-Length']
-                params = cherrypy.request.body.read(int(cl))
-                params = json.loads(params)
+                cl = int(cherrypy.request.headers['Content-Length'])
+                if cl > 0:
+                    params = cherrypy.request.body.read(cl)
+                    params = json.loads(params)
+                else:
+                    params = []
 
             # Process the API request.
             if len(args) > 0:
