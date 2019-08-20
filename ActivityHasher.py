@@ -50,10 +50,10 @@ class ActivityHasher(object):
                 print("Hashing " + sensor_type + " data...")
                 for datum in self.activity[sensor_type]:
                     if sys.version_info[0] < 3:
-                        time = str(int(datum.keys()[0]).encode('utf-8'))
+                        time = str(int(datum.keys()[0])).encode('utf-8')
                         value = self.floatToStr(datum.values()[0])
                     else:
-                        time = str(int(list(datum.keys())[0]).encode('utf-8'))
+                        time = str(int(list(datum.keys())[0])).encode('utf-8')
                         value = self.floatToStr(list(datum.values())[0])
 
                     h.update(time)
