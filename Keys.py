@@ -59,6 +59,7 @@ ESTIMATED_FTP_KEY = "estimated ftp"
 
 # Personal records
 RECORDS_USER_ID = "user_id"
+RECORD_NAME = "record_name"
 PERSONAL_RECORDS = "records"
 
 # Workout plans

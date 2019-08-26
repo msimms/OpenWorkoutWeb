@@ -213,6 +213,22 @@ class StraenWeb(object):
 
     @cherrypy.expose
     @require()
+    def all_records(self, activity_type, record_name):
+        """Renders the list of records for the specified user and record type."""
+        try:
+            return self.app.all_records(activity_type, record_name)
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.workouts.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
     def workouts(self, *args, **kw):
         """Renders the list of workouts the specified user is allowed to view."""
         try:

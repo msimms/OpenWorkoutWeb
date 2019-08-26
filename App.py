@@ -13,6 +13,7 @@ import threading
 import time
 import timeit
 import traceback
+import urllib
 import cProfile
 import StringIO
 import pstats
@@ -825,6 +826,27 @@ class App(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
+    def render_personal_record_simple(self, user_id, activity_type, record, record_name):
+        """Helper function that renders a single table row in the personal bests table."""
+        record_value = record[0]
+        activity_id = record[1]
+        record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+        out_str = "<td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
+        return out_str
+
+    def render_personal_record(self, user_id, activity_type, record, record_name):
+        """Helper function that renders a single table row in the personal bests table."""
+        record_value = record[0]
+        activity_id = record[1]
+        record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+        out_str = "<td>"
+        out_str += record_name
+        params = {}
+        params[Keys.ACTIVITY_TYPE_KEY] = activity_type
+        params[Keys.RECORD_NAME] = record_name
+        out_str += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><td><a href=\"" + self.root_url + "/all_records?" + urllib.urlencode(params) + "\">[...]</td><tr>\n"
+        return out_str
+
     def render_personal_records(self, user_id, cycling_bests, running_bests):
         """Helper function that renders the table rows used to show personal bests."""
         bests_str = ""
@@ -832,29 +854,40 @@ class App(object):
             bests_str += "<h3>Cycling Efforts</h3>\n"
             bests_str += "<table>\n"
             for record_name in cycling_bests:
-                record = cycling_bests[record_name]
-                record_value = record[0]
-                activity_id = record[1]
-                record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
-
-                bests_str += "<td>"
-                bests_str += record_name
-                bests_str += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
+                bests_str += self.render_personal_record(user_id, Keys.TYPE_CYCLING_KEY, cycling_bests[record_name], record_name)
             bests_str += "</table>\n"
         if running_bests is not None and len(running_bests) > 0:
             bests_str += "<h3>Running Efforts</h3>\n"
             bests_str += "<table>\n"
             for record_name in running_bests:
-                record = running_bests[record_name]
-                record_value = record[0]
-                activity_id = record[1]
-                record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
-
-                bests_str += "<td>"
-                bests_str += record_name
-                bests_str += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
+                bests_str += self.render_personal_record(user_id, Keys.TYPE_RUNNING_KEY, running_bests[record_name], record_name)
             bests_str += "</table>\n"
         return bests_str
+
+    @statistics
+    def all_records(self, activity_type, record_name):
+        """Renders the list of records for the specified user and record type."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        records_str = ""
+        records = self.data_mgr.compute_bests(user_id, activity_type, record_name)
+        for record in records:
+            records_str += self.render_personal_record_simple(user_id, activity_type, record, record_name)
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'records.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, record_name=record_name, records=records_str)
 
     @statistics
     def workouts(self):

@@ -732,6 +732,42 @@ class DataMgr(Importer.ActivityWriter):
         running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
         return cycling_bests, running_bests
 
+    def compute_bests(self, user_id, activity_type, key):
+        """Return a sorted list of all records for the given activity type and key."""
+        def compare(a, b):
+            if a[0] > b[0]:
+                return 1
+            elif a[0] == b[0]:
+                return 0
+            else:
+                return -1
+
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if activity_type is None:
+            raise Exception("Bad parameter.")
+        if key is None:
+            raise Exception("Bad parameter.")
+
+        bests = []
+        summarizer = Summarizer.Summarizer()
+
+        # Load cached summary data from all previous activities.
+        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, 0)
+        if all_activity_bests is not None:
+            for activity_id in all_activity_bests:
+                activity_bests = all_activity_bests[activity_id]
+                if (Keys.ACTIVITY_TYPE_KEY in activity_bests) and (activity_bests[Keys.ACTIVITY_TYPE_KEY] == activity_type) and (key in activity_bests):
+                    record = []
+                    record.append(activity_bests[key])
+                    record.append(activity_id)
+                    bests.append(record)
+
+        bests.sort(compare)
+        return bests
+
     def compute_run_training_paces(self, user_id, running_bests):
         run_paces = []
         calc = TrainingPaceCalculator.TrainingPaceCalculator()
