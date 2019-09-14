@@ -150,11 +150,22 @@ class StraenWeb(object):
     def live(self, device_str):
         """Renders the map page for the current activity from a single device."""
         try:
-            return self.app.live(device_str)
+            return self.app.live_device(device_str)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.live.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    def live_user(self, user_str):
+        """Renders the map page for the current activity from a specified user."""
+        try:
+            return self.app.live_user(user_str)
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.live_user.__name__)
         return self.error()
 
     @cherrypy.expose

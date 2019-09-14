@@ -456,11 +456,11 @@ class App(object):
             result += str(item)
         return result
 
-    def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
+    def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
 
         # Is the user logged in?
-        logged_in = logged_in_userid is not None
+        logged_in = logged_in_user_id is not None
 
         locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
         if locations is None or len(locations) == 0:
@@ -522,21 +522,21 @@ class App(object):
         summary += "\t<li>Name: " + name + "</li>\n"
 
         if location_analyzer.total_distance is not None:
-            value, value_units = Units.convert_to_preferred_distance_units(self.user_mgr, logged_in_userid, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
+            value, value_units = Units.convert_to_preferred_distance_units(self.user_mgr, logged_in_user_id, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
             summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
         if location_analyzer.avg_speed is not None:
-            value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_userid, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
+            value, value_distance_units, value_time_units = Units.convert_to_preferred_speed_units(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
             summary += "\t<li>Avg. Speed: {:.2f} ".format(value) + Units.get_speed_units_str(value_distance_units, value_time_units) + "</li>\n"
 
         # Add summary data that was computed out-of-band and cached.
         if summary_data is not None:
 
             if Keys.BEST_SPEED in summary_data:
-                summary += "\t<li>Max. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, summary_data[Keys.BEST_SPEED], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_SPEED) + "</li>\n"
+                summary += "\t<li>Max. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, summary_data[Keys.BEST_SPEED], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_SPEED) + "</li>\n"
             if Keys.BEST_1K in summary_data:
-                summary += "\t<li>Best KM: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, summary_data[Keys.BEST_1K], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_1K) + "</li>\n"
+                summary += "\t<li>Best KM: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, summary_data[Keys.BEST_1K], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_1K) + "</li>\n"
             if Keys.BEST_MILE in summary_data:
-                summary += "\t<li>Best Mile: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, summary_data[Keys.BEST_MILE], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_MILE) + "</li>\n"
+                summary += "\t<li>Best Mile: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, summary_data[Keys.BEST_MILE], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_MILE) + "</li>\n"
 
         if max_heart_rate > 1:
             summary += "\t<li>Max. Heart Rate: {:.2f} ".format(max_heart_rate) + Units.get_heart_rate_units_str() + "</li>\n"
@@ -561,7 +561,7 @@ class App(object):
                     details_str += key
                     details_str += "</b></td><td>"
                     value = summary_data[key]
-                    details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_userid, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
+                    details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
                     details_str += "</td><tr>"
         if len(details_str) == 0:
             details_str = "<td><b>No data</b></td><tr>"
@@ -601,17 +601,17 @@ class App(object):
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
             return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str, delete=delete_str)
 
-    def render_page_for_activity(self, activity, email, user_realname, activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, is_live):
+    def render_page_for_activity(self, activity, email, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
 
         try:
             if Keys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[Keys.ACTIVITY_LOCATIONS_KEY]) > 0:
-                return self.render_page_for_mapped_activity(email, user_realname, activity_id, activity, activity_user_id, logged_in_userid, belongs_to_current_user, is_live)
+                return self.render_page_for_mapped_activity(email, user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
             elif Keys.APP_ACCELEROMETER_KEY in activity or Keys.APP_SETS_KEY in activity:
-                return self.render_page_for_lifting_activity(email, user_realname, activity_id, activity, activity_user_id, logged_in_userid, belongs_to_current_user, is_live)
+                return self.render_page_for_lifting_activity(email, user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
             else:
                 my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
-                return my_template.render(nav=self.create_navbar(logged_in_userid is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
+                return my_template.render(nav=self.create_navbar(logged_in_user_id is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -684,27 +684,14 @@ class App(object):
         return ""
 
     @statistics
-    def live(self, device_str):
-        """Renders the map page for the current activity from a single device."""
+    def live_activity(self, activity, activity_user):
+        """Renders the map page for the specified (in progress) activity."""
 
         # Get the logged in user (if any).
-        logged_in_userid = None
+        logged_in_user_id = None
         logged_in_username = self.user_mgr.get_logged_in_user()
         if logged_in_username is not None:
-            logged_in_userid, _, _ = self.user_mgr.retrieve_user(logged_in_username)
-
-        # Determine the ID of the most recent activity logged from the specified device.
-        activity_id = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
-        if activity_id is None:
-            return self.error()
-
-        # Determine who owns the device.
-        device_user = self.user_mgr.retrieve_user_from_device(device_str)
-        activity_user_id = device_user[Keys.DATABASE_ID_KEY]
-        belongs_to_current_user = str(activity_user_id) == str(logged_in_userid)
-
-        # Load the activity.
-        activity = self.data_mgr.retrieve_activity(activity_id)
+            logged_in_user_id, _, _ = self.user_mgr.retrieve_user(logged_in_username)
 
         # Is the activity still live? After one day, the activity is no longer considered live.
         end_time = self.data_mgr.compute_end_time(activity) / 1000
@@ -716,21 +703,55 @@ class App(object):
             return self.error("The user has not posted any data in over 24 hours.")
 
         # Determine if the current user can view the activity.
+        activity_user_id = activity_user[Keys.DATABASE_ID_KEY]
+        belongs_to_current_user = str(activity_user_id) == str(logged_in_user_id)
         if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, True)
+        return self.render_page_for_activity(activity, activity_user[Keys.USERNAME_KEY], activity_user[Keys.REALNAME_KEY], activity_user_id, logged_in_user_id, belongs_to_current_user, True)
+
+    @statistics
+    def live_device(self, device_str):
+        """Renders the map page for the current activity from a single device."""
+
+        # Determine the ID of the most recent activity logged from the specified device.
+        activity = self.data_mgr.retrieve_most_recent_activity_for_device(device_str)
+        if activity is None:
+            return self.error()
+
+        # Determine who owns the device.
+        device_user = self.user_mgr.retrieve_user_from_device(device_str)
+
+        # Render the page.
+        return self.live_activity(activity, device_user)
+
+    @statistics
+    def live_user(self, user_str):
+        """Renders the map page for the current activity for a given user."""
+
+        # Look up the user.
+        user = self.user_mgr.retrieve_user_details(user_str)
+
+        # Find the user's most recent activity.
+        user_id = str(user[Keys.DATABASE_ID_KEY])
+        user_devices = self.user_mgr.retrieve_user_devices(user_id)
+        activity = self.data_mgr.retrieve_most_recent_activity_for_user(user_devices)
+        if activity is None:
+            return self.error()
+
+        # Render the page.
+        return self.live_activity(activity, user)
 
     @statistics
     def activity(self, activity_id):
         """Renders the map page for an activity."""
 
         # Get the logged in user (if any).
-        logged_in_userid = None
+        logged_in_user_id = None
         logged_in_username = self.user_mgr.get_logged_in_user()
         if logged_in_username is not None:
-            logged_in_userid, _, _ = self.user_mgr.retrieve_user(logged_in_username)
+            logged_in_user_id, _, _ = self.user_mgr.retrieve_user(logged_in_username)
 
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
@@ -739,7 +760,7 @@ class App(object):
 
         # Determine who owns the device, and hence the activity.
         activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
-        belongs_to_current_user = str(activity_user_id) == str(logged_in_userid)
+        belongs_to_current_user = str(activity_user_id) == str(logged_in_user_id)
         if activity_username is None:
             activity_username = ""
         if activity_user_realname is None:
@@ -750,17 +771,17 @@ class App(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, activity_username, activity_user_realname, activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, False)
+        return self.render_page_for_activity(activity, activity_username, activity_user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, False)
 
     @statistics
     def device(self, device_str):
         """Renders the map page for a single device."""
 
         # Get the logged in user (if any).
-        logged_in_userid = None
+        logged_in_user_id = None
         logged_in_username = self.user_mgr.get_logged_in_user()
         if logged_in_username is not None:
-            logged_in_userid, _, _ = self.user_mgr.retrieve_user(logged_in_username)
+            logged_in_user_id, _, _ = self.user_mgr.retrieve_user(logged_in_username)
 
         # Get the activity ID being requested. If one is not provided then get the latest activity for the device
         activity_id = cherrypy.request.params.get("activity_id")
@@ -772,7 +793,7 @@ class App(object):
         # Determine who owns the device.
         device_user = self.user_mgr.retrieve_user_from_device(device_str)
         activity_user_id = device_user[Keys.DATABASE_ID_KEY]
-        belongs_to_current_user = str(activity_user_id) == str(logged_in_userid)
+        belongs_to_current_user = str(activity_user_id) == str(logged_in_user_id)
 
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
@@ -784,7 +805,7 @@ class App(object):
             return self.error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_id, activity_user_id, logged_in_userid, belongs_to_current_user, False)
+        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_user_id, logged_in_user_id, belongs_to_current_user, False)
 
     @statistics
     def my_activities(self):

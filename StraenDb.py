@@ -104,6 +104,22 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def retrieve_user_details(self, username):
+        """Retrieve method for a user."""
+        if username is None:
+            self.log_error(MongoDatabase.retrieve_user_details.__name__ + ": Unexpected empty object: username")
+            return None
+        if len(username) == 0:
+            self.log_error(MongoDatabase.retrieve_user_details.__name__ + ": username is empty")
+            return None
+
+        try:
+            return self.users_collection.find_one({Keys.USERNAME_KEY: username})
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return None
+
     def retrieve_user(self, username):
         """Retrieve method for a user."""
         if username is None:

@@ -144,6 +144,17 @@ def live(device_str):
         g_app.log_error('Unhandled exception in ' + live.__name__)
     return g_app.error()
 
+@g_flask_app.route('/live_user')
+def live_user(user_str):
+    """Renders the map page for the current activity from a specified user."""
+    try:
+        return g_app.live_user(user_str)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + live_user.__name__)
+    return g_app.error()
+
 @g_flask_app.route('/activity')
 def activity(activity_id):
     """Renders the map page for an activity."""

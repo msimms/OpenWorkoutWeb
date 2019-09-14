@@ -433,6 +433,25 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_most_recent_activity_for_device(device_str)
 
+    def retrieve_most_recent_activity_for_user(self, user_devices):
+        """Returns the most recent activity id for the specified user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_devices is None:
+            raise Exception("Bad parameter.")
+
+        most_recent_activity = None
+        for device_str in user_devices:
+            device_activity = self.retrieve_most_recent_activity_for_device(device_str)
+            if most_recent_activity is None:
+                most_recent_activity = device_activity
+            elif Keys.ACTIVITY_TIME_KEY in device_activity and Keys.ACTIVITY_TIME_KEY in most_recent_activity:
+                curr_activity_time = device_activity[Keys.ACTIVITY_TIME_KEY]
+                prev_activity_time = most_recent_activity[Keys.ACTIVITY_TIME_KEY]
+                if curr_activity_time > prev_activity_time:
+                    most_recent_activity = device_activity
+        return most_recent_activity
+
     def create_activity_summary(self, activity_id, summary_data):
         """Create method for activity summary data. Summary data is data computed from the raw data."""
         if self.database is None:
