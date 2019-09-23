@@ -443,13 +443,14 @@ class DataMgr(Importer.ActivityWriter):
         most_recent_activity = None
         for device_str in user_devices:
             device_activity = self.retrieve_most_recent_activity_for_device(device_str)
-            if most_recent_activity is None:
-                most_recent_activity = device_activity
-            elif Keys.ACTIVITY_TIME_KEY in device_activity and Keys.ACTIVITY_TIME_KEY in most_recent_activity:
-                curr_activity_time = device_activity[Keys.ACTIVITY_TIME_KEY]
-                prev_activity_time = most_recent_activity[Keys.ACTIVITY_TIME_KEY]
-                if curr_activity_time > prev_activity_time:
+            if device_activity is not None:
+                if most_recent_activity is None:
                     most_recent_activity = device_activity
+                elif Keys.ACTIVITY_TIME_KEY in device_activity and Keys.ACTIVITY_TIME_KEY in most_recent_activity:
+                    curr_activity_time = device_activity[Keys.ACTIVITY_TIME_KEY]
+                    prev_activity_time = most_recent_activity[Keys.ACTIVITY_TIME_KEY]
+                    if curr_activity_time > prev_activity_time:
+                        most_recent_activity = device_activity
         return most_recent_activity
 
     def create_activity_summary(self, activity_id, summary_data):
