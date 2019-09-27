@@ -146,7 +146,7 @@ class MongoDatabase(Database.Database):
             return None, None
 
         try:
-            user_id_obj = ObjectId(user_id)
+            user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 return user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
@@ -175,7 +175,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            user_id_obj = ObjectId(user_id)
+            user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 user[Keys.USERNAME_KEY] = username
@@ -196,7 +196,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            user_id_obj = ObjectId(user_id)
+            user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.delete_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 return True
@@ -236,7 +236,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            user_id_obj = ObjectId(user_id)
+            user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             devices = []
             if user is not None:
@@ -258,7 +258,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            user_id_obj = ObjectId(user_id)
+            user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 if Keys.DEVICES_KEY in user:
@@ -301,7 +301,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            user_id_obj = ObjectId(user_id)
+            user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 if Keys.FOLLOWING_KEY in user:
@@ -344,7 +344,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            user_id_obj = ObjectId(user_id)
+            user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 user_list = []
@@ -373,7 +373,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            user_id_obj = ObjectId(user_id)
+            user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 user[key] = value
@@ -394,7 +394,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            user_id_obj = ObjectId(user_id)
+            user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 if key in user:
@@ -718,7 +718,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            activity_id_obj = ObjectId(object_id)
+            activity_id_obj = ObjectId(str(object_id))
             self.activities_collection.delete_one({Keys.DATABASE_ID_KEY: activity_id_obj})
             return True
         except:
@@ -1376,7 +1376,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            workout_id_obj = ObjectId(workout_id)
+            workout_id_obj = ObjectId(str(workout_id))
             workout = self.workouts_collection.delete_one({Keys.DATABASE_ID_KEY: workout_id_obj})
             if workout is not None:
                 return True
@@ -1398,7 +1398,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            user_id_obj = ObjectId(user_id)
+            user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 gear_list = []
@@ -1448,7 +1448,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            user_id_obj = ObjectId(user_id)
+            user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
                 gear_list = []
@@ -1473,7 +1473,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            gear_id_obj = ObjectId(gear_id)
+            gear_id_obj = ObjectId(str(gear_id))
             gear = self.gear_collection.find_one({Keys.DATABASE_ID_KEY: gear_id_obj})
             if gear is not None:
                 return True
@@ -1492,7 +1492,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            gear_id_obj = ObjectId(gear_id)
+            gear_id_obj = ObjectId(str(gear_id))
             gear = self.gear_collection.delete_one({Keys.DATABASE_ID_KEY: gear_id_obj})
             if gear is not None:
                 return True
