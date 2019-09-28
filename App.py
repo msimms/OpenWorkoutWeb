@@ -240,7 +240,7 @@ class App(object):
 
     def render_gear(self, activity_user_id, activity_type, activity, logged_in):
         """Helper function for building the gear string."""
-        if activity_type == Keys.TYPE_RUNNING_KEY or activity_type == Keys.TYPE_HIKING_KEY:
+        if activity_type in Keys.FOOT_BASED_ACTIVITIES:
             gear_type = Keys.GEAR_TYPE_SHOES
         elif activity_type == Keys.TYPE_CYCLING_KEY:
             gear_type = Keys.GEAR_TYPE_BIKE

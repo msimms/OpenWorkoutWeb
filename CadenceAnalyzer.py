@@ -14,7 +14,7 @@ class CadenceAnalyzer(SensorAnalyzer.SensorAnalyzer):
         """Called when all sensor readings have been processed."""
         results = SensorAnalyzer.SensorAnalyzer.analyze(self)
         if len(self.readings) > 0:
-            if self.activity_type == Keys.TYPE_RUNNING_KEY:
+            if self.activity_type in Keys.FOOT_BASED_ACTIVITIES:
                 results[Keys.MAX_CADENCE] = self.max * 2.0
                 results[Keys.AVG_CADENCE] = self.avg * 2.0
             else:
