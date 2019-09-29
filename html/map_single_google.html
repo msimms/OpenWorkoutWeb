@@ -116,33 +116,36 @@ ${nav}
 	{
 		if (response == null)
 			return;
-		if (response.length < 3)
-			return;
 
-		var objList = JSON.parse(response);
-		if (objList == null)
-			return;
+        contentString = '<div id="content">' +
+            '<div id="siteNotice">' +
+            '</div>' +
+            '<h2 id="firstHeading" class="firstHeading">Last Known Position</h2>' +
+            '<div id="bodyContent">' +
+            '<p>';
 
-		contentString = '<div id="content">' +
-			'<div id="siteNotice">' +
-			'</div>' +
-			'<h2 id="firstHeading" class="firstHeading">Last Known Position</h2>' +
-			'<div id="bodyContent">' +
-			'<p>';
-		for (var i = 0; i < objList.length; ++i)
-		{
-			if ((objList[i].name != "Name") && (objList[i].name != "Avg. Speed"))
-			{
-				contentString += objList[i].name;
-				contentString += " = ";
-				contentString += objList[i].value;
-				contentString += "<br>";
-			}
-		}
-		contentString +=
-			'</p>' +
-			'</div>' +
-			'</div>';
+		if (response.length >= 3)
+        {
+            var objList = JSON.parse(response);
+            if (objList == null)
+                return;
+
+            for (var i = 0; i < objList.length; ++i)
+            {
+                if ((objList[i].name != "Name") && (objList[i].name != "Avg. Speed"))
+                {
+                    contentString += objList[i].name;
+                    contentString += " = ";
+                    contentString += objList[i].value;
+                    contentString += "<br>";
+                }
+            }
+        }
+
+        contentString +=
+            '</p>' +
+            '</div>' +
+            '</div>';
 
 		if (infoWindow)
 		{
