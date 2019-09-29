@@ -214,7 +214,7 @@ def convert_to_preferred_speed_units(user_mgr, user_id, value, in_distance_units
 
 def convert_to_preferred_pace_units(user_mgr, user_id, value, in_distance_units, in_time_units):
     """Unit conversion for pace values. Converts to either metric or standard, depending on the user's preferences."""
-    out_time_units = UNITS_TIME_SECONDS
+    out_time_units = UNITS_TIME_MINUTES
     if user_id is not None:
         selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
         if selected_units == Keys.UNITS_METRIC_KEY:
@@ -314,11 +314,18 @@ def convert_seconds_to_hours_mins_secs(seconds_in):
     return out_str
 
 def convert_seconds_to_mins_secs(seconds_in):
-    """Converts seconds to HH:MM:SS format."""
+    """Converts seconds to MM:SS format."""
     temp_seconds = int(seconds_in)
     seconds = temp_seconds % 60
     minutes = temp_seconds / 60
     minutes = minutes % 60
+    out_str = "{:0>2d}:{:0>2d}".format(minutes, seconds)
+    return out_str
+
+def convert_minutes_to_mins_secs(minutes_in):
+    """Converts minutes to MM:SS format."""
+    minutes = int(minutes_in)
+    seconds = int((minutes_in - minutes) * 60)
     out_str = "{:0>2d}:{:0>2d}".format(minutes, seconds)
     return out_str
 
@@ -347,7 +354,7 @@ def convert_to_preferred_units_str(user_mgr, user_id, in_value, in_distance_unit
         out_value = "{:.2f} ".format(out_value) + get_speed_units_str(out_distance_units, out_time_units)
     elif label in Keys.PACE_KEYS:
         out_value, out_distance_units, out_time_units = convert_to_preferred_pace_units(user_mgr, user_id, in_value, in_distance_units, in_time_units)        
-        out_value = convert_seconds_to_mins_secs(out_value) + " " + get_pace_units_str(out_distance_units, out_time_units)
+        out_value = convert_minutes_to_mins_secs(out_value) + " " + get_pace_units_str(out_distance_units, out_time_units)
     elif label in Keys.HEART_RATE_KEYS:
         out_value = "{:.2f} ".format(in_value) + get_heart_rate_units_str()
     elif label in Keys.CADENCE_KEYS:
