@@ -337,7 +337,7 @@ class App(object):
         sets = None
         if Keys.APP_SETS_KEY in activity:
             sets = activity[Keys.APP_SETS_KEY]
-        elif Keys.APP_SETS_KEY in summary_data:
+        elif summary_data is not None and Keys.APP_SETS_KEY in summary_data:
             sets = summary_data[Keys.APP_SETS_KEY]
 
         # Build the details view.
