@@ -525,10 +525,11 @@ class App(object):
             value, value_units = Units.convert_to_preferred_distance_units(self.user_mgr, logged_in_user_id, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
             summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
         if location_analyzer.avg_speed is not None:
-            if activity_type in Keys.FOOT_BASED_ACTIVITIES:
-                summary += "\t<li>Avg. Pace: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
-            else:
-                summary += "\t<li>Avg. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
+            if location_analyzer.avg_speed > 0:
+                if activity_type in Keys.FOOT_BASED_ACTIVITIES:
+                    summary += "\t<li>Avg. Pace: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
+                else:
+                    summary += "\t<li>Avg. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
 
         # Add summary data that was computed out-of-band and cached.
         if summary_data is not None:
