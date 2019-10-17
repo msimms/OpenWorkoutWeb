@@ -144,6 +144,17 @@ def live(device_str):
         g_app.log_error('Unhandled exception in ' + live.__name__)
     return g_app.error()
 
+@g_flask_app.route('/live_user')
+def live_user(user_str):
+    """Renders the map page for the current activity from a specified user."""
+    try:
+        return g_app.live_user(user_str)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + live_user.__name__)
+    return g_app.error()
+
 @g_flask_app.route('/activity')
 def activity(activity_id):
     """Renders the map page for an activity."""
@@ -193,6 +204,20 @@ def all_activities():
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + all_activities.__name__)
     return g_app.error()
+
+@cherrypy.expose
+@require()
+def all_records(self, activity_type, record_name):
+    """Renders the list of records for the specified user and record type."""
+    try:
+        return g_app.all_records(activity_type, record_name)
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + all_records.__name__)
+    return self.error()
 
 @g_flask_app.route('/workouts')
 @login_requred
@@ -465,6 +490,7 @@ def main():
     # Parse command line options.
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background.", required=False)
+    parser.add_argument("--profile", action="store_true", default=False, help="Enables application profiling.", required=False)
     parser.add_argument("--host", default="", help="Host name on which users will access this website.", required=False)
     parser.add_argument("--hostport", type=int, default=5000, help="Port on which users will access this website.", required=False)
     parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS.", required=False)
@@ -500,7 +526,7 @@ def main():
     session_mgr = SessionMgr.FlaskSessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, g_root_dir)
     data_mgr = DataMgr.DataMgr(root_url, g_root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
-    g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, args.googlemapskey)
+    g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, args.googlemapskey, args.profile)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 

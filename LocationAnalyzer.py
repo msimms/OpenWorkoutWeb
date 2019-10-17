@@ -5,7 +5,9 @@ import itertools
 import os
 import sys
 import Keys
+import LocationHeatMap
 import SensorAnalyzer
+import SpeedHeatMap
 import Units
 
 # Locate and load the distance module as well as other LibMath modules.
@@ -43,6 +45,9 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
 
         self.avg_speed = None # Average speed (in meters/second)
         self.current_speed = None # Current speed (in meters/second)
+
+        self.location_heat_map = LocationHeatMap.LocationHeatMap()
+        self.speed_heat_map = SpeedHeatMap.SpeedHeatMap()
 
         # This refers to the number of seconds used when averaging samples together to
         # compute the current speed. The exact numbers were chosen based on experimentation.
@@ -92,6 +97,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                     break
                 self.speed_times.append(current_time)
                 self.speed_graph.append(self.current_speed)
+                self.speed_heat_map.append(self.current_speed)
 
             # Is this a new kilometer record for this activity?
             self.do_record_check(Keys.BEST_1K, total_seconds, total_meters, 1000)
@@ -156,6 +162,9 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             self.distance_buf.append([date_time, meters_traveled, self.total_distance])
             self.total_vertical = self.total_vertical + abs(altitude - self.last_alt)
             self.update_average_speed(date_time)
+
+        # Update the heat map.
+        self.location_heat_map.append(latitude, longitude)
 
         self.last_time = date_time
         self.last_lat = latitude

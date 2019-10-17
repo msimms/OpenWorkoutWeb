@@ -150,11 +150,22 @@ class StraenWeb(object):
     def live(self, device_str):
         """Renders the map page for the current activity from a single device."""
         try:
-            return self.app.live(device_str)
+            return self.app.live_device(device_str)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.live.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    def live_user(self, user_str):
+        """Renders the map page for the current activity from a specified user."""
+        try:
+            return self.app.live_user(user_str)
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.live_user.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -209,6 +220,22 @@ class StraenWeb(object):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.all_activities.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
+    def all_records(self, activity_type, record_name):
+        """Renders the list of records for the specified user and record type."""
+        try:
+            return self.app.all_records(activity_type, record_name)
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.workouts.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -457,9 +484,12 @@ class StraenWeb(object):
             if cherrypy.request.method == "GET":
                 params = kw
             else:
-                cl = cherrypy.request.headers['Content-Length']
-                params = cherrypy.request.body.read(int(cl))
-                params = json.loads(params)
+                cl = int(cherrypy.request.headers['Content-Length'])
+                if cl > 0:
+                    params = cherrypy.request.body.read(cl)
+                    params = json.loads(params)
+                else:
+                    params = []
 
             # Process the API request.
             if len(args) > 0:
@@ -501,6 +531,7 @@ def main():
     # Parse command line options.
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background.", required=False)
+    parser.add_argument("--profile", action="store_true", default=False, help="Enables application profiling.", required=False)
     parser.add_argument("--host", default="", help="Host name on which users will access this website.", required=False)
     parser.add_argument("--hostport", type=int, default=0, help="Port on which users will access this website.", required=False)
     parser.add_argument("--bind", default="127.0.0.1", help="Host name on which to bind.", required=False)
@@ -550,7 +581,7 @@ def main():
     session_mgr = SessionMgr.CherryPySessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, root_dir)
     data_mgr = DataMgr.DataMgr(root_url, root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
-    backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey)
+    backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey, args.profile)
     g_app = StraenWeb(backend)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')

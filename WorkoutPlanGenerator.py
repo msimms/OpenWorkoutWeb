@@ -102,6 +102,9 @@ class WorkoutPlanGenerator(object):
         if self.user_obj is None:
             self.log_error("User information not provided.")
             return
+        if model is None:
+            self.log_error("Model not provided.")
+            return
 
         try:
             user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID]
@@ -167,7 +170,7 @@ def generate_workout_plan(user_str):
     user_obj = json.loads(user_str)
     generator = WorkoutPlanGenerator(user_obj)
     generator.generate_plan(g_model)
-    print("Workout plan generation finished")
+    print("Workout plan generation finished.")
 
 def main():
     """Entry point for a workout plan generator."""

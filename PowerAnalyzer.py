@@ -4,6 +4,7 @@ import inspect
 import os
 import sys
 
+import DataMgr
 import FtpCalculator
 import Keys
 import SensorAnalyzer
@@ -18,11 +19,13 @@ import statistics
 class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on power data."""
 
-    def __init__(self, activity_type):
+    def __init__(self, activity_type, activity_user_id, data_mgr):
         SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_POWER_KEY, Units.get_power_units_str(), activity_type)
+        self.data_mgr = data_mgr
         self.np_buf = []
         self.current_30_sec_buf = []
         self.current_30_sec_buf_start_time = 0
+        self.activity_user_id = activity_user_id
 
     def do_power_record_check(self, record_name, watts):
         """Looks up the existing record and, if necessary, updates it."""
@@ -90,26 +93,37 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 # Throw away the first 30 second average.
                 self.np_buf.pop(0)
 
+                # Needs this for the variability index calculation.
+                ap = statistics.mean(self.np_buf)
+
                 # Raise all items to the fourth power.
                 for idx, item in enumerate(self.np_buf):
                     item = pow(item, 4)
                     self.np_buf[idx] = item
 
                 # Average the values that were raised to the fourth.
-                ap = statistics.mean(self.np_buf)
+                ap2 = statistics.mean(self.np_buf)
 
                 # Take the fourth root.
-                np = pow(ap, 0.25)
+                np = pow(ap2, 0.25)
                 results[Keys.NORMALIZED_POWER] = np
 
                 # Compute the variability index (VI = NP / AP).
-                results[Keys.INTENSITY_FACTOR]  = np / ap
+                vi  = np / ap
+                results[Keys.VARIABILITY_INDEX] = vi
 
-            #
-            # Compute the intensity factor (IF = NP / FTP).
-            #
+                # Additional calculations if we have the user's FTP.
+                if self.activity_user_id and self.data_mgr:
+                    ftp = self.data_mgr.retrieve_user_estimated_ftp(self.activity_user_id)
+                    if ftp is not None:
+                        # Compute the intensity factor (IF = NP / FTP).
+                        intfac = np / ftp[0]
+                        results[Keys.INTENSITY_FACTOR] = intfac
 
-            # todo
+                        # Compute the training stress score (TSS = (t * NP * IF) / (FTP * 36)).
+                        t = (self.end_time - self.start_time) / 1000.0
+                        tss = (t * np * intfac) / (ftp[0] * 36)
+                        results[Keys.TSS] = tss
 
             #
             # Compute the threshold power from this workout. Maybe we have a new estimated FTP?

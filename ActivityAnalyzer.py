@@ -55,11 +55,17 @@ class ActivityAnalyzer(object):
             else:
                 activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
 
+            # Determine the activity user.
+            activity_user_id = None
+            if Keys.ACTIVITY_USER_ID_KEY in self.activity:
+                activity_user_id = str(self.activity[Keys.ACTIVITY_USER_ID_KEY])
+
             # Hash the activity.
             print("Hashing the activity...")
             hasher = ActivityHasher.ActivityHasher(self.activity)
             hash_str = hasher.hash()
-            print(hash_str)
+            self.summary_data[Keys.ACTIVITY_HASH_KEY] = hash_str
+            self.should_yield()
 
             # Do the location analysis.
             print("Performing location analysis...")
@@ -82,7 +88,7 @@ class ActivityAnalyzer(object):
             sensor_types_to_analyze = SensorAnalyzerFactory.supported_sensor_types()
             for sensor_type in sensor_types_to_analyze:
                 if sensor_type in self.activity:
-                    sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type], activity_type)
+                    sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type], activity_type, activity_user_id, self.data_mgr)
                     self.summary_data.update(sensor_analyzer.analyze())
                     self.should_yield()
             self.should_yield()
@@ -105,10 +111,9 @@ class ActivityAnalyzer(object):
 
             # Update personal bests
             print("Updating personal bests...")
-            if Keys.ACTIVITY_USER_ID_KEY in self.activity and Keys.ACTIVITY_TIME_KEY in self.activity:
-                user_id = str(self.activity[Keys.ACTIVITY_USER_ID_KEY])
+            if activity_user_id and Keys.ACTIVITY_TIME_KEY in self.activity:
                 activity_time = self.activity[Keys.ACTIVITY_TIME_KEY]
-                if not self.data_mgr.insert_bests_from_activity(user_id, activity_id, activity_type, activity_time, self.summary_data):
+                if not self.data_mgr.insert_bests_from_activity(activity_user_id, activity_id, activity_type, activity_time, self.summary_data):
                     self.log_error("Error returned when updating personal records.")
             else:
                 self.log_error("User ID or activity time not provided. Cannot update personal records.")

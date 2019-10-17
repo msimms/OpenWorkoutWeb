@@ -56,11 +56,8 @@ class DataMgr(Importer.ActivityWriter):
         """Schedules the specified activity for analysis."""
         self.analysis_scheduler.add_to_queue(activity, activity_user_id)
 
-    def compute_and_store_end_time(self, activity):
-        """Examines the activity and computes the time at which the activity ended, storing it so we don't have to do this again."""
-        if self.database is None:
-            raise Exception("No database.")
-
+    def compute_end_time(self, activity):
+        """Examines the activity and computes the time at which the activity ended."""
         end_time = None
 
         # Look through activity attributes that have a "time".
@@ -74,6 +71,15 @@ class DataMgr(Importer.ActivityWriter):
                     possible_end_time = last_entry["time"]
                     if end_time is None or possible_end_time > end_time:
                         end_time = possible_end_time
+
+        return end_time
+
+    def compute_and_store_end_time(self, activity):
+        """Examines the activity and computes the time at which the activity ended, storing it so we don't have to do this again."""
+        if self.database is None:
+            raise Exception("No database.")
+
+        end_time = self.compute_end_time(activity)
 
         # If we couldn't find anything with a time then just duplicate the start time, assuming it's a manually entered workout or something.
         if end_time is None:
@@ -427,6 +433,26 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_most_recent_activity_for_device(device_str)
 
+    def retrieve_most_recent_activity_for_user(self, user_devices):
+        """Returns the most recent activity id for the specified user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_devices is None:
+            raise Exception("Bad parameter.")
+
+        most_recent_activity = None
+        for device_str in user_devices:
+            device_activity = self.retrieve_most_recent_activity_for_device(device_str)
+            if device_activity is not None:
+                if most_recent_activity is None:
+                    most_recent_activity = device_activity
+                elif Keys.ACTIVITY_TIME_KEY in device_activity and Keys.ACTIVITY_TIME_KEY in most_recent_activity:
+                    curr_activity_time = device_activity[Keys.ACTIVITY_TIME_KEY]
+                    prev_activity_time = most_recent_activity[Keys.ACTIVITY_TIME_KEY]
+                    if curr_activity_time > prev_activity_time:
+                        most_recent_activity = device_activity
+        return most_recent_activity
+
     def create_activity_summary(self, activity_id, summary_data):
         """Create method for activity summary data. Summary data is data computed from the raw data."""
         if self.database is None:
@@ -725,6 +751,42 @@ class DataMgr(Importer.ActivityWriter):
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
         running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
         return cycling_bests, running_bests
+
+    def compute_bests(self, user_id, activity_type, key):
+        """Return a sorted list of all records for the given activity type and key."""
+        def compare(a, b):
+            if a[0] > b[0]:
+                return 1
+            elif a[0] == b[0]:
+                return 0
+            else:
+                return -1
+
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if activity_type is None:
+            raise Exception("Bad parameter.")
+        if key is None:
+            raise Exception("Bad parameter.")
+
+        bests = []
+        summarizer = Summarizer.Summarizer()
+
+        # Load cached summary data from all previous activities.
+        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, 0)
+        if all_activity_bests is not None:
+            for activity_id in all_activity_bests:
+                activity_bests = all_activity_bests[activity_id]
+                if (Keys.ACTIVITY_TYPE_KEY in activity_bests) and (activity_bests[Keys.ACTIVITY_TYPE_KEY] == activity_type) and (key in activity_bests):
+                    record = []
+                    record.append(activity_bests[key])
+                    record.append(activity_id)
+                    bests.append(record)
+
+        bests.sort(compare)
+        return bests
 
     def compute_run_training_paces(self, user_id, running_bests):
         run_paces = []

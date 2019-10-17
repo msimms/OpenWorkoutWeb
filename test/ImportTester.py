@@ -76,7 +76,7 @@ class TestActivityWriter(Importer.ActivityWriter):
                 found = True
                 break
         if not found:
-            sensor_analyzer = SensorAnalyzerFactory.create(sensor_type, self.current_activity_type)
+            sensor_analyzer = SensorAnalyzerFactory.create(sensor_type, self.current_activity_type, None, None)
             if sensor_analyzer:
                 sensor_analyzer.append_sensor_value(date_time, value)
                 self.sensor_analyzers.append(sensor_analyzer)
