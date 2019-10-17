@@ -125,6 +125,9 @@ python start_flask.py [--debug] [--host <hostname>] [--hostport <hostport>] [--g
 ### 0.13
 * Bug fixes.
 
+### 0.14
+* Bug fixes.
+
 ## Tech
 This software uses several other source projects to work properly:
 
