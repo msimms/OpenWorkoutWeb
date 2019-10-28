@@ -52,6 +52,12 @@ python start_flask.py [--debug] [--host <hostname>] [--hostport <hostport>] [--g
 
 *If a Google Maps key is not provided, OpenStreetMap will be used instead.*
 
+## Architecture
+
+The software architecture makes it possible to use this system with different front-end technologies.
+
+![Architecture Diagram](https://github.com/msimms/StraenWeb/blob/master/docs/Architecture.png?raw=true)
+
 ## Version History
 
 ### 0.1
