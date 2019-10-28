@@ -1111,6 +1111,35 @@ class Api(object):
         location_description = self.data_mgr.get_location_description(activity_id)
         return True, str(location_description)
 
+    def handle_get_activity_id_from_hash(self, values):
+        """Given the activity ID, return sthe activity hash, or an error if not found. Only looks at the logged in user's acivities."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_HASH_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity hash not specified.")
+
+        activity_hash = values[Keys.ACTIVITY_HASH_KEY]
+        if not InputChecker.is_hex_str(activity_hash):
+            raise ApiException.ApiMalformedRequestException("Invalid activity hash.")
+        pass
+
+    def handle_get_activity_hash_from_id(self, values):
+        """Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's acivities."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+        
+        summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
+        if Keys.ACTIVITY_HASH_KEY not in summary:
+            raise ApiException.ApiMalformedRequestException("Hash not found.")
+
+        return True, str(summary_data[Keys.ACTIVITY_HASH_KEY])
+
     def handle_api_1_0_request(self, request, values):
         """Called to parse a version 1.0 API message."""
         if self.user_id is None:
@@ -1197,4 +1226,8 @@ class Api(object):
             return self.handle_generate_workout_plan(values)
         elif request == 'get_location_description':
             return self.handle_get_location_description(values)
+        elif request == 'activity_id_from_hash':
+            return self.handle_get_activity_id_from_hash(values)
+        elif request == 'activity_hash_from_id':
+            return self.handle_get_activity_hash_from_id(values)
         return False, ""
