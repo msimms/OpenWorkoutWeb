@@ -247,6 +247,20 @@ def gear():
         g_app.log_error('Unhandled exception in ' + gear.__name__)
     return g_app.error()
 
+@g_flask_app.route('/service_history')
+@login_requred
+def service_history(gear_id):
+    """Renders the service history for a particular piece of gear."""
+    try:
+        return g_app.service_history(gear_id)
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + service_history.__name__)
+    return g_app.error()
+
 @g_flask_app.route('/following')
 @login_requred
 def following():

@@ -628,7 +628,8 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if gear_description is None:
             raise Exception("Bad parameter.")
-        return self.database.create_gear(user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+        gear_id = uuid.uuid4()
+        return self.database.create_gear(user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
 
     def retrieve_gear_for_user(self, user_id):
         """Retrieve method for the gear with the specified ID."""
@@ -678,6 +679,21 @@ class DataMgr(Importer.ActivityWriter):
         if gear_id is None:
             raise Exception("Bad parameter.")
         return self.database.delete_gear(user_id, gear_id)
+
+    def create_service_record(self, user_id, gear_id, record_date, record_description):
+        """Create method for gear service records."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if gear_id is None:
+            raise Exception("Bad parameter.")
+        if record_date is None:
+            raise Exception("Bad parameter.")
+        if record_description is None:
+            raise Exception("Bad parameter.")
+        service_record_id = uuid.uuid4()
+        return self.database.create_service_record(user_id, gear_id, service_record_id, record_date, record_description)
 
     def retrieve_each_user_activity(self, context, user_id, cb=None):
         """Makes sure that summary data exists for all of the user's activities."""

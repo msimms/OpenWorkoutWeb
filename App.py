@@ -998,23 +998,25 @@ class App(object):
             if Keys.GEAR_TYPE_KEY in gear:
                 row_str = ""
                 if Keys.GEAR_NAME_KEY in gear:
-                    row_str += "<td>"
+                    row_str += "<td><a href=\"" + self.root_url + "/service_history/" + gear[Keys.GEAR_ID_KEY] + "\">"
                     row_str += gear[Keys.GEAR_NAME_KEY]
-                    row_str += "</td><td>"
+                    row_str += "</a></td><td>"
                     row_str += gear[Keys.GEAR_DESCRIPTION_KEY]
                     row_str += "</td><td>"
                     row_str += "<script>document.write(new Date(" + str(gear[Keys.GEAR_ADD_TIME_KEY]) + " * 1000))</script>"
+                    row_str += "<td>"
+                    row_str += "</td>"
                     row_str += "</td>"
                 row_str += "<tr>"
                 gear_type = gear[Keys.GEAR_TYPE_KEY]
                 if gear_type == Keys.GEAR_TYPE_BIKE:
                     if num_bikes == 0:
-                        bikes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><tr>"
+                        bikes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><td><b>Distance</b></td><tr>"
                     bikes += row_str
                     num_bikes = num_bikes + 1
                 elif gear_type == Keys.GEAR_TYPE_SHOES:
                     if num_shoes == 0:
-                        shoes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><tr>"
+                        shoes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><td><b>Distance</b></td><tr>"
                     shoes += row_str
                     num_shoes = num_shoes + 1
         bikes += "</table>"
@@ -1028,6 +1030,39 @@ class App(object):
         html_file = os.path.join(self.root_dir, HTML_DIR, 'gear.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bikes=bikes, shoes=shoes)
+
+    @statistics
+    def service_history(self, gear_id):
+        """Renders the service history for a particular piece of gear."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        service_records = "\t\t<table>"
+        gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
+        for gear in gear_list:
+            if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == gear_id:
+                if Keys.GEAR_SERVICE_HISTORY in gear:
+                    service_records += "\t\t\t<td>"
+                    for record in gear[Keys.GEAR_SERVICE_HISTORY]:
+                        service_records += record[Keys.SERVICE_RECORD_DESCRIPTION_KEY]
+                    service_records += "</td><tr>\n"
+                else:
+                    service_records += "none\n"
+        service_records += "\t\t\t</table>"
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'service_history.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, service_records=service_records, gear_id=gear_id)
 
     @statistics
     def following(self):

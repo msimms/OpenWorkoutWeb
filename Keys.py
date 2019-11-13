@@ -179,6 +179,12 @@ GEAR_RETIRE_TIME_KEY = "retire_time"
 GEAR_INITIAL_DISTANCE_KEY = "initial_distance"
 GEAR_TYPE_BIKE = "bike"
 GEAR_TYPE_SHOES = "shoes"
+GEAR_SERVICE_HISTORY = "service_history"
+
+# Service record keys.
+SERVICE_RECORD_ID_KEY = "service_id"
+SERVICE_RECORD_DATE_KEY = "date"
+SERVICE_RECORD_DESCRIPTION_KEY = "description"
 
 # Activity types
 TYPE_UNSPECIFIED_ACTIVITY = "Unknown"
