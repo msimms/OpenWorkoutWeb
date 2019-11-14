@@ -114,21 +114,24 @@
 
     function delete_service_record(service_id)
     {
-		var the_url = "${root_url}/api/1.0/delete_service_record";
-		var dict = [];
-		var result_text = {};
-
-		dict.push({["gear_id"] : "${gear_id}"});
-		dict.push({["service_id"] : service_id});
-
-		if (send_post_request(the_url, dict, result_text))
+		if (confirm('Are you sure you want to do this?'))
 		{
-			window.location.replace("${root_url}/service_history/${gear_id}");
-		}
-		else
-		{
-			alert(result_text.value);
-		}
+            var the_url = "${root_url}/api/1.0/delete_service_record";
+            var dict = [];
+            var result_text = {};
+
+            dict.push({["gear_id"] : "${gear_id}"});
+            dict.push({["service_id"] : service_id});
+
+            if (send_post_request(the_url, dict, result_text))
+            {
+                window.location.replace("${root_url}/service_history/${gear_id}");
+            }
+            else
+            {
+                alert(result_text.value);
+            }
+        }
     }
 
 </script>

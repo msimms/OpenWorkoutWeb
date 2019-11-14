@@ -1010,7 +1010,7 @@ class App(object):
                     row_str += "</td>"
                     row_str += "<td>"
                     row_str += "</td>"
-                    row_str += "<td><button type=\"button\" onclick=\"return delete_gear()\">Delete</button></td>"
+                    row_str += "<td><button type=\"button\" onclick=\"return delete_gear('" + str(gear[Keys.GEAR_ID_KEY]) + "')\">Delete</button></td>"
                 row_str += "<tr>"
                 gear_type = gear[Keys.GEAR_TYPE_KEY]
                 if gear_type == Keys.GEAR_TYPE_BIKE:

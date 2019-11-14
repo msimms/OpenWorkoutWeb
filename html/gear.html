@@ -139,8 +139,25 @@
         get_new_gear_info("shoes");
     }
 
-    function delete_gear()
+    function delete_gear(gear_id)
     {
+		if (confirm('Are you sure you want to do this?'))
+		{
+            var the_url = "${root_url}/api/1.0/delete_gear";
+            var dict = [];
+            var result_text = {};
+
+            dict.push({["gear_id"] : gear_id});
+
+            if (send_post_request(the_url, dict, result_text))
+            {
+                window.location.replace("${root_url}/gear");
+            }
+            else
+            {
+                alert(result_text.value);
+            }
+        }
     }
 
 </script>
