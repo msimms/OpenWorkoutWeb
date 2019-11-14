@@ -1010,7 +1010,7 @@ class App(object):
                     row_str += "</td>"
                     row_str += "<td>"
                     row_str += "</td>"
-                    row_str += "</td>"
+                    row_str += "<td><button type=\"button\" onclick=\"return delete_gear()\">Delete</button></td>"
                 row_str += "<tr>"
                 gear_type = gear[Keys.GEAR_TYPE_KEY]
                 if gear_type == Keys.GEAR_TYPE_BIKE:
@@ -1052,6 +1052,7 @@ class App(object):
 
         service_records = "\t\t<table>\n"
         gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
+        service_records += "\t\t\t<td><b>Date</b></td><td><b>Description</b></td><td></td><tr>\n"
         for gear in gear_list:
             if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == gear_id:
                 if Keys.GEAR_SERVICE_HISTORY in gear:
@@ -1059,6 +1060,7 @@ class App(object):
                         service_records += "\t\t\t<td>"
                         service_records += "<script>document.write(unix_time_to_local_string(" + str(record[Keys.SERVICE_RECORD_DATE_KEY]) + "))</script></td><td>"
                         service_records += record[Keys.SERVICE_RECORD_DESCRIPTION_KEY]
+                        service_records += "</td><td><button type=\"button\" onclick=\"return delete_service_record('" + str(record[Keys.SERVICE_RECORD_ID_KEY]) + "')\">Delete</button></td>"
                         service_records += "</td><tr>\n"
                 else:
                     service_records += "none\n"

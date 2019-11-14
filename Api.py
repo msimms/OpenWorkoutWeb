@@ -975,7 +975,16 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
         if Keys.SERVICE_RECORD_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        pass
+
+        gear_id = values[Keys.GEAR_ID_KEY]
+        if not InputChecker.is_uuid(gear_id):
+            raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
+        service_record_id = values[Keys.SERVICE_RECORD_ID_KEY]
+        if not InputChecker.is_uuid(service_record_id):
+            raise ApiException.ApiMalformedRequestException("Invalid service record ID.")
+
+        result = self.data_mgr.delete_service_record(self.user_id, gear_id, service_record_id)
+        return result, ""
 
     def handle_add_gear_to_activity(self, values):
         """Called when an API message to associate gear with an activity is received."""

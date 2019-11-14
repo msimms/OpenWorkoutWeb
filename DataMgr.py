@@ -695,6 +695,18 @@ class DataMgr(Importer.ActivityWriter):
         service_record_id = uuid.uuid4()
         return self.database.create_service_record(user_id, gear_id, service_record_id, record_date, record_description)
 
+    def delete_service_record(self, user_id, gear_id, service_record_id):
+        """Delete method for gear service records."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if gear_id is None:
+            raise Exception("Bad parameter.")
+        if service_record_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.delete_service_record(user_id, gear_id, service_record_id)
+
     def retrieve_each_user_activity(self, context, user_id, cb=None):
         """Makes sure that summary data exists for all of the user's activities."""
         if self.database is None:
