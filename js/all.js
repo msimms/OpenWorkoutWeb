@@ -3,7 +3,7 @@
 function unix_time_to_local_string(unix_time)
 {
 	var date = new Date(unix_time * 1000);
-	return date.toString();
+	return date.toLocaleString();
 }
 
 function unix_time_to_iso_time(unix_time)

@@ -1003,7 +1003,11 @@ class App(object):
                     row_str += "</a></td><td>"
                     row_str += gear[Keys.GEAR_DESCRIPTION_KEY]
                     row_str += "</td><td>"
-                    row_str += "<script>document.write(new Date(" + str(gear[Keys.GEAR_ADD_TIME_KEY]) + " * 1000))</script>"
+                    row_str += "<script>document.write(new Date(" + str(gear[Keys.GEAR_ADD_TIME_KEY]) + " * 1000).toLocaleDateString())</script>"
+                    row_str += "<td>"
+                    if Keys.GEAR_RETIRE_TIME_KEY in gear and gear[Keys.GEAR_RETIRE_TIME_KEY] > 0:
+                        row_str += "<script>document.write(new Date(" + str(gear[Keys.GEAR_RETIRE_TIME_KEY]) + " * 1000).toLocaleDateString())</script>"
+                    row_str += "</td>"
                     row_str += "<td>"
                     row_str += "</td>"
                     row_str += "</td>"
@@ -1011,12 +1015,12 @@ class App(object):
                 gear_type = gear[Keys.GEAR_TYPE_KEY]
                 if gear_type == Keys.GEAR_TYPE_BIKE:
                     if num_bikes == 0:
-                        bikes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><td><b>Distance</b></td><tr>"
+                        bikes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><td><b>Distance</b></td><tr>"
                     bikes += row_str
                     num_bikes = num_bikes + 1
                 elif gear_type == Keys.GEAR_TYPE_SHOES:
                     if num_shoes == 0:
-                        shoes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><td><b>Distance</b></td><tr>"
+                        shoes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><td><b>Date Retired</b><td><b>Distance</b></td><tr>"
                     shoes += row_str
                     num_shoes = num_shoes + 1
         bikes += "</table>"
@@ -1046,18 +1050,19 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        service_records = "\t\t<table>"
+        service_records = "\t\t<table>\n"
         gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
         for gear in gear_list:
             if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == gear_id:
                 if Keys.GEAR_SERVICE_HISTORY in gear:
-                    service_records += "\t\t\t<td>"
                     for record in gear[Keys.GEAR_SERVICE_HISTORY]:
+                        service_records += "\t\t\t<td>"
+                        service_records += "<script>document.write(unix_time_to_local_string(" + str(record[Keys.SERVICE_RECORD_DATE_KEY]) + "))</script></td><td>"
                         service_records += record[Keys.SERVICE_RECORD_DESCRIPTION_KEY]
-                    service_records += "</td><tr>\n"
+                        service_records += "</td><tr>\n"
                 else:
                     service_records += "none\n"
-        service_records += "\t\t\t</table>"
+        service_records += "\t\t</table>"
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'service_history.html')
