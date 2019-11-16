@@ -1003,10 +1003,10 @@ class App(object):
                     row_str += "</a></td><td>"
                     row_str += gear[Keys.GEAR_DESCRIPTION_KEY]
                     row_str += "</td><td>"
-                    row_str += "<script>document.write(new Date(" + str(gear[Keys.GEAR_ADD_TIME_KEY]) + " * 1000).toLocaleDateString())</script>"
+                    row_str += "<script>document.write(unix_time_to_local_date_string(" + str(gear[Keys.GEAR_ADD_TIME_KEY]) + "))</script>"
                     row_str += "<td>"
                     if Keys.GEAR_RETIRE_TIME_KEY in gear and gear[Keys.GEAR_RETIRE_TIME_KEY] > 0:
-                        row_str += "<script>document.write(new Date(" + str(gear[Keys.GEAR_RETIRE_TIME_KEY]) + " * 1000).toLocaleDateString())</script>"
+                        row_str += "<script>document.write(unix_time_to_local_date_string(" + str(gear[Keys.GEAR_RETIRE_TIME_KEY]) + " ))</script>"
                     row_str += "</td>"
                     row_str += "<td>"
                     row_str += "</td>"
@@ -1056,9 +1056,10 @@ class App(object):
         for gear in gear_list:
             if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == gear_id:
                 if Keys.GEAR_SERVICE_HISTORY in gear:
-                    for record in gear[Keys.GEAR_SERVICE_HISTORY]:
+                    sorted_history = sorted(gear[Keys.GEAR_SERVICE_HISTORY], key = lambda i: i[Keys.SERVICE_RECORD_DATE_KEY])
+                    for record in sorted_history:
                         service_records += "\t\t\t<td>"
-                        service_records += "<script>document.write(unix_time_to_local_string(" + str(record[Keys.SERVICE_RECORD_DATE_KEY]) + "))</script></td><td>"
+                        service_records += "<script>document.write(unix_time_to_local_date_string(" + str(record[Keys.SERVICE_RECORD_DATE_KEY]) + "))</script></td><td>"
                         service_records += record[Keys.SERVICE_RECORD_DESCRIPTION_KEY]
                         service_records += "</td><td><button type=\"button\" onclick=\"return delete_service_record('" + str(record[Keys.SERVICE_RECORD_ID_KEY]) + "')\">Delete</button></td>"
                         service_records += "</td><tr>\n"

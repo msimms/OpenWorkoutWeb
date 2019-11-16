@@ -1411,8 +1411,8 @@ class MongoDatabase(Database.Database):
                 new_gear[Keys.GEAR_TYPE_KEY] = gear_type
                 new_gear[Keys.GEAR_NAME_KEY] = gear_name
                 new_gear[Keys.GEAR_DESCRIPTION_KEY] = gear_description
-                new_gear[Keys.GEAR_ADD_TIME_KEY] = gear_add_time
-                new_gear[Keys.GEAR_RETIRE_TIME_KEY] = gear_retire_time
+                new_gear[Keys.GEAR_ADD_TIME_KEY] = int(gear_add_time)
+                new_gear[Keys.GEAR_RETIRE_TIME_KEY] = int(gear_retire_time)
                 gear_list.append(new_gear)
                 user[Keys.GEAR_KEY] = gear_list
                 self.users_collection.save(user)
@@ -1551,7 +1551,7 @@ class MongoDatabase(Database.Database):
                         if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
                             service_rec = {}
                             service_rec[Keys.SERVICE_RECORD_ID_KEY] = str(service_record_id)
-                            service_rec[Keys.SERVICE_RECORD_DATE_KEY] = record_date
+                            service_rec[Keys.SERVICE_RECORD_DATE_KEY] = int(record_date)
                             service_rec[Keys.SERVICE_RECORD_DESCRIPTION_KEY] = record_description
 
                             service_history = []
