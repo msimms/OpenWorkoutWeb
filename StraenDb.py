@@ -1485,9 +1485,20 @@ class MongoDatabase(Database.Database):
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
+                    gear_index = 0
                     for gear in gear_list:
                         if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
-                            print(gear)
+                            gear[Keys.GEAR_TYPE_KEY] = gear_type
+                            gear[Keys.GEAR_NAME_KEY] = gear_name
+                            gear[Keys.GEAR_DESCRIPTION_KEY] = gear_description
+                            gear[Keys.GEAR_ADD_TIME_KEY] = int(gear_add_time)
+                            gear[Keys.GEAR_RETIRE_TIME_KEY] = int(gear_retire_time)
+                            gear_list.pop(gear_index)
+                            gear_list.append(gear)
+                            user[Keys.GEAR_KEY] = gear_list
+                            self.users_collection.save(user)
+                            return True
+                        gear_index = gear_index + 1
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
