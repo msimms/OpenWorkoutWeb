@@ -1070,7 +1070,7 @@ class App(object):
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'service_history.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, service_records=service_records, gear_id=gear_id)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, gear_name=gear[Keys.GEAR_NAME_KEY], service_records=service_records, gear_id=gear_id)
 
     @statistics
     def following(self):
