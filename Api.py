@@ -779,6 +779,8 @@ class Api(object):
         tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
         if not InputChecker.is_valid(tag):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if len(tag) == 0:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         result = self.data_mgr.create_activity_tag(activity_id, tag)
         return result, ""

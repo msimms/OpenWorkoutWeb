@@ -259,6 +259,7 @@ class App(object):
 
         all_gear = self.data_mgr.retrieve_gear_of_specified_type_for_user(activity_user_id, gear_type)
         gear_str = ""
+
         if all_gear is not None:
             for gear in all_gear:
                 if Keys.GEAR_NAME_KEY in gear:
@@ -995,11 +996,21 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        # User's gear list.
+        gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
+
+        # Calculate distances for each gear.
+        tags = []
+        for gear in gear_list:
+            if Keys.GEAR_NAME_KEY in gear:
+                tags.append(gear[Keys.GEAR_NAME_KEY])
+        distance_tags = self.data_mgr.distance_for_tags(user_id, tags)
+
+        # Render the table.
         num_bikes = 0
         num_shoes = 0
         bikes = "<table>"
         shoes = "<table>"
-        gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
         for gear in gear_list:
             if Keys.GEAR_TYPE_KEY in gear:
                 row_str = ""
@@ -1015,6 +1026,11 @@ class App(object):
                         row_str += "<script>document.write(unix_time_to_local_date_string(" + str(gear[Keys.GEAR_RETIRE_TIME_KEY]) + " ))</script>"
                     row_str += "</td>"
                     row_str += "<td>"
+
+                    distance = distance_tags[gear[Keys.GEAR_NAME_KEY]]
+                    user_distance, user_units = Units.convert_to_preferred_distance_units(self.user_mgr, user_id, distance, Units.UNITS_DISTANCE_METERS)
+                    row_str += "{:.2f} ".format(user_distance) + Units.get_distance_units_str(user_units)
+
                     row_str += "</td>"
                     row_str += "<td><button type=\"button\" onclick=\"return delete_gear('" + str(gear[Keys.GEAR_ID_KEY]) + "')\">Delete</button></td>"
                 row_str += "<tr>"

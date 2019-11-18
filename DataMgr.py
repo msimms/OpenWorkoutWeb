@@ -530,6 +530,37 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.create_tag_on_activity(activity, tag)
 
+    @staticmethod
+    def distance_for_activity(activity):
+        if Keys.APP_DISTANCE_KEY in activity:
+            return activity[Keys.APP_DISTANCE_KEY]
+        if Keys.ACTIVITY_SUMMARY_KEY in activity:
+            summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
+            if Keys.LONGEST_DISTANCE in summary_data:
+                return summary_data[Keys.LONGEST_DISTANCE]
+        return 0.0
+
+    @staticmethod
+    def distance_for_tag_cb(tag_distances, activity, user_id):
+        distance = DataMgr.distance_for_activity(activity)
+        for key in tag_distances.keys():
+            tag_distances[key] = tag_distances[key] + distance
+
+    def distance_for_tags(self, user_id, tags):
+        """Computes the distance (in meters) for activities with the combination of user and tag."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if tags is None:
+            raise Exception("Bad parameter.")
+
+        tag_distances = {}
+        for tag in tags:
+            tag_distances[tag] = 0.0
+        self.database.retrieve_each_user_activity(tag_distances, user_id, DataMgr.distance_for_tag_cb)
+        return tag_distances
+
     def create_activity_comment(self, activity_id, commenter_id, comment):
         """Create method for a comment on an activity."""
         if self.database is None:
