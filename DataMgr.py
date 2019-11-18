@@ -490,6 +490,18 @@ class DataMgr(Importer.ActivityWriter):
         tags.append('Virtual')
         return tags
 
+    def list_tags_for_activity_type_and_user(self, user_id, activity_type):
+        """Returns a list of tags that are valid for a particular activity type."""
+        tags = self.list_default_tags()
+        gear_list = self.retrieve_gear_for_user(user_id)
+        show_shoes = activity_type in Keys.FOOT_BASED_ACTIVITIES
+        show_bikes = activity_type in Keys.BIKE_BASED_ACTIVITIES
+        for gear in gear_list:
+            if Keys.GEAR_TYPE_KEY in gear and Keys.GEAR_NAME_KEY in gear:
+                if (show_shoes and gear[Keys.GEAR_TYPE_KEY] == Keys.GEAR_TYPE_SHOES) or (show_bikes and gear[Keys.GEAR_TYPE_KEY] == Keys.GEAR_TYPE_BIKE):
+                    tags.append(gear[Keys.GEAR_NAME_KEY])
+        return tags
+
     def create_activity_tag(self, activity_id, tag):
         """Returns the most recent 'num' locations for the specified device and activity."""
         if self.database is None:
