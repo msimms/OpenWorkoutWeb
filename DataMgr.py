@@ -483,10 +483,12 @@ class DataMgr(Importer.ActivityWriter):
         """Returns a list of tags that can be used for any activity."""
         tags = []
         tags.append('Race')
-        tags.append('Virtual')
+        tags.append('Commute')
         tags.append('Hot')
         tags.append('Humid')
         tags.append('Cold')
+        tags.append('Rainy')
+        tags.append('Windy')
         tags.append('Virtual')
         return tags
 
@@ -496,6 +498,8 @@ class DataMgr(Importer.ActivityWriter):
         gear_list = self.retrieve_gear_for_user(user_id)
         show_shoes = activity_type in Keys.FOOT_BASED_ACTIVITIES
         show_bikes = activity_type in Keys.BIKE_BASED_ACTIVITIES
+        if activity_type == Keys.TYPE_RUNNING_KEY:
+            tags.append("Long Run")
         for gear in gear_list:
             if Keys.GEAR_TYPE_KEY in gear and Keys.GEAR_NAME_KEY in gear:
                 if (show_shoes and gear[Keys.GEAR_TYPE_KEY] == Keys.GEAR_TYPE_SHOES) or (show_bikes and gear[Keys.GEAR_TYPE_KEY] == Keys.GEAR_TYPE_BIKE):
