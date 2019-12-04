@@ -13,6 +13,7 @@ import Summarizer
 import TrainingPaceCalculator
 
 SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
+ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
 FOUR_WEEKS = (14.0 * 24.0 * 60.0 * 60.0)
 
 def get_activities_sort_key(item):
@@ -804,7 +805,7 @@ class DataMgr(Importer.ActivityWriter):
         return location_description
 
     def compute_recent_bests(self, user_id, timeframe):
-        """Return a dictionary of all best performances in the last six months."""
+        """Return a dictionary of all best performances in the specified time frame."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
@@ -815,7 +816,10 @@ class DataMgr(Importer.ActivityWriter):
         summarizer = Summarizer.Summarizer()
 
         # Load cached summary data from all previous activities.
-        cutoff_time = time.time() - timeframe
+        if timeframe > 0:
+            cutoff_time = time.time() - timeframe
+        else:
+            cutoff_time = 0
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
         if all_activity_bests is not None:
             for activity_id in all_activity_bests:

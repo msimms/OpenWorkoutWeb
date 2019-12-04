@@ -222,7 +222,7 @@ def all_records(self, activity_type, record_name):
 @g_flask_app.route('/workouts')
 @login_requred
 def workouts():
-    """Renders the list of workouts the specified user is allowed to view."""
+    """Renders the workouts view."""
     try:
         return g_app.workouts()
     except App.RedirectException as e:
@@ -231,6 +231,20 @@ def workouts():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + workouts.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/statistics')
+@login_requred
+def workouts():
+    """Renders the statistics view."""
+    try:
+        return g_app.stats()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + statistics.__name__)
     return g_app.error()
 
 @g_flask_app.route('/gear')

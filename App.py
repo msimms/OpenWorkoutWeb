@@ -204,6 +204,7 @@ class App(object):
                 "\t\t<li><a href=\"" + self.root_url + "/my_activities/\">My Activities</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/all_activities/\">All Activities</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/workouts/\">Workouts</a></li>\n" \
+                "\t\t<li><a href=\"" + self.root_url + "/statistics/\">Statistics</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/gear/\">Gear</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/following/\">Following</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/followers/\">Followers</a></li>\n" \
@@ -925,7 +926,7 @@ class App(object):
 
     @statistics
     def workouts(self):
-        """Renders the list of all workouts the specified user is allowed to view."""
+        """Renders the workouts view."""
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -980,6 +981,35 @@ class App(object):
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, runpaces=run_paces_str, plans=plans_str, goals=goals_str, goal_date=goal_date)
+
+    @statistics
+    def stats(self):
+        """Renders the statistics view."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Show the relevant PRs.
+        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, 0)
+        all_time_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests)
+        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.ONE_YEAR)
+        one_year_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests)
+
+        # Show the list of places.
+        places_str = ""
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'statistics.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, alltimebests=all_time_bests_str, oneyearbests=one_year_bests_str, places=places_str)
 
     @statistics
     def gear(self):
