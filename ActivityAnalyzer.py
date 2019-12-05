@@ -24,7 +24,7 @@ class ActivityAnalyzer(object):
         self.summary_data = {}
         self.speed_graph = None
         root_dir = os.path.dirname(os.path.abspath(__file__))
-        self.data_mgr = DataMgr.DataMgr(root_dir, root_dir, None, None, None)
+        self.data_mgr = DataMgr.DataMgr("file:/" + root_dir, root_dir, None, None, None)
         self.last_yield = time.time()
         super(ActivityAnalyzer, self).__init__()
 
