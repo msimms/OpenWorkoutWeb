@@ -1012,13 +1012,22 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Show the relevant PRs.
-        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, 0)
+        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, None)
         all_time_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests)
         cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.ONE_YEAR)
         one_year_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests)
 
         # Show the list of places.
-        places_str = ""
+        places_str = "<table>"
+        user_activities = self.data_mgr.retrieve_user_activity_list(user_id, user_realname, None, None)
+        heat_map = self.data_mgr.compute_location_heat_map(user_activities)
+        for location_str in heat_map:
+            places_str += "<td>"
+            places_str += location_str
+            places_str += "</td><td>"
+            places_str += str(heat_map[location_str])
+            places_str += "</td><tr>"
+        places_str += "</table>"
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'statistics.html')

@@ -804,22 +804,47 @@ class DataMgr(Importer.ActivityWriter):
             location_description = self.map_search.search_map(float(first_loc[Keys.LOCATION_LAT_KEY]), float(first_loc[Keys.LOCATION_LON_KEY]))
         return location_description
 
+    def compute_location_heat_map(self, activities):
+        """Returns a count of the number of times activities have been performed in each location."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activities is None:
+            raise Exception("Bad parameter.")
+
+        heat_map = {}
+
+        for activity in activities:
+            if Keys.ACTIVITY_ID_KEY in activity and activity[Keys.ACTIVITY_ID_KEY]:
+                summary_data = self.retrieve_activity_summary(activity[Keys.ACTIVITY_ID_KEY])
+                if summary_data is not None and Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
+                    locations = summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]
+                    locations_str = ""
+                    for location_elem in reversed(locations):
+                        if len(locations_str) > 0:
+                            locations_str += ", "
+                        locations_str += location_elem
+                    if locations_str in heat_map:
+                        heat_map[locations_str] = heat_map[locations_str] + 1
+                    else:
+                        heat_map[locations_str] = 1
+        return heat_map
+
     def compute_recent_bests(self, user_id, timeframe):
         """Return a dictionary of all best performances in the specified time frame."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        if timeframe is None:
-            raise Exception("Bad parameter.")
 
         summarizer = Summarizer.Summarizer()
 
-        # Load cached summary data from all previous activities.
-        if timeframe > 0:
-            cutoff_time = time.time() - timeframe
-        else:
+        # We're only interested in activities from this time forward.
+        if timeframe is None:
             cutoff_time = 0
+        else:
+            cutoff_time = time.time() - timeframe
+
+        # Load cached summary data from all previous activities.
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
         if all_activity_bests is not None:
             for activity_id in all_activity_bests:
