@@ -576,9 +576,9 @@ class App(object):
                     details_str += "</b></td><td>"
                     value = summary_data[key]
                     details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
-                    details_str += "</td><tr>"
+                    details_str += "</td><tr>\n"
         if len(details_str) == 0:
-            details_str = "<td><b>No data</b></td><tr>"
+            details_str = "<td><b>No data</b></td><tr>\n"
 
         # Controls are only allowed if the user viewing the activity owns it.
         if belongs_to_current_user:
@@ -861,12 +861,24 @@ class App(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
-    def render_personal_record_simple(self, user_id, activity_type, record, record_name):
+    def render_personal_record_simple(self, user_id, user_activities, activity_type, record, record_name):
         """Helper function that renders a single table row in the personal bests table."""
         record_value = record[0]
         activity_id = record[1]
+        activity_time = 0
+        for activity in user_activities:
+            if Keys.ACTIVITY_ID_KEY in activity and activity[Keys.ACTIVITY_ID_KEY] == activity_id and Keys.ACTIVITY_TIME_KEY in activity:
+                activity_time = activity[Keys.ACTIVITY_TIME_KEY]
+                break
         record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
-        out_str = "<td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
+
+        out_str = "\t\t\t"
+        if activity_time == 0:
+            out_str += "<td></td>"
+        else:
+            out_str += "<td><script>document.write(unix_time_to_local_date_string(" + str(activity_time) + "))</script></td>"
+        out_str += "<td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td>"
+        out_str += "<tr>\n"
         return out_str
 
     def render_personal_record(self, user_id, activity_type, record, record_name):
@@ -914,10 +926,12 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        user_activities = self.data_mgr.retrieve_user_activity_list(user_id, user_realname, None, None)
+
         records_str = ""
         records = self.data_mgr.compute_bests(user_id, activity_type, record_name)
         for record in records:
-            records_str += self.render_personal_record_simple(user_id, activity_type, record, record_name)
+            records_str += self.render_personal_record_simple(user_id, user_activities, activity_type, record, record_name)
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'records.html')
@@ -946,14 +960,14 @@ class App(object):
         # Show the running training paces.
         run_paces = self.data_mgr.compute_run_training_paces(user_id, running_bests)
         if run_paces:
-            run_paces_str = "<table>"
+            run_paces_str = "\t<table>\n"
             for run_pace in run_paces:
-                run_paces_str += "<td>"
+                run_paces_str += "\t\t<td>"
                 run_paces_str += run_pace
                 run_paces_str += "</td><td>"
                 run_paces_str += Units.convert_to_preferred_units_str(self.user_mgr, user_id, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
-                run_paces_str += "</td><tr>"
-            run_paces_str += "</table>"
+                run_paces_str += "</td><tr>\n"
+            run_paces_str += "\t</table>\n"
         else:
             run_paces_str = "Not calculated."
 
@@ -971,11 +985,11 @@ class App(object):
         plans_str = ""
         workouts = self.data_mgr.retrieve_workouts_for_user(user_id)
         if workouts is not None:
-            plans_str = "<table>"
+            plans_str = "\t<table>\n"
             for workout in workouts:
-                plans_str += "<td>"
-                plans_str += "</td><tr>"
-            plans_str += "</table>"
+                plans_str += "\t\t<td>"
+                plans_str += "</td><tr>\n"
+            plans_str += "\t</table>\n"
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
@@ -1039,13 +1053,13 @@ class App(object):
         # Render the table.
         num_bikes = 0
         num_shoes = 0
-        bikes = "<table>"
-        shoes = "<table>"
+        bikes = "<table>\n"
+        shoes = "<table>\n"
         for gear in gear_list:
             if Keys.GEAR_TYPE_KEY in gear:
                 row_str = ""
                 if Keys.GEAR_NAME_KEY in gear:
-                    row_str += "<td><a href=\"" + self.root_url + "/service_history/" + gear[Keys.GEAR_ID_KEY] + "\">"
+                    row_str += "\t\t<td><a href=\"" + self.root_url + "/service_history/" + gear[Keys.GEAR_ID_KEY] + "\">"
                     row_str += gear[Keys.GEAR_NAME_KEY]
                     row_str += "</a></td><td>"
                     row_str += gear[Keys.GEAR_DESCRIPTION_KEY]
@@ -1063,20 +1077,20 @@ class App(object):
 
                     row_str += "</td>"
                     row_str += "<td><button type=\"button\" onclick=\"return delete_gear('" + str(gear[Keys.GEAR_ID_KEY]) + "')\">Delete</button></td>"
-                row_str += "<tr>"
+                row_str += "<tr>\n"
                 gear_type = gear[Keys.GEAR_TYPE_KEY]
                 if gear_type == Keys.GEAR_TYPE_BIKE:
                     if num_bikes == 0:
-                        bikes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><td><b>Distance</b></td><tr>"
+                        bikes += "\t\t<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><td><b>Distance</b></td><tr>\n"
                     bikes += row_str
                     num_bikes = num_bikes + 1
                 elif gear_type == Keys.GEAR_TYPE_SHOES:
                     if num_shoes == 0:
-                        shoes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><td><b>Date Retired</b><td><b>Distance</b></td><tr>"
+                        shoes += "\t\t<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><td><b>Date Retired</b><td><b>Distance</b></td><tr>\n"
                     shoes += row_str
                     num_shoes = num_shoes + 1
-        bikes += "</table>"
-        shoes += "</table>"
+        bikes += "\t</table>"
+        shoes += "\t</table>"
         if num_bikes == 0:
             bikes = "<b>None</b>"
         if num_shoes == 0:
