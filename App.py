@@ -539,7 +539,8 @@ class App(object):
 
         # Build the detailed analysis table.
         details_str = ""
-        excluded_keys = [ Keys.LONGEST_DISTANCE ]
+        excluded_keys = Keys.UNSUMMARIZABLE_KEYS
+        excluded_keys.append(Keys.LONGEST_DISTANCE)
         if summary_data is not None:
             for key in sorted(summary_data):
                 if key not in excluded_keys:
