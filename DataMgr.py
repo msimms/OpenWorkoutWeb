@@ -102,18 +102,16 @@ class DataMgr(Importer.ActivityWriter):
         for activity in activities:
             if Keys.ACTIVITY_TIME_KEY in activity:
 
-                # We're looking for activities that start within the bounds of another activity.
+                # Get the activity start and end times.
                 activity_start_time = activity[Keys.ACTIVITY_TIME_KEY]
-                if start_time == activity_start_time:
-                    return True
-                if start_time > activity_start_time:
-                    if Keys.ACTIVITY_END_TIME_KEY not in activity:
-                        activity_end_time = self.compute_and_store_end_time(activity)
-                    else:
-                        activity_end_time = activity[Keys.ACTIVITY_END_TIME_KEY]
+                if Keys.ACTIVITY_END_TIME_KEY not in activity:
+                    activity_end_time = self.compute_and_store_end_time(activity)
+                else:
+                    activity_end_time = activity[Keys.ACTIVITY_END_TIME_KEY]
 
-                    if activity_end_time and start_time < activity_end_time:
-                        return True
+                # We're looking for activities that start within the bounds of another activity.
+                if start_time >= activity_start_time and start_time < activity_end_time:
+                    return True
 
         return False
 
