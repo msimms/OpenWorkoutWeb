@@ -1258,8 +1258,13 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Parse the file and store it's contents in the database.
-        file_data = ufile.file.read()
-        self.data_mgr.import_file(username, user_id, file_data, ufile.filename)
+        if type(ufile) == list:
+            for ufile_item in ufile:
+                file_data = ufile_item.file.read()
+                self.data_mgr.import_file(username, user_id, file_data, ufile_item.filename)
+        else:
+            file_data = ufile.file.read()
+            self.data_mgr.import_file(username, user_id, file_data, ufile.filename)
 
         raise RedirectException(DEFAULT_LOGGED_IN_URL)
 
