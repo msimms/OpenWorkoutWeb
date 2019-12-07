@@ -545,9 +545,16 @@ class DataMgr(Importer.ActivityWriter):
 
     @staticmethod
     def distance_for_tag_cb(tag_distances, activity, user_id):
+        activity_tags = None
+        if Keys.ACTIVITY_TAGS_KEY in activity:
+            activity_tags = activity[Keys.ACTIVITY_TAGS_KEY]
+        if activity_tags is None:
+            return
+
         distance = DataMgr.distance_for_activity(activity)
-        for key in tag_distances.keys():
-            tag_distances[key] = tag_distances[key] + distance
+        for distance_tag in tag_distances.keys():
+            if distance_tag in activity_tags:
+                tag_distances[distance_tag] = tag_distances[distance_tag] + distance
 
     def distance_for_tags(self, user_id, tags):
         """Computes the distance (in meters) for activities with the combination of user and tag."""

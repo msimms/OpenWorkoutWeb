@@ -564,7 +564,7 @@ class MongoDatabase(Database.Database):
     def retrieve_each_user_activity(self, context, user_id, callback_func):
         """Retrieves each user activity and calls the callback function for each one."""
         try:
-            activities = self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id})
+            activities = list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}))
             for activity in activities:
                 callback_func(context, activity, user_id)
         except:

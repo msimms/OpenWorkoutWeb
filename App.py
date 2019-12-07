@@ -245,34 +245,6 @@ class App(object):
                 tags_str += "</option>\n"
         return tags_str
 
-    def render_gear(self, activity_user_id, activity_type, activity, logged_in):
-        """Helper function for building the gear string."""
-        if activity_type in Keys.FOOT_BASED_ACTIVITIES:
-            gear_type = Keys.GEAR_TYPE_SHOES
-        elif activity_type == Keys.TYPE_CYCLING_KEY:
-            gear_type = Keys.GEAR_TYPE_BIKE
-        else:
-            return ""
-
-        activity_gear = []
-        if Keys.GEAR_KEY in activity:
-            activity_gear = activity[Keys.GEAR_KEY]
-
-        all_gear = self.data_mgr.retrieve_gear_of_specified_type_for_user(activity_user_id, gear_type)
-        gear_str = ""
-
-        if all_gear is not None:
-            for gear in all_gear:
-                if Keys.GEAR_NAME_KEY in gear:
-                    gear_name = gear[Keys.GEAR_NAME_KEY]
-                    if gear_name in activity_gear:
-                        gear_str += "<option selected=true>"
-                    else:
-                        gear_str += "<option>"
-                    gear_str += gear_name
-                    gear_str += "</option>\n"
-        return gear_str
-
     def render_comments(self, activity, logged_in):
         """Helper function for building the comments string."""
         comments_str = ""
@@ -589,9 +561,6 @@ class App(object):
         # List the tags.
         tags_str = self.render_tags(activity, activity_user_id, logged_in)
 
-        # List the gear.
-        gear_str = self.render_gear(activity_user_id, activity_type, activity, logged_in)
-
         # List the comments.
         comments_str = self.render_comments(activity, logged_in)
 
@@ -610,10 +579,10 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports=exports_str, delete=delete_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports=exports_str, delete=delete_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
@@ -1126,10 +1095,12 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         service_records = "\t\t<table>\n"
+        gear_name = ""
         gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
         service_records += "\t\t\t<td><b>Date</b></td><td><b>Description</b></td><td></td><tr>\n"
         for gear in gear_list:
             if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == gear_id:
+                gear_name = gear[Keys.GEAR_NAME_KEY]
                 if Keys.GEAR_SERVICE_HISTORY in gear:
                     sorted_history = sorted(gear[Keys.GEAR_SERVICE_HISTORY], key = lambda i: i[Keys.SERVICE_RECORD_DATE_KEY])
                     for record in sorted_history:
@@ -1145,7 +1116,7 @@ class App(object):
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'service_history.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, gear_name=gear[Keys.GEAR_NAME_KEY], service_records=service_records, gear_id=gear_id)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, gear_name=gear_name, service_records=service_records, gear_id=gear_id)
 
     @statistics
     def following(self):
