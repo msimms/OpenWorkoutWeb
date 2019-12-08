@@ -397,11 +397,17 @@ class App(object):
         max_value = 0.0
         data_str = ""
         data = []
+        multiplier = 1.0
+        if Keys.ACTIVITY_TYPE_KEY in activity:
+            activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
+            if activity_type in Keys.FOOT_BASED_ACTIVITIES:
+                if key in Keys.CADENCE_KEYS:
+                    multiplier = 2.0
         if key in activity:
             data = activity[key]
         for datum in data:
             time = datum.keys()[0]
-            value = float(datum.values()[0])
+            value = float(datum.values()[0]) * multiplier
             data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
             if value > max_value:
                 max_value = value
