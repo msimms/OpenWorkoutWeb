@@ -4,3 +4,6 @@
 [submodule "LibMath"]
 	path = LibMath
 	url = https://github.com/msimms/LibMath
+[submodule "ZwoReader"]
+	path = ZwoReader
+	url = https://github.com/msimms/ZwoReader
