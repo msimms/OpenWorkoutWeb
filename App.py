@@ -269,8 +269,7 @@ class App(object):
         """Helper function for building the exports string."""
         exports_str = ""
         if logged_in:
-            exports_str  = "<td>Export Format:</td><tr>\n"
-            exports_str += "<td><select id=\"format\" class=\"checkin\" >\n"
+            exports_str = "<td><select id=\"format\" class=\"checkin\" >\n"
             if has_location_data:
                 exports_str += "\t<option value=\"tcx\" selected>TCX</option>\n"
                 exports_str += "\t<option value=\"gpx\">GPX</option>\n"
