@@ -435,13 +435,13 @@ ${powerZones}
         });
 	});
 
-  </script>
+</script>
 
 <hr>
 
 <section class="analysis">
+<h3>Detailed Analysis</h3>
 <p>
-Detailed Analysis:
 <table>
 ${details}
 </table>
@@ -457,26 +457,17 @@ ${details_controls}
 </section>
 
 <section class="comments">
+<h3>Tags and Gear</h3>
 <p>
-Tags:
-<select name="tags" id="tags" class="chosen" multiple="true" style="width:30%;" data-placeholder="Specify tags...">
+<select name="tags" id="tags" class="chosen" multiple="true" style="width:50%;" data-placeholder="Specify tags and gear...">
 ${tags}
 </select>
 </p>
 </section>
 
 <section class="comments">
+<h3>Comments</h3>
 <p>
-Gear:
-<select name="gear" id="gear" class="chosen" multiple="true" style="width:30%;" data-placeholder="Specify gear...">
-${gear}
-</select>
-</p>
-</section>
-
-<section class="comments">
-<p>
-Comments:
 <table>
 ${comments}
 </table>
@@ -484,8 +475,15 @@ ${comments}
 </section>
 
 <section class="export">
+<h3>Export Format</h3>
 <table>
 ${exports}
+</table>
+</section>
+
+<section class="export">
+<h3>Deletion</h3>
+<table>
 ${delete}
 </table>
 </section>

@@ -241,7 +241,7 @@ class StraenWeb(object):
     @cherrypy.expose
     @require()
     def workouts(self, *args, **kw):
-        """Renders the list of workouts the specified user is allowed to view."""
+        """Renders the workouts view."""
         try:
             return self.app.workouts()
         except App.RedirectException as e:
@@ -252,6 +252,22 @@ class StraenWeb(object):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.workouts.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
+    def statistics(self, *args, **kw):
+        """Renders the statics view."""
+        try:
+            return self.app.stats()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.statistics.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -268,6 +284,22 @@ class StraenWeb(object):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.gear.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
+    def service_history(self, gear_id, *args, **kw):
+        """Renders the service history for a particular piece of gear."""
+        try:
+            return self.app.service_history(gear_id)
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.service_history.__name__)
         return self.error()
 
     @cherrypy.expose

@@ -52,7 +52,6 @@ class MongoDatabase(Database.Database):
             self.activities_collection = self.database['activities']
             self.records_collection = self.database['records']
             self.workouts_collection = self.database['wokrouts']
-            self.gear_collection = self.database['gear']
             return True
         except pymongo.errors.ConnectionFailure as e:
             self.log_error("Could not connect to MongoDB: %s" % e)
@@ -565,7 +564,7 @@ class MongoDatabase(Database.Database):
     def retrieve_each_user_activity(self, context, user_id, callback_func):
         """Retrieves each user activity and calls the callback function for each one."""
         try:
-            activities = self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id})
+            activities = list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}))
             for activity in activities:
                 callback_func(context, activity, user_id)
         except:
@@ -1385,10 +1384,13 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_gear(self, user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
+    def create_gear(self, user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Create method for gear."""
         if user_id is None:
             self.log_error(MongoDatabase.create_gear.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if gear_id is None:
+            self.log_error(MongoDatabase.create_gear.__name__ + ": Unexpected empty object: gear_id")
             return False
         if gear_type is None:
             self.log_error(MongoDatabase.create_gear.__name__ + ": Unexpected empty object: gear_type")
@@ -1405,11 +1407,12 @@ class MongoDatabase(Database.Database):
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
                 new_gear = {}
+                new_gear[Keys.GEAR_ID_KEY] = str(gear_id)
                 new_gear[Keys.GEAR_TYPE_KEY] = gear_type
                 new_gear[Keys.GEAR_NAME_KEY] = gear_name
                 new_gear[Keys.GEAR_DESCRIPTION_KEY] = gear_description
-                new_gear[Keys.GEAR_ADD_TIME_KEY] = gear_add_time
-                new_gear[Keys.GEAR_RETIRE_TIME_KEY] = gear_retire_time
+                new_gear[Keys.GEAR_ADD_TIME_KEY] = int(gear_add_time)
+                new_gear[Keys.GEAR_RETIRE_TIME_KEY] = int(gear_retire_time)
                 gear_list.append(new_gear)
                 user[Keys.GEAR_KEY] = gear_list
                 self.users_collection.save(user)
@@ -1460,8 +1463,11 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return []
 
-    def update_gear(self, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
+    def update_gear(self, user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Retrieve method for the gear with the specified ID."""
+        if user_id is None:
+            self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: user_id")
+            return None
         if gear_id is None:
             self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: gear_id")
             return False
@@ -1473,10 +1479,26 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            gear_id_obj = ObjectId(str(gear_id))
-            gear = self.gear_collection.find_one({Keys.DATABASE_ID_KEY: gear_id_obj})
-            if gear is not None:
-                return True
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+                gear_list = []
+                if Keys.GEAR_KEY in user:
+                    gear_list = user[Keys.GEAR_KEY]
+                    gear_index = 0
+                    for gear in gear_list:
+                        if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
+                            gear[Keys.GEAR_TYPE_KEY] = gear_type
+                            gear[Keys.GEAR_NAME_KEY] = gear_name
+                            gear[Keys.GEAR_DESCRIPTION_KEY] = gear_description
+                            gear[Keys.GEAR_ADD_TIME_KEY] = int(gear_add_time)
+                            gear[Keys.GEAR_RETIRE_TIME_KEY] = int(gear_retire_time)
+                            gear_list.pop(gear_index)
+                            gear_list.append(gear)
+                            user[Keys.GEAR_KEY] = gear_list
+                            self.users_collection.save(user)
+                            return True
+                        gear_index = gear_index + 1
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1492,10 +1514,102 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            gear_id_obj = ObjectId(str(gear_id))
-            gear = self.gear_collection.delete_one({Keys.DATABASE_ID_KEY: gear_id_obj})
-            if gear is not None:
-                return True
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+                gear_list = []
+                if Keys.GEAR_KEY in user:
+                    gear_list = user[Keys.GEAR_KEY]
+                    gear_index = 0
+                    for gear in gear_list:
+                        if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
+                            gear_list.pop(gear_index)
+                            user[Keys.GEAR_KEY] = gear_list
+                            self.users_collection.save(user)
+                            return True
+                        gear_index = gear_index + 1
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def create_service_record(self, user_id, gear_id, service_record_id, record_date, record_description):
+        """Create method for gear service records."""
+        if user_id is None:
+            self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if gear_id is None:
+            self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: gear_id")
+            return False
+        if service_record_id is None:
+            self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: service_record_id")
+            return False
+        if record_date is None:
+            self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: record_date")
+            return False
+        if record_description is None:
+            self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: record_description")
+            return False
+
+        try:
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+                gear_list = []
+                if Keys.GEAR_KEY in user:
+                    gear_list = user[Keys.GEAR_KEY]
+                    for gear in gear_list:
+                        if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
+                            service_rec = {}
+                            service_rec[Keys.SERVICE_RECORD_ID_KEY] = str(service_record_id)
+                            service_rec[Keys.SERVICE_RECORD_DATE_KEY] = int(record_date)
+                            service_rec[Keys.SERVICE_RECORD_DESCRIPTION_KEY] = record_description
+
+                            service_history = []
+                            if Keys.GEAR_SERVICE_HISTORY in gear:
+                                service_history = gear[Keys.GEAR_SERVICE_HISTORY]
+                            service_history.append(service_rec)
+                            gear[Keys.GEAR_SERVICE_HISTORY] = service_history
+
+                            self.users_collection.save(user)
+                            return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def delete_service_record(self, user_id, gear_id, service_record_id):
+        """Delete method for the service record with the specified user and gear ID."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_service_record.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if gear_id is None:
+            self.log_error(MongoDatabase.delete_service_record.__name__ + ": Unexpected empty object: gear_id")
+            return False
+        if service_record_id is None:
+            self.log_error(MongoDatabase.delete_service_record.__name__ + ": Unexpected empty object: service_record_id")
+            return False
+
+        try:
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+                gear_list = []
+                if Keys.GEAR_KEY in user:
+                    gear_list = user[Keys.GEAR_KEY]
+                    for gear in gear_list:
+                        if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
+                            if Keys.GEAR_SERVICE_HISTORY in gear:
+                                service_history = gear[Keys.GEAR_SERVICE_HISTORY]
+                                record_index = 0
+                                for service_record in service_history:
+                                    if Keys.SERVICE_RECORD_ID_KEY in service_record and service_record[Keys.SERVICE_RECORD_ID_KEY] == service_record_id:
+                                        service_history.pop(record_index)
+                                        gear[Keys.GEAR_SERVICE_HISTORY] = service_history
+
+                                        self.users_collection.save(user)
+                                        return True
+                                    record_index = record_index + 1
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

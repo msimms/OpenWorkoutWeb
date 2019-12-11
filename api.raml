@@ -11,7 +11,21 @@ version: v1
         responses:
             200:
             500:
-/login_submit:
+/activity_track:
+    description: Returns the activity track as a collection of JSON objects.
+    get:
+        responses:
+            200:
+            500:
+    post:
+/activity_metadata:
+    description: Returns the activity metadata as a collection of JSON objects.
+    get:
+        responses:
+            200:
+            500:
+    post:
+/login:
     description: Authenticates a username and password.
     get:
     post:
@@ -19,7 +33,7 @@ version: v1
             200:
             401:
             500:
-/create_login_submit:
+/create_login:
     description: Creates a new account.
     get:
     post:
@@ -31,11 +45,11 @@ version: v1
 /login_status:
     description: Determines if the current user has a valid session token.
     get:
-    post:
         responses:
             200:
             401:
             403:
+    post:
 /logout:
     description: Terminates the current user's session.
     get:
@@ -267,6 +281,33 @@ version: v1
             401:
             403:
             500:
+/create_service_record:
+    description:
+    get:
+    post:
+        responses:
+            200:
+            401:
+            403:
+            500:
+/delete_service_record:
+    description:
+    get:
+    post:
+        responses:
+            200:
+            401:
+            403:
+            500:
+/add_gear_to_activity:
+    description:
+    get:
+    post:
+        responses:
+            200:
+            401:
+            403:
+            500:
 /update_settings:
     description:
     get:
@@ -310,3 +351,24 @@ version: v1
         responses:
             200:
             403:
+/get_location_description:
+    description:
+    get:
+        responses:
+            200:
+            403:
+    post:
+/activity_id_from_hash:
+    description:
+    get:
+        responses:
+            200:
+            403:
+    post:
+/activity_hash_from_id:
+    description:
+    get:
+        responses:
+            200:
+            403:
+    post:

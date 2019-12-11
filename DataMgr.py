@@ -13,6 +13,7 @@ import Summarizer
 import TrainingPaceCalculator
 
 SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
+ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
 FOUR_WEEKS = (14.0 * 24.0 * 60.0 * 60.0)
 
 def get_activities_sort_key(item):
@@ -101,18 +102,16 @@ class DataMgr(Importer.ActivityWriter):
         for activity in activities:
             if Keys.ACTIVITY_TIME_KEY in activity:
 
-                # We're looking for activities that start within the bounds of another activity.
+                # Get the activity start and end times.
                 activity_start_time = activity[Keys.ACTIVITY_TIME_KEY]
-                if start_time == activity_start_time:
-                    return True
-                if start_time > activity_start_time:
-                    if Keys.ACTIVITY_END_TIME_KEY not in activity:
-                        activity_end_time = self.compute_and_store_end_time(activity)
-                    else:
-                        activity_end_time = activity[Keys.ACTIVITY_END_TIME_KEY]
+                if Keys.ACTIVITY_END_TIME_KEY not in activity:
+                    activity_end_time = self.compute_and_store_end_time(activity)
+                else:
+                    activity_end_time = activity[Keys.ACTIVITY_END_TIME_KEY]
 
-                    if activity_end_time and start_time < activity_end_time:
-                        return True
+                # We're looking for activities that start within the bounds of another activity.
+                if start_time >= activity_start_time and start_time < activity_end_time:
+                    return True
 
         return False
 
@@ -483,11 +482,27 @@ class DataMgr(Importer.ActivityWriter):
         """Returns a list of tags that can be used for any activity."""
         tags = []
         tags.append('Race')
-        tags.append('Virtual')
+        tags.append('Commute')
         tags.append('Hot')
         tags.append('Humid')
         tags.append('Cold')
+        tags.append('Rainy')
+        tags.append('Windy')
         tags.append('Virtual')
+        return tags
+
+    def list_tags_for_activity_type_and_user(self, user_id, activity_type):
+        """Returns a list of tags that are valid for a particular activity type."""
+        tags = self.list_default_tags()
+        gear_list = self.retrieve_gear_for_user(user_id)
+        show_shoes = activity_type in Keys.FOOT_BASED_ACTIVITIES
+        show_bikes = activity_type in Keys.BIKE_BASED_ACTIVITIES
+        if activity_type == Keys.TYPE_RUNNING_KEY:
+            tags.append("Long Run")
+        for gear in gear_list:
+            if Keys.GEAR_TYPE_KEY in gear and Keys.GEAR_NAME_KEY in gear:
+                if (show_shoes and gear[Keys.GEAR_TYPE_KEY] == Keys.GEAR_TYPE_SHOES) or (show_bikes and gear[Keys.GEAR_TYPE_KEY] == Keys.GEAR_TYPE_BIKE):
+                    tags.append(gear[Keys.GEAR_NAME_KEY])
         return tags
 
     def create_activity_tag(self, activity_id, tag):
@@ -517,6 +532,44 @@ class DataMgr(Importer.ActivityWriter):
         if tag is None:
             raise Exception("Bad parameter.")
         return self.database.create_tag_on_activity(activity, tag)
+
+    @staticmethod
+    def distance_for_activity(activity):
+        if Keys.APP_DISTANCE_KEY in activity:
+            return activity[Keys.APP_DISTANCE_KEY]
+        if Keys.ACTIVITY_SUMMARY_KEY in activity:
+            summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
+            if Keys.LONGEST_DISTANCE in summary_data:
+                return summary_data[Keys.LONGEST_DISTANCE]
+        return 0.0
+
+    @staticmethod
+    def distance_for_tag_cb(tag_distances, activity, user_id):
+        activity_tags = None
+        if Keys.ACTIVITY_TAGS_KEY in activity:
+            activity_tags = activity[Keys.ACTIVITY_TAGS_KEY]
+        if activity_tags is None:
+            return
+
+        distance = DataMgr.distance_for_activity(activity)
+        for distance_tag in tag_distances.keys():
+            if distance_tag in activity_tags:
+                tag_distances[distance_tag] = tag_distances[distance_tag] + distance
+
+    def distance_for_tags(self, user_id, tags):
+        """Computes the distance (in meters) for activities with the combination of user and tag."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if tags is None:
+            raise Exception("Bad parameter.")
+
+        tag_distances = {}
+        for tag in tags:
+            tag_distances[tag] = 0.0
+        self.database.retrieve_each_user_activity(tag_distances, user_id, DataMgr.distance_for_tag_cb)
+        return tag_distances
 
     def create_activity_comment(self, activity_id, commenter_id, comment):
         """Create method for a comment on an activity."""
@@ -628,7 +681,8 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if gear_description is None:
             raise Exception("Bad parameter.")
-        return self.database.create_gear(user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+        gear_id = uuid.uuid4()
+        return self.database.create_gear(user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
 
     def retrieve_gear_for_user(self, user_id):
         """Retrieve method for the gear with the specified ID."""
@@ -679,6 +733,33 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.delete_gear(user_id, gear_id)
 
+    def create_service_record(self, user_id, gear_id, record_date, record_description):
+        """Create method for gear service records."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if gear_id is None:
+            raise Exception("Bad parameter.")
+        if record_date is None:
+            raise Exception("Bad parameter.")
+        if record_description is None:
+            raise Exception("Bad parameter.")
+        service_record_id = uuid.uuid4()
+        return self.database.create_service_record(user_id, gear_id, service_record_id, record_date, record_description)
+
+    def delete_service_record(self, user_id, gear_id, service_record_id):
+        """Delete method for gear service records."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if gear_id is None:
+            raise Exception("Bad parameter.")
+        if service_record_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.delete_service_record(user_id, gear_id, service_record_id)
+
     def retrieve_each_user_activity(self, context, user_id, cb=None):
         """Makes sure that summary data exists for all of the user's activities."""
         if self.database is None:
@@ -728,19 +809,47 @@ class DataMgr(Importer.ActivityWriter):
             location_description = self.map_search.search_map(float(first_loc[Keys.LOCATION_LAT_KEY]), float(first_loc[Keys.LOCATION_LON_KEY]))
         return location_description
 
+    def compute_location_heat_map(self, activities):
+        """Returns a count of the number of times activities have been performed in each location."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activities is None:
+            raise Exception("Bad parameter.")
+
+        heat_map = {}
+
+        for activity in activities:
+            if Keys.ACTIVITY_ID_KEY in activity and activity[Keys.ACTIVITY_ID_KEY]:
+                summary_data = self.retrieve_activity_summary(activity[Keys.ACTIVITY_ID_KEY])
+                if summary_data is not None and Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
+                    locations = summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]
+                    locations_str = ""
+                    for location_elem in reversed(locations):
+                        if len(locations_str) > 0:
+                            locations_str += ", "
+                        locations_str += location_elem
+                    if locations_str in heat_map:
+                        heat_map[locations_str] = heat_map[locations_str] + 1
+                    else:
+                        heat_map[locations_str] = 1
+        return heat_map
+
     def compute_recent_bests(self, user_id, timeframe):
-        """Return a dictionary of all best performances in the last six months."""
+        """Return a dictionary of all best performances in the specified time frame."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        if timeframe is None:
-            raise Exception("Bad parameter.")
 
         summarizer = Summarizer.Summarizer()
 
+        # We're only interested in activities from this time forward.
+        if timeframe is None:
+            cutoff_time = 0
+        else:
+            cutoff_time = time.time() - timeframe
+
         # Load cached summary data from all previous activities.
-        cutoff_time = time.time() - timeframe
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
         if all_activity_bests is not None:
             for activity_id in all_activity_bests:

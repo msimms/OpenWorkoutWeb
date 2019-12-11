@@ -204,6 +204,7 @@ class App(object):
                 "\t\t<li><a href=\"" + self.root_url + "/my_activities/\">My Activities</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/all_activities/\">All Activities</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/workouts/\">Workouts</a></li>\n" \
+                "\t\t<li><a href=\"" + self.root_url + "/statistics/\">Statistics</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/gear/\">Gear</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/following/\">Following</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/followers/\">Followers</a></li>\n" \
@@ -217,16 +218,22 @@ class App(object):
         navbar_str += "\t</ul>\n</nav>"
         return navbar_str
 
-    def render_tags(self, activity, logged_in):
+    def render_tags(self, activity, activity_user_id, logged_in):
         """Helper function for building the tags string."""
         activity_tags = []
         if Keys.ACTIVITY_TAGS_KEY in activity:
             activity_tags = activity[Keys.ACTIVITY_TAGS_KEY]
-        default_tags = self.data_mgr.list_default_tags()
+
+        if activity_user_id is not None and Keys.ACTIVITY_TYPE_KEY in activity:
+            default_tags = self.data_mgr.list_tags_for_activity_type_and_user(activity_user_id, activity[Keys.ACTIVITY_TYPE_KEY])
+        else:
+            default_tags = self.data_mgr.list_default_tags()
+
         all_tags = []
         all_tags.extend(activity_tags)
         all_tags.extend(default_tags)
         all_tags = list(set(all_tags))
+
         tags_str = ""
         if all_tags is not None:
             for tag in all_tags:
@@ -237,33 +244,6 @@ class App(object):
                 tags_str += tag
                 tags_str += "</option>\n"
         return tags_str
-
-    def render_gear(self, activity_user_id, activity_type, activity, logged_in):
-        """Helper function for building the gear string."""
-        if activity_type in Keys.FOOT_BASED_ACTIVITIES:
-            gear_type = Keys.GEAR_TYPE_SHOES
-        elif activity_type == Keys.TYPE_CYCLING_KEY:
-            gear_type = Keys.GEAR_TYPE_BIKE
-        else:
-            return ""
-
-        activity_gear = []
-        if Keys.GEAR_KEY in activity:
-            activity_gear = activity[Keys.GEAR_KEY]
-
-        all_gear = self.data_mgr.retrieve_gear_of_specified_type_for_user(activity_user_id, gear_type)
-        gear_str = ""
-        if all_gear is not None:
-            for gear in all_gear:
-                if Keys.GEAR_NAME_KEY in gear:
-                    gear_name = gear[Keys.GEAR_NAME_KEY]
-                    if gear_name in activity_gear:
-                        gear_str += "<option selected=true>"
-                    else:
-                        gear_str += "<option>"
-                    gear_str += gear_name
-                    gear_str += "</option>\n"
-        return gear_str
 
     def render_comments(self, activity, logged_in):
         """Helper function for building the comments string."""
@@ -289,8 +269,7 @@ class App(object):
         """Helper function for building the exports string."""
         exports_str = ""
         if logged_in:
-            exports_str  = "<td>Export Format:</td><tr>\n"
-            exports_str += "<td><select id=\"format\" class=\"checkin\" >\n"
+            exports_str = "<td><select id=\"format\" class=\"checkin\" >\n"
             if has_location_data:
                 exports_str += "\t<option value=\"tcx\" selected>TCX</option>\n"
                 exports_str += "\t<option value=\"gpx\">GPX</option>\n"
@@ -376,7 +355,7 @@ class App(object):
             details_controls_str = ""
 
         # List the tags.
-        tags_str = self.render_tags(activity, logged_in)
+        tags_str = self.render_tags(activity, activity_user_id, logged_in)
 
         # List the comments.
         comments_str = self.render_comments(activity, logged_in)
@@ -417,11 +396,17 @@ class App(object):
         max_value = 0.0
         data_str = ""
         data = []
+        multiplier = 1.0
+        if Keys.ACTIVITY_TYPE_KEY in activity:
+            activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
+            if activity_type in Keys.FOOT_BASED_ACTIVITIES:
+                if key in Keys.CADENCE_KEYS:
+                    multiplier = 2.0
         if key in activity:
             data = activity[key]
         for datum in data:
             time = datum.keys()[0]
-            value = float(datum.values()[0])
+            value = float(datum.values()[0]) * multiplier
             data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
             if value > max_value:
                 max_value = value
@@ -559,7 +544,8 @@ class App(object):
 
         # Build the detailed analysis table.
         details_str = ""
-        excluded_keys = [ Keys.LONGEST_DISTANCE ]
+        excluded_keys = Keys.UNSUMMARIZABLE_KEYS
+        excluded_keys.append(Keys.LONGEST_DISTANCE)
         if summary_data is not None:
             for key in sorted(summary_data):
                 if key not in excluded_keys:
@@ -568,9 +554,9 @@ class App(object):
                     details_str += "</b></td><td>"
                     value = summary_data[key]
                     details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
-                    details_str += "</td><tr>"
+                    details_str += "</td><tr>\n"
         if len(details_str) == 0:
-            details_str = "<td><b>No data</b></td><tr>"
+            details_str = "<td><b>No data</b></td><tr>\n"
 
         # Controls are only allowed if the user viewing the activity owns it.
         if belongs_to_current_user:
@@ -579,10 +565,7 @@ class App(object):
             details_controls_str = ""
 
         # List the tags.
-        tags_str = self.render_tags(activity, logged_in)
-
-        # List the gear.
-        gear_str = self.render_gear(activity_user_id, activity_type, activity, logged_in)
+        tags_str = self.render_tags(activity, activity_user_id, logged_in)
 
         # List the comments.
         comments_str = self.render_comments(activity, logged_in)
@@ -602,10 +585,10 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports=exports_str, delete=delete_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, gear=gear_str, comments=comments_str, exports=exports_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports=exports_str, delete=delete_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
@@ -853,12 +836,24 @@ class App(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
-    def render_personal_record_simple(self, user_id, activity_type, record, record_name):
+    def render_personal_record_simple(self, user_id, user_activities, activity_type, record, record_name):
         """Helper function that renders a single table row in the personal bests table."""
         record_value = record[0]
         activity_id = record[1]
+        activity_time = 0
+        for activity in user_activities:
+            if Keys.ACTIVITY_ID_KEY in activity and activity[Keys.ACTIVITY_ID_KEY] == activity_id and Keys.ACTIVITY_TIME_KEY in activity:
+                activity_time = activity[Keys.ACTIVITY_TIME_KEY]
+                break
         record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
-        out_str = "<td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
+
+        out_str = "\t\t\t"
+        if activity_time == 0:
+            out_str += "<td></td>"
+        else:
+            out_str += "<td><script>document.write(unix_time_to_local_date_string(" + str(activity_time) + "))</script></td>"
+        out_str += "<td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td>"
+        out_str += "<tr>\n"
         return out_str
 
     def render_personal_record(self, user_id, activity_type, record, record_name):
@@ -906,10 +901,12 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        user_activities = self.data_mgr.retrieve_user_activity_list(user_id, user_realname, None, None)
+
         records_str = ""
         records = self.data_mgr.compute_bests(user_id, activity_type, record_name)
         for record in records:
-            records_str += self.render_personal_record_simple(user_id, activity_type, record, record_name)
+            records_str += self.render_personal_record_simple(user_id, user_activities, activity_type, record, record_name)
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'records.html')
@@ -918,7 +915,7 @@ class App(object):
 
     @statistics
     def workouts(self):
-        """Renders the list of all workouts the specified user is allowed to view."""
+        """Renders the workouts view."""
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -938,14 +935,14 @@ class App(object):
         # Show the running training paces.
         run_paces = self.data_mgr.compute_run_training_paces(user_id, running_bests)
         if run_paces:
-            run_paces_str = "<table>"
+            run_paces_str = "\t<table>\n"
             for run_pace in run_paces:
-                run_paces_str += "<td>"
+                run_paces_str += "\t\t<td>"
                 run_paces_str += run_pace
                 run_paces_str += "</td><td>"
                 run_paces_str += Units.convert_to_preferred_units_str(self.user_mgr, user_id, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
-                run_paces_str += "</td><tr>"
-            run_paces_str += "</table>"
+                run_paces_str += "</td><tr>\n"
+            run_paces_str += "\t</table>\n"
         else:
             run_paces_str = "Not calculated."
 
@@ -963,16 +960,54 @@ class App(object):
         plans_str = ""
         workouts = self.data_mgr.retrieve_workouts_for_user(user_id)
         if workouts is not None:
-            plans_str = "<table>"
+            plans_str = "\t<table>\n"
             for workout in workouts:
-                plans_str += "<td>"
-                plans_str += "</td><tr>"
-            plans_str += "</table>"
+                plans_str += "\t\t<td>"
+                plans_str += "</td><tr>\n"
+            plans_str += "\t</table>\n"
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, runpaces=run_paces_str, plans=plans_str, goals=goals_str, goal_date=goal_date)
+
+    @statistics
+    def stats(self):
+        """Renders the statistics view."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Show the relevant PRs.
+        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, None)
+        all_time_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests)
+        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.ONE_YEAR)
+        one_year_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests)
+
+        # Show the list of places.
+        places_str = "<table>"
+        user_activities = self.data_mgr.retrieve_user_activity_list(user_id, user_realname, None, None)
+        heat_map = self.data_mgr.compute_location_heat_map(user_activities)
+        for location_str in heat_map:
+            places_str += "<td>"
+            places_str += location_str
+            places_str += "</td><td>"
+            places_str += str(heat_map[location_str])
+            places_str += "</td><tr>"
+        places_str += "</table>"
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'statistics.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, alltimebests=all_time_bests_str, oneyearbests=one_year_bests_str, places=places_str)
 
     @statistics
     def gear(self):
@@ -989,36 +1024,57 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        # User's gear list.
+        gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
+
+        # Calculate distances for each gear.
+        tags = []
+        for gear in gear_list:
+            if Keys.GEAR_NAME_KEY in gear:
+                tags.append(gear[Keys.GEAR_NAME_KEY])
+        distance_tags = self.data_mgr.distance_for_tags(user_id, tags)
+
+        # Render the table.
         num_bikes = 0
         num_shoes = 0
-        bikes = "<table>"
-        shoes = "<table>"
-        gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
+        bikes = "<table>\n"
+        shoes = "<table>\n"
         for gear in gear_list:
             if Keys.GEAR_TYPE_KEY in gear:
                 row_str = ""
                 if Keys.GEAR_NAME_KEY in gear:
-                    row_str += "<td>"
+                    row_str += "\t\t<td><a href=\"" + self.root_url + "/service_history/" + gear[Keys.GEAR_ID_KEY] + "\">"
                     row_str += gear[Keys.GEAR_NAME_KEY]
-                    row_str += "</td><td>"
+                    row_str += "</a></td><td>"
                     row_str += gear[Keys.GEAR_DESCRIPTION_KEY]
                     row_str += "</td><td>"
-                    row_str += "<script>document.write(new Date(" + str(gear[Keys.GEAR_ADD_TIME_KEY]) + " * 1000))</script>"
+                    row_str += "<script>document.write(unix_time_to_local_date_string(" + str(gear[Keys.GEAR_ADD_TIME_KEY]) + "))</script>"
+                    row_str += "<td>"
+                    if Keys.GEAR_RETIRE_TIME_KEY in gear and gear[Keys.GEAR_RETIRE_TIME_KEY] > 0:
+                        row_str += "<script>document.write(unix_time_to_local_date_string(" + str(gear[Keys.GEAR_RETIRE_TIME_KEY]) + " ))</script>"
                     row_str += "</td>"
-                row_str += "<tr>"
+                    row_str += "<td>"
+
+                    distance = distance_tags[gear[Keys.GEAR_NAME_KEY]]
+                    user_distance, user_units = Units.convert_to_preferred_distance_units(self.user_mgr, user_id, distance, Units.UNITS_DISTANCE_METERS)
+                    row_str += "{:.2f} ".format(user_distance) + Units.get_distance_units_str(user_units)
+
+                    row_str += "</td>"
+                    row_str += "<td><button type=\"button\" onclick=\"return delete_gear('" + str(gear[Keys.GEAR_ID_KEY]) + "')\">Delete</button></td>"
+                row_str += "<tr>\n"
                 gear_type = gear[Keys.GEAR_TYPE_KEY]
                 if gear_type == Keys.GEAR_TYPE_BIKE:
                     if num_bikes == 0:
-                        bikes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><tr>"
+                        bikes += "\t\t<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><td><b>Distance</b></td><tr>\n"
                     bikes += row_str
                     num_bikes = num_bikes + 1
                 elif gear_type == Keys.GEAR_TYPE_SHOES:
                     if num_shoes == 0:
-                        shoes += "<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><tr>"
+                        shoes += "\t\t<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><td><b>Date Retired</b><td><b>Distance</b></td><tr>\n"
                     shoes += row_str
                     num_shoes = num_shoes + 1
-        bikes += "</table>"
-        shoes += "</table>"
+        bikes += "\t</table>"
+        shoes += "\t</table>"
         if num_bikes == 0:
             bikes = "<b>None</b>"
         if num_shoes == 0:
@@ -1028,6 +1084,45 @@ class App(object):
         html_file = os.path.join(self.root_dir, HTML_DIR, 'gear.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bikes=bikes, shoes=shoes)
+
+    @statistics
+    def service_history(self, gear_id):
+        """Renders the service history for a particular piece of gear."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        service_records = "\t\t<table>\n"
+        gear_name = ""
+        gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
+        service_records += "\t\t\t<td><b>Date</b></td><td><b>Description</b></td><td></td><tr>\n"
+        for gear in gear_list:
+            if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == gear_id:
+                gear_name = gear[Keys.GEAR_NAME_KEY]
+                if Keys.GEAR_SERVICE_HISTORY in gear:
+                    sorted_history = sorted(gear[Keys.GEAR_SERVICE_HISTORY], key = lambda i: i[Keys.SERVICE_RECORD_DATE_KEY])
+                    for record in sorted_history:
+                        service_records += "\t\t\t<td>"
+                        service_records += "<script>document.write(unix_time_to_local_date_string(" + str(record[Keys.SERVICE_RECORD_DATE_KEY]) + "))</script></td><td>"
+                        service_records += record[Keys.SERVICE_RECORD_DESCRIPTION_KEY]
+                        service_records += "</td><td><button type=\"button\" onclick=\"return delete_service_record('" + str(record[Keys.SERVICE_RECORD_ID_KEY]) + "')\">Delete</button></td>"
+                        service_records += "</td><tr>\n"
+                else:
+                    service_records += "none\n"
+        service_records += "\t\t</table>"
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'service_history.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, gear_name=gear_name, service_records=service_records, gear_id=gear_id)
 
     @statistics
     def following(self):
@@ -1140,8 +1235,13 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Parse the file and store it's contents in the database.
-        file_data = ufile.file.read()
-        self.data_mgr.import_file(username, user_id, file_data, ufile.filename)
+        if type(ufile) == list:
+            for ufile_item in ufile:
+                file_data = ufile_item.file.read()
+                self.data_mgr.import_file(username, user_id, file_data, ufile_item.filename)
+        else:
+            file_data = ufile.file.read()
+            self.data_mgr.import_file(username, user_id, file_data, ufile.filename)
 
         raise RedirectException(DEFAULT_LOGGED_IN_URL)
 

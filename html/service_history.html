@@ -3,7 +3,7 @@
 
 <head>
 
-<title>${product} - ${name} - Gear</title>
+<title>${product} - ${name} - ${gear_name} - Service History</title>
 
 <link rel="stylesheet" href="${root_url}/css/normalize.css">
 <link rel="stylesheet" href="${root_url}/css/site.css">
@@ -29,28 +29,23 @@
 
 <script>
 
-	function create_gear(target, gearType)
+	function create_service_record(target)
 	{
-		var the_url = "${root_url}/api/1.0/create_gear";
+		var the_url = "${root_url}/api/1.0/create_service_record";
 		var dict = [];
 		var result_text = {};
 		var innerDiv = document.getElementById("new_gear_div");
-		var addTimeObj = new Date(document.getElementById("startDate").value);
-		var addTime = addTimeObj.getTime() / 1000;
-		var retiredTimeObj = new Date(document.getElementById("retiredDate").value);
-		var retiredTime = retiredTimeObj.getTime() / 1000;
-		var name = document.getElementById("Name").value;
+		var serviceTimeObj = new Date(document.getElementById("startDate").value);
+		var serviceTime = serviceTimeObj.getTime() / 1000;
 		var description = document.getElementById("Description").value;
 
-		dict.push({["type"] : gearType});
-		dict.push({["add_time"] : addTime});
-		dict.push({["retire_time"] : retiredTime});
-		dict.push({["name"] : name});
+		dict.push({["gear_id"] : "${gear_id}"});
+		dict.push({["date"] : serviceTime});
 		dict.push({["description"] : description});
 
 		if (send_post_request(the_url, dict, result_text))
 		{
-			window.location.replace("${root_url}/gear");
+			window.location.replace("${root_url}/service_history/${gear_id}");
 		}
 		else
 		{
@@ -58,7 +53,7 @@
 		}
 	}
 
-    function get_new_gear_info(gearType)
+    function get_new_service_record_info()
     {
 		var outerDiv = document.getElementById("block");
 		var innerDiv = document.createElement('div');
@@ -71,10 +66,10 @@
 		}
 
 		// Determine which data fields are needed.
-		var fields = ["Name", "Description"];
+		var fields = ["Description"];
 
 		// Add a label for the date picker.
-		var dateLabel = document.createTextNode("Date Added: ");
+		var dateLabel = document.createTextNode("Date: ");
 		innerDiv.appendChild(dateLabel);
 
 		// Add the date picker.
@@ -86,18 +81,6 @@
 		$(startDate).datepicker({showButtonPanel: true, defaultDate: today});
 		$(startDate).datepicker('setDate', today);
 		innerDiv.appendChild(startDate);
-
-		// Add a label for the date retired picker.
-		var dateLabel = document.createTextNode("Date Retired: ");
-		innerDiv.appendChild(dateLabel);
-
-		// Add the date retired picker.
-		var retiredDate = document.createElement('input');
-		retiredDate.type = "input";
-		retiredDate.id = "retiredDate";
-		retiredDate.className = "pickDate";
-		$(retiredDate).datepicker({showButtonPanel: true});
-		innerDiv.appendChild(retiredDate);
 
 		// Add a line break.
 		var br = document.createElement("br");
@@ -117,7 +100,7 @@
 		var saveBtnText = document.createTextNode('Save');
 		saveBtn.appendChild(saveBtnText);
 		saveBtn.title = "Save";
-		saveBtn.addEventListener('click', function() { create_gear(this, gearType); });
+		saveBtn.addEventListener('click', function() { create_service_record(this); });
 
 		// Add the save button to the screen.
 		outerDiv.appendChild(saveBtn);
@@ -129,29 +112,20 @@
 		return false;
 	}
 
-    function get_new_bike_info()
-    {
-        get_new_gear_info("bike");
-    }
-
-    function get_new_shoes_info()
-    {
-        get_new_gear_info("shoes");
-    }
-
-    function delete_gear(gear_id)
+    function delete_service_record(service_id)
     {
 		if (confirm('Are you sure you want to do this?'))
 		{
-            var the_url = "${root_url}/api/1.0/delete_gear";
+            var the_url = "${root_url}/api/1.0/delete_service_record";
             var dict = [];
             var result_text = {};
 
-            dict.push({["gear_id"] : gear_id});
+            dict.push({["gear_id"] : "${gear_id}"});
+            dict.push({["service_id"] : service_id});
 
             if (send_post_request(the_url, dict, result_text))
             {
-                window.location.replace("${root_url}/gear");
+                window.location.replace("${root_url}/service_history/${gear_id}");
             }
             else
             {
@@ -171,19 +145,12 @@ ${nav}
 
 <div class="profile" style="width: 600px">
 
-    <h2>Bikes</h2>
+    <h2>${gear_name}</h2>
+    <h2>Service History</h2>
     <p>
-    ${bikes}
+${service_records}
     </p>
-    <button type="button" onclick="return get_new_bike_info()">Add New Bike</button>
-
-	<hr>
-
-    <h2>Shoes</h2>
-    <p>
-    ${shoes}
-    </p>
-    <button type="button" onclick="return get_new_shoes_info()">Add New Shoes</button>
+    <button type="button" onclick="return get_new_service_record_info()">Add Service Record</button>
 
 </div>
 

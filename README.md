@@ -134,6 +134,11 @@ The software architecture makes it possible to use this system with different fr
 ### 0.14
 * Bug fixes.
 
+### 0.15
+* Added gear tracking.
+* Added location descriptions (i.e., Florida, United States).
+* Bug fixes.
+
 ## Tech
 This software uses several other source projects to work properly:
 

@@ -59,19 +59,21 @@ class Exporter(object):
     def export_as_csv(self, file_name, activity):
         """Formats the accelerometer data as CSV."""
         buf = ""
-        with open(file_name, 'wt') as local_file:
-            if Keys.APP_ACCELEROMETER_KEY in activity:
-                accel_readings = activity[Keys.APP_ACCELEROMETER_KEY]
-                for reading in accel_readings:
-                    accel_time = reading[Keys.ACCELEROMETER_TIME_KEY]
-                    accel_x = reading[Keys.ACCELEROMETER_AXIS_NAME_X]
-                    accel_y = reading[Keys.ACCELEROMETER_AXIS_NAME_Y]
-                    accel_z = reading[Keys.ACCELEROMETER_AXIS_NAME_Z]
-                    row = str(accel_time) + "," + str(accel_x) + "," + str(accel_y) + "," + str(accel_z) + "\n"
-                    if file_name is not None:
-                        local_file.write(row)
-                    else:
-                        buf += row
+        local_file = None
+        if file_name is not None:
+            local_file = open(file_name, 'wt')
+        if Keys.APP_ACCELEROMETER_KEY in activity:
+            accel_readings = activity[Keys.APP_ACCELEROMETER_KEY]
+            for reading in accel_readings:
+                accel_time = reading[Keys.ACCELEROMETER_TIME_KEY]
+                accel_x = reading[Keys.ACCELEROMETER_AXIS_NAME_X]
+                accel_y = reading[Keys.ACCELEROMETER_AXIS_NAME_Y]
+                accel_z = reading[Keys.ACCELEROMETER_AXIS_NAME_Z]
+                row = str(accel_time) + "," + str(accel_x) + "," + str(accel_y) + "," + str(accel_z) + "\n"
+                if local_file is not None:
+                    local_file.write(row)
+                else:
+                    buf += row
         return buf
 
     def export_as_gpx(self, file_name, activity):

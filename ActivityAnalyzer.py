@@ -24,7 +24,7 @@ class ActivityAnalyzer(object):
         self.summary_data = {}
         self.speed_graph = None
         root_dir = os.path.dirname(os.path.abspath(__file__))
-        self.data_mgr = DataMgr.DataMgr("", root_dir, None, None, None)
+        self.data_mgr = DataMgr.DataMgr("file://" + root_dir, root_dir, None, None, None)
         self.last_yield = time.time()
         super(ActivityAnalyzer, self).__init__()
 
@@ -99,10 +99,16 @@ class ActivityAnalyzer(object):
                 self.speed_graph = location_analyzer.create_speed_graph()
             self.should_yield()
 
-            # Store the results.
-            print("Storing results...")
+            # The following require us to have an activity ID.
             if Keys.ACTIVITY_ID_KEY in self.activity:
                 activity_id = self.activity[Keys.ACTIVITY_ID_KEY]
+
+                # Where was this activity performed?
+                location_description = self.data_mgr.get_location_description(activity_id)
+                self.summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY] = location_description
+
+                # Store the results.
+                print("Storing results...")
                 if not self.data_mgr.create_activity_summary(activity_id, self.summary_data):
                     self.log_error("Error returned when saving activity summary data: " + str(self.summary_data))
             else:

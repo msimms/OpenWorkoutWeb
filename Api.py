@@ -779,6 +779,8 @@ class Api(object):
         tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
         if not InputChecker.is_valid(tag):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if len(tag) == 0:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         result = self.data_mgr.create_activity_tag(activity_id, tag)
         return result, ""
@@ -951,6 +953,41 @@ class Api(object):
         result = self.data_mgr.delete_gear(self.user_id, gear_id)
         return result, ""
 
+    def handle_create_service_record(self, values):
+        """Called when an API message to create a service record for an item of gear is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.SERVICE_RECORD_DATE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.SERVICE_RECORD_DESCRIPTION_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        gear_id = values[Keys.GEAR_ID_KEY]
+        if not InputChecker.is_uuid(gear_id):
+            raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
+        service_date = values[Keys.SERVICE_RECORD_DATE_KEY]
+        description = values[Keys.SERVICE_RECORD_DESCRIPTION_KEY]
+
+        result = self.data_mgr.create_service_record(self.user_id, gear_id, service_date, description)
+        return result, ""
+
+    def handle_delete_service_record(self, values):
+        """Called when an API message to delete a service record for an item of gear is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.SERVICE_RECORD_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        gear_id = values[Keys.GEAR_ID_KEY]
+        if not InputChecker.is_uuid(gear_id):
+            raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
+        service_record_id = values[Keys.SERVICE_RECORD_ID_KEY]
+        if not InputChecker.is_uuid(service_record_id):
+            raise ApiException.ApiMalformedRequestException("Invalid service record ID.")
+
+        result = self.data_mgr.delete_service_record(self.user_id, gear_id, service_record_id)
+        return result, ""
+
     def handle_add_gear_to_activity(self, values):
         """Called when an API message to associate gear with an activity is received."""
         if self.user_id is None:
@@ -1111,6 +1148,35 @@ class Api(object):
         location_description = self.data_mgr.get_location_description(activity_id)
         return True, str(location_description)
 
+    def handle_get_activity_id_from_hash(self, values):
+        """Given the activity ID, return sthe activity hash, or an error if not found. Only looks at the logged in user's acivities."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_HASH_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity hash not specified.")
+
+        activity_hash = values[Keys.ACTIVITY_HASH_KEY]
+        if not InputChecker.is_hex_str(activity_hash):
+            raise ApiException.ApiMalformedRequestException("Invalid activity hash.")
+        pass
+
+    def handle_get_activity_hash_from_id(self, values):
+        """Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's acivities."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+        
+        summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
+        if Keys.ACTIVITY_HASH_KEY not in summary:
+            raise ApiException.ApiMalformedRequestException("Hash not found.")
+
+        return True, str(summary_data[Keys.ACTIVITY_HASH_KEY])
+
     def handle_api_1_0_request(self, request, values):
         """Called to parse a version 1.0 API message."""
         if self.user_id is None:
@@ -1183,6 +1249,10 @@ class Api(object):
             return self.handle_update_gear(values)
         elif request == 'delete_gear':
             return self.handle_delete_gear(values)
+        elif request == 'create_service_record':
+            return self.handle_create_service_record(values)
+        elif request == 'delete_service_record':
+            return self.handle_delete_service_record(values)
         elif request == 'add_gear_to_activity':
             return self.handle_add_gear_to_activity(values)
         elif request == 'update_settings':
@@ -1197,4 +1267,8 @@ class Api(object):
             return self.handle_generate_workout_plan(values)
         elif request == 'get_location_description':
             return self.handle_get_location_description(values)
+        elif request == 'activity_id_from_hash':
+            return self.handle_get_activity_id_from_hash(values)
+        elif request == 'activity_hash_from_id':
+            return self.handle_get_activity_hash_from_id(values)
         return False, ""
