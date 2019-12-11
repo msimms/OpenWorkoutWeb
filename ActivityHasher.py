@@ -48,6 +48,8 @@ class ActivityHasher(object):
         for sensor_type in sensor_types_to_analyze:
             if sensor_type in self.activity:
                 print("Hashing " + sensor_type + " data...")
+
+                # Accelerometer data is stored differently....
                 if sensor_type == Keys.APP_ACCELEROMETER_KEY:
                     for datum in self.activity[sensor_type]:
                         time = str(datum[Keys.ACCELEROMETER_TIME_KEY])
