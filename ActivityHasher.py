@@ -48,16 +48,28 @@ class ActivityHasher(object):
         for sensor_type in sensor_types_to_analyze:
             if sensor_type in self.activity:
                 print("Hashing " + sensor_type + " data...")
-                for datum in self.activity[sensor_type]:
-                    if sys.version_info[0] < 3:
-                        time = str(int(datum.keys()[0])).encode('utf-8')
-                        value = self.floatToStr(datum.values()[0])
-                    else:
-                        time = str(int(list(datum.keys())[0])).encode('utf-8')
-                        value = self.floatToStr(list(datum.values())[0])
+                if sensor_type == Keys.APP_ACCELEROMETER_KEY:
+                    for datum in self.activity[sensor_type]:
+                        time = str(datum[Keys.ACCELEROMETER_TIME_KEY])
+                        x = self.floatToStr(datum[Keys.ACCELEROMETER_AXIS_NAME_X])
+                        y = self.floatToStr(datum[Keys.ACCELEROMETER_AXIS_NAME_Y])
+                        z = self.floatToStr(datum[Keys.ACCELEROMETER_AXIS_NAME_Z])
 
-                    h.update(time)
-                    h.update(value)
+                        h.update(time)
+                        h.update(x)
+                        h.update(y)
+                        h.update(z)
+                else:
+                    for datum in self.activity[sensor_type]:
+                        if sys.version_info[0] < 3:
+                            time = str(int(datum.keys()[0])).encode('utf-8')
+                            value = self.floatToStr(datum.values()[0])
+                        else:
+                            time = str(int(list(datum.keys())[0])).encode('utf-8')
+                            value = self.floatToStr(list(datum.values())[0])
+
+                        h.update(time)
+                        h.update(value)
 
         # Finalize the hash digest.
         hash_str = h.hexdigest()
