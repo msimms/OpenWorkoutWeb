@@ -143,6 +143,7 @@ The software architecture makes it possible to use this system with different fr
 This software uses several other source projects to work properly:
 
 * [LibMath](https://github.com/msimms/LibMath) - A collection of math utilities, including a peak finding algorithm.
+* [ZwoReader](https://github.com/msimms/ZwoReader) - A simple utility for parsing a ZWO-formatted file.
 * [fullcalendar](https://fullcalendar.io/) - A Javascript calendar implementation.
 * [chosen](https://github.com/harvesthq/chosen) - A select box implementation that is used for the tag user interface.
 * [pymongo](https://github.com/mongodb/mongo-python-driver) - Python interface to mongodb.
