@@ -15,12 +15,19 @@ import tensorflow as tf
 import time
 import traceback
 import AnalysisScheduler
+import BikePlanGenerator
 import DataMgr
 import UserMgr
 import Keys
+import Units
+import RunPlanGenerator
+import SwimPlanGenerator
+import WorkoutScheduler
 
 g_model = None
 
+METERS_PER_HALF_MARATHON = 13.1 * Units.METERS_PER_MILE
+METERS_PER_MARATHON = 26.2 * Units.METERS_PER_MILE
 
 class WorkoutPlanGenerator(object):
     """Class for performing the computationally expensive workout plan generation tasks."""
@@ -38,6 +45,26 @@ class WorkoutPlanGenerator(object):
         logger = logging.getLogger()
         if logger is not None:
             logger.debug(log_str)
+    
+    @staticmethod
+    def goal_enum_to_distances(goal):
+        """Converts the goal key/enum value to the equivalent value in meters, returned as an array of [swim, bike, run] distances."""
+        if goal == Keys.GOAL_5K_RUN_KEY:
+            return [0, 0, 5000]
+        elif goal == Keys.GOAL_10K_RUN_KEY:
+            return [0, 0, 10000]
+        elif goal == Keys.GOAL_15K_RUN_KEY:
+            return [0, 0, 15000]
+        elif goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
+            return [0, 0, METERS_PER_HALF_MARATHON]
+        elif goal == Keys.GOAL_MARATHON_RUN_KEY:
+            return [0, 0, METERS_PER_MARATHON]
+        return [0, 0, 0]
+
+    @staticmethod
+    def goal_enum_to_bike_distance(goal):
+        """Converts the goal key/enum value to the equivalent value in meters."""
+        return 0
 
     @staticmethod
     def update_summary_data_cb(context, activity, user_id):
@@ -79,37 +106,56 @@ class WorkoutPlanGenerator(object):
         if running_bests is not None:
             if Keys.LONGEST_DISTANCE in running_bests:
                 longest_run = running_bests[Keys.LONGEST_DISTANCE]
+                longest_run = longest_run[0]
 
         # Compute the user's age in years.
         birthday = int(self.user_mgr.retrieve_user_setting(user_id, Keys.BIRTHDAY_KEY))
         age_years = (now - birthday) / (365.25 * 24 * 60 * 60)
 
-        inputs = [ tempo_pace, longest_run, age_years, 0, goal, weeks_until_goal ]
+        # Compute an experience level for the user.
+        experience_level = 0
+
+        inputs = [ tempo_pace, longest_run, age_years, experience_level, goal, weeks_until_goal ]
+        print("Inputs: " + str(inputs))
         return inputs
 
-    def generate_outputs(self, user_id, inputs, model):
+    def generate_workouts(self, user_id, inputs):
+        swim_planner = SwimPlanGenerator.SwimPlanGenerator(user_id)
+        bike_planner = BikePlanGenerator.BikePlanGenerator(user_id)
+        run_planner = RunPlanGenerator.RunPlanGenerator(user_id)
+
+        goal_distances = WorkoutPlanGenerator.goal_enum_to_distances(inputs[0])
+        swim_workouts = swim_planner.gen_workouts_for_next_week(goal_distances[0])
+        bike_workouts = bike_planner.gen_workouts_for_next_week(goal_distances[1])
+        run_workouts = run_planner.gen_workouts_for_next_week(goal_distances[2])
+
+        return run_workouts
+
+    def generate_workouts_using_model(self, user_id, inputs, model):
         """Runs the neural network specified by 'model' to generate the workout plan."""
         return []
 
-    def organize_schedule(self, user_id, plan):
+    def organize_schedule(self, user_id, workouts):
         """Arranges the user's workouts into days/weeks, etc. To be called after the outputs are generated, but need cleaning up."""
         pass
 
     def generate_plan(self, model):
-        """Entry point for workout plan generation."""
+        """Entry point for workout plan generation. If a model is not provided then a simpler, non-neural network-based algorithm, is used instead."""
 
         # Sanity check.
         if self.user_obj is None:
             self.log_error("User information not provided.")
             return
         if model is None:
-            self.log_error("Model not provided.")
-            return
+            self.log_error("Model not provided. Will use non-ML algorithm instead.")
 
         try:
             user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID]
             inputs = self.calculate_inputs(user_id)
-            outputs = self.generate_outputs(user_id, inputs, model)
+            if model is None:
+                outputs = self.generate_workouts(user_id, inputs)
+            else:
+                outputs = self.generate_workouts_using_model(user_id, inputs, model)
             self.organize_schedule(user_id, outputs)
         except:
             self.log_error("Exception when generating a workout plan.")
@@ -178,7 +224,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--user_id", default="", help="The user ID for whom we are to generate a workout plan.", required=False)
-    parser.add_argument("--train", default="", help="The path to the training plan.", required=False)
+    parser.add_argument("--train", default="", help="The path to the training plan model.", required=False)
 
     try:
         args = parser.parse_args()
