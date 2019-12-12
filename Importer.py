@@ -327,7 +327,7 @@ class Importer(object):
         return True, device_str, activity_id
 
     def import_file(self, username, user_id, local_file_name, original_file_name, file_extension):
-        """Imports the specified file, parsing it based on the provided extension."""
+        """Imports the specified file, parsing it based on the provided extension. Result is {success, device_id, activity_id}."""
         try:
             if file_extension == '.gpx':
                 return self.import_gpx_file(username, user_id, local_file_name)

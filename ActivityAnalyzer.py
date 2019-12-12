@@ -69,6 +69,7 @@ class ActivityAnalyzer(object):
 
             # Do the location analysis.
             print("Performing location analysis...")
+            location_analyzer = None
             if Keys.ACTIVITY_LOCATIONS_KEY in self.activity:
                 location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
                 locations = self.activity[Keys.ACTIVITY_LOCATIONS_KEY]
@@ -95,7 +96,7 @@ class ActivityAnalyzer(object):
 
             # Create a current speed graph - if one has not already been created.
             print("Creating speed graph...")
-            if Keys.APP_CURRENT_SPEED_KEY not in self.activity:
+            if Keys.APP_CURRENT_SPEED_KEY not in self.activity and location_analyzer is not None:
                 self.speed_graph = location_analyzer.create_speed_graph()
             self.should_yield()
 
@@ -104,6 +105,7 @@ class ActivityAnalyzer(object):
                 activity_id = self.activity[Keys.ACTIVITY_ID_KEY]
 
                 # Where was this activity performed?
+                print("Computing location description...")
                 location_description = self.data_mgr.get_location_description(activity_id)
                 self.summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY] = location_description
 

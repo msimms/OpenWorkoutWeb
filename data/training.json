@@ -1,5 +1,5 @@
 {
-   "input_headers": [ "Tempo Pace", "Avg Number of Days Running / Week", "Avg Longest Run / Week", "Athlete Age (Years)", "Skill Level", "Goal Distance", "Weeks Until Goal", "Week Number" ],
+   "input_headers": [ "Tempo Pace", "Avg Number of Days Running / Week", "Avg Longest Run / Week", "Athlete Age (Years)", "Experience Level", "Goal Distance", "Weeks Until Goal", "Week Number" ],
    "output_headers": [ "Long Run Distance (KM)", "Tempo Run Distance (KM)", "Interval Workout", "Number Of Cross-Training Days" ],
    "input_data": [
       { "metrics": [0, 0, 0, 20, 0, 5000, 8, 0], "plan_number": 0 },

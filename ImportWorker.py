@@ -29,12 +29,14 @@ import celery
 import json
 import logging
 import os
+import sys
 import traceback
 import uuid
+import AnalysisScheduler
 import DataMgr
 import Importer
 
-def log_error(self, log_str):
+def log_error(log_str):
     """Writes an error message to the log file."""
     print(log_str)
     logger = logging.getLogger()
@@ -53,6 +55,7 @@ def import_activity(import_str):
         uploaded_file_name = import_obj['uploaded_file_name']
 
         # Generate a random name for the local file.
+        print("Generating local file name...")
         root_dir = os.path.dirname(os.path.abspath(__file__))
         tempfile_dir = os.path.join(root_dir, 'tempfile')
         if not os.path.exists(tempfile_dir):
@@ -63,12 +66,24 @@ def import_activity(import_str):
         local_file_name = local_file_name + uploaded_file_ext
 
         # Write the file.
+        print("Write the data to a local file...")
         with open(local_file_name, 'wb') as local_file:
             local_file.write(uploaded_file_data)
-            
+
+        # Import the file into the database.            
+        print("Import the data to the database...")
         data_mgr = DataMgr.DataMgr("", root_dir, None, None, None)
         importer = Importer.Importer(data_mgr)
-        importer.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
+        success, _, activity_id = importer.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
+
+        # If the import was successful, then schedule the activity for analysis.
+        if success:
+            print("Import was successful, perform analysis...")
+            analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
+            activity = data_mgr.retrieve_activity(activity_id)
+            analysis_scheduler.add_to_queue(activity, user_id)
+        else:
+            print("Import was not successful.")
     except:
         log_error("Exception when importing activity data: " + str(import_str))
         log_error(traceback.format_exc())
@@ -76,6 +91,7 @@ def import_activity(import_str):
     finally:
         # Remove the local file.
         if len(local_file_name) > 0:
+            print("Removing local file...")
             os.remove(local_file_name)
 
 def main():
