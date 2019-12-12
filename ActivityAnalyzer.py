@@ -105,6 +105,7 @@ class ActivityAnalyzer(object):
                 activity_id = self.activity[Keys.ACTIVITY_ID_KEY]
 
                 # Where was this activity performed?
+                print("Computing location description...")
                 location_description = self.data_mgr.get_location_description(activity_id)
                 self.summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY] = location_description
 
