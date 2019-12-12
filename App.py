@@ -1421,14 +1421,15 @@ class App(object):
                 prs += "<h3>" + record_group + "</h3>\n"
                 prs += "<table>\n"
                 for record_name in record_dict:
-                    record = record_dict[record_name]
-                    record_value = record[0]
-                    activity_id = record[1]
-                    record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+                    if record_name not in Keys.UNSUMMARIZABLE_KEYS:
+                        record = record_dict[record_name]
+                        record_value = record[0]
+                        activity_id = record[1]
+                        record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
 
-                    prs += "<td>"
-                    prs += record_name
-                    prs += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
+                        prs += "<td>"
+                        prs += record_name
+                        prs += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
                 prs += "</table>\n"
 
         # Render from the template.
