@@ -137,6 +137,7 @@ The software architecture makes it possible to use this system with different fr
 ### 0.15
 * Added gear tracking.
 * Added location descriptions (i.e., Florida, United States).
+* Importing data now also starts the analysis process.
 * Bug fixes.
 
 ## Tech
