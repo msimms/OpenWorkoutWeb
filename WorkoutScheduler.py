@@ -8,4 +8,4 @@ class WorkoutScheduler(object):
 
     def schedule_workouts(self, workouts):
         """Organizes the workouts into a schedule for the next week."""
-        pass
+        return workouts

@@ -120,16 +120,21 @@ class WorkoutPlanGenerator(object):
         return inputs
 
     def generate_workouts(self, user_id, inputs):
+        """Generates workouts for the specified user to perform in the next week."""
         swim_planner = SwimPlanGenerator.SwimPlanGenerator(user_id)
         bike_planner = BikePlanGenerator.BikePlanGenerator(user_id)
         run_planner = RunPlanGenerator.RunPlanGenerator(user_id)
 
         goal_distances = WorkoutPlanGenerator.goal_enum_to_distances(inputs[0])
-        swim_workouts = swim_planner.gen_workouts_for_next_week(goal_distances[0])
-        bike_workouts = bike_planner.gen_workouts_for_next_week(goal_distances[1])
-        run_workouts = run_planner.gen_workouts_for_next_week(goal_distances[2])
 
-        return run_workouts
+        workouts = []
+        swim_workouts = swim_planner.gen_workouts_for_next_week(goal_distances[0])
+        workouts.extend(swim_workouts)
+        bike_workouts = bike_planner.gen_workouts_for_next_week(goal_distances[1])
+        workouts.extend(bike_workouts)
+        run_workouts = run_planner.gen_workouts_for_next_week(goal_distances[2])
+        workouts.extend(run_workouts)
+        return workouts
 
     def generate_workouts_using_model(self, user_id, inputs, model):
         """Runs the neural network specified by 'model' to generate the workout plan."""
@@ -137,7 +142,8 @@ class WorkoutPlanGenerator(object):
 
     def organize_schedule(self, user_id, workouts):
         """Arranges the user's workouts into days/weeks, etc. To be called after the outputs are generated, but need cleaning up."""
-        pass
+        scheduler = WorkoutScheduler.WorkoutScheduler(user_id)
+        return scheduler.schedule_workouts(workouts)
 
     def generate_plan(self, model):
         """Entry point for workout plan generation. If a model is not provided then a simpler, non-neural network-based algorithm, is used instead."""
