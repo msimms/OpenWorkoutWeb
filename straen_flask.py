@@ -219,6 +219,20 @@ def all_records(self, activity_type, record_name):
         g_app.log_error('Unhandled exception in ' + all_records.__name__)
     return self.error()
 
+@cherrypy.expose
+@require()
+def record_progression(self, activity_type, record_name):
+    """Renders the list of records, in order of progression, for the specified user and record type."""
+    try:
+        return g_app.record_progression(activity_type, record_name)
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + record_progression.__name__)
+    return self.error()
+
 @g_flask_app.route('/workouts')
 @login_requred
 def workouts():

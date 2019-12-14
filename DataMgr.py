@@ -845,7 +845,7 @@ class DataMgr(Importer.ActivityWriter):
 
         # We're only interested in activities from this time forward.
         if timeframe is None:
-            cutoff_time = 0
+            cutoff_time = None
         else:
             cutoff_time = time.time() - timeframe
 
@@ -881,10 +881,9 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         bests = []
-        summarizer = Summarizer.Summarizer()
 
         # Load cached summary data from all previous activities.
-        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, 0)
+        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, None)
         if all_activity_bests is not None:
             for activity_id in all_activity_bests:
                 activity_bests = all_activity_bests[activity_id]
@@ -895,6 +894,45 @@ class DataMgr(Importer.ActivityWriter):
                     bests.append(record)
 
         bests.sort(compare)
+        return bests
+
+    def compute_progression(self, user_id, user_activities, activity_type, key):
+        """Return a sorted list of all records for the given activity type and key."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if user_activities is None:
+            raise Exception("Bad parameter.")
+        if activity_type is None:
+            raise Exception("Bad parameter.")
+        if key is None:
+            raise Exception("Bad parameter.")
+
+        bests = []
+
+        # Load cached summary data from all previous activities.
+        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, None)
+        if all_activity_bests is not None:
+            best_value = None
+    
+            # Loop through each of the user's activities, the key is the activity ID.
+            for activity in user_activities:
+                if Keys.ACTIVITY_ID_KEY in activity:
+                    activity_id = activity[Keys.ACTIVITY_ID_KEY]
+
+                    # Check the list of bests for the activity ID.
+                    if activity_id in all_activity_bests:
+                        activity_bests = all_activity_bests[activity_id]
+                        if (Keys.ACTIVITY_TYPE_KEY in activity_bests) and (activity_bests[Keys.ACTIVITY_TYPE_KEY] == activity_type) and (key in activity_bests):
+                            current_value = activity_bests[key]
+                            if best_value is None or Summarizer.Summarizer.is_better(key, best_value, current_value):
+                                record = []
+                                record.append(current_value)
+                                record.append(activity_id)
+                                bests.append(record)
+                                best_value = current_value
+
         return bests
 
     def compute_run_training_paces(self, user_id, running_bests):
