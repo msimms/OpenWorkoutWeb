@@ -1423,13 +1423,7 @@ class App(object):
                 for record_name in record_dict:
                     if record_name not in Keys.UNSUMMARIZABLE_KEYS:
                         record = record_dict[record_name]
-                        record_value = record[0]
-                        activity_id = record[1]
-                        record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
-
-                        prs += "<td>"
-                        prs += record_name
-                        prs += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><tr>\n"
+                        prs += self.render_personal_record(user_id, record_group, record, record_name)
                 prs += "</table>\n"
 
         # Render from the template.
