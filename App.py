@@ -485,8 +485,10 @@ class App(object):
         power_zones_str = ""
         ftp = self.data_mgr.retrieve_user_estimated_ftp(activity_user_id)
         if ftp is not None and Keys.APP_POWER_KEY in activity:
-            power_zone_distribution = self.data_mgr.compute_power_zone_distribution(ftp[0], activity[Keys.APP_POWER_KEY])
-            power_zones_str = "\t\t" + self.render_array(power_zone_distribution)
+            powers = activity[Keys.APP_POWER_KEY]
+            if len(powers) > 0:
+                power_zone_distribution = self.data_mgr.compute_power_zone_distribution(ftp[0], powers)
+                power_zones_str = "\t\t" + self.render_array(power_zone_distribution)
 
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
