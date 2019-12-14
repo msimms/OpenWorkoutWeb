@@ -75,9 +75,10 @@ class WorkoutPlanGenerator(object):
     def calculate_inputs(self, user_id):
         """Looks through the user's data and calculates the neural net inputs."""
 
+        inputs = {}
+
         now = time.time()
-        tempo_pace = None   # Tempo pace is ~30 secs/mile slower than 5K race pace.
-        longest_run = None  # Longest run in the last four weeks
+        longest_run_in_four_weeks = None  # Longest run in the last four weeks
 
         # Fetch the detail of the user's goal.
         goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
@@ -91,9 +92,9 @@ class WorkoutPlanGenerator(object):
         # Look through the user's six month records.
         cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.SIX_MONTHS)
         if running_bests is not None:
-            if Keys.BEST_5K in running_bests:
-                best_5K = running_bests[Keys.BEST_5K][0]
-                tempo_pace = (best_5K - (30.0 * 3.1)) / 5000.0 # Tempo pace per km
+            running_paces = self.data_mgr.compute_run_training_paces(user_id, running_bests)
+        else:
+            running_paces = {}
         if cycling_bests is not None:
             if Keys.THRESHOLD_POWER in cycling_bests:
                 threshold_power = cycling_bests[Keys.THRESHOLD_POWER]
@@ -105,8 +106,8 @@ class WorkoutPlanGenerator(object):
         cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.FOUR_WEEKS)
         if running_bests is not None:
             if Keys.LONGEST_DISTANCE in running_bests:
-                longest_run = running_bests[Keys.LONGEST_DISTANCE]
-                longest_run = longest_run[0]
+                longest_run_in_four_weeks = running_bests[Keys.LONGEST_DISTANCE]
+                longest_run_in_four_weeks = longest_run_in_four_weeks[0]
 
         # Compute the user's age in years.
         birthday = int(self.user_mgr.retrieve_user_setting(user_id, Keys.BIRTHDAY_KEY))
@@ -115,7 +116,14 @@ class WorkoutPlanGenerator(object):
         # Compute an experience level for the user.
         experience_level = 0
 
-        inputs = [ tempo_pace, longest_run, age_years, experience_level, goal, weeks_until_goal ]
+        # Store all the inputs in a dictionary.
+        inputs = running_paces
+        inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY] = longest_run_in_four_weeks
+        inputs[Keys.AGE_YEARS_KEY] = age_years
+        inputs[Keys.EXPERIENCE_LEVEL_KEY] = experience_level
+        inputs[Keys.GOAL_KEY] = goal
+        inputs[Keys.WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
+
         print("Inputs: " + str(inputs))
         return inputs
 
@@ -125,19 +133,39 @@ class WorkoutPlanGenerator(object):
         bike_planner = BikePlanGenerator.BikePlanGenerator(user_id)
         run_planner = RunPlanGenerator.RunPlanGenerator(user_id)
 
-        goal_distances = WorkoutPlanGenerator.goal_enum_to_distances(inputs[0])
+        speed_run_pace = inputs[Keys.SPEED_RUN_PACE]
+        tempo_run_pace = inputs[Keys.TEMPO_RUN_PACE]
+        long_run_pace = inputs[Keys.LONG_RUN_PACE]
+        longest_run_in_four_weeks = inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY]
+        goal_distances = WorkoutPlanGenerator.goal_enum_to_distances(inputs[Keys.GOAL_KEY])
 
         workouts = []
-        swim_workouts = swim_planner.gen_workouts_for_next_week(goal_distances[0])
+
+        # Generate the swim workotus.
+        if not swim_planner.is_workout_plan_possible(goal_distances[0], inputs):
+            raise Exception("The swim distance goal is not feasible in the time alloted.")
+        swim_workouts = swim_planner.gen_workouts_for_next_week(goal_distances[0], inputs)
         workouts.extend(swim_workouts)
-        bike_workouts = bike_planner.gen_workouts_for_next_week(goal_distances[1])
+
+        # Generate the bike workotus.
+        if not bike_planner.is_workout_plan_possible(goal_distances[1], inputs):
+            raise Exception("The bike distance goal is not feasible in the time alloted.")
+        bike_workouts = bike_planner.gen_workouts_for_next_week(goal_distances[1], inputs)
         workouts.extend(bike_workouts)
-        run_workouts = run_planner.gen_workouts_for_next_week(goal_distances[2])
+
+        # Generate the run workotus.
+        if not run_planner.is_workout_plan_possible(goal_distances[2], inputs):
+            raise Exception("The run distance goal is not feasible in the time alloted.")
+        run_workouts = run_planner.gen_workouts_for_next_week(goal_distances[2], inputs)
         workouts.extend(run_workouts)
+
         return workouts
 
     def generate_workouts_using_model(self, user_id, inputs, model):
         """Runs the neural network specified by 'model' to generate the workout plan."""
+
+        # Convert the input dictionary to an array as required by tf.
+        model_inputs = [ inputs[Keys.SPEED_RUN_PACE], inputs[Keys.TEMPO_RUN_PACE], inputs[Keys.LONG_RUN_PACE], inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY], inputs[Keys.AGE_YEARS_KEY], inputs[Keys.EXPERIENCE_LEVEL], inputs[Keys.GOAL], inputs[Keys.WEEKS_UNTIL_GOAL_KEY] ]
         return []
 
     def organize_schedule(self, user_id, workouts):
@@ -158,11 +186,16 @@ class WorkoutPlanGenerator(object):
         try:
             user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID]
             inputs = self.calculate_inputs(user_id)
+
+            # Generate the workouts.
             if model is None:
                 outputs = self.generate_workouts(user_id, inputs)
             else:
                 outputs = self.generate_workouts_using_model(user_id, inputs, model)
-            self.organize_schedule(user_id, outputs)
+
+            # Organize the workouts into a schedule.
+            outputs = self.organize_schedule(user_id, outputs)
+            print("Outputs: " + str(outputs))
         except:
             self.log_error("Exception when generating a workout plan.")
             self.log_error(traceback.format_exc())
