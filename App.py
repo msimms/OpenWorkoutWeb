@@ -874,20 +874,20 @@ class App(object):
         out_str += "?" + urllib.urlencode(params) + "\">[...]</td><tr>\n"
         return out_str
 
-    def render_personal_records(self, user_id, cycling_bests, running_bests):
+    def render_personal_records(self, user_id, cycling_bests, running_bests, show_progression):
         """Helper function that renders the table rows used to show personal bests."""
         bests_str = ""
         if cycling_bests is not None and len(cycling_bests) > 0:
             bests_str += "<h3>Cycling Efforts</h3>\n"
             bests_str += "<table>\n"
             for record_name in cycling_bests:
-                bests_str += self.render_personal_record(user_id, Keys.TYPE_CYCLING_KEY, cycling_bests[record_name], record_name, False)
+                bests_str += self.render_personal_record(user_id, Keys.TYPE_CYCLING_KEY, cycling_bests[record_name], record_name, show_progression)
             bests_str += "</table>\n"
         if running_bests is not None and len(running_bests) > 0:
             bests_str += "<h3>Running Efforts</h3>\n"
             bests_str += "<table>\n"
             for record_name in running_bests:
-                bests_str += self.render_personal_record(user_id, Keys.TYPE_RUNNING_KEY, running_bests[record_name], record_name, False)
+                bests_str += self.render_personal_record(user_id, Keys.TYPE_RUNNING_KEY, running_bests[record_name], record_name, show_progression)
             bests_str += "</table>\n"
         return bests_str
 
@@ -964,7 +964,7 @@ class App(object):
 
         # Show the relevant PRs.
         cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.SIX_MONTHS)
-        bests_str = self.render_personal_records(user_id, cycling_bests, running_bests)
+        bests_str = self.render_personal_records(user_id, cycling_bests, running_bests, False)
 
         # Show the running training paces.
         run_paces = self.data_mgr.compute_run_training_paces(user_id, running_bests)
@@ -1022,9 +1022,9 @@ class App(object):
 
         # Show the relevant PRs.
         cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, None)
-        all_time_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests)
+        all_time_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests, True)
         cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.ONE_YEAR)
-        one_year_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests)
+        one_year_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests, True)
 
         # Show the list of places.
         places_str = "<table>"
