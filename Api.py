@@ -16,11 +16,10 @@ import Units
 class Api(object):
     """Class for managing API messages."""
 
-    def __init__(self, user_mgr, data_mgr, temp_dir, user_id, root_url):
+    def __init__(self, user_mgr, data_mgr, user_id, root_url):
         super(Api, self).__init__()
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
-        self.temp_dir = temp_dir
         self.user_id = user_id
         self.root_url = root_url
 

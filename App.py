@@ -1514,7 +1514,7 @@ class App(object):
     @statistics
     def api(self, user_id, method, params):
         """Handles an API request."""
-        api = Api.Api(self.user_mgr, self.data_mgr, self.tempfile_dir, user_id, self.root_url)
+        api = Api.Api(self.user_mgr, self.data_mgr, user_id, self.root_url)
         handled, response = api.handle_api_1_0_request(method, params)
         return handled, response
 
