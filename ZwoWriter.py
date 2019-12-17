@@ -74,6 +74,7 @@ class ZwoWriter(XmlWriter.XmlWriter):
     def end_workout(self):
         if self.current_tag() is not ZWO_TAG_NAME_WORKOUT:
             raise Exception("ZWO tag error when ending a workout.")
+        self.close_tag()
 
     def store_workout_warmup(self, duration, power_low, power_high, pace):
         if self.current_tag() is not ZWO_TAG_NAME_WORKOUT:

@@ -202,6 +202,11 @@ BIKE_BASED_ACTIVITIES = [ TYPE_CYCLING_KEY ]
 # Activity names
 UNNAMED_ACTIVITY_TITLE = "Unnamed"
 
+# Interval workouts
+INTERVAL_REPEAT_KEY = "Repeat"
+INTERVAL_DISTANCE_KEY = "Distance"
+INTERVAL_PACE_KEY = "Pace"
+
 # Goals
 GOAL_KEY = "goal"
 GOAL_DATE_KEY = "goal_date"

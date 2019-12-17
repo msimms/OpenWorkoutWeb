@@ -14,6 +14,7 @@ import sys
 import tensorflow as tf
 import time
 import traceback
+import uuid
 import AnalysisScheduler
 import BikePlanGenerator
 import DataMgr
@@ -179,9 +180,11 @@ class WorkoutPlanGenerator(object):
         # Sanity check.
         if self.user_obj is None:
             self.log_error("User information not provided.")
-            return
+            return []
         if model is None:
             self.log_error("Model not provided. Will use non-ML algorithm instead.")
+
+        outputs = []
 
         try:
             user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID]
@@ -195,11 +198,11 @@ class WorkoutPlanGenerator(object):
 
             # Organize the workouts into a schedule.
             outputs = self.organize_schedule(user_id, outputs)
-            print("Outputs: " + str(outputs))
         except:
             self.log_error("Exception when generating a workout plan.")
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
+        return outputs
 
 def generate_model(training_file_name):
     """Creates the neural network, based on training data from the supplied JSON file."""
@@ -246,6 +249,17 @@ def generate_model(training_file_name):
 
     return model
 
+def generate_temp_file_name(extension):
+    """Utility function for generating a temporary file name."""
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    tempfile_dir = os.path.join(root_dir, 'tempfile')
+    if not os.path.exists(tempfile_dir):
+        os.makedirs(tempfile_dir)
+    tempfile_dir = os.path.normpath(tempfile_dir)
+    tempfile_name = os.path.join(tempfile_dir, str(uuid.uuid4()))
+    tempfile_name = tempfile_name + extension
+    return tempfile_name
+    
 @celery_worker.task()
 def generate_workout_plan(user_str):
     """Entry point for the celery worker."""
@@ -254,7 +268,11 @@ def generate_workout_plan(user_str):
     print("Starting workout plan generation...")
     user_obj = json.loads(user_str)
     generator = WorkoutPlanGenerator(user_obj)
-    generator.generate_plan(g_model)
+    workouts = generator.generate_plan(g_model)
+    for workout in workouts:
+        tempfile_name = generate_temp_file_name(".zwo")
+        workout.export_to_zwo(tempfile_name)
+        print("Exported a workout to " + tempfile_name + ".")
     print("Workout plan generation finished.")
 
 def main():
