@@ -416,6 +416,22 @@ class StraenWeb(object):
 
     @cherrypy.expose
     @require()
+    def import_status(self, *args, **kw):
+        """Renders the import status page."""
+        try:
+            return self.app.import_status()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.import_status.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
     def summary(self, *args, **kw):
         """Renders the user's summary page."""
         try:

@@ -373,6 +373,20 @@ def import_activity():
         g_app.log_error('Unhandled exception in ' + import_activity.__name__)
     return g_app.error()
 
+@g_flask_app.route('/import_status')
+@login_requred
+def import_status():
+    """Renders the import status page."""
+    try:
+        return g_app.import_status()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + import_status.__name__)
+    return g_app.error()
+
 @g_flask_app.route('/summary')
 @login_requred
 def summary():
