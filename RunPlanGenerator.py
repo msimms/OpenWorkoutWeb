@@ -32,32 +32,25 @@ class RunPlanGenerator(object):
         speed_run_workout = Workout.Workout(self.user_id)
         speed_run_workout.description = "Speed Run"
         speed_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
-        interval = {}
-        interval[Keys.INTERVAL_REPEAT_KEY] = 3
-        interval[Keys.INTERVAL_DISTANCE_KEY] = longest_run_in_four_weeks / 10
-        interval[Keys.INTERVAL_PACE_KEY] = speed_run_pace
-        speed_run_workout.intervals.append(interval)
+        speed_run_workout.add_warmup(10 * 60)
+        speed_run_workout.add_interval(3, longest_run_in_four_weeks / 10, speed_run_pace)
+        speed_run_workout.add_cooldown(5 * 60)
         workouts.append(speed_run_workout)
 
         # Tempo run
         tempo_run_workout = Workout.Workout(self.user_id)
         tempo_run_workout.description = "Tempo Run"
         tempo_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
-        interval = {}
-        interval[Keys.INTERVAL_REPEAT_KEY] = 1
-        interval[Keys.INTERVAL_DISTANCE_KEY] = longest_run_in_four_weeks / 5
-        interval[Keys.INTERVAL_PACE_KEY] = tempo_run_pace
-        tempo_run_workout.intervals.append(interval)
+        tempo_run_workout.add_warmup(5 * 60)
+        tempo_run_workout.add_interval(1, longest_run_in_four_weeks / 5, tempo_run_pace)
+        tempo_run_workout.add_cooldown(5 * 60)
         workouts.append(tempo_run_workout)
 
         # Long run
         long_run_workout = Workout.Workout(self.user_id)
         long_run_workout.description = "Long Run"
         long_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
-        interval = {}
-        interval[Keys.INTERVAL_REPEAT_KEY] = 1
-        interval[Keys.INTERVAL_DISTANCE_KEY] = longest_run_in_four_weeks * 1.1
-        interval[Keys.INTERVAL_PACE_KEY] = long_run_pace
+        long_run_workout.add_interval(1, longest_run_in_four_weeks * 1.1, long_run_pace)
         workouts.append(long_run_workout)
 
         return workouts
