@@ -78,13 +78,13 @@ class ZwoWriter(XmlWriter.XmlWriter):
         if self.current_tag() is not ZwoTags.ZWO_TAG_NAME_WORKOUT:
             raise Exception("ZWO tag error when ending a workout.")
         attributes = {}
-        attributes[ZwoTags.ZWO_ATTR_NAME_DURATION] = duration
+        attributes[ZwoTags.ZWO_ATTR_NAME_DURATION] = str(duration)
         if power_low is not None:
-            attributes[ZwoTags.ZWO_ATTR_NAME_POWERLOW] = power_low
+            attributes[ZwoTags.ZWO_ATTR_NAME_POWERLOW] = str(power_low)
         if power_high is not None:
-            attributes[ZwoTags.ZWO_ATTR_NAME_POWERHIGH] = power_high
+            attributes[ZwoTags.ZWO_ATTR_NAME_POWERHIGH] = str(power_high)
         if pace is not None:
-            attributes[ZwoTags.ZWO_ATTRIBUTE_PACE] = pace
+            attributes[ZwoTags.ZWO_ATTRIBUTE_PACE] = str(pace)
         self.open_tag_with_attributes(ZwoTags.ZWO_TAG_NAME_WORKOUT_WARMUP, attributes, False)
         self.close_tag()
 
@@ -92,13 +92,13 @@ class ZwoWriter(XmlWriter.XmlWriter):
         if self.current_tag() is not ZwoTags.ZWO_TAG_NAME_WORKOUT:
             raise Exception("ZWO tag error when ending a workout.")
         attributes = {}
-        attributes[ZwoTags.ZWO_ATTR_NAME_DURATION] = duration
+        attributes[ZwoTags.ZWO_ATTR_NAME_DURATION] = str(duration)
         if power_low is not None:
-            attributes[ZwoTags.ZWO_ATTR_NAME_POWERLOW] = power_low
+            attributes[ZwoTags.ZWO_ATTR_NAME_POWERLOW] = str(power_low)
         if power_high is not None:
-            attributes[ZwoTags.ZWO_ATTR_NAME_POWERHIGH] = power_high
+            attributes[ZwoTags.ZWO_ATTR_NAME_POWERHIGH] = str(power_high)
         if pace is not None:
-            attributes[ZwoTags.ZWO_ATTR_NAME_PACE] = pace
+            attributes[ZwoTags.ZWO_ATTR_NAME_PACE] = str(pace)
         self.open_tag_with_attributes(ZwoTags.ZWO_TAG_NAME_WORKOUT_COOLDOWN, attributes, False)
         self.close_tag()
 
@@ -106,11 +106,13 @@ class ZwoWriter(XmlWriter.XmlWriter):
         if self.current_tag() is not ZwoTags.ZWO_TAG_NAME_WORKOUT:
             raise Exception("ZWO tag error when ending a workout.")
         attributes = {}
-        attributes[ZwoTags.ZWO_ATTR_NAME_REPEAT] = repeat
-        attributes[ZwoTags.ZWO_ATTR_NAME_ONDURATION] = on_duration
-        attributes[ZwoTags.ZWO_ATTR_NAME_OFFDURATION] = off_duration
-        attributes[ZwoTags.ZWO_ATTR_NAME_ONPOWER] = on_power
-        attributes[ZwoTags.ZWO_ATTR_NAME_PACE] = pace
+        attributes[ZwoTags.ZWO_ATTR_NAME_REPEAT] = str(repeat)
+        attributes[ZwoTags.ZWO_ATTR_NAME_ONDURATION] = str(on_duration)
+        attributes[ZwoTags.ZWO_ATTR_NAME_OFFDURATION] = str(off_duration)
+        if ZwoTags.ZWO_ATTR_NAME_ONPOWER is not None:
+            attributes[ZwoTags.ZWO_ATTR_NAME_ONPOWER] = str(on_power)
+        if ZwoTags.ZWO_ATTR_NAME_PACE is not None:
+            attributes[ZwoTags.ZWO_ATTR_NAME_PACE] = str(pace)
         self.open_tag_with_attributes(ZwoTags.ZWO_TAG_NAME_WORKOUT_INTERVALS, attributes, False)
         self.close_tag()
 
@@ -118,7 +120,7 @@ class ZwoWriter(XmlWriter.XmlWriter):
         if self.current_tag() is not ZwoTags.ZWO_TAG_NAME_WORKOUT:
             raise Exception("ZWO tag error when ending a workout.")
         attributes = {}
-        attributes[ZwoTags.ZWO_ATTR_NAME_DURATION] = duration
-        attributes[ZwoTags.ZWO_ATTR_NAME_FLATROAD] = flat_road
+        attributes[ZwoTags.ZWO_ATTR_NAME_DURATION] = str(duration)
+        attributes[ZwoTags.ZWO_ATTR_NAME_FLATROAD] = str(flat_road)
         self.open_tag_with_attributes(ZwoTags.ZWO_TAG_NAME_WORKOUT_FREERIDE, attributes, False)
         self.close_tag()

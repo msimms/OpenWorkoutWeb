@@ -26,26 +26,29 @@ class Workout(object):
 
     def add_warmup(self, seconds):
         self.warmup = {}
-        self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION] = str(seconds)
-        self.warmup[ZwoTags.ZWO_ATTR_NAME_POWERLOW] = None
-        self.warmup[ZwoTags.ZWO_ATTR_NAME_POWERHIGH] = None
+        self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION] = seconds
+        self.warmup[ZwoTags.ZWO_ATTR_NAME_POWERLOW] = 0.25
+        self.warmup[ZwoTags.ZWO_ATTR_NAME_POWERHIGH] = 0.75
         self.warmup[ZwoTags.ZWO_ATTR_NAME_PACE] = None
 
     def add_cooldown(self, seconds):
         self.cooldown = {}
-        self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION] = str(seconds)
-        self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERLOW] = None
-        self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERHIGH] = None
+        self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION] = seconds
+        self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERLOW] = 0.75
+        self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERHIGH] = 0.25
         self.cooldown[ZwoTags.ZWO_ATTR_NAME_PACE] = None
 
-    def add_interval(self, repeat, distance, pace):
+    def add_interval(self, repeat, distance, pace, recovery_distance, recovery_pace):
         interval = {}
-        interval[Keys.INTERVAL_REPEAT_KEY] = str(repeat)
-        interval[Keys.INTERVAL_DISTANCE_KEY] = str(distance)
-        interval[Keys.INTERVAL_PACE_KEY] = str(pace)
+        interval[Keys.INTERVAL_REPEAT_KEY] = repeat
+        interval[Keys.INTERVAL_DISTANCE_KEY] = distance
+        interval[Keys.INTERVAL_PACE_KEY] = pace
+        interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY] = recovery_distance
+        interval[Keys.INTERVAL_RECOVERY_PACE_KEY] = recovery_pace
         self.intervals.append(interval)
 
     def export_to_zwo(self, file_name):
+        """Creates a ZWO-formatted file that describes the workout."""
         writer = ZwoWriter.ZwoWriter()
         writer.create_zwo(file_name)
         writer.store_description(self.description)
@@ -54,8 +57,9 @@ class Workout(object):
         if self.warmup is not None:
             writer.store_workout_warmup(self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION], self.warmup[ZwoTags.ZWO_ATTR_NAME_POWERLOW], self.warmup[ZwoTags.ZWO_ATTR_NAME_POWERHIGH], self.warmup[ZwoTags.ZWO_ATTR_NAME_PACE])
         for interval in self.intervals:
-            pass
-            #writer.store_workout_intervals(interval[Keys.INTERVAL_REPEAT_KEY])
+            on_duration = float(interval[Keys.INTERVAL_DISTANCE_KEY]) * float(interval[Keys.INTERVAL_PACE_KEY])
+            recovery_duration = float(interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY]) * float(interval[Keys.INTERVAL_RECOVERY_PACE_KEY])
+            writer.store_workout_intervals(interval[Keys.INTERVAL_REPEAT_KEY], on_duration, recovery_duration, None, None)
         if self.cooldown is not None:
             writer.store_workout_cooldown(self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION], self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERLOW], self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERHIGH], self.cooldown[ZwoTags.ZWO_ATTR_NAME_PACE])
         writer.end_workout()
