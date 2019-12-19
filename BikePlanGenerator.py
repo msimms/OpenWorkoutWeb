@@ -1,4 +1,5 @@
 # Copyright 2019 Michael J Simms
+"""Generates a bike plan for the specifiied user."""
 
 class BikePlanGenerator(object):
     """Class for generating a bike plan for the specifiied user."""

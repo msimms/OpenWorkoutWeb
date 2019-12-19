@@ -1,4 +1,5 @@
 # Copyright 2018 Michael J Simms
+"""Summerizes a user's activities."""
 
 import time
 import FtpCalculator

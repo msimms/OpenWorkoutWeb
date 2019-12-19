@@ -21,26 +21,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Schedules computationally expensive analysis tasks"""
+"""Formats an ICS file."""
 
-from bson.json_util import dumps
-from ActivityAnalyzer import analyze_activity
-import Keys
-
-class AnalysisScheduler(object):
-    """Class for scheduling computationally expensive analysis tasks."""
+class IcsWriter(object):
+    """Formats an ICS file."""
 
     def __init__(self):
-        self.enabled = True
-        super(AnalysisScheduler, self).__init__()
-
-    def add_to_queue(self, activity, activity_user_id, data_mgr):
-        """Adds the activity ID to the list of activities to be analyzed."""
-        if not self.enabled:
-            return
-
-        if Keys.ACTIVITY_USER_ID_KEY not in activity:
-            activity[Keys.ACTIVITY_USER_ID_KEY] = activity_user_id
-        analysis_task = analyze_activity.delay(dumps(activity))
-        if data_mgr is not None:
-            data_mgr.track_analysis_task(activity_user_id, analysis_task.task_id)
+        super(IcsWriter, self).__init__()

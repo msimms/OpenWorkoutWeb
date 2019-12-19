@@ -1,4 +1,5 @@
 # Copyright 2018 Michael J Simms
+"""Performs calculations on accelerometer data."""
 
 import inspect
 import os
@@ -14,7 +15,7 @@ sys.path.insert(0, libmathdir)
 import peaks
 
 class AccelerometerAnalyzer(SensorAnalyzer.SensorAnalyzer):
-    """Class for performing calculations on bicycle cadence."""
+    """Class for performing calculations on accelerometer data."""
 
     def __init__(self, activity_type):
         SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_ACCELEROMETER_KEY, "", activity_type)

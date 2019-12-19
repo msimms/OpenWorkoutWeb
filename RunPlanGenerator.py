@@ -1,4 +1,5 @@
 # Copyright 2019 Michael J Simms
+"""Generates a run plan for the specifiied user."""
 
 import Keys
 import TrainingPaceCalculator

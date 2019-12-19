@@ -21,6 +21,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+"""Formats a GPX file."""
 
 import datetime
 import XmlWriter
@@ -44,7 +45,7 @@ GPX_TPX_CADENCE = "gpxtpx:cad"
 GPX_TPX_POWER = "power"
 
 class GpxWriter(XmlWriter.XmlWriter):
-    """Formats an GPX file."""
+    """Formats a GPX file."""
 
     def __init__(self):
         XmlWriter.XmlWriter.__init__(self)

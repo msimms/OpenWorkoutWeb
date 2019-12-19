@@ -25,6 +25,7 @@ class Workout(object):
         self.intervals = []
 
     def add_warmup(self, seconds):
+        """Defines the workout warmup."""
         self.warmup = {}
         self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION] = seconds
         self.warmup[ZwoTags.ZWO_ATTR_NAME_POWERLOW] = 0.25
@@ -32,6 +33,7 @@ class Workout(object):
         self.warmup[ZwoTags.ZWO_ATTR_NAME_PACE] = None
 
     def add_cooldown(self, seconds):
+        """Defines the workout cooldown."""
         self.cooldown = {}
         self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION] = seconds
         self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERLOW] = 0.75
@@ -39,6 +41,7 @@ class Workout(object):
         self.cooldown[ZwoTags.ZWO_ATTR_NAME_PACE] = None
 
     def add_interval(self, repeat, distance, pace, recovery_distance, recovery_pace):
+        """Appends an interval to the workout."""
         interval = {}
         interval[Keys.INTERVAL_REPEAT_KEY] = repeat
         interval[Keys.INTERVAL_DISTANCE_KEY] = distance

@@ -21,6 +21,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+"""Formats a TCX file."""
 
 import datetime
 import XmlWriter
@@ -48,7 +49,7 @@ TCX_TAG_NAME_VALUE = "Value"
 TCX_TAG_NAME = "TCX"
 
 class TcxWriter(XmlWriter.XmlWriter):
-    """Formats an TCX file."""
+    """Formats a TCX file."""
 
     def __init__(self):
         XmlWriter.XmlWriter.__init__(self)

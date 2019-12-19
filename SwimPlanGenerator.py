@@ -1,4 +1,5 @@
 # Copyright 2019 Michael J Simms
+"""Generates a swim plan for the specifiied user."""
 
 class SwimPlanGenerator(object):
     """Class for generating a swim plan for the specifiied user."""
