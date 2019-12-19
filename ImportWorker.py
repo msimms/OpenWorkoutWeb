@@ -81,7 +81,7 @@ def import_activity(import_str):
             print("Import was successful, perform analysis...")
             analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
             activity = data_mgr.retrieve_activity(activity_id)
-            analysis_scheduler.add_to_queue(activity, user_id)
+            analysis_scheduler.add_to_queue(activity, user_id, data_mgr)
         else:
             print("Import was not successful.")
     except:

@@ -27,6 +27,12 @@ class RunPlanGenerator(object):
         easy_run_pace = inputs[Keys.EASY_RUN_PACE]
         longest_run_in_four_weeks = inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY]
 
+        # Handle situation in which the user hasn't run in four weeks
+        if longest_run_in_four_weeks is None:
+            raise Exception("No runs in the last four weeks.")
+
+        # Handle situation in which the user is already meeting or exceeding the goal distance.
+
         workouts = []
 
         # Speed session. Start with four intervals, increase the number of intervals as we get closer to the goal.

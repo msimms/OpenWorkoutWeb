@@ -118,7 +118,13 @@ class WorkoutPlanGenerator(object):
         experience_level = 0
 
         # Store all the inputs in a dictionary.
-        inputs = running_paces
+        if len(running_paces) == 0:
+            inputs[Keys.SPEED_RUN_PACE] = None
+            inputs[Keys.TEMPO_RUN_PACE] = None
+            inputs[Keys.LONG_RUN_PACE] = None
+            inputs[Keys.EASY_RUN_PACE] = None
+        else:
+            inputs = running_paces
         inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY] = longest_run_in_four_weeks
         inputs[Keys.AGE_YEARS_KEY] = age_years
         inputs[Keys.EXPERIENCE_LEVEL_KEY] = experience_level

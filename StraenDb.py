@@ -52,6 +52,7 @@ class MongoDatabase(Database.Database):
             self.activities_collection = self.database['activities']
             self.records_collection = self.database['records']
             self.workouts_collection = self.database['wokrouts']
+            self.tasks_collection = self.database['tasks']
             return True
         except pymongo.errors.ConnectionFailure as e:
             self.log_error("Could not connect to MongoDB: %s" % e)
@@ -1610,6 +1611,28 @@ class MongoDatabase(Database.Database):
                                         self.users_collection.save(user)
                                         return True
                                     record_index = record_index + 1
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def create_deferred_task(self, user_id, task_type, task_id):
+        """Create method for tracking a deferred task, such as a file import or activity analysis."""
+        if user_id is None:
+            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if task_type is None:
+            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: task_type")
+            return False
+        if task_id is None:
+            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: task_id")
+            return False
+
+        try:
+            user_id_obj = ObjectId(str(user_id))
+            user = self.tasks_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+                None
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

@@ -55,7 +55,7 @@ class DataMgr(Importer.ActivityWriter):
 
     def analyze(self, activity, activity_user_id):
         """Schedules the specified activity for analysis."""
-        self.analysis_scheduler.add_to_queue(activity, activity_user_id)
+        self.analysis_scheduler.add_to_queue(activity, activity_user_id, self)
 
     def compute_end_time(self, activity):
         """Examines the activity and computes the time at which the activity ended."""
@@ -205,6 +205,36 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity ID.")
         return self.database.create_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
 
+    def track_import_task(self, user_id, task_id):
+        """Called by the importer to store data associated with an ongoing import task."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+        if task_id is None:
+            raise Exception("No task ID.")
+        return self.database.create_deferred_task(user_id, Keys.IMPORT_TASK, task_id)
+
+    def track_analysis_task(self, user_id, task_id):
+        """Called by the importer to store data associated with an ongoing import task."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+        if task_id is None:
+            raise Exception("No task ID.")
+        return self.database.create_deferred_task(user_id, Keys.ANALYSIS_TASK, task_id)
+
+    def track_workout_plan_task(self, user_id, task_id):
+        """Called by the importer to store data associated with an ongoing import task."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+        if task_id is None:
+            raise Exception("No task ID.")
+        return self.database.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK, task_id)
+
     def import_file(self, username, user_id, local_file_name, uploaded_file_name):
         """Imports the contents of a local file into the database."""
         if self.import_scheduler is None:
@@ -217,7 +247,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No local file name.")
         if uploaded_file_name is None:
             raise Exception("No uploaded file name.")
-        self.import_scheduler.add_to_queue(username, user_id, local_file_name, uploaded_file_name)
+        self.import_scheduler.add_to_queue(username, user_id, local_file_name, uploaded_file_name, self)
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
@@ -788,7 +818,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        self.workout_plan_gen_scheduler.add_to_queue(user_id)
+        self.workout_plan_gen_scheduler.add_to_queue(user_id, self)
 
     def get_location_description(self, activity_id):
         """Returns the political location that corresponds to an activity."""
@@ -936,7 +966,7 @@ class DataMgr(Importer.ActivityWriter):
         return bests
 
     def compute_run_training_paces(self, user_id, running_bests):
-        run_paces = []
+        run_paces = {}
         calc = TrainingPaceCalculator.TrainingPaceCalculator()
         if Keys.BEST_5K in running_bests:
             best_time = running_bests[Keys.BEST_5K]
