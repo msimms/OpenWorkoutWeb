@@ -641,7 +641,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_user_setting(user_id, Keys.ESTIMATED_FTP_KEY)
 
-    def insert_bests_from_activity(self, user_id, activity_id, activity_type, activity_time, bests):
+    def update_bests_for_activity(self, user_id, activity_id, activity_type, activity_time, bests):
         """Update method for a user's personal record."""
         if self.database is None:
             raise Exception("No database.")
@@ -952,7 +952,8 @@ class DataMgr(Importer.ActivityWriter):
                 if cutoff_time is None or activity_time > cutoff_time:
                     if activity_id not in all_activity_bests:
                         num_unanalyzed = num_unanalyzed + 1
-                        self.analyze(activity, user_id)
+                        complete_activity_data = self.retrieve_activity(activity_id)
+                        self.analyze(complete_activity_data, user_id)
         return num_unanalyzed
 
     def compute_progression(self, user_id, user_activities, activity_type, key):

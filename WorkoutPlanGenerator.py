@@ -175,8 +175,18 @@ class WorkoutPlanGenerator(object):
         """Runs the neural network specified by 'model' to generate the workout plan."""
 
         # Convert the input dictionary to an array as required by tf.
-        model_inputs = [ inputs[Keys.SPEED_RUN_PACE], inputs[Keys.TEMPO_RUN_PACE], inputs[Keys.LONG_RUN_PACE], inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY], inputs[Keys.AGE_YEARS_KEY], inputs[Keys.EXPERIENCE_LEVEL], inputs[Keys.GOAL], inputs[Keys.WEEKS_UNTIL_GOAL_KEY] ]
-        return []
+        model_inputs = [ ]
+        model_inputs.append(inputs[Keys.SPEED_RUN_PACE])
+        model_inputs.append(inputs[Keys.TEMPO_RUN_PACE])
+        model_inputs.append(inputs[Keys.LONG_RUN_PACE])
+        model_inputs.append(inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY])
+        model_inputs.append(inputs[Keys.AGE_YEARS_KEY])
+        model_inputs.append(inputs[Keys.EXPERIENCE_LEVEL])
+        model_inputs.append(inputs[Keys.GOAL])
+        model_inputs.append(inputs[Keys.WEEKS_UNTIL_GOAL_KEY])
+
+        workouts = []
+        return workouts
 
     def organize_schedule(self, user_id, workouts):
         """Arranges the user's workouts into days/weeks, etc. To be called after the outputs are generated, but need cleaning up."""

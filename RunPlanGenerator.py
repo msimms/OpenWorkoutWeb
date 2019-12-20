@@ -34,6 +34,11 @@ class RunPlanGenerator(object):
 
         # Handle situation in which the user is already meeting or exceeding the goal distance.
 
+
+        # No pace data?
+        if speed_run_pace is None or tempo_run_pace is None or long_run_pace is None or easy_run_pace is None:
+            raise Exception("No run pace data.")
+
         workouts = []
 
         # Speed session. Start with four intervals, increase the number of intervals as we get closer to the goal.
