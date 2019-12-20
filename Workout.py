@@ -57,12 +57,29 @@ class Workout(object):
         writer.store_description(self.description)
         writer.store_sport_type(self.sport_type)
         writer.start_workout()
+
+        # Add the warmup (if applicable).
         if self.warmup is not None:
             writer.store_workout_warmup(self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION], self.warmup[ZwoTags.ZWO_ATTR_NAME_POWERLOW], self.warmup[ZwoTags.ZWO_ATTR_NAME_POWERHIGH], self.warmup[ZwoTags.ZWO_ATTR_NAME_PACE])
+
+        # Add each interval.
         for interval in self.intervals:
-            on_duration = float(interval[Keys.INTERVAL_DISTANCE_KEY]) * float(interval[Keys.INTERVAL_PACE_KEY])
-            recovery_duration = float(interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY]) * float(interval[Keys.INTERVAL_RECOVERY_PACE_KEY])
-            writer.store_workout_intervals(interval[Keys.INTERVAL_REPEAT_KEY], on_duration, recovery_duration, None, None)
+            interval_meters = interval[Keys.INTERVAL_DISTANCE_KEY]
+            interval_pace_minute = interval[Keys.INTERVAL_PACE_KEY]
+            recovery_meters = interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY]
+            recovery_pace_minute = interval[Keys.INTERVAL_RECOVERY_PACE_KEY]
+
+            # Convert distance and pace to time. Distance is given in meters/minute. The final result should be a whole number of seconds.
+            on_duration = float(interval_meters) / ((interval_pace_minute) / 60.0)
+            on_duration = int(on_duration)
+            if recovery_pace_minute == 0:
+                recovery_duration = 0
+            else:
+                recovery_duration = float(recovery_meters) / (float(recovery_pace_minute) / 60.0)
+                recovery_duration = int(recovery_duration)
+            writer.store_workout_intervals(interval[Keys.INTERVAL_REPEAT_KEY], on_duration, recovery_duration, None, 0)
+
+        # Add the cooldown (if applicable).
         if self.cooldown is not None:
             writer.store_workout_cooldown(self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION], self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERLOW], self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERHIGH], self.cooldown[ZwoTags.ZWO_ATTR_NAME_PACE])
         writer.end_workout()

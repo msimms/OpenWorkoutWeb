@@ -33,7 +33,8 @@ class RunPlanGenerator(object):
             raise Exception("No runs in the last four weeks.")
 
         # Handle situation in which the user is already meeting or exceeding the goal distance.
-
+        if longest_run_in_four_weeks >= goal_distance:
+            raise Exception("Distance goal has already been met.")
 
         # No pace data?
         if speed_run_pace is None or tempo_run_pace is None or long_run_pace is None or easy_run_pace is None:
@@ -55,7 +56,7 @@ class RunPlanGenerator(object):
         tempo_run_workout.description = "Tempo Run"
         tempo_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
         tempo_run_workout.add_warmup(5 * 60)
-        tempo_run_workout.add_interval(1, longest_run_in_four_weeks / 4, tempo_run_pace, 0, 0)
+        tempo_run_workout.add_interval(1, longest_run_in_four_weeks / 3, tempo_run_pace, 0, 0)
         tempo_run_workout.add_cooldown(5 * 60)
         workouts.append(tempo_run_workout)
 

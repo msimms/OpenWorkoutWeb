@@ -110,9 +110,9 @@ class ZwoWriter(XmlWriter.XmlWriter):
         attributes[ZwoTags.ZWO_ATTR_NAME_REPEAT] = str(repeat)
         attributes[ZwoTags.ZWO_ATTR_NAME_ONDURATION] = str(on_duration)
         attributes[ZwoTags.ZWO_ATTR_NAME_OFFDURATION] = str(off_duration)
-        if ZwoTags.ZWO_ATTR_NAME_ONPOWER is not None:
+        if on_power is not None:
             attributes[ZwoTags.ZWO_ATTR_NAME_ONPOWER] = str(on_power)
-        if ZwoTags.ZWO_ATTR_NAME_PACE is not None:
+        if pace is not None:
             attributes[ZwoTags.ZWO_ATTR_NAME_PACE] = str(pace)
         self.open_tag_with_attributes(ZwoTags.ZWO_TAG_NAME_WORKOUT_INTERVALS, attributes, False)
         self.close_tag()

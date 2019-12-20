@@ -50,15 +50,16 @@ class WorkoutPlanGenerator(object):
     @staticmethod
     def goal_enum_to_distances(goal):
         """Converts the goal key/enum value to the equivalent value in meters, returned as an array of [swim, bike, run] distances."""
-        if goal == Keys.GOAL_5K_RUN_KEY:
+        goal_lower = goal.lower()
+        if goal_lower == Keys.GOAL_5K_RUN_KEY.lower():
             return [0, 0, 5000]
-        elif goal == Keys.GOAL_10K_RUN_KEY:
+        elif goal_lower == Keys.GOAL_10K_RUN_KEY.lower():
             return [0, 0, 10000]
-        elif goal == Keys.GOAL_15K_RUN_KEY:
+        elif goal_lower == Keys.GOAL_15K_RUN_KEY.lower():
             return [0, 0, 15000]
-        elif goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
+        elif goal_lower == Keys.GOAL_HALF_MARATHON_RUN_KEY.lower():
             return [0, 0, METERS_PER_HALF_MARATHON]
-        elif goal == Keys.GOAL_MARATHON_RUN_KEY:
+        elif goal_lower == Keys.GOAL_MARATHON_RUN_KEY.lower():
             return [0, 0, METERS_PER_MARATHON]
         return [0, 0, 0]
 
