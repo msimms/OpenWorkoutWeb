@@ -952,7 +952,7 @@ class DataMgr(Importer.ActivityWriter):
                 if cutoff_time is None or activity_time > cutoff_time:
                     if activity_id not in all_activity_bests:
                         num_unanalyzed = num_unanalyzed + 1
-                        self.analyze(activity, activity_id)
+                        self.analyze(activity, user_id)
         return num_unanalyzed
 
     def compute_progression(self, user_id, user_activities, activity_type, key):
