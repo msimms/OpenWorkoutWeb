@@ -522,9 +522,9 @@ class MongoDatabase(Database.Database):
             if user_records is not None:
                 for record in user_records:
                     if InputChecker.is_uuid(record):
-                        records = user_records[record]
-                        if (cutoff_time is None) or (records[Keys.ACTIVITY_TIME_KEY] > cutoff_time):
-                            bests[record] = records
+                        activity_bests = user_records[record]
+                        if (cutoff_time is None) or (activity_bests[Keys.ACTIVITY_TIME_KEY] > cutoff_time):
+                            bests[record] = activity_bests
                 return bests
         except:
             self.log_error(traceback.format_exc())

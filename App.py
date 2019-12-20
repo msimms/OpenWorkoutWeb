@@ -912,7 +912,7 @@ class App(object):
         user_activities = self.data_mgr.retrieve_user_activity_list(user_id, user_realname, None, None)
 
         records_str = ""
-        records = self.data_mgr.compute_bests(user_id, activity_type, record_name)
+        records = self.data_mgr.retrieve_bests_for_activity_type(user_id, activity_type, record_name)
         for record in records:
             records_str += self.render_personal_record_simple(user_id, user_activities, activity_type, record, record_name)
 
@@ -965,7 +965,7 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Show the relevant PRs.
-        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.SIX_MONTHS)
+        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.SIX_MONTHS)
         bests_str = self.render_personal_records(user_id, cycling_bests, running_bests, False)
 
         # Show the running training paces.
@@ -1023,9 +1023,9 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Show the relevant PRs.
-        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, None)
+        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, None)
         all_time_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests, True)
-        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.ONE_YEAR)
+        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.ONE_YEAR)
         one_year_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests, True)
 
         # Show the list of places.

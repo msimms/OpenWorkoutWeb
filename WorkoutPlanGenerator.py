@@ -81,6 +81,9 @@ class WorkoutPlanGenerator(object):
         now = time.time()
         longest_run_in_four_weeks = None  # Longest run in the last four weeks
 
+        # Analyze any unanalyzed activities.
+        self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.FOUR_WEEKS)
+
         # Fetch the detail of the user's goal.
         goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
         goal_date = int(self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY))
@@ -91,7 +94,7 @@ class WorkoutPlanGenerator(object):
         self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb)
 
         # Look through the user's six month records.
-        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.SIX_MONTHS)
+        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.SIX_MONTHS)
         if running_bests is not None:
             running_paces = self.data_mgr.compute_run_training_paces(user_id, running_bests)
         else:
@@ -104,7 +107,7 @@ class WorkoutPlanGenerator(object):
                     self.data_mgr.store_user_estimated_ftp(user_id, threshold_power)
 
         # Look through the user's four week records.
-        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.FOUR_WEEKS)
+        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.FOUR_WEEKS)
         if running_bests is not None:
             if Keys.LONGEST_DISTANCE in running_bests:
                 longest_run_in_four_weeks = running_bests[Keys.LONGEST_DISTANCE]

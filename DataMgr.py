@@ -14,7 +14,7 @@ import TrainingPaceCalculator
 
 SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
 ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
-FOUR_WEEKS = (14.0 * 24.0 * 60.0 * 60.0)
+FOUR_WEEKS = (28.0 * 24.0 * 60.0 * 60.0)
 
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
@@ -303,17 +303,19 @@ class DataMgr(Importer.ActivityWriter):
         if devices is not None:
             for device in devices:
                 device_activities = self.database.retrieve_device_activity_list(device, start, None)
-                for device_activity in device_activities:
-                    device_activity[Keys.REALNAME_KEY] = user_realname
-                    self.update_activity_start_time(device_activity)
-                activities.extend(device_activities)
+                if device_activities is not None:
+                    for device_activity in device_activities:
+                        device_activity[Keys.REALNAME_KEY] = user_realname
+                        self.update_activity_start_time(device_activity)
+                    activities.extend(device_activities)
 
         # List activities with no device that are associated with the user.
         exclude_keys = self.database.list_excluded_keys() # Things we don't need.
         user_activities = self.database.retrieve_user_activity_list(user_id, start, None, exclude_keys)
-        for user_activity in user_activities:
-            user_activity[Keys.REALNAME_KEY] = user_realname
-        activities.extend(user_activities)
+        if user_activities is not None:
+            for user_activity in user_activities:
+                user_activity[Keys.REALNAME_KEY] = user_realname
+            activities.extend(user_activities)
 
         # Sort and limit the list.
         if len(activities) > 0:
@@ -711,6 +713,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if gear_description is None:
             raise Exception("Bad parameter.")
+
         gear_id = uuid.uuid4()
         return self.database.create_gear(user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
 
@@ -864,7 +867,7 @@ class DataMgr(Importer.ActivityWriter):
                         heat_map[locations_str] = 1
         return heat_map
 
-    def compute_recent_bests(self, user_id, timeframe):
+    def retrieve_recent_bests(self, user_id, timeframe):
         """Return a dictionary of all best performances in the specified time frame."""
         if self.database is None:
             raise Exception("No database.")
@@ -891,7 +894,7 @@ class DataMgr(Importer.ActivityWriter):
         running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
         return cycling_bests, running_bests
 
-    def compute_bests(self, user_id, activity_type, key):
+    def retrieve_bests_for_activity_type(self, user_id, activity_type, key):
         """Return a sorted list of all records for the given activity type and key."""
         def compare(a, b):
             if a[0] > b[0]:
@@ -925,6 +928,32 @@ class DataMgr(Importer.ActivityWriter):
 
         bests.sort(compare)
         return bests
+
+    def analyze_unanalyzed_activities(self, user_id, timeframe):
+        """Looks through the user's activities (within the given timeframe) and schedules any unanalyzed ones for analysis."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        # We're only interested in activities from this time forward.
+        if timeframe is None:
+            cutoff_time = None
+        else:
+            cutoff_time = time.time() - timeframe
+
+        num_unanalyzed = 0
+        all_activities = self.retrieve_user_activity_list(user_id, None, None, None)
+        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
+        for activity in all_activities:
+            activity_id = activity[Keys.ACTIVITY_ID_KEY]
+            if Keys.ACTIVITY_TIME_KEY in activity:
+                activity_time = activity[Keys.ACTIVITY_TIME_KEY]
+                if cutoff_time is None or activity_time > cutoff_time:
+                    if activity_id not in all_activity_bests:
+                        num_unanalyzed = num_unanalyzed + 1
+                        self.analyze(activity, activity_id)
+        return num_unanalyzed
 
     def compute_progression(self, user_id, user_activities, activity_type, key):
         """Return a sorted list of all records for the given activity type and key."""

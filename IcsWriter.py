@@ -23,8 +23,24 @@
 # SOFTWARE.
 """Formats an ICS file."""
 
+import uuid
+
 class IcsWriter(object):
     """Formats an ICS file."""
 
     def __init__(self):
         super(IcsWriter, self).__init__()
+
+    def create(self, start_time, stop_time, summary):
+        buffer  = "BEGIN:VCALENDAR\n"
+        buffer += "CALSCALE:GREGORIAN\n"
+        buffer += "VERSION:2.0\n"
+        buffer += "BEGIN:VEVENT\n"
+        buffer += "UID:" + str(uuid.uuid4()) + "\n"
+        buffer += "DTSTAMP:" + "\n"
+        buffer += "DTSTART:" + str(start_time) + "\n"
+        buffer += "DTEND:" + str(stop_time) + "\n"
+        buffer += "SUMMARY:" + summary + "\n"
+        buffer += "END:VEVENT\n"
+        buffer += "END:VCALENDAR\n"
+        return buffer
