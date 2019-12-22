@@ -14,11 +14,13 @@ class Summarizer(object):
     def __init__(self):
         self.running_bests = {} # Best ever times (best mile, best 20 minute power, etc.)
         self.cycling_bests = {} # Best ever times (best mile, best 20 minute power, etc.)
-        self.swimming_bests = {} # Best ever times (best mile, etc.)
+        self.open_water_swimming_bests = {} # Best ever times (best mile, etc.)
+        self.pool_swimming_bests = {} # Best ever times (best mile, etc.)
 
         self.annual_running_bests = {} # Best times for each year (best mile, best 20 minute power, etc.)
         self.annual_cycling_bests = {} # Best times for each year (best mile, best 20 minute power, etc.)
-        self.annual_swimming_bests = {} # Best times for each year (best mile, etc.)
+        self.annual_open_water_swimming_bests = {} # Best times for each year (best mile, etc.)
+        self.annual_pool_swimming_bests = {} # Best times for each year (best mile, etc.)
 
         self.ftp_calc = FtpCalculator.FtpCalculator()
         self.hr_calc = HeartRateCalculator.HeartRateCalculator()
@@ -29,8 +31,10 @@ class Summarizer(object):
             return self.running_bests
         elif activity_type == Keys.TYPE_CYCLING_KEY:
             return self.cycling_bests
-        elif activity_type == Keys.TYPE_SWIMMING_KEY:
-            return self.swimming_bests
+        elif activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY:
+            return self.open_water_swimming_bests
+        elif activity_type == Keys.TYPE_POOL_SWIMMING_KEY:
+            return self.pool_swimming_bests
         return {}
 
     def set_record_dictionary(self, activity_type, bests):
@@ -39,8 +43,10 @@ class Summarizer(object):
             self.running_bests = bests
         elif activity_type == Keys.TYPE_CYCLING_KEY:
             self.cycling_bests = bests
-        elif activity_type == Keys.TYPE_SWIMMING_KEY:
-            self.swimming_bests = bests
+        elif activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY:
+            self.open_water_swimming_bests = bests
+        elif activity_type == Keys.TYPE_POOL_SWIMMING_KEY:
+            self.pool_swimming_bests = bests
 
     def get_annual_record_dictionary(self, activity_type, year):
         """Returns the record dictionary that corresponds to the given activity type."""
@@ -52,10 +58,14 @@ class Summarizer(object):
             if year not in self.annual_cycling_bests:
                 self.annual_cycling_bests[year] = {}
             return self.annual_cycling_bests[year]
-        elif activity_type == Keys.TYPE_SWIMMING_KEY:
-            if year not in self.annual_swimming_bests:
-                self.annual_swimming_bests[year] = {}
-            return self.annual_swimming_bests[year]
+        elif activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY:
+            if year not in self.annual_open_water_swimming_bests:
+                self.annual_open_water_swimming_bests[year] = {}
+            return self.annual_open_water_swimming_bests[year]
+        elif activity_type == Keys.TYPE_POOL_SWIMMING_KEY:
+            if year not in self.annual_pool_swimming_bests:
+                self.annual_pool_swimming_bests[year] = {}
+            return self.annual_pool_swimming_bests[year]
         return {}
 
     def get_annual_record_years(self, activity_type):
@@ -64,8 +74,10 @@ class Summarizer(object):
             return self.annual_running_bests.keys()
         elif activity_type == Keys.TYPE_CYCLING_KEY:
             return self.annual_cycling_bests.keys()
-        elif activity_type == Keys.TYPE_SWIMMING_KEY:
-            return self.annual_swimming_bests.keys()
+        elif activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY:
+            return self.annual_open_water_swimming_bests.keys()
+        elif activity_type == Keys.TYPE_POOL_SWIMMING_KEY:
+            return self.annual_pool_swimming_bests.keys()
         return {}
 
     def get_best_time(self, activity_type, record_name):

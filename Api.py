@@ -584,7 +584,8 @@ class Api(object):
         switcher = {
             Keys.TYPE_RUNNING_KEY : self.handle_add_time_and_distance_activity,
             Keys.TYPE_CYCLING_KEY : self.handle_add_time_and_distance_activity,
-            Keys.TYPE_SWIMMING_KEY : self.handle_add_time_and_distance_activity,
+            Keys.TYPE_OPEN_WATER_SWIMMING_KEY : self.handle_add_time_and_distance_activity,
+            Keys.TYPE_POOL_SWIMMING_KEY : self.handle_add_time_and_distance_activity,
             Keys.TYPE_PULL_UPS_KEY : self.handle_add_sets_and_reps_activity,
             Keys.TYPE_PUSH_UPS_KEY : self.handle_add_sets_and_reps_activity
         }

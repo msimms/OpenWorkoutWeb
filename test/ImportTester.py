@@ -255,7 +255,8 @@ def main():
     # Print the summary data.
     print_records(store, Keys.TYPE_RUNNING_KEY)
     print_records(store, Keys.TYPE_CYCLING_KEY)
-    print_records(store, Keys.TYPE_SWIMMING_KEY)
+    print_records(store, Keys.TYPE_OPEN_WATER_SWIMMING_KEY)
+    print_records(store, Keys.TYPE_POOL_SWIMMING_KEY)
 
     # Print the maximum heart rate and heart rate zone calculators.
     max_hr = store.summarizer.hr_calc.estimate_max_hr(45)

@@ -15,8 +15,12 @@ import timeit
 import traceback
 import urllib
 import cProfile
-import StringIO
 import pstats
+
+try:
+    from StringIO import StringIO ## for Python 2
+except ImportError:
+    from io import StringIO ## for Python 3
 
 import Keys
 import LocationAnalyzer
@@ -91,7 +95,7 @@ class App(object):
         self.tempfile_dir = os.path.join(self.root_dir, 'tempfile')
         self.tempmod_dir = os.path.join(self.root_dir, 'tempmod')
         self.google_maps_key = google_maps_key
-        self.lifting_activity_html_file = os.path.join(root_dir, HTML_DIR, 'lifting_activity.html')
+        self.unmapped_activity_html_file = os.path.join(root_dir, HTML_DIR, 'unmapped_activity.html')
         self.map_single_osm_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_osm.html')
         self.map_single_google_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
         self.map_multi_html_file = os.path.join(root_dir, HTML_DIR, 'map_multi_google.html')
@@ -286,8 +290,8 @@ class App(object):
             delete_str += "<td><button type=\"button\" onclick=\"return delete_activity()\">Delete</button></td><tr>\n"
         return delete_str
 
-    def render_page_for_lifting_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_username, belongs_to_current_user, is_live):
-        """Helper function for rendering the map corresonding to a specific device and activity."""
+    def render_page_for_unmapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_username, belongs_to_current_user, is_live):
+        """Helper function for rendering the page corresonding to a specific un-mapped activity."""
 
         # Is the user logged in?
         logged_in = logged_in_username is not None
@@ -372,7 +376,7 @@ class App(object):
         else:
             page_title = "Activity"
 
-        my_template = Template(filename=self.lifting_activity_html_file, module_directory=self.tempmod_dir)
+        my_template = Template(filename=self.unmapped_activity_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, tags=tags_str, comments=comments_str, exports=exports_str, delete=delete_str)
 
     def render_metadata_for_page(self, key, activity):
@@ -599,7 +603,7 @@ class App(object):
             if Keys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[Keys.ACTIVITY_LOCATIONS_KEY]) > 0:
                 return self.render_page_for_mapped_activity(email, user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
             elif Keys.APP_ACCELEROMETER_KEY in activity or Keys.APP_SETS_KEY in activity:
-                return self.render_page_for_lifting_activity(email, user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
+                return self.render_page_for_unmapped_activity(email, user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
             else:
                 my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
                 return my_template.render(nav=self.create_navbar(logged_in_user_id is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
