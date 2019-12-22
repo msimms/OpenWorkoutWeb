@@ -205,8 +205,8 @@ def all_activities():
         g_app.log_error('Unhandled exception in ' + all_activities.__name__)
     return g_app.error()
 
-@cherrypy.expose
-@require()
+@g_flask_app.route('/all_records')
+@login_requred
 def all_records(self, activity_type, record_name):
     """Renders the list of records for the specified user and record type."""
     try:
@@ -219,8 +219,8 @@ def all_records(self, activity_type, record_name):
         g_app.log_error('Unhandled exception in ' + all_records.__name__)
     return self.error()
 
-@cherrypy.expose
-@require()
+@g_flask_app.route('/record_progression')
+@login_requred
 def record_progression(self, activity_type, record_name):
     """Renders the list of records, in order of progression, for the specified user and record type."""
     try:
@@ -249,7 +249,7 @@ def workouts():
 
 @g_flask_app.route('/statistics')
 @login_requred
-def workouts():
+def statistics():
     """Renders the statistics view."""
     try:
         return g_app.stats()
