@@ -269,7 +269,8 @@ class App(object):
             comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>\n"
         return comments_str
 
-    def render_export_control(self, logged_in, has_location_data, has_accel_data):
+    @staticmethod
+    def render_export_control(logged_in, has_location_data, has_accel_data):
         """Helper function for building the exports string."""
         exports_str = ""
         if logged_in:
@@ -283,7 +284,8 @@ class App(object):
             exports_str += "<td><button type=\"button\" onclick=\"return export_activity()\">Export</button></td><tr>\n"
         return exports_str
 
-    def render_delete_control(self, logged_in):
+    @staticmethod
+    def render_delete_control(logged_in):
         """Helper function for building the delete string."""
         delete_str = ""
         if logged_in:
@@ -341,11 +343,11 @@ class App(object):
         summary = "<ul>\n"
 
         # Add the activity type.
-        activity_type = self.render_activity_type(activity)
+        activity_type = App.render_activity_type(activity)
         summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
 
         # Add the activity date.
-        name = self.render_activity_name(activity)
+        name = App.render_activity_name(activity)
         summary += "\t<li>Name: " + name + "</li>\n"
 
         # Add the activity date.
@@ -365,10 +367,10 @@ class App(object):
         comments_str = self.render_comments(activity, logged_in)
 
         # List the export options.
-        exports_str = self.render_export_control(logged_in, False, Keys.APP_ACCELEROMETER_KEY in activity)
+        exports_str = App.render_export_control(logged_in, False, Keys.APP_ACCELEROMETER_KEY in activity)
 
         # Render the delete control.
-        delete_str = self.render_delete_control(logged_in)
+        delete_str = App.render_delete_control(logged_in)
 
         # Build the page title.
         if is_live:
@@ -416,7 +418,8 @@ class App(object):
                 max_value = value
         return data_str, max_value
 
-    def render_activity_name(self, activity):
+    @staticmethod
+    def render_activity_name(activity):
         """Helper function for getting the activity name."""
         if Keys.ACTIVITY_NAME_KEY in activity:
             activity_name = activity[Keys.ACTIVITY_NAME_KEY]
@@ -426,7 +429,8 @@ class App(object):
             activity_name = Keys.UNNAMED_ACTIVITY_TITLE
         return activity_name
 
-    def render_activity_type(self, activity):
+    @staticmethod
+    def render_activity_type(activity):
         """Helper function for getting the activity type."""
         if Keys.ACTIVITY_TYPE_KEY in activity:
             activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
@@ -436,12 +440,23 @@ class App(object):
             activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
         return activity_type
 
-    def render_array(self, array):
+    @staticmethod
+    def render_array(array):
         """Helper function for converting an array (list) to a comma-separated string."""
         result = ""
         for item in array:
             if len(result) > 0:
-                result += ","
+                result += ", "
+            result += str(item)
+        return result
+
+    @staticmethod
+    def render_array_reversed(array):
+        """Helper function for converting an array (list) to a comma-separated string."""
+        result = ""
+        for item in array:
+            if len(result) > 0:
+                result += ", "
             result += str(item)
         return result
 
@@ -478,8 +493,8 @@ class App(object):
         heart_rates_str, max_heart_rate = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity)
         cadences_str, max_cadence = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity)
         powers_str, max_power = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity)
-        name = self.render_activity_name(activity)
-        activity_type = self.render_activity_type(activity)
+        name = App.render_activity_name(activity)
+        activity_type = App.render_activity_type(activity)
 
         # Compute location-based things.
         location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
@@ -492,7 +507,7 @@ class App(object):
             powers = activity[Keys.APP_POWER_KEY]
             if len(powers) > 0:
                 power_zone_distribution = self.data_mgr.compute_power_zone_distribution(ftp[0], powers)
-                power_zones_str = "\t\t" + self.render_array(power_zone_distribution)
+                power_zones_str = "\t\t" + App.render_array(power_zone_distribution)
 
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
@@ -511,6 +526,11 @@ class App(object):
 
         # Add the activity name.
         summary += "\t<li>Name: " + name + "</li>\n"
+
+        # Add the location description.
+        if summary_data is not None:
+            if Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
+                summary += "\t<li>" + App.render_array_reversed(summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]) + "</li>\n"
 
         if location_analyzer.total_distance is not None:
             value, value_units = Units.convert_to_preferred_distance_units(self.user_mgr, logged_in_user_id, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
@@ -577,10 +597,10 @@ class App(object):
         comments_str = self.render_comments(activity, logged_in)
 
         # List the export options.
-        exports_str = self.render_export_control(logged_in, True, Keys.APP_ACCELEROMETER_KEY in activity)
+        exports_str = App.render_export_control(logged_in, True, Keys.APP_ACCELEROMETER_KEY in activity)
 
         # Render the delete control.
-        delete_str = self.render_delete_control(logged_in)
+        delete_str = App.render_delete_control(logged_in)
 
         # Build the page title.
         if is_live:
