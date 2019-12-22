@@ -26,10 +26,10 @@
 import json
 import sys
 
-if sys.version_info > (3, 0):
-    import urllib.request
-else:
+if sys.version_info[0] < 3:
     import urllib
+else:
+    import urllib.request
 
 class GeoJsonReader(object):
     """Reads a GeoJson file."""

@@ -74,10 +74,22 @@ def check_auth(*args, **kwargs):
         requested_url_parts = requested_url.split('/')
         requested_url_parts = filter(lambda part: part != '', requested_url_parts)
 
+        # Have to do this differently for python2 and 3.
+        if sys.version_info[0] < 3:
+            first_url_part = requested_url_parts[0]
+        else:
+            first_url_part = next(requested_url_parts)
+
         # If the user is trying to view an activity then make sure they have permissions
         # to view it. First check to see if it's a public activity.
-        if requested_url_parts[0] == "device":
-            url_params = requested_url_parts[1].split("?")
+        if first_url_part == "device":
+
+            # Have to do this differently for python2 and 3.
+            if sys.version_info[0] < 3:
+                url_params = requested_url_parts[1].split("?")
+            else:
+                url_params = next(requested_url_parts)
+
             if url_params is not None and len(url_params) >= 2:
                 activity_params = url_params[1].split("=")
                 if activity_params is not None and len(activity_params) >= 2:
@@ -273,7 +285,7 @@ class StraenWeb(object):
     @cherrypy.expose
     @require()
     def statistics(self, *args, **kw):
-        """Renders the statics view."""
+        """Renders the statistics view."""
         try:
             return self.app.stats()
         except App.RedirectException as e:
@@ -671,6 +683,7 @@ def main():
             'tools.sessions.storage_type': 'file',
             'tools.sessions.storage_path': session_dir,
             'tools.sessions.timeout': 129600,
+            'tools.sessions.locking': 'early',
             'tools.secureheaders.on': True
         },
         '/css':
