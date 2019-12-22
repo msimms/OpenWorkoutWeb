@@ -596,6 +596,17 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def retrieve_each_device_activity(self, context, device_str, callback_func):
+        """Retrieves each device activity and calls the callback function for each one."""
+        try:
+            activities = list(self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}))
+            for activity in activities:
+                callback_func(context, activity, device_str)
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return None
+
     def retrieve_most_recent_activity_for_device(self, device_str):
         """Retrieves the ID for the most recent activity to be associated with the specified device."""
         if device_str is None:

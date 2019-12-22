@@ -322,6 +322,27 @@ class DataMgr(Importer.ActivityWriter):
             activities = sorted(activities, key=get_activities_sort_key, reverse=True)[:num_results]
         return activities
 
+    def retrieve_each_user_activity(self, context, user_id, cb=None):
+        """Fires a callback for all of the user's activities. num_results can be None for all activiites."""
+        if self.database is None:
+            raise Exception("No database.")
+        if context is None:
+            raise Exception("Bad parameter.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if cb is None:
+            raise Exception("Bad parameter.")
+
+        # List activities recorded on devices registered to the user.
+        devices = self.database.retrieve_user_devices(user_id)
+        devices = list(set(devices)) # De-duplicate
+        if devices is not None:
+            for device in devices:
+                self.database.retrieve_each_device_activity(context, device, cb)
+
+        # List activities with no device that are associated with the user.
+        self.database.retrieve_each_user_activity(context, user_id, cb)
+
     def retrieve_all_activities_visible_to_user(self, user_id, user_realname, start, num_results):
         """Returns a list containing all of the activities visible to the specified user, up to num_results. num_results can be None for all activiites."""
         if self.database is None:
@@ -600,7 +621,7 @@ class DataMgr(Importer.ActivityWriter):
         tag_distances = {}
         for tag in tags:
             tag_distances[tag] = 0.0
-        self.database.retrieve_each_user_activity(tag_distances, user_id, DataMgr.distance_for_tag_cb)
+        self.retrieve_each_user_activity(tag_distances, user_id, DataMgr.distance_for_tag_cb)
         return tag_distances
 
     def create_activity_comment(self, activity_id, commenter_id, comment):
@@ -792,18 +813,6 @@ class DataMgr(Importer.ActivityWriter):
         if service_record_id is None:
             raise Exception("Bad parameter.")
         return self.database.delete_service_record(user_id, gear_id, service_record_id)
-
-    def retrieve_each_user_activity(self, context, user_id, cb=None):
-        """Makes sure that summary data exists for all of the user's activities."""
-        if self.database is None:
-            raise Exception("No database.")
-        if context is None:
-            raise Exception("Bad parameter.")
-        if user_id is None:
-            raise Exception("Bad parameter.")
-        if cb is None:
-            raise Exception("Bad parameter.")
-        self.database.retrieve_each_user_activity(context, user_id, cb)
 
     def associate_gear_with_activity(self, activity, gear_name):
         """Adds gear to an activity."""
