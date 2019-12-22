@@ -1,5 +1,5 @@
 # Copyright 2018 Michael J Simms
-"""Main application, contains all web page handlers"""
+"""Main application - if using flask, contains all web page handlers"""
 
 import argparse
 import functools

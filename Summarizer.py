@@ -7,7 +7,6 @@ import HeartRateCalculator
 import Keys
 import Units
 
-
 class Summarizer(object):
     """Class for summarizing a user's activities."""
 
