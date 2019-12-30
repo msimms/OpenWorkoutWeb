@@ -352,7 +352,7 @@ class App(object):
 
         # Add the activity date.
         if Keys.ACTIVITY_TIME_KEY in activity:
-            summary += "\t<li>Start Time: <script>document.write(" + activity[Keys.ACTIVITY_TIME_KEY] + ")</script></li>\n"
+            summary += "\t<li>Start Time: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script></li>\n"
 
         # Controls are only allowed if the user viewing the activity owns it.
         if belongs_to_current_user:
@@ -522,7 +522,7 @@ class App(object):
 
         # Add the activity date.
         if Keys.ACTIVITY_TIME_KEY in activity:
-            summary += "\t<li>Start Time: " + App.timestamp_code_to_str(activity[Keys.ACTIVITY_TIME_KEY]) + "</li>\n"
+            summary += "\t<li>Start Time: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script></li>\n"
 
         # Add the activity name.
         summary += "\t<li>Name: " + name + "</li>\n"
