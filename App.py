@@ -352,7 +352,7 @@ class App(object):
 
         # Add the activity date.
         if Keys.ACTIVITY_TIME_KEY in activity:
-            summary += "\t<li>Start Time: " + App.timestamp_code_to_str(activity[Keys.ACTIVITY_TIME_KEY]) + "</li>\n"
+            summary += "\t<li>Start Time: <script>document.write(" + activity[Keys.ACTIVITY_TIME_KEY] + ")</script></li>\n"
 
         # Controls are only allowed if the user viewing the activity owns it.
         if belongs_to_current_user:
@@ -1377,6 +1377,7 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         analysis_tasks_str = ""
+        self.data_mgr.update_deferred_analysis_tasks(user_id)
         analysis_tasks = self.data_mgr.retrieve_deferred_analysis_tasks(user_id)
         for task in analysis_tasks:
             analysis_tasks_str += "<td>"
