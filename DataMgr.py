@@ -213,7 +213,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No user ID.")
         if task_id is None:
             raise Exception("No task ID.")
-        return self.database.create_deferred_task(user_id, Keys.IMPORT_TASK, task_id)
+        return self.database.create_deferred_task(user_id, Keys.IMPORT_TASK_KEY, task_id)
 
     def track_analysis_task(self, user_id, task_id):
         """Called by the importer to store data associated with an ongoing import task."""
@@ -223,7 +223,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No user ID.")
         if task_id is None:
             raise Exception("No task ID.")
-        return self.database.create_deferred_task(user_id, Keys.ANALYSIS_TASK, task_id)
+        return self.database.create_deferred_task(user_id, Keys.ANALYSIS_TASK_KEY, task_id)
 
     def track_workout_plan_task(self, user_id, task_id):
         """Called by the importer to store data associated with an ongoing import task."""
@@ -233,7 +233,31 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No user ID.")
         if task_id is None:
             raise Exception("No task ID.")
-        return self.database.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK, task_id)
+        return self.database.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, task_id)
+
+    def retrieve_deferred_import_tasks(self, user_id):
+        """Returns a list of all incomplete analysis tasks."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+        return self.database.retrieve_deferred_tasks_of_type(user_id, Keys.IMPORT_TASK_KEY)
+
+    def retrieve_deferred_analysis_tasks(self, user_id):
+        """Returns a list of all incomplete analysis tasks."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+        return self.database.retrieve_deferred_tasks_of_type(user_id, Keys.ANALYSIS_TASK_KEY)
+
+    def retrieve_deferred_workout_plan_tasks(self, user_id):
+        """Returns a list of all incomplete workout plan tasks."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+        return self.database.retrieve_deferred_tasks_of_type(user_id, Keys.WORKOUT_PLAN_TASK_KEY)
 
     def import_file(self, username, user_id, local_file_name, uploaded_file_name):
         """Imports the contents of a local file into the database."""

@@ -1338,7 +1338,7 @@ class App(object):
 
     @statistics
     def import_status(self):
-        """Renders the import page."""
+        """Renders the import status page."""
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -1351,10 +1351,42 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        import_tasks_str = ""
+        import_tasks = self.data_mgr.retrieve_deferred_import_tasks(user_id)
+        for task in import_tasks:
+            pass
+
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'import_status.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=import_tasks_str)
+
+    @statistics
+    def analysis_status(self):
+        """Renders the analysis status page, which shows the status of deferred analysis tasks."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        analysis_tasks_str = ""
+        analysis_tasks = self.data_mgr.retrieve_deferred_analysis_tasks(user_id)
+        for task in analysis_tasks:
+            analysis_tasks_str += "<td>"
+            analysis_tasks_str += str(task[Keys.TASK_ID_KEY])
+            analysis_tasks_str += "</td><tr>\n"
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'import_status.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=analysis_tasks_str)
 
     @statistics
     def summary(self):

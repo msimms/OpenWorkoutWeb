@@ -1412,9 +1412,12 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
+
+                # Update the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
@@ -1463,9 +1466,12 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
+            # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
+
+                # Read the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
@@ -1491,9 +1497,12 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
+
+                # Update the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
@@ -1526,9 +1535,12 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
+
+                # Update the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
@@ -1564,12 +1576,17 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
+
+                # Find the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
+
+                    # Find the gear.
                     for gear in gear_list:
                         if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
                             service_rec = {}
@@ -1603,12 +1620,17 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
+
+                # Find the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
+
+                    # Find the gear.
                     for gear in gear_list:
                         if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
                             if Keys.GEAR_SERVICE_HISTORY in gear:
@@ -1640,10 +1662,68 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            user_id_obj = ObjectId(str(user_id))
-            user = self.tasks_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
-            if user is not None:
-                None
+            # Find the user's tasks document.
+            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            if user_tasks is None:
+                post = {Keys.DEFERRED_TASKS_USER_ID: user_id}
+                self.tasks_collection.insert(post)
+                user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            if user_tasks is not None:
+                deferred_tasks = []
+                if Keys.TASKS_KEY in user_tasks:
+                    deferred_tasks = user_tasks[Keys.TASKS_KEY]
+                task = {}
+                task[Keys.TASK_ID_KEY] = task_id
+                task[Keys.TASK_TYPE_KEY] = task_type
+                deferred_tasks.append(task)
+                user_tasks[Keys.TASKS_KEY] = deferred_tasks
+                self.tasks_collection.save(user_tasks)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_deferred_tasks_of_type(self, user_id, task_type):
+        """Retrieve method for returning all the deferred tasks of a given type."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_deferred_tasks_of_type.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if task_type is None:
+            self.log_error(MongoDatabase.retrieve_deferred_tasks_of_type.__name__ + ": Unexpected empty object: task_type")
+            return False
+
+        try:
+            # Find the user's tasks document.
+            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            if user_tasks is not None:
+                deferred_tasks = []
+                if Keys.TASKS_KEY in user_tasks:
+                    deferred_tasks = user_tasks[Keys.TASKS_KEY]
+                return deferred_tasks
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return []
+
+    def delete_deferred_tasks(self, user_id, task_id):
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_deferred_tasks.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if task_id is None:
+            self.log_error(MongoDatabase.delete_deferred_tasks.__name__ + ": Unexpected empty object: task_id")
+            return False
+
+        try:
+            # Find the user's tasks document.
+            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            if user_tasks is not None:
+                deferred_tasks = []
+                if Keys.TASKS_KEY in user_tasks:
+                    deferred_tasks = user_tasks[Keys.TASKS_KEY]
+                for task in deferred_tasks:
+                    if task[Keys.TASKS_KEY] == task_id:
+                        pass
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

@@ -444,6 +444,22 @@ class StraenWeb(object):
 
     @cherrypy.expose
     @require()
+    def analysis_status(self, *args, **kw):
+        """Renders the analysis status page."""
+        try:
+            return self.app.analysis_status()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.analysis_status.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
     def summary(self, *args, **kw):
         """Renders the user's summary page."""
         try:
