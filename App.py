@@ -454,7 +454,7 @@ class App(object):
     def render_array_reversed(array):
         """Helper function for converting an array (list) to a comma-separated string."""
         result = ""
-        for item in array:
+        for item in reversed(array):
             if len(result) > 0:
                 result += ", "
             result += str(item)
@@ -530,7 +530,7 @@ class App(object):
         # Add the location description.
         if summary_data is not None:
             if Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
-                summary += "\t<li>" + App.render_array_reversed(summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]) + "</li>\n"
+                summary += "\t<li> Location: " + App.render_array_reversed(summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]) + "</li>\n"
 
         if location_analyzer.total_distance is not None:
             value, value_units = Units.convert_to_preferred_distance_units(self.user_mgr, logged_in_user_id, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
