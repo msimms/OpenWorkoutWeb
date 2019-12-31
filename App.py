@@ -222,7 +222,7 @@ class App(object):
         navbar_str += "\t</ul>\n</nav>"
         return navbar_str
 
-    def render_tags(self, activity, activity_user_id, logged_in):
+    def render_tags(self, activity, activity_user_id, belongs_to_current_user):
         """Helper function for building the tags string."""
         activity_tags = []
         if Keys.ACTIVITY_TAGS_KEY in activity:
@@ -242,9 +242,12 @@ class App(object):
         if all_tags is not None:
             for tag in all_tags:
                 if tag in activity_tags:
-                    tags_str += "<option selected=true>"
+                    tags_str += "<option selected=true"
                 else:
-                    tags_str += "<option>"
+                    tags_str += "<option"
+                if not belongs_to_current_user:
+                    tags_str += " disabled"
+                tags_str += ">"
                 tags_str += tag
                 tags_str += "</option>\n"
         return tags_str
@@ -359,7 +362,7 @@ class App(object):
             details_controls_str = ""
 
         # List the tags.
-        tags_str = self.render_tags(activity, activity_user_id, logged_in)
+        tags_str = self.render_tags(activity, activity_user_id, belongs_to_current_user)
 
         # List the comments.
         comments_str = self.render_comments(activity, logged_in)
@@ -599,7 +602,7 @@ class App(object):
             details_controls_str = ""
 
         # List the tags.
-        tags_str = self.render_tags(activity, activity_user_id, logged_in)
+        tags_str = self.render_tags(activity, activity_user_id, belongs_to_current_user)
 
         # List the comments.
         comments_str = self.render_comments(activity, logged_in)
