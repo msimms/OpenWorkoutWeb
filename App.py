@@ -1351,15 +1351,21 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        import_tasks_str = ""
-        import_tasks = self.data_mgr.retrieve_deferred_import_tasks(user_id)
-        for task in import_tasks:
-            pass
+        tasks_str = ""
+        tasks = self.data_mgr.retrieve_deferred_import_tasks(user_id)
+        for task in tasks:
+            tasks_str += "<td>"
+            if Keys.TASK_ID_KEY in task:
+                tasks_str += str(task[Keys.TASK_ID_KEY])
+            tasks_str += "</td><td>"
+            if Keys.TASK_STATE_KEY in task:
+                tasks_str += str(task[Keys.TASK_STATE_KEY])
+            tasks_str += "</td><tr>\n"
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'import_status.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=import_tasks_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=tasks_str)
 
     @statistics
     def analysis_status(self):
@@ -1376,18 +1382,21 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        analysis_tasks_str = ""
-        self.data_mgr.update_deferred_analysis_tasks(user_id)
-        analysis_tasks = self.data_mgr.retrieve_deferred_analysis_tasks(user_id)
-        for task in analysis_tasks:
-            analysis_tasks_str += "<td>"
-            analysis_tasks_str += str(task[Keys.TASK_ID_KEY])
-            analysis_tasks_str += "</td><tr>\n"
+        tasks_str = ""
+        tasks = self.data_mgr.retrieve_deferred_analysis_tasks(user_id)
+        for task in tasks:
+            tasks_str += "<td>"
+            if Keys.TASK_ID_KEY in task:
+                tasks_str += str(task[Keys.TASK_ID_KEY])
+            tasks_str += "</td><td>"
+            if Keys.TASK_STATE_KEY in task:
+                tasks_str += str(task[Keys.TASK_STATE_KEY])
+            tasks_str += "</td><tr>\n"
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'import_status.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=analysis_tasks_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=tasks_str)
 
     @statistics
     def summary(self):

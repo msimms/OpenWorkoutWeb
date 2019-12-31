@@ -11,6 +11,7 @@ import MapSearch
 import StraenDb
 import Summarizer
 import TrainingPaceCalculator
+import celery
 
 SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
 ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
@@ -33,6 +34,8 @@ class DataMgr(Importer.ActivityWriter):
         self.import_scheduler = import_scheduler
         self.workout_plan_gen_scheduler = workout_plan_gen_scheduler
         self.map_search = None
+        self.celery_worker = celery.Celery('straen_worker')
+        self.celery_worker.config_from_object('CeleryConfig')
         super(Importer.ActivityWriter, self).__init__()
 
     def terminate(self):
@@ -233,7 +236,21 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No user ID.")
         if task_id is None:
             raise Exception("No task ID.")
-        return self.database.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, task_id)
+
+        tasks = self.database.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, task_id)
+        for task in tasks:
+            task_id = task[Keys.TASK_ID_KEY]
+            r = self.celery_worker.AsyncResult(task_id)
+            task[Keys.TASK_STATE_KEY] = r.state
+        return tasks
+
+    def query_deferred_task_statuses(self, tasks):
+        """Helper function for updating deferred task info."""
+        for task in tasks:
+            task_id = task[Keys.TASK_ID_KEY]
+            r = self.celery_worker.AsyncResult(task_id)
+            task[Keys.TASK_STATE_KEY] = r.state
+        return tasks
 
     def retrieve_deferred_import_tasks(self, user_id):
         """Returns a list of all incomplete analysis tasks."""
@@ -241,7 +258,10 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("No user ID.")
-        return self.database.retrieve_deferred_tasks_of_type(user_id, Keys.IMPORT_TASK_KEY)
+
+        tasks = self.database.retrieve_deferred_tasks_of_type(user_id, Keys.IMPORT_TASK_KEY)
+        tasks = self.query_deferred_task_statuses(tasks)
+        return tasks
 
     def retrieve_deferred_analysis_tasks(self, user_id):
         """Returns a list of all incomplete analysis tasks."""
@@ -249,7 +269,10 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("No user ID.")
-        return self.database.retrieve_deferred_tasks_of_type(user_id, Keys.ANALYSIS_TASK_KEY)
+
+        tasks = self.database.retrieve_deferred_tasks_of_type(user_id, Keys.ANALYSIS_TASK_KEY)
+        tasks = self.query_deferred_task_statuses(tasks)
+        return tasks
 
     def retrieve_deferred_workout_plan_tasks(self, user_id):
         """Returns a list of all incomplete workout plan tasks."""
@@ -257,7 +280,10 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("No user ID.")
-        return self.database.retrieve_deferred_tasks_of_type(user_id, Keys.WORKOUT_PLAN_TASK_KEY)
+
+        tasks = self.database.retrieve_deferred_tasks_of_type(user_id, Keys.WORKOUT_PLAN_TASK_KEY)
+        tasks = self.query_deferred_task_statuses(tasks)
+        return tasks
 
     def import_file(self, username, user_id, local_file_name, uploaded_file_name):
         """Imports the contents of a local file into the database."""
