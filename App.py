@@ -497,6 +497,7 @@ class App(object):
         powers_str, max_power = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity)
         name = App.render_activity_name(activity)
         activity_type = App.render_activity_type(activity)
+        is_foot_based_activity = activity_type in Keys.FOOT_BASED_ACTIVITIES
 
         # Compute location-based things.
         location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
@@ -539,7 +540,7 @@ class App(object):
             summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
         if location_analyzer.avg_speed is not None:
             if location_analyzer.avg_speed > 0:
-                if activity_type in Keys.FOOT_BASED_ACTIVITIES:
+                if is_foot_based_activity:
                     summary += "\t<li>Avg. Pace: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
                 else:
                     summary += "\t<li>Avg. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
@@ -548,7 +549,7 @@ class App(object):
         if summary_data is not None:
 
             if Keys.BEST_SPEED in summary_data:
-                if activity_type in Keys.FOOT_BASED_ACTIVITIES:
+                if is_foot_based_activity:
                     summary += "\t<li>Max. Pace: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, summary_data[Keys.BEST_SPEED], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE) + "</li>\n"
                 else:
                     summary += "\t<li>Max. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, summary_data[Keys.BEST_SPEED], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_SPEED) + "</li>\n"
@@ -576,7 +577,12 @@ class App(object):
         excluded_keys.append(Keys.LONGEST_DISTANCE)
         if summary_data is not None:
             for key in sorted(summary_data):
-                if key not in excluded_keys:
+                if is_foot_based_activity and key == Keys.BEST_SPEED:
+                    details_str += "<td><b>" + Keys.BEST_PACE + "</b></td><td>"
+                    value = summary_data[key]
+                    details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE)
+                    details_str += "</td><tr>\n"
+                elif key not in excluded_keys:
                     details_str += "<td><b>"
                     details_str += key
                     details_str += "</b></td><td>"
