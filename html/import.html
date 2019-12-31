@@ -199,14 +199,14 @@ ${nav}
 <div class="import" style="width: 600px">
 	<h2>Import a File</h2>
 	<form action="${root_url}/upload" method="post" enctype="multipart/form-data">
-		Select files: <input type="file" name="ufile" multiple>
-		<input type="submit">
+		Select files: <input type="file" name="ufile" multiple><br>
+		<input type="submit" value="Upload" class="modern_button">
 	</form>
 
 	<hr>
 
 	<h2>Import an Entire Directory</h2>
-	<input type="file" id="picker" name="fileList" webkitdirectory multiple>
+	<input type="file" id="picker" name="fileList" webkitdirectory multiple><br>
 	<button type="button" onclick="return upload_dir()">Upload</button>
 	<ul id="listing"></ul>
 
