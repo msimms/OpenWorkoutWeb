@@ -279,7 +279,7 @@ class App(object):
         if has_location_data:
             exports_str += "\t<option value=\"tcx\" selected>TCX</option>\n"
             exports_str += "\t<option value=\"gpx\">GPX</option>\n"
-        if has_accel_data:
+        if has_location_data or has_accel_data:
             exports_str += "\t<option value=\"csv\">CSV</option>\n"
         exports_str += "</select>\n</td><tr>\n"
         exports_str += "<td><button type=\"button\" onclick=\"return export_activity()\">Export</button></td><tr>\n"

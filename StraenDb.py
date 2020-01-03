@@ -976,7 +976,7 @@ class MongoDatabase(Database.Database):
         return None
 
     def create_metadata(self, activity_id, date_time, key, value, create_list):
-        """Create method for a piece of metaadata."""
+        """Create method for a piece of metaadata. When dealing with a list, will append values."""
         if activity_id is None:
             self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: activity_id")
             return False
@@ -1027,7 +1027,7 @@ class MongoDatabase(Database.Database):
         return False
 
     def create_metadata_list(self, activity_id, key, values):
-        """Create method for a list of of metaadata values."""
+        """Create method for a list of metaadata values. Will overwrite existing data."""
         if activity_id is None:
             self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Unexpected empty object: activity_id")
             return False
@@ -1042,9 +1042,6 @@ class MongoDatabase(Database.Database):
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
             if activity is not None:
                 value_list = []
-
-                if key in activity:
-                    value_list = activity[key]
 
                 for value in values:
                     time_value_pair = {str(value[0]): float(value[1])}
