@@ -40,6 +40,7 @@ PRODUCT_NAME = 'Straen'
 
 LOGIN_URL = '/login'
 DEFAULT_LOGGED_IN_URL = '/all_activities'
+IMPORT_STATUS_URL = '/import_status'
 HTML_DIR = 'html'
 
 
@@ -1318,7 +1319,7 @@ class App(object):
             file_data = ufile.file.read()
             self.data_mgr.import_file(username, user_id, file_data, ufile.filename)
 
-        raise RedirectException(DEFAULT_LOGGED_IN_URL)
+        raise RedirectException(IMPORT_STATUS_URL)
 
     @statistics
     def manual_entry(self, activity_type):
