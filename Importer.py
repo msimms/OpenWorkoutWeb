@@ -80,11 +80,20 @@ class Importer(object):
     @staticmethod
     def normalize_activity_type(activity_type):
         """Takes the various activity names that appear in GPX and TCX files and normalizes to the ones used in this app."""
-        if activity_type == 'Biking':
-            activity_type = 'Cycling'
-        elif len(activity_type) == 0:
-            activity_type = 'Unknown'
-        return activity_type
+        lower_activity_type = activity_type.lower()
+        if lower_activity_type == Keys.TYPE_RUNNING_KEY.lower():
+            return Keys.TYPE_RUNNING_KEY
+        elif lower_activity_type == Keys.TYPE_HIKING_KEY.lower():
+            return Keys.TYPE_HIKING_KEY
+        elif lower_activity_type == Keys.TYPE_WALKING_KEY.lower():
+            return Keys.TYPE_WALKING_KEY
+        elif lower_activity_type == Keys.TYPE_CYCLING_KEY.lower():
+            return Keys.TYPE_CYCLING_KEY
+        elif lower_activity_type == 'biking':
+            return Keys.TYPE_CYCLING_KEY
+        elif lower_activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY.lower():
+            return Keys.TYPE_OPEN_WATER_SWIMMING_KEY
+        return Keys.TYPE_UNSPECIFIED_ACTIVITY
 
     def import_gpx_file(self, username, user_id, file_name):
         """Imports the specified GPX file."""
@@ -95,6 +104,11 @@ class Importer(object):
             # Parse the file.
             gpx = gpxpy.parse(gpx_file)
 
+            # Figure out the sport type.
+            sport_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+            if len(gpx.tracks) > 0:
+                sport_type = Importer.normalize_activity_type(gpx.tracks[0].type)
+
             # Find the start timestamp.
             start_time_tuple = gpx.time.timetuple()
             start_time_unix = calendar.timegm(start_time_tuple)
@@ -104,7 +118,7 @@ class Importer(object):
                 raise Exception("Duplicate activity.")
 
             # Indicate the start of the activity.
-            device_str, activity_id = self.activity_writer.create_activity(username, user_id, gpx.name, gpx.description, 'Unknown', start_time_unix)
+            device_str, activity_id = self.activity_writer.create_activity(username, user_id, gpx.name, gpx.description, sport_type, start_time_unix)
 
             # We'll store the most recent timecode here.
             end_time_unix = 0
