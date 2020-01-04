@@ -68,7 +68,7 @@ def import_activity(import_str):
         # Write the file.
         print("Write the data to a local file...")
         with open(local_file_name, 'wb') as local_file:
-            local_file.write(uploaded_file_data)
+            local_file.write(uploaded_file_data.encode("utf-8"))
 
         # Import the file into the database.            
         print("Import the data to the database...")
