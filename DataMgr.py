@@ -125,6 +125,8 @@ class DataMgr(Importer.ActivityWriter):
 
         device_str = ""
         activity_id = self.create_activity_id()
+        if stream_name is None:
+            stream_name = ""
 
         if not self.database.create_activity(activity_id, stream_name, start_time, device_str):
             return None, None

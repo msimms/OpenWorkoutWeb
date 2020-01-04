@@ -102,9 +102,11 @@ class ActivityAnalyzer(object):
                 if Keys.APP_CURRENT_SPEED_KEY not in self.activity and location_analyzer is not None:
                     print("Creating speed graph...")
                     self.speed_graph = location_analyzer.create_speed_graph()
+
                     print("Storing the speed graph...")
                     if not self.data_mgr.create_metadata_list(activity_id, Keys.APP_CURRENT_SPEED_KEY, self.speed_graph):
                         self.log_error("Error returned when saving activity speed graph.")
+
                     print("Storing distance calculations...")
                     if not self.data_mgr.create_metadata_list(activity_id, Keys.APP_DISTANCES_KEY, location_analyzer.distance_buf):
                         self.log_error("Error returned when saving activity speed graph.")                    

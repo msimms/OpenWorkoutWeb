@@ -140,6 +140,9 @@ class Exporter(object):
         writer = GpxWriter.GpxWriter()
         writer.create_gpx(file_name, "")
 
+        start_time_ms = locations[0][Keys.LOCATION_TIME_KEY]
+        writer.write_metadata(start_time_ms)
+
         writer.start_track()
         writer.start_track_segment()
 
