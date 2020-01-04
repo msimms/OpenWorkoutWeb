@@ -177,8 +177,9 @@ class Exporter(object):
 
         writer.end_track_segment()
         writer.end_track()
-        result = writer.buffer()
         writer.close()
+
+        result = writer.buffer()
 
         return result
 
@@ -277,10 +278,12 @@ class Exporter(object):
                     done = True
 
             writer.end_track()
+            writer.end_lap()
 
         writer.end_activity()
-        result = writer.buffer()
         writer.close()
+
+        result = writer.buffer()
 
         return result
 
