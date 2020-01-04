@@ -70,7 +70,8 @@ class Exporter(object):
             buf = self.write_or_buffer(local_file, key + "\n")
             readings = activity[key]
             for reading in readings:
-                buf += self.write_or_buffer(local_file, str(reading) + "\n")
+                ts = reading.keys()[0]
+                buf += self.write_or_buffer(local_file, str(ts) + "," + str(reading[ts]) + "\n")
         return buf
 
     def export_accelerometer_data_to_csv(self, local_file, activity):
@@ -93,7 +94,6 @@ class Exporter(object):
         local_file = None
         if file_name is not None:
             local_file = open(file_name, 'wt')
-        print('foo')
 
         buf  = self.export_time_value_list_to_csv(local_file, activity, Keys.APP_CURRENT_SPEED_KEY)
         buf += self.export_time_value_list_to_csv(local_file, activity, Keys.APP_CURRENT_PACE_KEY)
@@ -101,7 +101,6 @@ class Exporter(object):
         buf += self.export_time_value_list_to_csv(local_file, activity, Keys.APP_POWER_KEY)
         buf += self.export_time_value_list_to_csv(local_file, activity, Keys.APP_CADENCE_KEY)
         buf += self.export_accelerometer_data_to_csv(local_file, activity)
-        print(buf)
 
         return buf
 
