@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+<title>${product} - ${name}</title>
+
+<link rel="stylesheet" href="${root_url}/css/normalize.css">
+<link rel="stylesheet" href="${root_url}/css/site.css">
+
+<meta charset="UTF-8">
+<meta name="description" content="Lists all devices claimed by the logged in user">
+<meta name="keywords" content="device list">
+
+</head>
+
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+
+<body>
+
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script>
+
+    function update_activity_info()
+    {
+		var the_url = "${root_url}/api/1.0/update_activity_info";
+		var activity_name = document.getElementById("activity_name").value;
+		var activity_type = document.getElementById("activity_type").value;
+		var description = document.getElementById("description").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["activity_name"] : activity_name});
+		dict.push({["activity_type"] : activity_type});
+		dict.push({["description"] : activity_name});
+
+		if (send_post_request(the_url, dict, result_text))
+            window.location.replace("${root_url}/activity/${activity_id}");
+		else
+			alert("An error occurred!");
+    }
+
+</script>
+
+<section class="nav">
+${nav}
+</section>
+
+<div class="profile" style="width: 600px">
+	<h2>Activity Name</h2>
+	<input type="text" name="activity_name" id="activity_name" value="${activity_name}"><br>
+	<hr>
+	<h2>Activity Type</h2>
+	<select id="activity_type" class="checkin" >
+${activity_type_options}
+	</select><br>
+	<hr>
+	<h2>Description</h2>
+	<textarea id="description" value="${description}" rows="10" cols="82"></textarea>
+	<br>
+	<button type="button" onclick="return save()">Update</button>
+</div>
+
+</body>
+</html>

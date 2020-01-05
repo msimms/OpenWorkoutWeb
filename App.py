@@ -275,7 +275,7 @@ class App(object):
 
     @staticmethod
     def render_export_control(has_location_data, has_accel_data):
-        """Helper function for building the exports string."""
+        """Helper function for building the exports string that appears on the activity details screens."""
         exports_str = "<td><select id=\"format\" class=\"checkin\" >\n"
         if has_location_data:
             exports_str += "\t<option value=\"tcx\" selected>TCX</option>\n"
@@ -287,11 +287,15 @@ class App(object):
         return exports_str
 
     @staticmethod
-    def render_delete_control(logged_in):
-        """Helper function for building the delete string."""
-        delete_str = ""
-        if logged_in:
-            delete_str += "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\"\">Delete</button></td><tr>\n"
+    def render_edit_controls():
+        """Helper function for building the edit string that appears on the activity details screens."""
+        edit_str = "<td><button type=\"button\" onclick=\"return edit_activity()\" style=\"color:black\"\">Edit</button></td><tr>\n"
+        return edit_str
+
+    @staticmethod
+    def render_delete_control():
+        """Helper function for building the delete string that appears on the activity details screens."""
+        delete_str = "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\"\">Delete</button></td><tr>\n"
         return delete_str
 
     def render_page_for_unmapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_username, belongs_to_current_user, is_live):
@@ -375,8 +379,17 @@ class App(object):
             exports_title_str = "<h3>Export Format</h3>"
             exports_str = App.render_export_control(False, Keys.APP_ACCELEROMETER_KEY in activity)
 
+        # List the edit controls.
+        edit_title_str = ""
+        edit_str = ""
+        if logged_in:
+            edit_title_str = "<h3>Edit</h3>"
+            edit_str = App.render_edit_controls()
+
         # Render the delete control.
-        delete_str = App.render_delete_control(logged_in)
+        delete_str = ""
+        if logged_in:
+            delete_str = App.render_delete_control()
 
         # Build the page title.
         if is_live:
@@ -385,7 +398,7 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.unmapped_activity_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, delete=delete_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
 
     def render_metadata_for_page(self, key, activity):
         """Helper function for processing meatadata and formatting it for display."""
@@ -615,8 +628,17 @@ class App(object):
             exports_title_str = "<h3>Export Format</h3>"
             exports_str = App.render_export_control(True, Keys.APP_ACCELEROMETER_KEY in activity)
 
+        # List the edit controls.
+        edit_title_str = ""
+        edit_str = ""
+        if logged_in:
+            edit_title_str = "<h3>Edit</h3>"
+            edit_str = App.render_edit_controls()
+
         # Render the delete control.
-        delete_str = App.render_delete_control(logged_in)
+        delete_str = ""
+        if logged_in:
+            delete_str = App.render_delete_control()
 
         # Build the page title.
         if is_live:
@@ -627,10 +649,10 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
@@ -776,7 +798,7 @@ class App(object):
 
     @statistics
     def activity(self, activity_id):
-        """Renders the map page for an activity."""
+        """Renders the details page for an activity."""
 
         # Get the logged in user (if any).
         logged_in_user_id = None
@@ -803,6 +825,62 @@ class App(object):
 
         # Render from template.
         return self.render_page_for_activity(activity, activity_username, activity_user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, False)
+
+    @statistics
+    def edit_activity(self, activity_id):
+        """Renders the edit page for an activity."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Load the activity.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if activity is None:
+            return self.error("The requested activity does not exist.")
+
+        # Determine who owns the device, and hence the activity.
+        activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
+        belongs_to_current_user = str(activity_user_id) == str(user_id)
+        if not belongs_to_current_user:
+            return self.error("The logged in user does not own the requested activity.")
+
+        # Render the activity name.
+        activity_name_str = ""
+        if Keys.ACTIVITY_NAME_KEY in activity:
+            activity_name_str = activity[Keys.ACTIVITY_NAME_KEY]
+
+        # Render the activity types selection.
+        selected_activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+        if Keys.ACTIVITY_TYPE_KEY in activity:
+            selected_activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
+        all_activity_types = Keys.FOOT_BASED_ACTIVITIES
+        all_activity_types.extend(Keys.BIKE_BASED_ACTIVITIES)
+        all_activity_types.extend(Keys.SWIMMING_ACTIVITIES)
+        all_activity_types.append(Keys.TYPE_UNSPECIFIED_ACTIVITY)
+        activity_type_options_str = ""
+        for activity_type in all_activity_types:
+            activity_type_options_str += "\t\t<option value=\"" + activity_type + "\""
+            if selected_activity_type == activity_type:
+                activity_type_options_str += " selected"
+            activity_type_options_str += ">" + activity_type + "</option>\n"
+
+        # Render the activity description.
+        description_str = ""
+        if Keys.ACTIVITY_DESCRIPTION_KEY in activity:
+            description_str = activity[Keys.ACTIVITY_DESCRIPTION_KEY]
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'edit_activity.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id, activity_name=activity_name_str, activity_type_options=activity_type_options_str, description=description_str)
 
     @statistics
     def device(self, device_str):

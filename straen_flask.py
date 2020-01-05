@@ -157,13 +157,24 @@ def live_user(user_str):
 
 @g_flask_app.route('/activity')
 def activity(activity_id):
-    """Renders the map page for an activity."""
+    """Renders the details page for an activity."""
     try:
         return g_app.activity(activity_id)
     except:
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + activity.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/edit_activity')
+def edit_activity(activity_id):
+    """Renders the edit page for an activity."""
+    try:
+        return g_app.edit_activity(activity_id)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + edit_activity.__name__)
     return g_app.error()
 
 @g_flask_app.route('/device')

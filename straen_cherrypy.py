@@ -182,13 +182,24 @@ class StraenWeb(object):
 
     @cherrypy.expose
     def activity(self, activity_id, *args, **kw):
-        """Renders the map page for an activity."""
+        """Renders the details page for an activity."""
         try:
             return self.app.activity(activity_id)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.activity.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    def edit_activity(self, activity_id, *args, **kw):
+        """Renders the edit page for an activity."""
+        try:
+            return self.app.edit_activity(activity_id)
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.edit_activity.__name__)
         return self.error()
 
     @cherrypy.expose
