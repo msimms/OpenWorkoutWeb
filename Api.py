@@ -325,12 +325,8 @@ class Api(object):
         activity = self.data_mgr.retrieve_activity(activity_id)
 
         # Get the ID of the user that owns the activity and make sure it's the current user.
-        if not Keys.ACTIVITY_USER_ID_KEY:
-            raise ApiException.ApiAuthenticationException("Activity is not associated with a user.")
-        activity_user_id = activity[Keys.ACTIVITY_USER_ID_KEY]
-        belongs_to_current_user = str(activity_user_id) == str(self.user_id)
-        if not belongs_to_current_user:
-            raise ApiException.ApiAuthenticationException("Activity is not owned by the current user.")
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
 
         if Keys.ACTIVITY_NAME_KEY in values:
             self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, urllib.unquote_plus(values[Keys.ACTIVITY_NAME_KEY]), False)
