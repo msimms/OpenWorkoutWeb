@@ -1055,28 +1055,6 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
-        
-    def retrieve_activity_metadata(self, key, activity_id):
-        """Returns all the metadata of the given type for the specified activity."""
-        if key is None:
-            self.log_error(MongoDatabase.retrieve_activity_metadata.__name__ + ": Unexpected empty object: key")
-            return None
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_activity_metadata.__name__ + ": Unexpected empty object: activity_id")
-            return None
-
-        try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if key in activity:
-                    metadata = activity[key]
-                    if isinstance(metadata, list):
-                        metadata.sort(key=retrieve_time_from_time_value_pair)
-                    return metadata
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return None
 
     def create_activity_sets_and_reps_data(self, activity_id, sets):
         """Create method for a list of of metaadata values."""

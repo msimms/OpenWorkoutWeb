@@ -210,6 +210,9 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
+        # Get the activity from the database.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+
         # Determine if the requesting user can view the activity.
         #activity_user_id = activity_user[Keys.DATABASE_ID_KEY]
         #belongs_to_current_user = str(activity_user_id) == str(self.user_id)
@@ -218,79 +221,89 @@ class Api(object):
 
         response = "["
 
-        activity_name = self.data_mgr.retrieve_activity_metadata(Keys.ACTIVITY_NAME_KEY, activity_id)
-        if activity_name is not None and len(activity_name) > 0:
-            if len(response) > 1:
-                response += ","
-            response += json.dumps({"name": "Name", "value": activity_name})
+        if Keys.ACTIVITY_NAME_KEY in activity:
+            activity_name = activity[Keys.ACTIVITY_NAME_KEY]
+            if activity_name is not None and len(activity_name) > 0:
+                if len(response) > 1:
+                    response += ","
+                response += json.dumps({"name": "Name", "value": activity_name})
 
-        activity_type = self.data_mgr.retrieve_activity_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
-        if activity_type is not None and len(activity_type) > 0:
-            if len(response) > 1:
-                response += ","
-            response += json.dumps({"name": "Type", "value": activity_type})
+        if Keys.ACTIVITY_TYPE_KEY in activity:
+            activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
+            if activity_type is not None and len(activity_type) > 0:
+                if len(response) > 1:
+                    response += ","
+                response += json.dumps({"name": "Type", "value": activity_type})
 
-        activity_description = self.data_mgr.retrieve_activity_metadata(Keys.ACTIVITY_DESCRIPTION_KEY, activity_id)
-        if activity_description is not None and len(activity_description) > 0:
-            if len(response) > 1:
-                response += ","
-            response += json.dumps({"name": "Description", "value": activity_description})
+        if Keys.ACTIVITY_DESCRIPTION_KEY in activity:
+            activity_description = activity[Keys.ACTIVITY_DESCRIPTION_KEY]
+            if activity_description is not None and len(activity_description) > 0:
+                if len(response) > 1:
+                    response += ","
+                response += json.dumps({"name": "Description", "value": activity_description})
 
-        times = self.data_mgr.retrieve_activity_metadata(Keys.APP_TIME_KEY, activity_id)
-        if times is not None and len(times) > 0:
-            if len(response) > 1:
-                response += ","
-            localtimezone = tzlocal()
-            value_str = datetime.datetime.fromtimestamp(times[-1][1] / 1000, localtimezone).strftime('%Y-%m-%d %H:%M:%S')
-            response += json.dumps({"name": Keys.APP_TIME_KEY, "value": value_str})
+        if Keys.APP_TIME_KEY in activity:
+            times = activity[Keys.APP_TIME_KEY]
+            if times is not None and len(times) > 0:
+                if len(response) > 1:
+                    response += ","
+                localtimezone = tzlocal()
+                value_str = datetime.datetime.fromtimestamp(times[-1][1] / 1000, localtimezone).strftime('%Y-%m-%d %H:%M:%S')
+                response += json.dumps({"name": Keys.APP_TIME_KEY, "value": value_str})
 
-        distances = self.data_mgr.retrieve_activity_metadata(Keys.APP_DISTANCE_KEY, activity_id)
-        if distances is not None and len(distances) > 0:
-            if len(response) > 1:
-                response += ","
-            distance = distances[-1]
-            value = float(distance.values()[0])
-            response += json.dumps({"name": Keys.APP_DISTANCE_KEY, "value": "{:.2f}".format(value)})
+        if Keys.APP_DISTANCE_KEY in activity:
+            distances = activity[Keys.APP_DISTANCE_KEY]
+            if distances is not None and len(distances) > 0:
+                if len(response) > 1:
+                    response += ","
+                distance = distances[-1]
+                value = float(distance.values()[0])
+                response += json.dumps({"name": Keys.APP_DISTANCE_KEY, "value": "{:.2f}".format(value)})
 
-        avg_speeds = self.data_mgr.retrieve_activity_metadata(Keys.APP_AVG_SPEED_KEY, activity_id)
-        if avg_speeds is not None and len(avg_speeds) > 0:
-            if len(response) > 1:
-                response += ","
-            speed = avg_speeds[-1]
-            value = float(speed.values()[0])
-            response += json.dumps({"name": Keys.APP_AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
+        if Keys.APP_AVG_SPEED_KEY in activity:
+            avg_speeds = activity[Keys.APP_AVG_SPEED_KEY]
+            if avg_speeds is not None and len(avg_speeds) > 0:
+                if len(response) > 1:
+                    response += ","
+                speed = avg_speeds[-1]
+                value = float(speed.values()[0])
+                response += json.dumps({"name": Keys.APP_AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
 
-        moving_speeds = self.data_mgr.retrieve_activity_metadata(Keys.APP_MOVING_SPEED_KEY, activity_id)
-        if moving_speeds is not None and len(moving_speeds) > 0:
-            if len(response) > 1:
-                response += ","
-            speed = moving_speeds[-1]
-            value = float(speed.values()[0])
-            response += json.dumps({"name": Keys.APP_MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
+        if Keys.APP_MOVING_SPEED_KEY in activity:
+            moving_speeds = activity[Keys.APP_MOVING_SPEED_KEY]
+            if moving_speeds is not None and len(moving_speeds) > 0:
+                if len(response) > 1:
+                    response += ","
+                speed = moving_speeds[-1]
+                value = float(speed.values()[0])
+                response += json.dumps({"name": Keys.APP_MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
 
-        heart_rates = self.data_mgr.retrieve_activity_sensor_readings(Keys.APP_HEART_RATE_KEY, activity_id)
-        if heart_rates is not None and len(heart_rates) > 0:
-            if len(response) > 1:
-                response += ","
-            heart_rate = heart_rates[-1]
-            value = float(heart_rate.values()[0])
-            response += json.dumps({"name": Keys.APP_HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
+        if Keys.APP_HEART_RATE_KEY in activity:
+            heart_rates = activity[Keys.APP_HEART_RATE_KEY]
+            if heart_rates is not None and len(heart_rates) > 0:
+                if len(response) > 1:
+                    response += ","
+                heart_rate = heart_rates[-1]
+                value = float(heart_rate.values()[0])
+                response += json.dumps({"name": Keys.APP_HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
 
-        cadences = self.data_mgr.retrieve_activity_sensor_readings(Keys.APP_CADENCE_KEY, activity_id)
-        if cadences is not None and len(cadences) > 0:
-            if len(response) > 1:
-                response += ","
-            cadence = cadences[-1]
-            value = float(cadence.values()[0])
-            response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} rpm".format(value)})
+        if Keys.APP_CADENCE_KEY in activity:
+            cadences = activity[Keys.APP_CADENCE_KEY]
+            if cadences is not None and len(cadences) > 0:
+                if len(response) > 1:
+                    response += ","
+                cadence = cadences[-1]
+                value = float(cadence.values()[0])
+                response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} rpm".format(value)})
 
-        powers = self.data_mgr.retrieve_activity_sensor_readings(Keys.APP_POWER_KEY, activity_id)
-        if powers is not None and len(powers) > 0:
-            if len(response) > 1:
-                response += ","
-            power = powers[-1]
-            value = float(power.values()[0])
-            response += json.dumps({"name": Keys.APP_POWER_KEY, "value": "{:.2f} watts".format(value)})
+        if Keys.APP_POWER_KEY in activity:
+            powers = activity[Keys.APP_POWER_KEY]
+            if powers is not None and len(powers) > 0:
+                if len(response) > 1:
+                    response += ","
+                power = powers[-1]
+                value = float(power.values()[0])
+                response += json.dumps({"name": Keys.APP_POWER_KEY, "value": "{:.2f} watts".format(value)})
 
         response += "]"
 

@@ -500,16 +500,6 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity_sensor_readings(key, activity_id)
 
-    def retrieve_activity_metadata(self, key, activity_id):
-        """Returns all the metadata for the specified sensor for the given activity."""
-        if self.database is None:
-            raise Exception("No database.")
-        if key is None or len(key) == 0:
-            raise Exception("Bad parameter.")
-        if activity_id is None or len(activity_id) == 0:
-            raise Exception("Bad parameter.")
-        return self.database.retrieve_activity_metadata(key, activity_id)
-
     def retrieve_most_recent_activity_id_for_device(self, device_str):
         """Returns the most recent activity id for the specified device."""
         if self.database is None:
