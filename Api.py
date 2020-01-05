@@ -321,6 +321,24 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
+        # Get the activity from the database.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+
+        # Get the ID of the user that owns the activity and make sure it's the current user.
+        if not Keys.ACTIVITY_USER_ID_KEY:
+            raise ApiException.ApiAuthenticationException("Activity is not associated with a user.")
+        activity_user_id = activity[Keys.ACTIVITY_USER_ID_KEY]
+        belongs_to_current_user = str(activity_user_id) == str(self.user_id)
+        if not belongs_to_current_user:
+            raise ApiException.ApiAuthenticationException("Activity is not owned by the current user.")
+
+        if Keys.ACTIVITY_NAME_KEY in values:
+            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, urllib.unquote_plus(values[Keys.ACTIVITY_NAME_KEY]), False)
+        if Keys.ACTIVITY_TYPE_KEY in values:
+            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY]), False)
+        if Keys.ACTIVITY_DESCRIPTION_KEY in values:
+            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_DESCRIPTION_KEY, urllib.unquote_plus(values[Keys.ACTIVITY_DESCRIPTION_KEY]), False)
+
         return True, ""
 
     def handle_login(self, values):
