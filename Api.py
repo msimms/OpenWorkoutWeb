@@ -147,11 +147,11 @@ class Api(object):
 
             # Update the accelerometer readings.
             if accels:
-                self.data_mgr.create_accelerometer_reading(device_str, activity_id, accels)
+                self.data_mgr.create_activity_accelerometer_reading(device_str, activity_id, accels)
 
         # Udpate the activity type.
         if len(activity_type) > 0:
-            self.data_mgr.create_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
+            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
 
         # Update the user device association.
         if len(username) > 0:
@@ -166,7 +166,7 @@ class Api(object):
 
         return True, ""
 
-    def handle_activity_track(self, values):
+    def handle_retrieve_activity_track(self, values):
         """Called when an API message to get the activity track is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -185,7 +185,7 @@ class Api(object):
         if not InputChecker.is_integer(num_points):
             raise ApiException.ApiMalformedRequestException("Invalid number of points.")
 
-        locations = self.data_mgr.retrieve_most_recent_locations(activity_id, int(num_points))
+        locations = self.data_mgr.retrieve_most_recent_activity_locations(activity_id, int(num_points))
 
         response = "["
 
@@ -198,21 +198,45 @@ class Api(object):
 
         return True, response
 
-    def handle_activity_metadata(self, values):
+    def handle_retrieve_activity_metadata(self, values):
         """Called when an API message to get the activity metadata."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
-        # Get the device and activity IDs from the request.
+        # Get the activity ID from the request.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
+        # Determine if the requesting user can view the activity.
+        #activity_user_id = activity_user[Keys.DATABASE_ID_KEY]
+        #belongs_to_current_user = str(activity_user_id) == str(self.user_id)
+        #if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
+        #    return self.error("The requested activity is not public.")
+
         response = "["
 
-        times = self.data_mgr.retrieve_metadata(Keys.APP_TIME_KEY, activity_id)
+        activity_name = self.data_mgr.retrieve_activity_metadata(Keys.ACTIVITY_NAME_KEY, activity_id)
+        if activity_name is not None and len(activity_name) > 0:
+            if len(response) > 1:
+                response += ","
+            response += json.dumps({"name": "Name", "value": activity_name})
+
+        activity_type = self.data_mgr.retrieve_activity_metadata(Keys.ACTIVITY_TYPE_KEY, activity_id)
+        if activity_type is not None and len(activity_type) > 0:
+            if len(response) > 1:
+                response += ","
+            response += json.dumps({"name": "Type", "value": activity_type})
+
+        activity_description = self.data_mgr.retrieve_activity_metadata(Keys.ACTIVITY_DESCRIPTION_KEY, activity_id)
+        if activity_description is not None and len(activity_description) > 0:
+            if len(response) > 1:
+                response += ","
+            response += json.dumps({"name": "Description", "value": activity_description})
+
+        times = self.data_mgr.retrieve_activity_metadata(Keys.APP_TIME_KEY, activity_id)
         if times is not None and len(times) > 0:
             if len(response) > 1:
                 response += ","
@@ -220,7 +244,7 @@ class Api(object):
             value_str = datetime.datetime.fromtimestamp(times[-1][1] / 1000, localtimezone).strftime('%Y-%m-%d %H:%M:%S')
             response += json.dumps({"name": Keys.APP_TIME_KEY, "value": value_str})
 
-        distances = self.data_mgr.retrieve_metadata(Keys.APP_DISTANCE_KEY, activity_id)
+        distances = self.data_mgr.retrieve_activity_metadata(Keys.APP_DISTANCE_KEY, activity_id)
         if distances is not None and len(distances) > 0:
             if len(response) > 1:
                 response += ","
@@ -228,7 +252,7 @@ class Api(object):
             value = float(distance.values()[0])
             response += json.dumps({"name": Keys.APP_DISTANCE_KEY, "value": "{:.2f}".format(value)})
 
-        avg_speeds = self.data_mgr.retrieve_metadata(Keys.APP_AVG_SPEED_KEY, activity_id)
+        avg_speeds = self.data_mgr.retrieve_activity_metadata(Keys.APP_AVG_SPEED_KEY, activity_id)
         if avg_speeds is not None and len(avg_speeds) > 0:
             if len(response) > 1:
                 response += ","
@@ -236,7 +260,7 @@ class Api(object):
             value = float(speed.values()[0])
             response += json.dumps({"name": Keys.APP_AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
 
-        moving_speeds = self.data_mgr.retrieve_metadata(Keys.APP_MOVING_SPEED_KEY, activity_id)
+        moving_speeds = self.data_mgr.retrieve_activity_metadata(Keys.APP_MOVING_SPEED_KEY, activity_id)
         if moving_speeds is not None and len(moving_speeds) > 0:
             if len(response) > 1:
                 response += ","
@@ -244,7 +268,7 @@ class Api(object):
             value = float(speed.values()[0])
             response += json.dumps({"name": Keys.APP_MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
 
-        heart_rates = self.data_mgr.retrieve_sensor_readings(Keys.APP_HEART_RATE_KEY, activity_id)
+        heart_rates = self.data_mgr.retrieve_activity_sensor_readings(Keys.APP_HEART_RATE_KEY, activity_id)
         if heart_rates is not None and len(heart_rates) > 0:
             if len(response) > 1:
                 response += ","
@@ -252,7 +276,7 @@ class Api(object):
             value = float(heart_rate.values()[0])
             response += json.dumps({"name": Keys.APP_HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
 
-        cadences = self.data_mgr.retrieve_sensor_readings(Keys.APP_CADENCE_KEY, activity_id)
+        cadences = self.data_mgr.retrieve_activity_sensor_readings(Keys.APP_CADENCE_KEY, activity_id)
         if cadences is not None and len(cadences) > 0:
             if len(response) > 1:
                 response += ","
@@ -260,7 +284,7 @@ class Api(object):
             value = float(cadence.values()[0])
             response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} rpm".format(value)})
 
-        powers = self.data_mgr.retrieve_sensor_readings(Keys.APP_POWER_KEY, activity_id)
+        powers = self.data_mgr.retrieve_activity_sensor_readings(Keys.APP_POWER_KEY, activity_id)
         if powers is not None and len(powers) > 0:
             if len(response) > 1:
                 response += ","
@@ -271,6 +295,20 @@ class Api(object):
         response += "]"
 
         return True, response
+
+    def handle_update_activity_metadata(self, values):
+        """Called when an API message to update the activity metadata."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+
+        # Get the activity ID from the request.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        return True, ""
 
     def handle_login(self, values):
         """Called when an API message to log in is received."""
@@ -520,8 +558,8 @@ class Api(object):
         # Add the activity to the database.
         activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
         device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time))
-        self.data_mgr.create_metadata(activity_id, 0, Keys.APP_DISTANCE_KEY, float(values[Keys.APP_DISTANCE_KEY]), False)
-        self.data_mgr.create_metadata(activity_id, 0, Keys.APP_DURATION_KEY, float(values[Keys.APP_DURATION_KEY]), False)
+        self.data_mgr.create_activity_metadata(activity_id, 0, Keys.APP_DISTANCE_KEY, float(values[Keys.APP_DISTANCE_KEY]), False)
+        self.data_mgr.create_activity_metadata(activity_id, 0, Keys.APP_DURATION_KEY, float(values[Keys.APP_DURATION_KEY]), False)
 
         return ""
 
@@ -569,7 +607,7 @@ class Api(object):
         # Add the activity to the database.
         activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
         device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time))
-        self.data_mgr.create_sets_and_reps_data(activity_id, new_sets)
+        self.data_mgr.create_activity_sets_and_reps_data(activity_id, new_sets)
 
         return ""
 
@@ -1188,9 +1226,11 @@ class Api(object):
         if request == 'update_status':
             return self.handle_update_status(values)
         elif request == 'activity_track':
-            return self.handle_activity_track(values)
+            return self.handle_retrieve_activity_track(values)
         elif request == 'activity_metadata':
-            return self.handle_activity_metadata(values)
+            return self.handle_retrieve_activity_metadata(values)
+        elif request == 'update_activity_metadata':
+            return self.handle_update_activity_metadata(values)
         elif request == 'login':
             return self.handle_login(values)
         elif request == 'create_login':

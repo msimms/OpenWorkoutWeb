@@ -690,7 +690,7 @@ class App(object):
             if activity_id is None:
                 continue
 
-            locations = self.data_mgr.retrieve_locations(activity_id)
+            locations = self.data_mgr.retrieve_activity_locations(activity_id)
             if locations is None:
                 continue
 
@@ -747,7 +747,7 @@ class App(object):
             logged_in_user_id, _, _ = self.user_mgr.retrieve_user(logged_in_username)
 
         # Is the activity still live? After one day, the activity is no longer considered live.
-        end_time = self.data_mgr.compute_end_time(activity) / 1000
+        end_time = self.data_mgr.compute_activity_end_time(activity) / 1000
         now = time.time()
         diff = now - end_time
         diff_hours = diff / 60 / 60

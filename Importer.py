@@ -46,23 +46,23 @@ class ActivityWriter(object):
         """Pure virtual method for starting a location stream - creates the activity ID for the specified user."""
         pass
 
-    def create_track(self, device_str, activity_id, track_name, track_description):
+    def create_activity_track(self, device_str, activity_id, track_name, track_description):
         """Pure virtual method for starting a location track - creates the activity ID for the specified user."""
         pass
 
-    def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
+    def create_activity_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
         """Pure virtual method for processing a location read by the importer."""
         pass
 
-    def create_locations(self, device_str, activity_id, locations):
+    def create_activity_locations(self, device_str, activity_id, locations):
         """Pure virtual method for processing multiple location reads. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
         pass
 
-    def create_sensor_reading(self, activity_id, date_time, sensor_type, value):
+    def create_activity_sensor_reading(self, activity_id, date_time, sensor_type, value):
         """Pure virtual method for processing a sensor reading from the importer."""
         pass
 
-    def create_sensor_readings(self, activity_id, sensor_type, values):
+    def create_activity_sensor_readings(self, activity_id, sensor_type, values):
         """Pure virtual method for processing multiple sensor readings. 'values' is an array of arrays in the form [time, value]."""
         pass
 
@@ -130,7 +130,7 @@ class Importer(object):
             temperature_readings = []
 
             for track in gpx.tracks:
-                self.activity_writer.create_track(device_str, activity_id, track.name, track.description)
+                self.activity_writer.create_activity_track(device_str, activity_id, track.name, track.description)
                 for segment in track.segments:
                     for point in segment.points:
 
@@ -178,13 +178,13 @@ class Importer(object):
                                 temperature_readings.append(reading)
 
             # Write all the locations at once.
-            self.activity_writer.create_locations(device_str, activity_id, locations)
+            self.activity_writer.create_activity_locations(device_str, activity_id, locations)
 
             # Write all the sensor readings at once.
-            self.activity_writer.create_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
-            self.activity_writer.create_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
-            self.activity_writer.create_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
-            self.activity_writer.create_sensor_readings(activity_id, Keys.APP_TEMP_KEY, temperature_readings)
+            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
+            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
+            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
+            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_TEMP_KEY, temperature_readings)
 
             # Let it be known that we are finished with this activity.
             self.activity_writer.finish_activity(activity_id, end_time_unix)
@@ -287,12 +287,12 @@ class Importer(object):
                                             power_readings.append(reading)
 
         # Write all the locations at once.
-        self.activity_writer.create_locations(device_str, activity_id, locations)
+        self.activity_writer.create_activity_locations(device_str, activity_id, locations)
 
         # Write all the sensor readings at once.
-        self.activity_writer.create_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
-        self.activity_writer.create_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
-        self.activity_writer.create_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
+        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
+        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
+        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
 
         # Let it be known that we are finished with this activity.
         self.activity_writer.finish_activity(activity_id, end_time_unix)
@@ -333,7 +333,7 @@ class Importer(object):
                 if row_count == 1:
                     device_str, activity_id = self.activity_writer.create_activity(username, user_id, "", "", "Lifting", ts)
 
-                self.activity_writer.create_sensor_reading(activity_id, ts, Keys.APP_ACCELEROMETER_KEY, accel_data)
+                self.activity_writer.create_activity_sensor_reading(activity_id, ts, Keys.APP_ACCELEROMETER_KEY, accel_data)
                 row_count = row_count + 1
 
         # Let it be known that we are finished with this activity.

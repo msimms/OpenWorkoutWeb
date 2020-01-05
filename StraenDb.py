@@ -774,22 +774,22 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
+    def create_activity_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
         """Create method for a location."""
         if device_str is None:
-            self.log_error(MongoDatabase.create_location.__name__ + ": Unexpected empty object: device_str")
+            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: device_str")
             return False
         if activity_id is None:
-            self.log_error(MongoDatabase.create_location.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: activity_id")
             return False
         if latitude is None:
-            self.log_error(MongoDatabase.create_location.__name__ + ": Unexpected empty object: latitude")
+            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: latitude")
             return False
         if longitude is None:
-            self.log_error(MongoDatabase.create_location.__name__ + ": Unexpected empty object: longitude")
+            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: longitude")
             return False
         if altitude is None:
-            self.log_error(MongoDatabase.create_location.__name__ + ": Unexpected empty object: altitude")
+            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: altitude")
             return False
 
         try:
@@ -814,16 +814,16 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_locations(self, device_str, activity_id, locations):
+    def create_activity_locations(self, device_str, activity_id, locations):
         """Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
         if device_str is None:
-            self.log_error(MongoDatabase.create_locations.__name__ + ": Unexpected empty object: device_str")
+            self.log_error(MongoDatabase.create_activity_locations.__name__ + ": Unexpected empty object: device_str")
             return False
         if activity_id is None:
-            self.log_error(MongoDatabase.create_locations.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_locations.__name__ + ": Unexpected empty object: activity_id")
             return False
         if not locations:
-            self.log_error(MongoDatabase.create_locations.__name__ + ": Unexpected empty object: locations")
+            self.log_error(MongoDatabase.create_activity_locations.__name__ + ": Unexpected empty object: locations")
             return False
 
         try:
@@ -851,10 +851,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_locations(self, activity_id):
+    def retrieve_activity_locations(self, activity_id):
         """Returns all the locations for the specified activity."""
         if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_locations.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.retrieve_activity_locations.__name__ + ": Unexpected empty object: activity_id")
             return None
 
         try:
@@ -869,17 +869,17 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def retrieve_most_recent_locations(self, activity_id, num):
+    def retrieve_most_recent_activity_locations(self, activity_id, num):
         """Returns the most recent 'num' locations for the specified activity."""
         if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_most_recent_locations.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.retrieve_most_recent_activity_locations.__name__ + ": Unexpected empty object: activity_id")
             return None
         if num is None:
-            self.log_error(MongoDatabase.retrieve_most_recent_locations.__name__ + ": Unexpected empty object: num")
+            self.log_error(MongoDatabase.retrieve_most_recent_activity_locations.__name__ + ": Unexpected empty object: num")
             return None
 
         try:
-            locations = self.retrieve_locations(activity_id)
+            locations = self.retrieve_activity_locations(activity_id)
             locations.sort(key=retrieve_time_from_location)
             return locations
         except:
@@ -887,19 +887,19 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_sensor_reading(self, activity_id, date_time, sensor_type, value):
+    def create_activity_sensor_reading(self, activity_id, date_time, sensor_type, value):
         """Create method for a piece of sensor data, such as a heart rate or power meter reading."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: activity_id")
             return False
         if date_time is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: date_time")
+            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: date_time")
             return False
         if sensor_type is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: sensor_type")
+            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: sensor_type")
             return False
         if value is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: value")
+            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: value")
             return False
 
         try:
@@ -921,16 +921,16 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_sensor_readings(self, activity_id, sensor_type, values):
+    def create_activity_sensor_readings(self, activity_id, sensor_type, values):
         """Create method for several pieces of sensor data, such as a heart rate or power meter reading."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: activity_id")
             return False
         if sensor_type is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: sensor_type")
+            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: sensor_type")
             return False
         if values is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: values")
+            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: values")
             return False
 
         try:
@@ -954,13 +954,13 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_sensor_readings(self, sensor_type, activity_id):
+    def retrieve_activity_sensor_readings(self, sensor_type, activity_id):
         """Returns all the sensor data for the specified sensor for the given activity."""
         if sensor_type is None:
-            self.log_error(MongoDatabase.retrieve_sensor_readings.__name__ + ": Unexpected empty object: sensor_type")
+            self.log_error(MongoDatabase.retrieve_activity_sensor_readings.__name__ + ": Unexpected empty object: sensor_type")
             return None
         if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_sensor_readings.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.retrieve_activity_sensor_readings.__name__ + ": Unexpected empty object: activity_id")
             return None
 
         try:
@@ -975,22 +975,22 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_metadata(self, activity_id, date_time, key, value, create_list):
+    def create_activity_metadata(self, activity_id, date_time, key, value, create_list):
         """Create method for a piece of metaadata. When dealing with a list, will append values."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: activity_id")
             return False
         if date_time is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: date_time")
+            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: date_time")
             return False
         if key is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: key")
+            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: key")
             return False
         if value is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: value")
+            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: value")
             return False
         if create_list is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: create_list")
+            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: create_list")
             return False
 
         try:
@@ -1026,16 +1026,16 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_metadata_list(self, activity_id, key, values):
+    def create_activity_metadata_list(self, activity_id, key, values):
         """Create method for a list of metaadata values. Will overwrite existing data."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_metadata_list.__name__ + ": Unexpected empty object: activity_id")
             return False
         if key is None:
-            self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Unexpected empty object: key")
+            self.log_error(MongoDatabase.create_activity_metadata_list.__name__ + ": Unexpected empty object: key")
             return False
         if values is None:
-            self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Unexpected empty object: values")
+            self.log_error(MongoDatabase.create_activity_metadata_list.__name__ + ": Unexpected empty object: values")
             return False
 
         try:
@@ -1056,13 +1056,13 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
         
-    def retrieve_metadata(self, key, activity_id):
+    def retrieve_activity_metadata(self, key, activity_id):
         """Returns all the metadata of the given type for the specified activity."""
         if key is None:
-            self.log_error(MongoDatabase.retrieve_metadata.__name__ + ": Unexpected empty object: key")
+            self.log_error(MongoDatabase.retrieve_activity_metadata.__name__ + ": Unexpected empty object: key")
             return None
         if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_metadata.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.retrieve_activity_metadata.__name__ + ": Unexpected empty object: activity_id")
             return None
 
         try:
@@ -1078,13 +1078,13 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_sets_and_reps_data(self, activity_id, sets):
+    def create_activity_sets_and_reps_data(self, activity_id, sets):
         """Create method for a list of of metaadata values."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_sets_and_reps_data.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_sets_and_reps_data.__name__ + ": Unexpected empty object: activity_id")
             return False
         if sets is None:
-            self.log_error(MongoDatabase.create_sets_and_reps_data.__name__ + ": Unexpected empty object: sets")
+            self.log_error(MongoDatabase.create_activity_sets_and_reps_data.__name__ + ": Unexpected empty object: sets")
             return False
 
         try:
@@ -1098,16 +1098,16 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_accelerometer_reading(self, device_str, activity_id, accels):
+    def create_activity_accelerometer_reading(self, device_str, activity_id, accels):
         """Adds several accelerometer readings to the database. 'accels' is an array of arrays in the form [time, x, y, z]."""
         if device_str is None:
-            self.log_error(MongoDatabase.create_accelerometer_reading.__name__ + ": Unexpected empty object: device_str")
+            self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Unexpected empty object: device_str")
             return False
         if activity_id is None:
-            self.log_error(MongoDatabase.create_accelerometer_reading.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Unexpected empty object: activity_id")
             return False
         if not accels:
-            self.log_error(MongoDatabase.create_accelerometer_reading.__name__ + ": Unexpected empty object: accels")
+            self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Unexpected empty object: accels")
             return False
 
         try:
@@ -1123,7 +1123,7 @@ class MongoDatabase(Database.Database):
                 for accel in accels:
                     # Make sure time values are monotonically increasing.
                     if accel_list and int(accel_list[-1][Keys.ACCELEROMETER_TIME_KEY]) > accel[0]:
-                        self.log_error(MongoDatabase.create_accelerometer_reading.__name__ + ": Received out-of-order time value.")
+                        self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Received out-of-order time value.")
                     else:
                         value = {Keys.ACCELEROMETER_TIME_KEY: accel[0], Keys.ACCELEROMETER_AXIS_NAME_X: accel[1], Keys.ACCELEROMETER_AXIS_NAME_Y: accel[2], Keys.ACCELEROMETER_AXIS_NAME_Z: accel[3]}
                         accel_list.append(value)
@@ -1135,24 +1135,6 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
-
-    def retrieve_accelerometer_readings(self, activity_id):
-        """Returns all the locations for the specified activity."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_accelerometer_readings.__name__ + ": Unexpected empty object: activity_id")
-            return None
-
-        try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if Keys.APP_ACCELEROMETER_KEY in activity:
-                    accels = activity[Keys.APP_ACCELEROMETER_KEY]
-                    accels.sort(key=retrieve_time_from_accelerometer_reading)
-                    return accels
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return None
 
     def create_activity_summary(self, activity_id, summary_data):
         """Create method for activity summary data. Summary data is data computed from the raw data."""

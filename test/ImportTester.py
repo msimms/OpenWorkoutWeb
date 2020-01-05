@@ -53,21 +53,21 @@ class TestActivityWriter(Importer.ActivityWriter):
 
         return None, None
 
-    def create_track(self, device_str, activity_id, track_name, track_description):
+    def create_activity_track(self, device_str, activity_id, track_name, track_description):
         """Inherited from ActivityWriter."""
         pass
 
-    def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
+    def create_activity_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
         """Inherited from ActivityWriter. Called for each location that is read from the input file."""
         self.location_analyzer.append_location(date_time, latitude, longitude, altitude)
         self.location_analyzer.update_speeds()
 
-    def create_locations(self, device_str, activity_id, locations):
+    def create_activity_locations(self, device_str, activity_id, locations):
         """Inherited from ActivityWriter. Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
         for location in locations:
-            self.create_location(device_str, activity_id, location[0], location[1], location[2], location[3])
+            self.create_activity_location(device_str, activity_id, location[0], location[1], location[2], location[3])
 
-    def create_sensor_reading(self, activity_id, date_time, sensor_type, value):
+    def create_activity_sensor_reading(self, activity_id, date_time, sensor_type, value):
         """Inherited from ActivityWriter. Called for each sensor reading that is read from the input file."""
         found = False
         for sensor_analyzer in self.sensor_analyzers:
@@ -81,10 +81,10 @@ class TestActivityWriter(Importer.ActivityWriter):
                 sensor_analyzer.append_sensor_value(date_time, value)
                 self.sensor_analyzers.append(sensor_analyzer)
 
-    def create_sensor_readings(self, activity_id, sensor_type, values):
+    def create_activity_sensor_readings(self, activity_id, sensor_type, values):
         """Inherited from ActivityWriter. Adds several sensor readings to the database. 'values' is an array of arrays in the form [time, value]."""
         for value in values:
-            self.create_sensor_reading(activity_id, value[0], sensor_type, value[1]) 
+            self.create_activity_sensor_reading(activity_id, value[0], sensor_type, value[1]) 
 
     def finish_activity(self, activity_id, end_time):
         """Inherited from ActivityWriter. Called for post-processing."""

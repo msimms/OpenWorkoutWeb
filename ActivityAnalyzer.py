@@ -104,11 +104,11 @@ class ActivityAnalyzer(object):
                     self.speed_graph = location_analyzer.create_speed_graph()
 
                     print("Storing the speed graph...")
-                    if not self.data_mgr.create_metadata_list(activity_id, Keys.APP_CURRENT_SPEED_KEY, self.speed_graph):
+                    if not self.data_mgr.create_activity_metadata_list(activity_id, Keys.APP_CURRENT_SPEED_KEY, self.speed_graph):
                         self.log_error("Error returned when saving activity speed graph.")
 
                     print("Storing distance calculations...")
-                    if not self.data_mgr.create_metadata_list(activity_id, Keys.APP_DISTANCES_KEY, location_analyzer.distance_buf):
+                    if not self.data_mgr.create_activity_metadata_list(activity_id, Keys.APP_DISTANCES_KEY, location_analyzer.distance_buf):
                         self.log_error("Error returned when saving activity speed graph.")                    
                 self.should_yield()
 
