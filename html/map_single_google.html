@@ -395,6 +395,12 @@ ${powerZones}
 			alert(result_text.value);
 	}
 
+    function edit_activity()
+    {
+        var the_url = "${root_url}/edit_activity/${activityId}";
+        window.location.replace(the_url);
+    }
+
 	function delete_activity()
 	{
 		if (confirm('Are you sure you want to do this?'))

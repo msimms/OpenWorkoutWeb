@@ -289,13 +289,13 @@ class App(object):
     @staticmethod
     def render_edit_controls():
         """Helper function for building the edit string that appears on the activity details screens."""
-        edit_str = "<td><button type=\"button\" onclick=\"return edit_activity()\" style=\"color:black\"\">Edit</button></td><tr>\n"
+        edit_str = "<td><button type=\"button\" onclick=\"return edit_activity()\" style=\"color:black\">Edit</button></td><tr>\n"
         return edit_str
 
     @staticmethod
     def render_delete_control():
         """Helper function for building the delete string that appears on the activity details screens."""
-        delete_str = "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\"\">Delete</button></td><tr>\n"
+        delete_str = "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\">Delete</button></td><tr>\n"
         return delete_str
 
     def render_page_for_unmapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_username, belongs_to_current_user, is_live):
