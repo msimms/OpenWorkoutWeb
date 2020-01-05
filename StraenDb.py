@@ -1397,10 +1397,10 @@ class MongoDatabase(Database.Database):
     def create_gear_on_activity(self, activity, gear):
         """Adds a tag to the specified activity."""
         if activity is None:
-            self.log_error(MongoDatabase.create_tag_on_activity.__name__ + ": Unexpected empty object: activity")
+            self.log_error(MongoDatabase.create_gear_on_activity.__name__ + ": Unexpected empty object: activity")
             return False
         if gear is None:
-            self.log_error(MongoDatabase.create_tag_on_activity.__name__ + ": Unexpected empty object: gear")
+            self.log_error(MongoDatabase.create_gear_on_activity.__name__ + ": Unexpected empty object: gear")
             return False
 
         try:
