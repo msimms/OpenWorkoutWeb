@@ -366,6 +366,9 @@ class App(object):
         else:
             details_controls_str = ""
 
+        # Get the description.
+        description_str = self.render_description_for_page(activity)
+
         # List the tags.
         tags_str = self.render_tags(activity, activity_user_id, belongs_to_current_user)
 
@@ -398,7 +401,7 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.unmapped_activity_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, description=description_str, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
 
     def render_metadata_for_page(self, key, activity):
         """Helper function for processing meatadata and formatting it for display."""
@@ -415,6 +418,15 @@ class App(object):
                 if value > max_value:
                     max_value = value
         return data_str, max_value
+
+    def render_description_for_page(self, activity):
+        """Helper function for processing the activity description and formatting it for display."""
+        description = ""
+        if Keys.ACTIVITY_DESCRIPTION_KEY in activity:
+            description = activity[Keys.ACTIVITY_DESCRIPTION_KEY]
+        if len(description) == 0:
+            description = "None"
+        return description
 
     def render_sensor_data_for_page(self, key, activity):
         """Helper function for processing sensor data and formatting it for display."""
@@ -508,6 +520,7 @@ class App(object):
             last_lon = last_loc[Keys.LOCATION_LON_KEY]
 
         # Get all the things.
+        description_str = self.render_description_for_page(activity)
         current_speeds_str, _ = self.render_metadata_for_page(Keys.APP_CURRENT_SPEED_KEY, activity)
         heart_rates_str, max_heart_rate = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity)
         cadences_str, max_cadence = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity)
@@ -649,10 +662,10 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
