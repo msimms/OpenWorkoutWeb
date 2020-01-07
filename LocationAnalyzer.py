@@ -18,6 +18,7 @@ sys.path.insert(0, libmathdir)
 import distance
 import kmeans
 import peaks
+import signals
 import statistics
 
 METERS_PER_HALF_MARATHON = 13.1 * Units.METERS_PER_MILE
@@ -40,7 +41,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         self.distance_buf = [] # Holds the distance calculations; used for the current speed calcuations
         self.speed_times = [] # Holds the times associated with self.speed_graph
         self.speed_graph = [] # Holds the current speed calculations 
-        self.pace_blocks = [] # List of pace blocks, i.e. statistically significant times spent at a given pace
+        self.speed_blocks = [] # List of speed/pace blocks, i.e. statistically significant times spent at a given pace
         self.total_distance = 0.0 # Distance traveled (in meters)
         self.total_vertical = 0.0 # Total ascent (in meters)
 
@@ -182,22 +183,33 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             altitude = location[Keys.LOCATION_ALT_KEY]
             self.append_location(date_time, latitude, longitude, altitude)
     
-    def check_pace_block(self, peak_list, start_index, end_index):
+    def examine_peak(self, start_index, end_index):
         """Examines a line of near-constant pace/speed."""
         if start_index >= end_index:
             return
 
+        # How long (in seconds) was this block?
         start_time = self.speed_times[start_index]
         end_time = self.speed_times[end_index]
         line_duration = end_time - start_time
-        if line_duration > 60000:
+        line_length = 0
+        line_speed = 0
+
+        # Don't consider anything less than ten seconds.
+        if line_duration > 10:
             speeds = self.speed_graph[start_index:end_index - 1]
-            avg_speed = statistics.mean(speeds)
-            avg_pace = Units.meters_per_sec_to_minutes_per_kilometers(avg_speed)
-            self.pace_blocks.append(avg_pace)
+            start_distance_rec = self.distance_buf[start_index]
+            end_distance_rec = self.distance_buf[end_index]
+            line_length = end_distance_rec[2] - start_distance_rec[2]
+            line_speed = statistics.mean(speeds)
+            self.speed_blocks.append(line_speed)
+
+        return start_time, end_time, line_duration, line_length, line_speed
 
     def analyze(self):
         """Called when all location readings have been processed."""
+
+        # Let the base class perform the analysis first.
         results = SensorAnalyzer.SensorAnalyzer.analyze(self)
 
         # Do pace analysis.
@@ -207,19 +219,28 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             speed_variance = statistics.variance(self.speed_graph, self.avg_speed)
             results[Keys.APP_SPEED_VARIANCE_KEY] = speed_variance
 
+            # Smooth the speed graph to take out some of the GPS jitter.
+            smoothed_graph = signals.smooth(self.speed_graph, 4)
+
             # Find peaks in the speed graph.
-            peak_list = peaks.find_peaks_in_numeric_array(self.speed_graph, 2.0)
+            peak_list = peaks.find_peaks_in_numeric_array(smoothed_graph, 0.5)
 
             # Examine the lines between the peaks.
-            last_peak_index = 0
+            all_intervals = []
             for peak in peak_list:
-                peak_index = peak.left_trough.x
-                self.check_pace_block(peak_list, last_peak_index, peak_index)
-                last_peak_index = peak_index + 1
-            self.check_pace_block(peak_list, last_peak_index, len(self.speed_graph) - 1)
+                interval = self.examine_peak(peak.left_trough.x, peak.right_trough.x)
+                all_intervals.append(interval)
 
-            # Do a k-means analysis on the computed paces blocks.
-            tags = kmeans.kmeans_equally_space_centroids_1_d(self.pace_blocks, 3, 0.1, 3)
+            # Do a k-means analysis on the computed paces blocks so we can get rid of any outliers.
+            significant_intervals = []
+            tags = kmeans.kmeans_equally_space_centroids_1_d(self.speed_blocks, 2, 1, len(self.speed_blocks))
+            interval_index = 0
+            for tag in tags:
+                if tag == 1:
+                    significant_intervals.append(all_intervals[interval_index])
+                interval_index = interval_index + 1
+
+            results[Keys.ACTIVITY_INTERVALS] = significant_intervals
 
         # Insert the location into the analysis dictionary so that it gets cached.
         results[Keys.LONGEST_DISTANCE] = self.total_distance

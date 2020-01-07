@@ -450,6 +450,27 @@ class App(object):
         return data_str, max_value
 
     @staticmethod
+    def render_intervals_str(intervals):
+        """Helper function for building a description from the raw intervals description."""
+        num_intervals = len(intervals)
+        if num_intervals <= 0:
+            return ""
+
+        avg_interval_duration = 0.0
+        avg_interval_length = 0.0
+        avg_interval_speed = 0.0
+        for interval in intervals:
+            avg_interval_duration = avg_interval_duration + interval[2]
+            avg_interval_length = avg_interval_length + interval[3]
+            avg_interval_speed = avg_interval_speed + interval[4]
+        avg_interval_duration = (avg_interval_duration / num_intervals) / 1000.0
+        avg_interval_length = avg_interval_length / num_intervals
+        avg_interval_speed = avg_interval_speed / num_intervals
+
+        intervals_str = str(num_intervals) + " intervals averaging {:.2f}".format(avg_interval_length) + " meters in {:.2f}".format(avg_interval_duration) + " seconds."
+        return intervals_str
+
+    @staticmethod
     def render_activity_name(activity):
         """Helper function for getting the activity name."""
         if Keys.ACTIVITY_NAME_KEY in activity:
@@ -611,6 +632,10 @@ class App(object):
                     details_str += "<td><b>" + Keys.BEST_PACE + "</b></td><td>"
                     value = summary_data[key]
                     details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE)
+                    details_str += "</td><tr>\n"
+                elif key == Keys.ACTIVITY_INTERVALS:
+                    details_str += "<td><b>Intervals</b><td><b>"
+                    details_str += App.render_intervals_str(summary_data[key])
                     details_str += "</td><tr>\n"
                 elif key not in excluded_keys:
                     details_str += "<td><b>"

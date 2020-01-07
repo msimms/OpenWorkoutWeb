@@ -69,7 +69,7 @@ WORKOUT_PLAN_USER_ID = "user_id"
 UPLOADED_FILE_NAME_KEY = "uploaded_file_name"
 UPLOADED_FILE_DATA_KEY = "uploaded_file_data"
 
-# Keys inherited from the mobile app.
+# Keys inherited from the mobile app. Some of these are also used by the web app.
 APP_NAME_KEY = "Name"
 APP_TIME_KEY = "Time"
 APP_USERNAME_KEY = "User Name"
@@ -130,8 +130,9 @@ ACTIVITY_TAG_KEY = "tag"
 ACTIVITY_TAGS_KEY = "tags"
 ACTIVITY_SUMMARY_KEY = "summary_data"
 ACTIVITY_EXPORT_FORMAT_KEY = "export_format"
-ACTIVITY_NUM_POINTS = "num_points"
-ACTIVITY_LOCATION_DESCRIPTION_KEY = "location_description"
+ACTIVITY_NUM_POINTS = "num_points" 
+ACTIVITY_LOCATION_DESCRIPTION_KEY = "location_description" # Political description of the activity location (i.e., Florida)
+ACTIVITY_INTERVALS = "intervals" # Intervals that were computed from the workout
 
 # Keys used to summarize activity data.
 BEST_SPEED = "Best Speed"
