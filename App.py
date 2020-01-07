@@ -1036,18 +1036,21 @@ class App(object):
 
     def render_personal_records(self, user_id, cycling_bests, running_bests, show_progression):
         """Helper function that renders the table rows used to show personal bests."""
+        excluded_keys = Keys.UNSUMMARIZABLE_KEYS
         bests_str = ""
         if cycling_bests is not None and len(cycling_bests) > 0:
             bests_str += "<h3>Cycling Efforts</h3>\n"
             bests_str += "<table>\n"
             for record_name in cycling_bests:
-                bests_str += self.render_personal_record(user_id, Keys.TYPE_CYCLING_KEY, cycling_bests[record_name], record_name, show_progression)
+                if not record_name in excluded_keys:
+                    bests_str += self.render_personal_record(user_id, Keys.TYPE_CYCLING_KEY, cycling_bests[record_name], record_name, show_progression)
             bests_str += "</table>\n"
         if running_bests is not None and len(running_bests) > 0:
             bests_str += "<h3>Running Efforts</h3>\n"
             bests_str += "<table>\n"
             for record_name in running_bests:
-                bests_str += self.render_personal_record(user_id, Keys.TYPE_RUNNING_KEY, running_bests[record_name], record_name, show_progression)
+                if not record_name in excluded_keys:
+                    bests_str += self.render_personal_record(user_id, Keys.TYPE_RUNNING_KEY, running_bests[record_name], record_name, show_progression)
             bests_str += "</table>\n"
         return bests_str
 
