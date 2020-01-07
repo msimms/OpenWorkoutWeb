@@ -271,6 +271,8 @@ class App(object):
         if logged_in:
             comments_str += "<td><textarea rows=\"4\" style=\"width:50%;\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>\n"
             comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>\n"
+        elif len(comments_str) == 0:
+            comments_str = "None"
         return comments_str
 
     @staticmethod
@@ -467,7 +469,7 @@ class App(object):
         avg_interval_length = avg_interval_length / num_intervals
         avg_interval_speed = avg_interval_speed / num_intervals
 
-        intervals_str = str(num_intervals) + " intervals averaging {:.2f}".format(avg_interval_length) + " meters in {:.2f}".format(avg_interval_duration) + " seconds."
+        intervals_str = str(num_intervals) + " intervals averaging {:.2f}".format(avg_interval_length) + " meters at {:.2f}".format(avg_interval_duration) + " seconds/each."
         return intervals_str
 
     @staticmethod
