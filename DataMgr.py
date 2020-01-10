@@ -426,6 +426,21 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_device_activity_list(device_id, start, num_results)
 
+    def delete_user_gear(self, user_id):
+        """Deletes all user gear."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None or len(user_id) == 0:
+            raise Exception("Bad parameter.")
+
+        # TODO: Remove from each activity
+        gear_list = self.database.retrieve_gear_for_user(user_id)
+        for gear in gear_list:
+            pass
+
+        # Remove the gear list from the user's profile.
+        return self.database.delete_all_gear(user_id)
+
     def delete_user_activities(self, user_id):
         """Deletes all user activities."""
         if self.database is None:
@@ -579,7 +594,7 @@ class DataMgr(Importer.ActivityWriter):
         return tags
 
     def list_tags_for_activity_type_and_user(self, user_id, activity_type):
-        """Returns a list of tags that are valid for a particular activity type."""
+        """Returns a list of tags that are valid for a particular activity type and user."""
         tags = self.list_default_tags()
         gear_list = self.retrieve_gear_for_user(user_id)
         show_shoes = activity_type in Keys.FOOT_BASED_ACTIVITIES

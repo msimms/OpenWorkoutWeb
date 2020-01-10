@@ -1514,6 +1514,29 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def delete_all_gear(self, user_id):
+        """Delete method for the gear with the specified ID."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: user_id")
+            return None
+
+        try:
+            # Find the user's document.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+
+                # Update the gear list.
+                if Keys.GEAR_KEY in user:
+                    user[Keys.GEAR_KEY] = []
+                    self.users_collection.save(user)
+                return True
+
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+        
     def create_service_record(self, user_id, gear_id, service_record_id, record_date, record_description):
         """Create method for gear service records."""
         if user_id is None:

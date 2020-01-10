@@ -470,6 +470,46 @@ class Api(object):
             raise Exception("Update failed.")
         return True, ""
 
+    def handle_delete_gear(self, values):
+        """Removes the current user's gear data."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.PASSWORD_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Password not specified.")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise ApiException.ApiMalformedRequestException("Empty username.")
+
+        # Reauthenticate the user.
+        password = urllib.unquote_plus(values[Keys.PASSWORD_KEY])
+        if not self.user_mgr.authenticate_user(username, password):
+            raise Exception("Authentication failed.")
+
+        # Delete all the user's gear.
+        self.data_mgr.delete_user_gear(self.user_id)
+
+    def handle_delete_activities(self, values):
+        """Removes the current user's activity data."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.PASSWORD_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Password not specified.")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise ApiException.ApiMalformedRequestException("Empty username.")
+
+        # Reauthenticate the user.
+        password = urllib.unquote_plus(values[Keys.PASSWORD_KEY])
+        if not self.user_mgr.authenticate_user(username, password):
+            raise Exception("Authentication failed.")
+
+        # Delete all the user's activities.
+        self.data_mgr.delete_user_activities(self.user_id)
+
     def handle_delete_user(self, values):
         """Removes the current user and all associated data."""
         if self.user_id is None:
@@ -1270,6 +1310,10 @@ class Api(object):
             return self.handle_update_email(values)
         elif request == 'update_password':
             return self.handle_update_password(values)
+        elif request == 'delete_gear':
+            return self.delete_gear(values)
+        elif request == 'delete_activities':
+            return self.delete_activities(values)
         elif request == 'delete_user':
             return self.handle_delete_user(values)
         elif request == 'list_activities':
