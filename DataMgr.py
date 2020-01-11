@@ -1085,6 +1085,6 @@ class DataMgr(Importer.ActivityWriter):
         types.append(Keys.TYPE_CYCLING_KEY)
         types.append(Keys.TYPE_OPEN_WATER_SWIMMING_KEY)
         types.append(Keys.TYPE_POOL_SWIMMING_KEY)
-        types.append(Keys.TYPE_PULL_UPS_KEY)
-        types.append(Keys.TYPE_PUSH_UPS_KEY)
+        types.append(Keys.TYPE_PULL_UP_KEY)
+        types.append(Keys.TYPE_PUSH_UP_KEY)
         return types
