@@ -200,8 +200,6 @@ class Api(object):
 
     def handle_retrieve_activity_metadata(self, values):
         """Called when an API message to get the activity metadata."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
@@ -214,10 +212,12 @@ class Api(object):
         activity = self.data_mgr.retrieve_activity(activity_id)
 
         # Determine if the requesting user can view the activity.
-        #activity_user_id = activity_user[Keys.DATABASE_ID_KEY]
-        #belongs_to_current_user = str(activity_user_id) == str(self.user_id)
-        #if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
-        #    return self.error("The requested activity is not public.")
+        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
+        belongs_to_current_user = False
+        if self.user_id is not None:
+            belongs_to_current_user = str(activity_user_id) == str(self.user_id)
+        if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
+            return self.error("The requested activity is not public.")
 
         response = "["
 
