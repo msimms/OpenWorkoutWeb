@@ -29,7 +29,7 @@ from unidecode import unidecode
 hex = "[a-fA-F0-9]"
 uuid = re.compile(hex + "{8}-" + hex + "{4}-" + hex + "{4}-" + hex + "{4}-" + hex + "{12}")
 alphanums = re.compile(r"[\w-]*$")
-safe = re.compile(r"[\w_ ',/.-]*$")
+safe = re.compile(r"[\w_ %',/.+-]*$")
 email_addr = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 
 def is_alphanumeric(test_str):
