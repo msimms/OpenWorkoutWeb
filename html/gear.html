@@ -87,6 +87,10 @@
 		$(startDate).datepicker('setDate', today);
 		innerDiv.appendChild(startDate);
 
+		// Add a line break.
+		var br = document.createElement("br");
+		innerDiv.appendChild(br);
+
 		// Add a label for the date retired picker.
 		var dateLabel = document.createTextNode("Date Retired: ");
 		innerDiv.appendChild(dateLabel);
@@ -100,7 +104,7 @@
 		innerDiv.appendChild(retiredDate);
 
 		// Add a line break.
-		var br = document.createElement("br");
+		br = document.createElement("br");
 		innerDiv.appendChild(br);
 
 		// Add the data fields.
@@ -121,8 +125,6 @@
 
 		// Add the save button to the screen.
 		outerDiv.appendChild(saveBtn);
-
-		return false;
 	}
 
     function get_new_bike_info()

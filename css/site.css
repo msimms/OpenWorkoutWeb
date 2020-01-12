@@ -152,6 +152,10 @@ tr:hover {
 	padding-bottom: .25cm;
 }
 
+.user_search_form input {
+	width: 400px;
+}
+
 .activities_list {
 	padding: 25px 25px 25px 25px;
 }
@@ -230,4 +234,9 @@ button .fa {
 .modern_button .fa {
     color: #bfbfbf;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.block input {
+	width: 250px;
+	margin: 5px;
 }
