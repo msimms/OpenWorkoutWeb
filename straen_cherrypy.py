@@ -1,5 +1,5 @@
 # Copyright 2017-2018 Michael J Simms
-"""Main application, contains all web page handlers"""
+"""Main application - if using cherrypy, contains all web page handlers"""
 
 import argparse
 import cherrypy
@@ -74,10 +74,22 @@ def check_auth(*args, **kwargs):
         requested_url_parts = requested_url.split('/')
         requested_url_parts = filter(lambda part: part != '', requested_url_parts)
 
+        # Have to do this differently for python2 and 3.
+        if sys.version_info[0] < 3:
+            first_url_part = requested_url_parts[0]
+        else:
+            first_url_part = next(requested_url_parts)
+
         # If the user is trying to view an activity then make sure they have permissions
         # to view it. First check to see if it's a public activity.
-        if requested_url_parts[0] == "device":
-            url_params = requested_url_parts[1].split("?")
+        if first_url_part == "device":
+
+            # Have to do this differently for python2 and 3.
+            if sys.version_info[0] < 3:
+                url_params = requested_url_parts[1].split("?")
+            else:
+                url_params = next(requested_url_parts)
+
             if url_params is not None and len(url_params) >= 2:
                 activity_params = url_params[1].split("=")
                 if activity_params is not None and len(activity_params) >= 2:
@@ -170,13 +182,24 @@ class StraenWeb(object):
 
     @cherrypy.expose
     def activity(self, activity_id, *args, **kw):
-        """Renders the map page for an activity."""
+        """Renders the details page for an activity."""
         try:
             return self.app.activity(activity_id)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.activity.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    def edit_activity(self, activity_id, *args, **kw):
+        """Renders the edit page for an activity."""
+        try:
+            return self.app.edit_activity(activity_id)
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.edit_activity.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -273,7 +296,7 @@ class StraenWeb(object):
     @cherrypy.expose
     @require()
     def statistics(self, *args, **kw):
-        """Renders the statics view."""
+        """Renders the statistics view."""
         try:
             return self.app.stats()
         except App.RedirectException as e:
@@ -412,6 +435,38 @@ class StraenWeb(object):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.import_activity.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
+    def import_status(self, *args, **kw):
+        """Renders the import status page."""
+        try:
+            return self.app.import_status()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.import_status.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
+    def analysis_status(self, *args, **kw):
+        """Renders the analysis status page."""
+        try:
+            return self.app.analysis_status()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.analysis_status.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -655,6 +710,7 @@ def main():
             'tools.sessions.storage_type': 'file',
             'tools.sessions.storage_path': session_dir,
             'tools.sessions.timeout': 129600,
+            'tools.sessions.locking': 'early',
             'tools.secureheaders.on': True
         },
         '/css':

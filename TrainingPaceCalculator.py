@@ -32,7 +32,7 @@ class TrainingPaceCalculator(object):
     def __init__(self):
         super(TrainingPaceCalculator, self).__init__()
 
-    def convert_to_speed(self, vo2):
+    def convert_vo2max_to_speed(self, vo2):
     	return 29.54 + 5.000663 * vo2 - 0.007546 * vo2 * vo2
 
     def calc_from_vo2max(self, vo2max):
@@ -41,10 +41,10 @@ class TrainingPaceCalculator(object):
         easy_pace = vo2max * 0.7
         tempo_pace = vo2max * 0.88
         speed_pace = vo2max * 1.1
-        long_run_pace = self.convert_to_speed(long_run_pace)
-        easy_pace = self.convert_to_speed(easy_pace)
-        tempo_pace = self.convert_to_speed(tempo_pace)
-        speed_pace = self.convert_to_speed(speed_pace)
+        long_run_pace = self.convert_vo2max_to_speed(long_run_pace)
+        easy_pace = self.convert_vo2max_to_speed(easy_pace)
+        tempo_pace = self.convert_vo2max_to_speed(tempo_pace)
+        speed_pace = self.convert_vo2max_to_speed(speed_pace)
         paces = {}
         paces[Keys.LONG_RUN_PACE] = long_run_pace
         paces[Keys.EASY_RUN_PACE] = easy_pace

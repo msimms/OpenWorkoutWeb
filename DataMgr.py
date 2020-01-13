@@ -11,10 +11,11 @@ import MapSearch
 import StraenDb
 import Summarizer
 import TrainingPaceCalculator
+import celery
 
 SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
 ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
-FOUR_WEEKS = (14.0 * 24.0 * 60.0 * 60.0)
+FOUR_WEEKS = (28.0 * 24.0 * 60.0 * 60.0)
 
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
@@ -33,6 +34,8 @@ class DataMgr(Importer.ActivityWriter):
         self.import_scheduler = import_scheduler
         self.workout_plan_gen_scheduler = workout_plan_gen_scheduler
         self.map_search = None
+        self.celery_worker = celery.Celery('straen_worker')
+        self.celery_worker.config_from_object('CeleryConfig')
         super(Importer.ActivityWriter, self).__init__()
 
     def terminate(self):
@@ -55,9 +58,9 @@ class DataMgr(Importer.ActivityWriter):
 
     def analyze(self, activity, activity_user_id):
         """Schedules the specified activity for analysis."""
-        self.analysis_scheduler.add_to_queue(activity, activity_user_id)
+        self.analysis_scheduler.add_to_queue(activity, activity_user_id, self)
 
-    def compute_end_time(self, activity):
+    def compute_activity_end_time(self, activity):
         """Examines the activity and computes the time at which the activity ended."""
         end_time = None
 
@@ -75,12 +78,12 @@ class DataMgr(Importer.ActivityWriter):
 
         return end_time
 
-    def compute_and_store_end_time(self, activity):
+    def compute_and_store_activity_end_time(self, activity):
         """Examines the activity and computes the time at which the activity ended, storing it so we don't have to do this again."""
         if self.database is None:
             raise Exception("No database.")
 
-        end_time = self.compute_end_time(activity)
+        end_time = self.compute_activity_end_time(activity)
 
         # If we couldn't find anything with a time then just duplicate the start time, assuming it's a manually entered workout or something.
         if end_time is None:
@@ -89,7 +92,7 @@ class DataMgr(Importer.ActivityWriter):
         # Store the end time, so we don't have to go through this again.
         if end_time is not None:
             activity_id = activity[Keys.ACTIVITY_ID_KEY]
-            self.database.create_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
+            self.database.create_activity_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
 
         return end_time
 
@@ -105,7 +108,7 @@ class DataMgr(Importer.ActivityWriter):
                 # Get the activity start and end times.
                 activity_start_time = activity[Keys.ACTIVITY_TIME_KEY]
                 if Keys.ACTIVITY_END_TIME_KEY not in activity:
-                    activity_end_time = self.compute_and_store_end_time(activity)
+                    activity_end_time = self.compute_and_store_activity_end_time(activity)
                 else:
                     activity_end_time = activity[Keys.ACTIVITY_END_TIME_KEY]
 
@@ -122,80 +125,82 @@ class DataMgr(Importer.ActivityWriter):
 
         device_str = ""
         activity_id = self.create_activity_id()
+        if stream_name is None:
+            stream_name = ""
 
         if not self.database.create_activity(activity_id, stream_name, start_time, device_str):
             return None, None
         if activity_type is not None and len(activity_type) > 0:
-            self.database.create_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
+            self.database.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
         if user_id is not None:
-            self.database.create_metadata(activity_id, 0, Keys.ACTIVITY_USER_ID_KEY, user_id, False)
+            self.database.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_USER_ID_KEY, user_id, False)
         return device_str, activity_id
 
-    def create_track(self, device_str, activity_id, track_name, track_description):
+    def create_activity_track(self, device_str, activity_id, track_name, track_description):
         """Inherited from ActivityWriter."""
         pass
 
-    def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
+    def create_activity_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
         """Inherited from ActivityWriter. Create method for a location."""
         if self.database is None:
             raise Exception("No database.")
-        return self.database.create_location(device_str, activity_id, date_time, latitude, longitude, altitude)
+        return self.database.create_activity_location(device_str, activity_id, date_time, latitude, longitude, altitude)
 
-    def create_locations(self, device_str, activity_id, locations):
+    def create_activity_locations(self, device_str, activity_id, locations):
         """Inherited from ActivityWriter. Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
-        return self.database.create_locations(device_str, activity_id, locations)
+        return self.database.create_activity_locations(device_str, activity_id, locations)
 
-    def create_sensor_reading(self, activity_id, date_time, sensor_type, value):
+    def create_activity_sensor_reading(self, activity_id, date_time, sensor_type, value):
         """Inherited from ActivityWriter. Create method for sensor data."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
-        return self.database.create_sensor_reading(activity_id, date_time, sensor_type, value)
+        return self.database.create_activity_sensor_reading(activity_id, date_time, sensor_type, value)
 
-    def create_sensor_readings(self, activity_id, sensor_type, values):
+    def create_activity_sensor_readings(self, activity_id, sensor_type, values):
         """Inherited from ActivityWriter. Adds several sensor readings to the database. 'values' is an array of arrays in the form [time, value]."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
-        return self.database.create_sensor_readings(activity_id, sensor_type, values)
+        return self.database.create_activity_sensor_readings(activity_id, sensor_type, values)
 
-    def create_metadata(self, activity_id, date_time, key, value, create_list):
+    def create_activity_metadata(self, activity_id, date_time, key, value, create_list):
         """Create method for activity metadata."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
-        return self.database.create_metadata(activity_id, date_time, key, value, create_list)
+        return self.database.create_activity_metadata(activity_id, date_time, key, value, create_list)
 
-    def create_metadata_list(self, activity_id, key, values):
+    def create_activity_metadata_list(self, activity_id, key, values):
         """Create method for activity metadata."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
-        return self.database.create_metadata_list(activity_id, key, values)
+        return self.database.create_activity_metadata_list(activity_id, key, values)
 
-    def create_sets_and_reps_data(self, activity_id, sets):
+    def create_activity_sets_and_reps_data(self, activity_id, sets):
         """Create method for activity set and rep data."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
-        return self.database.create_sets_and_reps_data(activity_id, sets)
+        return self.database.create_activity_sets_and_reps_data(activity_id, sets)
 
-    def create_accelerometer_reading(self, device_str, activity_id, accels):
+    def create_activity_accelerometer_reading(self, device_str, activity_id, accels):
         """Adds several accelerometer readings to the database. 'accels' is an array of arrays in the form [time, x, y, z]."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
-        return self.database.create_accelerometer_reading(device_str, activity_id, accels)
+        return self.database.create_activity_accelerometer_reading(device_str, activity_id, accels)
 
     def finish_activity(self, activity_id, end_time):
         """Inherited from ActivityWriter. Called for post-processing."""
@@ -203,7 +208,84 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
-        return self.database.create_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
+        return self.database.create_activity_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
+
+    def track_import_task(self, user_id, task_id):
+        """Called by the importer to store data associated with an ongoing import task."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+        if task_id is None:
+            raise Exception("No task ID.")
+        return self.database.create_deferred_task(user_id, Keys.IMPORT_TASK_KEY, task_id)
+
+    def track_analysis_task(self, user_id, task_id):
+        """Called by the importer to store data associated with an ongoing import task."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+        if task_id is None:
+            raise Exception("No task ID.")
+        return self.database.create_deferred_task(user_id, Keys.ANALYSIS_TASK_KEY, task_id)
+
+    def track_workout_plan_task(self, user_id, task_id):
+        """Called by the importer to store data associated with an ongoing import task."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+        if task_id is None:
+            raise Exception("No task ID.")
+
+        tasks = self.database.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, task_id)
+        for task in tasks:
+            task_id = task[Keys.TASK_ID_KEY]
+            r = self.celery_worker.AsyncResult(task_id)
+            task[Keys.TASK_STATE_KEY] = r.state
+        return tasks
+
+    def query_deferred_task_statuses(self, tasks):
+        """Helper function for updating deferred task info."""
+        for task in tasks:
+            task_id = task[Keys.TASK_ID_KEY]
+            r = self.celery_worker.AsyncResult(task_id)
+            task[Keys.TASK_STATE_KEY] = r.state
+        return tasks
+
+    def retrieve_deferred_import_tasks(self, user_id):
+        """Returns a list of all incomplete analysis tasks."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+
+        tasks = self.database.retrieve_deferred_tasks_of_type(user_id, Keys.IMPORT_TASK_KEY)
+        tasks = self.query_deferred_task_statuses(tasks)
+        return tasks
+
+    def retrieve_deferred_analysis_tasks(self, user_id):
+        """Returns a list of all incomplete analysis tasks."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+
+        tasks = self.database.retrieve_deferred_tasks_of_type(user_id, Keys.ANALYSIS_TASK_KEY)
+        tasks = self.query_deferred_task_statuses(tasks)
+        return tasks
+
+    def retrieve_deferred_workout_plan_tasks(self, user_id):
+        """Returns a list of all incomplete workout plan tasks."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+
+        tasks = self.database.retrieve_deferred_tasks_of_type(user_id, Keys.WORKOUT_PLAN_TASK_KEY)
+        tasks = self.query_deferred_task_statuses(tasks)
+        return tasks
 
     def import_file(self, username, user_id, local_file_name, uploaded_file_name):
         """Imports the contents of a local file into the database."""
@@ -217,7 +299,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No local file name.")
         if uploaded_file_name is None:
             raise Exception("No uploaded file name.")
-        self.import_scheduler.add_to_queue(username, user_id, local_file_name, uploaded_file_name)
+        self.import_scheduler.add_to_queue(username, user_id, local_file_name, uploaded_file_name, self)
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
@@ -227,7 +309,7 @@ class DataMgr(Importer.ActivityWriter):
         if Keys.ACTIVITY_LOCATIONS_KEY in activity:
             locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
         else:
-            locations = self.retrieve_locations(activity[Keys.ACTIVITY_ID_KEY])
+            locations = self.retrieve_activity_locations(activity[Keys.ACTIVITY_ID_KEY])
 
         if len(locations) > 0:
             first_loc = locations[0]
@@ -235,7 +317,7 @@ class DataMgr(Importer.ActivityWriter):
                 time_num = first_loc[Keys.LOCATION_TIME_KEY] / 1000 # Milliseconds to seconds
                 activity_id = activity[Keys.ACTIVITY_ID_KEY]
                 activity[Keys.ACTIVITY_TIME_KEY] = time_num
-                self.create_metadata(activity_id, time_num, Keys.ACTIVITY_TIME_KEY, time_num, False)
+                self.create_activity_metadata(activity_id, time_num, Keys.ACTIVITY_TIME_KEY, time_num, False)
 
     def update_moving_activity(self, device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict):
         """Updates locations, sensor readings, and metadata associated with a moving activity. Provided as a performance improvement over making several database updates."""
@@ -273,22 +355,45 @@ class DataMgr(Importer.ActivityWriter):
         if devices is not None:
             for device in devices:
                 device_activities = self.database.retrieve_device_activity_list(device, start, None)
-                for device_activity in device_activities:
-                    device_activity[Keys.REALNAME_KEY] = user_realname
-                    self.update_activity_start_time(device_activity)
-                activities.extend(device_activities)
+                if device_activities is not None:
+                    for device_activity in device_activities:
+                        device_activity[Keys.REALNAME_KEY] = user_realname
+                        self.update_activity_start_time(device_activity)
+                    activities.extend(device_activities)
 
         # List activities with no device that are associated with the user.
         exclude_keys = self.database.list_excluded_keys() # Things we don't need.
         user_activities = self.database.retrieve_user_activity_list(user_id, start, None, exclude_keys)
-        for user_activity in user_activities:
-            user_activity[Keys.REALNAME_KEY] = user_realname
-        activities.extend(user_activities)
+        if user_activities is not None:
+            for user_activity in user_activities:
+                user_activity[Keys.REALNAME_KEY] = user_realname
+            activities.extend(user_activities)
 
         # Sort and limit the list.
         if len(activities) > 0:
             activities = sorted(activities, key=get_activities_sort_key, reverse=True)[:num_results]
         return activities
+
+    def retrieve_each_user_activity(self, context, user_id, cb=None):
+        """Fires a callback for all of the user's activities. num_results can be None for all activiites."""
+        if self.database is None:
+            raise Exception("No database.")
+        if context is None:
+            raise Exception("Bad parameter.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if cb is None:
+            raise Exception("Bad parameter.")
+
+        # List activities recorded on devices registered to the user.
+        devices = self.database.retrieve_user_devices(user_id)
+        devices = list(set(devices)) # De-duplicate
+        if devices is not None:
+            for device in devices:
+                self.database.retrieve_each_device_activity(context, device, cb)
+
+        # List activities with no device that are associated with the user.
+        self.database.retrieve_each_user_activity(context, user_id, cb)
 
     def retrieve_all_activities_visible_to_user(self, user_id, user_realname, start, num_results):
         """Returns a list containing all of the activities visible to the specified user, up to num_results. num_results can be None for all activiites."""
@@ -320,6 +425,21 @@ class DataMgr(Importer.ActivityWriter):
         if device_id is None or len(device_id) == 0:
             raise Exception("Bad parameter.")
         return self.database.retrieve_device_activity_list(device_id, start, num_results)
+
+    def delete_user_gear(self, user_id):
+        """Deletes all user gear."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None or len(user_id) == 0:
+            raise Exception("Bad parameter.")
+
+        # TODO: Remove from each activity
+        gear_list = self.database.retrieve_gear_for_user(user_id)
+        for gear in gear_list:
+            pass
+
+        # Remove the gear list from the user's profile.
+        return self.database.delete_all_gear(user_id)
 
     def delete_user_activities(self, user_id):
         """Deletes all user activities."""
@@ -369,23 +489,23 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.update_activity_visibility(activity_id, visibility)
 
-    def retrieve_locations(self, activity_id):
+    def retrieve_activity_locations(self, activity_id):
         """Returns the location list for the specified activity."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_locations(activity_id)
+        return self.database.retrieve_activity_locations(activity_id)
 
-    def retrieve_most_recent_locations(self, activity_id, num):
+    def retrieve_most_recent_activity_locations(self, activity_id, num):
         """Returns the most recent 'num' locations for the specified device and activity."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_most_recent_locations(activity_id, num)
+        return self.database.retrieve_most_recent_activity_locations(activity_id, num)
 
-    def retrieve_sensor_readings(self, key, activity_id):
+    def retrieve_activity_sensor_readings(self, key, activity_id):
         """Returns all the sensor data for the specified sensor for the given activity."""
         if self.database is None:
             raise Exception("No database.")
@@ -393,25 +513,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_sensor_readings(key, activity_id)
-
-    def retrieve_metadata(self, key, activity_id):
-        """Returns all the sensordata for the specified sensor for the given activity."""
-        if self.database is None:
-            raise Exception("No database.")
-        if key is None or len(key) == 0:
-            raise Exception("Bad parameter.")
-        if activity_id is None or len(activity_id) == 0:
-            raise Exception("Bad parameter.")
-        return self.database.retrieve_metadata(key, activity_id)
-
-    def retrieve_accelerometer_readings(self, activity_id):
-        """Returns the location list for the specified activity."""
-        if self.database is None:
-            raise Exception("No database.")
-        if activity_id is None or len(activity_id) == 0:
-            raise Exception("Bad parameter.")
-        return self.database.retrieve_accelerometer_readings(activity_id)
+        return self.database.retrieve_activity_sensor_readings(key, activity_id)
 
     def retrieve_most_recent_activity_id_for_device(self, device_str):
         """Returns the most recent activity id for the specified device."""
@@ -492,7 +594,7 @@ class DataMgr(Importer.ActivityWriter):
         return tags
 
     def list_tags_for_activity_type_and_user(self, user_id, activity_type):
-        """Returns a list of tags that are valid for a particular activity type."""
+        """Returns a list of tags that are valid for a particular activity type and user."""
         tags = self.list_default_tags()
         gear_list = self.retrieve_gear_for_user(user_id)
         show_shoes = activity_type in Keys.FOOT_BASED_ACTIVITIES
@@ -568,7 +670,7 @@ class DataMgr(Importer.ActivityWriter):
         tag_distances = {}
         for tag in tags:
             tag_distances[tag] = 0.0
-        self.database.retrieve_each_user_activity(tag_distances, user_id, DataMgr.distance_for_tag_cb)
+        self.retrieve_each_user_activity(tag_distances, user_id, DataMgr.distance_for_tag_cb)
         return tag_distances
 
     def create_activity_comment(self, activity_id, commenter_id, comment):
@@ -609,7 +711,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_user_setting(user_id, Keys.ESTIMATED_FTP_KEY)
 
-    def insert_bests_from_activity(self, user_id, activity_id, activity_type, activity_time, bests):
+    def update_bests_for_activity(self, user_id, activity_id, activity_type, activity_time, bests):
         """Update method for a user's personal record."""
         if self.database is None:
             raise Exception("No database.")
@@ -681,6 +783,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if gear_description is None:
             raise Exception("Bad parameter.")
+
         gear_id = uuid.uuid4()
         return self.database.create_gear(user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
 
@@ -760,18 +863,6 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.delete_service_record(user_id, gear_id, service_record_id)
 
-    def retrieve_each_user_activity(self, context, user_id, cb=None):
-        """Makes sure that summary data exists for all of the user's activities."""
-        if self.database is None:
-            raise Exception("No database.")
-        if context is None:
-            raise Exception("Bad parameter.")
-        if user_id is None:
-            raise Exception("Bad parameter.")
-        if cb is None:
-            raise Exception("Bad parameter.")
-        self.database.retrieve_each_user_activity(context, user_id, cb)
-
     def associate_gear_with_activity(self, activity, gear_name):
         """Adds gear to an activity."""
         if self.database is None:
@@ -788,7 +879,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        self.workout_plan_gen_scheduler.add_to_queue(user_id)
+        self.workout_plan_gen_scheduler.add_to_queue(user_id, self)
 
     def get_location_description(self, activity_id):
         """Returns the political location that corresponds to an activity."""
@@ -803,7 +894,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Internal error.")
 
         location_description = []
-        locations = self.retrieve_locations(activity_id)
+        locations = self.retrieve_activity_locations(activity_id)
         if locations and len(locations) > 0:
             first_loc = locations[0]
             location_description = self.map_search.search_map(float(first_loc[Keys.LOCATION_LAT_KEY]), float(first_loc[Keys.LOCATION_LON_KEY]))
@@ -834,7 +925,7 @@ class DataMgr(Importer.ActivityWriter):
                         heat_map[locations_str] = 1
         return heat_map
 
-    def compute_recent_bests(self, user_id, timeframe):
+    def retrieve_recent_bests(self, user_id, timeframe):
         """Return a dictionary of all best performances in the specified time frame."""
         if self.database is None:
             raise Exception("No database.")
@@ -861,7 +952,7 @@ class DataMgr(Importer.ActivityWriter):
         running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
         return cycling_bests, running_bests
 
-    def compute_bests(self, user_id, activity_type, key):
+    def retrieve_bests_for_activity_type(self, user_id, activity_type, key):
         """Return a sorted list of all records for the given activity type and key."""
         def compare(a, b):
             if a[0] > b[0]:
@@ -895,6 +986,33 @@ class DataMgr(Importer.ActivityWriter):
 
         bests.sort(compare)
         return bests
+
+    def analyze_unanalyzed_activities(self, user_id, timeframe):
+        """Looks through the user's activities (within the given timeframe) and schedules any unanalyzed ones for analysis."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        # We're only interested in activities from this time forward.
+        if timeframe is None:
+            cutoff_time = None
+        else:
+            cutoff_time = time.time() - timeframe
+
+        num_unanalyzed = 0
+        all_activities = self.retrieve_user_activity_list(user_id, None, None, None)
+        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
+        for activity in all_activities:
+            activity_id = activity[Keys.ACTIVITY_ID_KEY]
+            if Keys.ACTIVITY_TIME_KEY in activity:
+                activity_time = activity[Keys.ACTIVITY_TIME_KEY]
+                if cutoff_time is None or activity_time > cutoff_time:
+                    if activity_id not in all_activity_bests:
+                        num_unanalyzed = num_unanalyzed + 1
+                        complete_activity_data = self.retrieve_activity(activity_id)
+                        self.analyze(complete_activity_data, user_id)
+        return num_unanalyzed
 
     def compute_progression(self, user_id, user_activities, activity_type, key):
         """Return a sorted list of all records for the given activity type and key."""
@@ -936,7 +1054,7 @@ class DataMgr(Importer.ActivityWriter):
         return bests
 
     def compute_run_training_paces(self, user_id, running_bests):
-        run_paces = []
+        run_paces = {}
         calc = TrainingPaceCalculator.TrainingPaceCalculator()
         if Keys.BEST_5K in running_bests:
             best_time = running_bests[Keys.BEST_5K]
@@ -965,7 +1083,8 @@ class DataMgr(Importer.ActivityWriter):
         types.append(Keys.TYPE_RUNNING_KEY)
         types.append(Keys.TYPE_HIKING_KEY)
         types.append(Keys.TYPE_CYCLING_KEY)
-        types.append(Keys.TYPE_SWIMMING_KEY)
-        types.append(Keys.TYPE_PULL_UPS_KEY)
-        types.append(Keys.TYPE_PUSH_UPS_KEY)
+        types.append(Keys.TYPE_OPEN_WATER_SWIMMING_KEY)
+        types.append(Keys.TYPE_POOL_SWIMMING_KEY)
+        types.append(Keys.TYPE_PULL_UP_KEY)
+        types.append(Keys.TYPE_PUSH_UP_KEY)
         return types

@@ -21,6 +21,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+"""Formats a GPX file."""
 
 import datetime
 import XmlWriter
@@ -44,7 +45,7 @@ GPX_TPX_CADENCE = "gpxtpx:cad"
 GPX_TPX_POWER = "power"
 
 class GpxWriter(XmlWriter.XmlWriter):
-    """Formats an GPX file."""
+    """Formats a GPX file."""
 
     def __init__(self):
         XmlWriter.XmlWriter.__init__(self)
@@ -65,9 +66,9 @@ class GpxWriter(XmlWriter.XmlWriter):
     def close(self):
         self.close_all_tags()
 
-    def write_metadata(self, start_time):
+    def write_metadata(self, start_time_ms):
         self.open_tag(GPX_TAG_NAME_METADATA)
-        buf = datetime.datetime.utcfromtimestamp(start_time).strftime('%Y-%m-%dT%H:%M:%SZ')
+        buf = self.format_time_ms(start_time_ms)
         self.write_tag_and_value(GPX_TAG_NAME_TIME, buf)
         self.close_tag()
 
@@ -138,6 +139,6 @@ class GpxWriter(XmlWriter.XmlWriter):
         sec  = t / 1000
         ms = t % 1000
 
-        buf1 = datetime.datetime.utcfromtimestamp(sec).strftime('%Y-%m-%d %H:%M:%S')
-        buf2 = buf1 + ".%04uZ" % ms
+        buf1 = datetime.datetime.utcfromtimestamp(sec).strftime('%Y-%m-%dT%H:%M:%S')
+        buf2 = buf1 + ".%03uZ" % ms
         return buf2

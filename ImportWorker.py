@@ -68,7 +68,7 @@ def import_activity(import_str):
         # Write the file.
         print("Write the data to a local file...")
         with open(local_file_name, 'wb') as local_file:
-            local_file.write(uploaded_file_data)
+            local_file.write(uploaded_file_data.encode("utf-8"))
 
         # Import the file into the database.            
         print("Import the data to the database...")
@@ -81,7 +81,7 @@ def import_activity(import_str):
             print("Import was successful, perform analysis...")
             analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
             activity = data_mgr.retrieve_activity(activity_id)
-            analysis_scheduler.add_to_queue(activity, user_id)
+            analysis_scheduler.add_to_queue(activity, user_id, data_mgr)
         else:
             print("Import was not successful.")
     except:

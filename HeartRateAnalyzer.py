@@ -1,4 +1,5 @@
 # Copyright 2018 Michael J Simms
+"""Performs calculations on heart rate data."""
 
 import Keys
 import SensorAnalyzer

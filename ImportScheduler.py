@@ -33,11 +33,13 @@ class ImportScheduler(object):
     def __init__(self):
         super(ImportScheduler, self).__init__()
 
-    def add_to_queue(self, username, user_id, uploaded_file_data, uploaded_file_name):
+    def add_to_queue(self, username, user_id, uploaded_file_data, uploaded_file_name, data_mgr):
         """Adds the activity ID to the list of activities to be analyzed."""
         params = {}
         params['username'] = username
         params['user_id'] = user_id
         params['uploaded_file_data'] = uploaded_file_data
         params['uploaded_file_name'] = uploaded_file_name
-        import_activity.delay(dumps(params))
+        import_task = import_activity.delay(dumps(params))
+        if data_mgr is not None:
+            data_mgr.track_import_task(user_id, import_task.task_id)

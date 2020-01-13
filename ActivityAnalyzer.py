@@ -94,15 +94,23 @@ class ActivityAnalyzer(object):
                     self.should_yield()
             self.should_yield()
 
-            # Create a current speed graph - if one has not already been created.
-            print("Creating speed graph...")
-            if Keys.APP_CURRENT_SPEED_KEY not in self.activity and location_analyzer is not None:
-                self.speed_graph = location_analyzer.create_speed_graph()
-            self.should_yield()
-
             # The following require us to have an activity ID.
             if Keys.ACTIVITY_ID_KEY in self.activity:
                 activity_id = self.activity[Keys.ACTIVITY_ID_KEY]
+
+                # Create a current speed graph - if one has not already been created.
+                if Keys.APP_CURRENT_SPEED_KEY not in self.activity and location_analyzer is not None:
+                    print("Creating speed graph...")
+                    self.speed_graph = location_analyzer.create_speed_graph()
+
+                    print("Storing the speed graph...")
+                    if not self.data_mgr.create_activity_metadata_list(activity_id, Keys.APP_CURRENT_SPEED_KEY, self.speed_graph):
+                        self.log_error("Error returned when saving activity speed graph.")
+
+                    print("Storing distance calculations...")
+                    if not self.data_mgr.create_activity_metadata_list(activity_id, Keys.APP_DISTANCES_KEY, location_analyzer.distance_buf):
+                        self.log_error("Error returned when saving activity speed graph.")                    
+                self.should_yield()
 
                 # Where was this activity performed?
                 print("Computing location description...")
@@ -117,11 +125,11 @@ class ActivityAnalyzer(object):
                 self.log_error("Activity ID not provided. Cannot create activity summary.")
             self.should_yield()
 
-            # Update personal bests
+            # Update personal bests.
             print("Updating personal bests...")
             if activity_user_id and Keys.ACTIVITY_TIME_KEY in self.activity:
                 activity_time = self.activity[Keys.ACTIVITY_TIME_KEY]
-                if not self.data_mgr.insert_bests_from_activity(activity_user_id, activity_id, activity_type, activity_time, self.summary_data):
+                if not self.data_mgr.update_bests_for_activity(activity_user_id, activity_id, activity_type, activity_time, self.summary_data):
                     self.log_error("Error returned when updating personal records.")
             else:
                 self.log_error("User ID or activity time not provided. Cannot update personal records.")

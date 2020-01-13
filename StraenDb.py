@@ -52,6 +52,7 @@ class MongoDatabase(Database.Database):
             self.activities_collection = self.database['activities']
             self.records_collection = self.database['records']
             self.workouts_collection = self.database['wokrouts']
+            self.tasks_collection = self.database['tasks']
             return True
         except pymongo.errors.ConnectionFailure as e:
             self.log_error("Could not connect to MongoDB: %s" % e)
@@ -521,9 +522,9 @@ class MongoDatabase(Database.Database):
             if user_records is not None:
                 for record in user_records:
                     if InputChecker.is_uuid(record):
-                        records = user_records[record]
-                        if (cutoff_time is None) or (records[Keys.ACTIVITY_TIME_KEY] > cutoff_time):
-                            bests[record] = records
+                        activity_bests = user_records[record]
+                        if (cutoff_time is None) or (activity_bests[Keys.ACTIVITY_TIME_KEY] > cutoff_time):
+                            bests[record] = activity_bests
                 return bests
         except:
             self.log_error(traceback.format_exc())
@@ -590,6 +591,17 @@ class MongoDatabase(Database.Database):
                 return list(self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start))
             else:
                 return list(self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start).limit(num_results))
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def retrieve_each_device_activity(self, context, device_str, callback_func):
+        """Retrieves each device activity and calls the callback function for each one."""
+        try:
+            activities = list(self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}))
+            for activity in activities:
+                callback_func(context, activity, device_str)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -762,22 +774,22 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
+    def create_activity_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
         """Create method for a location."""
         if device_str is None:
-            self.log_error(MongoDatabase.create_location.__name__ + ": Unexpected empty object: device_str")
+            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: device_str")
             return False
         if activity_id is None:
-            self.log_error(MongoDatabase.create_location.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: activity_id")
             return False
         if latitude is None:
-            self.log_error(MongoDatabase.create_location.__name__ + ": Unexpected empty object: latitude")
+            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: latitude")
             return False
         if longitude is None:
-            self.log_error(MongoDatabase.create_location.__name__ + ": Unexpected empty object: longitude")
+            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: longitude")
             return False
         if altitude is None:
-            self.log_error(MongoDatabase.create_location.__name__ + ": Unexpected empty object: altitude")
+            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: altitude")
             return False
 
         try:
@@ -802,16 +814,16 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_locations(self, device_str, activity_id, locations):
+    def create_activity_locations(self, device_str, activity_id, locations):
         """Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
         if device_str is None:
-            self.log_error(MongoDatabase.create_locations.__name__ + ": Unexpected empty object: device_str")
+            self.log_error(MongoDatabase.create_activity_locations.__name__ + ": Unexpected empty object: device_str")
             return False
         if activity_id is None:
-            self.log_error(MongoDatabase.create_locations.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_locations.__name__ + ": Unexpected empty object: activity_id")
             return False
         if not locations:
-            self.log_error(MongoDatabase.create_locations.__name__ + ": Unexpected empty object: locations")
+            self.log_error(MongoDatabase.create_activity_locations.__name__ + ": Unexpected empty object: locations")
             return False
 
         try:
@@ -839,10 +851,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_locations(self, activity_id):
+    def retrieve_activity_locations(self, activity_id):
         """Returns all the locations for the specified activity."""
         if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_locations.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.retrieve_activity_locations.__name__ + ": Unexpected empty object: activity_id")
             return None
 
         try:
@@ -857,17 +869,17 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def retrieve_most_recent_locations(self, activity_id, num):
+    def retrieve_most_recent_activity_locations(self, activity_id, num):
         """Returns the most recent 'num' locations for the specified activity."""
         if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_most_recent_locations.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.retrieve_most_recent_activity_locations.__name__ + ": Unexpected empty object: activity_id")
             return None
         if num is None:
-            self.log_error(MongoDatabase.retrieve_most_recent_locations.__name__ + ": Unexpected empty object: num")
+            self.log_error(MongoDatabase.retrieve_most_recent_activity_locations.__name__ + ": Unexpected empty object: num")
             return None
 
         try:
-            locations = self.retrieve_locations(activity_id)
+            locations = self.retrieve_activity_locations(activity_id)
             locations.sort(key=retrieve_time_from_location)
             return locations
         except:
@@ -875,19 +887,19 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_sensor_reading(self, activity_id, date_time, sensor_type, value):
+    def create_activity_sensor_reading(self, activity_id, date_time, sensor_type, value):
         """Create method for a piece of sensor data, such as a heart rate or power meter reading."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: activity_id")
             return False
         if date_time is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: date_time")
+            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: date_time")
             return False
         if sensor_type is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: sensor_type")
+            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: sensor_type")
             return False
         if value is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: value")
+            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: value")
             return False
 
         try:
@@ -909,16 +921,16 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_sensor_readings(self, activity_id, sensor_type, values):
+    def create_activity_sensor_readings(self, activity_id, sensor_type, values):
         """Create method for several pieces of sensor data, such as a heart rate or power meter reading."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: activity_id")
             return False
         if sensor_type is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: sensor_type")
+            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: sensor_type")
             return False
         if values is None:
-            self.log_error(MongoDatabase.create_sensor_reading.__name__ + ": Unexpected empty object: values")
+            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: values")
             return False
 
         try:
@@ -942,13 +954,13 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_sensor_readings(self, sensor_type, activity_id):
+    def retrieve_activity_sensor_readings(self, sensor_type, activity_id):
         """Returns all the sensor data for the specified sensor for the given activity."""
         if sensor_type is None:
-            self.log_error(MongoDatabase.retrieve_sensor_readings.__name__ + ": Unexpected empty object: sensor_type")
+            self.log_error(MongoDatabase.retrieve_activity_sensor_readings.__name__ + ": Unexpected empty object: sensor_type")
             return None
         if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_sensor_readings.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.retrieve_activity_sensor_readings.__name__ + ": Unexpected empty object: activity_id")
             return None
 
         try:
@@ -963,22 +975,22 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_metadata(self, activity_id, date_time, key, value, create_list):
-        """Create method for a piece of metaadata."""
+    def create_activity_metadata(self, activity_id, date_time, key, value, create_list):
+        """Create method for a piece of metaadata. When dealing with a list, will append values."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: activity_id")
             return False
         if date_time is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: date_time")
+            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: date_time")
             return False
         if key is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: key")
+            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: key")
             return False
         if value is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: value")
+            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: value")
             return False
         if create_list is None:
-            self.log_error(MongoDatabase.create_metadata.__name__ + ": Unexpected empty object: create_list")
+            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: create_list")
             return False
 
         try:
@@ -1014,25 +1026,22 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_metadata_list(self, activity_id, key, values):
-        """Create method for a list of of metaadata values."""
+    def create_activity_metadata_list(self, activity_id, key, values):
+        """Create method for a list of metaadata values. Will overwrite existing data."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_metadata_list.__name__ + ": Unexpected empty object: activity_id")
             return False
         if key is None:
-            self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Unexpected empty object: key")
+            self.log_error(MongoDatabase.create_activity_metadata_list.__name__ + ": Unexpected empty object: key")
             return False
         if values is None:
-            self.log_error(MongoDatabase.create_metadata_list.__name__ + ": Unexpected empty object: values")
+            self.log_error(MongoDatabase.create_activity_metadata_list.__name__ + ": Unexpected empty object: values")
             return False
 
         try:
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
             if activity is not None:
                 value_list = []
-
-                if key in activity:
-                    value_list = activity[key]
 
                 for value in values:
                     time_value_pair = {str(value[0]): float(value[1])}
@@ -1046,36 +1055,14 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
-        
-    def retrieve_metadata(self, key, activity_id):
-        """Returns all the metadata of the given type for the specified activity."""
-        if key is None:
-            self.log_error(MongoDatabase.retrieve_metadata.__name__ + ": Unexpected empty object: key")
-            return None
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_metadata.__name__ + ": Unexpected empty object: activity_id")
-            return None
 
-        try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if key in activity:
-                    metadata = activity[key]
-                    if isinstance(metadata, list):
-                        metadata.sort(key=retrieve_time_from_time_value_pair)
-                    return metadata
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return None
-
-    def create_sets_and_reps_data(self, activity_id, sets):
+    def create_activity_sets_and_reps_data(self, activity_id, sets):
         """Create method for a list of of metaadata values."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_sets_and_reps_data.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_sets_and_reps_data.__name__ + ": Unexpected empty object: activity_id")
             return False
         if sets is None:
-            self.log_error(MongoDatabase.create_sets_and_reps_data.__name__ + ": Unexpected empty object: sets")
+            self.log_error(MongoDatabase.create_activity_sets_and_reps_data.__name__ + ": Unexpected empty object: sets")
             return False
 
         try:
@@ -1089,16 +1076,16 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_accelerometer_reading(self, device_str, activity_id, accels):
+    def create_activity_accelerometer_reading(self, device_str, activity_id, accels):
         """Adds several accelerometer readings to the database. 'accels' is an array of arrays in the form [time, x, y, z]."""
         if device_str is None:
-            self.log_error(MongoDatabase.create_accelerometer_reading.__name__ + ": Unexpected empty object: device_str")
+            self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Unexpected empty object: device_str")
             return False
         if activity_id is None:
-            self.log_error(MongoDatabase.create_accelerometer_reading.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Unexpected empty object: activity_id")
             return False
         if not accels:
-            self.log_error(MongoDatabase.create_accelerometer_reading.__name__ + ": Unexpected empty object: accels")
+            self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Unexpected empty object: accels")
             return False
 
         try:
@@ -1114,7 +1101,7 @@ class MongoDatabase(Database.Database):
                 for accel in accels:
                     # Make sure time values are monotonically increasing.
                     if accel_list and int(accel_list[-1][Keys.ACCELEROMETER_TIME_KEY]) > accel[0]:
-                        self.log_error(MongoDatabase.create_accelerometer_reading.__name__ + ": Received out-of-order time value.")
+                        self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Received out-of-order time value.")
                     else:
                         value = {Keys.ACCELEROMETER_TIME_KEY: accel[0], Keys.ACCELEROMETER_AXIS_NAME_X: accel[1], Keys.ACCELEROMETER_AXIS_NAME_Y: accel[2], Keys.ACCELEROMETER_AXIS_NAME_Z: accel[3]}
                         accel_list.append(value)
@@ -1126,24 +1113,6 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
-
-    def retrieve_accelerometer_readings(self, activity_id):
-        """Returns all the locations for the specified activity."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_accelerometer_readings.__name__ + ": Unexpected empty object: activity_id")
-            return None
-
-        try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if Keys.APP_ACCELEROMETER_KEY in activity:
-                    accels = activity[Keys.APP_ACCELEROMETER_KEY]
-                    accels.sort(key=retrieve_time_from_accelerometer_reading)
-                    return accels
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return None
 
     def create_activity_summary(self, activity_id, summary_data):
         """Create method for activity summary data. Summary data is data computed from the raw data."""
@@ -1400,9 +1369,12 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
+
+                # Update the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
@@ -1425,10 +1397,10 @@ class MongoDatabase(Database.Database):
     def create_gear_on_activity(self, activity, gear):
         """Adds a tag to the specified activity."""
         if activity is None:
-            self.log_error(MongoDatabase.create_tag_on_activity.__name__ + ": Unexpected empty object: activity")
+            self.log_error(MongoDatabase.create_gear_on_activity.__name__ + ": Unexpected empty object: activity")
             return False
         if gear is None:
-            self.log_error(MongoDatabase.create_tag_on_activity.__name__ + ": Unexpected empty object: gear")
+            self.log_error(MongoDatabase.create_gear_on_activity.__name__ + ": Unexpected empty object: gear")
             return False
 
         try:
@@ -1451,9 +1423,12 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
+            # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
+
+                # Read the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
@@ -1479,9 +1454,12 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
+
+                # Update the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
@@ -1514,9 +1492,12 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
+
+                # Update the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
@@ -1533,6 +1514,29 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def delete_all_gear(self, user_id):
+        """Delete method for the gear with the specified ID."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: user_id")
+            return None
+
+        try:
+            # Find the user's document.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None:
+
+                # Update the gear list.
+                if Keys.GEAR_KEY in user:
+                    user[Keys.GEAR_KEY] = []
+                    self.users_collection.save(user)
+                return True
+
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+        
     def create_service_record(self, user_id, gear_id, service_record_id, record_date, record_description):
         """Create method for gear service records."""
         if user_id is None:
@@ -1552,12 +1556,17 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
+
+                # Find the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
+
+                    # Find the gear.
                     for gear in gear_list:
                         if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
                             service_rec = {}
@@ -1591,12 +1600,17 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
+
+                # Find the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
+
+                    # Find the gear.
                     for gear in gear_list:
                         if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
                             if Keys.GEAR_SERVICE_HISTORY in gear:
@@ -1610,6 +1624,86 @@ class MongoDatabase(Database.Database):
                                         self.users_collection.save(user)
                                         return True
                                     record_index = record_index + 1
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def create_deferred_task(self, user_id, task_type, task_id):
+        """Create method for tracking a deferred task, such as a file import or activity analysis."""
+        if user_id is None:
+            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if task_type is None:
+            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: task_type")
+            return False
+        if task_id is None:
+            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: task_id")
+            return False
+
+        try:
+            # Find the user's tasks document.
+            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            if user_tasks is None:
+                post = {Keys.DEFERRED_TASKS_USER_ID: user_id}
+                self.tasks_collection.insert(post)
+                user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            if user_tasks is not None:
+                deferred_tasks = []
+                if Keys.TASKS_KEY in user_tasks:
+                    deferred_tasks = user_tasks[Keys.TASKS_KEY]
+                task = {}
+                task[Keys.TASK_ID_KEY] = task_id
+                task[Keys.TASK_TYPE_KEY] = task_type
+                deferred_tasks.append(task)
+                user_tasks[Keys.TASKS_KEY] = deferred_tasks
+                self.tasks_collection.save(user_tasks)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_deferred_tasks_of_type(self, user_id, task_type):
+        """Retrieve method for returning all the deferred tasks of a given type."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_deferred_tasks_of_type.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if task_type is None:
+            self.log_error(MongoDatabase.retrieve_deferred_tasks_of_type.__name__ + ": Unexpected empty object: task_type")
+            return False
+
+        try:
+            # Find the user's tasks document.
+            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            if user_tasks is not None:
+                deferred_tasks = []
+                if Keys.TASKS_KEY in user_tasks:
+                    deferred_tasks = user_tasks[Keys.TASKS_KEY]
+                return deferred_tasks
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return []
+
+    def delete_deferred_tasks(self, user_id, task_id):
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_deferred_tasks.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if task_id is None:
+            self.log_error(MongoDatabase.delete_deferred_tasks.__name__ + ": Unexpected empty object: task_id")
+            return False
+
+        try:
+            # Find the user's tasks document.
+            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            if user_tasks is not None:
+                deferred_tasks = []
+                if Keys.TASKS_KEY in user_tasks:
+                    deferred_tasks = user_tasks[Keys.TASKS_KEY]
+                for task in deferred_tasks:
+                    if task[Keys.TASKS_KEY] == task_id:
+                        pass
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

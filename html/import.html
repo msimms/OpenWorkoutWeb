@@ -61,7 +61,7 @@
 
 		if (send_post_request(the_url, dict, result_text))
 		{
-			window.location.replace("${root_url}/my_activities");
+			window.location.replace("${root_url}/import_status");
 		}
 		else
 		{
@@ -86,8 +86,8 @@
 		var fields = ["Duration", "Distance"];
 		switch (activityType)
 		{
-			case "Push Ups / Press Ups":
-			case "Pull Ups":
+			case "Push Up":
+			case "Pull Up":
 				fields = ["Repititions", "Repititions", "Repititions"];
 				break;
 		}
@@ -161,7 +161,7 @@
 
 			if (send_post_request(the_url, dict, result_text))
 			{
-				window.location.replace("${root_url}/my_activities");
+				window.location.replace("${root_url}/import_status");
 			}
 			else
 			{
@@ -199,14 +199,14 @@ ${nav}
 <div class="import" style="width: 600px">
 	<h2>Import a File</h2>
 	<form action="${root_url}/upload" method="post" enctype="multipart/form-data">
-		Select files: <input type="file" name="ufile" multiple>
-		<input type="submit">
+		Select files: <input type="file" name="ufile" multiple><br>
+		<input type="submit" value="Upload" class="modern_button">
 	</form>
 
 	<hr>
 
 	<h2>Import an Entire Directory</h2>
-	<input type="file" id="picker" name="fileList" webkitdirectory multiple>
+	<input type="file" id="picker" name="fileList" webkitdirectory multiple><br>
 	<button type="button" onclick="return upload_dir()">Upload</button>
 	<ul id="listing"></ul>
 
@@ -222,7 +222,7 @@ ${nav}
 			{
 				upload_file_no_ui(file_list[i]);
 			}
-            window.location.replace("${root_url}/my_activities");
+            window.location.replace("${root_url}/import_status");
 		}
 
 		picker.addEventListener('change', e => {

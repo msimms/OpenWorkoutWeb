@@ -33,5 +33,6 @@ class BmiCalculator(object):
         super(BmiCalculator, self).__init__()
 
     def estimate_bmi(self, weight_kg, height_m):
+        """Simple BMI estimation based on height and weight."""
         # bmi = kg / m2
         return weight_kg / (height_m * height_m)

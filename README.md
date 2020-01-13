@@ -140,6 +140,16 @@ The software architecture makes it possible to use this system with different fr
 * Importing data now also starts the analysis process.
 * Bug fixes.
 
+### 0.16
+* Rudimentary run plan generation - still much to do.
+* Updates to support python3.
+* Bug fixes.
+
+### 0.17
+* Bug fixes when importing and exporting activities.
+* Ability to export position data as a CSV file.
+* Bug fixes in computing gear distances.
+
 ## Tech
 This software uses several other source projects to work properly:
 

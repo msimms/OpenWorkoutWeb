@@ -56,24 +56,52 @@ class Exporter(object):
             return None
         return current_reading
 
-    def export_as_csv(self, file_name, activity):
+    def write_or_buffer(self, local_file, row):
+        """Helper function for writing CSV files."""
+        if local_file is not None:
+            local_file.write(row)
+            return ""
+        return row
+
+    def export_time_value_list_to_csv(self, local_file, activity, key):
+        """Takes a list of time/value pairs from the activity and renders the data as CSV."""
+        buf = ""
+        if key in activity:
+            buf = self.write_or_buffer(local_file, key + "\n")
+            readings = activity[key]
+            for reading in readings:
+                ts = reading.keys()[0]
+                buf += self.write_or_buffer(local_file, str(ts) + "," + str(reading[ts]) + "\n")
+        return buf
+
+    def export_accelerometer_data_to_csv(self, local_file, activity):
         """Formats the accelerometer data as CSV."""
         buf = ""
-        local_file = None
-        if file_name is not None:
-            local_file = open(file_name, 'wt')
         if Keys.APP_ACCELEROMETER_KEY in activity:
-            accel_readings = activity[Keys.APP_ACCELEROMETER_KEY]
-            for reading in accel_readings:
+            buf = self.write_or_buffer(local_file, Keys.APP_ACCELEROMETER_KEY + "\n")
+            readings = activity[Keys.APP_ACCELEROMETER_KEY]
+            for reading in readings:
                 accel_time = reading[Keys.ACCELEROMETER_TIME_KEY]
                 accel_x = reading[Keys.ACCELEROMETER_AXIS_NAME_X]
                 accel_y = reading[Keys.ACCELEROMETER_AXIS_NAME_Y]
                 accel_z = reading[Keys.ACCELEROMETER_AXIS_NAME_Z]
                 row = str(accel_time) + "," + str(accel_x) + "," + str(accel_y) + "," + str(accel_z) + "\n"
-                if local_file is not None:
-                    local_file.write(row)
-                else:
-                    buf += row
+                buf += self.write_or_buffer(local_file, row)
+        return buf
+
+    def export_as_csv(self, file_name, activity):
+        """Formats the activity data as CSV."""
+        local_file = None
+        if file_name is not None:
+            local_file = open(file_name, 'wt')
+
+        buf  = self.export_time_value_list_to_csv(local_file, activity, Keys.APP_CURRENT_SPEED_KEY)
+        buf += self.export_time_value_list_to_csv(local_file, activity, Keys.APP_CURRENT_PACE_KEY)
+        buf += self.export_time_value_list_to_csv(local_file, activity, Keys.APP_HEART_RATE_KEY)
+        buf += self.export_time_value_list_to_csv(local_file, activity, Keys.APP_POWER_KEY)
+        buf += self.export_time_value_list_to_csv(local_file, activity, Keys.APP_CADENCE_KEY)
+        buf += self.export_accelerometer_data_to_csv(local_file, activity)
+
         return buf
 
     def export_as_gpx(self, file_name, activity):
@@ -112,6 +140,9 @@ class Exporter(object):
         writer = GpxWriter.GpxWriter()
         writer.create_gpx(file_name, "")
 
+        start_time_ms = locations[0][Keys.LOCATION_TIME_KEY]
+        writer.write_metadata(start_time_ms)
+
         writer.start_track()
         writer.start_track_segment()
 
@@ -149,8 +180,9 @@ class Exporter(object):
 
         writer.end_track_segment()
         writer.end_track()
-        result = writer.buffer()
         writer.close()
+
+        result = writer.buffer()
 
         return result
 
@@ -249,10 +281,12 @@ class Exporter(object):
                     done = True
 
             writer.end_track()
+            writer.end_lap()
 
         writer.end_activity()
-        result = writer.buffer()
         writer.close()
+
+        result = writer.buffer()
 
         return result
 

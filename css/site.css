@@ -113,7 +113,7 @@ tr {
 	width: 100%;
 }
 
-.comments table {
+.activity_control table {
 	font-family: arial, sans-serif;
 	background: linear-gradient(to left, #FFFFFF , #FFFFFF);
 	margin-left: auto;
@@ -121,34 +121,15 @@ tr {
 	width: 100%;
 }
 
-.comments td {
+.activity_control td {
 	border: 1px solid #FFFFFF;
 	padding: 2px;
 	border-radius: 2px;
 	text-align: left;
 }
 
-.comments tr {
+.activity_control tr {
 	opacity: 0.7;
-}
-
-.export table {
-	font-family: arial, sans-serif;
-	background: linear-gradient(to left, #FFFFFF , #FFFFFF);
-	margin-left: auto;
-	margin-right: auto;
-	width: 100%;
-}
-
-.export td {
-	border: 1px solid #FFFFFF;
-	padding: 2px;
-	border-radius: 2px;
-	text-align: left;
-}
-
-.export tr {
-	opacity: 1.0;
 }
 
 tr:hover {
@@ -171,10 +152,91 @@ tr:hover {
 	padding-bottom: .25cm;
 }
 
+.user_search_form input {
+	width: 400px;
+}
+
 .activities_list {
 	padding: 25px 25px 25px 25px;
 }
 
 div {
 	margin: 10px;
+}
+
+button {
+    background-color: #f2f2f2;
+    background-image: linear-gradient(to bottom, #f2f2f2, #f2f2f2);
+    border: 1px solid #bfbfbf;
+    box-shadow: inset 0 1px 0 white, inset 0 -1px 0 #d9d9d9, inset 0 0 0 1px #f2f2f2, 0 2px 4px rgba(0, 0, 0, 0.2);
+    color: #8c8c8c;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    border-radius: 3px;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Verdana, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 20px;
+    padding: 8px 8px 8px 8px;
+    margin: 8px 0 0 0;
+    transition: all 20ms ease-out;
+    vertical-align: top;
+}
+
+button:hover, button:focus {
+    background: #f2f2f2;
+    border-color: #8c8c8c;
+    box-shadow: inset 0 1px 0 white, inset 0 -1px 0 #d9d9d9, inset 0 0 0 1px #f2f2f2;
+}
+
+button:active {
+    background: #f2f2f2;
+    box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+button .fa {
+    color: #bfbfbf;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.modern_button {
+    background-color: #f2f2f2;
+    background-image: linear-gradient(to bottom, #f2f2f2, #f2f2f2);
+    border: 1px solid #bfbfbf;
+    box-shadow: inset 0 1px 0 white, inset 0 -1px 0 #d9d9d9, inset 0 0 0 1px #f2f2f2, 0 2px 4px rgba(0, 0, 0, 0.2);
+    color: #8c8c8c;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    border-radius: 3px;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Verdana, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 20px;
+    padding: 8px 8px 8px 8px;
+    margin: 8px 0 0 0;
+    transition: all 20ms ease-out;
+    vertical-align: top;
+}
+
+.modern_button:hover, .modern_button:focus {
+    background: #f2f2f2;
+    border-color: #8c8c8c;
+    box-shadow: inset 0 1px 0 white, inset 0 -1px 0 #d9d9d9, inset 0 0 0 1px #f2f2f2;
+}
+
+.modern_button:active {
+    background: #f2f2f2;
+    box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+.modern_button .fa {
+    color: #bfbfbf;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.block input {
+	width: 250px;
+	margin: 5px;
 }

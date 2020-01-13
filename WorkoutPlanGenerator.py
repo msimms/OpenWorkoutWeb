@@ -14,6 +14,7 @@ import sys
 import tensorflow as tf
 import time
 import traceback
+import uuid
 import AnalysisScheduler
 import BikePlanGenerator
 import DataMgr
@@ -49,15 +50,16 @@ class WorkoutPlanGenerator(object):
     @staticmethod
     def goal_enum_to_distances(goal):
         """Converts the goal key/enum value to the equivalent value in meters, returned as an array of [swim, bike, run] distances."""
-        if goal == Keys.GOAL_5K_RUN_KEY:
+        goal_lower = goal.lower()
+        if goal_lower == Keys.GOAL_5K_RUN_KEY.lower():
             return [0, 0, 5000]
-        elif goal == Keys.GOAL_10K_RUN_KEY:
+        elif goal_lower == Keys.GOAL_10K_RUN_KEY.lower():
             return [0, 0, 10000]
-        elif goal == Keys.GOAL_15K_RUN_KEY:
+        elif goal_lower == Keys.GOAL_15K_RUN_KEY.lower():
             return [0, 0, 15000]
-        elif goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
+        elif goal_lower == Keys.GOAL_HALF_MARATHON_RUN_KEY.lower():
             return [0, 0, METERS_PER_HALF_MARATHON]
-        elif goal == Keys.GOAL_MARATHON_RUN_KEY:
+        elif goal_lower == Keys.GOAL_MARATHON_RUN_KEY.lower():
             return [0, 0, METERS_PER_MARATHON]
         return [0, 0, 0]
 
@@ -80,6 +82,9 @@ class WorkoutPlanGenerator(object):
         now = time.time()
         longest_run_in_four_weeks = None  # Longest run in the last four weeks
 
+        # Analyze any unanalyzed activities.
+        self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.FOUR_WEEKS)
+
         # Fetch the detail of the user's goal.
         goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
         goal_date = int(self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY))
@@ -90,7 +95,7 @@ class WorkoutPlanGenerator(object):
         self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb)
 
         # Look through the user's six month records.
-        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.SIX_MONTHS)
+        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.SIX_MONTHS)
         if running_bests is not None:
             running_paces = self.data_mgr.compute_run_training_paces(user_id, running_bests)
         else:
@@ -103,7 +108,7 @@ class WorkoutPlanGenerator(object):
                     self.data_mgr.store_user_estimated_ftp(user_id, threshold_power)
 
         # Look through the user's four week records.
-        cycling_bests, running_bests = self.data_mgr.compute_recent_bests(user_id, DataMgr.FOUR_WEEKS)
+        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.FOUR_WEEKS)
         if running_bests is not None:
             if Keys.LONGEST_DISTANCE in running_bests:
                 longest_run_in_four_weeks = running_bests[Keys.LONGEST_DISTANCE]
@@ -117,7 +122,13 @@ class WorkoutPlanGenerator(object):
         experience_level = 0
 
         # Store all the inputs in a dictionary.
-        inputs = running_paces
+        if len(running_paces) == 0:
+            inputs[Keys.SPEED_RUN_PACE] = None
+            inputs[Keys.TEMPO_RUN_PACE] = None
+            inputs[Keys.LONG_RUN_PACE] = None
+            inputs[Keys.EASY_RUN_PACE] = None
+        else:
+            inputs = running_paces
         inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY] = longest_run_in_four_weeks
         inputs[Keys.AGE_YEARS_KEY] = age_years
         inputs[Keys.EXPERIENCE_LEVEL_KEY] = experience_level
@@ -165,8 +176,18 @@ class WorkoutPlanGenerator(object):
         """Runs the neural network specified by 'model' to generate the workout plan."""
 
         # Convert the input dictionary to an array as required by tf.
-        model_inputs = [ inputs[Keys.SPEED_RUN_PACE], inputs[Keys.TEMPO_RUN_PACE], inputs[Keys.LONG_RUN_PACE], inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY], inputs[Keys.AGE_YEARS_KEY], inputs[Keys.EXPERIENCE_LEVEL], inputs[Keys.GOAL], inputs[Keys.WEEKS_UNTIL_GOAL_KEY] ]
-        return []
+        model_inputs = [ ]
+        model_inputs.append(inputs[Keys.SPEED_RUN_PACE])
+        model_inputs.append(inputs[Keys.TEMPO_RUN_PACE])
+        model_inputs.append(inputs[Keys.LONG_RUN_PACE])
+        model_inputs.append(inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY])
+        model_inputs.append(inputs[Keys.AGE_YEARS_KEY])
+        model_inputs.append(inputs[Keys.EXPERIENCE_LEVEL])
+        model_inputs.append(inputs[Keys.GOAL])
+        model_inputs.append(inputs[Keys.WEEKS_UNTIL_GOAL_KEY])
+
+        workouts = []
+        return workouts
 
     def organize_schedule(self, user_id, workouts):
         """Arranges the user's workouts into days/weeks, etc. To be called after the outputs are generated, but need cleaning up."""
@@ -179,9 +200,11 @@ class WorkoutPlanGenerator(object):
         # Sanity check.
         if self.user_obj is None:
             self.log_error("User information not provided.")
-            return
+            return []
         if model is None:
             self.log_error("Model not provided. Will use non-ML algorithm instead.")
+
+        outputs = []
 
         try:
             user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID]
@@ -195,11 +218,11 @@ class WorkoutPlanGenerator(object):
 
             # Organize the workouts into a schedule.
             outputs = self.organize_schedule(user_id, outputs)
-            print("Outputs: " + str(outputs))
         except:
             self.log_error("Exception when generating a workout plan.")
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
+        return outputs
 
 def generate_model(training_file_name):
     """Creates the neural network, based on training data from the supplied JSON file."""
@@ -246,6 +269,17 @@ def generate_model(training_file_name):
 
     return model
 
+def generate_temp_file_name(extension):
+    """Utility function for generating a temporary file name."""
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    tempfile_dir = os.path.join(root_dir, 'tempfile')
+    if not os.path.exists(tempfile_dir):
+        os.makedirs(tempfile_dir)
+    tempfile_dir = os.path.normpath(tempfile_dir)
+    tempfile_name = os.path.join(tempfile_dir, str(uuid.uuid4()))
+    tempfile_name = tempfile_name + extension
+    return tempfile_name
+    
 @celery_worker.task()
 def generate_workout_plan(user_str):
     """Entry point for the celery worker."""
@@ -254,7 +288,11 @@ def generate_workout_plan(user_str):
     print("Starting workout plan generation...")
     user_obj = json.loads(user_str)
     generator = WorkoutPlanGenerator(user_obj)
-    generator.generate_plan(g_model)
+    workouts = generator.generate_plan(g_model)
+    for workout in workouts:
+        tempfile_name = generate_temp_file_name(".zwo")
+        workout.export_to_zwo(tempfile_name)
+        print("Exported a workout to " + tempfile_name + ".")
     print("Workout plan generation finished.")
 
 def main():

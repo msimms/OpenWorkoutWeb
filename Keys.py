@@ -69,7 +69,7 @@ WORKOUT_PLAN_USER_ID = "user_id"
 UPLOADED_FILE_NAME_KEY = "uploaded_file_name"
 UPLOADED_FILE_DATA_KEY = "uploaded_file_data"
 
-# Keys inherited from the mobile app.
+# Keys inherited from the mobile app. Some of these are also used by the web app.
 APP_NAME_KEY = "Name"
 APP_TIME_KEY = "Time"
 APP_USERNAME_KEY = "User Name"
@@ -78,22 +78,23 @@ APP_ID_KEY = "ActivityId"
 APP_TYPE_KEY = "ActivityType"
 APP_DISTANCE_KEY = "Distance"
 APP_DURATION_KEY = "Duration"
-APP_CADENCE_KEY = "Cadence"
+APP_CADENCE_KEY = "Cadence" # Raw cadence list.
 APP_TEMP_KEY = "Temperature"
 APP_CURRENT_SPEED_KEY = "Current Speed"
 APP_AVG_SPEED_KEY = "Avgerage Speed"
-APP_MOVING_SPEED_KEY = "Moving Speed"
+APP_MOVING_SPEED_KEY = "Moving Speed" 
 APP_SPEED_VARIANCE_KEY = "Speed Variance"
-APP_HEART_RATE_KEY = "Heart Rate"
-APP_AVG_HEART_RATE_KEY = "Average Heart Rate"
-APP_CURRENT_PACE_KEY = "Current Pace"
-APP_POWER_KEY = "Power"
+APP_HEART_RATE_KEY = "Heart Rate"  # Raw heart rate list.
+APP_AVG_HEART_RATE_KEY = "Average Heart Rate" # Computed average heart rate.
+APP_CURRENT_PACE_KEY = "Current Pace" # Computed pace list.
+APP_POWER_KEY = "Power" # Raw power data list.
 APP_SETS_KEY = "Sets"
-APP_LOCATIONS_KEY = "locations"
+APP_DISTANCES_KEY = "distances" # Distance between data points.
+APP_LOCATIONS_KEY = "locations" # Raw position data.
 APP_LOCATION_LAT_KEY = "Latitude"
 APP_LOCATION_LON_KEY = "Longitude"
 APP_LOCATION_ALT_KEY = "Altitude"
-APP_ACCELEROMETER_KEY = "accelerometer"
+APP_ACCELEROMETER_KEY = "accelerometer" # Raw accelerometer list.
 APP_AXIS_NAME_X = "x"
 APP_AXIS_NAME_Y = "y"
 APP_AXIS_NAME_Z = "z"
@@ -112,6 +113,7 @@ ACCELEROMETER_TIME_KEY = "time"
 ACTIVITY_ID_KEY = "activity_id"
 ACTIVITY_HASH_KEY = "activity_hash"
 ACTIVITY_TYPE_KEY = "activity_type"
+ACTIVITY_DESCRIPTION_KEY = "description"
 ACTIVITY_USER_ID_KEY = "user_id"
 ACTIVITY_DEVICE_STR_KEY = "device_str"
 ACTIVITY_LOCATIONS_KEY = "locations"
@@ -128,8 +130,9 @@ ACTIVITY_TAG_KEY = "tag"
 ACTIVITY_TAGS_KEY = "tags"
 ACTIVITY_SUMMARY_KEY = "summary_data"
 ACTIVITY_EXPORT_FORMAT_KEY = "export_format"
-ACTIVITY_NUM_POINTS = "num_points"
-ACTIVITY_LOCATION_DESCRIPTION_KEY = "location_description"
+ACTIVITY_NUM_POINTS = "num_points" 
+ACTIVITY_LOCATION_DESCRIPTION_KEY = "location_description" # Political description of the activity location (i.e., Florida)
+ACTIVITY_INTERVALS = "intervals" # Intervals that were computed from the workout
 
 # Keys used to summarize activity data.
 BEST_SPEED = "Best Speed"
@@ -193,14 +196,24 @@ TYPE_RUNNING_KEY = "Running"
 TYPE_HIKING_KEY = "Hiking"
 TYPE_WALKING_KEY = "Walking"
 TYPE_CYCLING_KEY = "Cycling"
-TYPE_SWIMMING_KEY = "Swimming"
-TYPE_PULL_UPS_KEY = "Pull Ups"
-TYPE_PUSH_UPS_KEY = "Push Ups / Press Ups"
+TYPE_MOUNTAIN_BIKING_KEY = "Mountain Biking"
+TYPE_OPEN_WATER_SWIMMING_KEY = "Open Water Swimming"
+TYPE_POOL_SWIMMING_KEY = "Pool Swimming"
+TYPE_PULL_UP_KEY = "Pull Up"
+TYPE_PUSH_UP_KEY = "Push Up"
 FOOT_BASED_ACTIVITIES = [ TYPE_RUNNING_KEY, TYPE_HIKING_KEY, TYPE_WALKING_KEY ]
-BIKE_BASED_ACTIVITIES = [ TYPE_CYCLING_KEY ]
+BIKE_BASED_ACTIVITIES = [ TYPE_CYCLING_KEY, TYPE_MOUNTAIN_BIKING_KEY ]
+SWIMMING_ACTIVITIES = [ TYPE_OPEN_WATER_SWIMMING_KEY, TYPE_POOL_SWIMMING_KEY ]
 
 # Activity names
 UNNAMED_ACTIVITY_TITLE = "Unnamed"
+
+# Interval workouts
+INTERVAL_REPEAT_KEY = "Repeat"
+INTERVAL_DISTANCE_KEY = "Distance"
+INTERVAL_PACE_KEY = "Pace"
+INTERVAL_RECOVERY_DISTANCE_KEY = "Recovery Distance"
+INTERVAL_RECOVERY_PACE_KEY = "Recovery Pace"
 
 # Goals
 GOAL_KEY = "goal"
@@ -217,6 +230,16 @@ AGE_YEARS_KEY = "Age In Years"
 EXPERIENCE_LEVEL_KEY = "Experience Level"
 WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
 
+# Used to track deferred tasks
+DEFERRED_TASKS_USER_ID = "user_id"
+TASKS_KEY = "tasks"
+TASK_ID_KEY = "task id"
+TASK_TYPE_KEY = "task type"
+TASK_STATE_KEY = "task state"
+IMPORT_TASK_KEY = "import"
+ANALYSIS_TASK_KEY = "analysis"
+WORKOUT_PLAN_TASK_KEY = "workout plan"
+
 TIME_KEYS = [ BEST_1K, BEST_MILE, BEST_5K, BEST_10K, BEST_15K, BEST_HALF_MARATHON, BEST_MARATHON, BEST_METRIC_CENTURY, BEST_CENTURY ]
 DISTANCE_KEYS = [ TOTAL_DISTANCE, LONGEST_DISTANCE ]
 SPEED_KEYS = [ APP_CURRENT_SPEED_KEY, APP_AVG_SPEED_KEY, APP_MOVING_SPEED_KEY, APP_SPEED_VARIANCE_KEY, BEST_SPEED, APP_AVG_SPEED_KEY ]
@@ -226,4 +249,4 @@ HEART_RATE_KEYS = [ AVG_HEART_RATE, MAX_HEART_RATE ]
 CADENCE_KEYS = [ APP_CADENCE_KEY, AVG_CADENCE, MAX_CADENCE ]
 GOALS = [ GOAL_5K_RUN_KEY, GOAL_10K_RUN_KEY, GOAL_15K_RUN_KEY, GOAL_HALF_MARATHON_RUN_KEY, GOAL_MARATHON_RUN_KEY ]
 
-UNSUMMARIZABLE_KEYS = [ APP_SPEED_VARIANCE_KEY, ACTIVITY_TIME_KEY, ACTIVITY_TYPE_KEY, ACTIVITY_HASH_KEY, ACTIVITY_LOCATION_DESCRIPTION_KEY]
+UNSUMMARIZABLE_KEYS = [ APP_SPEED_VARIANCE_KEY, APP_DISTANCES_KEY, APP_LOCATIONS_KEY, ACTIVITY_TIME_KEY, ACTIVITY_TYPE_KEY, ACTIVITY_HASH_KEY, ACTIVITY_LOCATION_DESCRIPTION_KEY, ACTIVITY_INTERVALS ]

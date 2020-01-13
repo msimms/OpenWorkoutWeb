@@ -1,5 +1,5 @@
 # Copyright 2018 Michael J Simms
-"""Main application, contains all web page handlers"""
+"""Main application - if using flask, contains all web page handlers"""
 
 import argparse
 import functools
@@ -157,13 +157,24 @@ def live_user(user_str):
 
 @g_flask_app.route('/activity')
 def activity(activity_id):
-    """Renders the map page for an activity."""
+    """Renders the details page for an activity."""
     try:
         return g_app.activity(activity_id)
     except:
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + activity.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/edit_activity')
+def edit_activity(activity_id):
+    """Renders the edit page for an activity."""
+    try:
+        return g_app.edit_activity(activity_id)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + edit_activity.__name__)
     return g_app.error()
 
 @g_flask_app.route('/device')
@@ -205,8 +216,8 @@ def all_activities():
         g_app.log_error('Unhandled exception in ' + all_activities.__name__)
     return g_app.error()
 
-@cherrypy.expose
-@require()
+@g_flask_app.route('/all_records')
+@login_requred
 def all_records(self, activity_type, record_name):
     """Renders the list of records for the specified user and record type."""
     try:
@@ -219,8 +230,8 @@ def all_records(self, activity_type, record_name):
         g_app.log_error('Unhandled exception in ' + all_records.__name__)
     return self.error()
 
-@cherrypy.expose
-@require()
+@g_flask_app.route('/record_progression')
+@login_requred
 def record_progression(self, activity_type, record_name):
     """Renders the list of records, in order of progression, for the specified user and record type."""
     try:
@@ -249,7 +260,7 @@ def workouts():
 
 @g_flask_app.route('/statistics')
 @login_requred
-def workouts():
+def statistics():
     """Renders the statistics view."""
     try:
         return g_app.stats()
@@ -371,6 +382,34 @@ def import_activity():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + import_activity.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/import_status')
+@login_requred
+def import_status():
+    """Renders the import status page."""
+    try:
+        return g_app.import_status()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + import_status.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/analysis_status')
+@login_requred
+def analysis_status():
+    """Renders the analysis status page."""
+    try:
+        return g_app.analysis_status()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + analysis_status.__name__)
     return g_app.error()
 
 @g_flask_app.route('/summary')
