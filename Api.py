@@ -1071,7 +1071,7 @@ class Api(object):
         if not InputChecker.is_uuid(gear_id):
             raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
         service_date = values[Keys.SERVICE_RECORD_DATE_KEY]
-        description = values[Keys.SERVICE_RECORD_DESCRIPTION_KEY]
+        description = urllib.unquote_plus(values[Keys.SERVICE_RECORD_DESCRIPTION_KEY])
 
         result = self.data_mgr.create_service_record(self.user_id, gear_id, service_date, description)
         return result, ""
