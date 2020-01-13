@@ -362,6 +362,9 @@ class App(object):
         if Keys.ACTIVITY_TIME_KEY in activity:
             summary += "\t<li>Start Time: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script></li>\n"
 
+        # Close the summary list.
+        summary += "</ul>\n"
+
         # Controls are only allowed if the user viewing the activity owns it.
         if belongs_to_current_user:
             details_controls_str = "<td><button type=\"button\" onclick=\"return refresh_analysis()\">Refresh Analysis</button></td><tr>\n"
@@ -623,6 +626,9 @@ class App(object):
             if Keys.NORMALIZED_POWER in summary_data:
                 normalized_power = summary_data[Keys.NORMALIZED_POWER]
                 summary += "\t<li>Normalized Power: {:.2f} ".format(normalized_power) + Units.get_power_units_str() + "</li>\n"
+
+        # Close the summary list.
+        summary += "</ul>\n"
 
         # Build the detailed analysis table.
         details_str = ""
