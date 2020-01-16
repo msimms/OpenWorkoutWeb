@@ -88,7 +88,7 @@ class RedirectException(Exception):
 class App(object):
     """Class containing the URL handlers."""
 
-    def __init__(self, user_mgr, data_mgr, root_dir, root_url, google_maps_key, enable_profiling):
+    def __init__(self, user_mgr, data_mgr, root_dir, root_url, google_maps_key, enable_profiling, debug):
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
         self.root_dir = root_dir
@@ -96,6 +96,7 @@ class App(object):
         self.tempfile_dir = os.path.join(self.root_dir, 'tempfile')
         self.tempmod_dir = os.path.join(self.root_dir, 'tempmod')
         self.google_maps_key = google_maps_key
+        self.debug = debug
         self.unmapped_activity_html_file = os.path.join(root_dir, HTML_DIR, 'unmapped_activity.html')
         self.map_single_osm_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_osm.html')
         self.map_single_google_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
@@ -642,7 +643,7 @@ class App(object):
                     details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE)
                     details_str += "</td><tr>\n"
                 elif key == Keys.ACTIVITY_INTERVALS:
-                    details_str += "<td><b>Intervals</b><td><b>"
+                    details_str += "<td><b>Intervals</b><td>"
                     details_str += App.render_intervals_str(summary_data[key])
                     details_str += "</td><tr>\n"
                 elif key not in excluded_keys:
@@ -654,6 +655,13 @@ class App(object):
                     details_str += "</td><tr>\n"
         if len(details_str) == 0:
             details_str = "<td><b>No data</b></td><tr>\n"
+
+        # Append the hash (for debugging purposes).
+        if self.debug:
+            if Keys.ACTIVITY_HASH_KEY in summary_data:
+                details_str += "<td><b>Activity Hash</b></td><td>"
+                details_str += summary_data[Keys.ACTIVITY_HASH_KEY]
+                details_str += "</td><tr>\n"
 
         # Controls are only allowed if the user viewing the activity owns it.
         if belongs_to_current_user:
