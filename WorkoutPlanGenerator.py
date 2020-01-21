@@ -140,6 +140,7 @@ class WorkoutPlanGenerator(object):
 
     def generate_workouts(self, user_id, inputs):
         """Generates workouts for the specified user to perform in the next week."""
+
         swim_planner = SwimPlanGenerator.SwimPlanGenerator(user_id)
         bike_planner = BikePlanGenerator.BikePlanGenerator(user_id)
         run_planner = RunPlanGenerator.RunPlanGenerator(user_id)
@@ -281,18 +282,24 @@ def generate_temp_file_name(extension):
     return tempfile_name
     
 @celery_worker.task()
-def generate_workout_plan(user_str):
+def generate_workout_plan(user_str, format):
     """Entry point for the celery worker."""
     global g_model
 
     print("Starting workout plan generation...")
+
     user_obj = json.loads(user_str)
     generator = WorkoutPlanGenerator(user_obj)
     workouts = generator.generate_plan(g_model)
     for workout in workouts:
-        tempfile_name = generate_temp_file_name(".zwo")
-        workout.export_to_zwo(tempfile_name)
-        print("Exported a workout to " + tempfile_name + ".")
+        
+        if format is None or format == 'text':
+            print(workout.export_to_text())
+        elif format == 'zwo':
+            tempfile_name = generate_temp_file_name(".zwo")
+            workout.export_to_zwo(tempfile_name)
+            print("Exported a workout to " + tempfile_name + ".")
+
     print("Workout plan generation finished.")
 
 def main():
@@ -302,6 +309,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--user_id", default="", help="The user ID for whom we are to generate a workout plan.", required=False)
     parser.add_argument("--train", default="", help="The path to the training plan model.", required=False)
+    parser.add_argument("--format", default="text", help="The output format.", required=False)
 
     try:
         args = parser.parse_args()
@@ -310,12 +318,12 @@ def main():
         sys.exit(1)
 
     if len(args.train) > 0:
-       g_model = generate_model(args.train)        
+       g_model = generate_model(args.train, args.format)
 
     if len(args.user_id) > 0:
         data = {}
         data['user_id'] = args.user_id
-        generate_workout_plan(json.dumps(data))
+        generate_workout_plan(json.dumps(data), args.format)
 
 
 if __name__ == "__main__":

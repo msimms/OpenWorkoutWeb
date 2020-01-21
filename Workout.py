@@ -90,6 +90,48 @@ class Workout(object):
         with open(file_name, 'wt') as local_file:
             local_file.write(file_data)
 
+    def export_to_text(self):
+        """Creates a string that describes the workout."""
+        result = self.description
+        result += "\nSport: "
+        result += self.sport_type
+        result += "\n"
+
+        # Add the warmup (if applicable).
+        if self.warmup is not None:
+            duration = self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION]
+
+            result += "Warmup: "
+            result += str(duration)
+            result += " seconds\n"
+
+        # Add each interval.
+        for interval in self.intervals:
+            interval_meters = interval[Keys.INTERVAL_DISTANCE_KEY]
+            interval_pace_minute = interval[Keys.INTERVAL_PACE_KEY]
+            recovery_meters = interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY]
+            recovery_pace_minute = interval[Keys.INTERVAL_RECOVERY_PACE_KEY]
+
+            result += "Interval: "
+            result += str(interval_meters)
+            result += " meters at "
+            result += str(interval_pace_minute)
+            result += " with "
+            result += str(recovery_meters)
+            result += " meters recovery at "
+            result += str(recovery_pace_minute)
+            result += "\n"
+
+        # Add the cooldown (if applicable).
+        if self.cooldown is not None:
+            duration = self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION]
+
+            result += "Cooldown: "
+            result += str(duration)
+            result += " seconds\n"
+
+        return result
+        
     def print(*args, **kwargs):
         """For debugging purposes. Prints details to standard output."""
         __builtin__.print(self.description)
