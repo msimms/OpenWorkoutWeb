@@ -197,8 +197,8 @@ class MongoDatabase(Database.Database):
 
         try:
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.delete_one({Keys.DATABASE_ID_KEY: user_id_obj})
-            if user is not None:
+            deleted_result = self.users_collection.delete_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            if deleted_result is not None:
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -730,8 +730,9 @@ class MongoDatabase(Database.Database):
 
         try:
             activity_id_obj = ObjectId(str(object_id))
-            self.activities_collection.delete_one({Keys.DATABASE_ID_KEY: activity_id_obj})
-            return True
+            deleted_result = self.activities_collection.delete_one({Keys.DATABASE_ID_KEY: activity_id_obj})
+            if deleted_result is not None:
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1345,8 +1346,8 @@ class MongoDatabase(Database.Database):
 
         try:
             workout_id_obj = ObjectId(str(workout_id))
-            workout = self.workouts_collection.delete_one({Keys.DATABASE_ID_KEY: workout_id_obj})
-            if workout is not None:
+            deleted_result = self.workouts_collection.delete_one({Keys.DATABASE_ID_KEY: workout_id_obj})
+            if deleted_result is not None:
                 return True
         except:
             self.log_error(traceback.format_exc())
