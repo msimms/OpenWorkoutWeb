@@ -21,17 +21,18 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Formats an ICS file."""
+"""Formats an data for writing to an ICS file."""
 
 import uuid
 
 class IcsWriter(object):
-    """Formats an ICS file."""
+    """Formats an data for writing to an ICS file."""
 
     def __init__(self):
         super(IcsWriter, self).__init__()
 
     def create(self, start_time, stop_time, summary):
+        """Returns an ICS-formatted string."""
         buffer  = "BEGIN:VCALENDAR\n"
         buffer += "CALSCALE:GREGORIAN\n"
         buffer += "VERSION:2.0\n"

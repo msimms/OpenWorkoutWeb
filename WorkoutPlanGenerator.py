@@ -295,6 +295,12 @@ def generate_workout_plan(user_str, format):
 
         if format is None or format == 'text':
             print(workout.export_to_text())
+        elif format == 'json':
+            print(workout.export_to_json())
+        elif format == 'ics':
+            tempfile_name = generate_temp_file_name(".ics")
+            workout.export_to_ics(tempfile_name)
+            print("Exported a workout to " + tempfile_name + ".")
         elif format == 'zwo':
             tempfile_name = generate_temp_file_name(".zwo")
             workout.export_to_zwo(tempfile_name)
