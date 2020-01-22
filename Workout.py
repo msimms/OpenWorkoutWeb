@@ -20,10 +20,10 @@ class Workout(object):
         self.user_id = user_id
         self.description = ""
         self.sport_type = ""
+        self.scheduled_time = None # The time at which this workout is to be performed
         self.warmup = None # The warmup interval
         self.cooldown = None # The cooldown interval
         self.intervals = [] # The workout intervals
-        self.timestamp = None # The time at which this workout is to be performed
         self.needs_rest_day_afterwards = False # Used by the scheduler
         self.can_be_doubled = False # Used by the scheduler to know whether or not this workout can be doubled up with other workouts
 

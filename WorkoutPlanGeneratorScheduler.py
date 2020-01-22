@@ -14,7 +14,7 @@ class WorkoutPlanGeneratorScheduler(object):
     def add_to_queue(self, user_id, data_mgr):
         """Adds the user to the list of workout plans to be generated."""
         user_obj = {}
-        user_obj[Keys.WORKOUT_PLAN_USER_ID] = user_id
+        user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
         plan_task = generate_workout_plan.delay(dumps(user_obj))
         if data_mgr is not None:
             data_mgr.track_workout_plan_task(user_id, plan_task.task_id)

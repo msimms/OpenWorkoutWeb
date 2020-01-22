@@ -208,7 +208,7 @@ class WorkoutPlanGenerator(object):
         outputs = []
 
         try:
-            user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID]
+            user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY]
             inputs = self.calculate_inputs(user_id)
 
             # Generate the workouts.
@@ -292,7 +292,7 @@ def generate_workout_plan(user_str, format):
     generator = WorkoutPlanGenerator(user_obj)
     workouts = generator.generate_plan(g_model)
     for workout in workouts:
-        
+
         if format is None or format == 'text':
             print(workout.export_to_text())
         elif format == 'zwo':

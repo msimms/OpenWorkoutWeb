@@ -64,7 +64,10 @@ RECORD_NAME = "record_name"
 PERSONAL_RECORDS = "records"
 
 # Workout plans
-WORKOUT_PLAN_USER_ID = "user_id"
+WORKOUT_PLAN_USER_ID_KEY = "user_id"
+WORKOUT_ID_KEY = "workout_id"
+WORKOUT_TIME_KEY = "time"
+WORKOUT_DESCRIPTION_KEY = "description"
 
 # Keys associated with uploading data
 UPLOADED_FILE_NAME_KEY = "uploaded_file_name"

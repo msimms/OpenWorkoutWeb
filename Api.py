@@ -547,7 +547,7 @@ class Api(object):
         # Get the user details.
         _, _, user_realname = self.user_mgr.retrieve_user(username)
 
-        # Get the activiites that belong to the logged in user.
+        # Get the activities that belong to the logged in user.
         matched_activities = []
         if Keys.FOLLOWING_KEY in values:
             activities = self.data_mgr.retrieve_all_activities_visible_to_user(self.user_id, user_realname, None, None)
@@ -566,7 +566,7 @@ class Api(object):
 
                 if Keys.ACTIVITY_TIME_KEY in activity and Keys.ACTIVITY_ID_KEY in activity:
                     url = self.root_url + "/activity/" + activity[Keys.ACTIVITY_ID_KEY]
-                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time':int(activity[Keys.ACTIVITY_TIME_KEY])}
+                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time': int(activity[Keys.ACTIVITY_TIME_KEY])}
                 matched_activities.append(temp_activity)
         json_result = json.dumps(matched_activities, ensure_ascii=False)
         return True, json_result
@@ -583,7 +583,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        # Get the activiites that belong to the logged in user.
+        # Get the activities that belong to the logged in user.
         activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None)
         deleted = False
         for activity in activities:
@@ -1246,6 +1246,32 @@ class Api(object):
         self.data_mgr.generate_workout_plan(self.user_id)
         return True, ""
 
+    def handle_list_workouts(self, values):
+        """Called when the user wants wants a list of their planned workouts."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise ApiException.ApiMalformedRequestException("Empty username.")
+
+        # Get the user details.
+        _, _, user_realname = self.user_mgr.retrieve_user(username)
+
+        # Get the activiites that belong to the logged in user.
+        workouts = self.data_mgr.retrieve_workouts_for_user(self.user_id)
+
+        # Convert the activities list to an array of JSON objects for return to the client.
+        if workouts is not None and isinstance(workouts, list):
+            for workout in workouts:
+                if Keys.WORKOUT_TIME_KEY in workout and Keys.WORKOUT_ID_KEY in workout and Keys.WORKOUT_DESCRIPTION_KEY in workout:
+                    url = self.root_url + "/workout/" + workout[Keys.ACTIVITY_ID_KEY]
+                    temp_workout = {'title': workout[Keys.WORKOUT_DESCRIPTION_KEY], 'url':url, 'time': int(workout[Keys.WORKOUT_TIME_KEY])}
+                matched_activities.append(temp_workout)
+        json_result = json.dumps(matched_activities, ensure_ascii=False)
+        return True, json_result
+
     def handle_get_location_description(self, values):
         """Called when the user wants get the political location that corresponds to an activity."""
         if self.user_id is None:
@@ -1383,6 +1409,8 @@ class Api(object):
             return self.handle_refresh_analysis(values)
         elif request == 'generate_workout_plan':
             return self.handle_generate_workout_plan(values)
+        elif request == 'list_workouts':
+            return self.handle_list_workouts(values)
         elif request == 'get_location_description':
             return self.handle_get_location_description(values)
         elif request == 'activity_id_from_hash':

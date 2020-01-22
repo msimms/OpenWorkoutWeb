@@ -1331,7 +1331,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            workouts = self.users_collection.find({Keys.WORKOUT_PLAN_USER_ID: user_id})
+            workouts = self.users_collection.find({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
             return list(workouts)
         except:
             self.log_error(traceback.format_exc())
