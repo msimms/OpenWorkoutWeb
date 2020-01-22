@@ -258,6 +258,20 @@ def workouts():
         g_app.log_error('Unhandled exception in ' + workouts.__name__)
     return g_app.error()
 
+@g_flask_app.route('/workout')
+@login_requred
+def workout(workout_id):
+    """Renders the view for an individual workout."""
+    try:
+        return g_app.workout(workout_id)
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + workout.__name__)
+    return g_app.error()
+
 @g_flask_app.route('/statistics')
 @login_requred
 def statistics():

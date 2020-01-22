@@ -68,6 +68,10 @@ WORKOUT_PLAN_USER_ID_KEY = "user_id"
 WORKOUT_ID_KEY = "workout_id"
 WORKOUT_TIME_KEY = "time"
 WORKOUT_DESCRIPTION_KEY = "description"
+WORKOUT_SPORT_TYPE_KEY = "sport type"
+WORKOUT_WARMUP_KEY = "warmup"
+WORKOUT_INTERVALS_KEY = "intervals"
+WORKOUT_COOLDOWN_KEY = "cooldown"
 
 # Keys associated with uploading data
 UPLOADED_FILE_NAME_KEY = "uploaded_file_name"

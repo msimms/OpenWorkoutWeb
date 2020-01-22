@@ -1177,20 +1177,19 @@ class App(object):
                 days_str += " selected"
             days_str += ">" + day + "</option>\n"
 
-        # Show plans that have already been generated.
-        plans_str = ""
-        workouts = self.data_mgr.retrieve_workouts_for_user(user_id)
-        if workouts is not None:
-            plans_str = "\t<table>\n"
-            for workout in workouts:
-                plans_str += "\t\t<td>"
-                plans_str += "</td><tr>\n"
-            plans_str += "\t</table>\n"
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, runpaces=run_paces_str, plans=plans_str, goals=goals_str, goal_date=goal_date, preferred_long_run_day=days_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, runpaces=run_paces_str, goals=goals_str, goal_date=goal_date, preferred_long_run_day=days_str)
+
+    @statistics
+    def workout(workout_id):
+        """Renders the view for an individual workout."""
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'workout.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
     @statistics
     def stats(self):

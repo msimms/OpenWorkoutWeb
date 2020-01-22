@@ -1,9 +1,11 @@
 # Copyright 2019 Michael J Simms
 
 from __future__ import print_function
+import json
 import inspect
 import os
 import sys
+import IcsWriter
 import Keys
 import ZwoWriter
 
@@ -106,7 +108,7 @@ class Workout(object):
 
             result += "Warmup: "
             result += str(duration)
-            result += " seconds\n"
+            result += " seconds.\n"
 
         # Add each interval.
         for interval in self.intervals:
@@ -119,11 +121,12 @@ class Workout(object):
             result += str(interval_meters)
             result += " meters at "
             result += str(interval_pace_minute)
-            result += " with "
-            result += str(recovery_meters)
-            result += " meters recovery at "
-            result += str(recovery_pace_minute)
-            result += "\n"
+            if recovery_meters > 0:
+                result += " with "
+                result += str(recovery_meters)
+                result += " meters recovery at "
+                result += str(recovery_pace_minute)
+            result += ".\n"
 
         # Add the cooldown (if applicable).
         if self.cooldown is not None:
@@ -131,12 +134,24 @@ class Workout(object):
 
             result += "Cooldown: "
             result += str(duration)
-            result += " seconds\n"
+            result += " seconds.\n"
 
         return result
-        
-    def print(*args, **kwargs):
-        """For debugging purposes. Prints details to standard output."""
-        __builtin__.print(self.description)
-        __builtin__.print(self.distance_in_meters)
-        return __builtin__.print(*args, **kwargs)
+
+    def export_to_json(self):
+        """Creates a JSON string that describes the workout."""
+        result = {}
+        result[Keys.WORKOUT_DESCRIPTION_KEY] = self.description
+        result[Keys.WORKOUT_SPORT_TYPE_KEY] = self.sport_type
+        if self.warmup is not None:
+            duration = self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION]
+            result[Keys.WORKOUT_WARMUP_KEY] = duration
+        if self.intervals is not None:
+            result[Keys.WORKOUT_INTERVALS_KEY] = self.intervals
+        if self.cooldown is not None:
+            duration = self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION]
+            result[Keys.WORKOUT_COOLDOWN_KEY] = duration
+        return json.dumps(matched_workouts, ensure_ascii=False)
+
+    def export_to_ics(self):
+        return ""

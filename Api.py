@@ -1263,13 +1263,14 @@ class Api(object):
         workouts = self.data_mgr.retrieve_workouts_for_user(self.user_id)
 
         # Convert the activities list to an array of JSON objects for return to the client.
+        matched_workouts = []
         if workouts is not None and isinstance(workouts, list):
             for workout in workouts:
                 if Keys.WORKOUT_TIME_KEY in workout and Keys.WORKOUT_ID_KEY in workout and Keys.WORKOUT_DESCRIPTION_KEY in workout:
                     url = self.root_url + "/workout/" + workout[Keys.ACTIVITY_ID_KEY]
                     temp_workout = {'title': workout[Keys.WORKOUT_DESCRIPTION_KEY], 'url':url, 'time': int(workout[Keys.WORKOUT_TIME_KEY])}
-                matched_activities.append(temp_workout)
-        json_result = json.dumps(matched_activities, ensure_ascii=False)
+                matched_workouts.append(temp_workout)
+        json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
 
     def handle_get_location_description(self, values):
