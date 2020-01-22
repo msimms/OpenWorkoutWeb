@@ -56,6 +56,7 @@ GENDER_FEMALE_KEY = "female"
 RESTING_HEART_RATE_KEY = "resting heart rate"
 ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate"
 ESTIMATED_FTP_KEY = "estimated ftp"
+PREFERRED_LONG_RUN_DAY_KEY = "preferred long run day"
 
 # Personal records
 RECORDS_USER_ID = "user_id"

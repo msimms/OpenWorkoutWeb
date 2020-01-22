@@ -71,6 +71,7 @@ class RunPlanGenerator(object):
         speed_run_workout.add_warmup(10 * 60)
         speed_run_workout.add_interval(3, interval_distance, speed_run_pace, interval_distance * 2, easy_run_pace)
         speed_run_workout.add_cooldown(5 * 60)
+        long_run_workout.needs_rest_day_afterwards = True
         workouts.append(speed_run_workout)
 
         # Tempo run
@@ -89,6 +90,7 @@ class RunPlanGenerator(object):
         long_run_workout.description = "Long Run"
         long_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
         long_run_workout.add_interval(1, interval_distance, long_run_pace, 0, 0)
+        long_run_workout.needs_rest_day_afterwards = True
         workouts.append(long_run_workout)
 
         return workouts

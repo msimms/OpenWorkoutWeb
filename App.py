@@ -1167,6 +1167,16 @@ class App(object):
                 goals_str += " selected"
             goals_str += ">" + possible_goal + "</option>\n"
 
+        # Set the preferred long run of the week.
+        preferred_long_run_day = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY)
+        days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        days_str = ""
+        for day in days_of_week:
+            days_str += "\t\t\t<option value=\"" + day + "\""
+            if preferred_long_run_day.lower() == day.lower():
+                days_str += " selected"
+            days_str += ">" + day + "</option>\n"
+
         # Show plans that have already been generated.
         plans_str = ""
         workouts = self.data_mgr.retrieve_workouts_for_user(user_id)
@@ -1180,7 +1190,7 @@ class App(object):
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, runpaces=run_paces_str, plans=plans_str, goals=goals_str, goal_date=goal_date)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, runpaces=run_paces_str, plans=plans_str, goals=goals_str, goal_date=goal_date, preferred_long_run_day=days_str)
 
     @statistics
     def stats(self):

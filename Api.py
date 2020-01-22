@@ -1142,6 +1142,13 @@ class Api(object):
                     raise ApiException.ApiMalformedRequestException("Invalid units value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY, preferred_units)
 
+            # Preferred long run day of the week.
+            elif decoded_key == Keys.PREFERRED_LONG_RUN_DAY_KEY:
+                preferred_long_run_day = urllib.unquote_plus(values[key]).lower()
+                if not InputChecker.is_day_of_week(preferred_long_run_day):
+                    raise ApiException.ApiMalformedRequestException("Invalid long run day.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day)
+
         return result, ""
 
     def handle_update_profile(self, values):

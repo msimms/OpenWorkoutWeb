@@ -44,6 +44,14 @@ def is_timestamp(test_str):
     """Returns True if the string appears to be a valid timestamp."""
     return True
 
+def is_day_of_week(test_str):
+    test_str_lower = test_str.lower()
+    days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    for day in days_of_week:
+        if day.lower() == test_str_lower:
+            return True
+    return False
+
 def is_uuid(test_str):
     """Returns True if the string appears to be a valid UUID."""
     try:
