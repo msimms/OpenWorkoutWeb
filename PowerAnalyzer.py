@@ -89,7 +89,7 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
             # Compute normalized power.
             #
 
-            if len(self.np_buf) > 0:
+            if len(self.np_buf) > 1:
 
                 # Throw away the first 30 second average.
                 self.np_buf.pop(0)
