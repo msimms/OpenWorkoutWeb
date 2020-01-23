@@ -2,7 +2,7 @@
 # 
 # # MIT License
 # 
-# Copyright (c) 2019 Mike Simms
+# Copyright (c) 2020 Mike Simms
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,27 +21,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Formats data for writing to an ICS file."""
+"""Handles ical calendar requests."""
 
-import uuid
-
-class IcsWriter(object):
-    """Formats data for writing to an ICS file."""
+class IcalServer(object):
+    """Handles ical calendar requests."""
 
     def __init__(self):
-        super(IcsWriter, self).__init__()
+        super(IcalServer, self).__init__()
 
-    def create(self, start_time, stop_time, summary):
-        """Returns an ICS-formatted string."""
-        buffer  = "BEGIN:VCALENDAR\n"
-        buffer += "CALSCALE:GREGORIAN\n"
-        buffer += "VERSION:2.0\n"
-        buffer += "BEGIN:VEVENT\n"
-        buffer += "UID:" + str(uuid.uuid4()) + "\n"
-        buffer += "DTSTAMP:" + "\n"
-        buffer += "DTSTART:" + str(start_time) + "\n"
-        buffer += "DTEND:" + str(stop_time) + "\n"
-        buffer += "SUMMARY:" + summary + "\n"
-        buffer += "END:VEVENT\n"
-        buffer += "END:VCALENDAR\n"
-        return buffer
+    def handle_request(self, calendar_id):
+        handled = False
+        response = ""
+        return handled, response

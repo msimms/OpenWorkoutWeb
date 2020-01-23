@@ -528,8 +528,12 @@ def status():
 def ical(calendar_id):
     """Returns the ical calendar with the specified ID."""
     result = ""
+    code = 200
     try:
-        result = g_app.ical(calendar_id)
+        handled, response = g_app.ical(calendar_id)
+        if not handled:
+            code = 400
+        return response
     except:
         result = g_app.error()
     return result

@@ -27,6 +27,7 @@ import LocationAnalyzer
 import Api
 import BmiCalculator
 import DataMgr
+import IcalServer
 import Units
 import UserMgr
 import VO2MaxCalculator
@@ -102,6 +103,7 @@ class App(object):
         self.map_single_google_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
         self.map_multi_html_file = os.path.join(root_dir, HTML_DIR, 'map_multi_google.html')
         self.error_logged_in_html_file = os.path.join(root_dir, HTML_DIR, 'error_logged_in.html')
+        self.ical_server = IcalServer.IcalServer()
 
         self.tempfile_dir = os.path.join(root_dir, 'tempfile')
         if not os.path.exists(self.tempfile_dir):
@@ -1760,8 +1762,8 @@ class App(object):
     @statistics
     def ical(self, calendar_id):
         """Returns the ical calendar with the specified ID."""
-        response = ""
-        return response
+        handled, response = self.ical_server.handle_request(calendar_id)
+        return handled, response
 
     @statistics
     def api(self, user_id, method, params):

@@ -592,7 +592,10 @@ class StraenWeb(object):
     def ical(self, calendar_id):
         """Returns the ical calendar with the specified ID."""
         try:
-            return self.app.ical(calendar_id)
+            handled, response = self.app.ical(calendar_id)
+            if not handled:
+                cherrypy.response.status = 400
+            return response
         except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
