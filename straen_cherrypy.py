@@ -589,6 +589,21 @@ class StraenWeb(object):
         return result
 
     @cherrypy.expose
+    def ical(self, calendar_id):
+        """Returns the ical calendar with the specified ID."""
+        try:
+            return self.app.ical(calendar_id)
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.ical.__name__)
+        return self.error()
+
+    @cherrypy.expose
     def api(self, *args, **kw):
         """Endpoint for API calls."""
         response = ""

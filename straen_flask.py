@@ -524,6 +524,16 @@ def status():
         result = g_app.error()
     return result
 
+@g_flask_app.route('/ical/<calendar_id>')
+def ical(calendar_id):
+    """Returns the ical calendar with the specified ID."""
+    result = ""
+    try:
+        result = g_app.ical(calendar_id)
+    except:
+        result = g_app.error()
+    return result
+
 @g_flask_app.route('/api/<version>/<method>', methods = ['GET','POST'])
 def api(version, method):
     """Endpoint for API calls."""

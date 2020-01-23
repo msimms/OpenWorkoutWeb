@@ -1758,6 +1758,12 @@ class App(object):
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, privacy_options=privacy_options, unit_options=unit_options)
 
     @statistics
+    def ical(self, calendar_id):
+        """Returns the ical calendar with the specified ID."""
+        response = ""
+        return response
+
+    @statistics
     def api(self, user_id, method, params):
         """Handles an API request."""
         api = Api.Api(self.user_mgr, self.data_mgr, user_id, self.root_url)
