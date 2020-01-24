@@ -1331,7 +1331,21 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            workouts = self.users_collection.find({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+            workouts = self.workouts_collection.find({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+            return list(workouts)
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def retrieve_workouts_by_calendar_id(self, calendar_id):
+        """Retrieve method for all workouts pertaining to the user with the specified ID."""
+        if calendar_id is None:
+            self.log_error(MongoDatabase.retrieve_workouts_by_calendar_id.__name__ + ": Unexpected empty object: calendar_id")
+            return None
+
+        try:
+            workouts = self.workouts_collection.find({Keys.WORKOUT_PLAN_CALENDAR_ID_KEY: calendar_id})
             return list(workouts)
         except:
             self.log_error(traceback.format_exc())

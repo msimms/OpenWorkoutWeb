@@ -5,8 +5,11 @@ import json
 import inspect
 import os
 import sys
+import uuid
 import IcsWriter
 import Keys
+import Units
+import UserMgr
 import ZwoWriter
 
 # Locate and load the ZwoTags module.
@@ -20,6 +23,8 @@ class Workout(object):
 
     def __init__(self, user_id):
         self.user_id = user_id
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        self.user_mgr = UserMgr.UserMgr(None, root_dir)
         self.description = ""
         self.sport_type = ""
         self.scheduled_time = None # The time at which this workout is to be performed
@@ -28,6 +33,7 @@ class Workout(object):
         self.intervals = [] # The workout intervals
         self.needs_rest_day_afterwards = False # Used by the scheduler
         self.can_be_doubled = False # Used by the scheduler to know whether or not this workout can be doubled up with other workouts
+        self.workout_id = uuid.uuid4() # Unique identifier for the workout
 
     def add_warmup(self, seconds):
         """Defines the workout warmup."""
@@ -120,12 +126,12 @@ class Workout(object):
             result += "Interval: "
             result += str(interval_meters)
             result += " meters at "
-            result += str(interval_pace_minute)
+            result += Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
             if recovery_meters > 0:
                 result += " with "
                 result += str(recovery_meters)
                 result += " meters recovery at "
-                result += str(recovery_pace_minute)
+                result += Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
             result += ".\n"
 
         # Add the cooldown (if applicable).
@@ -157,7 +163,7 @@ class Workout(object):
         """Creates a ICS-formatted file that describes the workout."""
         summary = self.export_to_text()
         ics_writer = IcsWriter.IcsWriter()
-        file_data = ics_writer.create(self.scheduled_time, self.scheduled_time, summary)
+        file_data = ics_writer.create(self.workout_id, self.scheduled_time, self.scheduled_time, summary)
 
         with open(file_name, 'wt') as local_file:
             local_file.write(file_data)

@@ -23,13 +23,35 @@
 # SOFTWARE.
 """Handles ical calendar requests."""
 
+import DataMgr
+import IcsWriter
+
 class IcalServer(object):
     """Handles ical calendar requests."""
 
-    def __init__(self):
+    def __init__(self, data_mgr):
+        self.data_mgr = data_mgr
         super(IcalServer, self).__init__()
 
     def handle_request(self, calendar_id):
-        handled = False
-        response = ""
-        return handled, response
+        calendar_name = "Planned Workouts"
+        product_id = ""
+        version = 2.0
+
+        workouts = self.data_mgr.retrieve_workouts_by_calendar_id(calendar_id)
+        if workouts is None:
+            return False, ""
+        ics_writer = IcsWriter.IcsWriter()
+
+        response  = "BEGIN:VCALENDAR\n"
+        response += "NAME:" + calendar_name + "\n"
+        response += "X-WR-CALNAME:" + product_id + "\n"
+        response += "VERSION:" + str(version) + "\n"
+        response += "CALSCALE:GREGORIAN\n"
+        response += "METHOD:PUBLISH\n"
+        for workout in workouts:
+            response += "BEGIN:VEVENT\n"
+            resposne += ics_writer.create_event(workout[Keys.WORKOUT_ID_KEY], workout[Keys.WORKOUT_TIME_KEY], workout[Keys.WORKOUT_DESCRIPTION_KEY])
+            response += "END:VEVENT\n"
+        response += "END:VCALENDAR\n"
+        return True, response
