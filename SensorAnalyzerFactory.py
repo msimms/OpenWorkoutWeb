@@ -57,7 +57,7 @@ def create_with_data(sensor_type, data, activity_type, activity_user_id, data_mg
             for datum in data:
                 if py_version < 3:
                     time = int(datum.keys()[0])
-                    value = int(datum.values()[0])
+                    value = float(datum.values()[0])
                 else:
                     time = int(list(datum.keys())[0])
                     value = float(list(datum.values())[0])
