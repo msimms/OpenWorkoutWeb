@@ -28,6 +28,7 @@ import Api
 import BmiCalculator
 import DataMgr
 import IcalServer
+import InputChecker
 import Units
 import UserMgr
 import VO2MaxCalculator
@@ -1188,6 +1189,12 @@ class App(object):
     def workout(workout_id):
         """Renders the view for an individual workout."""
 
+        # Sanity check the input.
+        if gear_id is None:
+            return self.error()
+        if not InputChecker.is_uuid(workout_id):
+            return self.error()
+
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workout.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
@@ -1321,6 +1328,12 @@ class App(object):
         if user_id is None:
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
+
+        # Sanity check the input.
+        if gear_id is None:
+            return self.error()
+        if not InputChecker.is_uuid(gear_id):
+            return self.error()
 
         service_records = "\t\t<table>\n"
         gear_name = ""
@@ -1762,6 +1775,11 @@ class App(object):
     @statistics
     def ical(self, calendar_id):
         """Returns the ical calendar with the specified ID."""
+        if calendar_id is None:
+            return self.error()
+        if not InputChecker.is_uuid(calendar_id):
+            return self.error()
+
         handled, response = self.ical_server.handle_request(calendar_id)
         return handled, response
 
