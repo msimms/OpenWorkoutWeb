@@ -25,6 +25,7 @@
 
 import DataMgr
 import IcsWriter
+import Keys
 
 class IcalServer(object):
     """Handles ical calendar requests."""
@@ -51,7 +52,7 @@ class IcalServer(object):
         response += "METHOD:PUBLISH\n"
         for workout in workouts:
             response += "BEGIN:VEVENT\n"
-            resposne += ics_writer.create_event(workout[Keys.WORKOUT_ID_KEY], workout[Keys.WORKOUT_TIME_KEY], workout[Keys.WORKOUT_DESCRIPTION_KEY])
+            response += ics_writer.create_event(workout[Keys.WORKOUT_ID_KEY], workout[Keys.WORKOUT_TIME_KEY], workout[Keys.WORKOUT_TIME_KEY], workout[Keys.WORKOUT_DESCRIPTION_KEY])
             response += "END:VEVENT\n"
         response += "END:VCALENDAR\n"
         return True, response

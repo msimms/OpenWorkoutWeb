@@ -1464,7 +1464,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's workouts document.
-            workouts_doc = self.workouts_collection.find({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+            workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
 
             # If the workouts document was found.
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
@@ -1490,15 +1490,15 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's document with the specified calendar ID.
-            workouts_doc = self.workouts_collection.find({Keys.WORKOUT_PLAN_CALENDAR_ID_KEY: calendar_id})
+            workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_CALENDAR_ID_KEY: calendar_id})
 
             # If the workouts document was found then return the workouts list.
-            if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
+            if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc and Keys.WORKOUT_PLAN_USER_ID_KEY in workouts_doc:
                 workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
 
                 # Create an object for each workout in the list.
                 for workout in workouts_list:
-                    workout_obj = Workout.Workout()
+                    workout_obj = Workout.Workout(workouts_doc[Keys.WORKOUT_PLAN_USER_ID_KEY])
                     workout_obj.from_dict(workout)
                     workouts.append(workout_obj)
         except:

@@ -35,6 +35,21 @@ class Workout(object):
         self.can_be_doubled = False # Used by the scheduler to know whether or not this workout can be doubled up with other workouts
         self.workout_id = uuid.uuid4() # Unique identifier for the workout
 
+    def __getitem__(self, key):
+        if key == Keys.WORKOUT_ID_KEY:
+            return self.workout_id
+        if key == Keys.WORKOUT_DESCRIPTION_KEY:
+            return self.description
+        if key == Keys.WORKOUT_SPORT_TYPE_KEY:
+            return self.sport_type
+        if key == Keys.WORKOUT_WARMUP_KEY:
+            return self.warmup
+        if key == Keys.WORKOUT_COOLDOWN_KEY:
+            return self.cooldown
+        if key == Keys.WORKOUT_INTERVALS_KEY:
+            return self.intervals
+        return None
+
     def to_dict(self):
         """Converts the object representation to a dictionary, only converting what is actually useful, as opposed to __dict__."""
         output = {}

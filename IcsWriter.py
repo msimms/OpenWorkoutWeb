@@ -38,6 +38,7 @@ class IcsWriter(object):
         buffer += "DTEND:" + str(stop_time) + "\n"
         buffer += "SUMMARY:" + summary + "\n"
         buffer += "END:VEVENT\n"
+        return buffer
         
     def create_calendar(self, event_id, start_time, stop_time, summary):
         """Returns an ICS-formatted string that represents an entire calendar."""
