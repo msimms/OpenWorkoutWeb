@@ -195,6 +195,13 @@ class WorkoutPlanGenerator(object):
         scheduler = WorkoutScheduler.WorkoutScheduler(user_id)
         return scheduler.schedule_workouts(workouts)
 
+    def store_plan(self, user_id, workouts):
+        """Saves the user's workouts to the database."""
+        for workout_obj in workouts:
+            result = self.data_mgr.create_workout(user_id, workout_obj)
+            if not result:
+                print("Failed to save a workout to the database.")
+
     def generate_plan(self, model):
         """Entry point for workout plan generation. If a model is not provided then a simpler, non-neural network-based algorithm, is used instead."""
 
@@ -205,7 +212,7 @@ class WorkoutPlanGenerator(object):
         if model is None:
             self.log_error("Model not provided. Will use non-ML algorithm instead.")
 
-        outputs = []
+        workouts = []
 
         try:
             user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY]
@@ -213,17 +220,20 @@ class WorkoutPlanGenerator(object):
 
             # Generate the workouts.
             if model is None:
-                outputs = self.generate_workouts(user_id, inputs)
+                workouts = self.generate_workouts(user_id, inputs)
             else:
-                outputs = self.generate_workouts_using_model(user_id, inputs, model)
+                workouts = self.generate_workouts_using_model(user_id, inputs, model)
 
             # Organize the workouts into a schedule.
-            outputs = self.organize_schedule(user_id, outputs)
+            workouts = self.organize_schedule(user_id, workouts)
+
+            # Save to the database.
+            self.store_plan(user_id, workouts)
         except:
             self.log_error("Exception when generating a workout plan.")
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return outputs
+        return workouts
 
 def generate_model(training_file_name):
     """Creates the neural network, based on training data from the supplied JSON file."""
@@ -290,9 +300,12 @@ def generate_workout_plan(user_str, format):
 
     user_obj = json.loads(user_str)
     generator = WorkoutPlanGenerator(user_obj)
-    workouts = generator.generate_plan(g_model)
-    for workout in workouts:
 
+    # Generate the workouts.
+    workouts = generator.generate_plan(g_model)
+
+    # Export the workouts to local files, if requested.
+    for workout in workouts:
         if format is None or format == 'text':
             print(workout.export_to_text())
         elif format == 'json':

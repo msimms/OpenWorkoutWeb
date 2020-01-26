@@ -35,6 +35,30 @@ class Workout(object):
         self.can_be_doubled = False # Used by the scheduler to know whether or not this workout can be doubled up with other workouts
         self.workout_id = uuid.uuid4() # Unique identifier for the workout
 
+    def to_dict(self):
+        """Converts the object representation to a dictionary, only converting what is actually useful, as opposed to __dict__."""
+        output = {}
+        output[Keys.WORKOUT_ID_KEY] = self.workout_id
+        output[Keys.WORKOUT_DESCRIPTION_KEY] = self.description
+        output[Keys.WORKOUT_SPORT_TYPE_KEY] = self.sport_type
+        output[Keys.WORKOUT_WARMUP_KEY] = self.warmup
+        output[Keys.WORKOUT_COOLDOWN_KEY] = self.cooldown
+        output[Keys.WORKOUT_INTERVALS_KEY] = self.intervals
+        return output
+
+    def from_dict(self, input):
+        """Sets the object's members from a dictionary."""
+        if Keys.WORKOUT_ID_KEY in input:
+            self.workout_id = input[Keys.WORKOUT_ID_KEY]
+        if Keys.WORKOUT_DESCRIPTION_KEY in input:
+            self.description = input[Keys.WORKOUT_DESCRIPTION_KEY]
+        if Keys.WORKOUT_SPORT_TYPE_KEY in input:
+            self.sport_type = input[Keys.WORKOUT_SPORT_TYPE_KEY]
+        if Keys.WORKOUT_WARMUP_KEY in input:
+            self.warmup = input[Keys.WORKOUT_WARMUP_KEY]
+        if Keys.WORKOUT_COOLDOWN_KEY in input:
+            self.cooldown = input[Keys.WORKOUT_COOLDOWN_KEY]
+
     def add_warmup(self, seconds):
         """Defines the workout warmup."""
         self.warmup = {}

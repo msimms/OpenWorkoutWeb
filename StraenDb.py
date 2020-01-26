@@ -5,11 +5,13 @@ import json
 import re
 import sys
 import traceback
+import uuid
 from bson.objectid import ObjectId
 import pymongo
 import Database
 import InputChecker
 import Keys
+import Workout
 
 
 def retrieve_time_from_accelerometer_reading(location):
@@ -39,6 +41,8 @@ class MongoDatabase(Database.Database):
     database = None
     users_collection = None
     activities_collection = None
+    workouts_collection = None
+    tasks_collectoin = None
 
     def __init__(self, rootDir):
         Database.Database.__init__(self, rootDir)
@@ -51,7 +55,7 @@ class MongoDatabase(Database.Database):
             self.users_collection = self.database['users']
             self.activities_collection = self.database['activities']
             self.records_collection = self.database['records']
-            self.workouts_collection = self.database['wokrouts']
+            self.workouts_collection = self.database['workouts']
             self.tasks_collection = self.database['tasks']
             return True
         except pymongo.errors.ConnectionFailure as e:
@@ -146,6 +150,7 @@ class MongoDatabase(Database.Database):
             return None, None
 
         try:
+            # Find the user.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
@@ -175,6 +180,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
@@ -236,12 +242,16 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # Read the devices list.
             devices = []
-            if user is not None:
-                if Keys.DEVICES_KEY in user:
-                    devices = user[Keys.DEVICES_KEY]
+            if user is not None and Keys.DEVICES_KEY in user:
+                devices = user[Keys.DEVICES_KEY]
+
+            # Append the device to the devices list, if it is not already there.
             if device_str not in devices:
                 devices.append(device_str)
                 user[Keys.DEVICES_KEY] = devices
@@ -258,11 +268,13 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
+            # Find the user.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
-            if user is not None:
-                if Keys.DEVICES_KEY in user:
-                    return user[Keys.DEVICES_KEY]
+
+            # Read the devices list.
+            if user is not None and Keys.DEVICES_KEY in user:
+                return user[Keys.DEVICES_KEY]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -301,20 +313,22 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
+            # Find the user.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
-            if user is not None:
-                if Keys.FOLLOWING_KEY in user:
-                    following_ids = user[Keys.FOLLOWING_KEY]
-                    following_users = []
-                    for following_id in following_ids:
-                        username, realname = self.retrieve_user_from_id(following_id)
-                        user = {}
-                        user[Keys.DATABASE_ID_KEY] = following_id
-                        user[Keys.USERNAME_KEY] = username
-                        user[Keys.REALNAME_KEY] = realname
-                        following_users.append(user)
-                    return following_users
+
+            # Find the following list.
+            if user is not None and Keys.FOLLOWING_KEY in user:
+                following_ids = user[Keys.FOLLOWING_KEY]
+                following_users = []
+                for following_id in following_ids:
+                    username, realname = self.retrieve_user_from_id(following_id)
+                    user = {}
+                    user[Keys.DATABASE_ID_KEY] = following_id
+                    user[Keys.USERNAME_KEY] = username
+                    user[Keys.REALNAME_KEY] = realname
+                    following_users.append(user)
+                return following_users
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -344,6 +358,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
@@ -373,6 +388,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
             if user is not None:
@@ -394,11 +410,13 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
+            # Find the user.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
-            if user is not None:
-                if key in user:
-                    return user[key]
+
+            # Find the setting.
+            if user is not None and key in user:
+                return user[key]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -414,6 +432,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user's records collection.
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
             if user_records is None:
                 post = {Keys.RECORDS_USER_ID: user_id, Keys.PERSONAL_RECORDS: records}
@@ -431,10 +450,10 @@ class MongoDatabase(Database.Database):
             return {}
 
         try:
+            # Find the user's records collection.
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
-            if user_records is not None:
-                if Keys.PERSONAL_RECORDS in user_records:
-                    return user_records[Keys.PERSONAL_RECORDS]
+            if user_records is not None and Keys.PERSONAL_RECORDS in user_records:
+                return user_records[Keys.PERSONAL_RECORDS]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -450,6 +469,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user's records collection.
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
             if user_records is not None:
                 user_records[Keys.PERSONAL_RECORDS] = records
@@ -479,6 +499,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the user's records collection.
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
             if user_records is not None:
                 bests[Keys.ACTIVITY_TYPE_KEY] = activity_type
@@ -654,6 +675,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
+            # Find the activity.
             return self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: re.compile(activity_id, re.IGNORECASE)})
         except:
             self.log_error(traceback.format_exc())
@@ -674,10 +696,14 @@ class MongoDatabase(Database.Database):
 
         try:
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+
+            # If the activity was not found then create it.
             if activity is None:
                 first_location = locations[0]
                 if self.create_activity(activity_id, "", first_location[0] / 1000, device_str):
                     activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+
+            # If the activity was found.
             if activity is not None:
 
                 # Update the locations.
@@ -745,11 +771,13 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if Keys.ACTIVITY_VISIBILITY_KEY in activity:
-                    visibility = activity[Keys.ACTIVITY_VISIBILITY_KEY]
-                    return visibility
+
+            # If the activity was found and it has a visibility setting.
+            if activity is not None and Keys.ACTIVITY_VISIBILITY_KEY in activity:
+                visibility = activity[Keys.ACTIVITY_VISIBILITY_KEY]
+                return visibility
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -765,7 +793,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found.
             if activity is not None:
                 activity[Keys.ACTIVITY_VISIBILITY_KEY] = visibility
                 self.activities_collection.save(activity)
@@ -795,9 +826,13 @@ class MongoDatabase(Database.Database):
 
         try:
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+
+            # If the activity was not found then create it.
             if activity is None:
                 if self.create_activity(activity_id, "", date_time / 1000, device_str):
                     activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+
+            # If the activity was found.
             if activity is not None:
                 location_list = []
 
@@ -829,10 +864,14 @@ class MongoDatabase(Database.Database):
 
         try:
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+
+            # If the activity was not found then create it.
             if activity is None:
                 first_location = locations[0]
                 if self.create_activity(activity_id, "", first_location[0] / 1000, device_str):
                     activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+
+            # If the activity was found.
             if activity is not None:
                 location_list = []
 
@@ -859,12 +898,14 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if Keys.ACTIVITY_LOCATIONS_KEY in activity:
-                    locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
-                    locations.sort(key=retrieve_time_from_location)
-                    return locations
+
+            # If the activity was found and it has location data.
+            if activity is not None and Keys.ACTIVITY_LOCATIONS_KEY in activity:
+                locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
+                locations.sort(key=retrieve_time_from_location)
+                return locations
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -904,7 +945,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found.
             if activity is not None:
                 value_list = []
 
@@ -935,7 +979,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found.
             if activity is not None:
                 value_list = []
 
@@ -965,12 +1012,14 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if sensor_type in activity:
-                    sensor_data = activity[sensor_type]
-                    sensor_data.sort(key=retrieve_time_from_time_value_pair)
-                    return sensor_data
+
+            # If the activity was found and if it has data for the specified sensor type.
+            if activity is not None and sensor_type in activity:
+                sensor_data = activity[sensor_type]
+                sensor_data.sort(key=retrieve_time_from_time_value_pair)
+                return sensor_data
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -995,7 +1044,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found.
             if activity is not None:
 
                 # Make sure we're working with a number, if the value is supposed to be a number.
@@ -1040,7 +1092,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found.
             if activity is not None:
                 value_list = []
 
@@ -1067,7 +1122,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found.
             if activity is not None:
                 activity[Keys.APP_SETS_KEY] = sets
                 self.activities_collection.save(activity)
@@ -1091,10 +1149,14 @@ class MongoDatabase(Database.Database):
 
         try:
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+
+            # If the activity was not found then create it.
             if activity is None:
                 first_accel = accels[0]
                 if self.create_activity(activity_id, "", first_accel[0] / 1000, device_str):
                     activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+
+            # If the activity was found.
             if activity is not None:
                 accel_list = []
                 if Keys.APP_ACCELEROMETER_KEY in activity:
@@ -1125,7 +1187,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found.
             if activity is not None:
                 activity[Keys.ACTIVITY_SUMMARY_KEY] = summary_data
                 self.activities_collection.save(activity)
@@ -1142,7 +1207,10 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found.
             if activity is not None:
                 if Keys.ACTIVITY_SUMMARY_KEY in activity:
                     summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
@@ -1159,7 +1227,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found.
             if activity is not None:
                 pass
         except:
@@ -1177,7 +1248,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found.
             if activity is not None:
                 data = []
                 if Keys.ACTIVITY_TAGS_KEY in activity:
@@ -1220,10 +1294,12 @@ class MongoDatabase(Database.Database):
             return []
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if Keys.ACTIVITY_TAGS_KEY in activity:
-                    return activity[Keys.ACTIVITY_TAGS_KEY]
+
+            # If the activity was found and contains tags.
+            if activity is not None and Keys.ACTIVITY_TAGS_KEY in activity:
+                return activity[Keys.ACTIVITY_TAGS_KEY]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1239,7 +1315,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found.
             if activity is not None:
                 data = []
                 if Keys.ACTIVITY_TAGS_KEY in activity:
@@ -1266,7 +1345,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found.
             if activity is not None:
                 data = []
                 if Keys.ACTIVITY_COMMENTS_KEY in activity:
@@ -1289,36 +1371,84 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
-            if activity is not None:
-                if Keys.ACTIVITY_COMMENTS_KEY in activity:
-                    return activity[Keys.ACTIVITY_COMMENTS_KEY]
+
+            # If the activity was found and contains comments.
+            if activity is not None and Keys.ACTIVITY_COMMENTS_KEY in activity:
+                return activity[Keys.ACTIVITY_COMMENTS_KEY]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_workout(self, user_id):
+    def create_workout(self, user_id, workout_obj):
         """Create method for a workout."""
         if user_id is None:
             self.log_error(MongoDatabase.create_workout.__name__ + ": Unexpected empty object: user_id")
             return False
+        if workout_obj is None:
+            self.log_error(MongoDatabase.create_workout.__name__ + ": Unexpected empty object: workout_obj")
+            return False
 
         try:
-            pass
+            # Find the user's workouts document.
+            workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+
+            # If the workouts document was not found then create it.
+            if workouts_doc is None:
+                post = {}
+                post[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
+                post[Keys.WORKOUT_PLAN_CALENDAR_ID_KEY] = str(uuid.uuid4()) # Create a calendar ID
+                post[Keys.WORKOUT_LIST_KEY] = []
+                self.workouts_collection.insert(post)
+                workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+
+            # If the workouts document was found (or created).
+            if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
+                workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
+
+                # Make sure this workout isn't already in the list.
+                for workout in workouts_list:
+                    if Keys.WORKOUT_ID_KEY in workout and workout[Keys.WORKOUT_ID_KEY] == workout_obj.workout_id:
+                        return False
+
+                # Add the workout to the list.
+                workout = workout_obj.to_dict()
+                workouts_list.append(workout)
+
+                # Update and save the document.
+                workouts_doc[Keys.WORKOUT_LIST_KEY] = workouts_list
+                self.workouts_collection.save(workouts_doc)
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return True
+        return False
 
-    def retrieve_workout(self, workout_id):
+    def retrieve_workout(self, user_id, workout_id):
         """Retrieve method for the workout with the specified ID."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_workout.__name__ + ": Unexpected empty object: user_id")
+            return None
         if workout_id is None:
             self.log_error(MongoDatabase.retrieve_workout.__name__ + ": Unexpected empty object: workout_id")
             return None
 
         try:
-            pass
+            # Find the user's workouts document.
+            workouts_doc = self.workouts_collection.find({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+
+            # If the workouts document was found.
+            if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
+                workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
+
+                # Find the workout in the list.
+                for workout in workouts_list:
+                    if Keys.WORKOUT_ID_KEY in workout and workout[Keys.WORKOUT_ID_KEY] == workout_id:
+                        workout_obj = Workout.Workout()
+                        workout_obj.from_dict(workout)
+                        return workout_obj
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1330,13 +1460,25 @@ class MongoDatabase(Database.Database):
             self.log_error(MongoDatabase.retrieve_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
             return None
 
+        workouts = []
+
         try:
-            workouts = self.workouts_collection.find({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
-            return list(workouts)
+            # Find the user's workouts document.
+            workouts_doc = self.workouts_collection.find({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+
+            # If the workouts document was found.
+            if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
+                workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
+
+                # Create an object for each workout in the list.
+                for workout in workouts_list:
+                    workout_obj = Workout.Workout()
+                    workout_obj.from_dict(workout)
+                    workouts.append(workout_obj)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return workouts
 
     def retrieve_workouts_by_calendar_id(self, calendar_id):
         """Retrieve method for all workouts pertaining to the user with the specified ID."""
@@ -1344,25 +1486,46 @@ class MongoDatabase(Database.Database):
             self.log_error(MongoDatabase.retrieve_workouts_by_calendar_id.__name__ + ": Unexpected empty object: calendar_id")
             return None
 
+        workouts = []
+
         try:
-            workouts = self.workouts_collection.find({Keys.WORKOUT_PLAN_CALENDAR_ID_KEY: calendar_id})
-            return list(workouts)
+            # Find the user's document with the specified calendar ID.
+            workouts_doc = self.workouts_collection.find({Keys.WORKOUT_PLAN_CALENDAR_ID_KEY: calendar_id})
+
+            # If the workouts document was found then return the workouts list.
+            if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
+                workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
+
+                # Create an object for each workout in the list.
+                for workout in workouts_list:
+                    workout_obj = Workout.Workout()
+                    workout_obj.from_dict(workout)
+                    workouts.append(workout_obj)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return workouts
 
-    def delete_workout(self, workout_id):
+    def delete_workout(self, user_id, workout_id):
         """Delete method for the workout with the specified ID."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_workout.__name__ + ": Unexpected empty object: user_id")
+            return None
         if workout_id is None:
             self.log_error(MongoDatabase.delete_workout.__name__ + ": Unexpected empty object: workout_id")
             return False
 
         try:
-            workout_id_obj = ObjectId(str(workout_id))
-            deleted_result = self.workouts_collection.delete_one({Keys.DATABASE_ID_KEY: workout_id_obj})
-            if deleted_result is not None:
-                return True
+            # Find the user's workouts document.
+            workouts_doc = self.workouts_collection.find({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+
+            # If the workouts document was found and it contains the specified workout.
+            if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
+                workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
+                
+                deleted_result = self.workouts_collection.delete_one({Keys.DATABASE_ID_KEY: workout_id_obj})
+                if deleted_result is not None:
+                    return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1387,6 +1550,8 @@ class MongoDatabase(Database.Database):
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user's document was found.
             if user is not None:
 
                 # Update the gear list.
@@ -1441,6 +1606,8 @@ class MongoDatabase(Database.Database):
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user's document was found.
             if user is not None:
 
                 # Read the gear list.
@@ -1472,6 +1639,8 @@ class MongoDatabase(Database.Database):
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user's document was found.
             if user is not None:
 
                 # Update the gear list.
@@ -1510,6 +1679,8 @@ class MongoDatabase(Database.Database):
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user's document was found.
             if user is not None:
 
                 # Update the gear list.
@@ -1539,6 +1710,8 @@ class MongoDatabase(Database.Database):
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user's document was found.
             if user is not None:
 
                 # Update the gear list.
@@ -1546,7 +1719,6 @@ class MongoDatabase(Database.Database):
                     user[Keys.GEAR_KEY] = []
                     self.users_collection.save(user)
                 return True
-
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1574,6 +1746,8 @@ class MongoDatabase(Database.Database):
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user's document was found.
             if user is not None:
 
                 # Find the gear list.
@@ -1618,6 +1792,8 @@ class MongoDatabase(Database.Database):
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user's document was found.
             if user is not None:
 
                 # Find the gear list.
@@ -1659,10 +1835,14 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user's tasks document.
             user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+
+            # If the user's tasks document was not found then create it.
             if user_tasks is None:
                 post = {Keys.DEFERRED_TASKS_USER_ID: user_id}
                 self.tasks_collection.insert(post)
                 user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+
+            # If the user's tasks document was found.
             if user_tasks is not None:
                 deferred_tasks = []
                 if Keys.TASKS_KEY in user_tasks:
@@ -1691,6 +1871,8 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user's tasks document.
             user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+
+            # If the user's tasks document was found.
             if user_tasks is not None:
                 deferred_tasks = []
                 if Keys.TASKS_KEY in user_tasks:
@@ -1712,6 +1894,8 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user's tasks document.
             user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+
+            # If the user's tasks document was found.
             if user_tasks is not None:
                 deferred_tasks = []
                 if Keys.TASKS_KEY in user_tasks:

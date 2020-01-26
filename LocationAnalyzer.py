@@ -38,7 +38,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         self.last_lon = None
         self.last_alt = None
 
-        self.distance_buf = [] # Holds the distance calculations; used for the current speed calcuations
+        self.distance_buf = [] # Holds the distance calculations; used for the current speed calcuations. Each item is an array of the form [date_time, meters_traveled, total_distance]
         self.speed_times = [] # Holds the times associated with self.speed_graph
         self.speed_graph = [] # Holds the current speed calculations 
         self.speed_blocks = [] # List of speed/pace blocks, i.e. statistically significant times spent at a given pace
@@ -50,6 +50,8 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
 
         self.location_heat_map = LocationHeatMap.LocationHeatMap()
         self.speed_heat_map = SpeedHeatMap.SpeedHeatMap()
+
+        self.last_speed_buf_update_time = 0
 
         # This refers to the number of seconds used when averaging samples together to
         # compute the current speed. The exact numbers were chosen based on experimentation.
@@ -97,9 +99,11 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                     self.bests[Keys.BEST_SPEED] = self.current_speed
                 if self.total_distance < 1000:
                     break
-                self.speed_times.append(current_time)
-                self.speed_graph.append(self.current_speed)
-                self.speed_heat_map.append(self.current_speed)
+                if current_time > self.last_speed_buf_update_time:
+                    self.speed_times.append(current_time)
+                    self.speed_graph.append(self.current_speed)
+                    self.speed_heat_map.append(self.current_speed)
+                    self.last_speed_buf_update_time = current_time
 
             # Is this a new kilometer record for this activity?
             self.do_record_check(Keys.BEST_1K, total_seconds, total_meters, 1000)
@@ -191,20 +195,28 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         # How long (in seconds) was this block?
         start_time = self.speed_times[start_index]
         end_time = self.speed_times[end_index]
-        line_duration = end_time - start_time
-        line_length = 0
-        line_speed = 0
+        line_duration_seconds = end_time - start_time
+        line_length_meters = 0
+        line_avg_speed = 0.0
 
         # Don't consider anything less than ten seconds.
-        if line_duration > 10:
+        if line_duration_seconds > 10:
             speeds = self.speed_graph[start_index:end_index - 1]
-            start_distance_rec = self.distance_buf[start_index]
-            end_distance_rec = self.distance_buf[end_index]
-            line_length = end_distance_rec[2] - start_distance_rec[2]
-            line_speed = statistics.mean(speeds)
-            self.speed_blocks.append(line_speed)
+            start_distance_rec = None
+            end_distance_rec = None
+            for rec in self.distance_buf:
+                if rec[0] == start_time:
+                    start_distance_rec = rec
+                if rec[0] == end_time:
+                    end_distance_rec = rec
+                    break
+            line_length_meters = 0.0
+            if start_distance_rec is not None and end_distance_rec is not None:
+                line_length_meters = end_distance_rec[2] - start_distance_rec[2]
+            line_avg_speed = statistics.mean(speeds)
+            self.speed_blocks.append(line_avg_speed)
 
-        return start_time, end_time, line_duration, line_length, line_speed
+        return start_time, end_time, line_duration_seconds, line_length_meters, line_avg_speed
 
     def analyze(self):
         """Called when all location readings have been processed."""

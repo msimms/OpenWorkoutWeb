@@ -372,6 +372,7 @@ class DataMgr(Importer.ActivityWriter):
         # Sort and limit the list.
         if len(activities) > 0:
             activities = sorted(activities, key=get_activities_sort_key, reverse=True)[:num_results]
+
         return activities
 
     def retrieve_each_user_activity(self, context, user_id, cb=None):
@@ -416,6 +417,7 @@ class DataMgr(Importer.ActivityWriter):
         # Sort and limit the list.
         if len(activities) > 0:
             activities = sorted(activities, key=get_activities_sort_key, reverse=True)[:num_results]
+
         return activities
 
     def retrieve_device_activity_list(self, device_id, start, num_results):
@@ -521,6 +523,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if device_str is None or len(device_str) == 0:
             raise Exception("Bad parameter.")
+
         activity = self.database.retrieve_most_recent_activity_for_device(device_str)
         if activity is None:
             return None
@@ -585,6 +588,7 @@ class DataMgr(Importer.ActivityWriter):
         tags = []
         tags.append('Race')
         tags.append('Commute')
+        tags.append('Workout')
         tags.append('Hot')
         tags.append('Humid')
         tags.append('Cold')
@@ -756,6 +760,16 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_user_personal_records(user_id)
 
+    def create_workout(self, user_id, workout_obj):
+        """Create method for a workout."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if workout_obj is None:
+            raise Exception("Bad parameter.")
+        return self.database.create_workout(user_id, workout_obj)
+
     def retrieve_workouts_for_user(self, user_id):
         """Retrieve method for all workouts pertaining to the user with the specified ID."""
         if self.database is None:
@@ -772,12 +786,14 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_workouts_by_calendar_id(calendar_id)
 
-    def delete_workout(self, workout_id):
+    def delete_workout(self, user_id, workout_id):
         if self.database is None:
             raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
         if workout_id is None:
             raise Exception("Bad parameter.")
-        return self.database.delete_workout(workout_id)
+        return self.database.delete_workout(user_id, workout_id)
 
     def create_gear(self, user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Create method for gear."""
@@ -1020,6 +1036,7 @@ class DataMgr(Importer.ActivityWriter):
                         num_unanalyzed = num_unanalyzed + 1
                         complete_activity_data = self.retrieve_activity(activity_id)
                         self.analyze(complete_activity_data, user_id)
+
         return num_unanalyzed
 
     def compute_progression(self, user_id, user_activities, activity_type, key):

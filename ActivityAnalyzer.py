@@ -60,6 +60,9 @@ class ActivityAnalyzer(object):
             if Keys.ACTIVITY_USER_ID_KEY in self.activity:
                 activity_user_id = str(self.activity[Keys.ACTIVITY_USER_ID_KEY])
 
+            # Make sure the activity start time is set.
+            self.data_mgr.update_activity_start_time(self.activity)
+
             # Hash the activity.
             print("Hashing the activity...")
             hasher = ActivityHasher.ActivityHasher(self.activity)
@@ -133,6 +136,12 @@ class ActivityAnalyzer(object):
                     self.log_error("Error returned when updating personal records.")
             else:
                 self.log_error("User ID or activity time not provided. Cannot update personal records.")
+
+                # Give more detailed info.
+                if activity_user_id is None:
+                    self.log_error("activity_user_id is None.")
+                if Keys.ACTIVITY_TIME_KEY not in self.activity:
+                    self.log_error("activity time not set.")
         except:
             self.log_error("Exception when analyzing activity data: " + str(self.summary_data))
             self.log_error(traceback.format_exc())
