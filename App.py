@@ -1163,12 +1163,13 @@ class App(object):
         # Set the default goals based on previous selections.
         goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
         goal_date = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY)
-        goals_str = ""
-        for possible_goal in Keys.GOALS:
-            goals_str += "\t\t\t<option value=\"" + possible_goal + "\""
-            if possible_goal.lower() == goal.lower():
-                goals_str += " selected"
-            goals_str += ">" + possible_goal + "</option>\n"
+        if goal_date is not None:
+            goals_str = ""
+            for possible_goal in Keys.GOALS:
+                goals_str += "\t\t\t<option value=\"" + possible_goal + "\""
+                if goal is not None and possible_goal.lower() == goal.lower():
+                    goals_str += " selected"
+                goals_str += ">" + possible_goal + "</option>\n"
 
         # Set the preferred long run of the week.
         preferred_long_run_day = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY)
@@ -1176,7 +1177,7 @@ class App(object):
         days_str = ""
         for day in days_of_week:
             days_str += "\t\t\t<option value=\"" + day + "\""
-            if preferred_long_run_day.lower() == day.lower():
+            if preferred_long_run_day is not None and preferred_long_run_day.lower() == day.lower():
                 days_str += " selected"
             days_str += ">" + day + "</option>\n"
 
@@ -1749,7 +1750,7 @@ class App(object):
 
         # Render the privacy option.
         privacy_options = "\t\t<option value=\"Public\""
-        if selected_default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC:
+        if selected_default_privacy is not None and selected_default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC:
             privacy_options += " selected"
         privacy_options += ">Public</option>\n"
         privacy_options += "\t\t<option value=\"Private\""
@@ -1759,11 +1760,11 @@ class App(object):
 
         # Render the units
         unit_options = "\t\t<option value=\"Metric\""
-        if selected_units == Keys.UNITS_METRIC_KEY:
+        if selected_units is not None and selected_units == Keys.UNITS_METRIC_KEY:
             unit_options += " selected"
         unit_options += ">Metric</option>\n"
         unit_options += "\t\t<option value=\"Standard\""
-        if selected_units == Keys.UNITS_STANDARD_KEY:
+        if selected_units is not None and selected_units == Keys.UNITS_STANDARD_KEY:
             unit_options += " selected"
         unit_options += ">Standard</option>"
 
