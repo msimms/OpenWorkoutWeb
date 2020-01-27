@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from CeleryWorker import celery_worker
 import argparse
 import celery
+import datetime
 import json
 import logging
 import os
@@ -191,8 +192,19 @@ class WorkoutPlanGenerator(object):
 
     def organize_schedule(self, user_id, workouts):
         """Arranges the user's workouts into days/weeks, etc. To be called after the outputs are generated, but need cleaning up."""
+
+        # What is the first day of next week?
+        today = datetime.datetime.now().date()
+        start_time = today + datetime.timedelta(days=7-today.weekday())
+        end_time = start_time + datetime.timedelta(days=7)
+
+        # Remove any existing workouts that cover the time period in question.
+        if not self.data_mgr.delete_workouts_for_date_range(user_id, start_time, end_time):
+            print("Failed to remove old workouts from the database.")
+
+        # Schedule the new workouts.
         scheduler = WorkoutScheduler.WorkoutScheduler(user_id)
-        return scheduler.schedule_workouts(workouts)
+        return scheduler.schedule_workouts(workouts, start_time)
 
     def store_plan(self, user_id, workouts):
         """Saves the user's workouts to the database."""

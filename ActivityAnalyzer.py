@@ -128,7 +128,7 @@ class ActivityAnalyzer(object):
                 self.summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY] = location_description
 
                 # Store the results.
-                print("Storing results...")
+                print("Storing the activity summary...")
                 if not self.data_mgr.create_activity_summary(activity_id, self.summary_data):
                     self.log_error("Error returned when saving activity summary data: " + str(self.summary_data))
             else:
@@ -136,8 +136,8 @@ class ActivityAnalyzer(object):
             self.should_yield()
 
             # Update personal bests.
-            print("Updating personal bests...")
             if Keys.ACTIVITY_TIME_KEY in self.activity:
+                print("Updating personal bests...")
                 activity_time = self.activity[Keys.ACTIVITY_TIME_KEY]
                 if not self.data_mgr.update_bests_for_activity(activity_user_id, activity_id, activity_type, activity_time, self.summary_data):
                     self.log_error("Error returned when updating personal records.")

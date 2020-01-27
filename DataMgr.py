@@ -804,7 +804,13 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        pass
+
+        new_workouts_list = []
+        old_workouts_list = self.database.retrieve_workouts_for_user(user_id)
+        for workout in old_workouts_list:
+            if workout.scheduled_time is not None and workout.scheduled_time >= start_time and workout.scheduled_time < start_time:
+                new_workouts_list.append(workout)
+        return self.database.update_workouts_for_user(user_id, new_workouts_list)
 
     def delete_workout(self, user_id, workout_id):
         """Delete method for the workout with the specified ID and belonging to the specified user."""
@@ -1046,6 +1052,7 @@ class DataMgr(Importer.ActivityWriter):
             cutoff_time = time.time() - timeframe
 
         num_unanalyzed = 0
+
         all_activities = self.retrieve_user_activity_list(user_id, None, None, None)
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
 

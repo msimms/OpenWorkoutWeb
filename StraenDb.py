@@ -1446,7 +1446,7 @@ class MongoDatabase(Database.Database):
                 # Find the workout in the list.
                 for workout in workouts_list:
                     if Keys.WORKOUT_ID_KEY in workout and workout[Keys.WORKOUT_ID_KEY] == workout_id:
-                        workout_obj = Workout.Workout()
+                        workout_obj = Workout.Workout(user_id)
                         workout_obj.from_dict(workout)
                         return workout_obj
         except:
@@ -1472,7 +1472,7 @@ class MongoDatabase(Database.Database):
 
                 # Create an object for each workout in the list.
                 for workout in workouts_list:
-                    workout_obj = Workout.Workout()
+                    workout_obj = Workout.Workout(user_id)
                     workout_obj.from_dict(workout)
                     workouts.append(workout_obj)
         except:
@@ -1505,6 +1505,40 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return workouts
+
+    def update_workouts_for_user(self, user_id, workout_objs):
+        """Update method for a list of workout objects."""
+        if user_id is None:
+            self.log_error(MongoDatabase.update_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if workout_objs is None:
+            self.log_error(MongoDatabase.update_workouts_for_user.__name__ + ": Unexpected empty object: workout_objs")
+            return False
+
+        try:
+            # Find the user's workouts document.
+            workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+
+            # If the workouts document was not found then create it.
+            if workouts_doc is None:
+                post = {}
+                post[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
+                post[Keys.WORKOUT_PLAN_CALENDAR_ID_KEY] = str(uuid.uuid4()) # Create a calendar ID
+                post[Keys.WORKOUT_LIST_KEY] = []
+                self.workouts_collection.insert(post)
+                workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+
+            # If the workouts document was found (or created).
+            if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
+
+                # Update and save the document.
+                workouts_doc[Keys.WORKOUT_LIST_KEY] = workout_objs
+                self.workouts_collection.save(workouts_doc)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
 
     def delete_workout(self, user_id, workout_id):
         """Delete method for the workout with the specified ID."""
