@@ -115,8 +115,11 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
 
                 # Additional calculations if we have the user's FTP.
                 if self.activity_user_id and self.data_mgr:
+
+                    # Get the user's FTP.
                     ftp = self.data_mgr.retrieve_user_estimated_ftp(self.activity_user_id)
                     if ftp is not None:
+
                         # Compute the intensity factor (IF = NP / FTP).
                         intfac = np / ftp[0]
                         results[Keys.INTENSITY_FACTOR] = intfac
