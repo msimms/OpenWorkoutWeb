@@ -72,7 +72,7 @@ class WorkoutPlanGenerator(object):
     def update_summary_data_cb(context, activity, user_id):
         """Callback function for update_summary_data."""
         if Keys.ACTIVITY_SUMMARY_KEY not in activity:
-            analysis_obj = context.data_mgr.analyze(activity, user_id)
+            analysis_obj = context.data_mgr.analyze_activity(activity, user_id)
 
     def calculate_inputs(self, user_id):
         """Looks through the user's data and calculates the neural net inputs."""
@@ -86,8 +86,7 @@ class WorkoutPlanGenerator(object):
         self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.FOUR_WEEKS)
 
         # Fetch the detail of the user's goal.
-        goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
-        goal_date = int(self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY))
+        goal, goal_date = self.data_mgr.retrieve_user_goal(user_id)
         if goal_date <= now:
             raise Exception("The goal date should be in the future.")
         weeks_until_goal = (goal_date - now) / (7 * 24 * 60 * 60) # Convert to weeks

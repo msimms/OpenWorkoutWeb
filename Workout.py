@@ -48,6 +48,8 @@ class Workout(object):
             return self.cooldown
         if key == Keys.WORKOUT_INTERVALS_KEY:
             return self.intervals
+        if key == Keys.WORKOUT_SCHEDULED_TIME_KEY:
+            return self.scheduled_time
         return None
 
     def to_dict(self):
@@ -59,6 +61,7 @@ class Workout(object):
         output[Keys.WORKOUT_WARMUP_KEY] = self.warmup
         output[Keys.WORKOUT_COOLDOWN_KEY] = self.cooldown
         output[Keys.WORKOUT_INTERVALS_KEY] = self.intervals
+        output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = self.scheduled_time
         return output
 
     def from_dict(self, input):
@@ -73,6 +76,8 @@ class Workout(object):
             self.warmup = input[Keys.WORKOUT_WARMUP_KEY]
         if Keys.WORKOUT_COOLDOWN_KEY in input:
             self.cooldown = input[Keys.WORKOUT_COOLDOWN_KEY]
+        if Keys.WORKOUT_SCHEDULED_TIME_KEY in input:
+            self.scheduled_time = input[Keys.WORKOUT_SCHEDULED_TIME_KEY]
 
     def add_warmup(self, seconds):
         """Defines the workout warmup."""

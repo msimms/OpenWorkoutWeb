@@ -56,8 +56,9 @@ class DataMgr(Importer.ActivityWriter):
         """Generates a new activity ID."""
         return str(uuid.uuid4())
 
-    def analyze(self, activity, activity_user_id):
+    def analyze_activity(self, activity, activity_user_id):
         """Schedules the specified activity for analysis."""
+        activity[Keys.ACTIVITY_USER_ID_KEY] = activity_user_id
         self.analysis_scheduler.add_to_queue(activity, activity_user_id, self)
 
     def compute_activity_end_time(self, activity):
@@ -391,7 +392,7 @@ class DataMgr(Importer.ActivityWriter):
         devices = list(set(devices)) # De-duplicate
         if devices is not None:
             for device in devices:
-                self.database.retrieve_each_device_activity(context, device, cb)
+                self.database.retrieve_each_device_activity(context, user_id, device, cb)
 
         # List activities with no device that are associated with the user.
         self.database.retrieve_each_user_activity(context, user_id, cb)
@@ -715,6 +716,17 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_user_setting(user_id, Keys.ESTIMATED_FTP_KEY)
 
+    def retrieve_user_goal(self, user_id):
+        """Retrieves the user's current goal."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        goal = self.database.retrieve_user_setting(user_id, Keys.GOAL_KEY)
+        goal_date = int(self.database.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY))
+        return goal, goal_date
+
     def update_bests_for_activity(self, user_id, activity_id, activity_type, activity_time, bests):
         """Update method for a user's personal record."""
         if self.database is None:
@@ -786,7 +798,16 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_workouts_by_calendar_id(calendar_id)
 
+    def delete_workouts_for_date_range(self, user_id, start_time, end_time):
+        """Delete method for all workouts pertaining for the specified user within the given date range."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        pass
+
     def delete_workout(self, user_id, workout_id):
+        """Delete method for the workout with the specified ID and belonging to the specified user."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
@@ -1027,6 +1048,7 @@ class DataMgr(Importer.ActivityWriter):
         num_unanalyzed = 0
         all_activities = self.retrieve_user_activity_list(user_id, None, None, None)
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
+
         for activity in all_activities:
             activity_id = activity[Keys.ACTIVITY_ID_KEY]
             if Keys.ACTIVITY_TIME_KEY in activity:
@@ -1035,7 +1057,7 @@ class DataMgr(Importer.ActivityWriter):
                     if activity_id not in all_activity_bests:
                         num_unanalyzed = num_unanalyzed + 1
                         complete_activity_data = self.retrieve_activity(activity_id)
-                        self.analyze(complete_activity_data, user_id)
+                        self.analyze_activity(complete_activity_data, user_id)
 
         return num_unanalyzed
 
@@ -1079,6 +1101,7 @@ class DataMgr(Importer.ActivityWriter):
         return bests
 
     def compute_run_training_paces(self, user_id, running_bests):
+        """Computes the user's run training paces by searching the list of running 'bests' for the fastest 5K."""
         run_paces = {}
         calc = TrainingPaceCalculator.TrainingPaceCalculator()
         if Keys.BEST_5K in running_bests:

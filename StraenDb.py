@@ -617,12 +617,12 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def retrieve_each_device_activity(self, context, device_str, callback_func):
+    def retrieve_each_device_activity(self, context, user_id, device_str, callback_func):
         """Retrieves each device activity and calls the callback function for each one."""
         try:
             activities = list(self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}))
             for activity in activities:
-                callback_func(context, activity, device_str)
+                callback_func(context, activity, user_id)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

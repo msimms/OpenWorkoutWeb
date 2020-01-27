@@ -1226,7 +1226,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity.")
 
         activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
-        self.data_mgr.analyze(activity, activity_user_id)
+        self.data_mgr.analyze_activity(activity, activity_user_id)
         return True, ""
 
     def handle_generate_workout_plan(self, values):
