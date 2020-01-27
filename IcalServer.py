@@ -36,7 +36,6 @@ class IcalServer(object):
 
     def handle_request(self, calendar_id):
         calendar_name = "Planned Workouts"
-        product_id = ""
         version = 2.0
 
         workouts = self.data_mgr.retrieve_workouts_by_calendar_id(calendar_id)
@@ -45,14 +44,15 @@ class IcalServer(object):
         ics_writer = IcsWriter.IcsWriter()
 
         response  = "BEGIN:VCALENDAR\n"
-        response += "NAME:" + calendar_name + "\n"
-        response += "X-WR-CALNAME:" + product_id + "\n"
-        response += "VERSION:" + str(version) + "\n"
-        response += "CALSCALE:GREGORIAN\n"
-        response += "METHOD:PUBLISH\n"
+        response += "NAME:" + calendar_name + "\r\n"
+        response += "X-WR-CALNAME:" + calendar_name + "\r\n"
+        response += "VERSION:" + str(version) + "\r\n"
+        response += "CALSCALE:GREGORIAN\r\n"
+        response += "METHOD:PUBLISH\r\n"
         for workout in workouts:
-            response += "BEGIN:VEVENT\n"
-            response += ics_writer.create_event(workout[Keys.WORKOUT_ID_KEY], workout[Keys.WORKOUT_TIME_KEY], workout[Keys.WORKOUT_TIME_KEY], workout[Keys.WORKOUT_DESCRIPTION_KEY])
-            response += "END:VEVENT\n"
-        response += "END:VCALENDAR\n"
+            start_time = workout[Keys.WORKOUT_TIME_KEY]
+            if start_time > 0:
+                summary = workout.export_to_text()
+                response += ics_writer.create_event(workout[Keys.WORKOUT_ID_KEY], start_time, start_time, workout[Keys.WORKOUT_DESCRIPTION_KEY], summary)
+        response += "END:VCALENDAR\r\n"
         return True, response

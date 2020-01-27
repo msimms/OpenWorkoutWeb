@@ -202,7 +202,7 @@ class Workout(object):
         """Creates a ICS-formatted file that describes the workout."""
         summary = self.export_to_text()
         ics_writer = IcsWriter.IcsWriter()
-        file_data = ics_writer.create(self.workout_id, self.scheduled_time, self.scheduled_time, summary)
+        file_data = ics_writer.create(self.workout_id, self.scheduled_time, self.scheduled_time, self.description, summary)
 
         with open(file_name, 'wt') as local_file:
             local_file.write(file_data)
