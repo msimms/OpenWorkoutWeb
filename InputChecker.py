@@ -31,6 +31,7 @@ uuid = re.compile(hex + "{8}-" + hex + "{4}-" + hex + "{4}-" + hex + "{4}-" + he
 alphanums = re.compile(r"[\w-]*$")
 safe = re.compile(r"[\w_ \(\)%',/.+-]*$")
 email_addr = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
+days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 def is_alphanumeric(test_str):
     """Returns True if the string contains only alphanumeric characters. Otherwise, False."""
@@ -46,7 +47,6 @@ def is_timestamp(test_str):
 
 def is_day_of_week(test_str):
     test_str_lower = test_str.lower()
-    days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     for day in days_of_week:
         if day.lower() == test_str_lower:
             return True

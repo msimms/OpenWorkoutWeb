@@ -1173,9 +1173,8 @@ class App(object):
 
         # Set the preferred long run of the week.
         preferred_long_run_day = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY)
-        days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
         days_str = ""
-        for day in days_of_week:
+        for day in InputChecker.days_of_week:
             days_str += "\t\t\t<option value=\"" + day + "\""
             if preferred_long_run_day is not None and preferred_long_run_day.lower() == day.lower():
                 days_str += " selected"

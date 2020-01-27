@@ -76,6 +76,11 @@ WORKOUT_INTERVALS_KEY = "intervals"
 WORKOUT_COOLDOWN_KEY = "cooldown"
 WORKOUT_SCHEDULED_TIME_KEY = "scheduled time"
 
+# Workout descriptions
+WORKOUT_DESCRIPTION_SPEED_RUN = "Speed Run"
+WORKOUT_DESCRIPTION_TEMPO_RUN = "Tempo Run"
+WORKOUT_DESCRIPTION_LONG_RUN = "Long Run"
+
 # Keys associated with uploading data
 UPLOADED_FILE_NAME_KEY = "uploaded_file_name"
 UPLOADED_FILE_DATA_KEY = "uploaded_file_data"
