@@ -150,6 +150,10 @@ The software architecture makes it possible to use this system with different fr
 * Ability to export position data as a CSV file.
 * Bug fixes in computing gear distances.
 
+### 0.18
+* Bug fixes.
+* Added an iCal server for subscribing to planned workouts.
+
 ## Tech
 This software uses several other source projects to work properly:
 
