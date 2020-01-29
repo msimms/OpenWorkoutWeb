@@ -22,10 +22,10 @@ class WorkoutScheduler(object):
         week = [None] * 7
 
         # Find the long run and put it on the preferred day.
-        if preferred_long_run_day is None:
+        if preferred_long_run_day is not None:
             for workout in workouts:
-                if self.description == Keys.WORKOUT_DESCRIPTION_LONG_RUN:
-                    start_index = InputChecker.days_of_week.index(preferred_long_run_day)
+                if workout.description == Keys.WORKOUT_DESCRIPTION_LONG_RUN:
+                    start_index = [x.lower() for x in InputChecker.days_of_week].index(preferred_long_run_day)
                     long_run_time = start_time + datetime.timedelta(days=start_index)
                     workout.scheduled_time = long_run_time
                     week[start_index] = workout
