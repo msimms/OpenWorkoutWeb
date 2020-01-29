@@ -32,11 +32,18 @@ class IcsWriter(object):
     def create_event(self, event_id, start_time, stop_time, summary, description):
         """Returns an ICS-formatted string that represents a single event within a calendar."""
         buffer  = "BEGIN:VEVENT\r\n"
+        start_ts = start_time.strftime("%Y%m%dT%H%M%SZ")
+        stop_ts = stop_time.strftime("%Y%m%dT%H%M%SZ")
+        buffer += "DTSTART:" + start_ts + "\r\n"
+        buffer += "DTEND:" + stop_ts + "\r\n"
         buffer += "UID:" + str(event_id) + "\r\n"
-        buffer += "DTSTART:" + str(start_time) + "\r\n"
-        buffer += "DTEND:" + str(stop_time) + "\r\n"
         buffer += "SUMMARY:" + summary + "\r\n"
         buffer += "DESCRIPTION:" + description + "\r\n"
+        buffer += "STATUS:CONFIRMED\r\n"
+        buffer += "DTSTAMP:" + start_ts + "\r\n"
+        buffer += "CREATED:" + start_ts + "\r\n"
+        buffer += "LAST-MODIFIED:" + start_ts + "\r\n"
+        buffer += "TRANSP:OPAQUE\r\n"
         buffer += "END:VEVENT\r\n"
         return buffer
         
@@ -44,8 +51,8 @@ class IcsWriter(object):
         """Returns an ICS-formatted string that represents an entire calendar."""
         """Use this method when generating a .ical file with just one event."""
         buffer  = "BEGIN:VCALENDAR\r\n"
-        buffer += "CALSCALE:GREGORIAN\r\n"
         buffer += "VERSION:2.0\r\n"
+        buffer += "CALSCALE:GREGORIAN\r\n"
         buffer += self.create_event(event_id, start_time, stop_time, summary, description)
         buffer += "END:VCALENDAR\r\n"
         return buffer
