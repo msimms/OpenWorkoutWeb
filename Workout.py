@@ -82,6 +82,8 @@ class Workout(object):
             self.warmup = input[Keys.WORKOUT_WARMUP_KEY]
         if Keys.WORKOUT_COOLDOWN_KEY in input:
             self.cooldown = input[Keys.WORKOUT_COOLDOWN_KEY]
+        if Keys.WORKOUT_INTERVALS_KEY in input:
+            self.intervals = input[Keys.WORKOUT_INTERVALS_KEY]
         if Keys.WORKOUT_SCHEDULED_TIME_KEY in input and input[Keys.WORKOUT_SCHEDULED_TIME_KEY] is not None:
             self.scheduled_time = datetime.datetime.fromtimestamp(input[Keys.WORKOUT_SCHEDULED_TIME_KEY]).date()
 
