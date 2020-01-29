@@ -1186,14 +1186,23 @@ class App(object):
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, runpaces=run_paces_str, goals=goals_str, goal_date=goal_date, preferred_long_run_day=days_str)
 
     @statistics
-    def workout(workout_id):
+    def workout(self, workout_id):
         """Renders the view for an individual workout."""
 
         # Sanity check the input.
-        if gear_id is None:
-            return self.error()
         if not InputChecker.is_uuid(workout_id):
             return self.error()
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workout.html')
