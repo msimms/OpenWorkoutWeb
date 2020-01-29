@@ -73,7 +73,7 @@ class WorkoutPlanGenerator(object):
     def update_summary_data_cb(context, activity, user_id):
         """Callback function for update_summary_data."""
         if Keys.ACTIVITY_SUMMARY_KEY not in activity:
-            analysis_obj = context.data_mgr.analyze_activity(activity, user_id)
+            context.data_mgr.analyze_activity(activity, user_id)
 
     def calculate_inputs(self, user_id):
         """Looks through the user's data and calculates the neural net inputs."""

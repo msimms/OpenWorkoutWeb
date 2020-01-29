@@ -1211,10 +1211,8 @@ class MongoDatabase(Database.Database):
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
 
             # If the activity was found.
-            if activity is not None:
-                if Keys.ACTIVITY_SUMMARY_KEY in activity:
-                    summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
-                    return summary_data
+            if activity is not None and Keys.ACTIVITY_SUMMARY_KEY in activity:
+                return activity[Keys.ACTIVITY_SUMMARY_KEY]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1319,14 +1317,12 @@ class MongoDatabase(Database.Database):
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
 
             # If the activity was found.
-            if activity is not None:
-                data = []
-                if Keys.ACTIVITY_TAGS_KEY in activity:
-                    data = activity[Keys.ACTIVITY_TAGS_KEY]
-                    data.remove(tag)
-                    activity[Keys.ACTIVITY_TAGS_KEY] = data
-                    self.activities_collection.save(activity)
-                    return True
+            if activity is not None and Keys.ACTIVITY_TAGS_KEY in activity:
+                data = activity[Keys.ACTIVITY_TAGS_KEY]
+                data.remove(tag)
+                activity[Keys.ACTIVITY_TAGS_KEY] = data
+                self.activities_collection.save(activity)
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
