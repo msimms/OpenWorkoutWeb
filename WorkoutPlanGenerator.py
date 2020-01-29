@@ -194,7 +194,7 @@ class WorkoutPlanGenerator(object):
         """Arranges the user's workouts into days/weeks, etc. To be called after the outputs are generated, but need cleaning up."""
 
         # What is the first day of next week?
-        today = datetime.datetime.now().date()
+        today = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0).date()
         start_time = today + datetime.timedelta(days=7-today.weekday())
         end_time = start_time + datetime.timedelta(days=7)
 

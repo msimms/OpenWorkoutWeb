@@ -143,6 +143,7 @@ class Workout(object):
         # Add the cooldown (if applicable).
         if self.cooldown is not None:
             writer.store_workout_cooldown(self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION], self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERLOW], self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERHIGH], self.cooldown[ZwoTags.ZWO_ATTR_NAME_PACE])
+
         writer.end_workout()
         writer.close()
 
@@ -200,13 +201,11 @@ class Workout(object):
         result[Keys.WORKOUT_DESCRIPTION_KEY] = self.description
         result[Keys.WORKOUT_SPORT_TYPE_KEY] = self.sport_type
         if self.warmup is not None:
-            duration = self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION]
-            result[Keys.WORKOUT_WARMUP_KEY] = duration
+            result[Keys.WORKOUT_WARMUP_KEY] = self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION]
         if self.intervals is not None:
             result[Keys.WORKOUT_INTERVALS_KEY] = self.intervals
         if self.cooldown is not None:
-            duration = self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION]
-            result[Keys.WORKOUT_COOLDOWN_KEY] = duration
+            result[Keys.WORKOUT_COOLDOWN_KEY] = self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION]
         return json.dumps(matched_workouts, ensure_ascii=False)
 
     def export_to_ics(self, file_name):

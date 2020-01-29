@@ -32,8 +32,8 @@ class IcsWriter(object):
     def create_event(self, event_id, start_time, stop_time, summary, description):
         """Returns an ICS-formatted string that represents a single event within a calendar."""
         buffer  = "BEGIN:VEVENT\r\n"
-        start_ts = start_time.strftime("%Y%m%dT%H%M%SZ")
-        stop_ts = stop_time.strftime("%Y%m%dT%H%M%SZ")
+        start_ts = start_time.strftime("%Y%m%dT%H%M%S")
+        stop_ts = stop_time.strftime("%Y%m%dT%H%M%S")
         buffer += "DTSTART:" + start_ts + "\r\n"
         buffer += "DTEND:" + stop_ts + "\r\n"
         buffer += "UID:" + str(event_id) + "\r\n"
