@@ -1422,6 +1422,24 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def retrieve_workouts_calendar_id_for_user(self, user_id):
+        """Retrieve method for all workouts pertaining to the user with the specified ID."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_workouts_calendar_id_for_user.__name__ + ": Unexpected empty object: user_id")
+            return None
+
+        try:
+            # Find the user's workouts document.
+            workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+
+            # If the workouts document was found and it has a calendar ID.
+            if workouts_doc is not None and Keys.WORKOUT_PLAN_CALENDAR_ID_KEY in workouts_doc:
+                return workouts_doc[Keys.WORKOUT_PLAN_CALENDAR_ID_KEY]
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return None
+
     def retrieve_workout(self, user_id, workout_id):
         """Retrieve method for the workout with the specified ID."""
         if user_id is None:
@@ -1451,7 +1469,7 @@ class MongoDatabase(Database.Database):
         return None
 
     def retrieve_workouts_for_user(self, user_id):
-        """Retrieve method for all workouts pertaining to the user with the specified ID."""
+        """Retrieve method for the ical calendar ID for with specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.retrieve_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
             return None
@@ -1519,7 +1537,6 @@ class MongoDatabase(Database.Database):
             if workouts_doc is None:
                 post = {}
                 post[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
-                post[Keys.WORKOUT_PLAN_CALENDAR_ID_KEY] = str(uuid.uuid4()) # Create a calendar ID
                 post[Keys.WORKOUT_LIST_KEY] = []
                 self.workouts_collection.insert(post)
                 workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})

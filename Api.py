@@ -1273,6 +1273,15 @@ class Api(object):
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
 
+    def handle_get_workout_ical_url(self, values):
+        """Called when the user wants wants a link to the ical url for their planned workouts."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        calendar_id = self.data_mgr.retrieve_workouts_calendar_id_for_user(self.user_id)
+        url = self.root_url + "/ical/" + str(calendar_id)
+        return True, url
+
     def handle_get_location_description(self, values):
         """Called when the user wants get the political location that corresponds to an activity."""
         if self.user_id is None:
@@ -1412,6 +1421,8 @@ class Api(object):
             return self.handle_generate_workout_plan(values)
         elif request == 'list_workouts':
             return self.handle_list_workouts(values)
+        elif request == 'get_workout_ical_url':
+            return self.handle_get_workout_ical_url(values)
         elif request == 'get_location_description':
             return self.handle_get_location_description(values)
         elif request == 'activity_id_from_hash':

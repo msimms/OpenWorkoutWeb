@@ -790,6 +790,14 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_workouts_for_user(user_id)
 
+    def retrieve_workouts_calendar_id_for_user(self, user_id):
+        """Retrieve method for the ical calendar ID for with specified ID."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_workouts_calendar_id_for_user(user_id)
+
     def retrieve_workouts_by_calendar_id(self, calendar_id):
         """Retrieve method for all workouts pertaining to the calendar with the specified ID."""
         if self.database is None:
