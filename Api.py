@@ -1266,10 +1266,10 @@ class Api(object):
         matched_workouts = []
         if workouts is not None and isinstance(workouts, list):
             for workout in workouts:
-                if Keys.WORKOUT_TIME_KEY in workout and Keys.WORKOUT_ID_KEY in workout and Keys.WORKOUT_DESCRIPTION_KEY in workout:
-                    url = self.root_url + "/workout/" + workout[Keys.ACTIVITY_ID_KEY]
-                    temp_workout = {'title': workout[Keys.WORKOUT_DESCRIPTION_KEY], 'url':url, 'time': int(workout[Keys.WORKOUT_TIME_KEY])}
-                matched_workouts.append(temp_workout)
+                if workout.scheduled_time is not None and workout.workout_id is not None and workout.description is not None:
+                    url = self.root_url + "/workout/" + str(workout.workout_id)
+                    temp_workout = {'title': workout.description, 'url': url, 'time': time.mktime(workout.scheduled_time.timetuple())}
+                    matched_workouts.append(temp_workout)
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
 

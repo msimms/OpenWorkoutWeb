@@ -111,7 +111,7 @@
 			for (var i = 0; i < obj.length; i++)
 			{
 				var workout_obj = obj[i];
-				workout_obj['start'] = unix_time_to_iso_time(activity_obj['time']);
+				workout_obj['start'] = unix_time_to_iso_time(workout_obj['time']);
                 workout_obj['color'] = 'Tomato';
 				workout_list.push(workout_obj);
 			}

@@ -1,10 +1,12 @@
 # Copyright 2019 Michael J Simms
 
 from __future__ import print_function
+import datetime
 import json
 import inspect
 import os
 import sys
+import time
 import uuid
 import IcsWriter
 import Keys
@@ -48,8 +50,9 @@ class Workout(object):
             return self.cooldown
         if key == Keys.WORKOUT_INTERVALS_KEY:
             return self.intervals
-        if key == Keys.WORKOUT_SCHEDULED_TIME_KEY:
-            return self.scheduled_time
+        if key == Keys.WORKOUT_SCHEDULED_TIME_KEY and self.scheduled_time is not None:
+            dt = time.mktime(self.scheduled_time.timetuple())
+            return datetime.datetime(dt.year, dt.month, dt.day)
         return None
 
     def to_dict(self):
@@ -61,7 +64,10 @@ class Workout(object):
         output[Keys.WORKOUT_WARMUP_KEY] = self.warmup
         output[Keys.WORKOUT_COOLDOWN_KEY] = self.cooldown
         output[Keys.WORKOUT_INTERVALS_KEY] = self.intervals
-        output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = self.scheduled_time
+        if self.scheduled_time is not None:
+            output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = time.mktime(self.scheduled_time.timetuple())
+        else:
+            output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = None
         return output
 
     def from_dict(self, input):
@@ -76,8 +82,8 @@ class Workout(object):
             self.warmup = input[Keys.WORKOUT_WARMUP_KEY]
         if Keys.WORKOUT_COOLDOWN_KEY in input:
             self.cooldown = input[Keys.WORKOUT_COOLDOWN_KEY]
-        if Keys.WORKOUT_SCHEDULED_TIME_KEY in input:
-            self.scheduled_time = input[Keys.WORKOUT_SCHEDULED_TIME_KEY]
+        if Keys.WORKOUT_SCHEDULED_TIME_KEY in input and input[Keys.WORKOUT_SCHEDULED_TIME_KEY] is not None:
+            self.scheduled_time = datetime.datetime.fromtimestamp(input[Keys.WORKOUT_SCHEDULED_TIME_KEY]).date()
 
     def add_warmup(self, seconds):
         """Defines the workout warmup."""
