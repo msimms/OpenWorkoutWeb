@@ -25,10 +25,9 @@ class WorkoutScheduler(object):
         if preferred_long_run_day is not None:
             for workout in workouts:
                 if workout.description == Keys.WORKOUT_DESCRIPTION_LONG_RUN:
-                    start_index = [x.lower() for x in InputChecker.days_of_week].index(preferred_long_run_day)
-                    long_run_time = start_time + datetime.timedelta(days=start_index)
-                    workout.scheduled_time = long_run_time
-                    week[start_index] = workout
+                    day_index = [x.lower() for x in InputChecker.days_of_week].index(preferred_long_run_day)
+                    workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
+                    week[day_index] = workout
                     break
 
         # Assign workouts to days, while attempting to satisfy all constraints.
@@ -46,6 +45,8 @@ class WorkoutScheduler(object):
 
                 # Pick one of the days from the candidate list.
                 if len(possible_days) > 0:
-                    pass
+                    day_index = possible_days[len(possible_days) / 2]
+                    workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
+                    week[day_index] = workout
 
         return workouts
