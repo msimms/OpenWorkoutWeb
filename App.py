@@ -104,7 +104,7 @@ class App(object):
         self.map_single_google_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
         self.map_multi_html_file = os.path.join(root_dir, HTML_DIR, 'map_multi_google.html')
         self.error_logged_in_html_file = os.path.join(root_dir, HTML_DIR, 'error_logged_in.html')
-        self.ical_server = IcalServer.IcalServer(data_mgr)
+        self.ical_server = IcalServer.IcalServer(data_mgr, self.root_url)
 
         self.tempfile_dir = os.path.join(root_dir, 'tempfile')
         if not os.path.exists(self.tempfile_dir):
