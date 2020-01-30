@@ -27,7 +27,6 @@ import logging
 import os
 import sqlite3
 
-
 class Database(object):
     """Base class for a database. Encapsulates common functionality."""
     db_file = ""

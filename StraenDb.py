@@ -14,10 +14,6 @@ import Keys
 import Workout
 
 
-def retrieve_time_from_accelerometer_reading(location):
-    """Used with the sort function."""
-    return location['time']
-
 def retrieve_time_from_location(location):
     """Used with the sort function."""
     return location['time']

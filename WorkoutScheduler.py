@@ -51,4 +51,8 @@ class WorkoutScheduler(object):
                     workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
                     week[day_index] = workout
 
+                    # Do we need to schedule a rest day after this workout?
+                    if workout.needs_rest_day_afterwards:
+                        pass
+
         return workouts

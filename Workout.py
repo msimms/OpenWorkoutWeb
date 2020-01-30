@@ -1,4 +1,5 @@
 # Copyright 2019 Michael J Simms
+"""Dscribes a workout to be performed."""
 
 from __future__ import print_function
 import datetime
@@ -21,7 +22,7 @@ sys.path.insert(0, zworeaderdir)
 import ZwoTags
 
 class Workout(object):
-    """Class for generating a run plan for the specifiied user."""
+    """Class that describes a workout to be performed."""
 
     def __init__(self, user_id):
         self.user_id = user_id

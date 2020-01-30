@@ -27,7 +27,6 @@ import flask
 import Keys
 import SessionException
 
-
 class SessionMgr(object):
     """Class for managing sessions. A user may have more than one session"""
 
@@ -49,7 +48,6 @@ class SessionMgr(object):
     def clear_session(self):
         """Ends the current session."""
         pass
-
 
 class CherryPySessionMgr(SessionMgr):
     """Class for managing sessions when using the cherrypy framework. A user may have more than one session"""
@@ -82,7 +80,6 @@ class CherryPySessionMgr(SessionMgr):
         """Ends the current session."""
         sess = cherrypy.session
         sess[Keys.SESSION_KEY] = None
-
 
 class FlaskSessionMgr(SessionMgr):
     """Class for managing sessions when using the flask framework. A user may have more than one session"""

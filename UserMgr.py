@@ -21,6 +21,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+"""Managing user accounts"""
 
 import bcrypt
 import time
@@ -32,7 +33,7 @@ import StraenDb
 MIN_PASSWORD_LEN  = 8
 
 class UserMgr(object):
-    """Class for managing users"""
+    """Class for managing user accounts"""
 
     def __init__(self, session_mgr, root_dir):
         self.database = StraenDb.MongoDatabase(root_dir)
