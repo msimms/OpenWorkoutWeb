@@ -489,6 +489,7 @@ class Api(object):
 
         # Delete all the user's gear.
         self.data_mgr.delete_user_gear(self.user_id)
+        return True, ""
 
     def handle_delete_activities(self, values):
         """Removes the current user's activity data."""
@@ -509,6 +510,7 @@ class Api(object):
 
         # Delete all the user's activities.
         self.data_mgr.delete_user_activities(self.user_id)
+        return True, ""
 
     def handle_delete_user(self, values):
         """Removes the current user and all associated data."""
