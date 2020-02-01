@@ -75,6 +75,7 @@ WORKOUT_WARMUP_KEY = "warmup"
 WORKOUT_INTERVALS_KEY = "intervals"
 WORKOUT_COOLDOWN_KEY = "cooldown"
 WORKOUT_SCHEDULED_TIME_KEY = "scheduled time"
+WORKOUT_EXPLANATION_KEY = "explanation"
 
 # Workout descriptions
 WORKOUT_DESCRIPTION_REST = "Rest"

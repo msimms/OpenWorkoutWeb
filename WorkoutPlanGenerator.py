@@ -320,7 +320,7 @@ def generate_workout_plan(user_str, format):
         if format is None or format == 'text':
             print(workout.export_to_text())
         elif format == 'json':
-            print(workout.export_to_json())
+            print(workout.export_to_json_str())
         elif format == 'ics':
             tempfile_name = generate_temp_file_name(".ics")
             workout.export_to_ics(tempfile_name)

@@ -245,3 +245,7 @@ button .fa {
 	width: 250px;
 	margin: 5px;
 }
+
+.block textarea {
+    border: 0px;
+}

@@ -31,20 +31,28 @@
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
-    function get_description()
-    {
-		var the_url = "${root_url}/api/1.0/get_workout_description?workout_id=${workout_id}";
-		var result_text = {};
+	var update_description = function(response)
+	{
+		if (response == null)
+			return;
 
-		if (send_get_request(the_url, result_text))
-			alert("foo!");
-		else
-			alert("An error occurred!");
-    }
+		if (response.length >= 3)
+        {
+            var obj_list = JSON.parse(response);
+            if (obj_list == null)
+                return;
+
+    		var elem = document.getElementById("description");
+            elem.textContent = obj_list.description;
+
+    		elem = document.getElementById("explanation");
+            elem.textContent = obj_list.explanation;
+        }
+	};
 
 	$(document).ready(function()
 	{
-        get_description();
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_workout_description?workout_id=${workout_id}", cache: false, success: update_description, dataType: "text" });
 	});
 </script>
 
@@ -54,14 +62,9 @@ ${nav}
 
 <div class="block" id="block" style="width: 600px">
 
-<h2>Overview</h2>
+<h2 id="description"></h2>
 
-<textarea rows="4" cols="250">
-</textarea> 
-
-<h2>Description</h2>
-
-<textarea rows="4" cols="250">
+<textarea id="explanation" rows="4" cols="250">
 </textarea> 
 
 </div>

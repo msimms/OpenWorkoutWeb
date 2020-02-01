@@ -1278,7 +1278,7 @@ class Api(object):
 
         # Get the workouts that belong to the logged in user.
         workout = self.data_mgr.retrieve_workout(self.user_id, workout_id)
-        json_results = workout.to_json()
+        json_results = workout.export_to_json_str()
         return True, json_results
 
     def handle_get_workout_ical_url(self, values):

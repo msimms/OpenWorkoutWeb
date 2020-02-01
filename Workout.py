@@ -71,12 +71,6 @@ class Workout(object):
             output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = None
         return output
 
-    def to_json(self):
-        """Converts the object representation to a JSON string, only converting what is actually useful, as opposed to __dict__."""
-        output = self.to_dict()
-        output[Keys.WORKOUT_ID_KEY] = str(self.workout_id)
-        return json.dumps(output, ensure_ascii=False)
-
     def from_dict(self, input):
         """Sets the object's members from a dictionary."""
         if Keys.WORKOUT_ID_KEY in input:
@@ -204,18 +198,12 @@ class Workout(object):
 
         return result
 
-    def export_to_json(self):
+    def export_to_json_str(self):
         """Creates a JSON string that describes the workout."""
-        result = {}
-        result[Keys.WORKOUT_DESCRIPTION_KEY] = self.description
-        result[Keys.WORKOUT_SPORT_TYPE_KEY] = self.sport_type
-        if self.warmup is not None:
-            result[Keys.WORKOUT_WARMUP_KEY] = self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION]
-        if self.intervals is not None:
-            result[Keys.WORKOUT_INTERVALS_KEY] = self.intervals
-        if self.cooldown is not None:
-            result[Keys.WORKOUT_COOLDOWN_KEY] = self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION]
-        return json.dumps(matched_workouts, ensure_ascii=False)
+        result = self.to_dict()
+        result[Keys.WORKOUT_ID_KEY] = str(self.workout_id)
+        result[Keys.WORKOUT_EXPLANATION_KEY] = self.export_to_text()
+        return json.dumps(result, ensure_ascii=False)
 
     def export_to_ics(self, file_name):
         """Creates a ICS-formatted file that describes the workout."""
