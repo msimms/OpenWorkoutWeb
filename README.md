@@ -151,8 +151,9 @@ The software architecture makes it possible to use this system with different fr
 * Bug fixes in computing gear distances.
 
 ### 0.18
-* Bug fixes.
+* Bug fixes, including many pertaining to the flask front end as well as activity analysis.
 * Added an iCal server for subscribing to planned workouts.
+* Added planned workouts to the My Activities calendar.
 
 ## Tech
 This software uses several other source projects to work properly:
