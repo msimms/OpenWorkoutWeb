@@ -394,6 +394,14 @@ version: v1
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
+/get_workout_description:
+    description:
+    get:
+        responses:
+            200: A JSON string containing the details of the workout.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
 /get_workout_ical_url:
     description:
     get:

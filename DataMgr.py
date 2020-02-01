@@ -782,6 +782,14 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.create_workout(user_id, workout_obj)
 
+    def retrieve_workout(self, user_id, workout_id):
+        """Retrieve method for the workout with the specified user and ID."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_workout(user_id, workout_id)
+
     def retrieve_workouts_for_user(self, user_id):
         """Retrieve method for all workouts pertaining to the user with the specified ID."""
         if self.database is None:

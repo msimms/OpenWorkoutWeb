@@ -551,8 +551,10 @@ def api(version, method):
             user_id, _, _ = g_app.user_mgr.retrieve_user(username)
 
         # The the API params.
+        verb = "POST"
         if flask.request.method == 'GET':
-            params = ""
+            verb = "GET"
+            params = flask.request.args
         elif flask.request.data:
             params = json.loads(flask.request.data)
         else:
@@ -560,7 +562,7 @@ def api(version, method):
 
         # Process the API request.
         if version == '1.0':
-            handled, response = g_app.api(user_id, method, params)
+            handled, response = g_app.api(user_id, verb, method, params)
             if not handled:
                 response = "Failed to handle request: " + str(method)
                 g_app.log_error(response)

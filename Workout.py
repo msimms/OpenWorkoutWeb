@@ -71,6 +71,12 @@ class Workout(object):
             output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = None
         return output
 
+    def to_json(self):
+        """Converts the object representation to a JSON string, only converting what is actually useful, as opposed to __dict__."""
+        output = self.to_dict()
+        output[Keys.WORKOUT_ID_KEY] = str(self.workout_id)
+        return json.dumps(output, ensure_ascii=False)
+
     def from_dict(self, input):
         """Sets the object's members from a dictionary."""
         if Keys.WORKOUT_ID_KEY in input:

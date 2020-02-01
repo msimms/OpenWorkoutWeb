@@ -31,6 +31,21 @@
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
+    function get_description()
+    {
+		var the_url = "${root_url}/api/1.0/get_workout_description?workout_id=${workout_id}";
+		var result_text = {};
+
+		if (send_get_request(the_url, result_text))
+			alert("foo!");
+		else
+			alert("An error occurred!");
+    }
+
+	$(document).ready(function()
+	{
+        get_description();
+	});
 </script>
 
 <section class="nav">
@@ -38,6 +53,16 @@ ${nav}
 </section>
 
 <div class="block" id="block" style="width: 600px">
+
+<h2>Overview</h2>
+
+<textarea rows="4" cols="250">
+</textarea> 
+
+<h2>Description</h2>
+
+<textarea rows="4" cols="250">
+</textarea> 
 
 </div>
 

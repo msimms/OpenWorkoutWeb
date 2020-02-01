@@ -619,8 +619,10 @@ class StraenWeb(object):
 
             # The the API params.
             if cherrypy.request.method == "GET":
+                verb = "GET"
                 params = kw
             else:
+                verb = "POST"
                 cl = int(cherrypy.request.headers['Content-Length'])
                 if cl > 0:
                     params = cherrypy.request.body.read(cl)
@@ -633,7 +635,7 @@ class StraenWeb(object):
                 api_version = args[0]
                 if api_version == '1.0':
                     method = args[1:]
-                    handled, response = self.app.api(user_id, method[0], params)
+                    handled, response = self.app.api(user_id, verb, method[0], params)
                     if not handled:
                         response = "Failed to handle request: " + str(method)
                         self.log_error(response)

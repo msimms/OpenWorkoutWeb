@@ -28,6 +28,28 @@ function serialize(list)
 	return json_str
 }
 
+function send_get_request(url, result_text)
+{
+	var result = false;
+
+	var xml_http = new XMLHttpRequest();
+	var content_type = "application/json; charset=utf-8";
+
+	xml_http.open("GET", url, false);
+	xml_http.setRequestHeader('Content-Type', content_type);
+
+	xml_http.onreadystatechange = function()
+	{
+		if (xml_http.readyState == XMLHttpRequest.DONE)
+		{
+			result_text.value = xml_http.responseText;
+		}
+		result = (xml_http.status == 200);
+	}
+	xml_http.send();
+	return result;
+}
+
 function send_post_request(url, params, result_text)
 {
 	var result = false;

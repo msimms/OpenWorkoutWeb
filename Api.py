@@ -1253,15 +1253,7 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise ApiException.ApiMalformedRequestException("Empty username.")
-
-        # Get the user details.
-        _, _, user_realname = self.user_mgr.retrieve_user(username)
-
-        # Get the activiites that belong to the logged in user.
+        # Get the workouts that belong to the logged in user.
         workouts = self.data_mgr.retrieve_workouts_for_user(self.user_id)
 
         # Convert the activities list to an array of JSON objects for return to the client.
@@ -1275,8 +1267,22 @@ class Api(object):
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
 
+    def handle_get_workout_description(self, values):
+        """Called when the user requests the description for a workout."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        workout_id = values[Keys.WORKOUT_ID_KEY]
+        if not InputChecker.is_uuid(workout_id):
+            raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
+
+        # Get the workouts that belong to the logged in user.
+        workout = self.data_mgr.retrieve_workout(self.user_id, workout_id)
+        json_results = workout.to_json()
+        return True, json_results
+
     def handle_get_workout_ical_url(self, values):
-        """Called when the user wants wants a link to the ical url for their planned workouts."""
+        """Called when the user wants a link to the ical url for their planned workouts."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -1327,7 +1333,7 @@ class Api(object):
 
         return True, str(summary_data[Keys.ACTIVITY_HASH_KEY])
 
-    def handle_api_1_0_request(self, request, values):
+    def handle_api_1_0_request(self, verb, request, values):
         """Called to parse a version 1.0 API message."""
         if self.user_id is None:
             if Keys.SESSION_KEY in values:
@@ -1423,6 +1429,8 @@ class Api(object):
             return self.handle_generate_workout_plan(values)
         elif request == 'list_workouts':
             return self.handle_list_workouts(values)
+        elif request == 'get_workout_description':
+            return self.handle_get_workout_description(values)
         elif request == 'get_workout_ical_url':
             return self.handle_get_workout_ical_url(values)
         elif request == 'get_location_description':

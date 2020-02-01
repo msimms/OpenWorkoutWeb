@@ -1207,7 +1207,7 @@ class App(object):
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workout.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, workout_id=workout_id)
 
     @statistics
     def stats(self):
@@ -1793,10 +1793,10 @@ class App(object):
         return handled, response
 
     @statistics
-    def api(self, user_id, method, params):
+    def api(self, user_id, verb, method, params):
         """Handles an API request."""
         api = Api.Api(self.user_mgr, self.data_mgr, user_id, self.root_url)
-        handled, response = api.handle_api_1_0_request(method, params)
+        handled, response = api.handle_api_1_0_request(verb, method, params)
         return handled, response
 
     @statistics
