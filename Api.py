@@ -536,7 +536,7 @@ class Api(object):
         self.user_mgr.delete_user(self.user_id)
         return True, ""
 
-    def handle_list_activities(self, values):
+    def handle_list_activities(self, values, include_followed_users):
         """Returns a list of JSON objects describing all of the user's activities."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -551,7 +551,7 @@ class Api(object):
 
         # Get the activities that belong to the logged in user.
         matched_activities = []
-        if Keys.FOLLOWING_KEY in values:
+        if include_followed_users:
             activities = self.data_mgr.retrieve_all_activities_visible_to_user(self.user_id, user_realname, None, None)
         else:
             activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
@@ -1333,28 +1333,48 @@ class Api(object):
 
         return True, str(summary_data[Keys.ACTIVITY_HASH_KEY])
 
-    def handle_api_1_0_request(self, verb, request, values):
-        """Called to parse a version 1.0 API message."""
-        if self.user_id is None:
-            if Keys.SESSION_KEY in values:
-                username = self.user_mgr.get_logged_in_user_from_cookie(values[Keys.SESSION_KEY])
-                if username is not None:
-                    self.user_id, _, _ = self.user_mgr.retrieve_user(username)
-
-        if request == 'update_status':
-            return self.handle_update_status(values)
-        elif request == 'activity_track':
+    def handle_api_1_0_get_request(self, request, values):
+        """Called to parse a version 1.0 API GET request."""
+        if request == 'activity_track':
             return self.handle_retrieve_activity_track(values)
         elif request == 'activity_metadata':
             return self.handle_retrieve_activity_metadata(values)
+        elif request == 'login_status':
+            return self.handle_login_status(values)
+        elif request == 'list_all_activities':
+            return self.handle_list_activities(values, True)
+        elif request == 'list_my_activities':
+            return self.handle_list_activities(values, False)
+        elif request == 'list_tags':
+            return self.handle_list_tags(values)
+        elif request == 'list_comments':
+            return self.handle_list_comments(values)
+        elif request == 'list_gear':
+            return self.handle_list_gear(values)
+        elif request == 'list_workouts':
+            return self.handle_list_workouts(values)
+        elif request == 'get_workout_description':
+            return self.handle_get_workout_description(values)
+        elif request == 'get_workout_ical_url':
+            return self.handle_get_workout_ical_url(values)
+        elif request == 'get_location_description':
+            return self.handle_get_location_description(values)
+        elif request == 'activity_id_from_hash':
+            return self.handle_get_activity_id_from_hash(values)
+        elif request == 'activity_hash_from_id':
+            return self.handle_get_activity_hash_from_id(values)
+        return False, ""
+
+    def handle_api_1_0_post_request(self, request, values):
+        """Called to parse a version 1.0 API POST request."""
+        if request == 'update_status':
+            return self.handle_update_status(values)
         elif request == 'update_activity_metadata':
             return self.handle_update_activity_metadata(values)
         elif request == 'login':
             return self.handle_login(values)
         elif request == 'create_login':
             return self.handle_create_login(values)
-        elif request == 'login_status':
-            return self.handle_login_status(values)
         elif request == 'logout':
             return self.handle_logout(values)
         elif request == 'update_email':
@@ -1367,8 +1387,6 @@ class Api(object):
             return self.delete_activities(values)
         elif request == 'delete_user':
             return self.handle_delete_user(values)
-        elif request == 'list_activities':
-            return self.handle_list_activities(values)
         elif request == 'delete_activity':
             return self.handle_delete_activity(values)
         elif request == 'add_activity':
@@ -1397,16 +1415,10 @@ class Api(object):
             return self.handle_create_tag(values)
         elif request == 'delete_tag':
             return self.handle_delete_tag(values)
-        elif request == 'list_tags':
-            return self.handle_list_tags(values)
         elif request == 'create_comment':
             return self.handle_create_comment(values)
-        elif request == 'list_comments':
-            return self.handle_list_comments(values)
         elif request == 'create_gear':
             return self.handle_create_gear(values)
-        elif request == 'list_gear':
-            return self.handle_list_gear(values)
         elif request == 'update_gear':
             return self.handle_update_gear(values)
         elif request == 'delete_gear':
@@ -1427,16 +1439,18 @@ class Api(object):
             return self.handle_refresh_analysis(values)
         elif request == 'generate_workout_plan':
             return self.handle_generate_workout_plan(values)
-        elif request == 'list_workouts':
-            return self.handle_list_workouts(values)
-        elif request == 'get_workout_description':
-            return self.handle_get_workout_description(values)
-        elif request == 'get_workout_ical_url':
-            return self.handle_get_workout_ical_url(values)
-        elif request == 'get_location_description':
-            return self.handle_get_location_description(values)
-        elif request == 'activity_id_from_hash':
-            return self.handle_get_activity_id_from_hash(values)
-        elif request == 'activity_hash_from_id':
-            return self.handle_get_activity_hash_from_id(values)
+        return False, ""
+
+    def handle_api_1_0_request(self, verb, request, values):
+        """Called to parse a version 1.0 API message."""
+        if self.user_id is None:
+            if Keys.SESSION_KEY in values:
+                username = self.user_mgr.get_logged_in_user_from_cookie(values[Keys.SESSION_KEY])
+                if username is not None:
+                    self.user_id, _, _ = self.user_mgr.retrieve_user(username)
+
+        if verb == 'GET':
+            return self.handle_api_1_0_get_request(request, values)
+        elif verb == 'POST':
+            return self.handle_api_1_0_post_request(request, values)
         return False, ""

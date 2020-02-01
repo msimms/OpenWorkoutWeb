@@ -32,12 +32,10 @@
 	function list_activities()
 	{
 		var activity_list = [];
-		var the_url = "${root_url}/api/1.0/list_activities";
-		var dict = [];
+		var the_url = "${root_url}/api/1.0/list_all_activities";
 		var result_text = {};
 
-		dict.push({["following"] : 1});
-		if (send_post_request(the_url, dict, result_text))
+		if (send_get_request(the_url, result_text))
 		{
 			var obj = JSON.parse(result_text.value);
 			for (var i = 0; i < obj.length; i++)

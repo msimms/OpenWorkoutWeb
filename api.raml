@@ -115,15 +115,24 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-/list_activities:
-    description: Returns a list of JSON objects describing all of the user's activities.
+/list_all_activities:
+    description: Returns a list of JSON objects describing all of the user's activities and the activities of the users being followed.
     get:
-    post:
         responses:
             200:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
+    post:
+/list_my_activities:
+    description: Returns a list of JSON objects describing all of the user's activities.
+    get:
+        responses:
+            200:
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
 /delete_activity:
     description: Removes the specified activity.
     get:
@@ -253,12 +262,12 @@ version: v1
 /list_tags:
     description: Lists the tags for the specified activity.
     get:
-    post:
         responses:
             200:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
+    post:
 /create_comment:
     description: Adds a comment to the specified activity.
     get:
@@ -271,12 +280,12 @@ version: v1
 /list_comments:
     description: Lists comments for the specified activity.
     get:
-    post:
         responses:
             200:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
+    post:
 /create_gear:
     description: Creates a new gear record for the current user, such as a new bike or pair of shoes.
     get:
@@ -289,12 +298,12 @@ version: v1
 /list_gear:
     description: Lists gear associated with the current user.
     get:
-    post:
         responses:
             200:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
+    post:
 /update_gear:
     description: Updates the gear name or description.
     get:
