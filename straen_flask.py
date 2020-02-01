@@ -37,7 +37,7 @@ g_flask_app.secret_key = 'UB2s60qJrithXHt2w71f'
 g_flask_app.url_map.strict_slashes = False
 g_root_dir = os.path.dirname(os.path.abspath(__file__))
 g_app = None
-g_session_mgr = None
+g_session_mgr = SessionMgr.FlaskSessionMgr()
 
 
 def signal_handler(signal, frame):
@@ -133,7 +133,7 @@ def error(error_str=None):
         pass
     return g_app.error()
 
-@g_flask_app.route('/live')
+@g_flask_app.route('/live/<device_str>')
 def live(device_str):
     """Renders the map page for the current activity from a single device."""
     try:
@@ -144,7 +144,7 @@ def live(device_str):
         g_app.log_error('Unhandled exception in ' + live.__name__)
     return g_app.error()
 
-@g_flask_app.route('/live_user')
+@g_flask_app.route('/live_user/<user_str>')
 def live_user(user_str):
     """Renders the map page for the current activity from a specified user."""
     try:
@@ -155,7 +155,7 @@ def live_user(user_str):
         g_app.log_error('Unhandled exception in ' + live_user.__name__)
     return g_app.error()
 
-@g_flask_app.route('/activity')
+@g_flask_app.route('/activity/<activity_id>')
 def activity(activity_id):
     """Renders the details page for an activity."""
     try:
@@ -166,7 +166,7 @@ def activity(activity_id):
         g_app.log_error('Unhandled exception in ' + activity.__name__)
     return g_app.error()
 
-@g_flask_app.route('/edit_activity')
+@g_flask_app.route('/edit_activity/<activity_id>')
 def edit_activity(activity_id):
     """Renders the edit page for an activity."""
     try:
@@ -177,7 +177,7 @@ def edit_activity(activity_id):
         g_app.log_error('Unhandled exception in ' + edit_activity.__name__)
     return g_app.error()
 
-@g_flask_app.route('/device')
+@g_flask_app.route('/device/<device_str>')
 def device(device_str):
     """Renders the map page for a single device."""
     try:
@@ -216,7 +216,7 @@ def all_activities():
         g_app.log_error('Unhandled exception in ' + all_activities.__name__)
     return g_app.error()
 
-@g_flask_app.route('/all_records')
+@g_flask_app.route('/all_records/<activity_type>/<record_name>')
 @login_requred
 def all_records(self, activity_type, record_name):
     """Renders the list of records for the specified user and record type."""
@@ -230,7 +230,7 @@ def all_records(self, activity_type, record_name):
         g_app.log_error('Unhandled exception in ' + all_records.__name__)
     return self.error()
 
-@g_flask_app.route('/record_progression')
+@g_flask_app.route('/record_progression/<activity_type>/<record_name>')
 @login_requred
 def record_progression(self, activity_type, record_name):
     """Renders the list of records, in order of progression, for the specified user and record type."""
@@ -256,6 +256,20 @@ def workouts():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + workouts.__name__)
+    return g_app.error()
+
+@g_flask_app.route('/workout/<workout_id>')
+@login_requred
+def workout(workout_id):
+    """Renders the view for an individual workout."""
+    try:
+        return g_app.workout(workout_id)
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + workout.__name__)
     return g_app.error()
 
 @g_flask_app.route('/statistics')
@@ -286,7 +300,7 @@ def gear():
         g_app.log_error('Unhandled exception in ' + gear.__name__)
     return g_app.error()
 
-@g_flask_app.route('/service_history')
+@g_flask_app.route('/service_history/<gear_id>')
 @login_requred
 def service_history(gear_id):
     """Renders the service history for a particular piece of gear."""
@@ -342,7 +356,7 @@ def device_list():
         g_app.log_error('Unhandled exception in ' + device_list.__name__)
     return g_app.error()
 
-@g_flask_app.route('/upload')
+@g_flask_app.route('/upload/<ufile>')
 @login_requred
 def upload(ufile):
     """Processes an upload request."""
@@ -356,7 +370,7 @@ def upload(ufile):
         g_app.log_error('Unhandled exception in ' + upload.__name__)
     return g_app.error()
 
-@g_flask_app.route('/manual_entry')
+@g_flask_app.route('/manual_entry/<activity_type>')
 @login_requred
 def manual_entry(activity_type):
     """Called when the user selects an activity type, indicating they want to make a manual data entry."""
@@ -510,6 +524,20 @@ def status():
         result = g_app.error()
     return result
 
+@g_flask_app.route('/ical/<calendar_id>')
+def ical(calendar_id):
+    """Returns the ical calendar with the specified ID."""
+    result = ""
+    code = 200
+    try:
+        handled, response = g_app.ical(calendar_id)
+        if not handled:
+            code = 400
+        return response
+    except:
+        result = g_app.error()
+    return result
+
 @g_flask_app.route('/api/<version>/<method>', methods = ['GET','POST'])
 def api(version, method):
     """Endpoint for API calls."""
@@ -523,8 +551,10 @@ def api(version, method):
             user_id, _, _ = g_app.user_mgr.retrieve_user(username)
 
         # The the API params.
+        verb = "POST"
         if flask.request.method == 'GET':
-            params = ""
+            verb = "GET"
+            params = flask.request.args
         elif flask.request.data:
             params = json.loads(flask.request.data)
         else:
@@ -532,7 +562,7 @@ def api(version, method):
 
         # Process the API request.
         if version == '1.0':
-            handled, response = g_app.api(user_id, method, params)
+            handled, response = g_app.api(user_id, verb, method, params)
             if not handled:
                 response = "Failed to handle request: " + str(method)
                 g_app.log_error(response)
@@ -607,7 +637,7 @@ def main():
     session_mgr = SessionMgr.FlaskSessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, g_root_dir)
     data_mgr = DataMgr.DataMgr(root_url, g_root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
-    g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, args.googlemapskey, args.profile)
+    g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, args.googlemapskey, args.profile, args.debug)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 

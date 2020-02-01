@@ -295,6 +295,22 @@ class StraenWeb(object):
 
     @cherrypy.expose
     @require()
+    def workout(self, workout_id, *args, **kw):
+        """Renders the view for an individual workout."""
+        try:
+            return self.app.workout(workout_id)
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.workout.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
     def statistics(self, *args, **kw):
         """Renders the statistics view."""
         try:
@@ -573,6 +589,24 @@ class StraenWeb(object):
         return result
 
     @cherrypy.expose
+    def ical(self, calendar_id):
+        """Returns the ical calendar with the specified ID."""
+        try:
+            handled, response = self.app.ical(calendar_id)
+            if not handled:
+                cherrypy.response.status = 400
+            return response
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.ical.__name__)
+        return self.error()
+
+    @cherrypy.expose
     def api(self, *args, **kw):
         """Endpoint for API calls."""
         response = ""
@@ -585,8 +619,10 @@ class StraenWeb(object):
 
             # The the API params.
             if cherrypy.request.method == "GET":
+                verb = "GET"
                 params = kw
             else:
+                verb = "POST"
                 cl = int(cherrypy.request.headers['Content-Length'])
                 if cl > 0:
                     params = cherrypy.request.body.read(cl)
@@ -599,7 +635,7 @@ class StraenWeb(object):
                 api_version = args[0]
                 if api_version == '1.0':
                     method = args[1:]
-                    handled, response = self.app.api(user_id, method[0], params)
+                    handled, response = self.app.api(user_id, verb, method[0], params)
                     if not handled:
                         response = "Failed to handle request: " + str(method)
                         self.log_error(response)
@@ -684,7 +720,7 @@ def main():
     session_mgr = SessionMgr.CherryPySessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr, root_dir)
     data_mgr = DataMgr.DataMgr(root_url, root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
-    backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey, args.profile)
+    backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey, args.profile, args.debug)
     g_app = StraenWeb(backend)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')

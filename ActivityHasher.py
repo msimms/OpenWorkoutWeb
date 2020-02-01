@@ -52,7 +52,7 @@ class ActivityHasher(object):
                 # Accelerometer data is stored differently....
                 if sensor_type == Keys.APP_ACCELEROMETER_KEY:
                     for datum in self.activity[sensor_type]:
-                        time = str(datum[Keys.ACCELEROMETER_TIME_KEY])
+                        time = str(datum[Keys.ACCELEROMETER_TIME_KEY]).encode('utf-8')
                         x = self.floatToStr(datum[Keys.ACCELEROMETER_AXIS_NAME_X])
                         y = self.floatToStr(datum[Keys.ACCELEROMETER_AXIS_NAME_Y])
                         z = self.floatToStr(datum[Keys.ACCELEROMETER_AXIS_NAME_Z])
@@ -65,10 +65,10 @@ class ActivityHasher(object):
                     for datum in self.activity[sensor_type]:
                         if sys.version_info[0] < 3:
                             time = str(int(datum.keys()[0])).encode('utf-8')
-                            value = self.floatToStr(datum.values()[0])
+                            value = self.floatToStr(float(datum.values()[0]))
                         else:
                             time = str(int(list(datum.keys())[0])).encode('utf-8')
-                            value = self.floatToStr(list(datum.values())[0])
+                            value = self.floatToStr(float(list(datum.values())[0]))
 
                         h.update(time)
                         h.update(value)

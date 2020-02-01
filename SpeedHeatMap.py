@@ -5,7 +5,7 @@ import HeatMap
 from decimal import *
 
 class SpeedHeatMap(HeatMap.HeatMap):
-    """Heat map for speed values."""
+    """Class that generates a heat map for speed values."""
 
     def __init__(self):
         HeatMap.HeatMap.__init__(self)

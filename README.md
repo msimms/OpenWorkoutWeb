@@ -54,7 +54,7 @@ python start_flask.py [--debug] [--host <hostname>] [--hostport <hostport>] [--g
 
 ## Architecture
 
-The software architecture makes it possible to use this system with different front-end technologies.
+The software architecture makes it possible to use this system with different front-end technologies. Also, computationally expensive analysis tasks are kept separate from the main application, communicating via RabbitMQ.
 
 ![Architecture Diagram](https://github.com/msimms/StraenWeb/blob/master/docs/Architecture.png?raw=true)
 
@@ -149,6 +149,11 @@ The software architecture makes it possible to use this system with different fr
 * Bug fixes when importing and exporting activities.
 * Ability to export position data as a CSV file.
 * Bug fixes in computing gear distances.
+
+### 0.18
+* Bug fixes, including many pertaining to the flask front end as well as activity analysis.
+* Added an iCal server for subscribing to planned workouts.
+* Added planned workouts to the My Activities calendar.
 
 ## Tech
 This software uses several other source projects to work properly:

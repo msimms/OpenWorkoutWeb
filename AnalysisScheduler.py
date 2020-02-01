@@ -39,8 +39,6 @@ class AnalysisScheduler(object):
         if not self.enabled:
             return
 
-        if Keys.ACTIVITY_USER_ID_KEY not in activity:
-            activity[Keys.ACTIVITY_USER_ID_KEY] = activity_user_id
         analysis_task = analyze_activity.delay(dumps(activity))
         if data_mgr is not None:
             data_mgr.track_analysis_task(activity_user_id, analysis_task.task_id)

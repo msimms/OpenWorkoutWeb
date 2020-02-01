@@ -30,6 +30,20 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
 
 <script>
+    function set_preferred_long_run_day()
+    {
+		var the_url = "${root_url}/api/1.0/update_settings";
+		var preferred_long_run_day = document.getElementById("preferred_long_run_day").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["preferred long run day"] : preferred_long_run_day});
+		if (send_post_request(the_url, dict, result_text))
+			alert("Preferred long run day updated!");
+		else
+			alert("An error occurred!");
+    }
+
 	function generate_workout_plan()
 	{
 		var the_url = "${root_url}/api/1.0/generate_workout_plan";
@@ -93,15 +107,28 @@ ${goals}
 
 	<hr>
 
-    <h2>Plans</h2>
+    <h2>Preferences</h2>
     <p>
-${plans}
+        Preferred Long Run Day: <select name="preferred_long_run_day" id="preferred_long_run_day" class="right" value="Weekday" onchange="return set_preferred_long_run_day()">
+${preferred_long_run_day}
+        </select>
     </p>
+
+    <hr>
+
+    <h2>Plans</h2>
     <p>
         Workout plan generation is highly experimental. Consult your doctor and use common sense before following any exercise plan.
     </p>
     <p>
         <button type="button" onclick="return generate_workout_plan()">Generate New Workout Plan</button>
+    </p>
+
+    <hr>
+
+    <h2>Calendar</h2>
+    <p>
+        Planned workouts will be added to the <a href="${root_url}/my_activities"><b>My Activities</b></a> calendar.
     </p>
 
 </div>

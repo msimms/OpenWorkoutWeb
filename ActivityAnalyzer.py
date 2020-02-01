@@ -46,6 +46,7 @@ class ActivityAnalyzer(object):
 
         # Sanity check.
         if self.activity is None:
+            self.log_error("The activity object was not provided.")
             return
 
         try:
@@ -59,6 +60,14 @@ class ActivityAnalyzer(object):
             activity_user_id = None
             if Keys.ACTIVITY_USER_ID_KEY in self.activity:
                 activity_user_id = str(self.activity[Keys.ACTIVITY_USER_ID_KEY])
+
+            # Activity ID is not set, or is not valid. Try to sort it out.
+            if activity_user_id is None:
+                self.log_error("The activity user ID was not provided.")
+                return
+
+            # Make sure the activity start time is set.
+            self.data_mgr.update_activity_start_time(self.activity)
 
             # Hash the activity.
             print("Hashing the activity...")
@@ -89,6 +98,7 @@ class ActivityAnalyzer(object):
             sensor_types_to_analyze = SensorAnalyzerFactory.supported_sensor_types()
             for sensor_type in sensor_types_to_analyze:
                 if sensor_type in self.activity:
+                    print("Analyzing " + sensor_type + " data...")
                     sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type], activity_type, activity_user_id, self.data_mgr)
                     self.summary_data.update(sensor_analyzer.analyze())
                     self.should_yield()
@@ -118,7 +128,7 @@ class ActivityAnalyzer(object):
                 self.summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY] = location_description
 
                 # Store the results.
-                print("Storing results...")
+                print("Storing the activity summary...")
                 if not self.data_mgr.create_activity_summary(activity_id, self.summary_data):
                     self.log_error("Error returned when saving activity summary data: " + str(self.summary_data))
             else:
@@ -126,13 +136,13 @@ class ActivityAnalyzer(object):
             self.should_yield()
 
             # Update personal bests.
-            print("Updating personal bests...")
-            if activity_user_id and Keys.ACTIVITY_TIME_KEY in self.activity:
+            if Keys.ACTIVITY_TIME_KEY in self.activity:
+                print("Updating personal bests...")
                 activity_time = self.activity[Keys.ACTIVITY_TIME_KEY]
                 if not self.data_mgr.update_bests_for_activity(activity_user_id, activity_id, activity_type, activity_time, self.summary_data):
                     self.log_error("Error returned when updating personal records.")
             else:
-                self.log_error("User ID or activity time not provided. Cannot update personal records.")
+                self.log_error("Activity time not provided. Cannot update personal records.")
         except:
             self.log_error("Exception when analyzing activity data: " + str(self.summary_data))
             self.log_error(traceback.format_exc())

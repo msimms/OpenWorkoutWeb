@@ -27,6 +27,8 @@ import LocationAnalyzer
 import Api
 import BmiCalculator
 import DataMgr
+import IcalServer
+import InputChecker
 import Units
 import UserMgr
 import VO2MaxCalculator
@@ -88,7 +90,7 @@ class RedirectException(Exception):
 class App(object):
     """Class containing the URL handlers."""
 
-    def __init__(self, user_mgr, data_mgr, root_dir, root_url, google_maps_key, enable_profiling):
+    def __init__(self, user_mgr, data_mgr, root_dir, root_url, google_maps_key, enable_profiling, debug):
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
         self.root_dir = root_dir
@@ -96,11 +98,13 @@ class App(object):
         self.tempfile_dir = os.path.join(self.root_dir, 'tempfile')
         self.tempmod_dir = os.path.join(self.root_dir, 'tempmod')
         self.google_maps_key = google_maps_key
+        self.debug = debug
         self.unmapped_activity_html_file = os.path.join(root_dir, HTML_DIR, 'unmapped_activity.html')
         self.map_single_osm_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_osm.html')
         self.map_single_google_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
         self.map_multi_html_file = os.path.join(root_dir, HTML_DIR, 'map_multi_google.html')
         self.error_logged_in_html_file = os.path.join(root_dir, HTML_DIR, 'error_logged_in.html')
+        self.ical_server = IcalServer.IcalServer(data_mgr, self.root_url)
 
         self.tempfile_dir = os.path.join(root_dir, 'tempfile')
         if not os.path.exists(self.tempfile_dir):
@@ -324,7 +328,7 @@ class App(object):
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None or len(summary_data) == 0:
-            self.data_mgr.analyze(activity, activity_user_id)
+            self.data_mgr.analyze_activity(activity, activity_user_id)
 
         # Find the sets data.
         sets = None
@@ -361,6 +365,9 @@ class App(object):
         # Add the activity date.
         if Keys.ACTIVITY_TIME_KEY in activity:
             summary += "\t<li>Start Time: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script></li>\n"
+
+        # Close the summary list.
+        summary += "</ul>\n"
 
         # Controls are only allowed if the user viewing the activity owns it.
         if belongs_to_current_user:
@@ -568,7 +575,7 @@ class App(object):
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None or len(summary_data) == 0:
-            self.data_mgr.analyze(activity, activity_user_id)
+            self.data_mgr.analyze_activity(activity, activity_user_id)
 
         # Build the summary data view.
         summary = "<ul>\n"
@@ -624,6 +631,9 @@ class App(object):
                 normalized_power = summary_data[Keys.NORMALIZED_POWER]
                 summary += "\t<li>Normalized Power: {:.2f} ".format(normalized_power) + Units.get_power_units_str() + "</li>\n"
 
+        # Close the summary list.
+        summary += "</ul>\n"
+
         # Build the detailed analysis table.
         details_str = ""
         excluded_keys = Keys.UNSUMMARIZABLE_KEYS
@@ -636,7 +646,7 @@ class App(object):
                     details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE)
                     details_str += "</td><tr>\n"
                 elif key == Keys.ACTIVITY_INTERVALS:
-                    details_str += "<td><b>Intervals</b><td><b>"
+                    details_str += "<td><b>Intervals</b><td>"
                     details_str += App.render_intervals_str(summary_data[key])
                     details_str += "</td><tr>\n"
                 elif key not in excluded_keys:
@@ -648,6 +658,13 @@ class App(object):
                     details_str += "</td><tr>\n"
         if len(details_str) == 0:
             details_str = "<td><b>No data</b></td><tr>\n"
+
+        # Append the hash (for debugging purposes).
+        if self.debug:
+            if Keys.ACTIVITY_HASH_KEY in summary_data:
+                details_str += "<td><b>Activity Hash</b></td><td>"
+                details_str += summary_data[Keys.ACTIVITY_HASH_KEY]
+                details_str += "</td><tr>\n"
 
         # Controls are only allowed if the user viewing the activity owns it.
         if belongs_to_current_user:
@@ -1146,27 +1163,51 @@ class App(object):
         # Set the default goals based on previous selections.
         goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
         goal_date = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY)
-        goals_str = ""
-        for possible_goal in Keys.GOALS:
-            goals_str += "\t\t\t<option value=\"" + possible_goal + "\""
-            if possible_goal.lower() == goal.lower():
-                goals_str += " selected"
-            goals_str += ">" + possible_goal + "</option>\n"
+        if goal_date is not None:
+            goals_str = ""
+            for possible_goal in Keys.GOALS:
+                goals_str += "\t\t\t<option value=\"" + possible_goal + "\""
+                if goal is not None and possible_goal.lower() == goal.lower():
+                    goals_str += " selected"
+                goals_str += ">" + possible_goal + "</option>\n"
 
-        # Show plans that have already been generated.
-        plans_str = ""
-        workouts = self.data_mgr.retrieve_workouts_for_user(user_id)
-        if workouts is not None:
-            plans_str = "\t<table>\n"
-            for workout in workouts:
-                plans_str += "\t\t<td>"
-                plans_str += "</td><tr>\n"
-            plans_str += "\t</table>\n"
+        # Set the preferred long run of the week.
+        preferred_long_run_day = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY)
+        days_str = ""
+        for day in InputChecker.days_of_week:
+            days_str += "\t\t\t<option value=\"" + day + "\""
+            if preferred_long_run_day is not None and preferred_long_run_day.lower() == day.lower():
+                days_str += " selected"
+            days_str += ">" + day + "</option>\n"
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, runpaces=run_paces_str, plans=plans_str, goals=goals_str, goal_date=goal_date)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, runpaces=run_paces_str, goals=goals_str, goal_date=goal_date, preferred_long_run_day=days_str)
+
+    @statistics
+    def workout(self, workout_id):
+        """Renders the view for an individual workout."""
+
+        # Sanity check the input.
+        if not InputChecker.is_uuid(workout_id):
+            return self.error()
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'workout.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, workout_id=workout_id)
 
     @statistics
     def stats(self):
@@ -1296,6 +1337,12 @@ class App(object):
         if user_id is None:
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
+
+        # Sanity check the input.
+        if gear_id is None:
+            return self.error()
+        if not InputChecker.is_uuid(gear_id):
+            return self.error()
 
         service_records = "\t\t<table>\n"
         gear_name = ""
@@ -1711,7 +1758,7 @@ class App(object):
 
         # Render the privacy option.
         privacy_options = "\t\t<option value=\"Public\""
-        if selected_default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC:
+        if selected_default_privacy is not None and selected_default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC:
             privacy_options += " selected"
         privacy_options += ">Public</option>\n"
         privacy_options += "\t\t<option value=\"Private\""
@@ -1721,11 +1768,11 @@ class App(object):
 
         # Render the units
         unit_options = "\t\t<option value=\"Metric\""
-        if selected_units == Keys.UNITS_METRIC_KEY:
+        if selected_units is not None and selected_units == Keys.UNITS_METRIC_KEY:
             unit_options += " selected"
         unit_options += ">Metric</option>\n"
         unit_options += "\t\t<option value=\"Standard\""
-        if selected_units == Keys.UNITS_STANDARD_KEY:
+        if selected_units is not None and selected_units == Keys.UNITS_STANDARD_KEY:
             unit_options += " selected"
         unit_options += ">Standard</option>"
 
@@ -1735,10 +1782,21 @@ class App(object):
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, privacy_options=privacy_options, unit_options=unit_options)
 
     @statistics
-    def api(self, user_id, method, params):
+    def ical(self, calendar_id):
+        """Returns the ical calendar with the specified ID."""
+        if calendar_id is None:
+            return self.error()
+        if not InputChecker.is_uuid(calendar_id):
+            return self.error()
+
+        handled, response = self.ical_server.handle_request(calendar_id)
+        return handled, response
+
+    @statistics
+    def api(self, user_id, verb, method, params):
         """Handles an API request."""
         api = Api.Api(self.user_mgr, self.data_mgr, user_id, self.root_url)
-        handled, response = api.handle_api_1_0_request(method, params)
+        handled, response = api.handle_api_1_0_request(verb, method, params)
         return handled, response
 
     @statistics

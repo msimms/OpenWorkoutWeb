@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from CeleryWorker import celery_worker
 import argparse
 import celery
+import datetime
 import json
 import logging
 import os
@@ -72,7 +73,7 @@ class WorkoutPlanGenerator(object):
     def update_summary_data_cb(context, activity, user_id):
         """Callback function for update_summary_data."""
         if Keys.ACTIVITY_SUMMARY_KEY not in activity:
-            analysis_obj = context.data_mgr.analyze(activity, user_id)
+            context.data_mgr.analyze_activity(activity, user_id)
 
     def calculate_inputs(self, user_id):
         """Looks through the user's data and calculates the neural net inputs."""
@@ -86,8 +87,7 @@ class WorkoutPlanGenerator(object):
         self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.FOUR_WEEKS)
 
         # Fetch the detail of the user's goal.
-        goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
-        goal_date = int(self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY))
+        goal, goal_date = self.data_mgr.retrieve_user_goal(user_id)
         if goal_date <= now:
             raise Exception("The goal date should be in the future.")
         weeks_until_goal = (goal_date - now) / (7 * 24 * 60 * 60) # Convert to weeks
@@ -140,6 +140,7 @@ class WorkoutPlanGenerator(object):
 
     def generate_workouts(self, user_id, inputs):
         """Generates workouts for the specified user to perform in the next week."""
+
         swim_planner = SwimPlanGenerator.SwimPlanGenerator(user_id)
         bike_planner = BikePlanGenerator.BikePlanGenerator(user_id)
         run_planner = RunPlanGenerator.RunPlanGenerator(user_id)
@@ -191,8 +192,26 @@ class WorkoutPlanGenerator(object):
 
     def organize_schedule(self, user_id, workouts):
         """Arranges the user's workouts into days/weeks, etc. To be called after the outputs are generated, but need cleaning up."""
+
+        # What is the first day of next week?
+        today = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0).date()
+        start_time = today + datetime.timedelta(days=7-today.weekday())
+        end_time = start_time + datetime.timedelta(days=7)
+
+        # Remove any existing workouts that cover the time period in question.
+        if not self.data_mgr.delete_workouts_for_date_range(user_id, start_time, end_time):
+            print("Failed to remove old workouts from the database.")
+
+        # Schedule the new workouts.
         scheduler = WorkoutScheduler.WorkoutScheduler(user_id)
-        return scheduler.schedule_workouts(workouts)
+        return scheduler.schedule_workouts(workouts, start_time)
+
+    def store_plan(self, user_id, workouts):
+        """Saves the user's workouts to the database."""
+        for workout_obj in workouts:
+            result = self.data_mgr.create_workout(user_id, workout_obj)
+            if not result:
+                print("Failed to save a workout to the database.")
 
     def generate_plan(self, model):
         """Entry point for workout plan generation. If a model is not provided then a simpler, non-neural network-based algorithm, is used instead."""
@@ -204,25 +223,28 @@ class WorkoutPlanGenerator(object):
         if model is None:
             self.log_error("Model not provided. Will use non-ML algorithm instead.")
 
-        outputs = []
+        workouts = []
 
         try:
-            user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID]
+            user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY]
             inputs = self.calculate_inputs(user_id)
 
             # Generate the workouts.
             if model is None:
-                outputs = self.generate_workouts(user_id, inputs)
+                workouts = self.generate_workouts(user_id, inputs)
             else:
-                outputs = self.generate_workouts_using_model(user_id, inputs, model)
+                workouts = self.generate_workouts_using_model(user_id, inputs, model)
 
             # Organize the workouts into a schedule.
-            outputs = self.organize_schedule(user_id, outputs)
+            workouts = self.organize_schedule(user_id, workouts)
+
+            # Save to the database.
+            self.store_plan(user_id, workouts)
         except:
             self.log_error("Exception when generating a workout plan.")
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return outputs
+        return workouts
 
 def generate_model(training_file_name):
     """Creates the neural network, based on training data from the supplied JSON file."""
@@ -281,18 +303,33 @@ def generate_temp_file_name(extension):
     return tempfile_name
     
 @celery_worker.task()
-def generate_workout_plan(user_str):
+def generate_workout_plan(user_str, format):
     """Entry point for the celery worker."""
     global g_model
 
     print("Starting workout plan generation...")
+
     user_obj = json.loads(user_str)
     generator = WorkoutPlanGenerator(user_obj)
+
+    # Generate the workouts.
     workouts = generator.generate_plan(g_model)
+
+    # Export the workouts to local files, if requested.
     for workout in workouts:
-        tempfile_name = generate_temp_file_name(".zwo")
-        workout.export_to_zwo(tempfile_name)
-        print("Exported a workout to " + tempfile_name + ".")
+        if format is None or format == 'text':
+            print(workout.export_to_text())
+        elif format == 'json':
+            print(workout.export_to_json_str())
+        elif format == 'ics':
+            tempfile_name = generate_temp_file_name(".ics")
+            workout.export_to_ics(tempfile_name)
+            print("Exported a workout to " + tempfile_name + ".")
+        elif format == 'zwo':
+            tempfile_name = generate_temp_file_name(".zwo")
+            workout.export_to_zwo(tempfile_name)
+            print("Exported a workout to " + tempfile_name + ".")
+
     print("Workout plan generation finished.")
 
 def main():
@@ -302,6 +339,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--user_id", default="", help="The user ID for whom we are to generate a workout plan.", required=False)
     parser.add_argument("--train", default="", help="The path to the training plan model.", required=False)
+    parser.add_argument("--format", default="text", help="The output format.", required=False)
 
     try:
         args = parser.parse_args()
@@ -310,12 +348,12 @@ def main():
         sys.exit(1)
 
     if len(args.train) > 0:
-       g_model = generate_model(args.train)        
+       g_model = generate_model(args.train, args.format)
 
     if len(args.user_id) > 0:
         data = {}
         data['user_id'] = args.user_id
-        generate_workout_plan(json.dumps(data))
+        generate_workout_plan(json.dumps(data), args.format)
 
 
 if __name__ == "__main__":

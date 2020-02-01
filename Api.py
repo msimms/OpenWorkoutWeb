@@ -489,6 +489,7 @@ class Api(object):
 
         # Delete all the user's gear.
         self.data_mgr.delete_user_gear(self.user_id)
+        return True, ""
 
     def handle_delete_activities(self, values):
         """Removes the current user's activity data."""
@@ -509,6 +510,7 @@ class Api(object):
 
         # Delete all the user's activities.
         self.data_mgr.delete_user_activities(self.user_id)
+        return True, ""
 
     def handle_delete_user(self, values):
         """Removes the current user and all associated data."""
@@ -534,7 +536,7 @@ class Api(object):
         self.user_mgr.delete_user(self.user_id)
         return True, ""
 
-    def handle_list_activities(self, values):
+    def handle_list_activities(self, values, include_followed_users):
         """Returns a list of JSON objects describing all of the user's activities."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -547,9 +549,9 @@ class Api(object):
         # Get the user details.
         _, _, user_realname = self.user_mgr.retrieve_user(username)
 
-        # Get the activiites that belong to the logged in user.
+        # Get the activities that belong to the logged in user.
         matched_activities = []
-        if Keys.FOLLOWING_KEY in values:
+        if include_followed_users:
             activities = self.data_mgr.retrieve_all_activities_visible_to_user(self.user_id, user_realname, None, None)
         else:
             activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
@@ -566,7 +568,7 @@ class Api(object):
 
                 if Keys.ACTIVITY_TIME_KEY in activity and Keys.ACTIVITY_ID_KEY in activity:
                     url = self.root_url + "/activity/" + activity[Keys.ACTIVITY_ID_KEY]
-                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time':int(activity[Keys.ACTIVITY_TIME_KEY])}
+                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time': int(activity[Keys.ACTIVITY_TIME_KEY])}
                 matched_activities.append(temp_activity)
         json_result = json.dumps(matched_activities, ensure_ascii=False)
         return True, json_result
@@ -583,7 +585,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        # Get the activiites that belong to the logged in user.
+        # Get the activities that belong to the logged in user.
         activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None)
         deleted = False
         for activity in activities:
@@ -1142,6 +1144,13 @@ class Api(object):
                     raise ApiException.ApiMalformedRequestException("Invalid units value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY, preferred_units)
 
+            # Preferred long run day of the week.
+            elif decoded_key == Keys.PREFERRED_LONG_RUN_DAY_KEY:
+                preferred_long_run_day = urllib.unquote_plus(values[key]).lower()
+                if not InputChecker.is_day_of_week(preferred_long_run_day):
+                    raise ApiException.ApiMalformedRequestException("Invalid long run day.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day)
+
         return result, ""
 
     def handle_update_profile(self, values):
@@ -1219,7 +1228,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity.")
 
         activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
-        self.data_mgr.analyze(activity, activity_user_id)
+        self.data_mgr.analyze_activity(activity, activity_user_id)
         return True, ""
 
     def handle_generate_workout_plan(self, values):
@@ -1238,6 +1247,48 @@ class Api(object):
         self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
         self.data_mgr.generate_workout_plan(self.user_id)
         return True, ""
+
+    def handle_list_workouts(self, values):
+        """Called when the user wants wants a list of their planned workouts."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        # Get the workouts that belong to the logged in user.
+        workouts = self.data_mgr.retrieve_workouts_for_user(self.user_id)
+
+        # Convert the activities list to an array of JSON objects for return to the client.
+        matched_workouts = []
+        if workouts is not None and isinstance(workouts, list):
+            for workout in workouts:
+                if workout.scheduled_time is not None and workout.workout_id is not None and workout.description is not None:
+                    url = self.root_url + "/workout/" + str(workout.workout_id)
+                    temp_workout = {'title': workout.description, 'url': url, 'time': time.mktime(workout.scheduled_time.timetuple())}
+                    matched_workouts.append(temp_workout)
+        json_result = json.dumps(matched_workouts, ensure_ascii=False)
+        return True, json_result
+
+    def handle_get_workout_description(self, values):
+        """Called when the user requests the description for a workout."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        workout_id = values[Keys.WORKOUT_ID_KEY]
+        if not InputChecker.is_uuid(workout_id):
+            raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
+
+        # Get the workouts that belong to the logged in user.
+        workout = self.data_mgr.retrieve_workout(self.user_id, workout_id)
+        json_results = workout.export_to_json_str()
+        return True, json_results
+
+    def handle_get_workout_ical_url(self, values):
+        """Called when the user wants a link to the ical url for their planned workouts."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        calendar_id = self.data_mgr.retrieve_workouts_calendar_id_for_user(self.user_id)
+        url = self.root_url + "/ical/" + str(calendar_id)
+        return True, url
 
     def handle_get_location_description(self, values):
         """Called when the user wants get the political location that corresponds to an activity."""
@@ -1282,28 +1333,48 @@ class Api(object):
 
         return True, str(summary_data[Keys.ACTIVITY_HASH_KEY])
 
-    def handle_api_1_0_request(self, request, values):
-        """Called to parse a version 1.0 API message."""
-        if self.user_id is None:
-            if Keys.SESSION_KEY in values:
-                username = self.user_mgr.get_logged_in_user_from_cookie(values[Keys.SESSION_KEY])
-                if username is not None:
-                    self.user_id, _, _ = self.user_mgr.retrieve_user(username)
-
-        if request == 'update_status':
-            return self.handle_update_status(values)
-        elif request == 'activity_track':
+    def handle_api_1_0_get_request(self, request, values):
+        """Called to parse a version 1.0 API GET request."""
+        if request == 'activity_track':
             return self.handle_retrieve_activity_track(values)
         elif request == 'activity_metadata':
             return self.handle_retrieve_activity_metadata(values)
+        elif request == 'login_status':
+            return self.handle_login_status(values)
+        elif request == 'list_all_activities':
+            return self.handle_list_activities(values, True)
+        elif request == 'list_my_activities':
+            return self.handle_list_activities(values, False)
+        elif request == 'list_tags':
+            return self.handle_list_tags(values)
+        elif request == 'list_comments':
+            return self.handle_list_comments(values)
+        elif request == 'list_gear':
+            return self.handle_list_gear(values)
+        elif request == 'list_workouts':
+            return self.handle_list_workouts(values)
+        elif request == 'get_workout_description':
+            return self.handle_get_workout_description(values)
+        elif request == 'get_workout_ical_url':
+            return self.handle_get_workout_ical_url(values)
+        elif request == 'get_location_description':
+            return self.handle_get_location_description(values)
+        elif request == 'activity_id_from_hash':
+            return self.handle_get_activity_id_from_hash(values)
+        elif request == 'activity_hash_from_id':
+            return self.handle_get_activity_hash_from_id(values)
+        return False, ""
+
+    def handle_api_1_0_post_request(self, request, values):
+        """Called to parse a version 1.0 API POST request."""
+        if request == 'update_status':
+            return self.handle_update_status(values)
         elif request == 'update_activity_metadata':
             return self.handle_update_activity_metadata(values)
         elif request == 'login':
             return self.handle_login(values)
         elif request == 'create_login':
             return self.handle_create_login(values)
-        elif request == 'login_status':
-            return self.handle_login_status(values)
         elif request == 'logout':
             return self.handle_logout(values)
         elif request == 'update_email':
@@ -1316,8 +1387,6 @@ class Api(object):
             return self.delete_activities(values)
         elif request == 'delete_user':
             return self.handle_delete_user(values)
-        elif request == 'list_activities':
-            return self.handle_list_activities(values)
         elif request == 'delete_activity':
             return self.handle_delete_activity(values)
         elif request == 'add_activity':
@@ -1346,16 +1415,10 @@ class Api(object):
             return self.handle_create_tag(values)
         elif request == 'delete_tag':
             return self.handle_delete_tag(values)
-        elif request == 'list_tags':
-            return self.handle_list_tags(values)
         elif request == 'create_comment':
             return self.handle_create_comment(values)
-        elif request == 'list_comments':
-            return self.handle_list_comments(values)
         elif request == 'create_gear':
             return self.handle_create_gear(values)
-        elif request == 'list_gear':
-            return self.handle_list_gear(values)
         elif request == 'update_gear':
             return self.handle_update_gear(values)
         elif request == 'delete_gear':
@@ -1376,10 +1439,18 @@ class Api(object):
             return self.handle_refresh_analysis(values)
         elif request == 'generate_workout_plan':
             return self.handle_generate_workout_plan(values)
-        elif request == 'get_location_description':
-            return self.handle_get_location_description(values)
-        elif request == 'activity_id_from_hash':
-            return self.handle_get_activity_id_from_hash(values)
-        elif request == 'activity_hash_from_id':
-            return self.handle_get_activity_hash_from_id(values)
+        return False, ""
+
+    def handle_api_1_0_request(self, verb, request, values):
+        """Called to parse a version 1.0 API message."""
+        if self.user_id is None:
+            if Keys.SESSION_KEY in values:
+                username = self.user_mgr.get_logged_in_user_from_cookie(values[Keys.SESSION_KEY])
+                if username is not None:
+                    self.user_id, _, _ = self.user_mgr.retrieve_user(username)
+
+        if verb == 'GET':
+            return self.handle_api_1_0_get_request(request, values)
+        elif verb == 'POST':
+            return self.handle_api_1_0_post_request(request, values)
         return False, ""
