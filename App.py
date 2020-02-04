@@ -1013,6 +1013,11 @@ class App(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
+    def render_activity_href(self, activity_id, display_str):
+        """Helper function that renders an activity href."""
+        url_str = "<a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + display_str + "</a>"
+        return url_str
+
     def render_personal_record_simple(self, user_id, user_activities, activity_type, record, record_name):
         """Helper function that renders a single table row in the personal bests table."""
         record_value = record[0]
@@ -1029,7 +1034,8 @@ class App(object):
             out_str += "<td></td>"
         else:
             out_str += "<td><script>document.write(unix_time_to_local_date_string(" + str(activity_time) + "))</script></td>"
-        out_str += "<td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td>"
+        out_str += "<td>"
+        out_str += self.render_activity_href(activity_id, record_str)
         out_str += "<tr>\n"
         return out_str
 
@@ -1043,7 +1049,9 @@ class App(object):
         params = {}
         params[Keys.ACTIVITY_TYPE_KEY] = activity_type
         params[Keys.RECORD_NAME] = record_name
-        out_str += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><td><a href=\"" + self.root_url + "/"
+        out_str += "</td><td>"
+        out_str += self.render_activity_href(activity_id, record_str)
+        out_str += "</td><td><a href=\"" + self.root_url + "/"
         if show_progression:
             out_str += "record_progression"
         else:
