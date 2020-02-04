@@ -1260,9 +1260,9 @@ class Api(object):
         matched_workouts = []
         if workouts is not None and isinstance(workouts, list):
             for workout in workouts:
-                if workout.scheduled_time is not None and workout.workout_id is not None and workout.description is not None:
+                if workout.scheduled_time is not None and workout.workout_id is not None and workout.type is not None:
                     url = self.root_url + "/workout/" + str(workout.workout_id)
-                    temp_workout = {'title': workout.description, 'url': url, 'time': time.mktime(workout.scheduled_time.timetuple())}
+                    temp_workout = {'title': workout.type, 'url': url, 'time': time.mktime(workout.scheduled_time.timetuple())}
                     matched_workouts.append(temp_workout)
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
