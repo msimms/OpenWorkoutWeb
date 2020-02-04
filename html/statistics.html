@@ -30,6 +30,96 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
 
 <script>
+    function latlon_to_xy(canvas, lat, lon, scale)
+    {
+        var width = canvas.width;
+        var height = canvas.height;
+
+        x = ((lon + 180.0) / 360.0) * width;
+        y = height - (((lat + 90.0) / 180.0) * height);
+        return [x, y];
+    }
+
+    function draw_coordinate_list(canvas, ctx, coordinate_list, scale)
+    {
+        ctx.beginPath();
+        for (coordinate of coordinate_list)
+        {
+            [x, y] = latlon_to_xy(canvas, coordinate[1], coordinate[0], scale);
+
+            if (is_first)
+            {
+                ctx.moveTo(x, y);
+                is_first = false;
+            }
+            else
+            {
+                ctx.lineTo(x, y);
+            }
+        }
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    function draw_geo_polygon(canvas, ctx, polygon_objects, scale)
+    {
+        for (coordinate_list of polygon_objects)
+        {
+            draw_coordinate_list(canvas, ctx, coordinate_list, scale);
+        }
+    }
+
+    function draw_region(canvas, ctx, region_objects, scale)
+    {
+        ctx.fillStyle = '#f00';
+
+        for (region_object of region_objects.features)
+        {
+            is_first = true;
+
+            if (region_object.geometry.type == "Polygon")
+            {
+                draw_geo_polygon(canvas, ctx, region_object.geometry.coordinates, scale);
+            }
+            else if (region_object.geometry.type == "MultiPolygon")
+            {
+                for (polygon_objects of region_object.geometry.coordinates)
+                {
+                    draw_geo_polygon(canvas, ctx, polygon_objects, scale);
+                }
+            }
+        }
+    }
+
+    var draw_world_map = function(region_objects)
+    {
+        var canvas = document.getElementById("worldCanvas");
+        var ctx = canvas.getContext("2d");
+        draw_region(canvas, ctx, region_objects, 1.0);
+    }
+
+    var draw_us_map = function(region_objects)
+    {
+        var canvas = document.getElementById("usCanvas");
+        var ctx = canvas.getContext("2d");
+        draw_region(canvas, ctx, region_objects, 3.0);
+    }
+
+    var draw_canada_map = function(region_objects)
+    {
+        var canvas = document.getElementById("canadaCanvas");
+        var ctx = canvas.getContext("2d");
+        draw_region(canvas, ctx, region_objects, 3.0);
+    }
+
+    function get_map_data()
+    {
+		$.ajax({ type: 'GET', url: "${root_url}/data/world.geo.json", cache: false, success: draw_world_map, dataType: "json" });
+		$.ajax({ type: 'GET', url: "${root_url}/data/us_states.geo.json", cache: false, success: draw_us_map, dataType: "json" });
+		$.ajax({ type: 'GET', url: "${root_url}/data/canada.geo.json", cache: false, success: draw_canada_map, dataType: "json" });
+    }
+
+    get_map_data();
 </script>
 
 <section class="nav">
@@ -53,6 +143,18 @@ ${oneyearbests}
 	<hr>
 
     <h2>Places</h2>
+    <h3>World</h3>
+    <canvas id="worldCanvas" width="960" height="480" style="border:1px solid #c3c3c3;">
+    Your browser does not support the canvas element.
+    </canvas>
+    <h3>United States</h3>
+    <canvas id="usCanvas" width="960" height="480" style="border:1px solid #c3c3c3;">
+    Your browser does not support the canvas element.
+    </canvas>
+    <h3>Canada</h3>
+    <canvas id="canadaCanvas" width="960" height="480" style="border:1px solid #c3c3c3;">
+    Your browser does not support the canvas element.
+    </canvas>
     <p>
 ${places}
     </p>

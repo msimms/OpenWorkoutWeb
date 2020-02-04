@@ -1304,6 +1304,17 @@ class Api(object):
         location_description = self.data_mgr.get_location_description(activity_id)
         return True, str(location_description)
 
+    def handle_get_location_summary(self, values):
+        """Called when the user wants get the summary of all political locations in which activities have occurred."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        username = self.user_mgr.get_logged_in_user()
+        _, _, user_realname = self.user_mgr.retrieve_user(username)
+        user_activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
+        heat_map = self.data_mgr.compute_location_heat_map(user_activities)
+        return True, str(heat_map)
+
     def handle_get_activity_id_from_hash(self, values):
         """Given the activity ID, return sthe activity hash, or an error if not found. Only looks at the logged in user's acivities."""
         if self.user_id is None:
@@ -1359,6 +1370,8 @@ class Api(object):
             return self.handle_get_workout_ical_url(values)
         elif request == 'get_location_description':
             return self.handle_get_location_description(values)
+        elif request == 'get_location_summary':
+            return self.handle_get_location_summary(values)
         elif request == 'activity_id_from_hash':
             return self.handle_get_activity_id_from_hash(values)
         elif request == 'activity_hash_from_id':
