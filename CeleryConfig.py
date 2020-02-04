@@ -1,4 +1,5 @@
-result_backend = ''
+broker_url = 'ampq://'
+result_backend = 'mongodb'
 task_serializer = 'json'
 result_serializer = 'json'
 accept_content = ['json']
