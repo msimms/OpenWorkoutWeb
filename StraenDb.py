@@ -1863,7 +1863,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_deferred_task(self, user_id, task_type, task_id):
+    def create_deferred_task(self, user_id, task_type, task_id, details):
         """Create method for tracking a deferred task, such as a file import or activity analysis."""
         if user_id is None:
             self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: user_id")
@@ -1893,6 +1893,8 @@ class MongoDatabase(Database.Database):
                 task = {}
                 task[Keys.TASK_ID_KEY] = task_id
                 task[Keys.TASK_TYPE_KEY] = task_type
+                if details is not None:
+                    task[Keys.TASK_DETAILS_KEY] = details
                 deferred_tasks.append(task)
                 user_tasks[Keys.TASKS_KEY] = deferred_tasks
                 self.tasks_collection.save(user_tasks)

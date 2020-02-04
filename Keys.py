@@ -257,10 +257,14 @@ DEFERRED_TASKS_USER_ID = "user_id"
 TASKS_KEY = "tasks"
 TASK_ID_KEY = "task id"
 TASK_TYPE_KEY = "task type"
+TASK_DETAILS_KEY = "task details"
 TASK_STATE_KEY = "task state"
 IMPORT_TASK_KEY = "import"
 ANALYSIS_TASK_KEY = "analysis"
 WORKOUT_PLAN_TASK_KEY = "workout plan"
+
+# Things associated with deferred tasks
+LOCAL_FILE_NAME = "local file name"
 
 TIME_KEYS = [ BEST_1K, BEST_MILE, BEST_5K, BEST_10K, BEST_15K, BEST_HALF_MARATHON, BEST_MARATHON, BEST_METRIC_CENTURY, BEST_CENTURY ]
 DISTANCE_KEYS = [ TOTAL_DISTANCE, LONGEST_DISTANCE ]

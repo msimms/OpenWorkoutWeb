@@ -211,7 +211,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity ID.")
         return self.database.create_activity_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
 
-    def track_import_task(self, user_id, task_id):
+    def track_import_task(self, user_id, task_id, local_file_name):
         """Called by the importer to store data associated with an ongoing import task."""
         if self.database is None:
             raise Exception("No database.")
@@ -219,20 +219,25 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No user ID.")
         if task_id is None:
             raise Exception("No task ID.")
-        return self.database.create_deferred_task(user_id, Keys.IMPORT_TASK_KEY, task_id)
+        if local_file_name is None:
+            raise Exception("No local file name.")
+
+        details = {}
+        details[Keys.LOCAL_FILE_NAME] = local_file_name
+        return self.database.create_deferred_task(user_id, Keys.IMPORT_TASK_KEY, task_id, details)
 
     def track_analysis_task(self, user_id, task_id):
-        """Called by the importer to store data associated with an ongoing import task."""
+        """Called by the importer to store data associated with an ongoing analysis task."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("No user ID.")
         if task_id is None:
             raise Exception("No task ID.")
-        return self.database.create_deferred_task(user_id, Keys.ANALYSIS_TASK_KEY, task_id)
+        return self.database.create_deferred_task(user_id, Keys.ANALYSIS_TASK_KEY, task_id, None)
 
     def track_workout_plan_task(self, user_id, task_id):
-        """Called by the importer to store data associated with an ongoing import task."""
+        """Called by the importer to store data associated with an ongoing workout task."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
@@ -240,7 +245,7 @@ class DataMgr(Importer.ActivityWriter):
         if task_id is None:
             raise Exception("No task ID.")
 
-        tasks = self.database.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, task_id)
+        tasks = self.database.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, task_id, None)
         for task in tasks:
             task_id = task[Keys.TASK_ID_KEY]
             r = self.celery_worker.AsyncResult(task_id)
