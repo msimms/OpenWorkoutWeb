@@ -42,7 +42,7 @@ PRODUCT_NAME = 'Straen'
 
 LOGIN_URL = '/login'
 DEFAULT_LOGGED_IN_URL = '/all_activities'
-IMPORT_STATUS_URL = '/import_status'
+TASK_STATUS_URL = '/task_status'
 HTML_DIR = 'html'
 
 
@@ -1495,7 +1495,7 @@ class App(object):
             file_data = ufile.file.read()
             self.data_mgr.import_file(username, user_id, file_data, ufile.filename)
 
-        raise RedirectException(IMPORT_STATUS_URL)
+        raise RedirectException(TASK_STATUS_URL)
 
     @statistics
     def manual_entry(self, activity_type):
@@ -1529,8 +1529,8 @@ class App(object):
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_type_list=activity_type_list_str)
 
     @statistics
-    def import_status(self):
-        """Renders the import status page."""
+    def task_status(self):
+        """Renders the status page for deferred tasks, such as file imports and activity analysis."""
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -1555,7 +1555,7 @@ class App(object):
             tasks_str += "</td><tr>\n"
 
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'import_status.html')
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'task_status.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=tasks_str)
 
@@ -1586,7 +1586,7 @@ class App(object):
             tasks_str += "</td><tr>\n"
 
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'import_status.html')
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'task_status.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=tasks_str)
 
