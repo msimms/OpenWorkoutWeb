@@ -1313,7 +1313,7 @@ class Api(object):
         _, _, user_realname = self.user_mgr.retrieve_user(username)
         user_activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
         heat_map = self.data_mgr.compute_location_heat_map(user_activities)
-        return True, str(heat_map)
+        return True, json.dumps(heat_map)
 
     def handle_get_activity_id_from_hash(self, values):
         """Given the activity ID, return sthe activity hash, or an error if not found. Only looks at the logged in user's acivities."""

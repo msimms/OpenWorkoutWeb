@@ -1238,22 +1238,10 @@ class App(object):
         cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.ONE_YEAR)
         one_year_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests, True)
 
-        # Show the list of places.
-        places_str = "<table>"
-        user_activities = self.data_mgr.retrieve_user_activity_list(user_id, user_realname, None, None)
-        heat_map = self.data_mgr.compute_location_heat_map(user_activities)
-        for location_str in heat_map:
-            places_str += "<td>"
-            places_str += location_str
-            places_str += "</td><td>"
-            places_str += str(heat_map[location_str])
-            places_str += "</td><tr>"
-        places_str += "</table>"
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'statistics.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, alltimebests=all_time_bests_str, oneyearbests=one_year_bests_str, places=places_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, alltimebests=all_time_bests_str, oneyearbests=one_year_bests_str)
 
     @statistics
     def gear(self):

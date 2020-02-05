@@ -30,22 +30,28 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
 
 <script>
-    function latlon_to_xy(canvas, lat, lon, scale)
+    var countries = [];
+    var us_states = [];
+    var canadian_provinces = [];
+
+    function latlon_to_xy(canvas, lat, lon, x_offset, y_offset, scale)
     {
         var width = canvas.width;
         var height = canvas.height;
 
-        x = ((lon + 180.0) / 360.0) * width;
-        y = height - (((lat + 90.0) / 180.0) * height);
+        x = (x_offset + (((lon + 180.0) / 360.0) * width)) * scale;
+        y = (y_offset + (height - (((lat + 90.0) / 180.0) * height))) * scale;
+
         return [x, y];
     }
 
-    function draw_coordinate_list(canvas, ctx, coordinate_list, scale)
+    function draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, scale)
     {
+        is_first = true;
         ctx.beginPath();
         for (coordinate of coordinate_list)
         {
-            [x, y] = latlon_to_xy(canvas, coordinate[1], coordinate[0], scale);
+            [x, y] = latlon_to_xy(canvas, coordinate[1], coordinate[0], x_offset, y_offset, scale);
 
             if (is_first)
             {
@@ -61,31 +67,33 @@
         ctx.fill();
     }
 
-    function draw_geo_polygon(canvas, ctx, polygon_objects, scale)
+    function draw_geo_polygon(canvas, ctx, polygon_objects, x_offset, y_offset, scale)
     {
         for (coordinate_list of polygon_objects)
         {
-            draw_coordinate_list(canvas, ctx, coordinate_list, scale);
+            draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, scale);
         }
     }
 
-    function draw_region(canvas, ctx, region_objects, scale)
+    function draw_region(canvas, ctx, region_objects, heat_map, x_offset, y_offset, scale)
     {
-        ctx.fillStyle = '#f00';
-
         for (region_object of region_objects.features)
         {
-            is_first = true;
+            name = region_object.properties.name;
+            if (heat_map.indexOf(name) == -1)
+                ctx.fillStyle = '#c3c3c3';
+            else
+                ctx.fillStyle = '#00aa00';
 
             if (region_object.geometry.type == "Polygon")
             {
-                draw_geo_polygon(canvas, ctx, region_object.geometry.coordinates, scale);
+                draw_geo_polygon(canvas, ctx, region_object.geometry.coordinates, x_offset, y_offset, scale);
             }
             else if (region_object.geometry.type == "MultiPolygon")
             {
                 for (polygon_objects of region_object.geometry.coordinates)
                 {
-                    draw_geo_polygon(canvas, ctx, polygon_objects, scale);
+                    draw_geo_polygon(canvas, ctx, polygon_objects, x_offset, y_offset, scale);
                 }
             }
         }
@@ -95,21 +103,21 @@
     {
         var canvas = document.getElementById("worldCanvas");
         var ctx = canvas.getContext("2d");
-        draw_region(canvas, ctx, region_objects, 1.0);
+        draw_region(canvas, ctx, region_objects, countries, 0.0, 0.0, 1.0);
     }
 
     var draw_us_map = function(region_objects)
     {
         var canvas = document.getElementById("usCanvas");
         var ctx = canvas.getContext("2d");
-        draw_region(canvas, ctx, region_objects, 3.0);
+        draw_region(canvas, ctx, region_objects, us_states, -20.0, -40.0, 3.0);
     }
 
     var draw_canada_map = function(region_objects)
     {
         var canvas = document.getElementById("canadaCanvas");
         var ctx = canvas.getContext("2d");
-        draw_region(canvas, ctx, region_objects, 3.0);
+        draw_region(canvas, ctx, region_objects, canadian_provinces, -90.0, 0.0, 3.5);
     }
 
     function get_map_data()
@@ -119,7 +127,37 @@
 		$.ajax({ type: 'GET', url: "${root_url}/data/canada.geo.json", cache: false, success: draw_canada_map, dataType: "json" });
     }
 
-    get_map_data();
+    var process_heat_map = function(heat_map)
+    {
+        for (var location_description in heat_map)
+        {
+            location_array = location_description.split(',');
+            if (location_array.length > 0)
+            {
+                country = location_array[location_array.length - 1].trim();
+                if (countries.indexOf(country) == -1)
+                {
+                    countries.push(country);
+                }
+                if (country == "United States")
+                {
+                    state = location_array[location_array.length - 2].trim();
+                    if (us_states.indexOf(state) == -1)
+                    {
+                        us_states.push(state);
+                    }
+                }
+            }
+        }
+        get_map_data();
+    }
+
+    function get_heat_map_data()
+    {
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_location_summary", cache: false, success: process_heat_map, dataType: "json" });
+    }
+
+    get_heat_map_data();
 </script>
 
 <section class="nav">
@@ -144,20 +182,17 @@ ${oneyearbests}
 
     <h2>Places</h2>
     <h3>World</h3>
-    <canvas id="worldCanvas" width="960" height="480" style="border:1px solid #c3c3c3;">
+    <canvas id="worldCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
     Your browser does not support the canvas element.
     </canvas>
     <h3>United States</h3>
-    <canvas id="usCanvas" width="960" height="480" style="border:1px solid #c3c3c3;">
+    <canvas id="usCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
     Your browser does not support the canvas element.
     </canvas>
     <h3>Canada</h3>
-    <canvas id="canadaCanvas" width="960" height="480" style="border:1px solid #c3c3c3;">
+    <canvas id="canadaCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
     Your browser does not support the canvas element.
     </canvas>
-    <p>
-${places}
-    </p>
 
 </div>
 
