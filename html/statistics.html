@@ -147,6 +147,14 @@
                         us_states.push(state);
                     }
                 }
+                if (country == "Canada")
+                {
+                    province = location_array[location_array.length - 2].trim();
+                    if (canadian_provinces.indexOf(province) == -1)
+                    {
+                        canadian_provinces.push(province);
+                    }
+                }
             }
         }
         get_map_data();
