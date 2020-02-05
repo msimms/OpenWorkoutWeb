@@ -139,20 +139,23 @@
                 {
                     countries.push(country);
                 }
-                if (country == "United States")
+                if (location_array.length >= 2)
                 {
-                    var state = location_array[location_array.length - 2].trim();
-                    if (us_states.indexOf(state) == -1)
+                    if (country == "United States")
                     {
-                        us_states.push(state);
+                        var state = location_array[location_array.length - 2].trim();
+                        if (us_states.indexOf(state) == -1)
+                        {
+                            us_states.push(state);
+                        }
                     }
-                }
-                else if (country == "Canada")
-                {
-                    var province = location_array[location_array.length - 2].trim();
-                    if (canadian_provinces.indexOf(province) == -1)
+                    else if (country == "Canada")
                     {
-                        canadian_provinces.push(province);
+                        var province = location_array[location_array.length - 2].trim();
+                        if (canadian_provinces.indexOf(province) == -1)
+                        {
+                            canadian_provinces.push(province);
+                        }
                     }
                 }
             }
