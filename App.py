@@ -42,7 +42,7 @@ PRODUCT_NAME = 'Straen'
 
 LOGIN_URL = '/login'
 DEFAULT_LOGGED_IN_URL = '/all_activities'
-IMPORT_STATUS_URL = '/import_status'
+TASK_STATUS_URL = '/task_status'
 HTML_DIR = 'html'
 
 
@@ -598,12 +598,12 @@ class App(object):
         if location_analyzer.total_distance is not None:
             value, value_units = Units.convert_to_preferred_distance_units(self.user_mgr, logged_in_user_id, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
             summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
-        if location_analyzer.avg_speed is not None:
-            if location_analyzer.avg_speed > 0:
-                if is_foot_based_activity:
-                    summary += "\t<li>Avg. Pace: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
-                else:
-                    summary += "\t<li>Avg. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
+
+        if location_analyzer.avg_speed is not None and location_analyzer.avg_speed > 0:
+            if is_foot_based_activity:
+                summary += "\t<li>Avg. Pace: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
+            else:
+                summary += "\t<li>Avg. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
 
         # Add summary data that was computed out-of-band and cached.
         if summary_data is not None:
@@ -1013,6 +1013,11 @@ class App(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
+    def render_activity_href(self, activity_id, display_str):
+        """Helper function that renders an activity href."""
+        url_str = "<a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + display_str + "</a>"
+        return url_str
+
     def render_personal_record_simple(self, user_id, user_activities, activity_type, record, record_name):
         """Helper function that renders a single table row in the personal bests table."""
         record_value = record[0]
@@ -1029,7 +1034,8 @@ class App(object):
             out_str += "<td></td>"
         else:
             out_str += "<td><script>document.write(unix_time_to_local_date_string(" + str(activity_time) + "))</script></td>"
-        out_str += "<td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td>"
+        out_str += "<td>"
+        out_str += self.render_activity_href(activity_id, record_str)
         out_str += "<tr>\n"
         return out_str
 
@@ -1043,7 +1049,9 @@ class App(object):
         params = {}
         params[Keys.ACTIVITY_TYPE_KEY] = activity_type
         params[Keys.RECORD_NAME] = record_name
-        out_str += "</td><td><a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + record_str + "</a></td><td><a href=\"" + self.root_url + "/"
+        out_str += "</td><td>"
+        out_str += self.render_activity_href(activity_id, record_str)
+        out_str += "</td><td><a href=\"" + self.root_url + "/"
         if show_progression:
             out_str += "record_progression"
         else:
@@ -1224,28 +1232,10 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # Show the relevant PRs.
-        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, None)
-        all_time_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests, True)
-        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.ONE_YEAR)
-        one_year_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests, True)
-
-        # Show the list of places.
-        places_str = "<table>"
-        user_activities = self.data_mgr.retrieve_user_activity_list(user_id, user_realname, None, None)
-        heat_map = self.data_mgr.compute_location_heat_map(user_activities)
-        for location_str in heat_map:
-            places_str += "<td>"
-            places_str += location_str
-            places_str += "</td><td>"
-            places_str += str(heat_map[location_str])
-            places_str += "</td><tr>"
-        places_str += "</table>"
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'statistics.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, alltimebests=all_time_bests_str, oneyearbests=one_year_bests_str, places=places_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
     @statistics
     def gear(self):
@@ -1487,7 +1477,7 @@ class App(object):
             file_data = ufile.file.read()
             self.data_mgr.import_file(username, user_id, file_data, ufile.filename)
 
-        raise RedirectException(IMPORT_STATUS_URL)
+        raise RedirectException(TASK_STATUS_URL)
 
     @statistics
     def manual_entry(self, activity_type):
@@ -1521,8 +1511,8 @@ class App(object):
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_type_list=activity_type_list_str)
 
     @statistics
-    def import_status(self):
-        """Renders the import status page."""
+    def task_status(self):
+        """Renders the status page for deferred tasks, such as file imports and activity analysis."""
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -1534,6 +1524,9 @@ class App(object):
         if user_id is None:
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
+
+        # Remove old items.
+        self.data_mgr.clean_deferred_tasks(user_id)
 
         tasks_str = ""
         tasks = self.data_mgr.retrieve_deferred_import_tasks(user_id)
@@ -1547,7 +1540,7 @@ class App(object):
             tasks_str += "</td><tr>\n"
 
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'import_status.html')
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'task_status.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=tasks_str)
 
@@ -1578,7 +1571,7 @@ class App(object):
             tasks_str += "</td><tr>\n"
 
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'import_status.html')
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'task_status.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=tasks_str)
 

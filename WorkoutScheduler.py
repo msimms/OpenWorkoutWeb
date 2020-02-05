@@ -24,7 +24,7 @@ class WorkoutScheduler(object):
         # Find the long run and put it on the preferred day.
         if preferred_long_run_day is not None:
             for workout in workouts:
-                if workout.description == Keys.WORKOUT_DESCRIPTION_LONG_RUN:
+                if workout.type == Keys.WORKOUT_TYPE_LONG_RUN:
 
                     # Convert the day name to an index and ignore case.
                     day_index = [x.lower() for x in InputChecker.days_of_week].index(preferred_long_run_day)

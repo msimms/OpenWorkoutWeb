@@ -61,7 +61,7 @@
 
 		if (send_post_request(the_url, dict, result_text))
 		{
-			window.location.replace("${root_url}/import_status");
+			window.location.replace("${root_url}/task_status");
 		}
 		else
 		{
@@ -161,7 +161,7 @@
 
 			if (send_post_request(the_url, dict, result_text))
 			{
-				window.location.replace("${root_url}/import_status");
+				window.location.replace("${root_url}/task_status");
 			}
 			else
 			{
@@ -222,7 +222,7 @@ ${nav}
 			{
 				upload_file_no_ui(file_list[i]);
 			}
-            window.location.replace("${root_url}/import_status");
+            window.location.replace("${root_url}/task_status");
 		}
 
 		picker.addEventListener('change', e => {

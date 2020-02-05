@@ -1260,9 +1260,9 @@ class Api(object):
         matched_workouts = []
         if workouts is not None and isinstance(workouts, list):
             for workout in workouts:
-                if workout.scheduled_time is not None and workout.workout_id is not None and workout.description is not None:
+                if workout.scheduled_time is not None and workout.workout_id is not None and workout.type is not None:
                     url = self.root_url + "/workout/" + str(workout.workout_id)
-                    temp_workout = {'title': workout.description, 'url': url, 'time': time.mktime(workout.scheduled_time.timetuple())}
+                    temp_workout = {'title': workout.type, 'url': url, 'time': time.mktime(workout.scheduled_time.timetuple())}
                     matched_workouts.append(temp_workout)
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
@@ -1304,8 +1304,19 @@ class Api(object):
         location_description = self.data_mgr.get_location_description(activity_id)
         return True, str(location_description)
 
+    def handle_get_location_summary(self, values):
+        """Called when the user wants get the summary of all political locations in which activities have occurred."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        username = self.user_mgr.get_logged_in_user()
+        _, _, user_realname = self.user_mgr.retrieve_user(username)
+        user_activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
+        heat_map = self.data_mgr.compute_location_heat_map(user_activities)
+        return True, json.dumps(heat_map)
+
     def handle_get_activity_id_from_hash(self, values):
-        """Given the activity ID, return sthe activity hash, or an error if not found. Only looks at the logged in user's acivities."""
+        """Given the activity ID, return sthe activity hash, or an error if not found. Only looks at the logged in user's activities."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_HASH_KEY not in values:
@@ -1317,7 +1328,7 @@ class Api(object):
         pass
 
     def handle_get_activity_hash_from_id(self, values):
-        """Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's acivities."""
+        """Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -1332,6 +1343,26 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Hash not found.")
 
         return True, str(summary_data[Keys.ACTIVITY_HASH_KEY])
+
+    def handle_list_personal_records(self, values):
+        """Returns the user's personal records."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(self.user_id, None)
+        for item in cycling_bests:
+            activity_id = cycling_bests[item][1]
+            new_value = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, cycling_bests[item][0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
+            cycling_bests[item] = new_value, activity_id
+        for item in running_bests:
+            activity_id = running_bests[item][1]
+            new_value = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, running_bests[item][0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
+            running_bests[item] = new_value, activity_id
+
+        bests = {}
+        bests[Keys.TYPE_CYCLING_KEY] = cycling_bests
+        bests[Keys.TYPE_RUNNING_KEY] = running_bests
+        return True, json.dumps(bests)
 
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
@@ -1359,10 +1390,14 @@ class Api(object):
             return self.handle_get_workout_ical_url(values)
         elif request == 'get_location_description':
             return self.handle_get_location_description(values)
+        elif request == 'get_location_summary':
+            return self.handle_get_location_summary(values)
         elif request == 'activity_id_from_hash':
             return self.handle_get_activity_id_from_hash(values)
         elif request == 'activity_hash_from_id':
             return self.handle_get_activity_hash_from_id(values)
+        elif request == 'list_personal_records':
+            return self.handle_list_personal_records(values)
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):

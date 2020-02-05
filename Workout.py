@@ -28,7 +28,7 @@ class Workout(object):
         self.user_id = user_id
         root_dir = os.path.dirname(os.path.abspath(__file__))
         self.user_mgr = UserMgr.UserMgr(None, root_dir)
-        self.description = ""
+        self.type = ""
         self.sport_type = ""
         self.scheduled_time = None # The time at which this workout is to be performed
         self.warmup = None # The warmup interval
@@ -41,8 +41,8 @@ class Workout(object):
     def __getitem__(self, key):
         if key == Keys.WORKOUT_ID_KEY:
             return self.workout_id
-        if key == Keys.WORKOUT_DESCRIPTION_KEY:
-            return self.description
+        if key == Keys.WORKOUT_TYPE_KEY:
+            return self.type
         if key == Keys.WORKOUT_SPORT_TYPE_KEY:
             return self.sport_type
         if key == Keys.WORKOUT_WARMUP_KEY:
@@ -60,7 +60,7 @@ class Workout(object):
         """Converts the object representation to a dictionary, only converting what is actually useful, as opposed to __dict__."""
         output = {}
         output[Keys.WORKOUT_ID_KEY] = self.workout_id
-        output[Keys.WORKOUT_DESCRIPTION_KEY] = self.description
+        output[Keys.WORKOUT_TYPE_KEY] = self.type
         output[Keys.WORKOUT_SPORT_TYPE_KEY] = self.sport_type
         output[Keys.WORKOUT_WARMUP_KEY] = self.warmup
         output[Keys.WORKOUT_COOLDOWN_KEY] = self.cooldown
@@ -75,8 +75,8 @@ class Workout(object):
         """Sets the object's members from a dictionary."""
         if Keys.WORKOUT_ID_KEY in input:
             self.workout_id = input[Keys.WORKOUT_ID_KEY]
-        if Keys.WORKOUT_DESCRIPTION_KEY in input:
-            self.description = input[Keys.WORKOUT_DESCRIPTION_KEY]
+        if Keys.WORKOUT_TYPE_KEY in input:
+            self.type = input[Keys.WORKOUT_TYPE_KEY]
         if Keys.WORKOUT_SPORT_TYPE_KEY in input:
             self.sport_type = input[Keys.WORKOUT_SPORT_TYPE_KEY]
         if Keys.WORKOUT_WARMUP_KEY in input:
@@ -118,7 +118,7 @@ class Workout(object):
         """Creates a ZWO-formatted file that describes the workout."""
         writer = ZwoWriter.ZwoWriter()
         writer.create_zwo(file_name)
-        writer.store_description(self.description)
+        writer.store_description(self.type)
         writer.store_sport_type(self.sport_type)
         writer.start_workout()
 
@@ -157,7 +157,7 @@ class Workout(object):
 
     def export_to_text(self):
         """Creates a string that describes the workout."""
-        result = self.description
+        result = self.type
         result += "\nSport: "
         result += self.sport_type
         result += "\n"
@@ -196,20 +196,27 @@ class Workout(object):
             result += str(duration)
             result += " seconds.\n"
 
+        # Add an string that describes how this workout fits into the big picture.
+        if self.type == Keys.WORKOUT_TYPE_INTERVAL_SESSION:
+            result += "Purpose: Interval sessions are designed to build speed and strength.\n"
+        elif self.type == Keys.WORKOUT_TYPE_TEMPO_RUN:
+            result += "Purpose: Tempo runs build a combination of speed and endurance. They should be performed at a pace you can hold for roughly one hour.\n"
+        elif self.type == Keys.WORKOUT_TYPE_EASY_RUN:
+            result += "Purpose: Easy runs build aerobic capacity while keeping the wear and tear on the body to a minimum.\n"
+
         return result
 
     def export_to_json_str(self):
         """Creates a JSON string that describes the workout."""
         result = self.to_dict()
         result[Keys.WORKOUT_ID_KEY] = str(self.workout_id)
-        result[Keys.WORKOUT_EXPLANATION_KEY] = self.export_to_text()
+        result[Keys.WORKOUT_DESCRIPTION_KEY] = self.export_to_text()
         return json.dumps(result, ensure_ascii=False)
 
     def export_to_ics(self, file_name):
         """Creates a ICS-formatted file that describes the workout."""
-        summary = self.export_to_text()
         ics_writer = IcsWriter.IcsWriter()
-        file_data = ics_writer.create(self.workout_id, self.scheduled_time, self.scheduled_time, self.description, summary)
+        file_data = ics_writer.create(self.workout_id, self.scheduled_time, self.scheduled_time, self.type, self.export_to_text())
 
         with open(file_name, 'wt') as local_file:
             local_file.write(file_data)

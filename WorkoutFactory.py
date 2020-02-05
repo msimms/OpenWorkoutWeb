@@ -2,7 +2,7 @@
 # 
 # # MIT License
 # 
-# Copyright (c) 2019 Mike Simms
+# Copyright (c) 2020 Mike Simms
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,25 +21,22 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Schedules computationally expensive import tasks"""
+"""Instantiates objects that can describe workouts."""
 
-import os
-from bson.json_util import dumps
-from ImportWorker import import_activity
+import sys
+import Keys
+import Event
+import Rest
+import Workout
 
-class ImportScheduler(object):
-    """Class for scheduling computationally expensive import tasks."""
-
-    def __init__(self):
-        super(ImportScheduler, self).__init__()
-
-    def add_to_queue(self, username, user_id, uploaded_file_data, uploaded_file_name, data_mgr):
-        """Adds the activity ID to the list of activities to be analyzed."""
-        params = {}
-        params['username'] = username
-        params['user_id'] = user_id
-        params['uploaded_file_data'] = uploaded_file_data
-        params['uploaded_file_name'] = uploaded_file_name
-        import_task = import_activity.delay(dumps(params))
-        if data_mgr is not None:
-            data_mgr.track_import_task(user_id, import_task.task_id, uploaded_file_data)
+def create(workout_type, user_id):
+    """Creates a workout object of the specified type."""
+    workout = None
+    if workout_type == Keys.WORKOUT_TYPE_EVENT:
+        workout = Event.Event(user_id)
+    elif workout_type == Keys.WORKOUT_TYPE_REST:
+        workout = Rest.Rest(user_id)
+    else:
+        workout = Workout.Workout(user_id)
+        workout.type = workout_type
+    return workout

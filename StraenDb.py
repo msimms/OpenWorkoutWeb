@@ -1863,7 +1863,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_deferred_task(self, user_id, task_type, task_id):
+    def create_deferred_task(self, user_id, task_type, task_id, details):
         """Create method for tracking a deferred task, such as a file import or activity analysis."""
         if user_id is None:
             self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: user_id")
@@ -1893,6 +1893,8 @@ class MongoDatabase(Database.Database):
                 task = {}
                 task[Keys.TASK_ID_KEY] = task_id
                 task[Keys.TASK_TYPE_KEY] = task_type
+                if details is not None:
+                    task[Keys.TASK_DETAILS_KEY] = details
                 deferred_tasks.append(task)
                 user_tasks[Keys.TASKS_KEY] = deferred_tasks
                 self.tasks_collection.save(user_tasks)
@@ -1901,6 +1903,25 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
+
+    def retrieve_deferred_tasks(self, user_id):
+        """Retrieve method for returning all the deferred tasks of a given type."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_deferred_tasks.__name__ + ": Unexpected empty object: user_id")
+            return None
+
+        try:
+            # Find the user's tasks document.
+            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+
+            # If the user's tasks document was found.
+            if user_tasks is not None:
+                if Keys.TASKS_KEY in user_tasks:
+                    return user_tasks[Keys.TASKS_KEY]
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return []
 
     def retrieve_deferred_tasks_of_type(self, user_id, task_type):
         """Retrieve method for returning all the deferred tasks of a given type."""
@@ -1917,22 +1938,26 @@ class MongoDatabase(Database.Database):
 
             # If the user's tasks document was found.
             if user_tasks is not None:
-                deferred_tasks = []
+
+                # Are there any deferred tasks?
                 if Keys.TASKS_KEY in user_tasks:
-                    deferred_tasks = user_tasks[Keys.TASKS_KEY]
-                return deferred_tasks
+
+                    # Copy out the tasks of the specified type.
+                    tasks = []
+                    for task in user_tasks[Keys.TASKS_KEY]:
+                        if Keys.TASK_TYPE_KEY == task_type:
+                            tasks.append(task)
+                    return tasks
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return []
 
-    def delete_deferred_tasks(self, user_id, task_id):
+    def retrieve_deferred_tasks(self, user_id):
+        """Retrieve method for returning all the deferred tasks of a given type."""
         if user_id is None:
-            self.log_error(MongoDatabase.delete_deferred_tasks.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.retrieve_deferred_tasks_of_type.__name__ + ": Unexpected empty object: user_id")
             return None
-        if task_id is None:
-            self.log_error(MongoDatabase.delete_deferred_tasks.__name__ + ": Unexpected empty object: task_id")
-            return False
 
         try:
             # Find the user's tasks document.
@@ -1940,12 +1965,31 @@ class MongoDatabase(Database.Database):
 
             # If the user's tasks document was found.
             if user_tasks is not None:
-                deferred_tasks = []
                 if Keys.TASKS_KEY in user_tasks:
-                    deferred_tasks = user_tasks[Keys.TASKS_KEY]
-                for task in deferred_tasks:
-                    if task[Keys.TASKS_KEY] == task_id:
-                        pass
+                    return user_tasks[Keys.TASKS_KEY]
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return []
+
+    def set_deferred_tasks(self, user_id, tasks):
+        """Retrieve method for returning all the deferred tasks of a given type."""
+        if user_id is None:
+            self.log_error(MongoDatabase.set_deferred_tasks.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if tasks is None:
+            self.log_error(MongoDatabase.set_deferred_tasks.__name__ + ": Unexpected empty object: tasks")
+            return None
+
+        try:
+            # Find the user's tasks document.
+            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+
+            # If the user's tasks document was found.
+            if user_tasks is not None:
+                user_tasks[Keys.TASKS_KEY] = tasks
+                self.tasks_collection.save(user_tasks)
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

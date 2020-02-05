@@ -58,6 +58,10 @@ The software architecture makes it possible to use this system with different fr
 
 ![Architecture Diagram](https://github.com/msimms/StraenWeb/blob/master/docs/Architecture.png?raw=true)
 
+## Workout Plans
+
+This feature is very much under development and will go through several iterations before being ready for general use. The idea is to use the athlete's existing data to generate workouts to help in reaching future goals.
+
 ## Version History
 
 ### 0.1
@@ -135,7 +139,7 @@ The software architecture makes it possible to use this system with different fr
 * Bug fixes.
 
 ### 0.15
-* Added gear tracking.
+* Added gear tracking. [Feature Page](https://github.com/msimms/StraenWeb/issues/4)
 * Added location descriptions (i.e., Florida, United States).
 * Importing data now also starts the analysis process.
 * Bug fixes.
@@ -154,6 +158,10 @@ The software architecture makes it possible to use this system with different fr
 * Bug fixes, including many pertaining to the flask front end as well as activity analysis.
 * Added an iCal server for subscribing to planned workouts.
 * Added planned workouts to the My Activities calendar.
+
+### 0.19
+* Added a map that shows the countries, US states, and Canadian provinces in which activities were recorded. [Feature Page](https://github.com/msimms/StraenWeb/issues/18)
+* Bug fixes and performance improvements.
 
 ## Tech
 This software uses several other source projects to work properly:
