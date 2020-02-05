@@ -661,7 +661,7 @@ class App(object):
 
         # Append the hash (for debugging purposes).
         if self.debug:
-            if Keys.ACTIVITY_HASH_KEY in summary_data:
+            if summary_data is not None and Keys.ACTIVITY_HASH_KEY in summary_data:
                 details_str += "<td><b>Activity Hash</b></td><td>"
                 details_str += summary_data[Keys.ACTIVITY_HASH_KEY]
                 details_str += "</td><tr>\n"
