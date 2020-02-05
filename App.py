@@ -598,12 +598,12 @@ class App(object):
         if location_analyzer.total_distance is not None:
             value, value_units = Units.convert_to_preferred_distance_units(self.user_mgr, logged_in_user_id, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
             summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
-        if location_analyzer.avg_speed is not None:
-            if location_analyzer.avg_speed > 0:
-                if is_foot_based_activity:
-                    summary += "\t<li>Avg. Pace: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
-                else:
-                    summary += "\t<li>Avg. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
+
+        if location_analyzer.avg_speed is not None and location_analyzer.avg_speed > 0:
+            if is_foot_based_activity:
+                summary += "\t<li>Avg. Pace: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
+            else:
+                summary += "\t<li>Avg. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
 
         # Add summary data that was computed out-of-band and cached.
         if summary_data is not None:
@@ -1232,16 +1232,10 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # Show the relevant PRs.
-        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, None)
-        all_time_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests, True)
-        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.ONE_YEAR)
-        one_year_bests_str = self.render_personal_records(user_id, cycling_bests, running_bests, True)
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'statistics.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, alltimebests=all_time_bests_str, oneyearbests=one_year_bests_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
     @statistics
     def gear(self):

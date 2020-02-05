@@ -103,14 +103,14 @@
     {
         var canvas = document.getElementById("worldCanvas");
         var ctx = canvas.getContext("2d");
-        draw_region(canvas, ctx, region_objects, countries, 0.0, 0.0, 1.0, 1.0);
+        draw_region(canvas, ctx, region_objects, countries, 20.0, 40.0, 1.0, 1.0);
     }
 
     var draw_us_map = function(region_objects)
     {
         var canvas = document.getElementById("usCanvas");
         var ctx = canvas.getContext("2d");
-        draw_region(canvas, ctx, region_objects, us_states, -20.0, -40.0, 3.0, 3.25);
+        draw_region(canvas, ctx, region_objects, us_states, -20.0, -50.0, 3.0, 3.4);
     }
 
     var draw_canada_map = function(region_objects)
@@ -131,25 +131,25 @@
     {
         for (var location_description in heat_map)
         {
-            location_array = location_description.split(',');
+            var location_array = location_description.split(',');
             if (location_array.length > 0)
             {
-                country = location_array[location_array.length - 1].trim();
+                var country = location_array[location_array.length - 1].trim();
                 if (countries.indexOf(country) == -1)
                 {
                     countries.push(country);
                 }
                 if (country == "United States")
                 {
-                    state = location_array[location_array.length - 2].trim();
+                    var state = location_array[location_array.length - 2].trim();
                     if (us_states.indexOf(state) == -1)
                     {
                         us_states.push(state);
                     }
                 }
-                if (country == "Canada")
+                else if (country == "Canada")
                 {
-                    province = location_array[location_array.length - 2].trim();
+                    var province = location_array[location_array.length - 2].trim();
                     if (canadian_provinces.indexOf(province) == -1)
                     {
                         canadian_provinces.push(province);
@@ -160,12 +160,49 @@
         get_map_data();
     }
 
+    function append_to_table(table, row_name, row_value)
+    {
+        new_row = table.insertRow();
+        cell = new_row.insertCell();
+        text = document.createTextNode(row_name);
+        cell.appendChild(text);
+
+        cell = new_row.insertCell();
+        var a = document.createElement('a');
+        var link_text = document.createTextNode(row_value[0]);
+        a.appendChild(link_text);
+        a.title = row_value;
+        a.href = "${root_url}/activity/" + row_value[1];
+        cell.appendChild(a);
+    }
+
+    var process_personal_records = function(records)
+    {
+		var cycling_table = document.getElementById("Cycling");
+		var running_table = document.getElementById("Running");
+
+        for (var record in records.Cycling)
+        {
+            append_to_table(cycling_table, record, records.Cycling[record]);
+        }
+        for (var record in records.Running)
+        {
+            append_to_table(running_table, record, records.Running[record]);
+        }
+    }
+
     function get_heat_map_data()
     {
 		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_location_summary", cache: false, success: process_heat_map, dataType: "json" });
     }
 
+    function get_personal_records()
+    {
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_personal_records", cache: false, success: process_personal_records, dataType: "json" });
+    }
+
     get_heat_map_data();
+    get_personal_records();
 </script>
 
 <section class="nav">
@@ -176,17 +213,14 @@ ${nav}
 
     <h2>All-Time Bests</h2>
     <p>
-${alltimebests}
+        <h3>Cycling</h3>
+        <table id="Cycling">
+        </table>
+
+        <h3>Running</h3>
+        <table id="Running">
+        </table>
     </p>
-
-	<hr>
-
-    <h2>One Year Bests</h2>
-    <p>
-${oneyearbests}
-    </p>
-
-	<hr>
 
     <h2>Places</h2>
     <h3>World</h3>

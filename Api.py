@@ -1316,7 +1316,7 @@ class Api(object):
         return True, json.dumps(heat_map)
 
     def handle_get_activity_id_from_hash(self, values):
-        """Given the activity ID, return sthe activity hash, or an error if not found. Only looks at the logged in user's acivities."""
+        """Given the activity ID, return sthe activity hash, or an error if not found. Only looks at the logged in user's activities."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_HASH_KEY not in values:
@@ -1328,7 +1328,7 @@ class Api(object):
         pass
 
     def handle_get_activity_hash_from_id(self, values):
-        """Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's acivities."""
+        """Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -1343,6 +1343,26 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Hash not found.")
 
         return True, str(summary_data[Keys.ACTIVITY_HASH_KEY])
+
+    def handle_list_personal_records(self, values):
+        """Returns the user's personal records."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(self.user_id, None)
+        for item in cycling_bests:
+            activity_id = cycling_bests[item][1]
+            new_value = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, cycling_bests[item][0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
+            cycling_bests[item] = new_value, activity_id
+        for item in running_bests:
+            activity_id = running_bests[item][1]
+            new_value = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, running_bests[item][0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
+            running_bests[item] = new_value, activity_id
+
+        bests = {}
+        bests[Keys.TYPE_CYCLING_KEY] = cycling_bests
+        bests[Keys.TYPE_RUNNING_KEY] = running_bests
+        return True, json.dumps(bests)
 
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
@@ -1376,6 +1396,8 @@ class Api(object):
             return self.handle_get_activity_id_from_hash(values)
         elif request == 'activity_hash_from_id':
             return self.handle_get_activity_hash_from_id(values)
+        elif request == 'list_personal_records':
+            return self.handle_list_personal_records(values)
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):
