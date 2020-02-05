@@ -1525,6 +1525,9 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        # Remove old items.
+        self.data_mgr.clean_deferred_tasks(user_id)
+
         tasks_str = ""
         tasks = self.data_mgr.retrieve_deferred_import_tasks(user_id)
         for task in tasks:

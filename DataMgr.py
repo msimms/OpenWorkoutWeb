@@ -12,6 +12,7 @@ import StraenDb
 import Summarizer
 import TrainingPaceCalculator
 import celery
+from celery import states
 
 SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
 ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
@@ -292,6 +293,22 @@ class DataMgr(Importer.ActivityWriter):
         tasks = self.database.retrieve_deferred_tasks_of_type(user_id, Keys.WORKOUT_PLAN_TASK_KEY)
         tasks = self.query_deferred_task_statuses(tasks)
         return tasks
+
+    def clean_deferred_tasks(self, user_id):
+        """Cleans up the list of deferred tasks, removing all that have completed successfully."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+
+        new_tasks = []
+        tasks = self.database.retrieve_deferred_tasks(user_id)
+        for task in tasks:
+            if Keys.TASK_ID_KEY in task:
+                r = self.celery_worker.AsyncResult(task[Keys.TASK_ID_KEY])
+                if r.state != states.SUCCESS:
+                    new_tasks.append(task)
+        return self.database.set_deferred_tasks(user_id, new_tasks)
 
     def import_file(self, username, user_id, local_file_name, uploaded_file_name):
         """Imports the contents of a local file into the database."""
