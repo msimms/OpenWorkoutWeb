@@ -234,25 +234,26 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             # Smooth the speed graph to take out some of the GPS jitter.
             smoothed_graph = signals.smooth(self.speed_graph, 4)
 
-            # Find peaks in the speed graph.
-            peak_list = peaks.find_peaks_in_numeric_array(smoothed_graph, 0.5)
+            if len(smoothed_graph) > 1:
+                # Find peaks in the speed graph.
+                peak_list = peaks.find_peaks_in_numeric_array(smoothed_graph, 0.5)
 
-            # Examine the lines between the peaks.
-            all_intervals = []
-            for peak in peak_list:
-                interval = self.examine_peak(peak.left_trough.x, peak.right_trough.x)
-                all_intervals.append(interval)
+                # Examine the lines between the peaks.
+                all_intervals = []
+                for peak in peak_list:
+                    interval = self.examine_peak(peak.left_trough.x, peak.right_trough.x)
+                    all_intervals.append(interval)
 
-            # Do a k-means analysis on the computed paces blocks so we can get rid of any outliers.
-            significant_intervals = []
-            tags = kmeans.kmeans_equally_space_centroids_1_d(self.speed_blocks, 2, 1, len(self.speed_blocks))
-            interval_index = 0
-            for tag in tags:
-                if tag == 1:
-                    significant_intervals.append(all_intervals[interval_index])
-                interval_index = interval_index + 1
+                # Do a k-means analysis on the computed paces blocks so we can get rid of any outliers.
+                significant_intervals = []
+                tags = kmeans.kmeans_equally_space_centroids_1_d(self.speed_blocks, 2, 1, len(self.speed_blocks))
+                interval_index = 0
+                for tag in tags:
+                    if tag == 1:
+                        significant_intervals.append(all_intervals[interval_index])
+                    interval_index = interval_index + 1
 
-            results[Keys.ACTIVITY_INTERVALS] = significant_intervals
+                results[Keys.ACTIVITY_INTERVALS] = significant_intervals
 
         # Insert the location into the analysis dictionary so that it gets cached.
         results[Keys.LONGEST_DISTANCE] = self.total_distance
