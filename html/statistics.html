@@ -34,24 +34,24 @@
     var us_states = [];
     var canadian_provinces = [];
 
-    function latlon_to_xy(canvas, lat, lon, x_offset, y_offset, scale)
+    function latlon_to_xy(canvas, lat, lon, x_offset, y_offset, x_scale, y_scale)
     {
         var width = canvas.width;
         var height = canvas.height;
 
-        x = (x_offset + (((lon + 180.0) / 360.0) * width)) * scale;
-        y = (y_offset + (height - (((lat + 90.0) / 180.0) * height))) * scale;
+        x = (x_offset + (((lon + 180.0) / 360.0) * width)) * x_scale;
+        y = (y_offset + (height - (((lat + 90.0) / 180.0) * height))) * y_scale;
 
         return [x, y];
     }
 
-    function draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, scale)
+    function draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, x_scale, y_scale)
     {
         is_first = true;
         ctx.beginPath();
         for (coordinate of coordinate_list)
         {
-            [x, y] = latlon_to_xy(canvas, coordinate[1], coordinate[0], x_offset, y_offset, scale);
+            [x, y] = latlon_to_xy(canvas, coordinate[1], coordinate[0], x_offset, y_offset, x_scale, y_scale);
 
             if (is_first)
             {
@@ -67,15 +67,15 @@
         ctx.fill();
     }
 
-    function draw_geo_polygon(canvas, ctx, polygon_objects, x_offset, y_offset, scale)
+    function draw_geo_polygon(canvas, ctx, polygon_objects, x_offset, y_offset, x_scale, y_scale)
     {
         for (coordinate_list of polygon_objects)
         {
-            draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, scale);
+            draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, x_scale, y_scale);
         }
     }
 
-    function draw_region(canvas, ctx, region_objects, heat_map, x_offset, y_offset, scale)
+    function draw_region(canvas, ctx, region_objects, heat_map, x_offset, y_offset, x_scale, y_scale)
     {
         for (region_object of region_objects.features)
         {
@@ -87,13 +87,13 @@
 
             if (region_object.geometry.type == "Polygon")
             {
-                draw_geo_polygon(canvas, ctx, region_object.geometry.coordinates, x_offset, y_offset, scale);
+                draw_geo_polygon(canvas, ctx, region_object.geometry.coordinates, x_offset, y_offset, x_scale, y_scale);
             }
             else if (region_object.geometry.type == "MultiPolygon")
             {
                 for (polygon_objects of region_object.geometry.coordinates)
                 {
-                    draw_geo_polygon(canvas, ctx, polygon_objects, x_offset, y_offset, scale);
+                    draw_geo_polygon(canvas, ctx, polygon_objects, x_offset, y_offset, x_scale, y_scale);
                 }
             }
         }
@@ -103,21 +103,21 @@
     {
         var canvas = document.getElementById("worldCanvas");
         var ctx = canvas.getContext("2d");
-        draw_region(canvas, ctx, region_objects, countries, 0.0, 0.0, 1.0);
+        draw_region(canvas, ctx, region_objects, countries, 0.0, 0.0, 1.0, 1.0);
     }
 
     var draw_us_map = function(region_objects)
     {
         var canvas = document.getElementById("usCanvas");
         var ctx = canvas.getContext("2d");
-        draw_region(canvas, ctx, region_objects, us_states, -20.0, -40.0, 3.0);
+        draw_region(canvas, ctx, region_objects, us_states, -20.0, -40.0, 3.0, 3.25);
     }
 
     var draw_canada_map = function(region_objects)
     {
         var canvas = document.getElementById("canadaCanvas");
         var ctx = canvas.getContext("2d");
-        draw_region(canvas, ctx, region_objects, canadian_provinces, -90.0, 0.0, 3.5);
+        draw_region(canvas, ctx, region_objects, canadian_provinces, -90.0, 0.0, 3.5, 3.5);
     }
 
     function get_map_data()
