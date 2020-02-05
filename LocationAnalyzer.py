@@ -235,6 +235,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             smoothed_graph = signals.smooth(self.speed_graph, 4)
 
             if len(smoothed_graph) > 1:
+    
                 # Find peaks in the speed graph.
                 peak_list = peaks.find_peaks_in_numeric_array(smoothed_graph, 0.5)
 
