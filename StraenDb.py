@@ -1907,7 +1907,7 @@ class MongoDatabase(Database.Database):
     def retrieve_deferred_tasks(self, user_id):
         """Retrieve method for returning all the deferred tasks of a given type."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_deferred_tasks_of_type.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.retrieve_deferred_tasks.__name__ + ": Unexpected empty object: user_id")
             return None
 
         try:
