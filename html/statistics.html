@@ -106,25 +106,26 @@
         draw_region(canvas, ctx, region_objects, countries, 20.0, 40.0, 1.0, 1.0);
     }
 
-    var draw_us_map = function(region_objects)
+    var draw_us_canada_map = function(us_region_objects, canada_region_objects)
     {
-        var canvas = document.getElementById("usCanvas");
+        var canvas = document.getElementById("usCanadaCanvas");
         var ctx = canvas.getContext("2d");
-        draw_region(canvas, ctx, region_objects, us_states, -20.0, -50.0, 3.0, 3.4);
-    }
-
-    var draw_canada_map = function(region_objects)
-    {
-        var canvas = document.getElementById("canadaCanvas");
-        var ctx = canvas.getContext("2d");
-        draw_region(canvas, ctx, region_objects, canadian_provinces, -90.0, 0.0, 3.5, 3.5);
+        draw_region(canvas, ctx, us_region_objects, us_states, -20.0, -50.0, 3.0, 3.4);
+        draw_region(canvas, ctx, canada_region_objects, canadian_provinces, -20.0, -50.0, 3.0, 3.4);
     }
 
     function get_map_data()
     {
-		$.ajax({ type: 'GET', url: "${root_url}/data/world.geo.json", cache: false, success: draw_world_map, dataType: "json" });
-		$.ajax({ type: 'GET', url: "${root_url}/data/us_states.geo.json", cache: false, success: draw_us_map, dataType: "json" });
-		$.ajax({ type: 'GET', url: "${root_url}/data/canada.geo.json", cache: false, success: draw_canada_map, dataType: "json" });
+        var map_store = {world:null, us:null, canada:null}; 
+
+        $.when(
+            $.get("${root_url}/data/world.geo.json", function(world) { map_store.world = world; }),
+            $.get("${root_url}/data/us_states.geo.json", function(us) { map_store.us = us; }),
+            $.get("${root_url}/data/canada.geo.json", function(canada) { map_store.canada = canada; }),
+        ).then(function() {
+            draw_world_map(map_store.world);
+            draw_us_canada_map(map_store.us, map_store.canada);
+        });
     }
 
     var process_heat_map = function(heat_map)
@@ -233,12 +234,8 @@ ${nav}
     <canvas id="worldCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
     Your browser does not support the canvas element.
     </canvas>
-    <h3>United States</h3>
-    <canvas id="usCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
-    Your browser does not support the canvas element.
-    </canvas>
-    <h3>Canada</h3>
-    <canvas id="canadaCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
+    <h3>United States and Canada</h3>
+    <canvas id="usCanadaCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
     Your browser does not support the canvas element.
     </canvas>
 
