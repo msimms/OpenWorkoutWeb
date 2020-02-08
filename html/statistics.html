@@ -184,13 +184,16 @@
 		var cycling_table = document.getElementById("Cycling");
 		var running_table = document.getElementById("Running");
 
-        for (var record in records.Cycling)
+        var sorted_cycling_keys = Object.keys(records.Cycling).sort()
+        var sorted_running_keys = Object.keys(records.Running).sort()
+
+        for (var key of sorted_cycling_keys)
         {
-            append_to_table(cycling_table, record, records.Cycling[record]);
+            append_to_table(cycling_table, key, records.Cycling[key]);
         }
-        for (var record in records.Running)
+        for (var key of sorted_running_keys)
         {
-            append_to_table(running_table, record, records.Running[record]);
+            append_to_table(running_table, key, records.Running[key]);
         }
     }
 
