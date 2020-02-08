@@ -47,9 +47,9 @@
 
     function draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, x_scale, y_scale)
     {
-        is_first = true;
+        var is_first = true;
         ctx.beginPath();
-        for (coordinate of coordinate_list)
+        for (var coordinate of coordinate_list)
         {
             [x, y] = latlon_to_xy(canvas, coordinate[1], coordinate[0], x_offset, y_offset, x_scale, y_scale);
 
@@ -69,7 +69,7 @@
 
     function draw_geo_polygon(canvas, ctx, polygon_objects, x_offset, y_offset, x_scale, y_scale)
     {
-        for (coordinate_list of polygon_objects)
+        for (var coordinate_list of polygon_objects)
         {
             draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, x_scale, y_scale);
         }
@@ -77,9 +77,9 @@
 
     function draw_region(canvas, ctx, region_objects, heat_map, x_offset, y_offset, x_scale, y_scale)
     {
-        for (region_object of region_objects.features)
+        for (var region_object of region_objects.features)
         {
-            name = region_object.properties.name;
+            var name = region_object.properties.name;
             if (heat_map.indexOf(name) == -1)
                 ctx.fillStyle = '#c3c3c3';
             else
@@ -165,9 +165,9 @@
 
     function append_to_table(table, row_name, row_value)
     {
-        new_row = table.insertRow();
-        cell = new_row.insertCell();
-        text = document.createTextNode(row_name);
+        var new_row = table.insertRow();
+        var cell = new_row.insertCell();
+        var text = document.createTextNode(row_name);
         cell.appendChild(text);
 
         cell = new_row.insertCell();
