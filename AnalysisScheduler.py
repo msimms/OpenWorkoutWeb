@@ -23,8 +23,12 @@
 # SOFTWARE.
 """Schedules computationally expensive analysis tasks"""
 
+import sys
+import traceback
+
 from bson.json_util import dumps
 from ActivityAnalyzer import analyze_activity
+
 import Keys
 
 class AnalysisScheduler(object):
@@ -39,6 +43,10 @@ class AnalysisScheduler(object):
         if not self.enabled:
             return
 
-        analysis_task = analyze_activity.delay(dumps(activity))
-        if data_mgr is not None:
-            data_mgr.track_analysis_task(activity_user_id, analysis_task.task_id)
+        try:
+            analysis_task = analyze_activity.delay(dumps(activity))
+            if data_mgr is not None:
+                data_mgr.track_analysis_task(activity_user_id, analysis_task.task_id)
+        except:
+            print(traceback.format_exc())
+            print(sys.exc_info()[0])
