@@ -402,7 +402,7 @@ class Api(object):
         """Called when an API message to check the login status in is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        return True, ""
+        return True, "Logged In"
 
     def handle_logout(self, values):
         """Ends the session for the specified user."""
