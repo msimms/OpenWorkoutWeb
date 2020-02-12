@@ -426,20 +426,6 @@ def analysis_status():
         g_app.log_error('Unhandled exception in ' + analysis_status.__name__)
     return g_app.error()
 
-@g_flask_app.route('/summary')
-@login_requred
-def summary():
-    """Renders the user's summary page."""
-    try:
-        return g_app.summary()
-    except App.RedirectException as e:
-        return flask.redirect(e.url, code=302)
-    except:
-        g_app.log_error(traceback.format_exc())
-        g_app.log_error(sys.exc_info()[0])
-        g_app.log_error('Unhandled exception in ' + summary.__name__)
-    return g_app.error()
-
 @g_flask_app.route('/profile')
 @login_requred
 def profile():
