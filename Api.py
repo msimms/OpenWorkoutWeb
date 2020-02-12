@@ -1349,7 +1349,12 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(self.user_id, None)
+        if Keys.SECONDS in values:
+            num_seconds = int(values[Keys.SECONDS])
+        else:
+            num_seconds = None
+
+        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(self.user_id, num_seconds)
         for item in cycling_bests:
             activity_id = cycling_bests[item][1]
             new_value = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, cycling_bests[item][0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)

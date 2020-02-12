@@ -83,6 +83,7 @@ WORKOUT_TYPE_SPEED_RUN = "Speed Run"
 WORKOUT_TYPE_INTERVAL_SESSION = "Interval Session"
 WORKOUT_TYPE_TEMPO_RUN = "Tempo Run"
 WORKOUT_TYPE_EASY_RUN = "Easy Run"
+WORKOUT_TYPE_MIDDLE_DISTANCE_RUN = "Middle Distance Run" # 2 hour run for advanced distance runners
 WORKOUT_TYPE_LONG_RUN = "Long Run"
 WORKOUT_TYPE_OPEN_WATER_SWIM = "Open Water Swim"
 WORKOUT_TYPE_POOL_WATER_SWIM = "Pool Swim"
@@ -187,6 +188,9 @@ VARIABILITY_INDEX = "Variability Index"
 CLUSTER = "Cluster"
 TOTAL_DISTANCE = "Total Distance"
 LONGEST_DISTANCE = "Longest Distance"
+
+# API-only keys.
+SECONDS = "Seconds"
 
 # Running paces.
 LONG_RUN_PACE = "Long Run Pace"
