@@ -749,6 +749,11 @@ def main():
             'tools.sessions.locking': 'early',
             'tools.secureheaders.on': True
         },
+        '/api':
+        {
+            'tools.response_headers.on': True,
+            'tools.response_headers.headers': [('Access-Control-Allow-Origin', '*')],
+        },
         '/css':
         {
             'tools.staticdir.on': True,
