@@ -412,7 +412,7 @@ class Api(object):
         # End the session
         self.user_mgr.clear_session()
         self.user_id = None
-        return True, ""
+        return True, "Logged Out"
 
     def handle_update_email(self, values):
         """Updates the user's email address."""
@@ -1004,8 +1004,8 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        result = self.data_mgr.list_gear(self.user_id)
-        return result, ""
+        response = self.data_mgr.retrieve_gear_for_user(self.user_id)
+        return True, json.dumps(response)
 
     def handle_update_gear(self, values):
         """Called when an API message to update gear for a user is received."""
