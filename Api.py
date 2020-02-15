@@ -12,6 +12,7 @@ import Exporter
 import InputChecker
 import Keys
 import Units
+import TrainingPaceCalculator
 
 class Api(object):
     """Class for managing API messages."""
@@ -1356,18 +1357,34 @@ class Api(object):
 
         cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(self.user_id, num_seconds)
         for item in cycling_bests:
+            seconds = cycling_bests[item][0]
             activity_id = cycling_bests[item][1]
-            new_value = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, cycling_bests[item][0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
-            cycling_bests[item] = new_value, activity_id
+            formatted_time = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, seconds, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
+            cycling_bests[item] = formatted_time, activity_id, seconds
         for item in running_bests:
+            seconds = running_bests[item][0]
             activity_id = running_bests[item][1]
-            new_value = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, running_bests[item][0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
-            running_bests[item] = new_value, activity_id
+            formatted_time = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, seconds, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
+            running_bests[item] = formatted_time, activity_id, seconds
 
         bests = {}
         bests[Keys.TYPE_CYCLING_KEY] = cycling_bests
         bests[Keys.TYPE_RUNNING_KEY] = running_bests
         return True, json.dumps(bests)
+
+    def handle_get_running_paces(self, values):
+        """Returns the user's estimated running paces."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.BEST_5K not in values:
+            raise ApiException.ApiMalformedRequestException("Best 5K not specified.")
+
+        calc = TrainingPaceCalculator.TrainingPaceCalculator()
+        run_paces = calc.calc_from_race_distance_in_meters(5000, int(values[Keys.BEST_5K]) / 60)
+        converted_paces = {}
+        for run_pace in run_paces:
+            converted_paces[run_pace] = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
+        return True, json.dumps(converted_paces)
 
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
@@ -1403,6 +1420,8 @@ class Api(object):
             return self.handle_get_activity_hash_from_id(values)
         elif request == 'list_personal_records':
             return self.handle_list_personal_records(values)
+        elif request == 'get_running_paces':
+            return self.handle_get_running_paces(values)
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):
