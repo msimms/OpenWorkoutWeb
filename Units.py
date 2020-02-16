@@ -226,7 +226,7 @@ def convert_to_preferred_pace_units(user_mgr, user_id, value, in_distance_units,
 
     speed = convert_speed(value, in_distance_units, in_time_units, out_distance_units, out_time_units)
     if speed < 0.001:
-        return 0.0
+        return 0.0, out_distance_units, out_time_units
 
     pace = 1.0 / speed
     return pace, out_distance_units, out_time_units
