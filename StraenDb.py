@@ -96,7 +96,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            post = {Keys.USERNAME_KEY: username, Keys.REALNAME_KEY: realname, Keys.HASH_KEY: passhash, Keys.DEVICES_KEY: [], Keys.FOLLOWING_KEY: [], Keys.DEFAULT_PRIVACY: Keys.ACTIVITY_VISIBILITY_PUBLIC}
+            post = {Keys.USERNAME_KEY: username, Keys.REALNAME_KEY: realname, Keys.HASH_KEY: passhash, Keys.DEVICES_KEY: [], Keys.FRIENDS_KEY: [], Keys.DEFAULT_PRIVACY: Keys.ACTIVITY_VISIBILITY_PUBLIC}
             self.users_collection.insert(post)
             return True
         except:
@@ -302,68 +302,42 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_users_followed(self, user_id):
-        """Returns the user ids for all users that are followed by the user with the specified id."""
+    def retrieve_friends(self, user_id):
+        """Returns the user ids for all users that are friends with the user who has the specified id."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_users_followed.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.retrieve_friends.__name__ + ": Unexpected empty object: user_id")
             return None
 
         try:
-            # Find the user.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
-
-            # Find the following list.
-            if user is not None and Keys.FOLLOWING_KEY in user:
-                following_ids = user[Keys.FOLLOWING_KEY]
-                following_users = []
-                for following_id in following_ids:
-                    username, realname = self.retrieve_user_from_id(following_id)
-                    user = {}
-                    user[Keys.DATABASE_ID_KEY] = following_id
-                    user[Keys.USERNAME_KEY] = username
-                    user[Keys.REALNAME_KEY] = realname
-                    following_users.append(user)
-                return following_users
+            friends = self.users_collection.find({Keys.FRIENDS_KEY: user_id})
+            return list(friends)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return None
 
-    def retrieve_followers(self, user_id):
-        """Returns the user ids for all users that follow the user with the specified id."""
+    def create_friend_entry(self, user_id, target_id):
+        """Appends a user to the friends list of the user with the specified id."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_followers.__name__ + ": Unexpected empty object: user_id")
-            return None
-
-        try:
-            followers = self.users_collection.find({Keys.FOLLOWING_KEY: user_id})
-            return list(followers)
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return None
-
-    def create_following_entry(self, user_id, target_id):
-        """Appends a user to the followers list of the user with the specified id."""
-        if user_id is None:
-            self.log_error(MongoDatabase.create_following_entry.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.create_friend_entry.__name__ + ": Unexpected empty object: user_id")
             return None
         if target_id is None:
-            self.log_error(MongoDatabase.create_following_entry.__name__ + ": Unexpected empty object: target_id")
+            self.log_error(MongoDatabase.create_friend_entry.__name__ + ": Unexpected empty object: target_id")
             return False
 
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user was found.
             if user is not None:
-                user_list = []
-                if Keys.FOLLOWING_KEY in user:
-                    user_list = user[Keys.FOLLOWING_KEY]
-                if target_id not in user_list:
-                    user_list.append(target_id)
-                    user[Keys.FOLLOWING_KEY] = user_list
+                friends_list = []
+                if Keys.FRIENDS_KEY in user:
+                    friends_list = user[Keys.FRIENDS_KEY]
+                if target_id not in friends_list:
+                    friends_list.append(target_id)
+                    user[Keys.FRIENDS_KEY] = friends_list
                     self.users_collection.save(user)
                     return True
         except:

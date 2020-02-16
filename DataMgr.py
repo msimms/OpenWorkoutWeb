@@ -430,9 +430,9 @@ class DataMgr(Importer.ActivityWriter):
         activities = self.retrieve_user_activity_list(user_id, user_realname, start, num_results)
 
         # Add the activities of users they follow.
-        followed_users = self.database.retrieve_users_followed(user_id)
-        for followed_user in followed_users:
-            more_activities = self.retrieve_user_activity_list(followed_user[Keys.DATABASE_ID_KEY], followed_user[Keys.REALNAME_KEY], start, num_results)
+        friends = self.database.retrieve_friends(user_id)
+        for friend in friends:
+            more_activities = self.retrieve_user_activity_list(friends[Keys.DATABASE_ID_KEY], friends[Keys.REALNAME_KEY], start, num_results)
             for another_activity in more_activities:
                 if self.is_activity_public(another_activity):
                     activities.append(another_activity)

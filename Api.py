@@ -537,7 +537,7 @@ class Api(object):
         self.user_mgr.delete_user(self.user_id)
         return True, ""
 
-    def handle_list_activities(self, values, include_followed_users):
+    def handle_list_activities(self, values, include_friends):
         """Returns a list of JSON objects describing all of the user's activities."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -552,7 +552,7 @@ class Api(object):
 
         # Get the activities that belong to the logged in user.
         matched_activities = []
-        if include_followed_users:
+        if include_friends:
             activities = self.data_mgr.retrieve_all_activities_visible_to_user(self.user_id, user_realname, None, None)
         else:
             activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
@@ -779,30 +779,17 @@ class Api(object):
         json_result = json.dumps(matched_users, ensure_ascii=False)
         return True, json_result
 
-    def list_users_following(self, values):
+    def list_friends(self, values):
         """Called when an API message to list the users you are following is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        users_following = self.user_mgr.list_users_followed(self.user_id)
-        users_list_str = ""
-        if users_following is not None and isinstance(users_following, list):
-            users_list_str = str(users_following)
-        return True, users_list_str
+        friends = self.user_mgr.list_friends(self.user_id)
+        json_result = json.dumps(friends, ensure_ascii=False)
+        return True, json_result
 
-    def list_users_followed_by(self, values):
-        """Called when an API message to list the users who are following you is received."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-
-        users_followed_by = self.user_mgr.list_followers(self.user_id)
-        users_list_str = ""
-        if users_followed_by is not None and isinstance(users_followed_by, list):
-            users_list_str = str(users_followed_by)
-        return True, users_list_str
-
-    def handle_request_to_follow(self, values):
-        """Called when an API message request to follow another user is received."""
+    def handle_friend_request(self, values):
+        """Called when an API message request to friend another user is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.TARGET_EMAIL_KEY not in values:
@@ -815,12 +802,12 @@ class Api(object):
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise ApiException.ApiMalformedRequestException("Target user does not exist.")
-        if not self.user_mgr.request_to_follow(self.user_id, target_id):
+        if not self.user_mgr.request_to_riend(self.user_id, target_id):
             raise ApiException.ApiMalformedRequestException("Request failed.")
         return True, ""
 
-    def handle_unfollow(self, values):
-        """Called when an API message request to unfollow another user is received."""
+    def handle_unfriend_request(self, values):
+        """Called when an API message request to unfriend another user is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.TARGET_EMAIL_KEY not in values:
@@ -924,8 +911,9 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        result = self.data_mgr.retrieve_activity_tags(activity_id)
-        return result, ""
+        tags = self.data_mgr.retrieve_activity_tags(activity_id)
+        json_result = json.dumps(tags, ensure_ascii=False)
+        return True, json_result
 
     def handle_create_comment(self, values):
         """Called when an API message create a comment is received."""
@@ -958,8 +946,9 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        result = self.data_mgr.retrieve_comments(activity_id)
-        return result, ""
+        comments = self.data_mgr.retrieve_comments(activity_id)
+        json_result = json.dumps(comments, ensure_ascii=False)
+        return True, json_result
 
     def handle_create_gear(self, values):
         """Called when an API message to create gear for a user is received."""
@@ -1398,6 +1387,8 @@ class Api(object):
             return self.handle_list_activities(values, True)
         elif request == 'list_my_activities':
             return self.handle_list_activities(values, False)
+        elif request == 'list_friends':
+            return self.list_friends(values)
         elif request == 'list_tags':
             return self.handle_list_tags(values)
         elif request == 'list_comments':
@@ -1458,14 +1449,10 @@ class Api(object):
             return self.handle_delete_tag_from_activity(values)
         elif request == 'list_matched_users':
             return self.handle_list_matched_users(values)
-        elif request == 'list_users_following':
-            return self.list_users_following(values)
-        elif request == 'list_users_followed_by':
-            return self.list_users_followed_by(values)
-        elif request == 'request_to_follow':
-            return self.handle_request_to_follow(values)
-        elif request == 'unfollow':
-            return self.handle_unfollow(values)
+        elif request == 'request_to_be_friends':
+            return self.handle_friend_request(values)
+        elif request == 'unfriend':
+            return self.handle_unfriend_request(values)
         elif request == 'export_activity':
             return self.handle_export_activity(values)
         elif request == 'claim_device':

@@ -9,8 +9,8 @@
 <link rel="stylesheet" href="${root_url}/css/site.css">
 
 <meta charset="UTF-8">
-<meta name="description" content="Lists all users being followed by the logged in user">
-<meta name="keywords" content="followers">
+<meta name="description" content="Lists all users following the logged in user">
+<meta name="keywords" content="friends">
 
 </head>
 
@@ -19,18 +19,20 @@
 <body>
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 
+<script>
 	function follow(target)
 	{
-		var the_url = "${root_url}/api/1.0/request_to_follow";
+		var the_url = "${root_url}/api/1.0/request_to_be_friends";
 		var dict = [];
 		var result_text = {};
 
 		dict.push({["target_email"] : target.name});
 		if (send_post_request(the_url, dict, result_text))
 		{
-			window.location.replace("${root_url}/following");
+			window.location.replace("${root_url}/friends");
 		}
 		else
 		{
@@ -79,6 +81,35 @@
 		}
 	}
 
+    function append_to_friends_table(table, row_name, row_value)
+    {
+        var new_row = table.insertRow();
+        var cell = new_row.insertCell();
+        var text = document.createTextNode(row_name);
+        cell.appendChild(text);
+
+        cell = new_row.insertCell();
+        text = document.createTextNode(row_value);
+        cell.appendChild(text);
+    }
+
+    var process_friends_list = function(records)
+    {
+		var friends_table = document.getElementById("Friends");
+        var sorted_friends_list = Object.keys(records).sort()
+
+        for (var friend of sorted_friends_list)
+        {
+            append_to_friends_table(friends_table, friend);
+        }
+    }
+
+    function get_friends_list()
+    {
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_friends", cache: false, success: process_friends_list, dataType: "json" });
+    }
+
+    get_friends_list();
 </script>
 
 <section class="nav">
@@ -91,15 +122,14 @@ ${nav}
 	<button type="button" onclick="return search()">Search</button>
 </div>
 
-<div class="users_list" style="width: 600px">
+<div class="friends_list" style="width: 600px">
 	<table id="search_results" >
 	</table>
 </div>
 
-<div class="users_list" style="width: 600px">
-	<h2>Users I Am Following</h2>
-	<table>
-	${users_list}
+<div class="friends_list" style="width: 600px">
+	<h2>My Friends</h2>
+	<table id="Friends">
 	</table>
 </div>
 

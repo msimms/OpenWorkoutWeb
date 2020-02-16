@@ -215,8 +215,7 @@ class App(object):
                 "\t\t<li><a href=\"" + self.root_url + "/workouts/\">Workouts</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/statistics/\">Statistics</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/gear/\">Gear</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/following/\">Following</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/followers/\">Followers</a></li>\n" \
+                "\t\t<li><a href=\"" + self.root_url + "/friends/\">Friends</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/device_list/\">Devices</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/import_activity/\">Import</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/profile/\">Profile</a></li>\n" \
@@ -1341,8 +1340,8 @@ class App(object):
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, gear_name=gear_name, service_records=service_records, gear_id=gear_id)
 
     @statistics
-    def following(self):
-        """Renders the list of users the specified user is following."""
+    def friends(self):
+        """Renders the list of users who are friends with the logged in user."""
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -1355,48 +1354,10 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # Get the list of users followed by the logged in user.
-        users_following = self.user_mgr.list_users_followed(user_id)
-        users_list_str = "Not currently following anyone."
-        if users_following is not None and isinstance(users_following, list):
-            if len(users_following) > 0:
-                users_list_str = ""
-                for user in users_following:
-                    users_list_str += self.render_user_row(user)
-
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'following.html')
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'friends.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, users_list=users_list_str)
-
-    @statistics
-    def followers(self):
-        """Renders the list of users that are following the specified user."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Get the list of users following the logged in user.
-        users_followed_by = self.user_mgr.list_followers(user_id)
-        users_list_str = "Not currently being followed by anyone."
-        if users_followed_by is not None and isinstance(users_followed_by, list):
-            if len(users_followed_by) > 0:
-                users_list_str = ""
-                for user in users_followed_by:
-                    users_list_str += self.render_user_row(user)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'followers.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, users_list=users_list_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
     @statistics
     def device_list(self):

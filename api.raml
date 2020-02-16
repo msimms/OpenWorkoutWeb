@@ -116,7 +116,7 @@ version: v1
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /list_all_activities:
-    description: Returns a list of JSON objects describing all of the user's activities and the activities of the users being followed.
+    description: Returns a list of JSON objects describing all of the user's activities and the activities of the user's friends.
     get:
         responses:
             200:
@@ -187,8 +187,8 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-/list_users_following:
-    description: Lists the users you are following.
+/list_friends:
+    description: Lists the users who are friends with the logged in user.
     get:
     post:
         responses:
@@ -196,17 +196,8 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-/list_users_followed_by:
-    description: Lists the users who are following you.
-    get:
-    post:
-        responses:
-            200:
-            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
-            403: Failed authentication. The user is not logged in.
-            500: An internal exception was thrown.
-/request_to_follow:
-    description: Sends a request to follow another user.
+/request_to_be_friends:
+    description: Sends a request to friend another user.
     get:
     post:
         responses:
@@ -214,8 +205,8 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-/unfollow:
-    description: Removes a user from the list of users being followed by the logged in user.
+/request_to_unfriend:
+    description: Removes a user from the list of users that are friends with the logged in user.
     get:
     post:
         responses:
