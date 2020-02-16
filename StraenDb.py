@@ -219,10 +219,16 @@ class MongoDatabase(Database.Database):
             return user_list
 
         try:
-            matched_users = self.users_collection.find({Keys.USERNAME_KEY: {"$regex": username}})
-            if matched_users is not None:
-                for matched_user in matched_users:
+            matched_usernames = self.users_collection.find({Keys.USERNAME_KEY: {"$regex": username}})
+            if matched_usernames is not None:
+                for matched_user in matched_usernames:
                     user_list.append(matched_user[Keys.USERNAME_KEY])
+            matched_realnames = self.users_collection.find({Keys.REALNAME_KEY: {"$regex": username}})
+            if matched_realnames is not None:
+                for matched_user in matched_realnames:
+                    username = matched_user[Keys.USERNAME_KEY]
+                    if username not in user_list:
+                        user_list.append(username)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
