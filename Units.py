@@ -224,10 +224,10 @@ def convert_to_preferred_pace_units(user_mgr, user_id, value, in_distance_units,
     else:
         out_distance_units = UNITS_DISTANCE_MILES
 
-    speed = convert_speed(value, in_distance_units, in_time_units, out_distance_units, out_time_units), out_distance_units, out_time_units
+    speed = convert_speed(value, in_distance_units, in_time_units, out_distance_units, out_time_units)
     if speed < 0.001:
         return 0.0
-    return 1.0 / speed
+    return 1.0 / speed, out_distance_units, out_time_units
 
 def meters_per_sec_to_minutes_per_mile(value):
     speed = convert_speed(value, UNITS_DISTANCE_METERS, UNITS_TIME_SECONDS, UNITS_DISTANCE_MILES, UNITS_TIME_MINUTES)
