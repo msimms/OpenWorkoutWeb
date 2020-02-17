@@ -96,10 +96,10 @@
 				var td2 = document.createElement('td');
 				var email_text = document.createTextNode(obj[i]);
 				var friend_link = document.createElement('button');
-				var friend_link_text = document.createTextNode('Friend');
+				var friend_link_text = document.createTextNode('Request Friend');
 
 				friend_link.appendChild(friend_link_text);
-				friend_link.title = "Friend";
+				friend_link.title = "Request Friend";
 				friend_link.value = obj[i];
 				friend_link.name = obj[i];
 				friend_link.addEventListener('click', function() { request_to_be_friends(this); });
