@@ -334,13 +334,13 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_friend_request(self, user_id, target_id):
+    def create_pending_friend_request(self, user_id, target_id):
         """Appends a user to the friends list of the user with the specified id."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_friend_request.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.create_pending_friend_request.__name__ + ": Unexpected empty object: user_id")
             return None
         if target_id is None:
-            self.log_error(MongoDatabase.create_friend_request.__name__ + ": Unexpected empty object: target_id")
+            self.log_error(MongoDatabase.create_pending_friend_request.__name__ + ": Unexpected empty object: target_id")
             return False
 
         try:
@@ -355,7 +355,7 @@ class MongoDatabase(Database.Database):
                     pending_friends_list = user[Keys.FRIEND_REQUESTS_KEY]
                 if user_id not in pending_friends_list:
                     pending_friends_list.append(user_id)
-                    user[Keys.FRIENDS_KEY] = pending_friends_list
+                    user[Keys.FRIEND_REQUESTS_KEY] = pending_friends_list
                     self.users_collection.save(user)
                     return True
         except:
@@ -382,7 +382,36 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return []
+
+    def delete_pending_friend_request(self, user_id, target_id):
+        """Appends a user to the friends list of the user with the specified id."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_pending_friend_request.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if target_id is None:
+            self.log_error(MongoDatabase.delete_pending_friend_request.__name__ + ": Unexpected empty object: target_id")
+            return False
+
+        try:
+            # Find the user whose friendship is being requested.
+            user_id_obj = ObjectId(str(target_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user was found then add the target user to the pending friends list.
+            if user is not None:
+                pending_friends_list = []
+                if Keys.FRIEND_REQUESTS_KEY in user:
+                    pending_friends_list = user[Keys.FRIEND_REQUESTS_KEY]
+                if user_id in pending_friends_list:
+                    pending_friends_list.remove(user_id)
+                    user[Keys.FRIEND_REQUESTS_KEY] = pending_friends_list
+                    self.users_collection.save(user)
+                    return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
 
     def create_friend(self, user_id, target_id):
         """Appends a user to the friends list of the user with the specified id."""
@@ -448,7 +477,7 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return []
 
     def delete_friend(self, user_id, target_id):
         """Removes the users from each other's friends lists."""

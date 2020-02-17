@@ -201,7 +201,7 @@ version: v1
     get:
     post:
         responses:
-            200:
+            200: JSON formatted list of pending friends.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
@@ -210,7 +210,7 @@ version: v1
     get:
     post:
         responses:
-            200:
+            200: JSON formatted list of friends.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
@@ -223,12 +223,21 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-/request_to_unfriend:
+/confirm_request_to_be_friends:
+    description: Takes a user to the pending friends list and adds them to the actual friends list.
+    get:
+    post:
+        responses:
+            200: Empty string
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+/unfriend:
     description: Removes a user from the list of users that are friends with the logged in user.
     get:
     post:
         responses:
-            200:
+            200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.

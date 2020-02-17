@@ -830,6 +830,24 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Request failed.")
         return True, ""
 
+    def handle_confirm_friend_request(self, values):
+        """Takes a user to the pending friends list and adds them to the actual friends list."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.TARGET_EMAIL_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
+        if not InputChecker.is_email_address(target_email):
+            raise ApiException.ApiMalformedRequestException("Invalid email address.")
+
+        target_id, _, _ = self.user_mgr.retrieve_user(target_email)
+        if target_id is None:
+            raise ApiException.ApiMalformedRequestException("Target user does not exist.")
+        if not self.user_mgr.confirm_request_to_be_friends(self.user_id, target_id):
+            raise ApiException.ApiMalformedRequestException("Request failed.")
+        return True, ""
+
     def handle_unfriend_request(self, values):
         """Called when an API message request to unfriend another user is received."""
         if self.user_id is None:
@@ -1481,6 +1499,8 @@ class Api(object):
             return self.handle_list_matched_users(values)
         elif request == 'request_to_be_friends':
             return self.handle_friend_request(values)
+        elif request == 'confirm_request_to_be_friends':
+            return self.handle_confirm_friend_request(values)
         elif request == 'unfriend':
             return self.handle_unfriend_request(values)
         elif request == 'export_activity':

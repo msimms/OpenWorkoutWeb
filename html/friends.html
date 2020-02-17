@@ -139,16 +139,14 @@
             cell = new_row.insertCell();
             cell.appendChild(btn);
         }
-        else
-        {
-            var btn = document.createElement('button');
-            var btn_txt = document.createTextNode('Delete');
-            btn.appendChild(btn_txt);
-            btn.title = "Delete";
-            btn.addEventListener('click', function() { unfriend(useremail); });
-            cell = new_row.insertCell();
-            cell.appendChild(btn);
-        }
+
+        var btn = document.createElement('button');
+        var btn_txt = document.createTextNode('Delete');
+        btn.appendChild(btn_txt);
+        btn.title = "Delete";
+        btn.addEventListener('click', function() { unfriend(useremail); });
+        cell = new_row.insertCell();
+        cell.appendChild(btn);
     }
 
     function process_friends_list(records, is_pending_request)
