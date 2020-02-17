@@ -255,6 +255,16 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         return self.database.retrieve_friends(user_id)
 
+    def unfriend(self, user_id, target_id):
+        """Removes the users from each other's friends lists."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None or len(user_id) == 0:
+            raise Exception("Bad parameter.")
+        if target_id is None or len(target_id) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.delete_friend(user_id, target_id)
+
     def update_user_setting(self, user_id, key, value):
         """Create/update method for user preferences."""
         if self.database is None:

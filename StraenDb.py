@@ -398,8 +398,14 @@ class MongoDatabase(Database.Database):
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
 
-            # If the user was found then add them to target user to the friends list.
-            if user is not None:
+            # Find the target user.
+            target_user_id_obj = ObjectId(str(target_id))
+            target_user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: target_user_id_obj})
+
+            # If the users were found then add each other to their friends lists.
+            if user is not None and target_user is not None:
+
+                # Update the user's friends list.
                 friends_list = []
                 if Keys.FRIENDS_KEY in user:
                     friends_list = user[Keys.FRIENDS_KEY]
@@ -407,7 +413,17 @@ class MongoDatabase(Database.Database):
                     friends_list.append(target_id)
                     user[Keys.FRIENDS_KEY] = friends_list
                     self.users_collection.save(user)
-                    return True
+
+                # Update the target user's friends list.
+                friends_list = []
+                if Keys.FRIENDS_KEY in user:
+                    friends_list = target_user[Keys.FRIENDS_KEY]
+                if user_id not in friends_list:
+                    friends_list.append(user_id)
+                    target_user[Keys.FRIENDS_KEY] = friends_list
+                    self.users_collection.save(target_user)
+
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -433,6 +449,51 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return None
+
+    def delete_friend(self, user_id, target_id):
+        """Removes the users from each other's friends lists."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_friend.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if target_id is None:
+            self.log_error(MongoDatabase.delete_friend.__name__ + ": Unexpected empty object: target_id")
+            return False
+
+        try:
+            # Find the user.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # Find the target user.
+            target_user_id_obj = ObjectId(str(target_id))
+            target_user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: target_user_id_obj})
+
+            # If the users were found then add each other to their friends lists.
+            if user is not None and target_user is not None:
+
+                # Update the user's friends list.
+                friends_list = []
+                if Keys.FRIENDS_KEY in user:
+                    friends_list = user[Keys.FRIENDS_KEY]
+                if target_id in friends_list:
+                    friends_list.remove(target_id)
+                    user[Keys.FRIENDS_KEY] = friends_list
+                    self.users_collection.save(user)
+
+                # Update the target user's friends list.
+                friends_list = []
+                if Keys.FRIENDS_KEY in user:
+                    friends_list = target_user[Keys.FRIENDS_KEY]
+                if user_id in friends_list:
+                    friends_list.remove(user_id)
+                    target_user[Keys.FRIENDS_KEY] = friends_list
+                    self.users_collection.save(target_user)
+
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
 
     def update_user_setting(self, user_id, key, value):
         """Create/update method for user preferences."""

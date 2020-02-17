@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="${root_url}/css/site.css">
 
 <meta charset="UTF-8">
-<meta name="description" content="Lists all users following the logged in user">
+<meta name="description" content="Lists all users who are friends with the logged in user">
 <meta name="keywords" content="friends">
 
 </head>
@@ -23,7 +23,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 
 <script>
-	function follow(target)
+	function request_to_be_friends(target)
 	{
 		var the_url = "${root_url}/api/1.0/request_to_be_friends";
 		var dict = [];
@@ -39,6 +39,22 @@
 			alert(result_text.value);
 		}
 	}
+
+    function confirm_friend(target)
+    {
+		var the_url = "${root_url}/api/1.0/confirm_request_to_be_friends";
+		var dict = [];
+		var result_text = {};
+
+    }
+
+    function unfriend(target)
+    {
+		var the_url = "${root_url}/api/1.0/unfriend";
+		var dict = [];
+		var result_text = {};
+
+    }
 
 	function search()
 	{
@@ -65,7 +81,7 @@
 				friend_link.title = "Friend";
 				friend_link.value = obj[i];
 				friend_link.name = obj[i];
-				friend_link.addEventListener('click', function() { follow(this); });
+				friend_link.addEventListener('click', function() { request_to_be_friends(this); });
 
 				td1.appendChild(email_text);
 				td2.appendChild(friend_link);
@@ -108,7 +124,7 @@
             var btn_txt = document.createTextNode('Delete');
             btn.appendChild(btn_txt);
             btn.title = "Delete";
-            btn.addEventListener('click', function() { confirm_friend(this); });
+            btn.addEventListener('click', function() { unfriend(this); });
             cell = new_row.insertCell();
             cell.appendChild(btn);
         }
