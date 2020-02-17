@@ -115,6 +115,15 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
+/list_devices:
+    description: Returns a list of JSON objects describing all of the devices claimed by the logged in user.
+    get:
+        responses:
+            200:
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
 /list_all_activities:
     description: Returns a list of JSON objects describing all of the user's activities and the activities of the user's friends.
     get:

@@ -168,7 +168,7 @@ class Api(object):
         return True, ""
 
     def handle_retrieve_activity_track(self, values):
-        """Called when an API message to get the activity track is received."""
+        """Called when an API message to get the activity track is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -200,7 +200,7 @@ class Api(object):
         return True, response
 
     def handle_retrieve_activity_metadata(self, values):
-        """Called when an API message to get the activity metadata."""
+        """Called when an API message to get the activity metadata. Result is a JSON string."""
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
@@ -537,8 +537,23 @@ class Api(object):
         self.user_mgr.delete_user(self.user_id)
         return True, ""
 
+    def handle_list_devices(self, values):
+        """Returns a JSON string describing all of the user's devices."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise ApiException.ApiMalformedRequestException("Empty username.")
+
+        # List the devices.
+        user_devices = self.user_mgr.retrieve_user_devices(self.user_id)
+        json_result = json.dumps(user_devices, ensure_ascii=False)
+        return True, json_result
+
     def handle_list_activities(self, values, include_friends):
-        """Returns a list of JSON objects describing all of the user's activities."""
+        """Returns a JSON string describing all of the user's activities."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -762,7 +777,7 @@ class Api(object):
         return True, ""
 
     def handle_list_matched_users(self, values):
-        """Called when an API message to list users is received."""
+        """Called when an API message to list users is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if 'searchname' not in values:
@@ -780,7 +795,7 @@ class Api(object):
         return True, json_result
 
     def list_pending_friends(self, values):
-        """Called when an API message to list the users requesting friendship with the current user is received."""
+        """Called when an API message to list the users requesting friendship with the current user is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -789,7 +804,7 @@ class Api(object):
         return True, json_result
 
     def list_friends(self, values):
-        """Called when an API message to list the current user's friends is received."""
+        """Called when an API message to list the current user's friends is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -910,7 +925,7 @@ class Api(object):
         return result, ""
 
     def handle_list_tags(self, values):
-        """Called when an API message create list tags associated with an activity is received."""
+        """Called when an API message create list tags associated with an activity is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -945,7 +960,7 @@ class Api(object):
         return result, ""
 
     def handle_list_comments(self, values):
-        """Called when an API message to list comments associated with an activity is received."""
+        """Called when an API message to list comments associated with an activity is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -999,7 +1014,7 @@ class Api(object):
         return result, ""
 
     def handle_list_gear(self, values):
-        """Called when an API message to list gear associated with a user is received."""
+        """Called when an API message to list gear associated with a user is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -1248,7 +1263,7 @@ class Api(object):
         return True, ""
 
     def handle_list_workouts(self, values):
-        """Called when the user wants wants a list of their planned workouts."""
+        """Called when the user wants wants a list of their planned workouts. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -1304,7 +1319,7 @@ class Api(object):
         return True, str(location_description)
 
     def handle_get_location_summary(self, values):
-        """Called when the user wants get the summary of all political locations in which activities have occurred."""
+        """Called when the user wants get the summary of all political locations in which activities have occurred. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -1344,7 +1359,7 @@ class Api(object):
         return True, str(summary_data[Keys.ACTIVITY_HASH_KEY])
 
     def handle_list_personal_records(self, values):
-        """Returns the user's personal records."""
+        """Returns the user's personal records. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -1371,7 +1386,7 @@ class Api(object):
         return True, json.dumps(bests)
 
     def handle_get_running_paces(self, values):
-        """Returns the user's estimated running paces."""
+        """Returns the user's estimated running paces. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.BEST_5K not in values:
@@ -1392,6 +1407,8 @@ class Api(object):
             return self.handle_retrieve_activity_metadata(values)
         elif request == 'login_status':
             return self.handle_login_status(values)
+        elif request == 'list_devices':
+            return self.handle_list_devices(values)
         elif request == 'list_all_activities':
             return self.handle_list_activities(values, True)
         elif request == 'list_my_activities':
