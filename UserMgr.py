@@ -219,15 +219,25 @@ class UserMgr(object):
             raise Exception("Device string not provided.")
         return self.database.retrieve_user_from_device(device_str)
 
-    def list_friends(self, user_id):
-        """Returns the user ids for all users that are friends with the user with specified id."""
+    def request_to_be_friends(self, user_id, target_id):
+        """Appends a user to the pending friends list of the user with the specified id."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None or len(user_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_friends(user_id)
+        if target_id is None or len(target_id) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.create_friend_request(user_id, target_id)
 
-    def request_to_be_friends(self, user_id, target_id):
+    def list_pending_friends(self, user_id):
+        """Returns the user ids for all users that are pending confirmation as friends of the specified user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None or len(user_id) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_pending_friends(user_id)
+
+    def confirm_request_to_be_friends(self, user_id, target_id):
         """Appends a user to the friends list of the user with the specified id."""
         if self.database is None:
             raise Exception("No database.")
@@ -235,7 +245,15 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         if target_id is None or len(target_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.create_friend_entry(user_id, target_id)
+        return self.database.create_friend(user_id, target_id)
+
+    def list_friends(self, user_id):
+        """Returns the user ids for all users that are friends with the user with specified id."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None or len(user_id) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_friends(user_id)
 
     def update_user_setting(self, user_id, key, value):
         """Create/update method for user preferences."""

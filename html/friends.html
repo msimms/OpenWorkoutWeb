@@ -57,18 +57,18 @@
 				var tr = document.createElement('tr');   
 				var td1 = document.createElement('td');
 				var td2 = document.createElement('td');
-				var emailText = document.createTextNode(obj[i]);
-				var followLink = document.createElement('button');
-				var followLinkText = document.createTextNode('Follow');
+				var email_text = document.createTextNode(obj[i]);
+				var friend_link = document.createElement('button');
+				var friend_link_text = document.createTextNode('Friend');
 
-				followLink.appendChild(followLinkText);
-				followLink.title = "Follow";
-				followLink.value = obj[i];
-				followLink.name = obj[i];
-				followLink.addEventListener('click', function() { follow(this); });
+				friend_link.appendChild(friend_link_text);
+				friend_link.title = "Friend";
+				friend_link.value = obj[i];
+				friend_link.name = obj[i];
+				friend_link.addEventListener('click', function() { follow(this); });
 
-				td1.appendChild(emailText);
-				td2.appendChild(followLink);
+				td1.appendChild(email_text);
+				td2.appendChild(friend_link);
 				tr.appendChild(td1);
 				tr.appendChild(td2);
 
@@ -81,7 +81,7 @@
 		}
 	}
 
-    function append_to_friends_table(table, row_name, row_value)
+    function append_to_friends_table(table, row_name, row_value, is_pending_request)
     {
         var new_row = table.insertRow();
         var cell = new_row.insertCell();
@@ -91,25 +91,54 @@
         cell = new_row.insertCell();
         text = document.createTextNode(row_value);
         cell.appendChild(text);
-    }
 
-    var process_friends_list = function(records)
-    {
-		var friends_table = document.getElementById("Friends");
-        var sorted_friends_list = Object.keys(records).sort()
-
-        for (var friend of sorted_friends_list)
+        if (is_pending_request)
         {
-            append_to_friends_table(friends_table, friend);
+            var btn = document.createElement('button');
+            var btn_txt = document.createTextNode('Confirm');
+            btn.appendChild(btn_txt);
+            btn.title = "Confirm";
+            btn.addEventListener('click', function() { confirm_friend(this); });
+            cell = new_row.insertCell();
+            cell.appendChild(btn);
+        }
+        else
+        {
+            var btn = document.createElement('button');
+            var btn_txt = document.createTextNode('Delete');
+            btn.appendChild(btn_txt);
+            btn.title = "Delete";
+            btn.addEventListener('click', function() { confirm_friend(this); });
+            cell = new_row.insertCell();
+            cell.appendChild(btn);
         }
     }
 
-    function get_friends_list()
+    function process_friends_list(records, is_pending_request)
     {
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_friends", cache: false, success: process_friends_list, dataType: "json" });
+		var friends_table = document.getElementById("Friends");
+
+        for (var friend of records)
+        {
+            append_to_friends_table(friends_table, friend.realname, friend.username, is_pending_request);
+        }
     }
 
-    get_friends_list();
+    function get_friends_lists()
+    {
+        var pending_friends = null;
+        var friends = null;
+
+        $.when(
+            $.get("${root_url}/api/1.0/list_pending_friends", function(users) { pending_friends = users; }),
+            $.get("${root_url}/api/1.0/list_friends", function(users) { friends = users; }),
+        ).then(function() {
+            process_friends_list(JSON.parse(pending_friends), true);
+            process_friends_list(JSON.parse(friends), false);
+        });
+    }
+
+    get_friends_lists();
 </script>
 
 <section class="nav">

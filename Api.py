@@ -779,8 +779,17 @@ class Api(object):
         json_result = json.dumps(matched_users, ensure_ascii=False)
         return True, json_result
 
+    def list_pending_friends(self, values):
+        """Called when an API message to list the users requesting friendship with the current user is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        friends = self.user_mgr.list_pending_friends(self.user_id)
+        json_result = json.dumps(friends, ensure_ascii=False)
+        return True, json_result
+
     def list_friends(self, values):
-        """Called when an API message to list the users you are following is received."""
+        """Called when an API message to list the current user's friends is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -802,7 +811,7 @@ class Api(object):
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise ApiException.ApiMalformedRequestException("Target user does not exist.")
-        if not self.user_mgr.request_to_riend(self.user_id, target_id):
+        if not self.user_mgr.request_to_be_friends(self.user_id, target_id):
             raise ApiException.ApiMalformedRequestException("Request failed.")
         return True, ""
 
@@ -1387,6 +1396,8 @@ class Api(object):
             return self.handle_list_activities(values, True)
         elif request == 'list_my_activities':
             return self.handle_list_activities(values, False)
+        elif request == 'list_pending_friends':
+            return self.list_pending_friends(values)
         elif request == 'list_friends':
             return self.list_friends(values)
         elif request == 'list_tags':

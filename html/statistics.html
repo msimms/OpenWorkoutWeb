@@ -100,14 +100,14 @@
         }
     }
 
-    var draw_world_map = function(region_objects)
+    function draw_world_map(region_objects)
     {
         var canvas = document.getElementById("worldCanvas");
         var ctx = canvas.getContext("2d");
         draw_region(canvas, ctx, region_objects, countries, 20.0, 40.0, 1.0, 1.0);
     }
 
-    var draw_us_canada_map = function(us_region_objects, canada_region_objects)
+    function draw_us_canada_map(us_region_objects, canada_region_objects)
     {
         var canvas = document.getElementById("usCanadaCanvas");
         var ctx = canvas.getContext("2d");

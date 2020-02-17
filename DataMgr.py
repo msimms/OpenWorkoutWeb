@@ -385,7 +385,7 @@ class DataMgr(Importer.ActivityWriter):
                     activities.extend(device_activities)
 
         # List activities with no device that are associated with the user.
-        exclude_keys = self.database.list_excluded_keys() # Things we don't need.
+        exclude_keys = self.database.list_excluded_activity_keys() # Things we don't need.
         user_activities = self.database.retrieve_user_activity_list(user_id, start, None, exclude_keys)
         if user_activities is not None:
             for user_activity in user_activities:
@@ -432,7 +432,7 @@ class DataMgr(Importer.ActivityWriter):
         # Add the activities of users they follow.
         friends = self.database.retrieve_friends(user_id)
         for friend in friends:
-            more_activities = self.retrieve_user_activity_list(friends[Keys.DATABASE_ID_KEY], friends[Keys.REALNAME_KEY], start, num_results)
+            more_activities = self.retrieve_user_activity_list(friend[Keys.DATABASE_ID_KEY], friend[Keys.REALNAME_KEY], start, num_results)
             for another_activity in more_activities:
                 if self.is_activity_public(another_activity):
                     activities.append(another_activity)

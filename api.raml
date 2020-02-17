@@ -187,6 +187,15 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
+/list_pending_friends:
+    description: Lists the users who are requesting friendship with the logged in user.
+    get:
+    post:
+        responses:
+            200:
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
 /list_friends:
     description: Lists the users who are friends with the logged in user.
     get:
