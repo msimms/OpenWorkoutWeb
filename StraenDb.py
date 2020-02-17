@@ -373,11 +373,29 @@ class MongoDatabase(Database.Database):
             # Things we don't need.
             exclude_keys = self.list_excluded_user_keys()
 
+            # Find the users whose friendship we have requested.
             pending_friends_list = []
             pending_friends = self.users_collection.find({Keys.FRIEND_REQUESTS_KEY: user_id}, exclude_keys)
-            for friend in pending_friends:
-                friend[Keys.DATABASE_ID_KEY] = str(friend[Keys.DATABASE_ID_KEY])
-                pending_friends_list.append(friend)
+            for pending_friend in pending_friends:
+                pending_friend[Keys.DATABASE_ID_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
+                pending_friends_list.append(pending_friend)
+
+            # Find the users who have requested our friendship.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If we found ourselves.
+            if user is not None:
+                temp_friend_id_list = []
+                if Keys.FRIEND_REQUESTS_KEY in user:
+                    temp_friend_id_list = user[Keys.FRIEND_REQUESTS_KEY]
+                for temp_friend_id in temp_friend_id_list:
+                    temp_friend_id_obj = ObjectId(str(temp_friend_id))
+                    pending_friend = self.users_collection.find_one({Keys.DATABASE_ID_KEY: temp_friend_id_obj}, exclude_keys)
+                    if pending_friend is not None:
+                        pending_friend[Keys.DATABASE_ID_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
+                        pending_friends_list.append(pending_friend)
+
             return pending_friends_list
         except:
             self.log_error(traceback.format_exc())
@@ -395,7 +413,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user whose friendship is being requested.
-            user_id_obj = ObjectId(str(target_id))
+            user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
 
             # If the user was found then add the target user to the pending friends list.
@@ -403,8 +421,8 @@ class MongoDatabase(Database.Database):
                 pending_friends_list = []
                 if Keys.FRIEND_REQUESTS_KEY in user:
                     pending_friends_list = user[Keys.FRIEND_REQUESTS_KEY]
-                if user_id in pending_friends_list:
-                    pending_friends_list.remove(user_id)
+                if target_id in pending_friends_list:
+                    pending_friends_list.remove(target_id)
                     user[Keys.FRIEND_REQUESTS_KEY] = pending_friends_list
                     self.users_collection.save(user)
                     return True
