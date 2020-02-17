@@ -163,6 +163,11 @@ This feature is very much under development and will go through several iteratio
 * Added a map that shows the countries, US states, and Canadian provinces in which activities were recorded. [Feature Page](https://github.com/msimms/StraenWeb/issues/18)
 * Bug fixes and performance improvements.
 
+### 0.20
+* Moved more functionality to the API.
+* Display US and Canada together for state/province statistics as it just looks better.
+* Reworked the follower/following system, so that everyone is just 'friends'.
+
 ## Tech
 This software uses several other source projects to work properly:
 
