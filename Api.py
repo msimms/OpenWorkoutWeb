@@ -846,7 +846,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Target user does not exist.")
         if not self.user_mgr.unfriend(self.user_id, target_id):
             raise ApiException.ApiMalformedRequestException("Request failed.")
-        return False, ""
+        return True, ""
 
     def handle_export_activity(self, values):
         """Called when an API message request to export an activity."""

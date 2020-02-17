@@ -40,20 +40,41 @@
 		}
 	}
 
-    function confirm_friend(target)
+    function confirm_friend(useremail)
     {
 		var the_url = "${root_url}/api/1.0/confirm_request_to_be_friends";
 		var dict = [];
 		var result_text = {};
 
+		dict.push({["target_email"] : useremail});
+		if (send_post_request(the_url, dict, result_text))
+		{
+			window.location.replace("${root_url}/friends");
+		}
+		else
+		{
+			alert(result_text.value);
+		}
     }
 
-    function unfriend(target)
+    function unfriend(useremail)
     {
-		var the_url = "${root_url}/api/1.0/unfriend";
-		var dict = [];
-		var result_text = {};
+		if (confirm('Are you sure you want to do this?'))
+		{
+            var the_url = "${root_url}/api/1.0/unfriend";
+            var dict = [];
+            var result_text = {};
 
+            dict.push({["target_email"] : useremail});
+            if (send_post_request(the_url, dict, result_text))
+            {
+                window.location.replace("${root_url}/friends");
+            }
+            else
+            {
+                alert(result_text.value);
+            }
+        }
     }
 
 	function search()
@@ -97,15 +118,15 @@
 		}
 	}
 
-    function append_to_friends_table(table, row_name, row_value, is_pending_request)
+    function append_to_friends_table(table, username, useremail, is_pending_request)
     {
         var new_row = table.insertRow();
         var cell = new_row.insertCell();
-        var text = document.createTextNode(row_name);
+        var text = document.createTextNode(username);
         cell.appendChild(text);
 
         cell = new_row.insertCell();
-        text = document.createTextNode(row_value);
+        text = document.createTextNode(useremail);
         cell.appendChild(text);
 
         if (is_pending_request)
@@ -114,7 +135,7 @@
             var btn_txt = document.createTextNode('Confirm');
             btn.appendChild(btn_txt);
             btn.title = "Confirm";
-            btn.addEventListener('click', function() { confirm_friend(this); });
+            btn.addEventListener('click', function() { confirm_friend(useremail); });
             cell = new_row.insertCell();
             cell.appendChild(btn);
         }
@@ -124,7 +145,7 @@
             var btn_txt = document.createTextNode('Delete');
             btn.appendChild(btn_txt);
             btn.title = "Delete";
-            btn.addEventListener('click', function() { unfriend(this); });
+            btn.addEventListener('click', function() { unfriend(useremail); });
             cell = new_row.insertCell();
             cell.appendChild(btn);
         }

@@ -416,7 +416,7 @@ class MongoDatabase(Database.Database):
 
                 # Update the target user's friends list.
                 friends_list = []
-                if Keys.FRIENDS_KEY in user:
+                if Keys.FRIENDS_KEY in target_user:
                     friends_list = target_user[Keys.FRIENDS_KEY]
                 if user_id not in friends_list:
                     friends_list.append(user_id)
@@ -482,7 +482,7 @@ class MongoDatabase(Database.Database):
 
                 # Update the target user's friends list.
                 friends_list = []
-                if Keys.FRIENDS_KEY in user:
+                if Keys.FRIENDS_KEY in target_user:
                     friends_list = target_user[Keys.FRIENDS_KEY]
                 if user_id in friends_list:
                     friends_list.remove(user_id)
