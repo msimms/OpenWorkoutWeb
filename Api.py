@@ -548,8 +548,21 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # List the devices.
-        user_devices = self.user_mgr.retrieve_user_devices(self.user_id)
-        json_result = json.dumps(user_devices, ensure_ascii=False)
+        user_device_ids = self.user_mgr.retrieve_user_devices(self.user_id)
+
+        # Get the time each device was last heard from.
+        devices = []
+        for device_id in user_device_ids:
+            device_info = {}
+            device_info[Keys.APP_DEVICE_ID_KEY] = device_id
+            activity = self.data_mgr.retrieve_most_recent_activity_for_device(device_id)
+            if activity is not None:
+                device_info[Keys.DEVICE_LAST_HEARD_FROM] = activity[Keys.ACTIVITY_TIME_KEY]
+            else:
+                device_info[Keys.DEVICE_LAST_HEARD_FROM] = 0
+            devices.append(device_info)
+
+        json_result = json.dumps(devices, ensure_ascii=False)
         return True, json_result
 
     def handle_list_activities(self, values, include_friends):

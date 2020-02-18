@@ -1374,27 +1374,10 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # Get the list of devices that are associated with the user.
-        devices = self.user_mgr.retrieve_user_devices(user_id)
-
-        # Build a list of table rows from the device information.
-        device_list_str = ""
-        if devices is not None and isinstance(devices, list):
-            device_list_str += "<td><b>Unique Identifier</b></td><td><b>Last Heard From</b></td><tr>\n"
-            for device in devices:
-                activity = self.data_mgr.retrieve_most_recent_activity_for_device(device)
-                device_list_str += "\t\t<tr>"
-                device_list_str += "<td><a href=\"" + self.root_url + "/device/" + device + "\">"
-                device_list_str += device
-                device_list_str += "</a></td><td>"
-                if activity is not None:
-                    device_list_str += "<script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script>"
-                device_list_str += "</td></tr>\n"
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'device_list.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, device_list=device_list_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
     @statistics
     def upload(self, ufile):

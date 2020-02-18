@@ -19,6 +19,46 @@
 <body>
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+
+<script>
+    function append_to_devices_table(table, device_id, last_heard_from)
+    {
+        var new_row = table.insertRow();
+        var cell = new_row.insertCell();
+        var a = document.createElement('a');
+        var link_text = document.createTextNode(device_id);
+        a.appendChild(link_text);
+        a.title = device_id;
+        a.href = "${root_url}/device/" + device_id;
+        cell.appendChild(a);
+
+        if (last_heard_from > 0)
+        {
+            cell = new_row.insertCell();
+            text = document.createTextNode(unix_time_to_local_string(last_heard_from));
+            cell.appendChild(text);
+        }
+    }
+
+    var process_device_list = function(records)
+    {
+		var device_table = document.getElementById("Devices");
+
+        for (var record of records)
+        {
+            append_to_devices_table(device_table, record.DeviceId, record.last_heard_from);
+        }
+    }
+
+    function get_device_list()
+    {
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_devices", cache: false, success: process_device_list, dataType: "json" });
+    }
+
+    get_device_list();
+</script>
 
 <section class="nav">
 ${nav}
@@ -26,15 +66,17 @@ ${nav}
 
 <div class="device_list" style="width: 800px">
 	<p>
-	This page lists instances of the Straen mobile app that are associated with this account. To associate an instance of the mobile app with your account, simply log in to your account from the mobile app and enable the Broadcast option. All of this can be found under Settings -> Broadcast as shown in below.
-	</p>
-	<p>
-	<img src="${root_url}/images/app_settings_screen.png" width=300 align="center"></img>
+	This page lists instances of the mobile app that are associated with this account. To associate an instance of the mobile app with your account, simply log in to your account from the mobile app and enable the Broadcast option. All of this can be found under Settings -> Broadcast as shown in below.
 	</p>
 
-	<table>
-${device_list}
+	<p>
+	<img src="${root_url}/images/app_settings_screen.png" width=300></img>
+	</p>
+
+	<p>
+	<table id="Devices">
 	</table>
+	</p>
 </div>
 
 </body>

@@ -199,6 +199,7 @@ KM_SPLITS = "KM Splits"
 
 # API-only keys.
 SECONDS = "seconds"
+DEVICE_LAST_HEARD_FROM = "last_heard_from"
 
 # Running paces.
 LONG_RUN_PACE = "Long Run Pace"
