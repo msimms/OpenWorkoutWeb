@@ -12,6 +12,7 @@ import Exporter
 import InputChecker
 import Keys
 import Units
+import TrainingPaceCalculator
 
 class Api(object):
     """Class for managing API messages."""
@@ -167,7 +168,7 @@ class Api(object):
         return True, ""
 
     def handle_retrieve_activity_track(self, values):
-        """Called when an API message to get the activity track is received."""
+        """Called when an API message to get the activity track is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -199,7 +200,7 @@ class Api(object):
         return True, response
 
     def handle_retrieve_activity_metadata(self, values):
-        """Called when an API message to get the activity metadata."""
+        """Called when an API message to get the activity metadata. Result is a JSON string."""
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
@@ -402,7 +403,7 @@ class Api(object):
         """Called when an API message to check the login status in is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        return True, ""
+        return True, "Logged In"
 
     def handle_logout(self, values):
         """Ends the session for the specified user."""
@@ -412,7 +413,7 @@ class Api(object):
         # End the session
         self.user_mgr.clear_session()
         self.user_id = None
-        return True, ""
+        return True, "Logged Out"
 
     def handle_update_email(self, values):
         """Updates the user's email address."""
@@ -536,8 +537,36 @@ class Api(object):
         self.user_mgr.delete_user(self.user_id)
         return True, ""
 
-    def handle_list_activities(self, values, include_followed_users):
-        """Returns a list of JSON objects describing all of the user's activities."""
+    def handle_list_devices(self, values):
+        """Returns a JSON string describing all of the user's devices."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise ApiException.ApiMalformedRequestException("Empty username.")
+
+        # List the devices.
+        user_device_ids = self.user_mgr.retrieve_user_devices(self.user_id)
+
+        # Get the time each device was last heard from.
+        devices = []
+        for device_id in user_device_ids:
+            device_info = {}
+            device_info[Keys.APP_DEVICE_ID_KEY] = device_id
+            activity = self.data_mgr.retrieve_most_recent_activity_for_device(device_id)
+            if activity is not None:
+                device_info[Keys.DEVICE_LAST_HEARD_FROM] = activity[Keys.ACTIVITY_TIME_KEY]
+            else:
+                device_info[Keys.DEVICE_LAST_HEARD_FROM] = 0
+            devices.append(device_info)
+
+        json_result = json.dumps(devices, ensure_ascii=False)
+        return True, json_result
+
+    def handle_list_activities(self, values, include_friends):
+        """Returns a JSON string describing all of the user's activities."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -551,7 +580,7 @@ class Api(object):
 
         # Get the activities that belong to the logged in user.
         matched_activities = []
-        if include_followed_users:
+        if include_friends:
             activities = self.data_mgr.retrieve_all_activities_visible_to_user(self.user_id, user_realname, None, None)
         else:
             activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
@@ -761,7 +790,7 @@ class Api(object):
         return True, ""
 
     def handle_list_matched_users(self, values):
-        """Called when an API message to list users is received."""
+        """Called when an API message to list users is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if 'searchname' not in values:
@@ -778,30 +807,26 @@ class Api(object):
         json_result = json.dumps(matched_users, ensure_ascii=False)
         return True, json_result
 
-    def list_users_following(self, values):
-        """Called when an API message to list the users you are following is received."""
+    def list_pending_friends(self, values):
+        """Called when an API message to list the users requesting friendship with the current user is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        users_following = self.user_mgr.list_users_followed(self.user_id)
-        users_list_str = ""
-        if users_following is not None and isinstance(users_following, list):
-            users_list_str = str(users_following)
-        return True, users_list_str
+        friends = self.user_mgr.list_pending_friends(self.user_id)
+        json_result = json.dumps(friends, ensure_ascii=False)
+        return True, json_result
 
-    def list_users_followed_by(self, values):
-        """Called when an API message to list the users who are following you is received."""
+    def list_friends(self, values):
+        """Called when an API message to list the current user's friends is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        users_followed_by = self.user_mgr.list_followers(self.user_id)
-        users_list_str = ""
-        if users_followed_by is not None and isinstance(users_followed_by, list):
-            users_list_str = str(users_followed_by)
-        return True, users_list_str
+        friends = self.user_mgr.list_friends(self.user_id)
+        json_result = json.dumps(friends, ensure_ascii=False)
+        return True, json_result
 
-    def handle_request_to_follow(self, values):
-        """Called when an API message request to follow another user is received."""
+    def handle_friend_request(self, values):
+        """Called when an API message request to friend another user is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.TARGET_EMAIL_KEY not in values:
@@ -814,12 +839,12 @@ class Api(object):
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise ApiException.ApiMalformedRequestException("Target user does not exist.")
-        if not self.user_mgr.request_to_follow(self.user_id, target_id):
+        if not self.user_mgr.request_to_be_friends(self.user_id, target_id):
             raise ApiException.ApiMalformedRequestException("Request failed.")
         return True, ""
 
-    def handle_unfollow(self, values):
-        """Called when an API message request to unfollow another user is received."""
+    def handle_confirm_friend_request(self, values):
+        """Takes a user to the pending friends list and adds them to the actual friends list."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.TARGET_EMAIL_KEY not in values:
@@ -832,7 +857,27 @@ class Api(object):
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise ApiException.ApiMalformedRequestException("Target user does not exist.")
-        return False, ""
+        if not self.user_mgr.confirm_request_to_be_friends(self.user_id, target_id):
+            raise ApiException.ApiMalformedRequestException("Request failed.")
+        return True, ""
+
+    def handle_unfriend_request(self, values):
+        """Called when an API message request to unfriend another user is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.TARGET_EMAIL_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
+        if not InputChecker.is_email_address(target_email):
+            raise ApiException.ApiMalformedRequestException("Invalid email address.")
+
+        target_id, _, _ = self.user_mgr.retrieve_user(target_email)
+        if target_id is None:
+            raise ApiException.ApiMalformedRequestException("Target user does not exist.")
+        if not self.user_mgr.unfriend(self.user_id, target_id):
+            raise ApiException.ApiMalformedRequestException("Request failed.")
+        return True, ""
 
     def handle_export_activity(self, values):
         """Called when an API message request to export an activity."""
@@ -913,7 +958,7 @@ class Api(object):
         return result, ""
 
     def handle_list_tags(self, values):
-        """Called when an API message create list tags associated with an activity is received."""
+        """Called when an API message create list tags associated with an activity is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -923,8 +968,9 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        result = self.data_mgr.retrieve_activity_tags(activity_id)
-        return result, ""
+        tags = self.data_mgr.retrieve_activity_tags(activity_id)
+        json_result = json.dumps(tags, ensure_ascii=False)
+        return True, json_result
 
     def handle_create_comment(self, values):
         """Called when an API message create a comment is received."""
@@ -947,7 +993,7 @@ class Api(object):
         return result, ""
 
     def handle_list_comments(self, values):
-        """Called when an API message to list comments associated with an activity is received."""
+        """Called when an API message to list comments associated with an activity is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -957,8 +1003,9 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        result = self.data_mgr.retrieve_comments(activity_id)
-        return result, ""
+        comments = self.data_mgr.retrieve_comments(activity_id)
+        json_result = json.dumps(comments, ensure_ascii=False)
+        return True, json_result
 
     def handle_create_gear(self, values):
         """Called when an API message to create gear for a user is received."""
@@ -1000,12 +1047,12 @@ class Api(object):
         return result, ""
 
     def handle_list_gear(self, values):
-        """Called when an API message to list gear associated with a user is received."""
+        """Called when an API message to list gear associated with a user is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        result = self.data_mgr.list_gear(self.user_id)
-        return result, ""
+        response = self.data_mgr.retrieve_gear_for_user(self.user_id)
+        return True, json.dumps(response)
 
     def handle_update_gear(self, values):
         """Called when an API message to update gear for a user is received."""
@@ -1249,7 +1296,7 @@ class Api(object):
         return True, ""
 
     def handle_list_workouts(self, values):
-        """Called when the user wants wants a list of their planned workouts."""
+        """Called when the user wants wants a list of their planned workouts. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -1305,7 +1352,7 @@ class Api(object):
         return True, str(location_description)
 
     def handle_get_location_summary(self, values):
-        """Called when the user wants get the summary of all political locations in which activities have occurred."""
+        """Called when the user wants get the summary of all political locations in which activities have occurred. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -1345,24 +1392,45 @@ class Api(object):
         return True, str(summary_data[Keys.ACTIVITY_HASH_KEY])
 
     def handle_list_personal_records(self, values):
-        """Returns the user's personal records."""
+        """Returns the user's personal records. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(self.user_id, None)
+        if Keys.SECONDS in values:
+            num_seconds = int(values[Keys.SECONDS])
+        else:
+            num_seconds = None
+
+        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(self.user_id, num_seconds)
         for item in cycling_bests:
+            seconds = cycling_bests[item][0]
             activity_id = cycling_bests[item][1]
-            new_value = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, cycling_bests[item][0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
-            cycling_bests[item] = new_value, activity_id
+            formatted_time = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, seconds, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
+            cycling_bests[item] = formatted_time, activity_id, seconds
         for item in running_bests:
+            seconds = running_bests[item][0]
             activity_id = running_bests[item][1]
-            new_value = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, running_bests[item][0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
-            running_bests[item] = new_value, activity_id
+            formatted_time = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, seconds, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
+            running_bests[item] = formatted_time, activity_id, seconds
 
         bests = {}
         bests[Keys.TYPE_CYCLING_KEY] = cycling_bests
         bests[Keys.TYPE_RUNNING_KEY] = running_bests
         return True, json.dumps(bests)
+
+    def handle_get_running_paces(self, values):
+        """Returns the user's estimated running paces. Result is a JSON string."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.BEST_5K not in values:
+            raise ApiException.ApiMalformedRequestException("Best 5K not specified.")
+
+        calc = TrainingPaceCalculator.TrainingPaceCalculator()
+        run_paces = calc.calc_from_race_distance_in_meters(5000, int(values[Keys.BEST_5K]) / 60)
+        converted_paces = {}
+        for run_pace in run_paces:
+            converted_paces[run_pace] = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
+        return True, json.dumps(converted_paces)
 
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
@@ -1372,10 +1440,16 @@ class Api(object):
             return self.handle_retrieve_activity_metadata(values)
         elif request == 'login_status':
             return self.handle_login_status(values)
+        elif request == 'list_devices':
+            return self.handle_list_devices(values)
         elif request == 'list_all_activities':
             return self.handle_list_activities(values, True)
         elif request == 'list_my_activities':
             return self.handle_list_activities(values, False)
+        elif request == 'list_pending_friends':
+            return self.list_pending_friends(values)
+        elif request == 'list_friends':
+            return self.list_friends(values)
         elif request == 'list_tags':
             return self.handle_list_tags(values)
         elif request == 'list_comments':
@@ -1398,6 +1472,8 @@ class Api(object):
             return self.handle_get_activity_hash_from_id(values)
         elif request == 'list_personal_records':
             return self.handle_list_personal_records(values)
+        elif request == 'get_running_paces':
+            return self.handle_get_running_paces(values)
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):
@@ -1434,14 +1510,12 @@ class Api(object):
             return self.handle_delete_tag_from_activity(values)
         elif request == 'list_matched_users':
             return self.handle_list_matched_users(values)
-        elif request == 'list_users_following':
-            return self.list_users_following(values)
-        elif request == 'list_users_followed_by':
-            return self.list_users_followed_by(values)
-        elif request == 'request_to_follow':
-            return self.handle_request_to_follow(values)
-        elif request == 'unfollow':
-            return self.handle_unfollow(values)
+        elif request == 'request_to_be_friends':
+            return self.handle_friend_request(values)
+        elif request == 'confirm_request_to_be_friends':
+            return self.handle_confirm_friend_request(values)
+        elif request == 'unfriend':
+            return self.handle_unfriend_request(values)
         elif request == 'export_activity':
             return self.handle_export_activity(values)
         elif request == 'claim_device':

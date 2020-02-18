@@ -15,7 +15,7 @@ class RunPlanGenerator(object):
     def __init__(self, user_id):
         self.user_id = user_id
 
-    def is_workout_plan_possible(self, goal_distance, inputs):
+    def is_workout_plan_possible(self, inputs):
         """Returns TRUE if we can actually generate a plan with the given contraints."""
         return True
 
@@ -37,30 +37,32 @@ class RunPlanGenerator(object):
     def round_distance(distance):
         return float(math.ceil(distance / 100.0)) * 100.0
 
-    def gen_workouts_for_next_week(self, goal_distance, inputs):
+    def gen_workouts_for_next_week(self, inputs):
         """Generates the workouts for the next week, but doesn't schedule them."""
 
         # 3 Critical runs: Speed session, tempo run, and long run
         # Long run: 10%/week increase for an experienced runner
         # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
 
+        goal_distance = inputs[Keys.GOAL_RUN_DISTANCE_KEY]
         speed_run_pace = inputs[Keys.SPEED_RUN_PACE]
         tempo_run_pace = inputs[Keys.TEMPO_RUN_PACE]
         long_run_pace = inputs[Keys.LONG_RUN_PACE]
         easy_run_pace = inputs[Keys.EASY_RUN_PACE]
         longest_run_in_four_weeks = inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY]
+        max_run_distance = goal_distance * 1.1
 
         # Handle situation in which the user hasn't run in four weeks
         if longest_run_in_four_weeks is None:
             raise Exception("No runs in the last four weeks.")
 
-        # Handle situation in which the user is already meeting or exceeding the goal distance.
-        if longest_run_in_four_weeks >= goal_distance:
-            raise Exception("Distance goal has already been met.")
-
         # No pace data?
         if speed_run_pace is None or tempo_run_pace is None or long_run_pace is None or easy_run_pace is None:
             raise Exception("No run pace data.")
+
+        # Handle situation in which the user is already meeting or exceeding the goal distance.
+        if longest_run_in_four_weeks >= max_run_distance:
+            longest_run_in_four_weeks = max_run_distance
 
         workouts = []
 
@@ -84,7 +86,10 @@ class RunPlanGenerator(object):
         workouts.append(tempo_run_workout)
 
         # Long run
-        interval_distance = RunPlanGenerator.round_distance(longest_run_in_four_weeks * 1.1)
+        long_run_distance = longest_run_in_four_weeks * 1.1
+        if long_run_distance > max_run_distance:
+            long_run_distance = max_run_distance 
+        interval_distance = RunPlanGenerator.round_distance(long_run_distance)
         long_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_LONG_RUN, self.user_id)
         long_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
         long_run_workout.add_interval(1, interval_distance, long_run_pace, 0, 0)

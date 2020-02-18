@@ -359,10 +359,10 @@ class StraenWeb(object):
 
     @cherrypy.expose
     @require()
-    def following(self, *args, **kw):
-        """Renders the list of users the specified user is following."""
+    def friends(self, *args, **kw):
+        """Renders the list of users who are friends with the logged in user."""
         try:
-            return self.app.following()
+            return self.app.friends()
         except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
@@ -370,23 +370,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.following.__name__)
-        return self.error()
-
-    @cherrypy.expose
-    @require()
-    def followers(self, *args, **kw):
-        """Renders the list of users that are following the specified user."""
-        try:
-            return self.app.followers()
-        except App.RedirectException as e:
-            raise cherrypy.HTTPRedirect(e.url)
-        except cherrypy.HTTPRedirect as e:
-            raise e
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.followers.__name__)
+            self.log_error('Unhandled exception in ' + StraenWeb.friends.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -483,22 +467,6 @@ class StraenWeb(object):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + StraenWeb.analysis_status.__name__)
-        return self.error()
-
-    @cherrypy.expose
-    @require()
-    def summary(self, *args, **kw):
-        """Renders the user's summary page."""
-        try:
-            return self.app.summary()
-        except App.RedirectException as e:
-            raise cherrypy.HTTPRedirect(e.url)
-        except cherrypy.HTTPRedirect as e:
-            raise e
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.summary.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -748,6 +716,11 @@ def main():
             'tools.sessions.timeout': 129600,
             'tools.sessions.locking': 'early',
             'tools.secureheaders.on': True
+        },
+        '/api':
+        {
+            'tools.response_headers.on': True,
+            'tools.response_headers.headers': [('Access-Control-Allow-Origin', '*')],
         },
         '/css':
         {

@@ -215,8 +215,7 @@ class App(object):
                 "\t\t<li><a href=\"" + self.root_url + "/workouts/\">Workouts</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/statistics/\">Statistics</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/gear/\">Gear</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/following/\">Following</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/followers/\">Followers</a></li>\n" \
+                "\t\t<li><a href=\"" + self.root_url + "/friends/\">Friends</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/device_list/\">Devices</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/import_activity/\">Import</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/profile/\">Profile</a></li>\n" \
@@ -661,7 +660,7 @@ class App(object):
 
         # Append the hash (for debugging purposes).
         if self.debug:
-            if Keys.ACTIVITY_HASH_KEY in summary_data:
+            if summary_data is not None and Keys.ACTIVITY_HASH_KEY in summary_data:
                 details_str += "<td><b>Activity Hash</b></td><td>"
                 details_str += summary_data[Keys.ACTIVITY_HASH_KEY]
                 details_str += "</td><tr>\n"
@@ -1150,24 +1149,6 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # Show the relevant PRs.
-        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.SIX_MONTHS)
-        bests_str = self.render_personal_records(user_id, cycling_bests, running_bests, False)
-
-        # Show the running training paces.
-        run_paces = self.data_mgr.compute_run_training_paces(user_id, running_bests)
-        if run_paces:
-            run_paces_str = "\t<table>\n"
-            for run_pace in run_paces:
-                run_paces_str += "\t\t<td>"
-                run_paces_str += run_pace
-                run_paces_str += "</td><td>"
-                run_paces_str += Units.convert_to_preferred_units_str(self.user_mgr, user_id, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
-                run_paces_str += "</td><tr>\n"
-            run_paces_str += "\t</table>\n"
-        else:
-            run_paces_str = "Not calculated."
-
         # Set the default goals based on previous selections.
         goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
         goal_date = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY)
@@ -1191,7 +1172,7 @@ class App(object):
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bests=bests_str, runpaces=run_paces_str, goals=goals_str, goal_date=goal_date, preferred_long_run_day=days_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, goals=goals_str, goal_date=goal_date, preferred_long_run_day=days_str)
 
     @statistics
     def workout(self, workout_id):
@@ -1359,8 +1340,8 @@ class App(object):
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, gear_name=gear_name, service_records=service_records, gear_id=gear_id)
 
     @statistics
-    def following(self):
-        """Renders the list of users the specified user is following."""
+    def friends(self):
+        """Renders the list of users who are friends with the logged in user."""
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -1373,48 +1354,10 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # Get the list of users followed by the logged in user.
-        users_following = self.user_mgr.list_users_followed(user_id)
-        users_list_str = "Not currently following anyone."
-        if users_following is not None and isinstance(users_following, list):
-            if len(users_following) > 0:
-                users_list_str = ""
-                for user in users_following:
-                    users_list_str += self.render_user_row(user)
-
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'following.html')
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'friends.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, users_list=users_list_str)
-
-    @statistics
-    def followers(self):
-        """Renders the list of users that are following the specified user."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Get the list of users following the logged in user.
-        users_followed_by = self.user_mgr.list_followers(user_id)
-        users_list_str = "Not currently being followed by anyone."
-        if users_followed_by is not None and isinstance(users_followed_by, list):
-            if len(users_followed_by) > 0:
-                users_list_str = ""
-                for user in users_followed_by:
-                    users_list_str += self.render_user_row(user)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'followers.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, users_list=users_list_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
     @statistics
     def device_list(self):
@@ -1431,27 +1374,10 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # Get the list of devices that are associated with the user.
-        devices = self.user_mgr.retrieve_user_devices(user_id)
-
-        # Build a list of table rows from the device information.
-        device_list_str = ""
-        if devices is not None and isinstance(devices, list):
-            device_list_str += "<td><b>Unique Identifier</b></td><td><b>Last Heard From</b></td><tr>\n"
-            for device in devices:
-                activity = self.data_mgr.retrieve_most_recent_activity_for_device(device)
-                device_list_str += "\t\t<tr>"
-                device_list_str += "<td><a href=\"" + self.root_url + "/device/" + device + "\">"
-                device_list_str += device
-                device_list_str += "</a></td><td>"
-                if activity is not None:
-                    device_list_str += "<script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script>"
-                device_list_str += "</td></tr>\n"
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'device_list.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, device_list=device_list_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
     @statistics
     def upload(self, ufile):
@@ -1574,26 +1500,6 @@ class App(object):
         html_file = os.path.join(self.root_dir, HTML_DIR, 'task_status.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=tasks_str)
-
-    @statistics
-    def summary(self):
-        """Renders the user's summary page."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from the template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'summary.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname)
 
     @statistics
     def profile(self):

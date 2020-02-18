@@ -385,7 +385,7 @@ class DataMgr(Importer.ActivityWriter):
                     activities.extend(device_activities)
 
         # List activities with no device that are associated with the user.
-        exclude_keys = self.database.list_excluded_keys() # Things we don't need.
+        exclude_keys = self.database.list_excluded_activity_keys() # Things we don't need.
         user_activities = self.database.retrieve_user_activity_list(user_id, start, None, exclude_keys)
         if user_activities is not None:
             for user_activity in user_activities:
@@ -430,9 +430,9 @@ class DataMgr(Importer.ActivityWriter):
         activities = self.retrieve_user_activity_list(user_id, user_realname, start, num_results)
 
         # Add the activities of users they follow.
-        followed_users = self.database.retrieve_users_followed(user_id)
-        for followed_user in followed_users:
-            more_activities = self.retrieve_user_activity_list(followed_user[Keys.DATABASE_ID_KEY], followed_user[Keys.REALNAME_KEY], start, num_results)
+        friends = self.database.retrieve_friends(user_id)
+        for friend in friends:
+            more_activities = self.retrieve_user_activity_list(friend[Keys.DATABASE_ID_KEY], friend[Keys.REALNAME_KEY], start, num_results)
             for another_activity in more_activities:
                 if self.is_activity_public(another_activity):
                     activities.append(another_activity)
@@ -846,7 +846,7 @@ class DataMgr(Importer.ActivityWriter):
         new_workouts_list = []
         old_workouts_list = self.database.retrieve_workouts_for_user(user_id)
         for workout in old_workouts_list:
-            if workout.scheduled_time is not None and workout.scheduled_time >= start_time and workout.scheduled_time < start_time:
+            if workout.scheduled_time is not None and (workout.scheduled_time < start_time or workout.scheduled_time > end_time):
                 new_workouts_list.append(workout)
         return self.database.update_workouts_for_user(user_id, new_workouts_list)
 
@@ -968,7 +968,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        self.workout_plan_gen_scheduler.add_to_queue(user_id, self)
+        self.workout_plan_gen_scheduler.add_to_queue(user_id, self.track_workout_plan_task)
 
     def get_location_description(self, activity_id):
         """Returns the political location that corresponds to an activity."""

@@ -26,18 +26,20 @@
 # Keys associated with user management.
 SESSION_KEY = '_straen_username'
 DATABASE_ID_KEY = "_id"
-USERNAME_KEY = "username"
-PASSWORD_KEY = "password"
-PASSWORD1_KEY = "password1"
-PASSWORD2_KEY = "password2"
-DEVICE_KEY = "device"
-REALNAME_KEY = "realname"
-HASH_KEY = "hash"
-DEVICES_KEY = "devices"
-FOLLOWING_KEY = "following"
-PR_KEY = "pr"
-EMAIL_KEY = "email"
-TARGET_EMAIL_KEY = "target_email"
+USERNAME_KEY = "username" # Login name for a user
+PASSWORD_KEY = "password" # User's password
+PASSWORD1_KEY = "password1" # User's password when creating an account
+PASSWORD2_KEY = "password2" # User's confirmation password when creating an account
+DEVICE_KEY = "device" # Unique identifier for the device which is recording the activity
+DEVICES_KEY = "devices" # List of device identifiers
+REALNAME_KEY = "realname" # User's real name
+HASH_KEY = "hash" # Password hash
+FRIEND_REQUESTS_KEY = "friend_requests"
+FRIENDS_KEY = "friends"
+REQUESTING_USER_KEY = "requesting_user"
+PR_KEY = "pr" # Personal record
+EMAIL_KEY = "email" # User's email
+TARGET_EMAIL_KEY = "target_email" # Email address of another user
 
 # User settings
 DEFAULT_PRIVACY = "default privacy"
@@ -48,7 +50,7 @@ BIRTHDAY_KEY = "birthday"
 DEFAULT_BIRTHDAY = "315532800"
 HEIGHT_KEY = "height"
 DEFAULT_HEIGHT = "1.8"
-WEIGHT_KEY = "weight"
+WEIGHT_KEY = "weight" # User's weight (kilograms)
 DEFAULT_WEIGHT = "70"
 GENDER_KEY = "gender"
 GENDER_MALE_KEY = "male"
@@ -56,7 +58,10 @@ GENDER_FEMALE_KEY = "female"
 RESTING_HEART_RATE_KEY = "resting heart rate"
 ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate"
 ESTIMATED_FTP_KEY = "estimated ftp"
-PREFERRED_LONG_RUN_DAY_KEY = "preferred long run day"
+PREFERRED_LONG_RUN_DAY_KEY = "preferred long run day" # Day of the week on which the user prefers to do their long runs
+GOAL_TYPE = "goal type" # Extra info about the user's goal, such as whether they care about speed or just finishing a race
+GOAL_TYPE_SPEED = "speed"
+GOAL_TYPE_COMPLETION = "completion"
 
 # Personal records
 RECORDS_USER_ID = "user_id"
@@ -83,6 +88,8 @@ WORKOUT_TYPE_SPEED_RUN = "Speed Run"
 WORKOUT_TYPE_INTERVAL_SESSION = "Interval Session"
 WORKOUT_TYPE_TEMPO_RUN = "Tempo Run"
 WORKOUT_TYPE_EASY_RUN = "Easy Run"
+WORKOUT_TYPE_HILL_REPEATS = "Hill Repeats" # 4-10 repeats, depending on skill level, done at 5K pace
+WORKOUT_TYPE_MIDDLE_DISTANCE_RUN = "Middle Distance Run" # 2 hour run for advanced distance runners
 WORKOUT_TYPE_LONG_RUN = "Long Run"
 WORKOUT_TYPE_OPEN_WATER_SWIM = "Open Water Swim"
 WORKOUT_TYPE_POOL_WATER_SWIM = "Pool Swim"
@@ -132,7 +139,7 @@ ACCELEROMETER_AXIS_NAME_Z = "z"
 ACCELEROMETER_TIME_KEY = "time"
 
 # Keys used exclusively by the web app.
-ACTIVITY_ID_KEY = "activity_id"
+ACTIVITY_ID_KEY = "activity_id" # Unique identifier for the activity
 ACTIVITY_HASH_KEY = "activity_hash"
 ACTIVITY_TYPE_KEY = "activity_type"
 ACTIVITY_DESCRIPTION_KEY = "description"
@@ -147,7 +154,7 @@ ACTIVITY_VISIBILITY_PUBLIC = "public"
 ACTIVITY_VISIBILITY_PRIVATE = "private"
 ACTIVITY_COMMENT_KEY = "comment"
 ACTIVITY_COMMENTS_KEY = "comments"
-ACTIVITY_COMMENTER_ID_KEY = "commenter_id"
+ACTIVITY_COMMENTER_ID_KEY = "commenter_id" # User ID of the user leaving the comment on an activity
 ACTIVITY_TAG_KEY = "tag"
 ACTIVITY_TAGS_KEY = "tags"
 ACTIVITY_SUMMARY_KEY = "summary_data"
@@ -187,6 +194,12 @@ VARIABILITY_INDEX = "Variability Index"
 CLUSTER = "Cluster"
 TOTAL_DISTANCE = "Total Distance"
 LONGEST_DISTANCE = "Longest Distance"
+MILE_SPLITS = "Mile Splits"
+KM_SPLITS = "KM Splits"
+
+# API-only keys.
+SECONDS = "seconds"
+DEVICE_LAST_HEARD_FROM = "last_heard_from"
 
 # Running paces.
 LONG_RUN_PACE = "Long Run Pace"
@@ -240,6 +253,10 @@ INTERVAL_RECOVERY_PACE_KEY = "Recovery Pace"
 # Goals
 GOAL_KEY = "goal"
 GOAL_DATE_KEY = "goal_date"
+GOAL_SWIM_DISTANCE_KEY = "goal_swim_distance"
+GOAL_BIKE_DISTANCE_KEY = "goal_bike_distance"
+GOAL_RUN_DISTANCE_KEY = "goal_run_distance"
+GOAL_FITNESS_KEY = "Fitness"
 GOAL_5K_RUN_KEY = "5K Run"
 GOAL_10K_RUN_KEY = "10K Run"
 GOAL_15K_RUN_KEY = "15K Run"
@@ -273,6 +290,6 @@ PACE_KEYS = [ APP_CURRENT_PACE_KEY, BEST_PACE, AVG_PACE, LONG_RUN_PACE, EASY_RUN
 POWER_KEYS = [ AVG_POWER, MAX_POWER, BEST_5_SEC_POWER, BEST_12_MIN_POWER, BEST_20_MIN_POWER, BEST_1_HOUR_POWER, NORMALIZED_POWER, THRESHOLD_POWER ]
 HEART_RATE_KEYS = [ AVG_HEART_RATE, MAX_HEART_RATE ]
 CADENCE_KEYS = [ APP_CADENCE_KEY, AVG_CADENCE, MAX_CADENCE ]
-GOALS = [ GOAL_5K_RUN_KEY, GOAL_10K_RUN_KEY, GOAL_15K_RUN_KEY, GOAL_HALF_MARATHON_RUN_KEY, GOAL_MARATHON_RUN_KEY ]
+GOALS = [ GOAL_FITNESS_KEY, GOAL_5K_RUN_KEY, GOAL_10K_RUN_KEY, GOAL_15K_RUN_KEY, GOAL_HALF_MARATHON_RUN_KEY, GOAL_MARATHON_RUN_KEY ]
 
 UNSUMMARIZABLE_KEYS = [ APP_SPEED_VARIANCE_KEY, APP_DISTANCES_KEY, APP_LOCATIONS_KEY, ACTIVITY_TIME_KEY, ACTIVITY_TYPE_KEY, ACTIVITY_HASH_KEY, ACTIVITY_LOCATION_DESCRIPTION_KEY, ACTIVITY_INTERVALS ]

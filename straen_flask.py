@@ -314,32 +314,18 @@ def service_history(gear_id):
         g_app.log_error('Unhandled exception in ' + service_history.__name__)
     return g_app.error()
 
-@g_flask_app.route('/following')
+@g_flask_app.route('/friends')
 @login_requred
-def following():
-    """Renders the list of users the specified user is following."""
+def friends():
+    """Renders the list of users who are friends with the logged in user."""
     try:
-        return g_app.following()
+        return g_app.friends()
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
-        g_app.log_error('Unhandled exception in ' + following.__name__)
-    return g_app.error()
-
-@g_flask_app.route('/followers')
-@login_requred
-def followers():
-    """Renders the list of users that are following the specified user."""
-    try:
-        return g_app.followers()
-    except App.RedirectException as e:
-        return flask.redirect(e.url, code=302)
-    except:
-        g_app.log_error(traceback.format_exc())
-        g_app.log_error(sys.exc_info()[0])
-        g_app.log_error('Unhandled exception in ' + followers.__name__)
+        g_app.log_error('Unhandled exception in ' + friends.__name__)
     return g_app.error()
 
 @g_flask_app.route('/device_list')
@@ -424,20 +410,6 @@ def analysis_status():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + analysis_status.__name__)
-    return g_app.error()
-
-@g_flask_app.route('/summary')
-@login_requred
-def summary():
-    """Renders the user's summary page."""
-    try:
-        return g_app.summary()
-    except App.RedirectException as e:
-        return flask.redirect(e.url, code=302)
-    except:
-        g_app.log_error(traceback.format_exc())
-        g_app.log_error(sys.exc_info()[0])
-        g_app.log_error('Unhandled exception in ' + summary.__name__)
     return g_app.error()
 
 @g_flask_app.route('/profile')

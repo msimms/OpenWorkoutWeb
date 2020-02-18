@@ -75,6 +75,85 @@
 		var n = new Date(${goal_date} * 1000);
 		document.getElementsByName('goalDate')[0].placeholder=n.toLocaleDateString();
 	});
+
+    function append_to_paces_table(table, row_name, row_value)
+    {
+        var new_row = table.insertRow();
+        var cell = new_row.insertCell();
+        var text = document.createTextNode(row_name);
+        cell.appendChild(text);
+
+        cell = new_row.insertCell();
+        text = document.createTextNode(row_value);
+        cell.appendChild(text);
+    }
+
+    var process_run_paces = function(records)
+    {
+		var paces_table = document.getElementById("RunPaces");
+        var paces_keys = Object.keys(records)
+
+        for (var key of paces_keys)
+        {
+            append_to_paces_table(paces_table, key, records[key]);
+        }
+    }
+
+    function get_run_paces(run_prs)
+    {
+        var api_url = "${root_url}/api/1.0/get_running_paces?" + serialize_to_url_params(run_prs);
+		$.ajax({ type: 'GET', url: api_url, cache: false, success: process_run_paces, dataType: "json" });
+    }
+
+    function append_to_pr_table(table, row_name, row_value)
+    {
+        var new_row = table.insertRow();
+        var cell = new_row.insertCell();
+        var text = document.createTextNode(row_name);
+        cell.appendChild(text);
+
+        cell = new_row.insertCell();
+        var a = document.createElement('a');
+        var link_text = document.createTextNode(row_value[0]);
+        a.appendChild(link_text);
+        a.title = row_value;
+        a.href = "${root_url}/activity/" + row_value[1];
+        cell.appendChild(a);
+    }
+
+    var process_personal_records = function(records)
+    {
+		var cycling_table = document.getElementById("Cycling");
+		var running_table = document.getElementById("Running");
+
+        var sorted_cycling_keys = Object.keys(records.Cycling).sort()
+        var sorted_running_keys = Object.keys(records.Running).sort()
+
+        for (var key of sorted_cycling_keys)
+        {
+            append_to_pr_table(cycling_table, key, records.Cycling[key]);
+        }
+
+        run_prs = {}
+        for (var key of sorted_running_keys)
+        {
+            if (key.includes("Best 5K"))
+                run_prs[key] = records.Running[key][2];
+            append_to_pr_table(running_table, key, records.Running[key]);
+        }
+
+        // Now that we have the records, we can ask for the estimated paces.
+        get_run_paces(run_prs)
+    }
+
+    function get_personal_records()
+    {
+        var six_months = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0);
+        var api_url = "${root_url}/api/1.0/list_personal_records?seconds=" + six_months;
+		$.ajax({ type: 'GET', url: api_url, cache: false, success: process_personal_records, dataType: "json" });
+    }
+
+    get_personal_records();
 </script>
 
 <section class="nav">
@@ -85,14 +164,21 @@ ${nav}
 
     <h2>Six Month Bests</h2>
     <p>
-${bests}
+        <h3>Cycling</h3>
+        <table id="Cycling">
+        </table>
+
+        <h3>Running</h3>
+        <table id="Running">
+        </table>
     </p>
 
 	<hr>
 
     <h2>Training Paces For Running</h2>
     <p>
-${runpaces}
+        <table id="RunPaces">
+        </table>
     </p>
 
 	<hr>

@@ -47,9 +47,10 @@
 
     function draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, x_scale, y_scale)
     {
-        is_first = true;
+        var is_first = true;
+
         ctx.beginPath();
-        for (coordinate of coordinate_list)
+        for (var coordinate of coordinate_list)
         {
             [x, y] = latlon_to_xy(canvas, coordinate[1], coordinate[0], x_offset, y_offset, x_scale, y_scale);
 
@@ -69,7 +70,7 @@
 
     function draw_geo_polygon(canvas, ctx, polygon_objects, x_offset, y_offset, x_scale, y_scale)
     {
-        for (coordinate_list of polygon_objects)
+        for (var coordinate_list of polygon_objects)
         {
             draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, x_scale, y_scale);
         }
@@ -77,9 +78,9 @@
 
     function draw_region(canvas, ctx, region_objects, heat_map, x_offset, y_offset, x_scale, y_scale)
     {
-        for (region_object of region_objects.features)
+        for (var region_object of region_objects.features)
         {
-            name = region_object.properties.name;
+            var name = region_object.properties.name;
             if (heat_map.indexOf(name) == -1)
                 ctx.fillStyle = '#c3c3c3';
             else
@@ -99,32 +100,33 @@
         }
     }
 
-    var draw_world_map = function(region_objects)
+    function draw_world_map(region_objects)
     {
         var canvas = document.getElementById("worldCanvas");
         var ctx = canvas.getContext("2d");
         draw_region(canvas, ctx, region_objects, countries, 20.0, 40.0, 1.0, 1.0);
     }
 
-    var draw_us_map = function(region_objects)
+    function draw_us_canada_map(us_region_objects, canada_region_objects)
     {
-        var canvas = document.getElementById("usCanvas");
+        var canvas = document.getElementById("usCanadaCanvas");
         var ctx = canvas.getContext("2d");
-        draw_region(canvas, ctx, region_objects, us_states, -20.0, -50.0, 3.0, 3.4);
-    }
-
-    var draw_canada_map = function(region_objects)
-    {
-        var canvas = document.getElementById("canadaCanvas");
-        var ctx = canvas.getContext("2d");
-        draw_region(canvas, ctx, region_objects, canadian_provinces, -90.0, 0.0, 3.5, 3.5);
+        draw_region(canvas, ctx, us_region_objects, us_states, -20.0, -50.0, 3.0, 3.4);
+        draw_region(canvas, ctx, canada_region_objects, canadian_provinces, -20.0, -50.0, 3.0, 3.4);
     }
 
     function get_map_data()
     {
-		$.ajax({ type: 'GET', url: "${root_url}/data/world.geo.json", cache: false, success: draw_world_map, dataType: "json" });
-		$.ajax({ type: 'GET', url: "${root_url}/data/us_states.geo.json", cache: false, success: draw_us_map, dataType: "json" });
-		$.ajax({ type: 'GET', url: "${root_url}/data/canada.geo.json", cache: false, success: draw_canada_map, dataType: "json" });
+        var map_store = {world:null, us:null, canada:null}; 
+
+        $.when(
+            $.get("${root_url}/data/world.geo.json", function(world) { map_store.world = world; }),
+            $.get("${root_url}/data/us_states.geo.json", function(us) { map_store.us = us; }),
+            $.get("${root_url}/data/canada.geo.json", function(canada) { map_store.canada = canada; }),
+        ).then(function() {
+            draw_world_map(map_store.world);
+            draw_us_canada_map(map_store.us, map_store.canada);
+        });
     }
 
     var process_heat_map = function(heat_map)
@@ -139,20 +141,23 @@
                 {
                     countries.push(country);
                 }
-                if (country == "United States")
+                if (location_array.length >= 2)
                 {
-                    var state = location_array[location_array.length - 2].trim();
-                    if (us_states.indexOf(state) == -1)
+                    if (country == "United States")
                     {
-                        us_states.push(state);
+                        var state = location_array[location_array.length - 2].trim();
+                        if (us_states.indexOf(state) == -1)
+                        {
+                            us_states.push(state);
+                        }
                     }
-                }
-                else if (country == "Canada")
-                {
-                    var province = location_array[location_array.length - 2].trim();
-                    if (canadian_provinces.indexOf(province) == -1)
+                    else if (country == "Canada")
                     {
-                        canadian_provinces.push(province);
+                        var province = location_array[location_array.length - 2].trim();
+                        if (canadian_provinces.indexOf(province) == -1)
+                        {
+                            canadian_provinces.push(province);
+                        }
                     }
                 }
             }
@@ -162,9 +167,9 @@
 
     function append_to_table(table, row_name, row_value)
     {
-        new_row = table.insertRow();
-        cell = new_row.insertCell();
-        text = document.createTextNode(row_name);
+        var new_row = table.insertRow();
+        var cell = new_row.insertCell();
+        var text = document.createTextNode(row_name);
         cell.appendChild(text);
 
         cell = new_row.insertCell();
@@ -181,13 +186,16 @@
 		var cycling_table = document.getElementById("Cycling");
 		var running_table = document.getElementById("Running");
 
-        for (var record in records.Cycling)
+        var sorted_cycling_keys = Object.keys(records.Cycling).sort()
+        var sorted_running_keys = Object.keys(records.Running).sort()
+
+        for (var key of sorted_cycling_keys)
         {
-            append_to_table(cycling_table, record, records.Cycling[record]);
+            append_to_table(cycling_table, key, records.Cycling[key]);
         }
-        for (var record in records.Running)
+        for (var key of sorted_running_keys)
         {
-            append_to_table(running_table, record, records.Running[record]);
+            append_to_table(running_table, key, records.Running[key]);
         }
     }
 
@@ -227,12 +235,8 @@ ${nav}
     <canvas id="worldCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
     Your browser does not support the canvas element.
     </canvas>
-    <h3>United States</h3>
-    <canvas id="usCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
-    Your browser does not support the canvas element.
-    </canvas>
-    <h3>Canada</h3>
-    <canvas id="canadaCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
+    <h3>United States and Canada</h3>
+    <canvas id="usCanadaCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
     Your browser does not support the canvas element.
     </canvas>
 

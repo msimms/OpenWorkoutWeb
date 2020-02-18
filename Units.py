@@ -223,13 +223,25 @@ def convert_to_preferred_pace_units(user_mgr, user_id, value, in_distance_units,
             out_distance_units = UNITS_DISTANCE_MILES
     else:
         out_distance_units = UNITS_DISTANCE_MILES
-    return 1.0 / convert_speed(value, in_distance_units, in_time_units, out_distance_units, out_time_units), out_distance_units, out_time_units
+
+    speed = convert_speed(value, in_distance_units, in_time_units, out_distance_units, out_time_units)
+    if speed < 0.001:
+        return 0.0, out_distance_units, out_time_units
+
+    pace = 1.0 / speed
+    return pace, out_distance_units, out_time_units
 
 def meters_per_sec_to_minutes_per_mile(value):
-    return 1.0 / convert_speed(value, UNITS_DISTANCE_METERS, UNITS_TIME_SECONDS, UNITS_DISTANCE_MILES, UNITS_TIME_MINUTES)
+    speed = convert_speed(value, UNITS_DISTANCE_METERS, UNITS_TIME_SECONDS, UNITS_DISTANCE_MILES, UNITS_TIME_MINUTES)
+    if speed < 0.001:
+        return 0.0
+    return 1.0 / speed
 
 def meters_per_sec_to_minutes_per_kilometers(value):
-    return 1.0 / convert_speed(value, UNITS_DISTANCE_METERS, UNITS_TIME_SECONDS, UNITS_DISTANCE_KILOMETERS, UNITS_TIME_MINUTES)
+    speed = convert_speed(value, UNITS_DISTANCE_METERS, UNITS_TIME_SECONDS, UNITS_DISTANCE_KILOMETERS, UNITS_TIME_MINUTES)
+    if speed < 0.001:
+        return 0.0
+    return 1.0 / speed
 
 def get_mass_units_str(mass_units):
     """Returns the units in which mass is displayed."""

@@ -18,7 +18,15 @@ function unix_time_to_iso_time(unix_time)
 	return date.toISOString();
 }
 
-function serialize(list)
+function serialize_to_url_params(dict)
+{
+    var str = [];
+    for (var p in dict)
+        str.push(encodeURIComponent(p) + "=" + encodeURIComponent(dict[p]));
+    return str.join("&");
+}
+
+function serialize_to_json(list)
 {
 	var str = [];
     for (var i = 0; i < list.length; ++i)
@@ -68,7 +76,7 @@ function send_post_request(url, params, result_text)
 		}
 		result = (xml_http.status == 200);
 	}
-	xml_http.send(serialize(params));
+	xml_http.send(serialize_to_json(params));
 	return result;
 }
 

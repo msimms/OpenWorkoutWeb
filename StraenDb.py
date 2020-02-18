@@ -74,6 +74,32 @@ class MongoDatabase(Database.Database):
             self.log_error(MongoDatabase.total_activities_count.__name__ + ": Exception")
         return 0
 
+    def list_excluded_activity_keys(self):
+        """This is the list of stuff we don't need to return when we're building an activity list. Helps with efficiency."""
+        exclude_keys = {}
+        exclude_keys[Keys.APP_CADENCE_KEY] = False
+        exclude_keys[Keys.APP_CURRENT_SPEED_KEY] = False
+        exclude_keys[Keys.APP_AVG_SPEED_KEY] = False
+        exclude_keys[Keys.APP_MOVING_SPEED_KEY] = False
+        exclude_keys[Keys.APP_HEART_RATE_KEY] = False
+        exclude_keys[Keys.APP_AVG_HEART_RATE_KEY] = False
+        exclude_keys[Keys.APP_CURRENT_PACE_KEY] = False
+        exclude_keys[Keys.APP_POWER_KEY] = False
+        exclude_keys[Keys.ACTIVITY_LOCATIONS_KEY] = False
+        return exclude_keys
+
+    def list_excluded_user_keys(self):
+        """This is the list of stuff we don't need to return when we're building a friends list. Helps with efficiency and privacy by not exposing more than we need."""
+        exclude_keys = {}
+        exclude_keys[Keys.HASH_KEY] = False
+        exclude_keys[Keys.DEVICES_KEY] = False
+        exclude_keys[Keys.FRIEND_REQUESTS_KEY] = False
+        exclude_keys[Keys.FRIENDS_KEY] = False
+        exclude_keys[Keys.PR_KEY] = False
+        exclude_keys[Keys.DEFAULT_PRIVACY] = False
+        exclude_keys[Keys.PREFERRED_UNITS_KEY] = False
+        return exclude_keys
+
     def create_user(self, username, realname, passhash):
         """Create method for a user."""
         if username is None:
@@ -96,7 +122,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            post = {Keys.USERNAME_KEY: username, Keys.REALNAME_KEY: realname, Keys.HASH_KEY: passhash, Keys.DEVICES_KEY: [], Keys.FOLLOWING_KEY: [], Keys.DEFAULT_PRIVACY: Keys.ACTIVITY_VISIBILITY_PUBLIC}
+            post = {Keys.USERNAME_KEY: username, Keys.REALNAME_KEY: realname, Keys.HASH_KEY: passhash, Keys.DEVICES_KEY: [], Keys.FRIENDS_KEY: [], Keys.DEFAULT_PRIVACY: Keys.ACTIVITY_VISIBILITY_PUBLIC}
             self.users_collection.insert(post)
             return True
         except:
@@ -219,10 +245,16 @@ class MongoDatabase(Database.Database):
             return user_list
 
         try:
-            matched_users = self.users_collection.find({Keys.USERNAME_KEY: {"$regex": username}})
-            if matched_users is not None:
-                for matched_user in matched_users:
+            matched_usernames = self.users_collection.find({Keys.USERNAME_KEY: {"$regex": username}})
+            if matched_usernames is not None:
+                for matched_user in matched_usernames:
                     user_list.append(matched_user[Keys.USERNAME_KEY])
+            matched_realnames = self.users_collection.find({Keys.REALNAME_KEY: {"$regex": username}})
+            if matched_realnames is not None:
+                for matched_user in matched_realnames:
+                    username = matched_user[Keys.USERNAME_KEY]
+                    if username not in user_list:
+                        user_list.append(username)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -302,70 +334,211 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_users_followed(self, user_id):
-        """Returns the user ids for all users that are followed by the user with the specified id."""
+    def create_pending_friend_request(self, user_id, target_id):
+        """Appends a user to the friends list of the user with the specified id."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_users_followed.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.create_pending_friend_request.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if target_id is None:
+            self.log_error(MongoDatabase.create_pending_friend_request.__name__ + ": Unexpected empty object: target_id")
+            return False
+
+        try:
+            # Find the user whose friendship is being requested.
+            user_id_obj = ObjectId(str(target_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user was found then add the target user to the pending friends list.
+            if user is not None:
+                pending_friends_list = []
+                if Keys.FRIEND_REQUESTS_KEY in user:
+                    pending_friends_list = user[Keys.FRIEND_REQUESTS_KEY]
+                if user_id not in pending_friends_list:
+                    pending_friends_list.append(user_id)
+                    user[Keys.FRIEND_REQUESTS_KEY] = pending_friends_list
+                    self.users_collection.save(user)
+                    return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_pending_friends(self, user_id):
+        """Returns the user ids for all users that are pending confirmation as friends of the specified user."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_pending_friends.__name__ + ": Unexpected empty object: user_id")
             return None
 
         try:
-            # Find the user.
+            # Things we don't need.
+            exclude_keys = self.list_excluded_user_keys()
+
+            # Find the users whose friendship we have requested.
+            pending_friends_list = []
+            pending_friends = self.users_collection.find({Keys.FRIEND_REQUESTS_KEY: user_id}, exclude_keys)
+            for pending_friend in pending_friends:
+                pending_friend[Keys.DATABASE_ID_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
+                pending_friend[Keys.REQUESTING_USER_KEY] = "self"
+                pending_friends_list.append(pending_friend)
+
+            # Find the users who have requested our friendship.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
 
-            # Find the following list.
-            if user is not None and Keys.FOLLOWING_KEY in user:
-                following_ids = user[Keys.FOLLOWING_KEY]
-                following_users = []
-                for following_id in following_ids:
-                    username, realname = self.retrieve_user_from_id(following_id)
-                    user = {}
-                    user[Keys.DATABASE_ID_KEY] = following_id
-                    user[Keys.USERNAME_KEY] = username
-                    user[Keys.REALNAME_KEY] = realname
-                    following_users.append(user)
-                return following_users
+            # If we found ourselves.
+            if user is not None:
+                temp_friend_id_list = []
+                if Keys.FRIEND_REQUESTS_KEY in user:
+                    temp_friend_id_list = user[Keys.FRIEND_REQUESTS_KEY]
+                for temp_friend_id in temp_friend_id_list:
+                    temp_friend_id_obj = ObjectId(str(temp_friend_id))
+                    pending_friend = self.users_collection.find_one({Keys.DATABASE_ID_KEY: temp_friend_id_obj}, exclude_keys)
+                    if pending_friend is not None:
+                        pending_friend[Keys.DATABASE_ID_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
+                        pending_friend[Keys.REQUESTING_USER_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
+                        pending_friends_list.append(pending_friend)
+
+            return pending_friends_list
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return []
 
-    def retrieve_followers(self, user_id):
-        """Returns the user ids for all users that follow the user with the specified id."""
+    def delete_pending_friend_request(self, user_id, target_id):
+        """Appends a user to the friends list of the user with the specified id."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_followers.__name__ + ": Unexpected empty object: user_id")
-            return None
-
-        try:
-            followers = self.users_collection.find({Keys.FOLLOWING_KEY: user_id})
-            return list(followers)
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return None
-
-    def create_following_entry(self, user_id, target_id):
-        """Appends a user to the followers list of the user with the specified id."""
-        if user_id is None:
-            self.log_error(MongoDatabase.create_following_entry.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.delete_pending_friend_request.__name__ + ": Unexpected empty object: user_id")
             return None
         if target_id is None:
-            self.log_error(MongoDatabase.create_following_entry.__name__ + ": Unexpected empty object: target_id")
+            self.log_error(MongoDatabase.delete_pending_friend_request.__name__ + ": Unexpected empty object: target_id")
+            return False
+
+        try:
+            # Find the user whose friendship is being requested.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user was found then add the target user to the pending friends list.
+            if user is not None:
+                pending_friends_list = []
+                if Keys.FRIEND_REQUESTS_KEY in user:
+                    pending_friends_list = user[Keys.FRIEND_REQUESTS_KEY]
+                if target_id in pending_friends_list:
+                    pending_friends_list.remove(target_id)
+                    user[Keys.FRIEND_REQUESTS_KEY] = pending_friends_list
+                    self.users_collection.save(user)
+                    return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def create_friend(self, user_id, target_id):
+        """Appends a user to the friends list of the user with the specified id."""
+        if user_id is None:
+            self.log_error(MongoDatabase.create_friend.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if target_id is None:
+            self.log_error(MongoDatabase.create_friend.__name__ + ": Unexpected empty object: target_id")
             return False
 
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
-            if user is not None:
-                user_list = []
-                if Keys.FOLLOWING_KEY in user:
-                    user_list = user[Keys.FOLLOWING_KEY]
-                if target_id not in user_list:
-                    user_list.append(target_id)
-                    user[Keys.FOLLOWING_KEY] = user_list
+
+            # Find the target user.
+            target_user_id_obj = ObjectId(str(target_id))
+            target_user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: target_user_id_obj})
+
+            # If the users were found then add each other to their friends lists.
+            if user is not None and target_user is not None:
+
+                # Update the user's friends list.
+                friends_list = []
+                if Keys.FRIENDS_KEY in user:
+                    friends_list = user[Keys.FRIENDS_KEY]
+                if target_id not in friends_list:
+                    friends_list.append(target_id)
+                    user[Keys.FRIENDS_KEY] = friends_list
                     self.users_collection.save(user)
-                    return True
+
+                # Update the target user's friends list.
+                friends_list = []
+                if Keys.FRIENDS_KEY in target_user:
+                    friends_list = target_user[Keys.FRIENDS_KEY]
+                if user_id not in friends_list:
+                    friends_list.append(user_id)
+                    target_user[Keys.FRIENDS_KEY] = friends_list
+                    self.users_collection.save(target_user)
+
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_friends(self, user_id):
+        """Returns the user ids for all users that are friends with the user who has the specified id."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_friends.__name__ + ": Unexpected empty object: user_id")
+            return None
+
+        try:
+            # Things we don't need.
+            exclude_keys = self.list_excluded_user_keys()
+
+            friends_list = []
+            friends = self.users_collection.find({Keys.FRIENDS_KEY: user_id}, exclude_keys)
+            for friend in friends:
+                friend[Keys.DATABASE_ID_KEY] = str(friend[Keys.DATABASE_ID_KEY])
+                friends_list.append(friend)
+            return friends_list
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return []
+
+    def delete_friend(self, user_id, target_id):
+        """Removes the users from each other's friends lists."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_friend.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if target_id is None:
+            self.log_error(MongoDatabase.delete_friend.__name__ + ": Unexpected empty object: target_id")
+            return False
+
+        try:
+            # Find the user.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # Find the target user.
+            target_user_id_obj = ObjectId(str(target_id))
+            target_user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: target_user_id_obj})
+
+            # If the users were found then add each other to their friends lists.
+            if user is not None and target_user is not None:
+
+                # Update the user's friends list.
+                friends_list = []
+                if Keys.FRIENDS_KEY in user:
+                    friends_list = user[Keys.FRIENDS_KEY]
+                if target_id in friends_list:
+                    friends_list.remove(target_id)
+                    user[Keys.FRIENDS_KEY] = friends_list
+                    self.users_collection.save(user)
+
+                # Update the target user's friends list.
+                friends_list = []
+                if Keys.FRIENDS_KEY in target_user:
+                    friends_list = target_user[Keys.FRIENDS_KEY]
+                if user_id in friends_list:
+                    friends_list.remove(user_id)
+                    target_user[Keys.FRIENDS_KEY] = friends_list
+                    self.users_collection.save(target_user)
+
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -387,6 +560,8 @@ class MongoDatabase(Database.Database):
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user was found.
             if user is not None:
                 user[key] = value
                 self.users_collection.save(user)
@@ -548,20 +723,6 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return {}
 
-    def list_excluded_keys(self):
-        """This is the list of stuff we don't need to return when we're building an activity list. Helps with efficiency."""
-        exclude_keys = {}
-        exclude_keys[Keys.APP_CADENCE_KEY] = False
-        exclude_keys[Keys.APP_CURRENT_SPEED_KEY] = False
-        exclude_keys[Keys.APP_AVG_SPEED_KEY] = False
-        exclude_keys[Keys.APP_MOVING_SPEED_KEY] = False
-        exclude_keys[Keys.APP_HEART_RATE_KEY] = False
-        exclude_keys[Keys.APP_AVG_HEART_RATE_KEY] = False
-        exclude_keys[Keys.APP_CURRENT_PACE_KEY] = False
-        exclude_keys[Keys.APP_POWER_KEY] = False
-        exclude_keys[Keys.ACTIVITY_LOCATIONS_KEY] = False
-        return exclude_keys
-
     def retrieve_user_activity_list(self, user_id, start, num_results, exclude_keys):
         """Retrieves the list of activities associated with the specified user."""
         if num_results is not None and num_results <= 0:
@@ -600,7 +761,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Things we don't need.
-            exclude_keys = self.list_excluded_keys()
+            exclude_keys = self.list_excluded_activity_keys()
 
             if start is None and num_results is None:
                 return list(self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
@@ -1541,7 +1702,9 @@ class MongoDatabase(Database.Database):
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
 
                 # Update and save the document.
-                workouts_doc[Keys.WORKOUT_LIST_KEY] = workout_objs
+                workouts_doc[Keys.WORKOUT_LIST_KEY] = []
+                for workout_obj in workout_objs:
+                    workouts_doc[Keys.WORKOUT_LIST_KEY].append(workout_obj.to_dict())
                 self.workouts_collection.save(workouts_doc)
                 return True
         except:
