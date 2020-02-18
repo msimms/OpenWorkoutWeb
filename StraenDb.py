@@ -378,6 +378,7 @@ class MongoDatabase(Database.Database):
             pending_friends = self.users_collection.find({Keys.FRIEND_REQUESTS_KEY: user_id}, exclude_keys)
             for pending_friend in pending_friends:
                 pending_friend[Keys.DATABASE_ID_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
+                pending_friend[Keys.REQUESTING_USER_KEY] = "self"
                 pending_friends_list.append(pending_friend)
 
             # Find the users who have requested our friendship.
@@ -394,6 +395,7 @@ class MongoDatabase(Database.Database):
                     pending_friend = self.users_collection.find_one({Keys.DATABASE_ID_KEY: temp_friend_id_obj}, exclude_keys)
                     if pending_friend is not None:
                         pending_friend[Keys.DATABASE_ID_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
+                        pending_friend[Keys.REQUESTING_USER_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
                         pending_friends_list.append(pending_friend)
 
             return pending_friends_list

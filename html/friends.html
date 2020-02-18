@@ -118,7 +118,7 @@
 		}
 	}
 
-    function append_to_friends_table(table, username, useremail, is_pending_request)
+    function append_to_friends_table(table, username, useremail, requesting_user, is_pending_request)
     {
         var new_row = table.insertRow();
         var cell = new_row.insertCell();
@@ -131,13 +131,22 @@
 
         if (is_pending_request)
         {
-            var btn = document.createElement('button');
-            var btn_txt = document.createTextNode('Confirm');
-            btn.appendChild(btn_txt);
-            btn.title = "Confirm";
-            btn.addEventListener('click', function() { confirm_friend(useremail); });
-            cell = new_row.insertCell();
-            cell.appendChild(btn);
+            if (requesting_user == "self")
+            {
+                cell = new_row.insertCell();
+                text = document.createTextNode("Pending");
+                cell.appendChild(text);
+            }
+            else
+            {
+                var btn = document.createElement('button');
+                var btn_txt = document.createTextNode('Confirm');
+                btn.appendChild(btn_txt);
+                btn.title = "Confirm";
+                btn.addEventListener('click', function() { confirm_friend(useremail); });
+                cell = new_row.insertCell();
+                cell.appendChild(btn);
+            }
         }
 
         var btn = document.createElement('button');
@@ -155,7 +164,7 @@
 
         for (var friend of records)
         {
-            append_to_friends_table(friends_table, friend.realname, friend.username, is_pending_request);
+            append_to_friends_table(friends_table, friend.realname, friend.username, friend.requesting_user, is_pending_request);
         }
     }
 
