@@ -846,7 +846,7 @@ class DataMgr(Importer.ActivityWriter):
         new_workouts_list = []
         old_workouts_list = self.database.retrieve_workouts_for_user(user_id)
         for workout in old_workouts_list:
-            if workout.scheduled_time is not None and workout.scheduled_time >= start_time and workout.scheduled_time < start_time:
+            if workout.scheduled_time is not None and (workout.scheduled_time < start_time or workout.scheduled_time > end_time):
                 new_workouts_list.append(workout)
         return self.database.update_workouts_for_user(user_id, new_workouts_list)
 
@@ -968,7 +968,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        self.workout_plan_gen_scheduler.add_to_queue(user_id, self)
+        self.workout_plan_gen_scheduler.add_to_queue(user_id, self.track_workout_plan_task)
 
     def get_location_description(self, activity_id):
         """Returns the political location that corresponds to an activity."""

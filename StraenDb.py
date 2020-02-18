@@ -1700,7 +1700,9 @@ class MongoDatabase(Database.Database):
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
 
                 # Update and save the document.
-                workouts_doc[Keys.WORKOUT_LIST_KEY] = workout_objs
+                workouts_doc[Keys.WORKOUT_LIST_KEY] = []
+                for workout_obj in workout_objs:
+                    workouts_doc[Keys.WORKOUT_LIST_KEY].append(workout_obj.to_dict())
                 self.workouts_collection.save(workouts_doc)
                 return True
         except:

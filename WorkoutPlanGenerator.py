@@ -49,25 +49,29 @@ class WorkoutPlanGenerator(object):
             logger.debug(log_str)
     
     @staticmethod
-    def goal_enum_to_distances(goal):
-        """Converts the goal key/enum value to the equivalent value in meters, returned as an array of [swim, bike, run] distances."""
+    def calculate_goal_distances(inputs):
+        """Adds the goal distances to the inputs."""
+        goal = inputs[Keys.GOAL_KEY]
         goal_lower = goal.lower()
-        if goal_lower == Keys.GOAL_5K_RUN_KEY.lower():
-            return [0, 0, 5000]
-        elif goal_lower == Keys.GOAL_10K_RUN_KEY.lower():
-            return [0, 0, 10000]
-        elif goal_lower == Keys.GOAL_15K_RUN_KEY.lower():
-            return [0, 0, 15000]
-        elif goal_lower == Keys.GOAL_HALF_MARATHON_RUN_KEY.lower():
-            return [0, 0, METERS_PER_HALF_MARATHON]
-        elif goal_lower == Keys.GOAL_MARATHON_RUN_KEY.lower():
-            return [0, 0, METERS_PER_MARATHON]
-        return [0, 0, 0]
 
-    @staticmethod
-    def goal_enum_to_bike_distance(goal):
-        """Converts the goal key/enum value to the equivalent value in meters."""
-        return 0
+        inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 0.0
+        inputs[Keys.GOAL_BIKE_DISTANCE_KEY] = 0.0
+        inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 0.0
+
+        if goal_lower == Keys.GOAL_FITNESS_KEY.lower():
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 5000.0
+        elif goal_lower == Keys.GOAL_5K_RUN_KEY.lower():
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 5000.0
+        elif goal_lower == Keys.GOAL_10K_RUN_KEY.lower():
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 10000.0
+        elif goal_lower == Keys.GOAL_15K_RUN_KEY.lower():
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 15000.0
+        elif goal_lower == Keys.GOAL_HALF_MARATHON_RUN_KEY.lower():
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = METERS_PER_HALF_MARATHON
+        elif goal_lower == Keys.GOAL_MARATHON_RUN_KEY.lower():
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = METERS_PER_MARATHON
+
+        return inputs
 
     @staticmethod
     def update_summary_data_cb(context, activity, user_id):
@@ -76,11 +80,12 @@ class WorkoutPlanGenerator(object):
             context.data_mgr.analyze_activity(activity, user_id)
 
     def calculate_inputs(self, user_id):
-        """Looks through the user's data and calculates the neural net inputs."""
+        """Looks through the user's data and calculates the algorithm's inputs."""
 
         inputs = {}
 
         now = time.time()
+        weeks_until_goal = None # Number of weeks until the goal, or None if not applicable
         longest_run_in_four_weeks = None  # Longest run in the last four weeks
 
         # Analyze any unanalyzed activities.
@@ -88,18 +93,28 @@ class WorkoutPlanGenerator(object):
 
         # Fetch the detail of the user's goal.
         goal, goal_date = self.data_mgr.retrieve_user_goal(user_id)
-        if goal_date <= now:
-            raise Exception("The goal date should be in the future.")
-        weeks_until_goal = (goal_date - now) / (7 * 24 * 60 * 60) # Convert to weeks
+        if goal is not Keys.GOAL_FITNESS_KEY:
 
+            # Sanity-check the goal date.
+            if goal_date <= now:
+                raise Exception("The goal date should be in the future.")
+
+            # Convert the goal time into weeks.
+            weeks_until_goal = (goal_date - now) / (7 * 24 * 60 * 60)
+
+        # This will trigger the callback for each of the user's activities.
         self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb)
 
         # Look through the user's six month records.
         cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.SIX_MONTHS)
+
+        # Estimate running paces from the user's six month records.
         if running_bests is not None:
             running_paces = self.data_mgr.compute_run_training_paces(user_id, running_bests)
         else:
             running_paces = {}
+
+        # Estimate an FTP from the last six months of cycling data.
         if cycling_bests is not None:
             if Keys.THRESHOLD_POWER in cycling_bests:
                 threshold_power = cycling_bests[Keys.THRESHOLD_POWER]
@@ -141,34 +156,31 @@ class WorkoutPlanGenerator(object):
     def generate_workouts(self, user_id, inputs):
         """Generates workouts for the specified user to perform in the next week."""
 
+        workouts = []
+
         swim_planner = SwimPlanGenerator.SwimPlanGenerator(user_id)
         bike_planner = BikePlanGenerator.BikePlanGenerator(user_id)
         run_planner = RunPlanGenerator.RunPlanGenerator(user_id)
 
-        speed_run_pace = inputs[Keys.SPEED_RUN_PACE]
-        tempo_run_pace = inputs[Keys.TEMPO_RUN_PACE]
-        long_run_pace = inputs[Keys.LONG_RUN_PACE]
-        longest_run_in_four_weeks = inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY]
-        goal_distances = WorkoutPlanGenerator.goal_enum_to_distances(inputs[Keys.GOAL_KEY])
+        # Adds the goal distances to the inputs.
+        inputs = WorkoutPlanGenerator.calculate_goal_distances(inputs)
 
-        workouts = []
-
-        # Generate the swim workotus.
-        if not swim_planner.is_workout_plan_possible(goal_distances[0], inputs):
+        # Generate the swim workouts.
+        if not swim_planner.is_workout_plan_possible(inputs):
             raise Exception("The swim distance goal is not feasible in the time alloted.")
-        swim_workouts = swim_planner.gen_workouts_for_next_week(goal_distances[0], inputs)
+        swim_workouts = swim_planner.gen_workouts_for_next_week(inputs)
         workouts.extend(swim_workouts)
 
-        # Generate the bike workotus.
-        if not bike_planner.is_workout_plan_possible(goal_distances[1], inputs):
+        # Generate the bike workouts.
+        if not bike_planner.is_workout_plan_possible(inputs):
             raise Exception("The bike distance goal is not feasible in the time alloted.")
-        bike_workouts = bike_planner.gen_workouts_for_next_week(goal_distances[1], inputs)
+        bike_workouts = bike_planner.gen_workouts_for_next_week(inputs)
         workouts.extend(bike_workouts)
 
-        # Generate the run workotus.
-        if not run_planner.is_workout_plan_possible(goal_distances[2], inputs):
+        # Generate the run workouts.
+        if not run_planner.is_workout_plan_possible(inputs):
             raise Exception("The run distance goal is not feasible in the time alloted.")
-        run_workouts = run_planner.gen_workouts_for_next_week(goal_distances[2], inputs)
+        run_workouts = run_planner.gen_workouts_for_next_week(inputs)
         workouts.extend(run_workouts)
 
         return workouts
@@ -317,18 +329,19 @@ def generate_workout_plan(user_str, format):
 
     # Export the workouts to local files, if requested.
     for workout in workouts:
-        if format is None or format == 'text':
-            print(workout.export_to_text())
-        elif format == 'json':
-            print(workout.export_to_json_str())
-        elif format == 'ics':
-            tempfile_name = generate_temp_file_name(".ics")
-            workout.export_to_ics(tempfile_name)
-            print("Exported a workout to " + tempfile_name + ".")
-        elif format == 'zwo':
-            tempfile_name = generate_temp_file_name(".zwo")
-            workout.export_to_zwo(tempfile_name)
-            print("Exported a workout to " + tempfile_name + ".")
+        if format is not None:
+            if format == 'text':
+                print(workout.export_to_text())
+            elif format == 'json':
+                print(workout.export_to_json_str())
+            elif format == 'ics':
+                tempfile_name = generate_temp_file_name(".ics")
+                workout.export_to_ics(tempfile_name)
+                print("Exported a workout to " + tempfile_name + ".")
+            elif format == 'zwo':
+                tempfile_name = generate_temp_file_name(".zwo")
+                workout.export_to_zwo(tempfile_name)
+                print("Exported a workout to " + tempfile_name + ".")
 
     print("Workout plan generation finished.")
 
