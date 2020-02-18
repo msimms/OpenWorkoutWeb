@@ -167,6 +167,7 @@ This feature is very much under development and will go through several iteratio
 * Moved more functionality to the API.
 * Display US and Canada together for state/province statistics as it just looks better.
 * Reworked the follower/following system, so that everyone is just 'friends'.
+* Track mile and kilometer split times. [Feature Page](https://github.com/msimms/StraenWeb/issues/19)
 * Bug fixes.
 
 ## Tech

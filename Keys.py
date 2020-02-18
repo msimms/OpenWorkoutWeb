@@ -194,6 +194,8 @@ VARIABILITY_INDEX = "Variability Index"
 CLUSTER = "Cluster"
 TOTAL_DISTANCE = "Total Distance"
 LONGEST_DISTANCE = "Longest Distance"
+MILE_SPLITS = "Mile Splits"
+KM_SPLITS = "KM Splits"
 
 # API-only keys.
 SECONDS = "seconds"
