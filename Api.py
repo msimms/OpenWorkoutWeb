@@ -1432,6 +1432,28 @@ class Api(object):
             converted_paces[run_pace] = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
         return True, json.dumps(converted_paces)
 
+    def handle_get_distance_for_tag(self, values):
+        """Returns the amount of distance logged to activities with the given tag. Result is a JSON string."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_TAG_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Tag not specified.")
+
+        tag = values[Keys.ACTIVITY_TAG_KEY]
+        if not InputChecker.is_valid(tag):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        tags = []
+        tags.append(tag)
+
+        converted_distances = []
+        gear_distances = self.data_mgr.distance_for_tags(self.user_id, tags)
+        for gear_name in gear_distances:
+            converted_distance = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, gear_distances[gear_name], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.TOTAL_DISTANCE)
+            converted_distances.append({gear_name: converted_distance})
+
+        return True, json.dumps(converted_distances)
+
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
         if request == 'activity_track':
@@ -1474,6 +1496,8 @@ class Api(object):
             return self.handle_list_personal_records(values)
         elif request == 'get_running_paces':
             return self.handle_get_running_paces(values)
+        elif request == 'get_distance_for_tag':
+            return self.handle_get_distance_for_tag(values)
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):

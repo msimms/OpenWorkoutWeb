@@ -28,6 +28,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
 
 <script>
+    var gear_name = ""
+
 	function create_service_record(target)
 	{
 		var the_url = "${root_url}/api/1.0/create_service_record";
@@ -153,6 +155,12 @@
         cell.appendChild(btn);
     }
 
+    var process_gear_distance = function(records)
+    {
+        var gear_distance_elem = document.getElementById("GearDistance");
+        gear_distance_elem.innerText = "Distance: " + records[0][gear_name];
+    }
+
     var process_gear = function(records)
     {
 		var history_table = document.getElementById("ServiceHistory");
@@ -162,7 +170,9 @@
             if (gear_record.gear_id == "${gear_id}")
             {
         		var gear_name_title = document.getElementById("GearName");
-                gear_name_title.innerText = gear_record.name;
+                gear_name = gear_record.name
+                gear_name_title.innerText = gear_name;
+        		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_distance_for_tag?tag=" + gear_name, cache: false, success: process_gear_distance, dataType: "json" });
 
                 for (var service_record of gear_record.service_history)
                 {
@@ -190,13 +200,14 @@ ${nav}
 <div class="profile" style="width: 600px">
 
     <h2 id="GearName"></h2>
-    <h2>Service History</h2>
+    <h3>Service History</h3>
     <p>
         <table id="ServiceHistory">
             <td><b>Date</b></td><td><b>Description</b></td><td></td><tr>
         </table>
     </p>
     <button type="button" onclick="return get_new_service_record_info()">Add Service Record</button>
+    <h3 id="GearDistance"></h3>
 
 </div>
 
