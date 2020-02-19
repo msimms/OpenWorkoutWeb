@@ -1233,66 +1233,10 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # User's gear list.
-        gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
-
-        # Calculate distances for each gear.
-        tags = []
-        for gear in gear_list:
-            if Keys.GEAR_NAME_KEY in gear:
-                tags.append(gear[Keys.GEAR_NAME_KEY])
-        distance_tags = self.data_mgr.distance_for_tags(user_id, tags)
-
-        # Render the table.
-        num_bikes = 0
-        num_shoes = 0
-        bikes = "<table>\n"
-        shoes = "<table>\n"
-        for gear in gear_list:
-            if Keys.GEAR_TYPE_KEY in gear:
-                row_str = ""
-                if Keys.GEAR_NAME_KEY in gear:
-                    row_str += "\t\t<td><a href=\"" + self.root_url + "/service_history/" + gear[Keys.GEAR_ID_KEY] + "\">"
-                    row_str += gear[Keys.GEAR_NAME_KEY]
-                    row_str += "</a></td><td>"
-                    row_str += gear[Keys.GEAR_DESCRIPTION_KEY]
-                    row_str += "</td><td>"
-                    row_str += "<script>document.write(unix_time_to_local_date_string(" + str(gear[Keys.GEAR_ADD_TIME_KEY]) + "))</script>"
-                    row_str += "<td>"
-                    if Keys.GEAR_RETIRE_TIME_KEY in gear and gear[Keys.GEAR_RETIRE_TIME_KEY] > 0:
-                        row_str += "<script>document.write(unix_time_to_local_date_string(" + str(gear[Keys.GEAR_RETIRE_TIME_KEY]) + " ))</script>"
-                    row_str += "</td>"
-                    row_str += "<td>"
-
-                    distance = distance_tags[gear[Keys.GEAR_NAME_KEY]]
-                    user_distance, user_units = Units.convert_to_preferred_distance_units(self.user_mgr, user_id, distance, Units.UNITS_DISTANCE_METERS)
-                    row_str += "{:.2f} ".format(user_distance) + Units.get_distance_units_str(user_units)
-
-                    row_str += "</td>"
-                    row_str += "<td><button type=\"button\" onclick=\"return delete_gear('" + str(gear[Keys.GEAR_ID_KEY]) + "')\">Delete</button></td>"
-                row_str += "<tr>\n"
-                gear_type = gear[Keys.GEAR_TYPE_KEY]
-                if gear_type == Keys.GEAR_TYPE_BIKE:
-                    if num_bikes == 0:
-                        bikes += "\t\t<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><td><b>Distance</b></td><tr>\n"
-                    bikes += row_str
-                    num_bikes = num_bikes + 1
-                elif gear_type == Keys.GEAR_TYPE_SHOES:
-                    if num_shoes == 0:
-                        shoes += "\t\t<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><td><b>Date Retired</b><td><b>Distance</b></td><tr>\n"
-                    shoes += row_str
-                    num_shoes = num_shoes + 1
-        bikes += "\t</table>"
-        shoes += "\t</table>"
-        if num_bikes == 0:
-            bikes = "<b>None</b>"
-        if num_shoes == 0:
-            shoes = "<b>None</b>"
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'gear.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bikes=bikes, shoes=shoes)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
     @statistics
     def service_history(self, gear_id):
