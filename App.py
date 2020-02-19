@@ -205,6 +205,25 @@ class App(object):
             pass
         return "-"
 
+    def render_simple_page(self, template_file_name):
+        """Renders a basic page from the specified template. This exists because a lot of pages only need this to be rendered."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, template_file_name)
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        
     def create_navbar(self, logged_in):
         """Helper function for building the navigation bar."""
         navbar_str = "<nav>\n\t<ul>\n"
@@ -975,42 +994,12 @@ class App(object):
     @statistics
     def my_activities(self):
         """Renders the list of the specified user's activities."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'my_activities.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return self.render_simple_page('my_activities.html')
 
     @statistics
     def all_activities(self):
         """Renders the list of all activities the specified user is allowed to view."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'all_activities.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return self.render_simple_page('all_activities.html')
 
     def render_activity_href(self, activity_id, display_str):
         """Helper function that renders an activity href."""
@@ -1201,42 +1190,12 @@ class App(object):
     @statistics
     def stats(self):
         """Renders the statistics view."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'statistics.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return self.render_simple_page('statistics.html')
 
     @statistics
     def gear(self):
         """Renders the list of all gear belonging to the logged in user."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'gear.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return self.render_simple_page('gear.html')
 
     @statistics
     def service_history(self, gear_id):
@@ -1286,42 +1245,12 @@ class App(object):
     @statistics
     def friends(self):
         """Renders the list of users who are friends with the logged in user."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'friends.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return self.render_simple_page('friends.html')
 
     @statistics
     def device_list(self):
         """Renders the list of a user's devices."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'device_list.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return self.render_simple_page('device_list.html')
 
     @statistics
     def upload(self, ufile):
