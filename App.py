@@ -744,7 +744,7 @@ class App(object):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + App.activity.__name__)
-        return self.error()
+        return self.render_error()
 
     def render_page_for_multiple_mapped_activities(self, email, user_realname, device_strs, user_id, logged_in):
         """Helper function for rendering the map to track multiple devices."""
@@ -799,7 +799,7 @@ class App(object):
         row += "</tr>\n"
         return row
 
-    def error(self, error_str=None):
+    def render_error(self, error_str=None):
         """Renders the error page."""
         try:
             error_html_file = os.path.join(self.root_dir, HTML_DIR, 'error.html')
@@ -828,13 +828,13 @@ class App(object):
         diff_hours = diff / 60 / 60
         diff_days = diff_hours / 24
         if diff_days >= 1.0:
-            return self.error("The user has not posted any data in over 24 hours.")
+            return self.render_error("The user has not posted any data in over 24 hours.")
 
         # Determine if the current user can view the activity.
         activity_user_id = activity_user[Keys.DATABASE_ID_KEY]
         belongs_to_current_user = str(activity_user_id) == str(logged_in_user_id)
         if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
-            return self.error("The requested activity is not public.")
+            return self.render_error("The requested activity is not public.")
 
         # Render from template.
         return self.render_page_for_activity(activity, activity_user[Keys.USERNAME_KEY], activity_user[Keys.REALNAME_KEY], activity_user_id, logged_in_user_id, belongs_to_current_user, True)
@@ -846,7 +846,7 @@ class App(object):
         # Determine the ID of the most recent activity logged from the specified device.
         activity = self.data_mgr.retrieve_most_recent_activity_for_device(device_str)
         if activity is None:
-            return self.error()
+            return self.render_error()
 
         # Determine who owns the device.
         device_user = self.user_mgr.retrieve_user_from_device(device_str)
@@ -866,7 +866,7 @@ class App(object):
         user_devices = self.user_mgr.retrieve_user_devices(user_id)
         activity = self.data_mgr.retrieve_most_recent_activity_for_user(user_devices)
         if activity is None:
-            return self.error()
+            return self.render_error()
 
         # Render the page.
         return self.live_activity(activity, user)
@@ -884,7 +884,7 @@ class App(object):
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if activity is None:
-            return self.error("The requested activity does not exist.")
+            return self.render_error("The requested activity does not exist.")
 
         # Determine who owns the device, and hence the activity.
         activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
@@ -896,7 +896,7 @@ class App(object):
 
         # Determine if the current user can view the activity.
         if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
-            return self.error("The requested activity is not public.")
+            return self.render_error("The requested activity is not public.")
 
         # Render from template.
         return self.render_page_for_activity(activity, activity_username, activity_user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, False)
@@ -919,13 +919,13 @@ class App(object):
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if activity is None:
-            return self.error("The requested activity does not exist.")
+            return self.render_error("The requested activity does not exist.")
 
         # Determine who owns the device, and hence the activity.
         activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
         belongs_to_current_user = str(activity_user_id) == str(user_id)
         if not belongs_to_current_user:
-            return self.error("The logged in user does not own the requested activity.")
+            return self.render_error("The logged in user does not own the requested activity.")
 
         # Render the activity name.
         activity_name_str = ""
@@ -972,7 +972,7 @@ class App(object):
         if activity_id is None:
             activity_id = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
             if activity_id is None:
-                return self.error()
+                return self.render_error()
 
         # Determine who owns the device.
         device_user = self.user_mgr.retrieve_user_from_device(device_str)
@@ -982,11 +982,11 @@ class App(object):
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if activity is None:
-            return self.error("The requested activity does not exist.")
+            return self.render_error("The requested activity does not exist.")
 
         # Determine if the current user can view the activity.
         if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
-            return self.error("The requested activity is not public.")
+            return self.render_error("The requested activity is not public.")
 
         # Render from template.
         return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_user_id, logged_in_user_id, belongs_to_current_user, False)
@@ -1168,8 +1168,10 @@ class App(object):
         """Renders the view for an individual workout."""
 
         # Sanity check the input.
+        if workout_id is None:
+            return self.render_error()
         if not InputChecker.is_uuid(workout_id):
-            return self.error()
+            return self.render_error()
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -1201,6 +1203,12 @@ class App(object):
     def service_history(self, gear_id):
         """Renders the service history for a particular piece of gear."""
 
+        # Sanity check the input.
+        if gear_id is None:
+            return self.render_error()
+        if not InputChecker.is_uuid(gear_id):
+            return self.render_error()
+
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
         if username is None:
@@ -1212,35 +1220,10 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # Sanity check the input.
-        if gear_id is None:
-            return self.error()
-        if not InputChecker.is_uuid(gear_id):
-            return self.error()
-
-        service_records = "\t\t<table>\n"
-        gear_name = ""
-        gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
-        service_records += "\t\t\t<td><b>Date</b></td><td><b>Description</b></td><td></td><tr>\n"
-        for gear in gear_list:
-            if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == gear_id:
-                gear_name = gear[Keys.GEAR_NAME_KEY]
-                if Keys.GEAR_SERVICE_HISTORY in gear:
-                    sorted_history = sorted(gear[Keys.GEAR_SERVICE_HISTORY], key = lambda i: i[Keys.SERVICE_RECORD_DATE_KEY])
-                    for record in sorted_history:
-                        service_records += "\t\t\t<td>"
-                        service_records += "<script>document.write(unix_time_to_local_date_string(" + str(record[Keys.SERVICE_RECORD_DATE_KEY]) + "))</script></td><td>"
-                        service_records += record[Keys.SERVICE_RECORD_DESCRIPTION_KEY]
-                        service_records += "</td><td><button type=\"button\" onclick=\"return delete_service_record('" + str(record[Keys.SERVICE_RECORD_ID_KEY]) + "')\">Delete</button></td>"
-                        service_records += "</td><tr>\n"
-                else:
-                    service_records += "none\n"
-        service_records += "\t\t</table>"
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'service_history.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, gear_name=gear_name, service_records=service_records, gear_id=gear_id)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, gear_id=gear_id)
 
     @statistics
     def friends(self):
@@ -1557,9 +1540,9 @@ class App(object):
     def ical(self, calendar_id):
         """Returns the ical calendar with the specified ID."""
         if calendar_id is None:
-            return self.error()
+            return self.render_error()
         if not InputChecker.is_uuid(calendar_id):
-            return self.error()
+            return self.render_error()
 
         handled, response = self.ical_server.handle_request(calendar_id)
         return handled, response

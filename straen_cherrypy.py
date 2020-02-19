@@ -146,17 +146,17 @@ class StraenWeb(object):
             return self.app.stats()
         except:
             pass
-        return self.app.error("")
+        return self.app.render_error("")
 
     @cherrypy.expose
     def error(self, error_str=None):
         """Renders the error page."""
         try:
             cherrypy.response.status = 500
-            return self.app.error(error_str)
+            return self.app.render_error(error_str)
         except:
             pass
-        return self.app.error("")
+        return self.app.render_error("")
 
     @cherrypy.expose
     def live(self, device_str):

@@ -3,7 +3,7 @@
 
 <head>
 
-<title>${product} - ${name} - ${gear_name} - Service History</title>
+<title>${product} - ${name} - Service History</title>
 
 <link rel="stylesheet" href="${root_url}/css/normalize.css">
 <link rel="stylesheet" href="${root_url}/css/site.css">
@@ -28,7 +28,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
 
 <script>
-
 	function create_service_record(target)
 	{
 		var the_url = "${root_url}/api/1.0/create_service_record";
@@ -134,6 +133,51 @@
         }
     }
 
+    function append_to_service_history_table(table, service_date, description, service_id)
+    {
+        var new_row = table.insertRow();
+        var cell = new_row.insertCell();
+        var text = document.createTextNode(unix_time_to_local_date_string(service_date));
+        cell.appendChild(text);
+
+        cell = new_row.insertCell();
+        text = document.createTextNode(description);
+        cell.appendChild(text);
+
+        var btn = document.createElement('button');
+        var btn_txt = document.createTextNode('Delete');
+        btn.appendChild(btn_txt);
+        btn.title = "Delete";
+        btn.addEventListener('click', function() { delete_service_record(service_id); });
+        cell = new_row.insertCell();
+        cell.appendChild(btn);
+    }
+
+    var process_gear = function(records)
+    {
+		var history_table = document.getElementById("ServiceHistory");
+
+        for (var gear_record of records)
+        {
+            if (gear_record.gear_id == "${gear_id}")
+            {
+        		var gear_name_title = document.getElementById("GearName");
+                gear_name_title.innerText = gear_record.name;
+
+                for (var service_record of gear_record.service_history)
+                {
+                    append_to_service_history_table(history_table, service_record.date, service_record.description, service_record.service_id);
+                }
+            }
+        }
+    }
+
+    function get_gear()
+    {
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_gear", cache: false, success: process_gear, dataType: "json" });
+    }
+
+    get_gear();
 </script>
 
 <section class="nav">
@@ -145,10 +189,12 @@ ${nav}
 
 <div class="profile" style="width: 600px">
 
-    <h2>${gear_name}</h2>
+    <h2 id="GearName"></h2>
     <h2>Service History</h2>
     <p>
-${service_records}
+        <table id="ServiceHistory">
+            <td><b>Date</b></td><td><b>Description</b></td><td></td><tr>
+        </table>
     </p>
     <button type="button" onclick="return get_new_service_record_info()">Add Service Record</button>
 
