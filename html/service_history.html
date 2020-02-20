@@ -150,6 +150,7 @@
         var btn_txt = document.createTextNode('Delete');
         btn.appendChild(btn_txt);
         btn.title = "Delete";
+        btn.style = "color:red";
         btn.addEventListener('click', function() { delete_service_record(service_id); });
         cell = new_row.insertCell();
         cell.appendChild(btn);
