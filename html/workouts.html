@@ -44,6 +44,20 @@
 			alert("An error occurred!");
     }
 
+    function set_goal_type()
+    {
+		var the_url = "${root_url}/api/1.0/update_settings";
+		var goal_type = document.getElementById("goal_type").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["goal type"] : goal_type});
+		if (send_post_request(the_url, dict, result_text))
+			alert("Goal type updated!");
+		else
+			alert("An error occurred!");
+    }
+
 	function generate_workout_plan()
 	{
 		var the_url = "${root_url}/api/1.0/generate_workout_plan";
@@ -197,6 +211,9 @@ ${goals}
     <p>
         Preferred Long Run Day: <select name="preferred_long_run_day" id="preferred_long_run_day" class="right" value="Weekday" onchange="return set_preferred_long_run_day()">
 ${preferred_long_run_day}
+        </select><br>
+        Goal Type: <select name="goal_type" id="goal_type" class="right" onchange="return set_goal_type()">
+${goal_type}
         </select>
     </p>
 
@@ -214,7 +231,8 @@ ${preferred_long_run_day}
 
     <h2>Calendar</h2>
     <p>
-        Planned workouts will be added to the <a href="${root_url}/my_activities"><b>My Activities</b></a> calendar.
+        Planned workouts will be added to the <a href="${root_url}/my_activities"><b>My Activities</b></a> calendar.<br>
+${calendar}
     </p>
 
 </div>
