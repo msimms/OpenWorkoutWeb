@@ -58,6 +58,7 @@ ${nav}
 <div class="map_canvas" id="map_canvas">
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script type="text/javascript" src="${root_url}/js/analyze.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}"></script>
@@ -202,7 +203,11 @@ ${route}
 			strokeWeight: 2
 		});
 
+        // Draw the route on the map.
 		routePath.setMap(map);
+
+        // Analyze the route, compute the total distance, avg. speed, etc.
+        //total_distance_google(routeCoordinates);
 
 		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", cache: false, success: updateMetadata, dataType: "text" });
 	}
