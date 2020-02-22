@@ -26,7 +26,6 @@ class Workout(object):
 
     def __init__(self, user_id):
         self.user_id = user_id
-        root_dir = os.path.dirname(os.path.abspath(__file__))
         self.user_mgr = UserMgr.UserMgr(None)
         self.type = ""
         self.sport_type = ""
