@@ -36,9 +36,8 @@ class WorkoutPlanGenerator(object):
 
     def __init__(self, user_obj):
         self.user_obj = user_obj
-        root_dir = os.path.dirname(os.path.abspath(__file__))
-        self.data_mgr = DataMgr.DataMgr("", root_dir, AnalysisScheduler.AnalysisScheduler(), None, None)
-        self.user_mgr = UserMgr.UserMgr(None, root_dir)
+        self.data_mgr = DataMgr.DataMgr("", AnalysisScheduler.AnalysisScheduler(), None, None)
+        self.user_mgr = UserMgr.UserMgr(None)
         super(WorkoutPlanGenerator, self).__init__()
 
     def log_error(self, log_str):

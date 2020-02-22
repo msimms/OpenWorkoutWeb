@@ -607,8 +607,8 @@ def main():
     mako.directories = "templates"
 
     session_mgr = SessionMgr.FlaskSessionMgr()
-    user_mgr = UserMgr.UserMgr(session_mgr, g_root_dir)
-    data_mgr = DataMgr.DataMgr(root_url, g_root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
+    user_mgr = UserMgr.UserMgr(session_mgr)
+    data_mgr = DataMgr.DataMgr(root_url, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
     g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, args.googlemapskey, args.profile, args.debug)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')

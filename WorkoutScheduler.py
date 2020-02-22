@@ -11,8 +11,7 @@ class WorkoutScheduler(object):
 
     def __init__(self, user_id):
         self.user_id = user_id
-        root_dir = os.path.dirname(os.path.abspath(__file__))
-        self.user_mgr = UserMgr.UserMgr(None, root_dir)
+        self.user_mgr = UserMgr.UserMgr(None)
 
     def schedule_workouts(self, workouts, start_time):
         """Organizes the workouts into a schedule for the next week. Implements a very basic constraint solving algorithm."""

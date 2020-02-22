@@ -40,8 +40,8 @@ class MongoDatabase(Database.Database):
     workouts_collection = None
     tasks_collectoin = None
 
-    def __init__(self, rootDir):
-        Database.Database.__init__(self, rootDir)
+    def __init__(self):
+        Database.Database.__init__(self)
 
     def connect(self):
         """Connects/creates the database"""
