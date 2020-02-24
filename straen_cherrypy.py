@@ -681,7 +681,10 @@ def main():
     if not args.debug:
         Daemonizer(cherrypy.engine).subscribe()
 
+    # Register the signal handler.
     signal.signal(signal.SIGINT, signal_handler)
+
+    # Configure the template engine.
     mako.collection_size = 100
     mako.directories = "templates"
 
@@ -691,6 +694,7 @@ def main():
     backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey, args.profile, args.debug)
     g_app = StraenWeb(backend)
 
+    # Configure the error logger.
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
     # The markdown library is kinda spammy.
