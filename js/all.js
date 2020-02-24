@@ -36,6 +36,7 @@ function serialize_to_json(list)
 	return json_str
 }
 
+/// @function Sends an HTTP GET request and waits for the response.
 function send_get_request(url, result_text)
 {
 	var result = false;
@@ -58,6 +59,7 @@ function send_get_request(url, result_text)
 	return result;
 }
 
+/// @function Sends an HTTP POST request and waits for the response.
 function send_post_request(url, params, result_text)
 {
 	var result = false;

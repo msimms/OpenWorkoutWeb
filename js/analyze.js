@@ -6,6 +6,7 @@ function degrees_to_radians(degrees)
     return degrees * (pi/180);
 }
 
+/// @function Calculates the distance between two points on the earth's surface.
 function haversine_distance(loc1_lat, loc1_lon, loc1_alt, loc2_lat, loc2_lon, loc2_alt)
 {
     // Returns the Haversine distance between two points on the Earth's surface.
@@ -27,6 +28,7 @@ function haversine_distance(loc1_lat, loc1_lon, loc1_alt, loc2_lat, loc2_lon, lo
     return rad * R;
 }
 
+/// @function Calculates the distance between two points on the earth's surface, ignores altitude.
 function haversine_distance_ignore_altitude(loc1_lat, loc1_lon, loc2_lat, loc2_lon)
 {
     // Returns the Haversine distance between two points on the Earth's surface."""
@@ -47,6 +49,7 @@ function haversine_distance_ignore_altitude(loc1_lat, loc1_lon, loc2_lat, loc2_l
     return rad * R;
 }
 
+/// @function Distance calculation for a coordinate array that was built for use with the Google Maps API.
 function total_distance_google(coordinates)
 {
     var last_coordinate = null;
@@ -64,6 +67,7 @@ function total_distance_google(coordinates)
     return total_distance_meters;
 }
 
+/// @function Distance calculation for a coordinate array that was built for use with the Open Street Map API.
 function total_distance_osm(coordinates)
 {
     var last_coordinate = null;
