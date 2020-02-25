@@ -623,36 +623,10 @@ class App(object):
             else:
                 summary += "\t<li>Avg. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
 
-        # Add summary data that was computed out-of-band and cached.
-        if summary_data is not None:
-
-            if Keys.BEST_SPEED in summary_data:
-                if is_foot_based_activity:
-                    summary += "\t<li>Max. Pace: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, summary_data[Keys.BEST_SPEED], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE) + "</li>\n"
-                else:
-                    summary += "\t<li>Max. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, summary_data[Keys.BEST_SPEED], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_SPEED) + "</li>\n"
-            if Keys.BEST_1K in summary_data:
-                summary += "\t<li>Best KM: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, summary_data[Keys.BEST_1K], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_1K) + "</li>\n"
-            if Keys.BEST_MILE in summary_data:
-                summary += "\t<li>Best Mile: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, summary_data[Keys.BEST_MILE], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_MILE) + "</li>\n"
-
-        if max_heart_rate > 1:
-            summary += "\t<li>Max. Heart Rate: {:.2f} ".format(max_heart_rate) + Units.get_heart_rate_units_str() + "</li>\n"
-        if max_cadence:
-            summary += "\t<li>Max. Cadence: {:.1f} ".format(max_cadence) + Units.get_cadence_units_str() + "</li>\n"
-        if max_power:
-            summary += "\t<li>Max. Power: {:.2f} ".format(max_power) + Units.get_power_units_str() + "</li>\n"
-
-        # Add power-related summary data that was computed out-of-band and cached.
-        if summary_data is not None:
-            if Keys.NORMALIZED_POWER in summary_data:
-                normalized_power = summary_data[Keys.NORMALIZED_POWER]
-                summary += "\t<li>Normalized Power: {:.2f} ".format(normalized_power) + Units.get_power_units_str() + "</li>\n"
-
         # Close the summary list.
         summary += "</ul>\n"
 
-        # Build the detailed analysis table.
+        # Build the detailed analysis table from data that was computed out-of-band and cached.
         details_str = ""
         excluded_keys = Keys.UNSUMMARIZABLE_KEYS
         excluded_keys.append(Keys.LONGEST_DISTANCE)
