@@ -1412,16 +1412,17 @@ class Api(object):
         else:
             num_seconds = None
 
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
         cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(self.user_id, num_seconds)
         for item in cycling_bests:
             seconds = cycling_bests[item][0]
             activity_id = cycling_bests[item][1]
-            formatted_time = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, seconds, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
+            formatted_time = Units.convert_to_string_in_specified_unit_system(unit_system, seconds, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
             cycling_bests[item] = formatted_time, activity_id, seconds
         for item in running_bests:
             seconds = running_bests[item][0]
             activity_id = running_bests[item][1]
-            formatted_time = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, seconds, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
+            formatted_time = Units.convert_to_string_in_specified_unit_system(unit_system, seconds, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
             running_bests[item] = formatted_time, activity_id, seconds
 
         bests = {}

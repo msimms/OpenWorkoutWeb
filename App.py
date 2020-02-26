@@ -576,6 +576,10 @@ class App(object):
         name = App.render_activity_name(activity)
         activity_type = App.render_activity_type(activity)
         is_foot_based_activity = activity_type in Keys.FOOT_BASED_ACTIVITIES
+        if logged_in:
+            unit_system = self.user_mgr.retrieve_user_setting(logged_in_user_id, Keys.PREFERRED_UNITS_KEY)
+        else:
+            unit_system = Keys.UNITS_STANDARD_KEY
 
         # Compute location-based things.
         location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
@@ -614,14 +618,14 @@ class App(object):
                 summary += "\t<li> Location: " + App.render_array_reversed(summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]) + "</li>\n"
 
         if location_analyzer.total_distance is not None:
-            value, value_units = Units.convert_to_preferred_distance_units(self.user_mgr, logged_in_user_id, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
+            value, value_units = Units.convert_to_distance_for_the_specified_unit_system(unit_system, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
             summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
 
         if location_analyzer.avg_speed is not None and location_analyzer.avg_speed > 0:
             if is_foot_based_activity:
-                summary += "\t<li>Avg. Pace: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
+                summary += "\t<li>Avg. Pace: " + Units.convert_to_string_in_specified_unit_system(unit_system, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
             else:
-                summary += "\t<li>Avg. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
+                summary += "\t<li>Avg. Speed: " + Units.convert_to_string_in_specified_unit_system(unit_system, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
 
         # Close the summary list.
         summary += "</ul>\n"
@@ -635,7 +639,7 @@ class App(object):
                 if is_foot_based_activity and key == Keys.BEST_SPEED:
                     details_str += "<td><b>" + Keys.BEST_PACE + "</b></td><td>"
                     value = summary_data[key]
-                    details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE)
+                    details_str += Units.convert_to_string_in_specified_unit_system(unit_system, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE)
                     details_str += "</td><tr>\n"
                 elif key == Keys.ACTIVITY_INTERVALS:
                     details_str += "<td><b>Intervals</b><td>"
@@ -646,7 +650,7 @@ class App(object):
                     details_str += key
                     details_str += "</b></td><td>"
                     value = summary_data[key]
-                    details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
+                    details_str += Units.convert_to_string_in_specified_unit_system(unit_system, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
                     details_str += "</td><tr>\n"
         if len(details_str) == 0:
             details_str = "<td><b>No data</b></td><tr>\n"
