@@ -31,9 +31,17 @@ class Api(object):
 
     def activity_belongs_to_logged_in_user(self, activity):
         """Returns True if the specified activity belongs to the logged in user."""
-        activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
+        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
         belongs_to_current_user = str(activity_user_id) == str(self.user_id)
         return belongs_to_current_user
+
+    def activity_can_be_viewed(self, activity):
+        """Determine if the requesting user can view the activity."""
+        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
+        belongs_to_current_user = False
+        if self.user_id is not None:
+            belongs_to_current_user = str(activity_user_id) == str(self.user_id)
+        return self.data_mgr.is_activity_public(activity) or belongs_to_current_user
 
     def parse_json_loc_obj(self, json_obj, sensor_readings_dict, metadata_list_dict):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
@@ -213,12 +221,8 @@ class Api(object):
         activity = self.data_mgr.retrieve_activity(activity_id)
 
         # Determine if the requesting user can view the activity.
-        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
-        belongs_to_current_user = False
-        if self.user_id is not None:
-            belongs_to_current_user = str(activity_user_id) == str(self.user_id)
-        if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
-            return self.error("The requested activity is not public.")
+        if not self.activity_can_be_viewed(activity):
+            return self.error("The requested activity is not viewable to this user.")
 
         response = "["
 
@@ -881,8 +885,6 @@ class Api(object):
 
     def handle_export_activity(self, values):
         """Called when an API message request to export an activity."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Missing activity ID parameter.")
         if Keys.ACTIVITY_EXPORT_FORMAT_KEY not in values:
@@ -897,8 +899,8 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid format.")
 
         activity = self.data_mgr.retrieve_activity(activity_id)
-        if not self.activity_belongs_to_logged_in_user(activity):
-            raise ApiException.ApiAuthenticationException("Not activity owner.")
+        if not self.activity_can_be_viewed(activity):
+            return self.error("The requested activity is not viewable to this user.")
 
         exporter = Exporter.Exporter()
         result = exporter.export(activity, None, export_format)
