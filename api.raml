@@ -244,6 +244,11 @@ version: v1
 /export_activity:
     description: Returns the activity in the specified format.
     get:
+        responses:
+            200:
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
     post:
         responses:
             200:
