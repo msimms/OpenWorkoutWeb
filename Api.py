@@ -1492,6 +1492,8 @@ class Api(object):
             return self.handle_list_gear(values)
         elif request == 'list_workouts':
             return self.handle_list_workouts(values)
+        elif request == 'export_activity':
+            return self.handle_export_activity(values)
         elif request == 'get_workout_description':
             return self.handle_get_workout_description(values)
         elif request == 'get_workout_ical_url':
