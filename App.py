@@ -557,7 +557,7 @@ class App(object):
         last_lon = 0
 
         for location in locations:
-            route += "\t\t\t\tnewCoord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
+            route += "\t\t\t\tnew_coord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
             last_loc = location
 
         if len(locations) > 0:
@@ -581,10 +581,6 @@ class App(object):
         else:
             unit_system = Keys.UNITS_STANDARD_KEY
 
-        # Compute location-based things.
-        location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
-        location_analyzer.append_locations(locations)
-
         # Compute the power zones.
         power_zones_str = ""
         ftp = self.data_mgr.retrieve_user_estimated_ftp(activity_user_id)
@@ -599,11 +595,8 @@ class App(object):
         if summary_data is None or len(summary_data) == 0:
             self.data_mgr.analyze_activity(activity, activity_user_id)
 
-        # Build the summary data view.
-        summary = "<ul>\n"
-
-        # Add the activity type.
-        summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
+        # Start with the activity type.
+        summary = "\t<li>Activity Type: " + activity_type + "</li>\n"
 
         # Add the activity date.
         if Keys.ACTIVITY_TIME_KEY in activity:
@@ -615,20 +608,22 @@ class App(object):
         # Add the location description.
         if summary_data is not None:
             if Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
-                summary += "\t<li> Location: " + App.render_array_reversed(summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]) + "</li>\n"
+                summary += "\t<li>Location: " + App.render_array_reversed(summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]) + "</li>\n"
 
-        if location_analyzer.total_distance is not None:
-            value, value_units = Units.convert_to_distance_for_the_specified_unit_system(unit_system, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
-            summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
+        # Compute location-based things. Once I figure out more of the OSM API then I won't need this as it's already done client-side when using Google Maps.
+        if not self.google_maps_key:
+            location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
+            location_analyzer.append_locations(locations)
 
-        if location_analyzer.avg_speed is not None and location_analyzer.avg_speed > 0:
-            if is_foot_based_activity:
-                summary += "\t<li>Avg. Pace: " + Units.convert_to_string_in_specified_unit_system(unit_system, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
-            else:
-                summary += "\t<li>Avg. Speed: " + Units.convert_to_string_in_specified_unit_system(unit_system, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
+            if location_analyzer.total_distance is not None:
+                value, value_units = Units.convert_to_distance_for_the_specified_unit_system(unit_system, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
+                summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
 
-        # Close the summary list.
-        summary += "</ul>\n"
+            if location_analyzer.avg_speed is not None and location_analyzer.avg_speed > 0:
+                if is_foot_based_activity:
+                    summary += "\t<li>Avg. Pace: " + Units.convert_to_string_in_specified_unit_system(unit_system, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
+                else:
+                    summary += "\t<li>Avg. Speed: " + Units.convert_to_string_in_specified_unit_system(unit_system, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
 
         # Build the detailed analysis table from data that was computed out-of-band and cached.
         details_str = ""
@@ -702,10 +697,10 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
@@ -749,7 +744,7 @@ class App(object):
 
             route_coordinates += "\t\t\tvar routeCoordinates" + str(device_index) + " = \n\t\t\t[\n"
             for location in locations:
-                route_coordinates += "\t\t\t\tnewCoord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
+                route_coordinates += "\t\t\t\tnew_coord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
                 last_loc = location
             route_coordinates += "\t\t\t];\n"
             route_coordinates += "\t\t\taddRoute(routeCoordinates" + str(device_index) + ");\n\n"

@@ -77,4 +77,17 @@ function total_distance_osm(coordinates)
     {
         last_coordinate = coordinate;
     }
+    return total_distance_meters;
+}
+
+/// Converts meters to whatever the preferred units are and formats it as a string.
+function convert_distance_to_unit_system_str(unit_system, meters_traveled)
+{
+    if (unit_system == "metric")
+    {
+        var km = meters_traveled / 1000.0;
+        return km.toFixed(2).toString() + " kms";
+    }
+    miles = meters_traveled * 0.000621371;
+    return miles.toFixed(2).toString() + " miles";
 }
