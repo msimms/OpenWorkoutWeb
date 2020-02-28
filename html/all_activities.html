@@ -57,7 +57,7 @@
 	{
 		$('#calendar').fullCalendar({
 			header: {
-				left: 'prev,next,today',
+				left: 'prevYear,prev,next,nextYear,today',
 				center: 'title',
 				right: 'month,agendaWeek,agendaDay,listWeek'
 			},
@@ -68,12 +68,20 @@
 			events: list_activities()
 		});
 
+		$('#prevYear').on('click', function() {
+			$('#calendar').fullCalendar('prevYear'); // call method
+		});
+
 		$('#prev').on('click', function() {
 			$('#calendar').fullCalendar('prev'); // call method
 		});
 
 		$('#next').on('click', function() {
 			$('#calendar').fullCalendar('next'); // call method
+		});
+
+		$('#nextYear').on('click', function() {
+			$('#calendar').fullCalendar('nextYear'); // call method
 		});
 	});
 
