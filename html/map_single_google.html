@@ -208,6 +208,16 @@ ${route}
         var meters_traveled = total_distance_google(routeCoordinates);
         var distance_traveled_str = convert_distance_to_unit_system_str("${unit_system}", meters_traveled);
         append_to_summary_list("Distance", distance_traveled_str);
+        if (${is_foot_based_activity})
+        {
+            var pace_str = convert_distance_and_duration_to_pace_str("${unit_system}", meters_traveled, ${duration});
+            append_to_summary_list("Avg. Pace:", pace_str);
+        }
+        else
+        {
+            var speed_str = convert_distance_and_duration_to_speed_str("${unit_system}", meters_traveled, ${duration});
+            append_to_summary_list("Avg. Speed:", speed_str);
+        }
 
 		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", cache: false, success: update_metadata, dataType: "text" });
 	}

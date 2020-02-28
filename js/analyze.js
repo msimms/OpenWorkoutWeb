@@ -88,6 +88,50 @@ function convert_distance_to_unit_system_str(unit_system, meters_traveled)
         var km = meters_traveled / 1000.0;
         return km.toFixed(2).toString() + " kms";
     }
-    miles = meters_traveled * 0.000621371;
+    var miles = meters_traveled * 0.000621371;
     return miles.toFixed(2).toString() + " miles";
+}
+
+function convert_distance_and_duration_to_pace_str(unit_system, meters_traveled, duration_ms)
+{
+    var pace = 0.0;
+    var units = "";
+
+    if (unit_system == "metric")
+    {
+        var km = meters_traveled / 1000.0;
+        pace = (duration_ms / 1000.0 / 60.0) / km;
+        units = " min/km";
+    }
+    else
+    {
+        var miles = meters_traveled * 0.000621371;
+        pace = (duration_ms / 1000.0 / 60.0) / miles;
+        units = " min/mile";
+    }
+
+    var mins = Math.trunc(pace);
+    var secs = (pace - mins) * 60.0;
+    var secs_str = secs.toFixed(1).toString().padStart(4, '0');
+    return mins.toString() + ":" + secs_str + units;
+}
+
+function convert_distance_and_duration_to_speed_str(unit_system, meters_traveled, duration_ms)
+{
+    var speed = 0.0;
+    var units = "";
+
+    if (unit_system == "metric")
+    {
+        var km = meters_traveled / 1000.0;
+        speed = km / (duration_ms / 1000.0 / 60.0 / 60.0);
+        units = " kph";
+    }
+    else
+    {
+        var miles = meters_traveled * 0.000621371;
+        speed = miles / (duration_ms / 1000.0 / 60.0 / 60.0);
+        units = " mph";
+    }
+    return speed.toFixed(2).toString() + units;
 }
