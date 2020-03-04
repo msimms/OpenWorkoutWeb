@@ -76,8 +76,8 @@ class RunPlanGenerator(object):
         speed_run_workout.needs_rest_day_afterwards = True
         workouts.append(speed_run_workout)
 
-        # Tempo run
-        interval_distance = RunPlanGenerator.round_distance(longest_run_in_four_weeks / 3)
+        # Tempo run. Run should be 20-30 minutes in duration.
+        interval_distance = RunPlanGenerator.nearest_interval_distance(30.0 * tempo_run_pace)
         tempo_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TEMPO_RUN, self.user_id)
         tempo_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
         tempo_run_workout.add_warmup(5 * 60)
