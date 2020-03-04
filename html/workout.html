@@ -46,7 +46,8 @@
             elem.textContent = obj_list.type;
 
     		elem = document.getElementById("description");
-            elem.textContent = obj_list.description;
+            var description = obj_list.description;
+            elem.textContent = description;
         }
 	};
 
@@ -64,7 +65,7 @@ ${nav}
 
 <h2 id="type"></h2>
 
-<textarea id="description" rows="4" cols="250">
+<textarea id="description" rows="10" cols="250">
 </textarea> 
 
 </div>

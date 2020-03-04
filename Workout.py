@@ -156,7 +156,7 @@ class Workout(object):
 
     def export_to_text(self):
         """Creates a string that describes the workout."""
-        result  = "\nWorkout Type: "
+        result  = "Workout Type: "
         result += self.type
         result += "\nSport: "
         result += self.sport_type
