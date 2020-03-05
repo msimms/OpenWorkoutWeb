@@ -50,7 +50,7 @@ class WorkoutScheduler(object):
 
                 # Pick one of the days from the candidate list.
                 if len(possible_days) > 0:
-                    day_index = possible_days[len(possible_days) / 2]
+                    day_index = possible_days[int(len(possible_days) / 2)]
                     workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
                     week[day_index] = workout
 
