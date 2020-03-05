@@ -106,11 +106,11 @@ class Workout(object):
     def add_interval(self, repeat, distance, pace, recovery_distance, recovery_pace):
         """Appends an interval to the workout."""
         interval = {}
-        interval[Keys.INTERVAL_REPEAT_KEY] = repeat
-        interval[Keys.INTERVAL_DISTANCE_KEY] = distance
-        interval[Keys.INTERVAL_PACE_KEY] = pace
-        interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY] = recovery_distance
-        interval[Keys.INTERVAL_RECOVERY_PACE_KEY] = recovery_pace
+        interval[Keys.INTERVAL_REPEAT_KEY] = int(repeat)
+        interval[Keys.INTERVAL_DISTANCE_KEY] = float(distance)
+        interval[Keys.INTERVAL_PACE_KEY] = float(pace)
+        interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY] = float(recovery_distance)
+        interval[Keys.INTERVAL_RECOVERY_PACE_KEY] = float(recovery_pace)
         self.intervals.append(interval)
 
     def export_to_zwo(self, file_name):
@@ -164,10 +164,8 @@ class Workout(object):
 
         # Add the warmup (if applicable).
         if self.warmup is not None and ZwoTags.ZWO_ATTR_NAME_DURATION in self.warmup:
-            duration = self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION]
-
             result += "Warmup: "
-            result += str(duration)
+            result += str(self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION])
             result += " seconds.\n"
 
         # Add each interval.
@@ -190,10 +188,8 @@ class Workout(object):
 
         # Add the cooldown (if applicable).
         if self.cooldown is not None and ZwoTags.ZWO_ATTR_NAME_DURATION in self.cooldown:
-            duration = self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION]
-
             result += "Cooldown: "
-            result += str(duration)
+            result += str(self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION])
             result += " seconds.\n"
 
         # Add an string that describes how this workout fits into the big picture.
