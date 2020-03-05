@@ -1561,9 +1561,13 @@ class MongoDatabase(Database.Database):
 
             # If the workouts document was found (or created).
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
-                workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
+
+                # Make sure we have a calendar ID.
+                if Keys.WORKOUT_PLAN_CALENDAR_ID_KEY not in workouts_doc:
+                    workouts_doc[Keys.WORKOUT_PLAN_CALENDAR_ID_KEY] = str(uuid.uuid4()) # Create a calendar ID
 
                 # Make sure this workout isn't already in the list.
+                workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
                 for workout in workouts_list:
                     if Keys.WORKOUT_ID_KEY in workout and workout[Keys.WORKOUT_ID_KEY] == workout_obj.workout_id:
                         return False
