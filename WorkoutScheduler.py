@@ -5,6 +5,7 @@ import os
 import InputChecker
 import Keys
 import UserMgr
+import WorkoutFactory
 
 class WorkoutScheduler(object):
     """Class for generating a run plan for the specifiied user."""
@@ -15,12 +16,12 @@ class WorkoutScheduler(object):
 
     def schedule_workouts(self, workouts, start_time):
         """Organizes the workouts into a schedule for the next week. Implements a very basic constraint solving algorithm."""
-        preferred_long_run_day = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY)
 
         # This will server as our calendar for next week.
         week = [None] * 7
 
         # Find the long run and put it on the preferred day.
+        preferred_long_run_day = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY)
         if preferred_long_run_day is not None:
             for workout in workouts:
                 if workout.type == Keys.WORKOUT_TYPE_LONG_RUN:
@@ -55,6 +56,6 @@ class WorkoutScheduler(object):
 
                     # Do we need to schedule a rest day after this workout?
                     if workout.needs_rest_day_afterwards:
-                        pass
+                        planned_rest = WorkoutFactory.create(Keys.WORKOUT_TYPE_REST, self.user_id)
 
         return workouts

@@ -254,7 +254,6 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
 
             # Smooth the speed graph to take out some of the GPS jitter.
             smoothed_graph = signals.smooth(self.speed_graph, 4)
-
             if len(smoothed_graph) > 1:
     
                 # Find peaks in the speed graph.
