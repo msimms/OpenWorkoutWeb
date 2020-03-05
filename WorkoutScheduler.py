@@ -26,7 +26,10 @@ class WorkoutScheduler(object):
                 if workout.type == Keys.WORKOUT_TYPE_LONG_RUN:
 
                     # Convert the day name to an index and ignore case.
-                    day_index = [x.lower() for x in InputChecker.days_of_week].index(preferred_long_run_day)
+                    try:
+                        day_index = [x.lower() for x in InputChecker.days_of_week].index(preferred_long_run_day)
+                    except:
+                        day_index = InputChecker.days_of_week[-1] # Default to the last day, Sunday.
                     workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
                     week[day_index] = workout
                     break
