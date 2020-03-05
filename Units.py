@@ -24,7 +24,6 @@
 """Unit conversion routines."""
 
 import Keys
-import UserMgr
 
 UNITS_MASS_KG = 1
 UNITS_MASS_POUNDS = 2
@@ -351,8 +350,3 @@ def convert_to_string_in_specified_unit_system(unit_system, in_value, in_distanc
     else:
         out_value = str(in_value)
     return out_value
-
-def convert_to_preferred_units_str(user_mgr, user_id, in_value, in_distance_units, in_time_units, label):
-    """Generic unit conversion routine. Returns a string with the converted number and units."""
-    unit_system = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-    return convert_to_string_in_specified_unit_system(unit_system, in_value, in_distance_units, in_time_units, label)
