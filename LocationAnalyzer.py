@@ -294,7 +294,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 zip_func = itertools.izip
             else:
                 zip_func = zip
-            for time_val, speed_val in itertools.izip(self.speed_times, self.speed_graph):
+            for time_val, speed_val in zip_func(self.speed_times, self.speed_graph):
                 point = []
                 point.append(time_val)
                 point.append(float(speed_val))
