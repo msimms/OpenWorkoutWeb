@@ -20,7 +20,9 @@ def retrieve_time_from_location(location):
 
 def retrieve_time_from_time_value_pair(value):
     """Used with the sort function."""
-    return value.keys()[0]
+    if sys.version_info[0] < 3:
+        return value.keys()[0]
+    return list(value.keys())[0]
 
 
 class Device(object):
@@ -40,8 +42,8 @@ class MongoDatabase(Database.Database):
     workouts_collection = None
     tasks_collectoin = None
 
-    def __init__(self, rootDir):
-        Database.Database.__init__(self, rootDir)
+    def __init__(self):
+        Database.Database.__init__(self)
 
     def connect(self):
         """Connects/creates the database"""
@@ -1559,9 +1561,13 @@ class MongoDatabase(Database.Database):
 
             # If the workouts document was found (or created).
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
-                workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
+
+                # Make sure we have a calendar ID.
+                if Keys.WORKOUT_PLAN_CALENDAR_ID_KEY not in workouts_doc:
+                    workouts_doc[Keys.WORKOUT_PLAN_CALENDAR_ID_KEY] = str(uuid.uuid4()) # Create a calendar ID
 
                 # Make sure this workout isn't already in the list.
+                workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
                 for workout in workouts_list:
                     if Keys.WORKOUT_ID_KEY in workout and workout[Keys.WORKOUT_ID_KEY] == workout_obj.workout_id:
                         return False

@@ -205,6 +205,25 @@ class App(object):
             pass
         return "-"
 
+    def render_simple_page(self, template_file_name):
+        """Renders a basic page from the specified template. This exists because a lot of pages only need this to be rendered."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, template_file_name)
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        
     def create_navbar(self, logged_in):
         """Helper function for building the navigation bar."""
         navbar_str = "<nav>\n\t<ul>\n"
@@ -536,9 +555,10 @@ class App(object):
         center_lon = 0
         last_lat = 0
         last_lon = 0
+        duration = 0 # Duration of the activity, in milliseconds
 
         for location in locations:
-            route += "\t\t\t\tnewCoord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
+            route += "\t\t\t\tnew_coord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
             last_loc = location
 
         if len(locations) > 0:
@@ -547,6 +567,7 @@ class App(object):
             center_lon = first_loc[Keys.LOCATION_LON_KEY]
             last_lat = last_loc[Keys.LOCATION_LAT_KEY]
             last_lon = last_loc[Keys.LOCATION_LON_KEY]
+            duration = last_loc[Keys.LOCATION_TIME_KEY] - first_loc[Keys.LOCATION_TIME_KEY]
 
         # Get all the things.
         description_str = self.render_description_for_page(activity)
@@ -557,10 +578,13 @@ class App(object):
         name = App.render_activity_name(activity)
         activity_type = App.render_activity_type(activity)
         is_foot_based_activity = activity_type in Keys.FOOT_BASED_ACTIVITIES
-
-        # Compute location-based things.
-        location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
-        location_analyzer.append_locations(locations)
+        is_foot_based_activity_str = "false"
+        if is_foot_based_activity:
+            is_foot_based_activity_str = "true"
+        if logged_in:
+            unit_system = self.user_mgr.retrieve_user_setting(logged_in_user_id, Keys.PREFERRED_UNITS_KEY)
+        else:
+            unit_system = Keys.UNITS_STANDARD_KEY
 
         # Compute the power zones.
         power_zones_str = ""
@@ -576,11 +600,8 @@ class App(object):
         if summary_data is None or len(summary_data) == 0:
             self.data_mgr.analyze_activity(activity, activity_user_id)
 
-        # Build the summary data view.
-        summary = "<ul>\n"
-
-        # Add the activity type.
-        summary += "\t<li>Activity Type: " + activity_type + "</li>\n"
+        # Start with the activity type.
+        summary = "\t<li>Activity Type: " + activity_type + "</li>\n"
 
         # Add the activity date.
         if Keys.ACTIVITY_TIME_KEY in activity:
@@ -592,48 +613,24 @@ class App(object):
         # Add the location description.
         if summary_data is not None:
             if Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
-                summary += "\t<li> Location: " + App.render_array_reversed(summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]) + "</li>\n"
+                summary += "\t<li>Location: " + App.render_array_reversed(summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]) + "</li>\n"
 
-        if location_analyzer.total_distance is not None:
-            value, value_units = Units.convert_to_preferred_distance_units(self.user_mgr, logged_in_user_id, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
-            summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
+        # Compute location-based things. Once I figure out more of the OSM API then I won't need this as it's already done client-side when using Google Maps.
+        if not self.google_maps_key:
+            location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
+            location_analyzer.append_locations(locations)
 
-        if location_analyzer.avg_speed is not None and location_analyzer.avg_speed > 0:
-            if is_foot_based_activity:
-                summary += "\t<li>Avg. Pace: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
-            else:
-                summary += "\t<li>Avg. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
+            if location_analyzer.total_distance is not None:
+                value, value_units = Units.convert_to_distance_for_the_specified_unit_system(unit_system, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
+                summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
 
-        # Add summary data that was computed out-of-band and cached.
-        if summary_data is not None:
-
-            if Keys.BEST_SPEED in summary_data:
+            if location_analyzer.avg_speed is not None and location_analyzer.avg_speed > 0:
                 if is_foot_based_activity:
-                    summary += "\t<li>Max. Pace: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, summary_data[Keys.BEST_SPEED], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE) + "</li>\n"
+                    summary += "\t<li>Avg. Pace: " + Units.convert_to_string_in_specified_unit_system(unit_system, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
                 else:
-                    summary += "\t<li>Max. Speed: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, summary_data[Keys.BEST_SPEED], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_SPEED) + "</li>\n"
-            if Keys.BEST_1K in summary_data:
-                summary += "\t<li>Best KM: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, summary_data[Keys.BEST_1K], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_1K) + "</li>\n"
-            if Keys.BEST_MILE in summary_data:
-                summary += "\t<li>Best Mile: " + Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, summary_data[Keys.BEST_MILE], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_MILE) + "</li>\n"
+                    summary += "\t<li>Avg. Speed: " + Units.convert_to_string_in_specified_unit_system(unit_system, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
 
-        if max_heart_rate > 1:
-            summary += "\t<li>Max. Heart Rate: {:.2f} ".format(max_heart_rate) + Units.get_heart_rate_units_str() + "</li>\n"
-        if max_cadence:
-            summary += "\t<li>Max. Cadence: {:.1f} ".format(max_cadence) + Units.get_cadence_units_str() + "</li>\n"
-        if max_power:
-            summary += "\t<li>Max. Power: {:.2f} ".format(max_power) + Units.get_power_units_str() + "</li>\n"
-
-        # Add power-related summary data that was computed out-of-band and cached.
-        if summary_data is not None:
-            if Keys.NORMALIZED_POWER in summary_data:
-                normalized_power = summary_data[Keys.NORMALIZED_POWER]
-                summary += "\t<li>Normalized Power: {:.2f} ".format(normalized_power) + Units.get_power_units_str() + "</li>\n"
-
-        # Close the summary list.
-        summary += "</ul>\n"
-
-        # Build the detailed analysis table.
+        # Build the detailed analysis table from data that was computed out-of-band and cached.
         details_str = ""
         excluded_keys = Keys.UNSUMMARIZABLE_KEYS
         excluded_keys.append(Keys.LONGEST_DISTANCE)
@@ -642,7 +639,7 @@ class App(object):
                 if is_foot_based_activity and key == Keys.BEST_SPEED:
                     details_str += "<td><b>" + Keys.BEST_PACE + "</b></td><td>"
                     value = summary_data[key]
-                    details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE)
+                    details_str += Units.convert_to_string_in_specified_unit_system(unit_system, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE)
                     details_str += "</td><tr>\n"
                 elif key == Keys.ACTIVITY_INTERVALS:
                     details_str += "<td><b>Intervals</b><td>"
@@ -653,7 +650,7 @@ class App(object):
                     details_str += key
                     details_str += "</b></td><td>"
                     value = summary_data[key]
-                    details_str += Units.convert_to_preferred_units_str(self.user_mgr, logged_in_user_id, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
+                    details_str += Units.convert_to_string_in_specified_unit_system(unit_system, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
                     details_str += "</td><tr>\n"
         if len(details_str) == 0:
             details_str = "<td><b>No data</b></td><tr>\n"
@@ -705,10 +702,10 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
@@ -725,7 +722,7 @@ class App(object):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
             self.log_error('Unhandled exception in ' + App.activity.__name__)
-        return self.error()
+        return self.render_error()
 
     def render_page_for_multiple_mapped_activities(self, email, user_realname, device_strs, user_id, logged_in):
         """Helper function for rendering the map to track multiple devices."""
@@ -752,7 +749,7 @@ class App(object):
 
             route_coordinates += "\t\t\tvar routeCoordinates" + str(device_index) + " = \n\t\t\t[\n"
             for location in locations:
-                route_coordinates += "\t\t\t\tnewCoord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
+                route_coordinates += "\t\t\t\tnew_coord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
                 last_loc = location
             route_coordinates += "\t\t\t];\n"
             route_coordinates += "\t\t\taddRoute(routeCoordinates" + str(device_index) + ");\n\n"
@@ -780,7 +777,7 @@ class App(object):
         row += "</tr>\n"
         return row
 
-    def error(self, error_str=None):
+    def render_error(self, error_str=None):
         """Renders the error page."""
         try:
             error_html_file = os.path.join(self.root_dir, HTML_DIR, 'error.html')
@@ -809,13 +806,13 @@ class App(object):
         diff_hours = diff / 60 / 60
         diff_days = diff_hours / 24
         if diff_days >= 1.0:
-            return self.error("The user has not posted any data in over 24 hours.")
+            return self.render_error("The user has not posted any data in over 24 hours.")
 
         # Determine if the current user can view the activity.
         activity_user_id = activity_user[Keys.DATABASE_ID_KEY]
         belongs_to_current_user = str(activity_user_id) == str(logged_in_user_id)
         if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
-            return self.error("The requested activity is not public.")
+            return self.render_error("The requested activity is not public.")
 
         # Render from template.
         return self.render_page_for_activity(activity, activity_user[Keys.USERNAME_KEY], activity_user[Keys.REALNAME_KEY], activity_user_id, logged_in_user_id, belongs_to_current_user, True)
@@ -827,7 +824,7 @@ class App(object):
         # Determine the ID of the most recent activity logged from the specified device.
         activity = self.data_mgr.retrieve_most_recent_activity_for_device(device_str)
         if activity is None:
-            return self.error()
+            return self.render_error()
 
         # Determine who owns the device.
         device_user = self.user_mgr.retrieve_user_from_device(device_str)
@@ -847,7 +844,7 @@ class App(object):
         user_devices = self.user_mgr.retrieve_user_devices(user_id)
         activity = self.data_mgr.retrieve_most_recent_activity_for_user(user_devices)
         if activity is None:
-            return self.error()
+            return self.render_error()
 
         # Render the page.
         return self.live_activity(activity, user)
@@ -865,7 +862,7 @@ class App(object):
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if activity is None:
-            return self.error("The requested activity does not exist.")
+            return self.render_error("The requested activity does not exist.")
 
         # Determine who owns the device, and hence the activity.
         activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
@@ -877,7 +874,7 @@ class App(object):
 
         # Determine if the current user can view the activity.
         if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
-            return self.error("The requested activity is not public.")
+            return self.render_error("The requested activity is not public.")
 
         # Render from template.
         return self.render_page_for_activity(activity, activity_username, activity_user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, False)
@@ -900,13 +897,13 @@ class App(object):
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if activity is None:
-            return self.error("The requested activity does not exist.")
+            return self.render_error("The requested activity does not exist.")
 
         # Determine who owns the device, and hence the activity.
         activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
         belongs_to_current_user = str(activity_user_id) == str(user_id)
         if not belongs_to_current_user:
-            return self.error("The logged in user does not own the requested activity.")
+            return self.render_error("The logged in user does not own the requested activity.")
 
         # Render the activity name.
         activity_name_str = ""
@@ -953,7 +950,7 @@ class App(object):
         if activity_id is None:
             activity_id = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
             if activity_id is None:
-                return self.error()
+                return self.render_error()
 
         # Determine who owns the device.
         device_user = self.user_mgr.retrieve_user_from_device(device_str)
@@ -963,11 +960,11 @@ class App(object):
         # Load the activity.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if activity is None:
-            return self.error("The requested activity does not exist.")
+            return self.render_error("The requested activity does not exist.")
 
         # Determine if the current user can view the activity.
         if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
-            return self.error("The requested activity is not public.")
+            return self.render_error("The requested activity is not public.")
 
         # Render from template.
         return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_user_id, logged_in_user_id, belongs_to_current_user, False)
@@ -975,49 +972,25 @@ class App(object):
     @statistics
     def my_activities(self):
         """Renders the list of the specified user's activities."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'my_activities.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return self.render_simple_page('my_activities.html')
 
     @statistics
     def all_activities(self):
         """Renders the list of all activities the specified user is allowed to view."""
+        return self.render_simple_page('all_activities.html')
 
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'all_activities.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+    def render_calendar_server_href(self, calendar_id):
+        """Helper function that renders an href for the user's ical."""
+        url_str = self.root_url + "/ical/" + calendar_id
+        url_str = "<a href=\"" + self.root_url + "/ical/" + calendar_id + "\">" + url_str + "</a>"
+        return url_str
 
     def render_activity_href(self, activity_id, display_str):
         """Helper function that renders an activity href."""
         url_str = "<a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + display_str + "</a>"
         return url_str
 
-    def render_personal_record_simple(self, user_id, user_activities, activity_type, record, record_name):
+    def render_personal_record_simple(self, unit_system, user_activities, activity_type, record, record_name):
         """Helper function that renders a single table row in the personal bests table."""
         record_value = record[0]
         activity_id = record[1]
@@ -1026,7 +999,7 @@ class App(object):
             if Keys.ACTIVITY_ID_KEY in activity and activity[Keys.ACTIVITY_ID_KEY] == activity_id and Keys.ACTIVITY_TIME_KEY in activity:
                 activity_time = activity[Keys.ACTIVITY_TIME_KEY]
                 break
-        record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+        record_str = Units.convert_to_string_in_specified_unit_system(unit_system, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
 
         out_str = "\t\t\t"
         if activity_time == 0:
@@ -1038,11 +1011,11 @@ class App(object):
         out_str += "<tr>\n"
         return out_str
 
-    def render_personal_record(self, user_id, activity_type, record, record_name, show_progression):
+    def render_personal_record(self, unit_system, activity_type, record, record_name, show_progression):
         """Helper function that renders a single table row in the personal bests table."""
         record_value = record[0]
         activity_id = record[1]
-        record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+        record_str = Units.convert_to_string_in_specified_unit_system(unit_system, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
         out_str = "<td>"
         out_str += record_name
         params = {}
@@ -1057,26 +1030,6 @@ class App(object):
             out_str += "all_records"
         out_str += "?" + urllib.urlencode(params) + "\">[...]</td><tr>\n"
         return out_str
-
-    def render_personal_records(self, user_id, cycling_bests, running_bests, show_progression):
-        """Helper function that renders the table rows used to show personal bests."""
-        excluded_keys = Keys.UNSUMMARIZABLE_KEYS
-        bests_str = ""
-        if cycling_bests is not None and len(cycling_bests) > 0:
-            bests_str += "<h3>Cycling Efforts</h3>\n"
-            bests_str += "<table>\n"
-            for record_name in cycling_bests:
-                if not record_name in excluded_keys:
-                    bests_str += self.render_personal_record(user_id, Keys.TYPE_CYCLING_KEY, cycling_bests[record_name], record_name, show_progression)
-            bests_str += "</table>\n"
-        if running_bests is not None and len(running_bests) > 0:
-            bests_str += "<h3>Running Efforts</h3>\n"
-            bests_str += "<table>\n"
-            for record_name in running_bests:
-                if not record_name in excluded_keys:
-                    bests_str += self.render_personal_record(user_id, Keys.TYPE_RUNNING_KEY, running_bests[record_name], record_name, show_progression)
-            bests_str += "</table>\n"
-        return bests_str
 
     @statistics
     def all_records(self, activity_type, record_name):
@@ -1098,8 +1051,9 @@ class App(object):
 
         records_str = ""
         records = self.data_mgr.retrieve_bests_for_activity_type(user_id, activity_type, record_name)
+        unit_system = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
         for record in records:
-            records_str += self.render_personal_record_simple(user_id, user_activities, activity_type, record, record_name)
+            records_str += self.render_personal_record_simple(unit_system, user_activities, activity_type, record, record_name)
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'records.html')
@@ -1126,8 +1080,9 @@ class App(object):
 
         records_str = ""
         records = self.data_mgr.compute_progression(user_id, user_activities, activity_type, record_name)
+        unit_system = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
         for record in records:
-            records_str += self.render_personal_record_simple(user_id, user_activities, activity_type, record, record_name)
+            records_str += self.render_personal_record_simple(unit_system, user_activities, activity_type, record, record_name)
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'records.html')
@@ -1161,26 +1116,44 @@ class App(object):
                 goals_str += ">" + possible_goal + "</option>\n"
 
         # Set the preferred long run of the week.
-        preferred_long_run_day = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY)
+        selected_preferred_long_run_day = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY)
         days_str = ""
         for day in InputChecker.days_of_week:
             days_str += "\t\t\t<option value=\"" + day + "\""
-            if preferred_long_run_day is not None and preferred_long_run_day.lower() == day.lower():
+            if selected_preferred_long_run_day is not None and selected_preferred_long_run_day.lower() == day.lower():
                 days_str += " selected"
             days_str += ">" + day + "</option>\n"
+
+        # Set the preferred long run of the week.
+        goal_types = [Keys.GOAL_TYPE_COMPLETION, Keys.GOAL_TYPE_SPEED]
+        selected_goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
+        goal_type_str = ""
+        for goal_type in goal_types:
+            goal_type_str += "\t\t\t<option value=\"" + goal_type + "\""
+            if selected_goal_type is not None and selected_goal_type.lower() == goal_type.lower():
+                goal_type_str += " selected"
+            goal_type_str += ">" + goal_type + "</option>\n"
+
+        # The the calendar ID used with the iCal server.
+        calendar_id_str = ""
+        calendar_id = self.data_mgr.retrieve_workouts_calendar_id_for_user(user_id)
+        if calendar_id is not None:
+            calendar_id_str = "These workouts are also available by via iCal by subscribing to your iCal workouts calendar: " + self.render_calendar_server_href(calendar_id) + "." 
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, goals=goals_str, goal_date=goal_date, preferred_long_run_day=days_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, goals=goals_str, goal_date=goal_date, preferred_long_run_day=days_str, goal_type=goal_type_str, calendar=calendar_id_str)
 
     @statistics
     def workout(self, workout_id):
         """Renders the view for an individual workout."""
 
         # Sanity check the input.
+        if workout_id is None:
+            return self.render_error()
         if not InputChecker.is_uuid(workout_id):
-            return self.error()
+            return self.render_error()
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -1201,103 +1174,23 @@ class App(object):
     @statistics
     def stats(self):
         """Renders the statistics view."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'statistics.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return self.render_simple_page('statistics.html')
 
     @statistics
     def gear(self):
         """Renders the list of all gear belonging to the logged in user."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # User's gear list.
-        gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
-
-        # Calculate distances for each gear.
-        tags = []
-        for gear in gear_list:
-            if Keys.GEAR_NAME_KEY in gear:
-                tags.append(gear[Keys.GEAR_NAME_KEY])
-        distance_tags = self.data_mgr.distance_for_tags(user_id, tags)
-
-        # Render the table.
-        num_bikes = 0
-        num_shoes = 0
-        bikes = "<table>\n"
-        shoes = "<table>\n"
-        for gear in gear_list:
-            if Keys.GEAR_TYPE_KEY in gear:
-                row_str = ""
-                if Keys.GEAR_NAME_KEY in gear:
-                    row_str += "\t\t<td><a href=\"" + self.root_url + "/service_history/" + gear[Keys.GEAR_ID_KEY] + "\">"
-                    row_str += gear[Keys.GEAR_NAME_KEY]
-                    row_str += "</a></td><td>"
-                    row_str += gear[Keys.GEAR_DESCRIPTION_KEY]
-                    row_str += "</td><td>"
-                    row_str += "<script>document.write(unix_time_to_local_date_string(" + str(gear[Keys.GEAR_ADD_TIME_KEY]) + "))</script>"
-                    row_str += "<td>"
-                    if Keys.GEAR_RETIRE_TIME_KEY in gear and gear[Keys.GEAR_RETIRE_TIME_KEY] > 0:
-                        row_str += "<script>document.write(unix_time_to_local_date_string(" + str(gear[Keys.GEAR_RETIRE_TIME_KEY]) + " ))</script>"
-                    row_str += "</td>"
-                    row_str += "<td>"
-
-                    distance = distance_tags[gear[Keys.GEAR_NAME_KEY]]
-                    user_distance, user_units = Units.convert_to_preferred_distance_units(self.user_mgr, user_id, distance, Units.UNITS_DISTANCE_METERS)
-                    row_str += "{:.2f} ".format(user_distance) + Units.get_distance_units_str(user_units)
-
-                    row_str += "</td>"
-                    row_str += "<td><button type=\"button\" onclick=\"return delete_gear('" + str(gear[Keys.GEAR_ID_KEY]) + "')\">Delete</button></td>"
-                row_str += "<tr>\n"
-                gear_type = gear[Keys.GEAR_TYPE_KEY]
-                if gear_type == Keys.GEAR_TYPE_BIKE:
-                    if num_bikes == 0:
-                        bikes += "\t\t<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><td><b>Distance</b></td><tr>\n"
-                    bikes += row_str
-                    num_bikes = num_bikes + 1
-                elif gear_type == Keys.GEAR_TYPE_SHOES:
-                    if num_shoes == 0:
-                        shoes += "\t\t<td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b></td><td><b>Date Retired</b><td><b>Distance</b></td><tr>\n"
-                    shoes += row_str
-                    num_shoes = num_shoes + 1
-        bikes += "\t</table>"
-        shoes += "\t</table>"
-        if num_bikes == 0:
-            bikes = "<b>None</b>"
-        if num_shoes == 0:
-            shoes = "<b>None</b>"
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'gear.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, bikes=bikes, shoes=shoes)
+        return self.render_simple_page('gear.html')
 
     @statistics
     def service_history(self, gear_id):
         """Renders the service history for a particular piece of gear."""
 
+        # Sanity check the input.
+        if gear_id is None:
+            return self.render_error()
+        if not InputChecker.is_uuid(gear_id):
+            return self.render_error()
+
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
         if username is None:
@@ -1308,76 +1201,21 @@ class App(object):
         if user_id is None:
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
-
-        # Sanity check the input.
-        if gear_id is None:
-            return self.error()
-        if not InputChecker.is_uuid(gear_id):
-            return self.error()
-
-        service_records = "\t\t<table>\n"
-        gear_name = ""
-        gear_list = self.data_mgr.retrieve_gear_for_user(user_id)
-        service_records += "\t\t\t<td><b>Date</b></td><td><b>Description</b></td><td></td><tr>\n"
-        for gear in gear_list:
-            if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == gear_id:
-                gear_name = gear[Keys.GEAR_NAME_KEY]
-                if Keys.GEAR_SERVICE_HISTORY in gear:
-                    sorted_history = sorted(gear[Keys.GEAR_SERVICE_HISTORY], key = lambda i: i[Keys.SERVICE_RECORD_DATE_KEY])
-                    for record in sorted_history:
-                        service_records += "\t\t\t<td>"
-                        service_records += "<script>document.write(unix_time_to_local_date_string(" + str(record[Keys.SERVICE_RECORD_DATE_KEY]) + "))</script></td><td>"
-                        service_records += record[Keys.SERVICE_RECORD_DESCRIPTION_KEY]
-                        service_records += "</td><td><button type=\"button\" onclick=\"return delete_service_record('" + str(record[Keys.SERVICE_RECORD_ID_KEY]) + "')\">Delete</button></td>"
-                        service_records += "</td><tr>\n"
-                else:
-                    service_records += "none\n"
-        service_records += "\t\t</table>"
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'service_history.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, gear_name=gear_name, service_records=service_records, gear_id=gear_id)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, gear_id=gear_id)
 
     @statistics
     def friends(self):
         """Renders the list of users who are friends with the logged in user."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'friends.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return self.render_simple_page('friends.html')
 
     @statistics
     def device_list(self):
         """Renders the list of a user's devices."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'device_list.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return self.render_simple_page('device_list.html')
 
     @statistics
     def upload(self, ufile):
@@ -1619,6 +1457,7 @@ class App(object):
 
         # Get the user's personal recorsd.
         prs = ""
+        unit_system = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
         record_groups = self.data_mgr.retrieve_user_personal_records(user_id)
         for record_group in record_groups:
             record_dict = record_groups[record_group]
@@ -1628,7 +1467,7 @@ class App(object):
                 for record_name in record_dict:
                     if record_name not in Keys.UNSUMMARIZABLE_KEYS:
                         record = record_dict[record_name]
-                        prs += self.render_personal_record(user_id, record_group, record, record_name, True)
+                        prs += self.render_personal_record(unit_system, record_group, record, record_name, True)
                 prs += "</table>\n"
 
         # Render from the template.
@@ -1684,9 +1523,9 @@ class App(object):
     def ical(self, calendar_id):
         """Returns the ical calendar with the specified ID."""
         if calendar_id is None:
-            return self.error()
+            return self.render_error()
         if not InputChecker.is_uuid(calendar_id):
-            return self.error()
+            return self.render_error()
 
         handled, response = self.ical_server.handle_request(calendar_id)
         return handled, response

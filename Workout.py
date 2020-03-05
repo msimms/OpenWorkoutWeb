@@ -26,13 +26,12 @@ class Workout(object):
 
     def __init__(self, user_id):
         self.user_id = user_id
-        root_dir = os.path.dirname(os.path.abspath(__file__))
-        self.user_mgr = UserMgr.UserMgr(None, root_dir)
+        self.user_mgr = UserMgr.UserMgr(None)
         self.type = ""
         self.sport_type = ""
         self.scheduled_time = None # The time at which this workout is to be performed
-        self.warmup = None # The warmup interval
-        self.cooldown = None # The cooldown interval
+        self.warmup = {} # The warmup interval
+        self.cooldown = {} # The cooldown interval
         self.intervals = [] # The workout intervals
         self.needs_rest_day_afterwards = False # Used by the scheduler
         self.can_be_doubled = False # Used by the scheduler to know whether or not this workout can be doubled up with other workouts
@@ -107,11 +106,11 @@ class Workout(object):
     def add_interval(self, repeat, distance, pace, recovery_distance, recovery_pace):
         """Appends an interval to the workout."""
         interval = {}
-        interval[Keys.INTERVAL_REPEAT_KEY] = repeat
-        interval[Keys.INTERVAL_DISTANCE_KEY] = distance
-        interval[Keys.INTERVAL_PACE_KEY] = pace
-        interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY] = recovery_distance
-        interval[Keys.INTERVAL_RECOVERY_PACE_KEY] = recovery_pace
+        interval[Keys.INTERVAL_REPEAT_KEY] = int(repeat)
+        interval[Keys.INTERVAL_DISTANCE_KEY] = float(distance)
+        interval[Keys.INTERVAL_PACE_KEY] = float(pace)
+        interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY] = float(recovery_distance)
+        interval[Keys.INTERVAL_RECOVERY_PACE_KEY] = float(recovery_pace)
         self.intervals.append(interval)
 
     def export_to_zwo(self, file_name):
@@ -157,17 +156,19 @@ class Workout(object):
 
     def export_to_text(self):
         """Creates a string that describes the workout."""
-        result = self.type
+
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+
+        result  = "Workout Type: "
+        result += self.type
         result += "\nSport: "
         result += self.sport_type
         result += "\n"
 
         # Add the warmup (if applicable).
-        if self.warmup is not None:
-            duration = self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION]
-
+        if self.warmup is not None and ZwoTags.ZWO_ATTR_NAME_DURATION in self.warmup:
             result += "Warmup: "
-            result += str(duration)
+            result += str(self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION])
             result += " seconds.\n"
 
         # Add each interval.
@@ -178,22 +179,20 @@ class Workout(object):
             recovery_pace_minute = interval[Keys.INTERVAL_RECOVERY_PACE_KEY]
 
             result += "Interval: "
-            result += str(interval_meters)
-            result += " meters at "
-            result += Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
+            result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+            result += " at "
+            result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
             if recovery_meters > 0:
                 result += " with "
-                result += str(recovery_meters)
-                result += " meters recovery at "
-                result += Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
+                result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                result += " recovery at "
+                result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
             result += ".\n"
 
         # Add the cooldown (if applicable).
-        if self.cooldown is not None:
-            duration = self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION]
-
+        if self.cooldown is not None and ZwoTags.ZWO_ATTR_NAME_DURATION in self.cooldown:
             result += "Cooldown: "
-            result += str(duration)
+            result += str(self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION])
             result += " seconds.\n"
 
         # Add an string that describes how this workout fits into the big picture.

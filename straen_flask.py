@@ -67,7 +67,7 @@ def css(file_name):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + css.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/data/<file_name>')
 def data(file_name):
@@ -78,7 +78,7 @@ def data(file_name):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + data.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/js/<file_name>')
 def js(file_name):
@@ -89,7 +89,7 @@ def js(file_name):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + js.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/images/<file_name>')
 def images(file_name):
@@ -100,7 +100,7 @@ def images(file_name):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + images.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/media/<file_name>')
 def media(file_name):
@@ -111,7 +111,7 @@ def media(file_name):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + media.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/stats')
 def stats():
@@ -122,16 +122,16 @@ def stats():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + stats.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/error')
 def error(error_str=None):
     """Renders the error page."""
     try:
-        return g_app.error(error_str)
+        return g_app.render_error(error_str)
     except:
         pass
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/live/<device_str>')
 def live(device_str):
@@ -142,7 +142,7 @@ def live(device_str):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + live.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/live_user/<user_str>')
 def live_user(user_str):
@@ -153,7 +153,7 @@ def live_user(user_str):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + live_user.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/activity/<activity_id>')
 def activity(activity_id):
@@ -164,7 +164,7 @@ def activity(activity_id):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + activity.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/edit_activity/<activity_id>')
 def edit_activity(activity_id):
@@ -175,7 +175,7 @@ def edit_activity(activity_id):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + edit_activity.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/device/<device_str>')
 def device(device_str):
@@ -186,7 +186,7 @@ def device(device_str):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + device.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/my_activities')
 @login_requred
@@ -200,7 +200,7 @@ def my_activities():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + my_activities.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/all_activities')
 @login_requred
@@ -214,7 +214,7 @@ def all_activities():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + all_activities.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/all_records/<activity_type>/<record_name>')
 @login_requred
@@ -256,7 +256,7 @@ def workouts():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + workouts.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/workout/<workout_id>')
 @login_requred
@@ -270,7 +270,7 @@ def workout(workout_id):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + workout.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/statistics')
 @login_requred
@@ -284,7 +284,7 @@ def statistics():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + statistics.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/gear')
 @login_requred
@@ -298,7 +298,7 @@ def gear():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + gear.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/service_history/<gear_id>')
 @login_requred
@@ -312,7 +312,7 @@ def service_history(gear_id):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + service_history.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/friends')
 @login_requred
@@ -326,7 +326,7 @@ def friends():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + friends.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/device_list')
 @login_requred
@@ -340,7 +340,7 @@ def device_list():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + device_list.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/upload/<ufile>')
 @login_requred
@@ -354,7 +354,7 @@ def upload(ufile):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + upload.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/manual_entry/<activity_type>')
 @login_requred
@@ -368,7 +368,7 @@ def manual_entry(activity_type):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + manual_entry.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/import_activity')
 @login_requred
@@ -382,7 +382,7 @@ def import_activity():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + import_activity.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/task_status')
 @login_requred
@@ -396,7 +396,7 @@ def task_status():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + task_status.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/analysis_status')
 @login_requred
@@ -410,7 +410,7 @@ def analysis_status():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + analysis_status.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/profile')
 @login_requred
@@ -424,7 +424,7 @@ def profile():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + profile.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/settings')
 @login_requred
@@ -438,7 +438,7 @@ def settings():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + settings.__name__)
-    return g_app.error()
+    return g_app.render_error()
 
 @g_flask_app.route('/login')
 def login():
@@ -448,8 +448,8 @@ def login():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
-        return g_app.error()
-    return g_app.error()
+        return g_app.render_error()
+    return g_app.render_error()
 
 @g_flask_app.route('/create_login')
 def create_login():
@@ -457,8 +457,8 @@ def create_login():
     try:
         return g_app.create_login()
     except:
-        return g_app.error()
-    return g_app.error()
+        return g_app.render_error()
+    return g_app.render_error()
 
 @g_flask_app.route('/logout')
 def logout():
@@ -473,8 +473,8 @@ def logout():
         response.delete_cookie(username)
         return response
     except:
-        return g_app.error()
-    return g_app.error()
+        return g_app.render_error()
+    return g_app.render_error()
 
 @g_flask_app.route('/about')
 def about():
@@ -483,7 +483,7 @@ def about():
     try:
         result = g_app.about()
     except:
-        result = g_app.error()
+        result = g_app.render_error()
     return result
 
 @g_flask_app.route('/status')
@@ -493,7 +493,7 @@ def status():
     try:
         result = g_app.status()
     except:
-        result = g_app.error()
+        result = g_app.render_error()
     return result
 
 @g_flask_app.route('/ical/<calendar_id>')
@@ -507,7 +507,7 @@ def ical(calendar_id):
             code = 400
         return response
     except:
-        result = g_app.error()
+        result = g_app.render_error()
     return result
 
 @g_flask_app.route('/api/<version>/<method>', methods = ['GET','POST'])
@@ -607,8 +607,8 @@ def main():
     mako.directories = "templates"
 
     session_mgr = SessionMgr.FlaskSessionMgr()
-    user_mgr = UserMgr.UserMgr(session_mgr, g_root_dir)
-    data_mgr = DataMgr.DataMgr(root_url, g_root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
+    user_mgr = UserMgr.UserMgr(session_mgr)
+    data_mgr = DataMgr.DataMgr(root_url, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
     g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, args.googlemapskey, args.profile, args.debug)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')

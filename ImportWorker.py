@@ -72,7 +72,7 @@ def import_activity(import_str):
 
         # Import the file into the database.            
         print("Import the data to the database...")
-        data_mgr = DataMgr.DataMgr("", root_dir, None, None, None)
+        data_mgr = DataMgr.DataMgr("", None, None, None)
         importer = Importer.Importer(data_mgr)
         success, _, activity_id = importer.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
 

@@ -44,19 +44,42 @@
 			alert("An error occurred!");
     }
 
+    function set_goal_type()
+    {
+		var the_url = "${root_url}/api/1.0/update_settings";
+		var goal_type = document.getElementById("goal_type").value;
+		var dict = [];
+		var result_text = {};
+
+		dict.push({["goal type"] : goal_type});
+		if (send_post_request(the_url, dict, result_text))
+			alert("Goal type updated!");
+		else
+			alert("An error occurred!");
+    }
+
 	function generate_workout_plan()
 	{
 		var the_url = "${root_url}/api/1.0/generate_workout_plan";
 		var goal = document.getElementById("goals").value;
         var goalDateObj = document.getElementById("goalDate");
-        if (goalDateObj.value == "")
-        {
-			alert("A goal date was not specified.");
-            return;
-        }
-		var goalDate = Date.parse(goalDateObj.value) / 1000;
+		var goalDate = 0;
 		var dict = [];
 		var result_text = {};
+
+        if (goalDateObj.value == "")
+        {
+            if (goalDateObj.placeholder == "")
+            {
+                alert("A goal date was not specified.");
+                return;
+            }
+            goalDate = Date.parse(goalDateObj.placeholder) / 1000;
+        }
+        else
+        {
+		    goalDate = Date.parse(goalDateObj.value) / 1000;
+        }
 
 		dict.push({["goal"] : goal});
 		dict.push({["goal_date"] : goalDate});
@@ -164,6 +187,9 @@ ${nav}
 
     <h2>Six Month Bests</h2>
     <p>
+        Workouts are calculated using paces computed from the last six months of activity.
+    </p>
+    <p>
         <h3>Cycling</h3>
         <table id="Cycling">
         </table>
@@ -176,6 +202,9 @@ ${nav}
 	<hr>
 
     <h2>Training Paces For Running</h2>
+    <p>
+        Run workouts will reference these paces, calculated from the last six months of activity.
+    </p>
     <p>
         <table id="RunPaces">
         </table>
@@ -197,6 +226,9 @@ ${goals}
     <p>
         Preferred Long Run Day: <select name="preferred_long_run_day" id="preferred_long_run_day" class="right" value="Weekday" onchange="return set_preferred_long_run_day()">
 ${preferred_long_run_day}
+        </select><br>
+        Goal Type: <select name="goal_type" id="goal_type" class="right" onchange="return set_goal_type()">
+${goal_type}
         </select>
     </p>
 
@@ -215,6 +247,9 @@ ${preferred_long_run_day}
     <h2>Calendar</h2>
     <p>
         Planned workouts will be added to the <a href="${root_url}/my_activities"><b>My Activities</b></a> calendar.
+    </p>
+    <p>
+${calendar}
     </p>
 
 </div>

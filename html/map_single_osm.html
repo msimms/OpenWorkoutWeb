@@ -58,72 +58,59 @@ ${nav}
 <div class="map_canvas" id="map_canvas">
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script type="text/javascript" src="${root_url}/js/coordinates.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="${root_url}/js/OpenStreetMap.js"></script>
 <script type="text/javascript">
-	var contentString
-	var routePath
-	var map
-	var lastLat = ${lastLat}
-	var lastLon = ${lastLon}
+    var content_string
+    var map
+    var lgpx
+    var last_lat = ${lastLat}
+    var last_lon = ${lastLon}
 
-	function escapeRegExp(str)
-	{
-		return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
-	}
+    function new_coord(x, y)
+    {
+        return new OpenLayers.LonLat(x, y);
+    }
 
-	function replaceAll(str, find, replace)
-	{
-		return str.replace(new RegExp(escapeRegExp(find), 'g'), replace);
-	}
+    var append_to_track = function(response)
+    {
+        if (response == null)
+            return;
+        if (response.length < 3)
+            return;
 
-	function newCoord(x, y)
-	{
-		return new OpenLayers.LonLat(x, y);
-	}
+        var objList = JSON.parse(response);
+        if (objList == null)
+            return;
+        if (objList.length == 0)
+            return;
 
-	var appendToTrack = function(response)
-	{
-		if (response == null)
-			return;
-		if (response.length < 3)
-			return;
-		if (routePath == null)
-			return;
+        var coordinates = feature.getGeometry().getCoordinates();
+        for (var i = 0; i < objList.length; ++i)
+        {
+            coordinates.push(new OpenLayers.LonLat(objList[i].latitude, objList[i].longitude));
+        }
 
-		var objList = JSON.parse(response);
-		if (objList == null)
-			return;
-		if (objList.length == 0)
-			return;
+        last_lat = objList[objList.length - 1].latitude;
+        last_lon = objList[objList.length - 1].longitude;
+    };
 
-		for (var i = 0; i < objList.length; ++i)
-		{
-			var path = routePath.getPath();
-			routeCoordinates.push(new OpenLayers.LonLat(objList[i].latitude, objList[i].longitude));
-			routePath.setPath(routeCoordinates);
-			routePath.setMap(map);
-		}
+    var update_metadata = function(response)
+    {
+        if (response == null)
+            return;
 
-		lastLat = objList[objList.length - 1].latitude;
-		lastLon = objList[objList.length - 1].longitude;
-	};
-
-	var updateMetadata = function(response)
-	{
-		if (response == null)
-			return;
-
-        contentString = '<div id="content">' +
+        content_string = '<div id="content">' +
             '<div id="siteNotice">' +
             '</div>' +
             '<h2 id="firstHeading" class="firstHeading">Last Known Position</h2>' +
             '<div id="bodyContent">' +
             '<p>';
 
-		if (response.length >= 3)
+        if (response.length >= 3)
         {
             var objList = JSON.parse(response);
             if (objList == null)
@@ -133,81 +120,117 @@ ${nav}
             {
                 if ((objList[i].name != "Name") && (objList[i].name != "Avg. Speed"))
                 {
-                    contentString += objList[i].name;
-                    contentString += " = ";
-                    contentString += objList[i].value;
-                    contentString += "<br>";
+                    content_string += objList[i].name;
+                    content_string += " = ";
+                    content_string += objList[i].value;
+                    content_string += "<br>";
                 }
             }
         }
 
-        contentString +=
+        content_string +=
             '</p>' +
             '</div>' +
             '</div>';
 
-		var lonLat = new OpenLayers.LonLat(lastLon, lastLat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
+        var lonLat = new OpenLayers.LonLat(last_lon, last_lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
         var markers = new OpenLayers.Layer.Markers("Markers");
         map.addLayer(markers);    
         markers.addMarker(new OpenLayers.Marker(lonLat));
-	};
-    
-	function initialize()
-	{
-		map = new OpenLayers.Map("map_canvas", {
-			controls:[
-				new OpenLayers.Control.Navigation(),
-				new OpenLayers.Control.PanZoomBar(),
-				new OpenLayers.Control.LayerSwitcher(),
-				new OpenLayers.Control.Attribution()],
-			maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
-			maxResolution: 156543.0399,
-			numZoomLevels: 19,
-			units: 'm',
-			projection: new OpenLayers.Projection("EPSG:900913"),
-			displayProjection: new OpenLayers.Projection("EPSG:4326")
-		} );
+    };
 
-		// Add the Layer with the GPX Track
-		var lgpx = new OpenLayers.Layer.Vector("", {
-			strategies: [new OpenLayers.Strategy.Fixed()],
-			protocol: new OpenLayers.Protocol.HTTP({
-				url: "${root_url}/api/1.0/export_activity?activity_id=${activityId}&export_format=gpx",
-				format: new OpenLayers.Format.GPX()
-			}),
-			style: {strokeColor: "red", strokeWidth: 3, strokeOpacity: 0.75},
-			projection: new OpenLayers.Projection("EPSG:4326")
-		});
-		map.addLayer(lgpx);
+    var routeLoaded = function(response, options)
+    {
+        if (options.callback)
+        {
+            if (response.priv.status == 200)
+            {
+                response.code = OpenLayers.Protocol.Response.SUCCESS;
+            }
+            else
+            {
+                response.code = OpenLayers.Protocol.Response.FAILURE;
+            }
+            options.callback.call(options.scope, response);
+        }
+    }
 
-		// Define the map layer
-		map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));
+    function initialize()
+    {
+        map = new OpenLayers.Map("map_canvas", {
+            controls:[
+                new OpenLayers.Control.Navigation(),
+                new OpenLayers.Control.PanZoomBar(),
+                new OpenLayers.Control.LayerSwitcher(),
+                new OpenLayers.Control.Attribution()],
+            maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
+            maxResolution: 156543.0399,
+            numZoomLevels: 19,
+            units: 'm',
+            projection: new OpenLayers.Projection("EPSG:900913"),
+            displayProjection: new OpenLayers.Projection("EPSG:4326")
+        } );
 
-		// Start position for the map (hardcoded here for simplicity,
-		// but maybe you want to get this from the URL params)
-		var lat = lastLat;
-		var lon = lastLon;
-		var zoom = 13;
-		var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
-		map.setCenter(lonLat, zoom);
+        // Data source.... export the activity as GPX.
+        var vectorSource = new OpenLayers.Protocol.HTTP({
+            url: "${root_url}/api/1.0/export_activity?activity_id=${activityId}&export_format=gpx",
+            format: new OpenLayers.Format.GPX()
+        });
 
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "text" });
-	}
+        // Add the layer with the GPX track.
+        lgpx = new OpenLayers.Layer.Vector("", {
+            strategies: [new OpenLayers.Strategy.Fixed()],
+            protocol: vectorSource,
+            style: {strokeColor: "red", strokeWidth: 3, strokeOpacity: 0.75},
+            projection: new OpenLayers.Projection("EPSG:4326")
+        });
+        map.addLayer(lgpx);
 
-	var checkForUpdates = function()
-	{
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=${routeLen}", success: appendToTrack, dataType: "application/json" });
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: updateMetadata, dataType: "text" });
-	};
+        // Define the map layer
+        map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));
 
-	initialize();
-	//setInterval(checkForUpdates, 15000);
+        // Start position for the map (hardcoded here for simplicity,
+        // but maybe you want to get this from the URL params).
+        var lat = last_lat;
+        var lon = last_lon;
+        var zoom = 13;
+        var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
+        map.setCenter(lonLat, zoom);
+
+        // Analyze the route, compute the total distance, avg. speed, etc.
+        //var metersTraveled = total_distance_osm(routeCoordinates);
+        //var distance_traveled_str = convert_distance_to_unit_system_str("${unit_system}", meters_traveled);
+        //var pace_str = convert_distance_and_duration_to_pace_str("${unit_system}", meters_traveled, ${duration});
+        //if (${is_foot_based_activity})
+        //{
+        //    var pace_str = convert_distance_and_duration_to_pace_str("${unit_system}", meters_traveled, ${duration});
+        //    append_to_summary_list("Avg. Pace:", pace_str);
+        //}
+        //else
+        //{
+        //    var speed_str = convert_distance_and_duration_to_speed_str("${unit_system}", meters_traveled, ${duration});
+        //    append_to_summary_list("Avg. Speed:", speed_str);
+        //}
+
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: update_metadata, dataType: "text" });
+    }
+
+    var check_for_updates = function()
+    {
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=${routeLen}", success: append_to_track, dataType: "application/json" });
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: update_metadata, dataType: "text" });
+    };
+
+    initialize();
+    //setInterval(check_for_updates, 15000);
 </script>
 
 </div>
 
 <section class="summary">
+<ul id="summary">
 ${summary}
+</ul>
 </section>
 
 <div id="charts"/>

@@ -24,7 +24,6 @@
 """Unit conversion routines."""
 
 import Keys
-import UserMgr
 
 UNITS_MASS_KG = 1
 UNITS_MASS_POUNDS = 2
@@ -58,26 +57,20 @@ def convert_mass(value, in_units, out_units):
 
 def convert_to_preferred_mass_units(user_mgr, user_id, value, in_units):
     """Unit conversion for mass values. Converts to either metric or standard, depending on the user's preferences."""
-    if user_id is not None:
-        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        if selected_units == Keys.UNITS_METRIC_KEY:
-            out_units = UNITS_MASS_KG
-        else:
-            out_units = UNITS_MASS_POUNDS
-    else:
+    selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+    if selected_units == Keys.UNITS_METRIC_KEY:
         out_units = UNITS_MASS_KG
+    else:
+        out_units = UNITS_MASS_POUNDS
     return convert_mass(value, in_units, out_units), out_units
 
 def convert_from_preferred_mass_units(user_mgr, user_id, value):
     """Unit conversion for mass values. Converts from either metric or standard, depending on the user's preferences, to metric."""
-    if user_id is not None:
-        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        if selected_units == Keys.UNITS_METRIC_KEY:
-            in_units = UNITS_MASS_KG
-        else:
-            in_units = UNITS_MASS_POUNDS
-    else:
+    selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+    if selected_units == Keys.UNITS_METRIC_KEY:
         in_units = UNITS_MASS_KG
+    else:
+        in_units = UNITS_MASS_POUNDS
     return convert_mass(value, in_units, UNITS_MASS_KG), UNITS_MASS_KG
 
 def convert_distance(value, in_units, out_units):
@@ -121,43 +114,33 @@ def convert_distance(value, in_units, out_units):
             return value / INCHES_PER_FOOT
     return value
 
-def convert_to_preferred_distance_units(user_mgr, user_id, value, in_units):
-    """Unit conversion for distance values. Converts to either metric or standard, depending on the user's preferences."""
-    if user_id is not None:
-        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        if selected_units == Keys.UNITS_METRIC_KEY:
-            if value < 1000:
-                out_units = UNITS_DISTANCE_METERS
-            else:
-                out_units = UNITS_DISTANCE_KILOMETERS
+def convert_to_distance_for_the_specified_unit_system(unit_system, value, in_units):
+    """Unit conversion for distance values. Converts to either metric or standard, depending on which is specified."""
+    if unit_system == Keys.UNITS_METRIC_KEY:
+        if value < 1000:
+            out_units = UNITS_DISTANCE_METERS
         else:
-            out_units = UNITS_DISTANCE_MILES
+            out_units = UNITS_DISTANCE_KILOMETERS
     else:
         out_units = UNITS_DISTANCE_MILES
     return convert_distance(value, in_units, out_units), out_units
 
 def convert_to_preferred_height_units(user_mgr, user_id, value, in_units):
     """Unit conversion for height values. Converts to either metric or standard, depending on the user's preferences."""
-    if user_id is not None:
-        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        if selected_units == Keys.UNITS_METRIC_KEY:
-            out_units = UNITS_DISTANCE_METERS
-        else:
-            out_units = UNITS_DISTANCE_INCHES
-    else:
+    selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+    if selected_units == Keys.UNITS_METRIC_KEY:
         out_units = UNITS_DISTANCE_METERS
+    else:
+        out_units = UNITS_DISTANCE_INCHES
     return convert_distance(value, in_units, out_units), out_units
 
 def convert_from_preferred_height_units(user_mgr, user_id, value):
     """Unit conversion for height values. Converts from either metric or standard, depending on the user's preferences, to metric."""
-    if user_id is not None:
-        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        if selected_units == Keys.UNITS_METRIC_KEY:
-            in_units = UNITS_DISTANCE_METERS
-        else:
-            in_units = UNITS_DISTANCE_INCHES
+    selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+    if selected_units == Keys.UNITS_METRIC_KEY:
+        in_units = UNITS_DISTANCE_METERS
     else:
-        in_units = UNITS_MASS_KG
+        in_units = UNITS_DISTANCE_INCHES
     return convert_distance(value, in_units, UNITS_DISTANCE_METERS), UNITS_DISTANCE_METERS
 
 def convert_time(value, in_units, out_units):
@@ -199,28 +182,20 @@ def convert_speed(value, in_distance_units, in_time_units, out_distance_units, o
             return value / 60.0
     return value
 
-def convert_to_preferred_speed_units(user_mgr, user_id, value, in_distance_units, in_time_units):
-    """Unit conversion for speed values. Converts to either metric or standard, depending on the user's preferences."""
+def convert_to_speed_for_the_specified_unit_system(unit_system, value, in_distance_units, in_time_units):
+    """Unit conversion for speed values. Converts to either metric or standard, depending on which is specified."""
     out_time_units = UNITS_TIME_HOURS
-    if user_id is not None:
-        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        if selected_units == Keys.UNITS_METRIC_KEY:
-            out_distance_units = UNITS_DISTANCE_KILOMETERS
-        else:
-            out_distance_units = UNITS_DISTANCE_MILES
+    if unit_system == Keys.UNITS_METRIC_KEY:
+        out_distance_units = UNITS_DISTANCE_KILOMETERS
     else:
         out_distance_units = UNITS_DISTANCE_MILES
     return convert_speed(value, in_distance_units, in_time_units, out_distance_units, out_time_units), out_distance_units, out_time_units
 
-def convert_to_preferred_pace_units(user_mgr, user_id, value, in_distance_units, in_time_units):
+def convert_to_pace_for_the_specified_unit_system(unit_system, value, in_distance_units, in_time_units):
     """Unit conversion for pace values. Converts to either metric or standard, depending on the user's preferences."""
     out_time_units = UNITS_TIME_MINUTES
-    if user_id is not None:
-        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        if selected_units == Keys.UNITS_METRIC_KEY:
-            out_distance_units = UNITS_DISTANCE_KILOMETERS
-        else:
-            out_distance_units = UNITS_DISTANCE_MILES
+    if unit_system == Keys.UNITS_METRIC_KEY:
+        out_distance_units = UNITS_DISTANCE_KILOMETERS
     else:
         out_distance_units = UNITS_DISTANCE_MILES
 
@@ -253,10 +228,9 @@ def get_mass_units_str(mass_units):
 
 def get_preferred_mass_units_str(user_mgr, user_id):
     """Returns the units in which mass is displayed."""
-    if user_id is not None:
-        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        if selected_units is not Keys.UNITS_METRIC_KEY:
-            return get_mass_units_str(UNITS_MASS_POUNDS)
+    selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+    if selected_units is not Keys.UNITS_METRIC_KEY:
+        return get_mass_units_str(UNITS_MASS_POUNDS)
     return get_mass_units_str(UNITS_MASS_KG)
 
 def get_distance_units_str(distance_units):
@@ -353,19 +327,19 @@ def get_power_units_str():
     """Returns the units in which power is displayed."""
     return "watts"
 
-def convert_to_preferred_units_str(user_mgr, user_id, in_value, in_distance_units, in_time_units, label):
+def convert_to_string_in_specified_unit_system(unit_system, in_value, in_distance_units, in_time_units, label):
     """Generic unit conversion routine. Returns a string with the converted number and units."""
     out_value = in_value
     if label in Keys.TIME_KEYS:
         out_value = convert_seconds_to_hours_mins_secs(in_value)
     elif label in Keys.DISTANCE_KEYS:
-        out_value, out_distance_units = convert_to_preferred_distance_units(user_mgr, user_id, in_value, in_distance_units)
+        out_value, out_distance_units = convert_to_distance_for_the_specified_unit_system(unit_system, in_value, in_distance_units)
         out_value = "{:.2f} ".format(out_value) + get_distance_units_str(out_distance_units)
     elif label in Keys.SPEED_KEYS:
-        out_value, out_distance_units, out_time_units = convert_to_preferred_speed_units(user_mgr, user_id, in_value, in_distance_units, in_time_units)        
+        out_value, out_distance_units, out_time_units = convert_to_speed_for_the_specified_unit_system(unit_system, in_value, in_distance_units, in_time_units)        
         out_value = "{:.2f} ".format(out_value) + get_speed_units_str(out_distance_units, out_time_units)
     elif label in Keys.PACE_KEYS:
-        out_value, out_distance_units, out_time_units = convert_to_preferred_pace_units(user_mgr, user_id, in_value, in_distance_units, in_time_units)        
+        out_value, out_distance_units, out_time_units = convert_to_pace_for_the_specified_unit_system(unit_system, in_value, in_distance_units, in_time_units)        
         out_value = convert_minutes_to_mins_secs(out_value) + " " + get_pace_units_str(out_distance_units, out_time_units)
     elif label in Keys.HEART_RATE_KEYS:
         out_value = "{:.2f} ".format(in_value) + get_heart_rate_units_str()

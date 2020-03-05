@@ -146,17 +146,17 @@ class StraenWeb(object):
             return self.app.stats()
         except:
             pass
-        return self.app.error("")
+        return self.app.render_error("")
 
     @cherrypy.expose
     def error(self, error_str=None):
         """Renders the error page."""
         try:
             cherrypy.response.status = 500
-            return self.app.error(error_str)
+            return self.app.render_error(error_str)
         except:
             pass
-        return self.app.error("")
+        return self.app.render_error("")
 
     @cherrypy.expose
     def live(self, device_str):
@@ -681,16 +681,20 @@ def main():
     if not args.debug:
         Daemonizer(cherrypy.engine).subscribe()
 
+    # Register the signal handler.
     signal.signal(signal.SIGINT, signal_handler)
+
+    # Configure the template engine.
     mako.collection_size = 100
     mako.directories = "templates"
 
     session_mgr = SessionMgr.CherryPySessionMgr()
-    user_mgr = UserMgr.UserMgr(session_mgr, root_dir)
-    data_mgr = DataMgr.DataMgr(root_url, root_dir, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
+    user_mgr = UserMgr.UserMgr(session_mgr)
+    data_mgr = DataMgr.DataMgr(root_url, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
     backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey, args.profile, args.debug)
     g_app = StraenWeb(backend)
 
+    # Configure the error logger.
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
     # The markdown library is kinda spammy.

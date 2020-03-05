@@ -31,7 +31,7 @@ class Database(object):
     """Base class for a database. Encapsulates common functionality."""
     db_file = ""
 
-    def __init__(self, root_dir):
+    def __init__(self):
         super(Database, self).__init__()
 
     def log_error(self, log_str):
@@ -61,7 +61,7 @@ class SqliteDatabase(Database):
 
     def __init__(self, root_dir, file_name):
         self.db_file_name = os.path.join(root_dir, file_name)
-        Database.__init__(self, root_dir)
+        Database.__init__(self)
 
     def connect(self):
         """Inherited from the base class and unused."""

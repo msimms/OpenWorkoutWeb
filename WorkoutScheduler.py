@@ -5,29 +5,32 @@ import os
 import InputChecker
 import Keys
 import UserMgr
+import WorkoutFactory
 
 class WorkoutScheduler(object):
     """Class for generating a run plan for the specifiied user."""
 
     def __init__(self, user_id):
         self.user_id = user_id
-        root_dir = os.path.dirname(os.path.abspath(__file__))
-        self.user_mgr = UserMgr.UserMgr(None, root_dir)
+        self.user_mgr = UserMgr.UserMgr(None)
 
     def schedule_workouts(self, workouts, start_time):
         """Organizes the workouts into a schedule for the next week. Implements a very basic constraint solving algorithm."""
-        preferred_long_run_day = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY)
 
         # This will server as our calendar for next week.
         week = [None] * 7
 
         # Find the long run and put it on the preferred day.
+        preferred_long_run_day = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY)
         if preferred_long_run_day is not None:
             for workout in workouts:
                 if workout.type == Keys.WORKOUT_TYPE_LONG_RUN:
 
                     # Convert the day name to an index and ignore case.
-                    day_index = [x.lower() for x in InputChecker.days_of_week].index(preferred_long_run_day)
+                    try:
+                        day_index = [x.lower() for x in InputChecker.days_of_week].index(preferred_long_run_day)
+                    except:
+                        day_index = InputChecker.days_of_week[-1] # Default to the last day, Sunday.
                     workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
                     week[day_index] = workout
                     break
@@ -47,12 +50,12 @@ class WorkoutScheduler(object):
 
                 # Pick one of the days from the candidate list.
                 if len(possible_days) > 0:
-                    day_index = possible_days[len(possible_days) / 2]
+                    day_index = possible_days[int(len(possible_days) / 2)]
                     workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
                     week[day_index] = workout
 
                     # Do we need to schedule a rest day after this workout?
                     if workout.needs_rest_day_afterwards:
-                        pass
+                        planned_rest = WorkoutFactory.create(Keys.WORKOUT_TYPE_REST, self.user_id)
 
         return workouts

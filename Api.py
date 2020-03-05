@@ -31,9 +31,17 @@ class Api(object):
 
     def activity_belongs_to_logged_in_user(self, activity):
         """Returns True if the specified activity belongs to the logged in user."""
-        activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
+        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
         belongs_to_current_user = str(activity_user_id) == str(self.user_id)
         return belongs_to_current_user
+
+    def activity_can_be_viewed(self, activity):
+        """Determine if the requesting user can view the activity."""
+        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
+        belongs_to_current_user = False
+        if self.user_id is not None:
+            belongs_to_current_user = str(activity_user_id) == str(self.user_id)
+        return self.data_mgr.is_activity_public(activity) or belongs_to_current_user
 
     def parse_json_loc_obj(self, json_obj, sensor_readings_dict, metadata_list_dict):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
@@ -213,12 +221,8 @@ class Api(object):
         activity = self.data_mgr.retrieve_activity(activity_id)
 
         # Determine if the requesting user can view the activity.
-        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
-        belongs_to_current_user = False
-        if self.user_id is not None:
-            belongs_to_current_user = str(activity_user_id) == str(self.user_id)
-        if not (self.data_mgr.is_activity_public(activity) or belongs_to_current_user):
-            return self.error("The requested activity is not public.")
+        if not self.activity_can_be_viewed(activity):
+            return self.error("The requested activity is not viewable to this user.")
 
         response = "["
 
@@ -881,8 +885,6 @@ class Api(object):
 
     def handle_export_activity(self, values):
         """Called when an API message request to export an activity."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Missing activity ID parameter.")
         if Keys.ACTIVITY_EXPORT_FORMAT_KEY not in values:
@@ -897,8 +899,8 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid format.")
 
         activity = self.data_mgr.retrieve_activity(activity_id)
-        if not self.activity_belongs_to_logged_in_user(activity):
-            raise ApiException.ApiAuthenticationException("Not activity owner.")
+        if not self.activity_can_be_viewed(activity):
+            return self.error("The requested activity is not viewable to this user.")
 
         exporter = Exporter.Exporter()
         result = exporter.export(activity, None, export_format)
@@ -1198,6 +1200,17 @@ class Api(object):
                     raise ApiException.ApiMalformedRequestException("Invalid long run day.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day)
 
+            # Goal type.
+            elif decoded_key == Keys.GOAL_TYPE_KEY:
+                goal_type = urllib.unquote_plus(values[key])
+                if not (goal_type == Keys.GOAL_TYPE_COMPLETION or goal_type == Keys.GOAL_TYPE_SPEED):
+                    raise ApiException.ApiMalformedRequestException("Invalid goal type.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_TYPE_KEY, goal_type)
+
+            # Unknown
+            else:
+                raise ApiException.ApiMalformedRequestException("Invalid user setting: " + decoded_key)
+
         return result, ""
 
     def handle_update_profile(self, values):
@@ -1401,16 +1414,17 @@ class Api(object):
         else:
             num_seconds = None
 
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
         cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(self.user_id, num_seconds)
         for item in cycling_bests:
             seconds = cycling_bests[item][0]
             activity_id = cycling_bests[item][1]
-            formatted_time = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, seconds, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
+            formatted_time = Units.convert_to_string_in_specified_unit_system(unit_system, seconds, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
             cycling_bests[item] = formatted_time, activity_id, seconds
         for item in running_bests:
             seconds = running_bests[item][0]
             activity_id = running_bests[item][1]
-            formatted_time = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, seconds, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
+            formatted_time = Units.convert_to_string_in_specified_unit_system(unit_system, seconds, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, item)
             running_bests[item] = formatted_time, activity_id, seconds
 
         bests = {}
@@ -1426,11 +1440,34 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Best 5K not specified.")
 
         calc = TrainingPaceCalculator.TrainingPaceCalculator()
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
         run_paces = calc.calc_from_race_distance_in_meters(5000, int(values[Keys.BEST_5K]) / 60)
         converted_paces = {}
         for run_pace in run_paces:
-            converted_paces[run_pace] = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
+            converted_paces[run_pace] = Units.convert_to_string_in_specified_unit_system(unit_system, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
         return True, json.dumps(converted_paces)
+
+    def handle_get_distance_for_tag(self, values):
+        """Returns the amount of distance logged to activities with the given tag. Result is a JSON string."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_TAG_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Tag not specified.")
+
+        tag = values[Keys.ACTIVITY_TAG_KEY]
+        if not InputChecker.is_valid(tag):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        tags = []
+        tags.append(tag)
+
+        converted_distances = []
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+        gear_distances = self.data_mgr.distance_for_tags(self.user_id, tags)
+        for gear_name in gear_distances:
+            converted_distance = Units.convert_to_string_in_specified_unit_system(unit_system, gear_distances[gear_name], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.TOTAL_DISTANCE)
+            converted_distances.append({gear_name: converted_distance})
+        return True, json.dumps(converted_distances)
 
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
@@ -1458,6 +1495,8 @@ class Api(object):
             return self.handle_list_gear(values)
         elif request == 'list_workouts':
             return self.handle_list_workouts(values)
+        elif request == 'export_activity':
+            return self.handle_export_activity(values)
         elif request == 'get_workout_description':
             return self.handle_get_workout_description(values)
         elif request == 'get_workout_ical_url':
@@ -1474,6 +1513,8 @@ class Api(object):
             return self.handle_list_personal_records(values)
         elif request == 'get_running_paces':
             return self.handle_get_running_paces(values)
+        elif request == 'get_distance_for_tag':
+            return self.handle_get_distance_for_tag(values)
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):

@@ -105,7 +105,9 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
 
             # Current speed is the average of the last ten seconds.
             if int(total_seconds) == self.speed_window_size or self.current_speed is None:
+
                 self.current_speed = total_meters / total_seconds
+
                 if Keys.BEST_SPEED not in self.bests or self.current_speed > self.bests[Keys.BEST_SPEED]:
                     self.bests[Keys.BEST_SPEED] = self.current_speed
                 if self.total_distance < 1000:
@@ -208,7 +210,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             altitude = location[Keys.LOCATION_ALT_KEY]
             self.append_location(date_time, latitude, longitude, altitude)
     
-    def examine_peak(self, start_index, end_index):
+    def examine_interval_peak(self, start_index, end_index):
         """Examines a line of near-constant pace/speed."""
         if start_index >= end_index:
             return
@@ -254,7 +256,6 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
 
             # Smooth the speed graph to take out some of the GPS jitter.
             smoothed_graph = signals.smooth(self.speed_graph, 4)
-
             if len(smoothed_graph) > 1:
     
                 # Find peaks in the speed graph.
@@ -263,7 +264,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 # Examine the lines between the peaks.
                 all_intervals = []
                 for peak in peak_list:
-                    interval = self.examine_peak(peak.left_trough.x, peak.right_trough.x)
+                    interval = self.examine_interval_peak(peak.left_trough.x, peak.right_trough.x)
                     all_intervals.append(interval)
 
                 # Do a k-means analysis on the computed paces blocks so we can get rid of any outliers.
@@ -294,7 +295,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 zip_func = itertools.izip
             else:
                 zip_func = zip
-            for time_val, speed_val in itertools.izip(self.speed_times, self.speed_graph):
+            for time_val, speed_val in zip_func(self.speed_times, self.speed_graph):
                 point = []
                 point.append(time_val)
                 point.append(float(speed_val))
