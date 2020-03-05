@@ -170,6 +170,11 @@ This feature is very much under development and will go through several iteratio
 * Track mile and kilometer split times. [Feature Page](https://github.com/msimms/StraenWeb/issues/19)
 * Bug fixes.
 
+### 0.21
+* Moved more functionality to the API.
+* Moved distance and pace calculations to the front end (at least when using Google Maps). [Feature Page](https://github.com/msimms/StraenWeb/issues/20)
+* Bug fixes.
+
 ## Tech
 This software uses several other source projects to work properly:
 
