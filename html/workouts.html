@@ -63,14 +63,23 @@
 		var the_url = "${root_url}/api/1.0/generate_workout_plan";
 		var goal = document.getElementById("goals").value;
         var goalDateObj = document.getElementById("goalDate");
-        if (goalDateObj.value == "")
-        {
-			alert("A goal date was not specified.");
-            return;
-        }
-		var goalDate = Date.parse(goalDateObj.value) / 1000;
+		var goalDate = 0;
 		var dict = [];
 		var result_text = {};
+
+        if (goalDateObj.value == "")
+        {
+            if (goalDateObj.placeholder == "")
+            {
+                alert("A goal date was not specified.");
+                return;
+            }
+            goalDate = Date.parse(goalDateObj.placeholder) / 1000;
+        }
+        else
+        {
+		    goalDate = Date.parse(goalDateObj.value) / 1000;
+        }
 
 		dict.push({["goal"] : goal});
 		dict.push({["goal_date"] : goalDate});
