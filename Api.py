@@ -1440,10 +1440,11 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Best 5K not specified.")
 
         calc = TrainingPaceCalculator.TrainingPaceCalculator()
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
         run_paces = calc.calc_from_race_distance_in_meters(5000, int(values[Keys.BEST_5K]) / 60)
         converted_paces = {}
         for run_pace in run_paces:
-            converted_paces[run_pace] = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
+            converted_paces[run_pace] = Units.convert_to_string_in_specified_unit_system(unit_system, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
         return True, json.dumps(converted_paces)
 
     def handle_get_distance_for_tag(self, values):
@@ -1461,11 +1462,11 @@ class Api(object):
         tags.append(tag)
 
         converted_distances = []
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
         gear_distances = self.data_mgr.distance_for_tags(self.user_id, tags)
         for gear_name in gear_distances:
-            converted_distance = Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, gear_distances[gear_name], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.TOTAL_DISTANCE)
+            converted_distance = Units.convert_to_string_in_specified_unit_system(unit_system, gear_distances[gear_name], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.TOTAL_DISTANCE)
             converted_distances.append({gear_name: converted_distance})
-
         return True, json.dumps(converted_distances)
 
     def handle_api_1_0_get_request(self, request, values):
