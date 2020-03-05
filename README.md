@@ -32,8 +32,14 @@ Straen is the Welsh word for stress and exercise is a (positive) form of stress.
 [Full bug and feature tracking](https://github.com/msimms/StraenWeb/issues).
 
 ## Installation
+To clone the source code:
+```
+git clone https://github.com/msimms/StraenWeb
+```
+
 To install the dependencies:
 ```
+cd StraenWeb
 python setup.py
 ```
 
@@ -173,6 +179,9 @@ This feature is very much under development and will go through several iteratio
 ### 0.21
 * Moved more functionality to the API.
 * Moved distance and pace calculations to the front end (at least when using Google Maps). [Feature Page](https://github.com/msimms/StraenWeb/issues/20)
+* Bug fixes.
+
+### 0.22
 * Bug fixes.
 
 ## Tech
