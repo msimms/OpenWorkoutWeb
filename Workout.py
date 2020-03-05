@@ -163,7 +163,7 @@ class Workout(object):
         result += "\n"
 
         # Add the warmup (if applicable).
-        if self.warmup is not None:
+        if self.warmup is not None and ZwoTags.ZWO_ATTR_NAME_DURATION in self.warmup:
             duration = self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION]
 
             result += "Warmup: "
@@ -189,7 +189,7 @@ class Workout(object):
             result += ".\n"
 
         # Add the cooldown (if applicable).
-        if self.cooldown is not None:
+        if self.cooldown is not None and ZwoTags.ZWO_ATTR_NAME_DURATION in self.cooldown:
             duration = self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION]
 
             result += "Cooldown: "
