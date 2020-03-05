@@ -1201,11 +1201,11 @@ class Api(object):
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day)
 
             # Goal type.
-            elif decoded_key == Keys.GOAL_TYPE:
+            elif decoded_key == Keys.GOAL_TYPE_KEY:
                 goal_type = urllib.unquote_plus(values[key])
                 if not (goal_type == Keys.GOAL_TYPE_COMPLETION or goal_type == Keys.GOAL_TYPE_SPEED):
                     raise ApiException.ApiMalformedRequestException("Invalid goal type.")
-                result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_TYPE, goal_type)
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_TYPE_KEY, goal_type)
 
             # Unknown
             else:

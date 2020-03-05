@@ -1124,7 +1124,7 @@ class App(object):
 
         # Set the preferred long run of the week.
         goal_types = [Keys.GOAL_TYPE_COMPLETION, Keys.GOAL_TYPE_SPEED]
-        selected_goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE)
+        selected_goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
         goal_type_str = ""
         for goal_type in goal_types:
             goal_type_str += "\t\t\t<option value=\"" + goal_type + "\""

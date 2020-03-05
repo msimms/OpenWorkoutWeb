@@ -59,7 +59,7 @@ RESTING_HEART_RATE_KEY = "resting heart rate"
 ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate"
 ESTIMATED_FTP_KEY = "estimated ftp"
 PREFERRED_LONG_RUN_DAY_KEY = "preferred long run day" # Day of the week on which the user prefers to do their long runs
-GOAL_TYPE = "goal type" # Extra info about the user's goal, such as whether they care about speed or just finishing a race
+GOAL_TYPE_KEY = "goal type" # Extra info about the user's goal, such as whether they care about speed or just finishing a race
 GOAL_TYPE_COMPLETION = "Completion"
 GOAL_TYPE_SPEED = "Speed"
 

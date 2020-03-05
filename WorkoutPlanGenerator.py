@@ -101,6 +101,9 @@ class WorkoutPlanGenerator(object):
             # Convert the goal time into weeks.
             weeks_until_goal = (goal_date - now) / (7 * 24 * 60 * 60)
 
+        # Is the user interesting in just completion, or do they care about pace?
+        goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
+
         # This will trigger the callback for each of the user's activities.
         self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb)
 
@@ -147,6 +150,7 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.AGE_YEARS_KEY] = age_years
         inputs[Keys.EXPERIENCE_LEVEL_KEY] = experience_level
         inputs[Keys.GOAL_KEY] = goal
+        inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
 
         print("Inputs: " + str(inputs))
@@ -194,8 +198,9 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.LONG_RUN_PACE])
         model_inputs.append(inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY])
         model_inputs.append(inputs[Keys.AGE_YEARS_KEY])
-        model_inputs.append(inputs[Keys.EXPERIENCE_LEVEL])
-        model_inputs.append(inputs[Keys.GOAL])
+        model_inputs.append(inputs[Keys.EXPERIENCE_LEVEL_KEY])
+        model_inputs.append(inputs[Keys.GOAL_KEY])
+        model_inputs.append(inputs[Keys.GOAL_TYPE_KEY])
         model_inputs.append(inputs[Keys.WEEKS_UNTIL_GOAL_KEY])
 
         workouts = []
