@@ -156,6 +156,9 @@ class Workout(object):
 
     def export_to_text(self):
         """Creates a string that describes the workout."""
+
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+
         result  = "Workout Type: "
         result += self.type
         result += "\nSport: "
@@ -176,14 +179,14 @@ class Workout(object):
             recovery_pace_minute = interval[Keys.INTERVAL_RECOVERY_PACE_KEY]
 
             result += "Interval: "
-            result += str(interval_meters)
-            result += " meters at "
-            result += Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
+            result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+            result += " at "
+            result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
             if recovery_meters > 0:
                 result += " with "
-                result += str(recovery_meters)
-                result += " meters recovery at "
-                result += Units.convert_to_preferred_units_str(self.user_mgr, self.user_id, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
+                result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                result += " recovery at "
+                result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
             result += ".\n"
 
         # Add the cooldown (if applicable).
