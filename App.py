@@ -990,7 +990,7 @@ class App(object):
         url_str = "<a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + display_str + "</a>"
         return url_str
 
-    def render_personal_record_simple(self, user_id, user_activities, activity_type, record, record_name):
+    def render_personal_record_simple(self, unit_system, user_activities, activity_type, record, record_name):
         """Helper function that renders a single table row in the personal bests table."""
         record_value = record[0]
         activity_id = record[1]
@@ -999,7 +999,7 @@ class App(object):
             if Keys.ACTIVITY_ID_KEY in activity and activity[Keys.ACTIVITY_ID_KEY] == activity_id and Keys.ACTIVITY_TIME_KEY in activity:
                 activity_time = activity[Keys.ACTIVITY_TIME_KEY]
                 break
-        record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+        record_str = Units.convert_to_string_in_specified_unit_system(unit_system, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
 
         out_str = "\t\t\t"
         if activity_time == 0:
@@ -1011,11 +1011,11 @@ class App(object):
         out_str += "<tr>\n"
         return out_str
 
-    def render_personal_record(self, user_id, activity_type, record, record_name, show_progression):
+    def render_personal_record(self, unit_system, activity_type, record, record_name, show_progression):
         """Helper function that renders a single table row in the personal bests table."""
         record_value = record[0]
         activity_id = record[1]
-        record_str = Units.convert_to_preferred_units_str(self.user_mgr, user_id, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+        record_str = Units.convert_to_string_in_specified_unit_system(unit_system, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
         out_str = "<td>"
         out_str += record_name
         params = {}
@@ -1051,8 +1051,9 @@ class App(object):
 
         records_str = ""
         records = self.data_mgr.retrieve_bests_for_activity_type(user_id, activity_type, record_name)
+        unit_system = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
         for record in records:
-            records_str += self.render_personal_record_simple(user_id, user_activities, activity_type, record, record_name)
+            records_str += self.render_personal_record_simple(unit_system, user_activities, activity_type, record, record_name)
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'records.html')
@@ -1079,8 +1080,9 @@ class App(object):
 
         records_str = ""
         records = self.data_mgr.compute_progression(user_id, user_activities, activity_type, record_name)
+        unit_system = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
         for record in records:
-            records_str += self.render_personal_record_simple(user_id, user_activities, activity_type, record, record_name)
+            records_str += self.render_personal_record_simple(unit_system, user_activities, activity_type, record, record_name)
 
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'records.html')
@@ -1455,6 +1457,7 @@ class App(object):
 
         # Get the user's personal recorsd.
         prs = ""
+        unit_system = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
         record_groups = self.data_mgr.retrieve_user_personal_records(user_id)
         for record_group in record_groups:
             record_dict = record_groups[record_group]
@@ -1464,7 +1467,7 @@ class App(object):
                 for record_name in record_dict:
                     if record_name not in Keys.UNSUMMARIZABLE_KEYS:
                         record = record_dict[record_name]
-                        prs += self.render_personal_record(user_id, record_group, record, record_name, True)
+                        prs += self.render_personal_record(unit_system, record_group, record, record_name, True)
                 prs += "</table>\n"
 
         # Render from the template.
