@@ -20,7 +20,9 @@ def retrieve_time_from_location(location):
 
 def retrieve_time_from_time_value_pair(value):
     """Used with the sort function."""
-    return value.keys()[0]
+    if sys.version_info[0] < 3:
+        return value.keys()[0]
+    return list(value.keys())[0]
 
 
 class Device(object):
