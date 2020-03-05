@@ -45,6 +45,7 @@ class RunPlanGenerator(object):
         # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
 
         goal_distance = inputs[Keys.GOAL_RUN_DISTANCE_KEY]
+        goal_type = inputs[Keys.GOAL_TYPE_KEY]
         speed_run_pace = inputs[Keys.SPEED_RUN_PACE]
         tempo_run_pace = inputs[Keys.TEMPO_RUN_PACE]
         long_run_pace = inputs[Keys.LONG_RUN_PACE]
@@ -66,15 +67,26 @@ class RunPlanGenerator(object):
 
         workouts = []
 
-        # Speed session. Start with four intervals, increase the number of intervals as we get closer to the goal.
-        interval_distance = RunPlanGenerator.nearest_interval_distance(longest_run_in_four_weeks / 10)
-        speed_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_RUN, self.user_id)
-        speed_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
-        speed_run_workout.add_warmup(10 * 60)
-        speed_run_workout.add_interval(3, interval_distance, speed_run_pace, interval_distance * 2, easy_run_pace)
-        speed_run_workout.add_cooldown(5 * 60)
-        speed_run_workout.needs_rest_day_afterwards = True
-        workouts.append(speed_run_workout)
+        if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower():
+
+            # Speed session. Start with four intervals, increase the number of intervals as we get closer to the goal.
+            interval_distance = RunPlanGenerator.nearest_interval_distance(longest_run_in_four_weeks / 10)
+            speed_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_RUN, self.user_id)
+            speed_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
+            speed_run_workout.add_warmup(10 * 60)
+            speed_run_workout.add_interval(3, interval_distance, speed_run_pace, interval_distance * 2, easy_run_pace)
+            speed_run_workout.add_cooldown(5 * 60)
+            speed_run_workout.needs_rest_day_afterwards = True
+            workouts.append(speed_run_workout)
+
+        else:
+
+            # Easy run.
+            interval_distance = RunPlanGenerator.nearest_interval_distance(longest_run_in_four_weeks / 5)
+            easy_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RUN, self.user_id)
+            easy_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
+            easy_run_workout.add_interval(1, interval_distance, easy_run_pace, 0, 0)
+            workouts.append(easy_run_workout)
 
         # Tempo run. Run should be 20-30 minutes in duration.
         interval_distance = RunPlanGenerator.nearest_interval_distance(30.0 * tempo_run_pace)
