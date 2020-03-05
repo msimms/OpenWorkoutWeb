@@ -332,8 +332,8 @@ def generate_workout_plan(user_str, format):
     workouts = generator.generate_plan(g_model)
 
     # Export the workouts to local files, if requested.
-    for workout in workouts:
-        if format is not None:
+    if format is not None:
+        for workout in workouts:
             if format == 'text':
                 print(workout.export_to_text())
             elif format == 'json':
