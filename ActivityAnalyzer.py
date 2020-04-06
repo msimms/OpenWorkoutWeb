@@ -99,8 +99,13 @@ class ActivityAnalyzer(object):
             for sensor_type in sensor_types_to_analyze:
                 if sensor_type in self.activity:
                     print("Analyzing " + sensor_type + " data...")
-                    sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type], activity_type, activity_user_id, self.data_mgr)
-                    self.summary_data.update(sensor_analyzer.analyze())
+                    try:
+                        sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type], activity_type, activity_user_id, self.data_mgr)
+                        self.summary_data.update(sensor_analyzer.analyze())
+                    except:
+                        self.log_error("Exception when analyzing activity " + sensor_type + " data.")
+                        self.log_error(traceback.format_exc())
+                        self.log_error(sys.exc_info()[0])
                     self.should_yield()
             self.should_yield()
 
