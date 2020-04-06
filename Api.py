@@ -387,7 +387,7 @@ class Api(object):
         if not InputChecker.is_email_address(email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
         realname = urllib.unquote_plus(values[Keys.REALNAME_KEY])
-        if not InputChecker.is_valid(realname):
+        if not InputChecker.is_valid_decoded_str(realname):
             raise ApiException.ApiMalformedRequestException("Invalid name.")
         password1 = urllib.unquote_plus(values[Keys.PASSWORD1_KEY])
         password2 = urllib.unquote_plus(values[Keys.PASSWORD2_KEY])
@@ -776,7 +776,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
-        if not InputChecker.is_valid(tag):
+        if not InputChecker.is_valid_decoded_str(tag):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         # Only the activity's owner should be able to do this.
@@ -931,7 +931,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
-        if not InputChecker.is_valid(tag):
+        if not InputChecker.is_valid_decoded_str(tag):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if len(tag) == 0:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -953,7 +953,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
-        if not InputChecker.is_valid(tag):
+        if not InputChecker.is_valid_decoded_str(tag):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         result = self.data_mgr.delete_tag(activity_id, tag)
@@ -988,7 +988,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         comment = urllib.unquote_plus(values[Keys.ACTIVITY_COMMENT_KEY])
-        if not InputChecker.is_valid(comment):
+        if not InputChecker.is_valid_decoded_str(comment):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         result = self.data_mgr.create_activity_comment(activity_id, self.user_id, comment)
@@ -1023,13 +1023,13 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         gear_type = urllib.unquote_plus(values[Keys.GEAR_TYPE_KEY])
-        if not InputChecker.is_valid(gear_type):
+        if not InputChecker.is_valid_decoded_str(gear_type):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
-        if not InputChecker.is_valid(gear_name):
+        if not InputChecker.is_valid_decoded_str(gear_name):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_description = urllib.unquote_plus(values[Keys.GEAR_DESCRIPTION_KEY])
-        if not InputChecker.is_valid(gear_description):
+        if not InputChecker.is_valid_decoded_str(gear_description):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
         if not InputChecker.is_integer(gear_add_time):
@@ -1070,13 +1070,13 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         gear_type = urllib.unquote_plus(values[Keys.GEAR_TYPE_KEY])
-        if not InputChecker.is_valid(gear_type):
+        if not InputChecker.is_valid_decoded_str(gear_type):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
-        if not InputChecker.is_valid(gear_name):
+        if not InputChecker.is_valid_decoded_str(gear_name):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_description = urllib.unquote_plus(values[Keys.GEAR_DESCRIPTION_KEY])
-        if not InputChecker.is_valid(gear_description):
+        if not InputChecker.is_valid_decoded_str(gear_description):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
         if not InputChecker.is_integer(gear_add_time):
@@ -1157,7 +1157,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
         gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
-        if not InputChecker.is_valid(gear_name):
+        if not InputChecker.is_valid_decoded_str(gear_name):
             raise ApiException.ApiMalformedRequestException("Invalid gear name.")
 
         # Only the activity's owner should be able to do this.
@@ -1455,7 +1455,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Tag not specified.")
 
         tag = values[Keys.ACTIVITY_TAG_KEY]
-        if not InputChecker.is_valid(tag):
+        if not InputChecker.is_valid_decoded_str(tag):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         tags = []
