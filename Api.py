@@ -475,7 +475,7 @@ class Api(object):
             raise Exception("Update failed.")
         return True, ""
 
-    def handle_delete_gear(self, values):
+    def handle_delete_users_gear(self, values):
         """Removes the current user's gear data."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -496,7 +496,7 @@ class Api(object):
         self.data_mgr.delete_user_gear(self.user_id)
         return True, ""
 
-    def handle_delete_activities(self, values):
+    def handle_delete_users_activities(self, values):
         """Removes the current user's activity data."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -1533,10 +1533,10 @@ class Api(object):
             return self.handle_update_email(values)
         elif request == 'update_password':
             return self.handle_update_password(values)
-        elif request == 'delete_gear':
-            return self.delete_gear(values)
-        elif request == 'delete_activities':
-            return self.delete_activities(values)
+        elif request == 'delete_users_gear':
+            return self.handle_delete_users_gear(values)
+        elif request == 'delete_users_activities':
+            return self.handle_delete_users_activities(values)
         elif request == 'delete_user':
             return self.handle_delete_user(values)
         elif request == 'delete_activity':
