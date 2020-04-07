@@ -176,17 +176,27 @@
         {
             if (gear_record.gear_id == "${gear_id}")
             {
+                // Add the title.
                 var gear_name_title = document.getElementById("GearName");
                 gear_name = gear_record.name
                 gear_name_title.innerText = gear_name;
 
-                $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_distance_for_tag?tag=" + gear_name, cache: false, success: process_gear_distance, dataType: "json" });
+                // Add the description.
+                var gear_desc_title = document.getElementById("GearDescription");
+                gear_desc_title.innerText = gear_record.description;
 
-                var sorted_service_records = gear_record.service_history.sort(service_sort)
-                for (var service_record of sorted_service_records)
+                // Add the service records.
+                if (gear_record.hasOwnProperty('service_history'))
                 {
-                    append_to_service_history_table(history_table, service_record.date, service_record.description, service_record.service_id);
+                    var sorted_service_records = gear_record.service_history.sort(service_sort)
+                    for (var service_record of sorted_service_records)
+                    {
+                        append_to_service_history_table(history_table, service_record.date, service_record.description, service_record.service_id);
+                    }
                 }
+
+                // Request the distance calculation for this item.
+                $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_distance_for_tag?tag=" + gear_name, cache: false, success: process_gear_distance, dataType: "json" });
             }
         }
     }
@@ -209,10 +219,8 @@ ${nav}
 <div class="profile" style="width: 600px">
 
     <h2 id="GearName"></h2>
-    <p>
-        <table id="GearDescription">
-        </table>
-    </p>
+    <p id="GearDescription"></p>
+    <h3 id="GearDistance"></h3>
     <h3>Service History</h3>
     <p>
         <table id="ServiceHistory">
@@ -220,7 +228,6 @@ ${nav}
         </table>
     </p>
     <button type="button" onclick="return get_new_service_record_info()">Add Service Record</button>
-    <h3 id="GearDistance"></h3>
 
 </div>
 

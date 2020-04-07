@@ -1,8 +1,8 @@
 // Copyright 2020 Michael J Simms
 
-function create_gear(target, gearType)
+function create_gear(root_url, gearType)
 {
-    var the_url = "${root_url}/api/1.0/create_gear";
+    var the_url = root_url + "/api/1.0/create_gear";
     var dict = [];
     var result_text = {};
     var addTimeObj = new Date(document.getElementById("startDate").value);
@@ -20,7 +20,7 @@ function create_gear(target, gearType)
 
     if (send_post_request(the_url, dict, result_text))
     {
-        window.location.replace("${root_url}/gear");
+        window.location.replace(root_url + "/gear");
     }
     else
     {
@@ -28,9 +28,9 @@ function create_gear(target, gearType)
     }
 }
 
-function update_gear(target, gearType)
+function update_gear(root_url, gearType)
 {
-    var the_url = "${root_url}/api/1.0/create_gear";
+    var the_url = root_url + "/api/1.0/update_gear";
     var dict = [];
     var result_text = {};
     var addTimeObj = new Date(document.getElementById("startDate").value);
@@ -48,7 +48,7 @@ function update_gear(target, gearType)
 
     if (send_post_request(the_url, dict, result_text))
     {
-        window.location.replace("${root_url}/gear");
+        window.location.replace(root_url + "/gear");
     }
     else
     {
@@ -56,11 +56,11 @@ function update_gear(target, gearType)
     }
 }
 
-function delete_gear(gear_id)
+function delete_gear(root_url, gear_id)
 {
     if (confirm('Are you sure you want to do this?'))
     {
-        var the_url = "${root_url}/api/1.0/delete_gear";
+        var the_url = root_url + "/api/1.0/delete_gear";
         var dict = [];
         var result_text = {};
 
@@ -68,7 +68,7 @@ function delete_gear(gear_id)
 
         if (send_post_request(the_url, dict, result_text))
         {
-            window.location.replace("${root_url}/gear");
+            window.location.replace(root_url + "/gear");
         }
         else
         {
@@ -77,7 +77,7 @@ function delete_gear(gear_id)
     }
 }
 
-function get_new_gear_info(gearType)
+function get_new_gear_info(root_url, gear_type)
 {
     var outerDiv = document.getElementById("block");
     var innerDiv = document.createElement('div');
@@ -140,18 +140,18 @@ function get_new_gear_info(gearType)
     var saveBtnText = document.createTextNode('Save');
     saveBtn.appendChild(saveBtnText);
     saveBtn.title = "Save";
-    saveBtn.addEventListener('click', function() { create_gear(this, gearType); });
+    saveBtn.addEventListener('click', function() { create_gear(root_url, gear_type); });
 
     // Add the save button to the screen.
     outerDiv.appendChild(saveBtn);
 }
 
-function get_new_bike_info()
+function get_new_bike_info(root_url)
 {
-    get_new_gear_info("bike");
+    get_new_gear_info(root_url, "bike");
 }
 
-function get_new_shoes_info()
+function get_new_shoes_info(root_url)
 {
-    get_new_gear_info("shoes");
+    get_new_gear_info(root_url, "shoes");
 }
