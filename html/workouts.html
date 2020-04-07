@@ -32,40 +32,40 @@
 <script>
     function set_preferred_long_run_day()
     {
-		var the_url = "${root_url}/api/1.0/update_settings";
-		var preferred_long_run_day = document.getElementById("preferred_long_run_day").value;
-		var dict = [];
-		var result_text = {};
+        var the_url = "${root_url}/api/1.0/update_settings";
+        var preferred_long_run_day = document.getElementById("preferred_long_run_day").value;
+        var dict = [];
+        var result_text = {};
 
-		dict.push({["preferred long run day"] : preferred_long_run_day});
-		if (send_post_request(the_url, dict, result_text))
-			alert("Preferred long run day updated!");
-		else
-			alert("An error occurred!");
+        dict.push({["preferred long run day"] : preferred_long_run_day});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Preferred long run day updated!");
+        else
+            alert("An error occurred!");
     }
 
     function set_goal_type()
     {
-		var the_url = "${root_url}/api/1.0/update_settings";
-		var goal_type = document.getElementById("goal_type").value;
-		var dict = [];
-		var result_text = {};
+        var the_url = "${root_url}/api/1.0/update_settings";
+        var goal_type = document.getElementById("goal_type").value;
+        var dict = [];
+        var result_text = {};
 
-		dict.push({["goal type"] : goal_type});
-		if (send_post_request(the_url, dict, result_text))
-			alert("Goal type updated!");
-		else
-			alert("An error occurred!");
+        dict.push({["goal type"] : goal_type});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Goal type updated!");
+        else
+            alert("An error occurred!");
     }
 
-	function generate_workout_plan()
-	{
-		var the_url = "${root_url}/api/1.0/generate_workout_plan";
-		var goal = document.getElementById("goals").value;
+    function generate_workout_plan()
+    {
+        var the_url = "${root_url}/api/1.0/generate_workout_plan";
+        var goal = document.getElementById("goals").value;
         var goalDateObj = document.getElementById("goalDate");
-		var goalDate = 0;
-		var dict = [];
-		var result_text = {};
+        var goalDate = 0;
+        var dict = [];
+        var result_text = {};
 
         if (goalDateObj.value == "")
         {
@@ -78,26 +78,26 @@
         }
         else
         {
-		    goalDate = Date.parse(goalDateObj.value) / 1000;
+            goalDate = Date.parse(goalDateObj.value) / 1000;
         }
 
-		dict.push({["goal"] : goal});
-		dict.push({["goal_date"] : goalDate});
-		if (send_post_request(the_url, dict, result_text))
-			window.location.reload();
-		else
-			alert(result_text.value);
-	}
+        dict.push({["goal"] : goal});
+        dict.push({["goal_date"] : goalDate});
+        if (send_post_request(the_url, dict, result_text))
+            window.location.reload();
+        else
+            alert(result_text.value);
+    }
 
-	$(function()
-	{
-		$('#goalDate').datepicker({
+    $(function()
+    {
+        $('#goalDate').datepicker({
             changeYear: true,
             changeMonth: true
         });
-		var n = new Date(${goal_date} * 1000);
-		document.getElementsByName('goalDate')[0].placeholder=n.toLocaleDateString();
-	});
+        var n = new Date(${goal_date} * 1000);
+        document.getElementsByName('goalDate')[0].placeholder=n.toLocaleDateString();
+    });
 
     function append_to_paces_table(table, row_name, row_value)
     {
@@ -113,7 +113,7 @@
 
     var process_run_paces = function(records)
     {
-		var paces_table = document.getElementById("RunPaces");
+        var paces_table = document.getElementById("RunPaces");
         var paces_keys = Object.keys(records)
 
         for (var key of paces_keys)
@@ -125,7 +125,7 @@
     function get_run_paces(run_prs)
     {
         var api_url = "${root_url}/api/1.0/get_running_paces?" + serialize_to_url_params(run_prs);
-		$.ajax({ type: 'GET', url: api_url, cache: false, success: process_run_paces, dataType: "json" });
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_run_paces, dataType: "json" });
     }
 
     function append_to_pr_table(table, row_name, row_value)
@@ -146,8 +146,8 @@
 
     var process_personal_records = function(records)
     {
-		var cycling_table = document.getElementById("Cycling");
-		var running_table = document.getElementById("Running");
+        var cycling_table = document.getElementById("Cycling");
+        var running_table = document.getElementById("Running");
 
         var sorted_cycling_keys = Object.keys(records.Cycling).sort()
         var sorted_running_keys = Object.keys(records.Running).sort()
@@ -173,7 +173,7 @@
     {
         var six_months = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0);
         var api_url = "${root_url}/api/1.0/list_personal_records?seconds=" + six_months;
-		$.ajax({ type: 'GET', url: api_url, cache: false, success: process_personal_records, dataType: "json" });
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_personal_records, dataType: "json" });
     }
 
     get_personal_records();
