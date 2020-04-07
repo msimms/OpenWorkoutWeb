@@ -5,7 +5,6 @@ function create_gear(target, gearType)
     var the_url = "${root_url}/api/1.0/create_gear";
     var dict = [];
     var result_text = {};
-    var innerDiv = document.getElementById("new_gear_div");
     var addTimeObj = new Date(document.getElementById("startDate").value);
     var addTime = addTimeObj.getTime() / 1000;
     var retiredTimeObj = new Date(document.getElementById("retiredDate").value);
@@ -34,7 +33,6 @@ function update_gear(target, gearType)
     var the_url = "${root_url}/api/1.0/create_gear";
     var dict = [];
     var result_text = {};
-    var innerDiv = document.getElementById("new_gear_div");
     var addTimeObj = new Date(document.getElementById("startDate").value);
     var addTime = addTimeObj.getTime() / 1000;
     var retiredTimeObj = new Date(document.getElementById("retiredDate").value);
