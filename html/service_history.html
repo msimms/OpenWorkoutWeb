@@ -165,7 +165,7 @@
     var process_gear_distance = function(records)
     {
         var gear_distance_elem = document.getElementById("GearDistance");
-        gear_distance_elem.innerText = "Distance: " + records[0][gear_name];
+        gear_distance_elem.innerText = records[0][gear_name];
     }
 
     var process_gear = function(records)
@@ -183,7 +183,21 @@
 
                 // Add the description.
                 var gear_desc_title = document.getElementById("GearDescription");
-                gear_desc_title.innerText = gear_record.description;
+                if (gear_record.description.length > 0)
+                    gear_desc_title.innerText = gear_record.description;
+                else
+                    gear_desc_title.innerText = "None";
+
+                // Add the added date.
+                var gear_desc_title = document.getElementById("GearAdded");
+                gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.add_time);
+
+                // Add the retired date.
+                var gear_desc_title = document.getElementById("GearRetired");
+                if (gear_record.retire_time > 0)
+                    gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.retire_time);
+                else
+                    gear_desc_title.innerText = "Not retired";
 
                 // Add the service records.
                 if (gear_record.hasOwnProperty('service_history'))
@@ -219,8 +233,14 @@ ${nav}
 <div class="profile" style="width: 600px">
 
     <h2 id="GearName"></h2>
+    <h3>Description</h3>
     <p id="GearDescription"></p>
-    <h3 id="GearDistance"></h3>
+    <h3>Distance</h3>
+    <p id="GearDistance"></p>
+    <h3>Date Added</h3>
+    <p id="GearAdded"></p>
+    <h3>Date Retired</h3>
+    <p id="GearRetired"></p>
     <h3>Service History</h3>
     <p>
         <table id="ServiceHistory">
