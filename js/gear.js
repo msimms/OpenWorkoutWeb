@@ -5,15 +5,15 @@ function create_gear(root_url, gearType)
     var the_url = root_url + "/api/1.0/create_gear";
     var dict = [];
     var result_text = {};
-    var addTimeObj = new Date(document.getElementById("startDate").value);
-    var addTime = addTimeObj.getTime() / 1000;
-    var retiredTimeObj = new Date(document.getElementById("retiredDate").value);
-    var retiredTime = retiredTimeObj.getTime() / 1000;
+    var add_time_obj = new Date(document.getElementById("startDate").value);
+    var add_time = add_time_obj.getTime() / 1000;
+    var retired_time_obj = new Date(document.getElementById("retiredDate").value);
+    var retiredTime = retired_time_obj.getTime() / 1000;
     var name = document.getElementById("Name").value;
     var description = document.getElementById("Description").value;
 
     dict.push({["type"] : gearType});
-    dict.push({["add_time"] : addTime});
+    dict.push({["add_time"] : add_time});
     dict.push({["retire_time"] : retiredTime});
     dict.push({["name"] : name});
     dict.push({["description"] : description});
@@ -33,15 +33,15 @@ function update_gear(root_url, gearType)
     var the_url = root_url + "/api/1.0/update_gear";
     var dict = [];
     var result_text = {};
-    var addTimeObj = new Date(document.getElementById("startDate").value);
-    var addTime = addTimeObj.getTime() / 1000;
-    var retiredTimeObj = new Date(document.getElementById("retiredDate").value);
-    var retiredTime = retiredTimeObj.getTime() / 1000;
+    var add_time_obj = new Date(document.getElementById("startDate").value);
+    var add_time = add_time_obj.getTime() / 1000;
+    var retired_time_obj = new Date(document.getElementById("retiredDate").value);
+    var retiredTime = retired_time_obj.getTime() / 1000;
     var name = document.getElementById("Name").value;
     var description = document.getElementById("Description").value;
 
     dict.push({["type"] : gearType});
-    dict.push({["add_time"] : addTime});
+    dict.push({["add_time"] : add_time});
     dict.push({["retire_time"] : retiredTime});
     dict.push({["name"] : name});
     dict.push({["description"] : description});
@@ -79,71 +79,71 @@ function delete_gear(root_url, gear_id)
 
 function get_new_gear_info(root_url, gear_type)
 {
-    var outerDiv = document.getElementById("block");
-    var innerDiv = document.createElement('div');
-    innerDiv.id = "new_gear_div";
+    var outer_div = document.getElementById("block");
+    var inner_div = document.createElement('div');
+    inner_div.id = "new_gear_div";
 
     // Remove existing items, if any.
-    while (outerDiv.firstChild)
+    while (outer_div.firstChild)
     {
-        outerDiv.removeChild(outerDiv.firstChild);
+        outer_div.removeChild(outer_div.firstChild);
     }
 
     // Determine which data fields are needed.
     var fields = ["Name", "Description"];
 
     // Add a label for the date picker.
-    var dateLabel = document.createTextNode("Date Added: ");
-    innerDiv.appendChild(dateLabel);
+    var date_label = document.createTextNode("Date Added: ");
+    inner_div.appendChild(date_label);
 
     // Add the date picker.
     var today = new Date();
-    var startDate = document.createElement('input');
-    startDate.type = "input";
-    startDate.id = "startDate";
-    startDate.className = "pickDate";
-    $(startDate).datepicker({showButtonPanel: true, defaultDate: today});
-    $(startDate).datepicker('setDate', today);
-    innerDiv.appendChild(startDate);
+    var start_date = document.createElement('input');
+    start_date.type = "input";
+    start_date.id = "startDate";
+    start_date.className = "pickDate";
+    $(start_date).datepicker({showButtonPanel: true, defaultDate: today});
+    $(start_date).datepicker('setDate', today);
+    inner_div.appendChild(start_date);
 
     // Add a line break.
     var br = document.createElement("br");
-    innerDiv.appendChild(br);
+    inner_div.appendChild(br);
 
     // Add a label for the date retired picker.
     var dateLabel = document.createTextNode("Date Retired: ");
-    innerDiv.appendChild(dateLabel);
+    inner_div.appendChild(dateLabel);
 
     // Add the date retired picker.
-    var retiredDate = document.createElement('input');
-    retiredDate.type = "input";
-    retiredDate.id = "retiredDate";
-    retiredDate.className = "pickDate";
-    $(retiredDate).datepicker({showButtonPanel: true});
-    innerDiv.appendChild(retiredDate);
+    var retired_date = document.createElement('input');
+    retired_date.type = "input";
+    retired_date.id = "retiredDate";
+    retired_date.className = "pickDate";
+    $(retired_date).datepicker({showButtonPanel: true});
+    inner_div.appendChild(retired_date);
 
     // Add a line break.
     br = document.createElement("br");
-    innerDiv.appendChild(br);
+    inner_div.appendChild(br);
 
     // Add the data fields.
     for (i = 0, len = fields.length; i < len; i++)
     {
-        add_text_entry_node(innerDiv, fields[i]);
+        add_text_entry_node(inner_div, fields[i]);
     }
 
     // Add to the div.
-    outerDiv.appendChild(innerDiv);
+    outer_div.appendChild(inner_div);
 
     // Create a save button.
-    var saveBtn = document.createElement('button');
-    var saveBtnText = document.createTextNode('Save');
-    saveBtn.appendChild(saveBtnText);
-    saveBtn.title = "Save";
-    saveBtn.addEventListener('click', function() { create_gear(root_url, gear_type); });
+    var save_btn = document.createElement('button');
+    var save_btn_text = document.createTextNode('Save');
+    save_btn.appendChild(save_btn_text);
+    save_btn.title = "Save";
+    save_btn.addEventListener('click', function() { create_gear(root_url, gear_type); });
 
     // Add the save button to the screen.
-    outerDiv.appendChild(saveBtn);
+    outer_div.appendChild(save_btn);
 }
 
 function get_new_bike_info(root_url)
