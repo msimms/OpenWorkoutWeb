@@ -21,6 +21,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous" />
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script type="text/javascript" src="${root_url}/js/gear.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 
@@ -30,93 +31,98 @@
 <script>
     var gear_name = ""
 
-	function create_service_record(target)
-	{
-		var the_url = "${root_url}/api/1.0/create_service_record";
-		var dict = [];
-		var result_text = {};
-		var innerDiv = document.getElementById("new_gear_div");
-		var serviceTimeObj = new Date(document.getElementById("startDate").value);
-		var serviceTime = serviceTimeObj.getTime() / 1000;
-		var description = document.getElementById("Description").value;
+    function service_sort(a, b)
+    {
+        return a.time < b.time ? -1 : 1;
+    }
 
-		dict.push({["gear_id"] : "${gear_id}"});
-		dict.push({["date"] : serviceTime});
-		dict.push({["description"] : description});
+    function create_service_record(target)
+    {
+        var the_url = "${root_url}/api/1.0/create_service_record";
+        var dict = [];
+        var result_text = {};
+        var innerDiv = document.getElementById("new_gear_div");
+        var serviceTimeObj = new Date(document.getElementById("startDate").value);
+        var serviceTime = serviceTimeObj.getTime() / 1000;
+        var description = document.getElementById("Description").value;
 
-		if (send_post_request(the_url, dict, result_text))
-		{
-			window.location.replace("${root_url}/service_history/${gear_id}");
-		}
-		else
-		{
-			alert(result_text.value);
-		}
-	}
+        dict.push({["gear_id"] : "${gear_id}"});
+        dict.push({["date"] : serviceTime});
+        dict.push({["description"] : description});
+
+        if (send_post_request(the_url, dict, result_text))
+        {
+            window.location.replace("${root_url}/service_history/${gear_id}");
+        }
+        else
+        {
+            alert(result_text.value);
+        }
+    }
 
     function get_new_service_record_info()
     {
-		var outerDiv = document.getElementById("block");
-		var innerDiv = document.createElement('div');
-		innerDiv.id = "new_gear_div";
+        var outerDiv = document.getElementById("block");
+        var innerDiv = document.createElement('div');
+        innerDiv.id = "new_gear_div";
 
-		// Remove existing items, if any.
-		while (outerDiv.firstChild)
-		{
-			outerDiv.removeChild(outerDiv.firstChild);
-		}
+        // Remove existing items, if any.
+        while (outerDiv.firstChild)
+        {
+            outerDiv.removeChild(outerDiv.firstChild);
+        }
 
-		// Determine which data fields are needed.
-		var fields = ["Description"];
+        // Determine which data fields are needed.
+        var fields = ["Description"];
 
-		// Add a label for the date picker.
-		var dateLabel = document.createTextNode("Date: ");
-		innerDiv.appendChild(dateLabel);
+        // Add a label for the date picker.
+        var dateLabel = document.createTextNode("Date: ");
+        innerDiv.appendChild(dateLabel);
 
-		// Add the date picker.
-		var today = new Date();
-		var startDate = document.createElement('input');
-		startDate.type = "input";
-		startDate.id = "startDate";
-		startDate.className = "pickDate";
-		$(startDate).datepicker({showButtonPanel: true, defaultDate: today});
-		$(startDate).datepicker('setDate', today);
-		innerDiv.appendChild(startDate);
+        // Add the date picker.
+        var today = new Date();
+        var startDate = document.createElement('input');
+        startDate.type = "input";
+        startDate.id = "startDate";
+        startDate.className = "pickDate";
+        $(startDate).datepicker({showButtonPanel: true, defaultDate: today});
+        $(startDate).datepicker('setDate', today);
+        innerDiv.appendChild(startDate);
 
-		// Add a line break.
-		var br = document.createElement("br");
-		innerDiv.appendChild(br);
+        // Add a line break.
+        var br = document.createElement("br");
+        innerDiv.appendChild(br);
 
-		// Add the data fields.
-		for (i = 0, len = fields.length; i < len; i++)
-		{
-			add_text_entry_node(innerDiv, fields[i]);
-		}
+        // Add the data fields.
+        for (i = 0, len = fields.length; i < len; i++)
+        {
+            add_text_entry_node(innerDiv, fields[i]);
+        }
 
-		// Add to the div.
-		outerDiv.appendChild(innerDiv);
+        // Add to the div.
+        outerDiv.appendChild(innerDiv);
 
-		// Create a save button.
-		var saveBtn = document.createElement('button');
-		var saveBtnText = document.createTextNode('Save');
-		saveBtn.appendChild(saveBtnText);
-		saveBtn.title = "Save";
-		saveBtn.addEventListener('click', function() { create_service_record(this); });
+        // Create a save button.
+        var saveBtn = document.createElement('button');
+        var saveBtnText = document.createTextNode('Save');
+        saveBtn.appendChild(saveBtnText);
+        saveBtn.title = "Save";
+        saveBtn.addEventListener('click', function() { create_service_record(this); });
 
-		// Add the save button to the screen.
-		outerDiv.appendChild(saveBtn);
+        // Add the save button to the screen.
+        outerDiv.appendChild(saveBtn);
 
-		// Add a line break.
-		var hr = document.createElement("hr");
-		outerDiv.appendChild(hr);
+        // Add a line break.
+        var hr = document.createElement("hr");
+        outerDiv.appendChild(hr);
 
-		return false;
-	}
+        return false;
+    }
 
     function delete_service_record(service_id)
     {
-		if (confirm('Are you sure you want to do this?'))
-		{
+        if (confirm('Are you sure you want to do this?'))
+        {
             var the_url = "${root_url}/api/1.0/delete_service_record";
             var dict = [];
             var result_text = {};
@@ -159,33 +165,59 @@
     var process_gear_distance = function(records)
     {
         var gear_distance_elem = document.getElementById("GearDistance");
-        gear_distance_elem.innerText = "Distance: " + records[0][gear_name];
+        gear_distance_elem.innerText = records[0][gear_name];
     }
 
     var process_gear = function(records)
     {
-		var history_table = document.getElementById("ServiceHistory");
+        var history_table = document.getElementById("ServiceHistory");
 
         for (var gear_record of records)
         {
             if (gear_record.gear_id == "${gear_id}")
             {
-        		var gear_name_title = document.getElementById("GearName");
+                // Add the title.
+                var gear_name_title = document.getElementById("GearName");
                 gear_name = gear_record.name
                 gear_name_title.innerText = gear_name;
-        		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_distance_for_tag?tag=" + gear_name, cache: false, success: process_gear_distance, dataType: "json" });
 
-                for (var service_record of gear_record.service_history)
+                // Add the description.
+                var gear_desc_title = document.getElementById("GearDescription");
+                if (gear_record.description.length > 0)
+                    gear_desc_title.innerText = gear_record.description;
+                else
+                    gear_desc_title.innerText = "None";
+
+                // Add the added date.
+                var gear_desc_title = document.getElementById("GearAdded");
+                gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.add_time);
+
+                // Add the retired date.
+                var gear_desc_title = document.getElementById("GearRetired");
+                if (gear_record.retire_time > 0)
+                    gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.retire_time);
+                else
+                    gear_desc_title.innerText = "Not retired";
+
+                // Add the service records.
+                if (gear_record.hasOwnProperty('service_history'))
                 {
-                    append_to_service_history_table(history_table, service_record.date, service_record.description, service_record.service_id);
+                    var sorted_service_records = gear_record.service_history.sort(service_sort)
+                    for (var service_record of sorted_service_records)
+                    {
+                        append_to_service_history_table(history_table, service_record.date, service_record.description, service_record.service_id);
+                    }
                 }
+
+                // Request the distance calculation for this item.
+                $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_distance_for_tag?tag=" + gear_name, cache: false, success: process_gear_distance, dataType: "json" });
             }
         }
     }
 
     function get_gear()
     {
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_gear", cache: false, success: process_gear, dataType: "json" });
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_gear", cache: false, success: process_gear, dataType: "json" });
     }
 
     get_gear();
@@ -201,6 +233,14 @@ ${nav}
 <div class="profile" style="width: 600px">
 
     <h2 id="GearName"></h2>
+    <h3>Description</h3>
+    <p id="GearDescription"></p>
+    <h3>Distance</h3>
+    <p id="GearDistance"></p>
+    <h3>Date Added</h3>
+    <p id="GearAdded"></p>
+    <h3>Date Retired</h3>
+    <p id="GearRetired"></p>
     <h3>Service History</h3>
     <p>
         <table id="ServiceHistory">
@@ -208,7 +248,6 @@ ${nav}
         </table>
     </p>
     <button type="button" onclick="return get_new_service_record_info()">Add Service Record</button>
-    <h3 id="GearDistance"></h3>
 
 </div>
 

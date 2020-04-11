@@ -29,7 +29,7 @@ from unidecode import unidecode
 hex = "[a-fA-F0-9]"
 uuid = re.compile(hex + "{8}-" + hex + "{4}-" + hex + "{4}-" + hex + "{4}-" + hex + "{12}")
 alphanums = re.compile(r"[\w-]*$")
-safe = re.compile(r"[\w_ \(\)%',/.+-]*$")
+safe = re.compile(r"[\w_ \(\)%'&,/.+-]*$")
 email_addr = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -87,8 +87,8 @@ def is_hex_str(test_str):
         pass
     return False
 
-def is_valid(test_str):
-    """Tests the input to see that it only contains safe characters."""
+def is_valid_decoded_str(test_str):
+    """Tests the input to see that it only contains safe characters for a string that has already been URL decoded."""
     try:
         if isinstance(test_str, str):
             if re.match(safe, test_str) is not None:

@@ -73,16 +73,23 @@
 	{
 		if (confirm('Are you sure you want to do this?'))
 		{
-			var the_url = "${root_url}/api/1.0/delete_gear";
+			var the_url = "${root_url}/api/1.0/delete_users_gear";
 			var pword = document.getElementById("password").value;
-			var dict = [];
-			var result_text = {};
+            if (pword.length > 0)
+            {
+                var dict = [];
+                var result_text = {};
 
-			dict.push({["password"] : pword});
-			if (send_post_request(the_url, dict, result_text))
-				window.location.replace("${root_url}");
-			else
-				alert("An error occurred!");
+                dict.push({["password"] : pword});
+                if (send_post_request(the_url, dict, result_text))
+                    window.location.replace("${root_url}");
+                else
+                    alert("An error occurred!");
+            }
+            else
+            {
+                alert("Please enter your password.");
+            }
 		}
 	}
 
@@ -90,16 +97,23 @@
 	{
 		if (confirm('Are you sure you want to do this?'))
 		{
-			var the_url = "${root_url}/api/1.0/delete_activities";
+			var the_url = "${root_url}/api/1.0/delete_users_activities";
 			var pword = document.getElementById("password").value;
-			var dict = [];
-			var result_text = {};
+            if (pword.length > 0)
+            {
+                var dict = [];
+                var result_text = {};
 
-			dict.push({["password"] : pword});
-			if (send_post_request(the_url, dict, result_text))
-				window.location.replace("${root_url}");
-			else
-				alert("An error occurred!");
+                dict.push({["password"] : pword});
+                if (send_post_request(the_url, dict, result_text))
+                    window.location.replace("${root_url}");
+                else
+                    alert("An error occurred!");
+            }
+            else
+            {
+                alert("Please enter your password.");
+            }
 		}
 	}
 
@@ -109,14 +123,21 @@
 		{
 			var the_url = "${root_url}/api/1.0/delete_user";
 			var pword = document.getElementById("password").value;
-			var dict = [];
-			var result_text = {};
+            if (pword.length > 0)
+            {
+                var dict = [];
+                var result_text = {};
 
-			dict.push({["password"] : pword});
-			if (send_post_request(the_url, dict, result_text))
-				window.location.replace("${root_url}");
-			else
-				alert("An error occurred!");
+                dict.push({["password"] : pword});
+                if (send_post_request(the_url, dict, result_text))
+                    window.location.replace("${root_url}");
+                else
+                    alert("An error occurred!");
+            }
+            else
+            {
+                alert("Please enter your password.");
+            }
 		}
 	}
 
@@ -145,7 +166,7 @@ ${unit_options}
 	<h2>Email</h2>
 	<p>New Email Address: <input type="text" id="new_email"><br></p>
 	<button type="button" onclick="return update_email()">Update</button>
-	<p>Note: Your email address is only used for login authentication.</p>
+	<p><b>Note:</b> Your email address is only used for login authentication.</p>
 	<hr>
 	<h2>Password</h2>
 	<p>Current Password: <input type="password" id="current_password"><br></p>
@@ -155,10 +176,10 @@ ${unit_options}
 	<hr>
 	<h2>Delete</h2>
 	<p>Password: <input type="password" id="password"><br></p>
-	<button type="button" onclick="return delete_user()" style="color:red">Delete My Gear</button><br>
-	<button type="button" onclick="return delete_user()" style="color:red">Delete My Activities</button><br>
+	<button type="button" onclick="return delete_gear()" style="color:red">Delete My Gear</button><br>
+	<button type="button" onclick="return delete_activities()" style="color:red">Delete My Activities</button><br>
 	<button type="button" onclick="return delete_user()" style="color:red">Delete My Account and All My Data</button><br>
-	<p>Note: This cannot be undone.</p>
+	<p><b>Note:</b> This cannot be undone.</p>
 </div>
 
 </body>
