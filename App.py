@@ -191,20 +191,6 @@ class App(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, page_stats=page_stats_str, total_activities=total_activities_str, total_users=total_users_str)
 
-    @staticmethod
-    def timestamp_format():
-        """The user's desired timestamp format."""
-        return "%Y/%m/%d %H:%M:%S"
-
-    @staticmethod
-    def timestamp_code_to_str(ts_code):
-        """Converts from unix timestamp to human-readable"""
-        try:
-            return datetime.datetime.fromtimestamp(ts_code).strftime(App.timestamp_format())
-        except:
-            pass
-        return "-"
-
     def render_simple_page(self, template_file_name):
         """Renders a basic page from the specified template. This exists because a lot of pages only need this to be rendered."""
 
