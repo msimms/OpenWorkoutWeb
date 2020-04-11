@@ -653,6 +653,22 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def delete_user_personal_records(self, user_id):
+        """Create method for a user's personal record."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_user_personal_records.__name__ + ": Unexpected empty object: user_id")
+            return False
+
+        try:
+            # Delete the user's records collection.
+            deleted_result = self.records_collection.delete_one({Keys.RECORDS_USER_ID: user_id})
+            if deleted_result is not None:
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def create_activity_bests(self, user_id, activity_id, activity_type, activity_time, bests):
         """Create method for a user's personal records for a given activity."""
         if user_id is None:

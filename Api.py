@@ -515,6 +515,10 @@ class Api(object):
 
         # Delete all the user's activities.
         self.data_mgr.delete_user_activities(self.user_id)
+
+        # Delete all the user's personal records.
+        self.data_mgr.delete_user_personal_records(self.user_id)
+
         return True, ""
 
     def handle_delete_user(self, values):

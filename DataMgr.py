@@ -794,6 +794,14 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_user_personal_records(user_id)
 
+    def delete_user_personal_records(self, user_id):
+        """Delete method for a user's personal record."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.delete_user_personal_records(user_id)
+
     def create_workout(self, user_id, workout_obj):
         """Create method for a workout."""
         if self.database is None:
