@@ -69,7 +69,7 @@
         btn.appendChild(btn_txt);
         btn.title = "Delete";
         btn.style = "color:red";
-        btn.addEventListener('click', function() { delete_gear(gear_id); });
+        btn.addEventListener('click', function() { delete_gear("${root_url}", gear_id); });
         cell = new_row.insertCell();
         cell.appendChild(btn);
     }
