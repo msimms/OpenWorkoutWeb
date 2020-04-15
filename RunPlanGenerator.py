@@ -51,7 +51,12 @@ class RunPlanGenerator(object):
         long_run_pace = inputs[Keys.LONG_RUN_PACE]
         easy_run_pace = inputs[Keys.EASY_RUN_PACE]
         longest_run_in_four_weeks = inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY]
-        max_run_distance = goal_distance * 1.1
+
+        # Compute the longest run needed to accomplish the goal.
+        # This equation was derived by playing with trendlines in Apple Numbers.
+        # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.
+        max_run_distance = -0.002 * (goal_distance * goal_distance) + (0.7 * goal_distance) + 4.4
+        max_run_distance = max_run_distance * 1000 # Convert from km to meters
 
         # Handle situation in which the user hasn't run in four weeks
         if longest_run_in_four_weeks is None:
@@ -67,9 +72,10 @@ class RunPlanGenerator(object):
 
         workouts = []
 
+        # The user cares about speed as well as completing the distance.
         if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower():
 
-            # Speed session. Start with four intervals, increase the number of intervals as we get closer to the goal.
+            # Add a speed session. Start with four intervals, increase the number of intervals as we get closer to the goal.
             interval_distance = RunPlanGenerator.nearest_interval_distance(longest_run_in_four_weeks / 10)
             speed_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_RUN, self.user_id)
             speed_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
@@ -79,16 +85,17 @@ class RunPlanGenerator(object):
             speed_run_workout.needs_rest_day_afterwards = True
             workouts.append(speed_run_workout)
 
+        # The user only cares about completing the distance.
         else:
 
-            # Easy run.
+            # Add an easy run.
             interval_distance = RunPlanGenerator.nearest_interval_distance(longest_run_in_four_weeks / 5)
             easy_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RUN, self.user_id)
             easy_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
             easy_run_workout.add_interval(1, interval_distance, easy_run_pace, 0, 0)
             workouts.append(easy_run_workout)
 
-        # Tempo run. Run should be 20-30 minutes in duration.
+        # Add a tempo run. Run should be 20-30 minutes in duration.
         interval_distance = RunPlanGenerator.nearest_interval_distance(30.0 * tempo_run_pace)
         tempo_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TEMPO_RUN, self.user_id)
         tempo_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
@@ -97,7 +104,7 @@ class RunPlanGenerator(object):
         tempo_run_workout.add_cooldown(5 * 60)
         workouts.append(tempo_run_workout)
 
-        # Long run
+        # Add a long run
         long_run_distance = longest_run_in_four_weeks * 1.1
         if long_run_distance > max_run_distance:
             long_run_distance = max_run_distance 
