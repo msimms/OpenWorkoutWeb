@@ -92,6 +92,10 @@ class WorkoutPlanGenerator(object):
 
         # Fetch the detail of the user's goal.
         goal, goal_date = self.data_mgr.retrieve_user_goal(user_id)
+        if goal is None:
+            raise Exception("A goal has not been defined.")
+        if goal_date is None:
+            raise Exception("A goal date has not been defined.")
         if goal is not Keys.GOAL_FITNESS_KEY:
 
             # Sanity-check the goal date.

@@ -746,7 +746,11 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         goal = self.database.retrieve_user_setting(user_id, Keys.GOAL_KEY)
-        goal_date = int(self.database.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY))
+        goal_date_str = self.database.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY)
+        if goal_date_str is not None:
+            goal_date = int(goal_date_str)
+        else:
+            goal_date = None
         return goal, goal_date
 
     def update_bests_for_activity(self, user_id, activity_id, activity_type, activity_time, bests):
