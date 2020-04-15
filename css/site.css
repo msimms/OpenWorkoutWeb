@@ -105,6 +105,8 @@ tr {
 	opacity: 0.7;
 }
 
+.device_list tr:first-child { font-weight: bold }
+
 .analysis table {
 	font-family: arial, sans-serif;
 	background: linear-gradient(to left, #FFFFFF , #FFFFFF);
