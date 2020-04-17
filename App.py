@@ -900,7 +900,8 @@ class App(object):
         selected_activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
         if Keys.ACTIVITY_TYPE_KEY in activity:
             selected_activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
-        all_activity_types = Keys.FOOT_BASED_ACTIVITIES
+        all_activity_types = []
+        all_activity_types.extend(Keys.FOOT_BASED_ACTIVITIES)
         all_activity_types.extend(Keys.BIKE_BASED_ACTIVITIES)
         all_activity_types.extend(Keys.SWIMMING_ACTIVITIES)
         all_activity_types.append(Keys.TYPE_UNSPECIFIED_ACTIVITY)
