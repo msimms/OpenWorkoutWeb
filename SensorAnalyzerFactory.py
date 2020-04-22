@@ -60,7 +60,7 @@ def create_with_data(sensor_type, data, activity_type, activity_user_id, data_mg
                     time = int(datum.keys()[0])
                     value = float(datum.values()[0])
                 else:
-                    time = int(list(datum.keys())[0])
+                    time = int(float(list(datum.keys())[0]))
                     value = float(list(datum.values())[0])
                 sensor_analyzer.append_sensor_value(time, value)
     return sensor_analyzer
