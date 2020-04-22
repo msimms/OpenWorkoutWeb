@@ -67,7 +67,7 @@ class ActivityHasher(object):
                             time = str(int(datum.keys()[0])).encode('utf-8')
                             value = self.floatToStr(float(datum.values()[0]))
                         else:
-                            time = str(int(list(datum.keys())[0])).encode('utf-8')
+                            time = str(float(list(datum.keys())[0])).encode('utf-8')
                             value = self.floatToStr(float(list(datum.values())[0]))
 
                         h.update(time)
