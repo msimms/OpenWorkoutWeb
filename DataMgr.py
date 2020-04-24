@@ -634,12 +634,15 @@ class DataMgr(Importer.ActivityWriter):
         tags.append('Race')
         tags.append('Commute')
         tags.append('Workout')
+        tags.append('Interval Workout')
+        tags.append('Brick Workout')
         tags.append('Hot')
         tags.append('Humid')
         tags.append('Cold')
         tags.append('Rainy')
         tags.append('Windy')
         tags.append('Virtual')
+        tags.append('Group Activity')
         return tags
 
     def list_tags_for_activity_type_and_user(self, user_id, activity_type):
