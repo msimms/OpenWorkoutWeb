@@ -2094,16 +2094,24 @@ class MongoDatabase(Database.Database):
 
             # If the user's tasks document was found.
             if user_tasks is not None:
+
+                # Get the list of existing tasks.
                 deferred_tasks = []
                 if Keys.TASKS_KEY in user_tasks:
                     deferred_tasks = user_tasks[Keys.TASKS_KEY]
+
+                # Create an entry for the new task.
                 task = {}
                 task[Keys.TASK_ID_KEY] = task_id
                 task[Keys.TASK_TYPE_KEY] = task_type
                 if details is not None:
                     task[Keys.TASK_DETAILS_KEY] = details
+
+                # Append it to the list.
                 deferred_tasks.append(task)
                 user_tasks[Keys.TASKS_KEY] = deferred_tasks
+
+                # Update the database.
                 self.tasks_collection.save(user_tasks)
                 return True
         except:
@@ -2143,18 +2151,15 @@ class MongoDatabase(Database.Database):
             # Find the user's tasks document.
             user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
 
-            # If the user's tasks document was found.
-            if user_tasks is not None:
+            # If the user's tasks document was found and there were deferred tasks in it.
+            if user_tasks is not None and Keys.TASKS_KEY in user_tasks:
 
-                # Are there any deferred tasks?
-                if Keys.TASKS_KEY in user_tasks:
-
-                    # Copy out the tasks of the specified type.
-                    tasks = []
-                    for task in user_tasks[Keys.TASKS_KEY]:
-                        if Keys.TASK_TYPE_KEY == task_type:
-                            tasks.append(task)
-                    return tasks
+                # Copy out the tasks of the specified type.
+                tasks = []
+                for task in user_tasks[Keys.TASKS_KEY]:
+                    if Keys.TASK_TYPE_KEY == task_type:
+                        tasks.append(task)
+                return tasks
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2171,9 +2176,8 @@ class MongoDatabase(Database.Database):
             user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
 
             # If the user's tasks document was found.
-            if user_tasks is not None:
-                if Keys.TASKS_KEY in user_tasks:
-                    return user_tasks[Keys.TASKS_KEY]
+            if user_tasks is not None and Keys.TASKS_KEY in user_tasks:
+                return user_tasks[Keys.TASKS_KEY]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

@@ -1303,6 +1303,9 @@ class App(object):
 
         tasks_str = ""
         tasks = self.data_mgr.retrieve_deferred_import_tasks(user_id)
+        if len(tasks) == 0:
+            raise RedirectException(DEFAULT_LOGGED_IN_URL)
+
         for task in tasks:
             tasks_str += "<td>"
             if Keys.TASK_ID_KEY in task:
