@@ -391,22 +391,6 @@ class StraenWeb(object):
 
     @cherrypy.expose
     @require()
-    def upload(self, ufile):
-        """Processes an upload request."""
-        try:
-            return self.app.upload(ufile)
-        except App.RedirectException as e:
-            raise cherrypy.HTTPRedirect(e.url)
-        except cherrypy.HTTPRedirect as e:
-            raise e
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.upload.__name__)
-        return self.error()
-
-    @cherrypy.expose
-    @require()
     def manual_entry(self, activity_type):
         """Called when the user selects an activity type, indicating they want to make a manual data entry."""
         try:

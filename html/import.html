@@ -143,53 +143,6 @@
 
 		return false;
 	}
-
-	function upload_file(fileObj)
-	{
-		var reader = new FileReader();
-
-		reader.onload = function(e)
-		{
-            var the_url = "${root_url}/api/1.0/upload_activity_file";
-            var dict = [];
-            var result_text = {};
-
-			text = reader.result;
-
-			dict.push({["uploaded_file_name"] : fileObj.name});
-			dict.push({["uploaded_file_data"] : text});
-
-			if (send_post_request(the_url, dict, result_text))
-			{
-				window.location.replace("${root_url}/task_status");
-			}
-			else
-			{
-				alert(result_text.value);
-			}
-		}
-		reader.readAsText(fileObj);
-	}
-
-	function upload_file_no_ui(fileObj)
-	{
-		var reader = new FileReader();
-
-		reader.onload = function(e)
-		{
-            var the_url = "${root_url}/api/1.0/upload_activity_file";
-            var dict = [];
-            var result_text = {};
-
-			text = reader.result;
-
-			dict.push({["uploaded_file_name"] : fileObj.name});
-			dict.push({["uploaded_file_data"] : text});
-
-			send_post_request(the_url, dict, result_text)
-		}
-		reader.readAsText(fileObj);
-	}
 </script>
 
 <section class="nav">
@@ -197,40 +150,84 @@ ${nav}
 </section>
 
 <div class="import" style="width: 600px">
-	<h2>Import a File</h2>
-	<form action="${root_url}/upload" method="post" enctype="multipart/form-data">
-		Select files: <input type="file" name="ufile" multiple><br>
-		<input type="submit" value="Upload" class="modern_button">
-	</form>
+	<h2>Import File(s)</h2>
 
-	<hr>
-
-	<h2>Import an Entire Directory</h2>
-	<input type="file" id="picker" name="fileList" webkitdirectory multiple><br>
-	<button type="button" onclick="return upload_dir()">Upload</button>
-	<ul id="listing"></ul>
+	<input type="file" id="picker" name="file_list" webkitdirectory multiple><br>
+    <table class="import" id="upload_table">
+    </table>
+	<button type="button" onclick="return upload_dir()">Upload</button><br>
 
 	<script>
 		let picker = document.getElementById('picker');
-		let listing = document.getElementById('listing');
 		let file_list = [];
+
+        function update_file_status(file_name, status_text)
+        {
+            let upload_table = document.getElementById("upload_table");
+
+            for (var i = 0, row; row = upload_table.rows[i]; i++)
+            {
+                if (row.cells[0].innerText.localeCompare(file_name) == 0)
+                {
+                    row.cells[1].innerText = status_text;
+                    break;
+                }
+            }
+        }
+
+        function upload_file_no_ui(file_obj)
+        {
+            if (file_obj.name.split('.').pop() == "fit")
+            {
+                alert("FIT files are not supported at this time.");
+                return;
+            }
+
+            var reader = new FileReader();
+
+            reader.onerror = function(event)
+            {
+                reader.abort();
+            };
+            reader.onload = function(e)
+            {
+                var the_url = "${root_url}/api/1.0/upload_activity_file";
+                var dict = [];
+                var result_text = {};
+
+                dict.push({["uploaded_file_name"] : file_obj.name});
+                dict.push({["uploaded_file_data"] : reader.result});
+
+                if (send_post_request(the_url, dict, result_text))
+                    update_file_status(file_obj.name, "Uploaded");
+                else
+                    alert(result_text.value);
+            }
+            reader.readAsText(file_obj);
+        }
 
 		function upload_dir()
 		{
-			var arrayLength = file_list.length;
-			for (var i = 0; i < arrayLength; i++)
+			for (var i = 0; i < file_list.length; i++)
 			{
 				upload_file_no_ui(file_list[i]);
 			}
-            window.location.replace("${root_url}/task_status");
+//            window.location.replace("${root_url}/task_status");
 		}
 
 		picker.addEventListener('change', e => {
+            let upload_table = document.getElementById("upload_table");
+
 			for (let file of Array.from(e.target.files))
 			{
-				let item = document.createElement('li');
-				item.textContent = file.webkitRelativePath;
-				listing.appendChild(item);
+                let new_row = upload_table.insertRow();
+                let cell = new_row.insertCell();
+                let text = document.createTextNode(file.name);
+                cell.appendChild(text);
+                cell = new_row.insertCell();
+                text = document.createTextNode("Waiting");
+                cell.appendChild(text);
+
 				file_list.push(file);
 			};
 		});
@@ -239,6 +236,7 @@ ${nav}
 	<hr>
 
 	<h2>Manual Entry</h2>
+
 	<form onChange="return show_manual_entry_options()" method="post" enctype="multipart/form-data">
 		<select id="activity_type" name="activity_type">
 ${activity_type_list}

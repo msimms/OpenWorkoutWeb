@@ -107,6 +107,15 @@ tr {
 
 .device_list tr:first-child { font-weight: bold }
 
+.import table {
+	font-family: arial, sans-serif;
+	background: linear-gradient(to left, #FFFFFF , #DDDDDD);
+	margin-top: 16px;
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+}
+
 .analysis table {
 	font-family: arial, sans-serif;
 	background: linear-gradient(to left, #FFFFFF , #FFFFFF);

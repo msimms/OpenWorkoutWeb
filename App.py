@@ -1227,32 +1227,6 @@ class App(object):
         return self.render_simple_page('device_list.html')
 
     @statistics
-    def upload(self, ufile):
-        """Processes an request from the upload form."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, _ = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Parse the file and store it's contents in the database.
-        if type(ufile) == list:
-            for ufile_item in ufile:
-                file_data = ufile_item.file.read()
-                self.data_mgr.import_file(username, user_id, file_data, ufile_item.filename)
-        else:
-            file_data = ufile.file.read()
-            self.data_mgr.import_file(username, user_id, file_data, ufile.filename)
-
-        raise RedirectException(TASK_STATUS_URL)
-
-    @statistics
     def manual_entry(self, activity_type):
         """Called when the user selects an activity type, indicatig they want to make a manual data entry."""
         print(activity_type)
