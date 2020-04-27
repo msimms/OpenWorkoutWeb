@@ -105,7 +105,7 @@ class WorkoutPlanGenerator(object):
             # Convert the goal time into weeks.
             weeks_until_goal = (goal_date - now) / (7 * 24 * 60 * 60)
 
-        # Is the user interesting in just completion, or do they care about pace?
+        # Is the user interested in just completion, or do they care about pace/speed?
         goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
 
         # This will trigger the callback for each of the user's activities.
