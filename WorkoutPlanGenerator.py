@@ -157,6 +157,9 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
 
+        # Adds the goal distances to the inputs.
+        inputs = WorkoutPlanGenerator.calculate_goal_distances(inputs)
+
         print("Inputs: " + str(inputs))
         return inputs
 
@@ -168,9 +171,6 @@ class WorkoutPlanGenerator(object):
         swim_planner = SwimPlanGenerator.SwimPlanGenerator(user_id)
         bike_planner = BikePlanGenerator.BikePlanGenerator(user_id)
         run_planner = RunPlanGenerator.RunPlanGenerator(user_id)
-
-        # Adds the goal distances to the inputs.
-        inputs = WorkoutPlanGenerator.calculate_goal_distances(inputs)
 
         # Generate the swim workouts.
         if not swim_planner.is_workout_plan_possible(inputs):

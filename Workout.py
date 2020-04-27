@@ -195,12 +195,15 @@ class Workout(object):
 
         # Add each interval.
         for interval in self.intervals:
+            num_repeats = interval[Keys.INTERVAL_REPEAT_KEY]
             interval_meters = interval[Keys.INTERVAL_DISTANCE_KEY]
             interval_pace_minute = interval[Keys.INTERVAL_PACE_KEY]
             recovery_meters = interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY]
             recovery_pace_minute = interval[Keys.INTERVAL_RECOVERY_PACE_KEY]
 
             result += "Interval: "
+            result += str(num_repeats)
+            result += " x "
             result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
             result += " at "
             result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
@@ -218,12 +221,16 @@ class Workout(object):
             result += " seconds.\n"
 
         # Add an string that describes how this workout fits into the big picture.
-        if self.type == Keys.WORKOUT_TYPE_INTERVAL_SESSION:
+        if self.type == Keys.WORKOUT_TYPE_SPEED_RUN:
+            result += "Purpose: Speed sessions get you used to running at faster paces.\n"
+        elif self.type == Keys.WORKOUT_TYPE_INTERVAL_SESSION:
             result += "Purpose: Interval sessions are designed to build speed and strength.\n"
         elif self.type == Keys.WORKOUT_TYPE_TEMPO_RUN:
             result += "Purpose: Tempo runs build a combination of speed and endurance. They should be performed at a pace you can hold for roughly one hour.\n"
         elif self.type == Keys.WORKOUT_TYPE_EASY_RUN:
             result += "Purpose: Easy runs build aerobic capacity while keeping the wear and tear on the body to a minimum.\n"
+        elif self.type == Keys.WORKOUT_TYPE_LONG_RUN:
+            result += "Purpose: Long runs build develop endurance.\n"
 
         return result
 
