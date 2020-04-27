@@ -64,7 +64,7 @@ class ActivityHasher(object):
                 else:
                     for datum in self.activity[sensor_type]:
                         if sys.version_info[0] < 3:
-                            time = str(int(datum.keys()[0])).encode('utf-8')
+                            time = str(float(datum.keys()[0])).encode('utf-8')
                             value = self.floatToStr(float(datum.values()[0]))
                         else:
                             time = str(float(list(datum.keys())[0])).encode('utf-8')
