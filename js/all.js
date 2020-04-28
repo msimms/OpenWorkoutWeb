@@ -1,5 +1,13 @@
 // Copyright 2018 Michael J Simms
 
+function set_background_style(background_id)
+{
+    var section = document.getElementById(background_id);
+    var img_index = Math.floor(Math.random() * 6) + 2;
+    var img_str = 'url("../images/main_background' + img_index + '.jpg")';
+    section.style.backgroundImage = img_str;
+}
+
 function unix_time_to_local_string(unix_time)
 {
 	var date = new Date(unix_time * 1000);

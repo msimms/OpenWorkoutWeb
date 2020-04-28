@@ -17,15 +17,15 @@
 
 <body>
 
-<section class="loginbackground">
-	<section class="loginform cf">
-		<form name="login" action="" method="get" accept-charset="utf-8">
-			<ul>
-				<label for="username"><b>${error}</b></label>
-			</ul>
-		</form>
-	</section>
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+
+<section class="errorbackground" id="errorbackground">
+    <label><b>${error}</b></label>
 </section>
+
+<script>
+    set_background_style("errorbackground");
+</script>
 
 </body>
 
