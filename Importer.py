@@ -78,21 +78,26 @@ class Importer(object):
         self.activity_writer = activity_writer
 
     @staticmethod
-    def normalize_activity_type(activity_type):
+    def normalize_activity_type(activity_type, file_name):
         """Takes the various activity names that appear in GPX and TCX files and normalizes to the ones used in this app."""
         lower_activity_type = activity_type.lower()
+        file_name_parts = file_name.lower().split(' ')
+
         if lower_activity_type == Keys.TYPE_RUNNING_KEY.lower():
+            if 'zwift' in file_name_parts:
+                return Keys.TYPE_VIRTUAL_RUNNING_KEY
             return Keys.TYPE_RUNNING_KEY
         elif lower_activity_type == Keys.TYPE_HIKING_KEY.lower():
             return Keys.TYPE_HIKING_KEY
         elif lower_activity_type == Keys.TYPE_WALKING_KEY.lower():
             return Keys.TYPE_WALKING_KEY
-        elif lower_activity_type == Keys.TYPE_CYCLING_KEY.lower():
-            return Keys.TYPE_CYCLING_KEY
-        elif lower_activity_type == 'biking':
+        elif lower_activity_type == Keys.TYPE_CYCLING_KEY.lower() or lower_activity_type == 'biking':
+            if 'zwift' in file_name_parts:
+                return Keys.TYPE_VIRTUAL_CYCLING_KEY
             return Keys.TYPE_CYCLING_KEY
         elif lower_activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY.lower():
             return Keys.TYPE_OPEN_WATER_SWIMMING_KEY
+
         return Keys.TYPE_UNSPECIFIED_ACTIVITY
 
     def import_gpx_file(self, username, user_id, file_name):
@@ -107,7 +112,7 @@ class Importer(object):
             # Figure out the sport type.
             sport_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
             if len(gpx.tracks) > 0:
-                sport_type = Importer.normalize_activity_type(gpx.tracks[0].type)
+                sport_type = Importer.normalize_activity_type(gpx.tracks[0].type, file_name)
 
             # Find the start timestamp.
             start_time_tuple = gpx.time.timetuple()
@@ -223,8 +228,10 @@ class Importer(object):
         # Since we don't have anything else, use the file name as the name of the activity.
         activity_name = os.path.splitext(os.path.basename(original_file_name))[0]
 
+        # Figure out the type of the activity.
+        normalized_activity_type = Importer.normalize_activity_type(activity_type, activity_name)
+
         # Indicate the start of the activity.
-        normalized_activity_type = Importer.normalize_activity_type(activity_type)
         device_str, activity_id = self.activity_writer.create_activity(username, user_id, activity_name, "", normalized_activity_type, start_time_unix)
 
         # We'll store the most recent timecode here.
