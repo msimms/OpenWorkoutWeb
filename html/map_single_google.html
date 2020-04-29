@@ -446,28 +446,12 @@ ${powerZones}
             alert(result_text.value);
     }
 
-    function add_gear(gear)
-    {
-        var the_url = "${root_url}/api/1.0/add_gear_to_activity";
-        var dict = [];
-        var result_text = {};
-
-        dict.push({["activity_id"] : "${activityId}"});
-        dict.push({["name"] : gear});
-        if (!send_post_request(the_url, dict, result_text))
-            alert(result_text.value);
-    }
-
 	jQuery(document).ready(function()
 	{
 		jQuery(".chosen").data("placeholder", "Specify tags...").chosen();
 
         jQuery('#tags').on('change', function(e) {
             add_tag(jQuery("#tags").val());
-        });
-
-        jQuery('#gear').on('change', function(e) {
-            add_gear(jQuery("#gear").val());
         });
 	});
 

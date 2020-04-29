@@ -1058,7 +1058,7 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        response = self.data_mgr.retrieve_gear_for_user(self.user_id)
+        response = self.data_mgr.retrieve_gear(self.user_id)
         return True, json.dumps(response)
 
     def handle_update_gear(self, values):
@@ -1147,30 +1147,6 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid service record ID.")
 
         result = self.data_mgr.delete_service_record(self.user_id, gear_id, service_record_id)
-        return result, ""
-
-    def handle_add_gear_to_activity(self, values):
-        """Called when an API message to associate gear with an activity is received."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-        if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.GEAR_NAME_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-
-        activity_id = values[Keys.ACTIVITY_ID_KEY]
-        if not InputChecker.is_uuid(activity_id):
-            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
-        gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
-        if not InputChecker.is_valid_decoded_str(gear_name):
-            raise ApiException.ApiMalformedRequestException("Invalid gear name.")
-
-        # Only the activity's owner should be able to do this.
-        activity = self.data_mgr.retrieve_activity(activity_id)
-        if not self.activity_belongs_to_logged_in_user(activity):
-            raise ApiException.ApiAuthenticationException("Not activity owner.")
-
-        result = self.data_mgr.associate_gear_with_activity(activity, gear_name)
         return result, ""
 
     def handle_update_settings(self, values):
@@ -1582,8 +1558,6 @@ class Api(object):
             return self.handle_create_service_record(values)
         elif request == 'delete_service_record':
             return self.handle_delete_service_record(values)
-        elif request == 'add_gear_to_activity':
-            return self.handle_add_gear_to_activity(values)
         elif request == 'update_settings':
             return self.handle_update_settings(values)
         elif request == 'update_profile':

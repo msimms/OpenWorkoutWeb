@@ -481,7 +481,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         # TODO: Remove from each activity
-        gear_list = self.database.retrieve_gear_for_user(user_id)
+        gear_list = self.database.retrieve_gear(user_id)
         for gear in gear_list:
             pass
 
@@ -648,7 +648,7 @@ class DataMgr(Importer.ActivityWriter):
     def list_tags_for_activity_type_and_user(self, user_id, activity_type):
         """Returns a list of tags that are valid for a particular activity type and user."""
         tags = self.list_default_tags()
-        gear_list = self.retrieve_gear_for_user(user_id)
+        gear_list = self.retrieve_gear(user_id)
         show_shoes = activity_type in Keys.FOOT_BASED_ACTIVITIES
         show_bikes = activity_type in Keys.BIKE_BASED_ACTIVITIES
         if activity_type == Keys.TYPE_RUNNING_KEY:
@@ -913,13 +913,13 @@ class DataMgr(Importer.ActivityWriter):
         gear_id = uuid.uuid4()
         return self.database.create_gear(user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
 
-    def retrieve_gear_for_user(self, user_id):
+    def retrieve_gear(self, user_id):
         """Retrieve method for the gear with the specified ID."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_gear_for_user(user_id)
+        return self.database.retrieve_gear(user_id)
 
     def retrieve_gear_of_specified_type_for_user(self, user_id, gear_type):
         """Retrieve method for the gear with the specified ID."""
@@ -931,7 +931,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         final_gear_list = []
-        gear_list = self.database.retrieve_gear_for_user(user_id)
+        gear_list = self.database.retrieve_gear(user_id)
         for gear in gear_list:
             if Keys.GEAR_TYPE_KEY in gear:
                 if gear_type == gear[Keys.GEAR_TYPE_KEY]:
@@ -988,16 +988,6 @@ class DataMgr(Importer.ActivityWriter):
         if service_record_id is None:
             raise Exception("Bad parameter.")
         return self.database.delete_service_record(user_id, gear_id, service_record_id)
-
-    def associate_gear_with_activity(self, activity, gear_name):
-        """Adds gear to an activity."""
-        if self.database is None:
-            raise Exception("No database.")
-        if activity is None:
-            raise Exception("Bad parameter.")
-        if gear_name is None:
-            raise Exception("Bad parameter.")
-        return self.database.create_gear_on_activity(activity, gear_name)
 
     def generate_workout_plan(self, user_id):
         """Generates/updates a workout plan for the user with the specified ID."""
