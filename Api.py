@@ -767,29 +767,34 @@ class Api(object):
 
         return True, ""
 
-    def handle_add_tag_to_activity(self, values):
+    def handle_create_tags_on_activity(self, values):
         """Called when an API message to add a tag to an activity is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.ACTIVITY_TAG_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
-        if not InputChecker.is_valid_decoded_str(tag):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        tags = []
+        tag_index = 0
+        tag_name = Keys.ACTIVITY_TAG_KEY + str(tag_index)
+        while tag_name in values:
+            tag = urllib.unquote_plus(values[tag_name])
+            if not InputChecker.is_valid_decoded_str(tag):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            tags.append(tag)
+            tag_index = tag_index + 1
+            tag_name = Keys.ACTIVITY_TAG_KEY + str(tag_index)
 
         # Only the activity's owner should be able to do this.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if not self.activity_belongs_to_logged_in_user(activity):
             raise ApiException.ApiAuthenticationException("Not activity owner.")
 
-        result = self.data_mgr.associate_tag_with_activity(activity, tag)
+        result = self.data_mgr.create_tags_on_activity(activity, tags)
         return result, ""
 
     def handle_delete_tag_from_activity(self, values):
@@ -1526,8 +1531,8 @@ class Api(object):
             return self.handle_add_activity(values)
         elif request == 'upload_activity_file':
             return self.handle_upload_activity_file(values)
-        elif request == 'add_tag_to_activity':
-            return self.handle_add_tag_to_activity(values)
+        elif request == 'create_tags_on_activity':
+            return self.handle_create_tags_on_activity(values)
         elif request == 'delete_tag_from_activity':
             return self.handle_delete_tag_from_activity(values)
         elif request == 'list_matched_users':

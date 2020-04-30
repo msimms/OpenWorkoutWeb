@@ -369,48 +369,48 @@ ${powerZones}
 </div>
 
 <script>
-	function refresh_analysis()
-	{
-		var the_url = "${root_url}/api/1.0/refresh_analysis";
-		var dict = [];
-		var result_text = {};
+    function refresh_analysis()
+    {
+        var the_url = "${root_url}/api/1.0/refresh_analysis";
+        var dict = [];
+        var result_text = {};
 
-		dict.push({["activity_id"] : "${activityId}"});
-		if (send_post_request(the_url, dict, result_text))
-			window.location.reload();
-		else
-			alert(result_text.value);
-	}
+        dict.push({["activity_id"] : "${activityId}"});
+        if (send_post_request(the_url, dict, result_text))
+            window.location.reload();
+        else
+            alert(result_text.value);
+    }
 
-	function create_comment()
-	{
-		var the_url = "${root_url}/api/1.0/create_comment";
-		var comment = document.getElementById("comment").value;
-		var dict = [];
-		var result_text = {};
+    function create_comment()
+    {
+        var the_url = "${root_url}/api/1.0/create_comment";
+        var comment = document.getElementById("comment").value;
+        var dict = [];
+        var result_text = {};
 
-		dict.push({["activity_id"] : "${activityId}"});
-		dict.push({["comment"] : comment});
-		if (send_post_request(the_url, dict, result_text))
-			window.location.reload();
-		else
-			alert(result_text.value);
-	}
+        dict.push({["activity_id"] : "${activityId}"});
+        dict.push({["comment"] : comment});
+        if (send_post_request(the_url, dict, result_text))
+            window.location.reload();
+        else
+            alert(result_text.value);
+    }
 
-	function export_activity()
-	{
-		var the_url = "${root_url}/api/1.0/export_activity";
-		var format = document.getElementById("format").value;
-		var dict = [];
-		var result_text = {};
+    function export_activity()
+    {
+        var the_url = "${root_url}/api/1.0/export_activity";
+        var format = document.getElementById("format").value;
+        var dict = [];
+        var result_text = {};
 
-		dict.push({["activity_id"] : "${activityId}"});
-		dict.push({["export_format"] : format});
-		if (send_post_request(the_url, dict, result_text))
-			create_local_file(result_text.value, "${activityId}." + format, "text/plain;charset=utf-8");
-		else
-			alert(result_text.value);
-	}
+        dict.push({["activity_id"] : "${activityId}"});
+        dict.push({["export_format"] : format});
+        if (send_post_request(the_url, dict, result_text))
+            create_local_file(result_text.value, "${activityId}." + format, "text/plain;charset=utf-8");
+        else
+            alert(result_text.value);
+    }
 
     function edit_activity()
     {
@@ -418,10 +418,10 @@ ${powerZones}
         window.location.replace(the_url);
     }
 
-	function delete_activity()
-	{
-		if (confirm('Are you sure you want to do this?'))
-		{
+    function delete_activity()
+    {
+        if (confirm('Are you sure you want to do this?'))
+        {
             var the_url = "${root_url}/api/1.0/delete_activity";
             var dict = [];
             var result_text = {};
@@ -432,29 +432,31 @@ ${powerZones}
             else
                 alert(result_text.value);
         }
-	}
+    }
 
-    function add_tag(tag)
+    function create_tags(tags)
     {
-        var the_url = "${root_url}/api/1.0/add_tag_to_activity";
+        var the_url = "${root_url}/api/1.0/create_tags_on_activity";
         var dict = [];
         var result_text = {};
 
         dict.push({["activity_id"] : "${activityId}"});
-        dict.push({["tag"] : tag});
+        for (var tag in tags)
+        {
+            dict.push({["tag" + tag] : tags[tag]});
+        }
         if (!send_post_request(the_url, dict, result_text))
             alert(result_text.value);
     }
 
-	jQuery(document).ready(function()
-	{
-		jQuery(".chosen").data("placeholder", "Specify tags...").chosen();
+    jQuery(document).ready(function()
+    {
+        jQuery(".chosen").data("placeholder", "Specify tags...").chosen();
 
         jQuery('#tags').on('change', function(e) {
-            add_tag(jQuery("#tags").val());
+            create_tags(jQuery("#tags").val());
         });
-	});
-
+    });
 </script>
 
 <hr>

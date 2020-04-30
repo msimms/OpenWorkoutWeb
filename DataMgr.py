@@ -677,15 +677,15 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_tags(activity_id)
 
-    def associate_tag_with_activity(self, activity, tag):
+    def create_tags_on_activity(self, activity, tags):
         """Adds a tag to an activity."""
         if self.database is None:
             raise Exception("No database.")
         if activity is None:
             raise Exception("Bad parameter.")
-        if tag is None:
+        if tags is None:
             raise Exception("Bad parameter.")
-        return self.database.create_tag_on_activity(activity, tag)
+        return self.database.create_tags_on_activity(activity, tags)
 
     @staticmethod
     def distance_for_activity(activity):

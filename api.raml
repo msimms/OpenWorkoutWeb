@@ -169,8 +169,8 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-/add_tag_to_activity:
-    description: Adds a tag to an activity.
+/create_tags_on_activity:
+    description: Sets the tags on an activity. Tags are provided in a dictionary {"tag0", "foo"|, {"tag1", "bar"), etc.
     get:
     post:
         responses:
