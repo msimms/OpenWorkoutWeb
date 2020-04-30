@@ -98,6 +98,10 @@ class Importer(object):
         elif lower_activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY.lower():
             return Keys.TYPE_OPEN_WATER_SWIMMING_KEY
 
+        # Didn't match any known activity types, so take a guess from the name.
+        if 'walk' in file_name_parts or 'walking' in file_name_parts:
+            return Keys.TYPE_WALKING_KEY
+
         return Keys.TYPE_UNSPECIFIED_ACTIVITY
 
     def import_gpx_file(self, username, user_id, file_name):
