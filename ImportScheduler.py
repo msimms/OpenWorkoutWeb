@@ -25,6 +25,7 @@
 
 import sys
 import traceback
+import Keys
 
 from bson.json_util import dumps
 from ImportWorker import import_activity
@@ -45,7 +46,7 @@ class ImportScheduler(object):
             params['uploaded_file_name'] = uploaded_file_name
             import_task = import_activity.delay(dumps(params))
             if data_mgr is not None:
-                data_mgr.track_import_task(user_id, import_task.task_id, uploaded_file_data)
+                data_mgr.create_deferred_task(user_id, Keys.IMPORT_TASK_KEY, import_task.task_id, uploaded_file_name)
         except:
             print(traceback.format_exc())
             print(sys.exc_info()[0])

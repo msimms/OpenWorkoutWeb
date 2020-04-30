@@ -1272,52 +1272,21 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # Remove old items.
-        self.data_mgr.clean_deferred_tasks(user_id)
-
         tasks_str = ""
-        tasks = self.data_mgr.retrieve_deferred_import_tasks(user_id)
-        if len(tasks) == 0:
-            raise RedirectException(DEFAULT_LOGGED_IN_URL)
-
+        tasks = self.data_mgr.retrieve_deferred_tasks(user_id)
         for task in tasks:
             tasks_str += "<td>"
             if Keys.TASK_ID_KEY in task:
                 tasks_str += str(task[Keys.TASK_ID_KEY])
             tasks_str += "</td><td>"
-            if Keys.TASK_STATE_KEY in task:
-                tasks_str += str(task[Keys.TASK_STATE_KEY])
-            tasks_str += "</td><tr>\n"
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'task_status.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=tasks_str)
-
-    @statistics
-    def analysis_status(self):
-        """Renders the analysis status page, which shows the status of deferred analysis tasks."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        tasks_str = ""
-        tasks = self.data_mgr.retrieve_deferred_analysis_tasks(user_id)
-        for task in tasks:
-            tasks_str += "<td>"
-            if Keys.TASK_ID_KEY in task:
-                tasks_str += str(task[Keys.TASK_ID_KEY])
+            if Keys.TASK_TYPE_KEY in task:
+                tasks_str += str(task[Keys.TASK_TYPE_KEY])
             tasks_str += "</td><td>"
-            if Keys.TASK_STATE_KEY in task:
-                tasks_str += str(task[Keys.TASK_STATE_KEY])
+            if Keys.TASK_DETAILS_KEY in task:
+                tasks_str += str(task[Keys.TASK_DETAILS_KEY])
+            tasks_str += "</td><td>"
+            if Keys.TASK_STATUS_KEY in task:
+                tasks_str += str(task[Keys.TASK_STATUS_KEY])
             tasks_str += "</td><tr>\n"
 
         # Render from template.

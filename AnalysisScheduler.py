@@ -46,7 +46,7 @@ class AnalysisScheduler(object):
         try:
             analysis_task = analyze_activity.delay(dumps(activity))
             if data_mgr is not None:
-                data_mgr.track_analysis_task(activity_user_id, analysis_task.task_id)
+                data_mgr.create_deferred_task(activity_user_id, Keys.ANALYSIS_TASK_KEY, analysis_task.task_id, None)
         except:
             print(traceback.format_exc())
             print(sys.exc_info()[0])
