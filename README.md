@@ -185,7 +185,7 @@ This feature is very much under development and will go through several iteratio
 * Bug fixes.
 
 ### 0.23
-* Bug fixes. Includes python3 fixes for the activity analyzer.
+* Bug fixes. Includes python2 and python3 fixes for the activity analyzer as well as fixes to managing activity tags.
 
 ## Tech
 This software uses several other source projects to work properly:
