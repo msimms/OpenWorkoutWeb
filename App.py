@@ -1272,27 +1272,10 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        tasks_str = ""
-        tasks = self.data_mgr.retrieve_deferred_tasks(user_id)
-        for task in tasks:
-            tasks_str += "<td>"
-            if Keys.TASK_ID_KEY in task:
-                tasks_str += str(task[Keys.TASK_ID_KEY])
-            tasks_str += "</td><td>"
-            if Keys.TASK_TYPE_KEY in task:
-                tasks_str += str(task[Keys.TASK_TYPE_KEY])
-            tasks_str += "</td><td>"
-            if Keys.TASK_DETAILS_KEY in task:
-                tasks_str += str(task[Keys.TASK_DETAILS_KEY])
-            tasks_str += "</td><td>"
-            if Keys.TASK_STATUS_KEY in task:
-                tasks_str += str(task[Keys.TASK_STATUS_KEY])
-            tasks_str += "</td><tr>\n"
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'task_status.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=tasks_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
 
     @statistics
     def profile(self):

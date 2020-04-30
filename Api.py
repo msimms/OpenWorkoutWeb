@@ -1455,6 +1455,14 @@ class Api(object):
             converted_distances.append({gear_name: converted_distance})
         return True, json.dumps(converted_distances)
 
+    def handle_get_task_statuses(self, values):
+        """Returns a description of all deferred tasks for the logged in user. Result is a JSON string."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        tasks = self.data_mgr.retrieve_deferred_tasks(self.user_id)
+        return True, json.dumps(tasks)
+
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
         if request == 'activity_track':
@@ -1501,6 +1509,8 @@ class Api(object):
             return self.handle_get_running_paces(values)
         elif request == 'get_distance_for_tag':
             return self.handle_get_distance_for_tag(values)
+        elif request == 'get_task_statuses':
+            return self.handle_get_task_statuses(values)
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):
