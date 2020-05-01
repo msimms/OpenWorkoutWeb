@@ -65,7 +65,7 @@ GOAL_TYPE_SPEED = "Speed"
 
 # Personal records
 RECORDS_USER_ID = "user_id"
-RECORD_NAME = "record_name"
+RECORD_NAME_KEY = "record_name"
 PERSONAL_RECORDS = "records"
 
 # Workout plans

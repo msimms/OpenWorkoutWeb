@@ -216,20 +216,6 @@ def all_activities():
         g_app.log_error('Unhandled exception in ' + all_activities.__name__)
     return g_app.render_error()
 
-@g_flask_app.route('/all_records/<activity_type>/<record_name>')
-@login_requred
-def all_records(self, activity_type, record_name):
-    """Renders the list of records for the specified user and record type."""
-    try:
-        return g_app.all_records(activity_type, record_name)
-    except App.RedirectException as e:
-        return flask.redirect(e.url, code=302)
-    except:
-        g_app.log_error(traceback.format_exc())
-        g_app.log_error(sys.exc_info()[0])
-        g_app.log_error('Unhandled exception in ' + all_records.__name__)
-    return self.error()
-
 @g_flask_app.route('/record_progression/<activity_type>/<record_name>')
 @login_requred
 def record_progression(self, activity_type, record_name):

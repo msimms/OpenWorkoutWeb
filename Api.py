@@ -1463,6 +1463,38 @@ class Api(object):
         tasks = self.data_mgr.retrieve_deferred_tasks(self.user_id)
         return True, json.dumps(tasks)
 
+    def handle_get_record_progression(self, values):
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_TYPE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity type specified.")
+        if Keys.RECORD_NAME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Record name not specified.")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise ApiException.ApiMalformedRequestException("Empty username.")
+
+        # Get the user details.
+        _, _, user_realname = self.user_mgr.retrieve_user(username)
+
+        # Get the user activity list, sorted by timestamp.
+        user_activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
+
+        activity_type = values[Keys.ACTIVITY_TYPE_KEY]
+        if not InputChecker.is_valid_decoded_str(activity_type):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        record_name = values[Keys.RECORD_NAME_KEY]
+        if not InputChecker.is_valid_decoded_str(record_name):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        records = self.data_mgr.compute_progression(self.user_id, user_activities, activity_type, record_name)
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+        for record in records:
+            record[0] = Units.convert_to_string_in_specified_unit_system(unit_system, record[0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+        return True, json.dumps(records)
+
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
         if request == 'activity_track':
@@ -1511,6 +1543,8 @@ class Api(object):
             return self.handle_get_distance_for_tag(values)
         elif request == 'get_task_statuses':
             return self.handle_get_task_statuses(values)
+        elif request == 'get_record_progression':
+            return self.handle_get_record_progression(values)
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):
