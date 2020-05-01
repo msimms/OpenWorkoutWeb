@@ -92,6 +92,10 @@ class WorkoutPlanGenerator(object):
 
         # Fetch the detail of the user's goal.
         goal, goal_date = self.data_mgr.retrieve_user_goal(user_id)
+        if goal is None:
+            raise Exception("A goal has not been defined.")
+        if goal_date is None:
+            raise Exception("A goal date has not been defined.")
         if goal is not Keys.GOAL_FITNESS_KEY:
 
             # Sanity-check the goal date.
@@ -101,7 +105,7 @@ class WorkoutPlanGenerator(object):
             # Convert the goal time into weeks.
             weeks_until_goal = (goal_date - now) / (7 * 24 * 60 * 60)
 
-        # Is the user interesting in just completion, or do they care about pace?
+        # Is the user interested in just completion, or do they care about pace/speed?
         goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
 
         # This will trigger the callback for each of the user's activities.
@@ -153,6 +157,9 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
 
+        # Adds the goal distances to the inputs.
+        inputs = WorkoutPlanGenerator.calculate_goal_distances(inputs)
+
         print("Inputs: " + str(inputs))
         return inputs
 
@@ -164,9 +171,6 @@ class WorkoutPlanGenerator(object):
         swim_planner = SwimPlanGenerator.SwimPlanGenerator(user_id)
         bike_planner = BikePlanGenerator.BikePlanGenerator(user_id)
         run_planner = RunPlanGenerator.RunPlanGenerator(user_id)
-
-        # Adds the goal distances to the inputs.
-        inputs = WorkoutPlanGenerator.calculate_goal_distances(inputs)
 
         # Generate the swim workouts.
         if not swim_planner.is_workout_plan_possible(inputs):

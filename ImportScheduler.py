@@ -25,6 +25,7 @@
 
 import sys
 import traceback
+import Keys
 
 from bson.json_util import dumps
 from ImportWorker import import_activity
@@ -37,16 +38,15 @@ class ImportScheduler(object):
 
     def add_to_queue(self, username, user_id, uploaded_file_data, uploaded_file_name, data_mgr):
         """Adds the activity ID to the list of activities to be analyzed."""
-        params = {}
-        params['username'] = username
-        params['user_id'] = user_id
-        params['uploaded_file_data'] = uploaded_file_data
-        params['uploaded_file_name'] = uploaded_file_name
-        import_task = import_activity.delay(dumps(params))
         try:
+            params = {}
+            params['username'] = username
+            params['user_id'] = user_id
+            params['uploaded_file_data'] = uploaded_file_data
+            params['uploaded_file_name'] = uploaded_file_name
+            import_task = import_activity.delay(dumps(params))
             if data_mgr is not None:
-                data_mgr.track_import_task(user_id, import_task.task_id, uploaded_file_data)
+                data_mgr.create_deferred_task(user_id, Keys.IMPORT_TASK_KEY, import_task.task_id, uploaded_file_name)
         except:
             print(traceback.format_exc())
             print(sys.exc_info()[0])
-        

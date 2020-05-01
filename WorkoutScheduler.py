@@ -1,4 +1,5 @@
 # Copyright 2019 Michael J Simms
+"""Organizes workouts."""
 
 import datetime
 import os
@@ -8,7 +9,7 @@ import UserMgr
 import WorkoutFactory
 
 class WorkoutScheduler(object):
-    """Class for generating a run plan for the specifiied user."""
+    """Organizes workouts."""
 
     def __init__(self, user_id):
         self.user_id = user_id

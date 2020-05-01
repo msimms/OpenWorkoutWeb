@@ -1,6 +1,7 @@
 # Copyright 2017 Michael J Simms
 """API request handlers"""
 
+import calendar
 import json
 import logging
 import os
@@ -766,29 +767,34 @@ class Api(object):
 
         return True, ""
 
-    def handle_add_tag_to_activity(self, values):
+    def handle_create_tags_on_activity(self, values):
         """Called when an API message to add a tag to an activity is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.ACTIVITY_TAG_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
-        if not InputChecker.is_valid_decoded_str(tag):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        tags = []
+        tag_index = 0
+        tag_name = Keys.ACTIVITY_TAG_KEY + str(tag_index)
+        while tag_name in values:
+            tag = urllib.unquote_plus(values[tag_name])
+            if not InputChecker.is_valid_decoded_str(tag):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            tags.append(tag)
+            tag_index = tag_index + 1
+            tag_name = Keys.ACTIVITY_TAG_KEY + str(tag_index)
 
         # Only the activity's owner should be able to do this.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if not self.activity_belongs_to_logged_in_user(activity):
             raise ApiException.ApiAuthenticationException("Not activity owner.")
 
-        result = self.data_mgr.associate_tag_with_activity(activity, tag)
+        result = self.data_mgr.create_tags_on_activity(activity, tags)
         return result, ""
 
     def handle_delete_tag_from_activity(self, values):
@@ -1057,7 +1063,7 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        response = self.data_mgr.retrieve_gear_for_user(self.user_id)
+        response = self.data_mgr.retrieve_gear(self.user_id)
         return True, json.dumps(response)
 
     def handle_update_gear(self, values):
@@ -1146,30 +1152,6 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid service record ID.")
 
         result = self.data_mgr.delete_service_record(self.user_id, gear_id, service_record_id)
-        return result, ""
-
-    def handle_add_gear_to_activity(self, values):
-        """Called when an API message to associate gear with an activity is received."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-        if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.GEAR_NAME_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-
-        activity_id = values[Keys.ACTIVITY_ID_KEY]
-        if not InputChecker.is_uuid(activity_id):
-            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
-        gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
-        if not InputChecker.is_valid_decoded_str(gear_name):
-            raise ApiException.ApiMalformedRequestException("Invalid gear name.")
-
-        # Only the activity's owner should be able to do this.
-        activity = self.data_mgr.retrieve_activity(activity_id)
-        if not self.activity_belongs_to_logged_in_user(activity):
-            raise ApiException.ApiAuthenticationException("Not activity owner.")
-
-        result = self.data_mgr.associate_gear_with_activity(activity, gear_name)
         return result, ""
 
     def handle_update_settings(self, values):
@@ -1326,7 +1308,7 @@ class Api(object):
             for workout in workouts:
                 if workout.scheduled_time is not None and workout.workout_id is not None and workout.type is not None:
                     url = self.root_url + "/workout/" + str(workout.workout_id)
-                    temp_workout = {'title': workout.type, 'url': url, 'time': time.mktime(workout.scheduled_time.timetuple())}
+                    temp_workout = {'title': workout.type, 'url': url, 'time': calendar.timegm(workout.scheduled_time.timetuple())}
                     matched_workouts.append(temp_workout)
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
@@ -1445,7 +1427,7 @@ class Api(object):
 
         calc = TrainingPaceCalculator.TrainingPaceCalculator()
         unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
-        run_paces = calc.calc_from_race_distance_in_meters(5000, int(values[Keys.BEST_5K]) / 60)
+        run_paces = calc.calc_from_race_distance_in_meters(5000, float(values[Keys.BEST_5K]) / 60)
         converted_paces = {}
         for run_pace in run_paces:
             converted_paces[run_pace] = Units.convert_to_string_in_specified_unit_system(unit_system, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
@@ -1472,6 +1454,47 @@ class Api(object):
             converted_distance = Units.convert_to_string_in_specified_unit_system(unit_system, gear_distances[gear_name], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.TOTAL_DISTANCE)
             converted_distances.append({gear_name: converted_distance})
         return True, json.dumps(converted_distances)
+
+    def handle_get_task_statuses(self, values):
+        """Returns a description of all deferred tasks for the logged in user. Result is a JSON string."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        tasks = self.data_mgr.retrieve_deferred_tasks(self.user_id)
+        return True, json.dumps(tasks)
+
+    def handle_get_record_progression(self, values):
+        """Returns an ordered list containing the time and activity ID of the user's record progression for the specified record and activity type, i.e. best running 5K. Result is a JSON string."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_TYPE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity type specified.")
+        if Keys.RECORD_NAME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Record name not specified.")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise ApiException.ApiMalformedRequestException("Empty username.")
+
+        # Get the user details.
+        _, _, user_realname = self.user_mgr.retrieve_user(username)
+
+        # Get the user activity list, sorted by timestamp.
+        user_activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
+
+        activity_type = values[Keys.ACTIVITY_TYPE_KEY]
+        if not InputChecker.is_valid_decoded_str(activity_type):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        record_name = values[Keys.RECORD_NAME_KEY]
+        if not InputChecker.is_valid_decoded_str(record_name):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        records = self.data_mgr.compute_progression(self.user_id, user_activities, activity_type, record_name)
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+        for record in records:
+            record[0] = Units.convert_to_string_in_specified_unit_system(unit_system, record[0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
+        return True, json.dumps(records)
 
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
@@ -1519,6 +1542,10 @@ class Api(object):
             return self.handle_get_running_paces(values)
         elif request == 'get_distance_for_tag':
             return self.handle_get_distance_for_tag(values)
+        elif request == 'get_task_statuses':
+            return self.handle_get_task_statuses(values)
+        elif request == 'get_record_progression':
+            return self.handle_get_record_progression(values)
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):
@@ -1549,8 +1576,8 @@ class Api(object):
             return self.handle_add_activity(values)
         elif request == 'upload_activity_file':
             return self.handle_upload_activity_file(values)
-        elif request == 'add_tag_to_activity':
-            return self.handle_add_tag_to_activity(values)
+        elif request == 'create_tags_on_activity':
+            return self.handle_create_tags_on_activity(values)
         elif request == 'delete_tag_from_activity':
             return self.handle_delete_tag_from_activity(values)
         elif request == 'list_matched_users':
@@ -1581,8 +1608,6 @@ class Api(object):
             return self.handle_create_service_record(values)
         elif request == 'delete_service_record':
             return self.handle_delete_service_record(values)
-        elif request == 'add_gear_to_activity':
-            return self.handle_add_gear_to_activity(values)
         elif request == 'update_settings':
             return self.handle_update_settings(values)
         elif request == 'update_profile':

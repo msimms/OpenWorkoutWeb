@@ -76,8 +76,8 @@
 
     var process_gear = function(records)
     {
-        var bikes_table = document.getElementById("Bikes");
-        var shoes_table = document.getElementById("Shoes");
+        var bikes_table = document.getElementById("bikes");
+        var shoes_table = document.getElementById("shoes");
 
         var sorted_records = records.sort(gear_sort)
         for (var record of sorted_records)
@@ -109,7 +109,7 @@ ${nav}
 
     <h2>Bikes</h2>
     <p>
-        <table id="Bikes">
+        <table id="bikes">
             <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
         </table>
     </p>
@@ -119,7 +119,7 @@ ${nav}
 
     <h2>Shoes</h2>
     <p>
-        <table id="Shoes">
+        <table id="shoes">
             <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
         </table>
     </p>

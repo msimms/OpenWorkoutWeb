@@ -1,4 +1,26 @@
-# Copyright 2017-2018 Michael J Simms
+# -*- coding: utf-8 -*-
+# 
+# # MIT License
+# 
+# Copyright (c) 2017-2020 Mike Simms
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 """Main application, contains all web page handlers"""
 
 import cherrypy
@@ -900,7 +922,8 @@ class App(object):
         selected_activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
         if Keys.ACTIVITY_TYPE_KEY in activity:
             selected_activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
-        all_activity_types = Keys.FOOT_BASED_ACTIVITIES
+        all_activity_types = []
+        all_activity_types.extend(Keys.FOOT_BASED_ACTIVITIES)
         all_activity_types.extend(Keys.BIKE_BASED_ACTIVITIES)
         all_activity_types.extend(Keys.SWIMMING_ACTIVITIES)
         all_activity_types.append(Keys.TYPE_UNSPECIFIED_ACTIVITY)
@@ -976,28 +999,7 @@ class App(object):
         url_str = "<a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + display_str + "</a>"
         return url_str
 
-    def render_personal_record_simple(self, unit_system, user_activities, activity_type, record, record_name):
-        """Helper function that renders a single table row in the personal bests table."""
-        record_value = record[0]
-        activity_id = record[1]
-        activity_time = 0
-        for activity in user_activities:
-            if Keys.ACTIVITY_ID_KEY in activity and activity[Keys.ACTIVITY_ID_KEY] == activity_id and Keys.ACTIVITY_TIME_KEY in activity:
-                activity_time = activity[Keys.ACTIVITY_TIME_KEY]
-                break
-        record_str = Units.convert_to_string_in_specified_unit_system(unit_system, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
-
-        out_str = "\t\t\t"
-        if activity_time == 0:
-            out_str += "<td></td>"
-        else:
-            out_str += "<td><script>document.write(unix_time_to_local_date_string(" + str(activity_time) + "))</script></td>"
-        out_str += "<td>"
-        out_str += self.render_activity_href(activity_id, record_str)
-        out_str += "<tr>\n"
-        return out_str
-
-    def render_personal_record(self, unit_system, activity_type, record, record_name, show_progression):
+    def render_personal_record(self, unit_system, activity_type, record, record_name):
         """Helper function that renders a single table row in the personal bests table."""
         record_value = record[0]
         activity_id = record[1]
@@ -1006,45 +1008,12 @@ class App(object):
         out_str += record_name
         params = {}
         params[Keys.ACTIVITY_TYPE_KEY] = activity_type
-        params[Keys.RECORD_NAME] = record_name
+        params[Keys.RECORD_NAME_KEY] = record_name
         out_str += "</td><td>"
         out_str += self.render_activity_href(activity_id, record_str)
-        out_str += "</td><td><a href=\"" + self.root_url + "/"
-        if show_progression:
-            out_str += "record_progression"
-        else:
-            out_str += "all_records"
-        out_str += "?" + urllib.urlencode(params) + "\">[...]</td><tr>\n"
+        out_str += "</td><td><a href=\"" + self.root_url + "/record_progression?"
+        out_str += urllib.urlencode(params) + "\">[...]</td><tr>\n"
         return out_str
-
-    @statistics
-    def all_records(self, activity_type, record_name):
-        """Renders the list of records for the specified user and record type."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Get the user activity list, sorted by timestamp.
-        user_activities = self.data_mgr.retrieve_user_activity_list(user_id, user_realname, None, None)
-
-        records_str = ""
-        records = self.data_mgr.retrieve_bests_for_activity_type(user_id, activity_type, record_name)
-        unit_system = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        for record in records:
-            records_str += self.render_personal_record_simple(unit_system, user_activities, activity_type, record, record_name)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'records.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, record_name=record_name, records=records_str)
 
     @statistics
     def record_progression(self, activity_type, record_name):
@@ -1061,19 +1030,10 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # Get the user activity list, sorted by timestamp.
-        user_activities = self.data_mgr.retrieve_user_activity_list(user_id, user_realname, None, None)
-
-        records_str = ""
-        records = self.data_mgr.compute_progression(user_id, user_activities, activity_type, record_name)
-        unit_system = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        for record in records:
-            records_str += self.render_personal_record_simple(unit_system, user_activities, activity_type, record, record_name)
-
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'records.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, record_name=record_name, records=records_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_type=activity_type, record_name=record_name)
 
     @statistics
     def workouts(self):
@@ -1204,32 +1164,6 @@ class App(object):
         return self.render_simple_page('device_list.html')
 
     @statistics
-    def upload(self, ufile):
-        """Processes an request from the upload form."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, _ = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Parse the file and store it's contents in the database.
-        if type(ufile) == list:
-            for ufile_item in ufile:
-                file_data = ufile_item.file.read()
-                self.data_mgr.import_file(username, user_id, file_data, ufile_item.filename)
-        else:
-            file_data = ufile.file.read()
-            self.data_mgr.import_file(username, user_id, file_data, ufile.filename)
-
-        raise RedirectException(TASK_STATUS_URL)
-
-    @statistics
     def manual_entry(self, activity_type):
         """Called when the user selects an activity type, indicatig they want to make a manual data entry."""
         print(activity_type)
@@ -1263,67 +1197,7 @@ class App(object):
     @statistics
     def task_status(self):
         """Renders the status page for deferred tasks, such as file imports and activity analysis."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Remove old items.
-        self.data_mgr.clean_deferred_tasks(user_id)
-
-        tasks_str = ""
-        tasks = self.data_mgr.retrieve_deferred_import_tasks(user_id)
-        for task in tasks:
-            tasks_str += "<td>"
-            if Keys.TASK_ID_KEY in task:
-                tasks_str += str(task[Keys.TASK_ID_KEY])
-            tasks_str += "</td><td>"
-            if Keys.TASK_STATE_KEY in task:
-                tasks_str += str(task[Keys.TASK_STATE_KEY])
-            tasks_str += "</td><tr>\n"
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'task_status.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=tasks_str)
-
-    @statistics
-    def analysis_status(self):
-        """Renders the analysis status page, which shows the status of deferred analysis tasks."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        tasks_str = ""
-        tasks = self.data_mgr.retrieve_deferred_analysis_tasks(user_id)
-        for task in tasks:
-            tasks_str += "<td>"
-            if Keys.TASK_ID_KEY in task:
-                tasks_str += str(task[Keys.TASK_ID_KEY])
-            tasks_str += "</td><td>"
-            if Keys.TASK_STATE_KEY in task:
-                tasks_str += str(task[Keys.TASK_STATE_KEY])
-            tasks_str += "</td><tr>\n"
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'task_status.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, table_str=tasks_str)
+        return self.render_simple_page('task_status.html')
 
     @statistics
     def profile(self):
@@ -1453,7 +1327,7 @@ class App(object):
                 for record_name in record_dict:
                     if record_name not in Keys.UNSUMMARIZABLE_KEYS:
                         record = record_dict[record_name]
-                        prs += self.render_personal_record(unit_system, record_group, record, record_name, True)
+                        prs += self.render_personal_record(unit_system, record_group, record, record_name)
                 prs += "</table>\n"
 
         # Render from the template.

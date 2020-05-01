@@ -1,5 +1,27 @@
-# Copyright 2019 Michael J Simms
-"""Dscribes a workout to be performed."""
+# -*- coding: utf-8 -*-
+# 
+# # MIT License
+# 
+# Copyright (c) 2019 Mike Simms
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+"""Describes a workout to be performed."""
 
 from __future__ import print_function
 import datetime
@@ -173,12 +195,15 @@ class Workout(object):
 
         # Add each interval.
         for interval in self.intervals:
+            num_repeats = interval[Keys.INTERVAL_REPEAT_KEY]
             interval_meters = interval[Keys.INTERVAL_DISTANCE_KEY]
             interval_pace_minute = interval[Keys.INTERVAL_PACE_KEY]
             recovery_meters = interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY]
             recovery_pace_minute = interval[Keys.INTERVAL_RECOVERY_PACE_KEY]
 
             result += "Interval: "
+            result += str(num_repeats)
+            result += " x "
             result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
             result += " at "
             result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
@@ -196,12 +221,16 @@ class Workout(object):
             result += " seconds.\n"
 
         # Add an string that describes how this workout fits into the big picture.
-        if self.type == Keys.WORKOUT_TYPE_INTERVAL_SESSION:
+        if self.type == Keys.WORKOUT_TYPE_SPEED_RUN:
+            result += "Purpose: Speed sessions get you used to running at faster paces.\n"
+        elif self.type == Keys.WORKOUT_TYPE_INTERVAL_SESSION:
             result += "Purpose: Interval sessions are designed to build speed and strength.\n"
         elif self.type == Keys.WORKOUT_TYPE_TEMPO_RUN:
             result += "Purpose: Tempo runs build a combination of speed and endurance. They should be performed at a pace you can hold for roughly one hour.\n"
         elif self.type == Keys.WORKOUT_TYPE_EASY_RUN:
             result += "Purpose: Easy runs build aerobic capacity while keeping the wear and tear on the body to a minimum.\n"
+        elif self.type == Keys.WORKOUT_TYPE_LONG_RUN:
+            result += "Purpose: Long runs build develop endurance.\n"
 
         return result
 

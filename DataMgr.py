@@ -1,4 +1,26 @@
-# Copyright 2017-2019 Michael J Simms
+# -*- coding: utf-8 -*-
+# 
+# # MIT License
+# 
+# Copyright (c) 2017-2020 Mike Simms
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 """Data store abstraction"""
 
 import time
@@ -212,103 +234,37 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity ID.")
         return self.database.create_activity_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
 
-    def track_import_task(self, user_id, task_id, local_file_name):
+    def create_deferred_task(self, user_id, task_type, task_id, details):
         """Called by the importer to store data associated with an ongoing import task."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("No user ID.")
+        if task_type is None:
+            raise Exception("No task type.")
         if task_id is None:
             raise Exception("No task ID.")
-        if local_file_name is None:
-            raise Exception("No local file name.")
+        return self.database.create_deferred_task(user_id, task_type, task_id, details, Keys.TASK_STATUS_QUEUED)
 
-        details = {}
-        details[Keys.LOCAL_FILE_NAME] = local_file_name
-        return self.database.create_deferred_task(user_id, Keys.IMPORT_TASK_KEY, task_id, details)
-
-    def track_analysis_task(self, user_id, task_id):
-        """Called by the importer to store data associated with an ongoing analysis task."""
+    def retrieve_deferred_tasks(self, user_id):
+        """Returns a list of all incomplete tasks."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("No user ID.")
-        if task_id is None:
-            raise Exception("No task ID.")
-        return self.database.create_deferred_task(user_id, Keys.ANALYSIS_TASK_KEY, task_id, None)
+        return self.database.retrieve_deferred_tasks(user_id)
 
-    def track_workout_plan_task(self, user_id, task_id):
-        """Called by the importer to store data associated with an ongoing workout task."""
+    def update_deferred_task(self, user_id, task_id, status):
+        """Returns a list of all incomplete tasks."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("No user ID.")
         if task_id is None:
             raise Exception("No task ID.")
-
-        tasks = self.database.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, task_id, None)
-        for task in tasks:
-            task_id = task[Keys.TASK_ID_KEY]
-            r = self.celery_worker.AsyncResult(task_id)
-            task[Keys.TASK_STATE_KEY] = r.state
-        return tasks
-
-    def query_deferred_task_statuses(self, tasks):
-        """Helper function for updating deferred task info."""
-        for task in tasks:
-            task_id = task[Keys.TASK_ID_KEY]
-            r = self.celery_worker.AsyncResult(task_id)
-            task[Keys.TASK_STATE_KEY] = r.state
-        return tasks
-
-    def retrieve_deferred_import_tasks(self, user_id):
-        """Returns a list of all incomplete analysis tasks."""
-        if self.database is None:
-            raise Exception("No database.")
-        if user_id is None:
-            raise Exception("No user ID.")
-
-        tasks = self.database.retrieve_deferred_tasks_of_type(user_id, Keys.IMPORT_TASK_KEY)
-        tasks = self.query_deferred_task_statuses(tasks)
-        return tasks
-
-    def retrieve_deferred_analysis_tasks(self, user_id):
-        """Returns a list of all incomplete analysis tasks."""
-        if self.database is None:
-            raise Exception("No database.")
-        if user_id is None:
-            raise Exception("No user ID.")
-
-        tasks = self.database.retrieve_deferred_tasks_of_type(user_id, Keys.ANALYSIS_TASK_KEY)
-        tasks = self.query_deferred_task_statuses(tasks)
-        return tasks
-
-    def retrieve_deferred_workout_plan_tasks(self, user_id):
-        """Returns a list of all incomplete workout plan tasks."""
-        if self.database is None:
-            raise Exception("No database.")
-        if user_id is None:
-            raise Exception("No user ID.")
-
-        tasks = self.database.retrieve_deferred_tasks_of_type(user_id, Keys.WORKOUT_PLAN_TASK_KEY)
-        tasks = self.query_deferred_task_statuses(tasks)
-        return tasks
-
-    def clean_deferred_tasks(self, user_id):
-        """Cleans up the list of deferred tasks, removing all that have completed successfully."""
-        if self.database is None:
-            raise Exception("No database.")
-        if user_id is None:
-            raise Exception("No user ID.")
-
-        new_tasks = []
-        tasks = self.database.retrieve_deferred_tasks(user_id)
-        for task in tasks:
-            if Keys.TASK_ID_KEY in task:
-                r = self.celery_worker.AsyncResult(task[Keys.TASK_ID_KEY])
-                if r.state != states.SUCCESS:
-                    new_tasks.append(task)
-        return self.database.set_deferred_tasks(user_id, new_tasks)
+        if status is None:
+            raise Exception("No status.")
+        return self.database.update_deferred_task(user_id, task_id, status)
 
     def import_file(self, username, user_id, local_file_name, uploaded_file_name):
         """Imports the contents of a local file into the database."""
@@ -459,7 +415,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         # TODO: Remove from each activity
-        gear_list = self.database.retrieve_gear_for_user(user_id)
+        gear_list = self.database.retrieve_gear(user_id)
         for gear in gear_list:
             pass
 
@@ -612,18 +568,21 @@ class DataMgr(Importer.ActivityWriter):
         tags.append('Race')
         tags.append('Commute')
         tags.append('Workout')
+        tags.append('Interval Workout')
+        tags.append('Brick Workout')
         tags.append('Hot')
         tags.append('Humid')
         tags.append('Cold')
         tags.append('Rainy')
         tags.append('Windy')
         tags.append('Virtual')
+        tags.append('Group Activity')
         return tags
 
     def list_tags_for_activity_type_and_user(self, user_id, activity_type):
         """Returns a list of tags that are valid for a particular activity type and user."""
         tags = self.list_default_tags()
-        gear_list = self.retrieve_gear_for_user(user_id)
+        gear_list = self.retrieve_gear(user_id)
         show_shoes = activity_type in Keys.FOOT_BASED_ACTIVITIES
         show_bikes = activity_type in Keys.BIKE_BASED_ACTIVITIES
         if activity_type == Keys.TYPE_RUNNING_KEY:
@@ -652,15 +611,15 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_tags(activity_id)
 
-    def associate_tag_with_activity(self, activity, tag):
+    def create_tags_on_activity(self, activity, tags):
         """Adds a tag to an activity."""
         if self.database is None:
             raise Exception("No database.")
         if activity is None:
             raise Exception("Bad parameter.")
-        if tag is None:
+        if tags is None:
             raise Exception("Bad parameter.")
-        return self.database.create_tag_on_activity(activity, tag)
+        return self.database.create_tags_on_activity(activity, tags)
 
     @staticmethod
     def distance_for_activity(activity):
@@ -746,7 +705,11 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         goal = self.database.retrieve_user_setting(user_id, Keys.GOAL_KEY)
-        goal_date = int(self.database.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY))
+        goal_date_str = self.database.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY)
+        if goal_date_str is not None:
+            goal_date = int(goal_date_str)
+        else:
+            goal_date = None
         return goal, goal_date
 
     def update_bests_for_activity(self, user_id, activity_id, activity_type, activity_time, bests):
@@ -884,13 +847,13 @@ class DataMgr(Importer.ActivityWriter):
         gear_id = uuid.uuid4()
         return self.database.create_gear(user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
 
-    def retrieve_gear_for_user(self, user_id):
+    def retrieve_gear(self, user_id):
         """Retrieve method for the gear with the specified ID."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_gear_for_user(user_id)
+        return self.database.retrieve_gear(user_id)
 
     def retrieve_gear_of_specified_type_for_user(self, user_id, gear_type):
         """Retrieve method for the gear with the specified ID."""
@@ -902,7 +865,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         final_gear_list = []
-        gear_list = self.database.retrieve_gear_for_user(user_id)
+        gear_list = self.database.retrieve_gear(user_id)
         for gear in gear_list:
             if Keys.GEAR_TYPE_KEY in gear:
                 if gear_type == gear[Keys.GEAR_TYPE_KEY]:
@@ -959,16 +922,6 @@ class DataMgr(Importer.ActivityWriter):
         if service_record_id is None:
             raise Exception("Bad parameter.")
         return self.database.delete_service_record(user_id, gear_id, service_record_id)
-
-    def associate_gear_with_activity(self, activity, gear_name):
-        """Adds gear to an activity."""
-        if self.database is None:
-            raise Exception("No database.")
-        if activity is None:
-            raise Exception("Bad parameter.")
-        if gear_name is None:
-            raise Exception("Bad parameter.")
-        return self.database.create_gear_on_activity(activity, gear_name)
 
     def generate_workout_plan(self, user_id):
         """Generates/updates a workout plan for the user with the specified ID."""
@@ -1045,6 +998,7 @@ class DataMgr(Importer.ActivityWriter):
                 if Keys.ACTIVITY_TYPE_KEY in activity_bests and Keys.ACTIVITY_TIME_KEY in activity_bests:
                     summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
 
+        # Output is a dictionary for each sport type.
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
         running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
         return cycling_bests, running_bests

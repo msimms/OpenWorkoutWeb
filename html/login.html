@@ -37,7 +37,7 @@
     }
 </script>
 
-<section class="loginbackground">
+<section class="loginbackground" id="loginbackground">
     <section class="loginform cf" style="width: 480px">
         <form name="create_login" action="javascript:submit_login()" accept-charset="utf-8">
             <ul>
@@ -57,6 +57,10 @@
         </form>
     </section>
 </section>
+
+<script>
+    set_background_style("loginbackground");
+</script>
 
 <section>
 ${readme}

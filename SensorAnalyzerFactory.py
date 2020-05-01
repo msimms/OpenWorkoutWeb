@@ -57,10 +57,10 @@ def create_with_data(sensor_type, data, activity_type, activity_user_id, data_mg
             py_version = sys.version_info[0]
             for datum in data:
                 if py_version < 3:
-                    time = int(datum.keys()[0])
+                    time = int(float(datum.keys()[0]))
                     value = float(datum.values()[0])
                 else:
-                    time = int(list(datum.keys())[0])
+                    time = int(float(list(datum.keys())[0]))
                     value = float(list(datum.values())[0])
                 sensor_analyzer.append_sensor_value(time, value)
     return sensor_analyzer

@@ -1,4 +1,26 @@
-# Copyright 2017 Michael J Simms
+# -*- coding: utf-8 -*-
+# 
+# # MIT License
+# 
+# Copyright (c) 2017 Mike Simms
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 """Database implementation"""
 
 import json
@@ -1438,21 +1460,17 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_tag_on_activity(self, activity, tag):
+    def create_tags_on_activity(self, activity, tags):
         """Adds a tag to the specified activity."""
         if activity is None:
-            self.log_error(MongoDatabase.create_tag_on_activity.__name__ + ": Unexpected empty object: activity")
+            self.log_error(MongoDatabase.create_tags_on_activity.__name__ + ": Unexpected empty object: activity")
             return False
-        if tag is None:
-            self.log_error(MongoDatabase.create_tag_on_activity.__name__ + ": Unexpected empty object: tag")
+        if tags is None:
+            self.log_error(MongoDatabase.create_tags_on_activity.__name__ + ": Unexpected empty object: tags")
             return False
 
         try:
-            data = []
-            if Keys.ACTIVITY_TAGS_KEY in activity:
-                data = activity[Keys.ACTIVITY_TAGS_KEY]
-            data.append(tag)
-            activity[Keys.ACTIVITY_TAGS_KEY] = data
+            activity[Keys.ACTIVITY_TAGS_KEY] = tags
             self.activities_collection.save(activity)
             return True
         except:
@@ -1802,32 +1820,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_gear_on_activity(self, activity, gear):
-        """Adds a tag to the specified activity."""
-        if activity is None:
-            self.log_error(MongoDatabase.create_gear_on_activity.__name__ + ": Unexpected empty object: activity")
-            return False
-        if gear is None:
-            self.log_error(MongoDatabase.create_gear_on_activity.__name__ + ": Unexpected empty object: gear")
-            return False
-
-        try:
-            data = []
-            if Keys.GEAR_KEY in activity:
-                data = activity[Keys.GEAR_KEY]
-            data.append(gear)
-            activity[Keys.GEAR_KEY] = data
-            self.activities_collection.save(activity)
-            return True
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return False
-
-    def retrieve_gear_for_user(self, user_id):
+    def retrieve_gear(self, user_id):
         """Retrieve method for the gear with the specified ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_gear_for_user.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.retrieve_gear.__name__ + ": Unexpected empty object: user_id")
             return None
 
         try:
@@ -2048,7 +2044,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_deferred_task(self, user_id, task_type, task_id, details):
+    def create_deferred_task(self, user_id, task_type, task_id, details, status):
         """Create method for tracking a deferred task, such as a file import or activity analysis."""
         if user_id is None:
             self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: user_id")
@@ -2058,6 +2054,9 @@ class MongoDatabase(Database.Database):
             return False
         if task_id is None:
             self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: task_id")
+            return False
+        if status is None:
+            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: status")
             return False
 
         try:
@@ -2072,16 +2071,24 @@ class MongoDatabase(Database.Database):
 
             # If the user's tasks document was found.
             if user_tasks is not None:
+
+                # Get the list of existing tasks.
                 deferred_tasks = []
                 if Keys.TASKS_KEY in user_tasks:
                     deferred_tasks = user_tasks[Keys.TASKS_KEY]
+
+                # Create an entry for the new task.
                 task = {}
                 task[Keys.TASK_ID_KEY] = task_id
                 task[Keys.TASK_TYPE_KEY] = task_type
-                if details is not None:
-                    task[Keys.TASK_DETAILS_KEY] = details
+                task[Keys.TASK_DETAILS_KEY] = details
+                task[Keys.TASK_STATUS_KEY] = status
+
+                # Append it to the list.
                 deferred_tasks.append(task)
                 user_tasks[Keys.TASKS_KEY] = deferred_tasks
+
+                # Update the database.
                 self.tasks_collection.save(user_tasks)
                 return True
         except:
@@ -2090,7 +2097,7 @@ class MongoDatabase(Database.Database):
         return False
 
     def retrieve_deferred_tasks(self, user_id):
-        """Retrieve method for returning all the deferred tasks of a given type."""
+        """Retrieve method for returning all the deferred tasks for a given user."""
         if user_id is None:
             self.log_error(MongoDatabase.retrieve_deferred_tasks.__name__ + ": Unexpected empty object: user_id")
             return None
@@ -2100,21 +2107,23 @@ class MongoDatabase(Database.Database):
             user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
 
             # If the user's tasks document was found.
-            if user_tasks is not None:
-                if Keys.TASKS_KEY in user_tasks:
-                    return user_tasks[Keys.TASKS_KEY]
+            if user_tasks is not None and Keys.TASKS_KEY in user_tasks:
+                return user_tasks[Keys.TASKS_KEY]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return []
 
-    def retrieve_deferred_tasks_of_type(self, user_id, task_type):
-        """Retrieve method for returning all the deferred tasks of a given type."""
+    def update_deferred_task(self, user_id, task_id, status):
+        """Updated method for deferred task status."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_deferred_tasks_of_type.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: user_id")
             return None
-        if task_type is None:
-            self.log_error(MongoDatabase.retrieve_deferred_tasks_of_type.__name__ + ": Unexpected empty object: task_type")
+        if task_id is None:
+            self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: task_id")
+            return False
+        if status is None:
+            self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: status")
             return False
 
         try:
@@ -2122,57 +2131,14 @@ class MongoDatabase(Database.Database):
             user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
 
             # If the user's tasks document was found.
-            if user_tasks is not None:
+            if user_tasks is not None and Keys.TASKS_KEY in user_tasks:
 
-                # Are there any deferred tasks?
-                if Keys.TASKS_KEY in user_tasks:
+                # Find and update the record.
+                for task in user_tasks:
+                    if Keys.TASK_ID_KEY in task and task[Keys.TASK_ID_KEY] == task_id:
+                        task[Keys.TASK_STATUS_KEY] = status
 
-                    # Copy out the tasks of the specified type.
-                    tasks = []
-                    for task in user_tasks[Keys.TASKS_KEY]:
-                        if Keys.TASK_TYPE_KEY == task_type:
-                            tasks.append(task)
-                    return tasks
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return []
-
-    def retrieve_deferred_tasks(self, user_id):
-        """Retrieve method for returning all the deferred tasks of a given type."""
-        if user_id is None:
-            self.log_error(MongoDatabase.retrieve_deferred_tasks_of_type.__name__ + ": Unexpected empty object: user_id")
-            return None
-
-        try:
-            # Find the user's tasks document.
-            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
-
-            # If the user's tasks document was found.
-            if user_tasks is not None:
-                if Keys.TASKS_KEY in user_tasks:
-                    return user_tasks[Keys.TASKS_KEY]
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return []
-
-    def set_deferred_tasks(self, user_id, tasks):
-        """Retrieve method for returning all the deferred tasks of a given type."""
-        if user_id is None:
-            self.log_error(MongoDatabase.set_deferred_tasks.__name__ + ": Unexpected empty object: user_id")
-            return None
-        if tasks is None:
-            self.log_error(MongoDatabase.set_deferred_tasks.__name__ + ": Unexpected empty object: tasks")
-            return None
-
-        try:
-            # Find the user's tasks document.
-            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
-
-            # If the user's tasks document was found.
-            if user_tasks is not None:
-                user_tasks[Keys.TASKS_KEY] = tasks
+                # Update the database.
                 self.tasks_collection.save(user_tasks)
                 return True
         except:

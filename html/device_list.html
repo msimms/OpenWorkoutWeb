@@ -37,7 +37,7 @@
         if (last_heard_from > 0)
         {
             cell = new_row.insertCell();
-            text = document.createTextNode(unix_time_to_local_string(last_heard_from));
+            var text = document.createTextNode(unix_time_to_local_string(last_heard_from));
             cell.appendChild(text);
         }
     }
@@ -46,9 +46,20 @@
     {
 		var device_table = document.getElementById("Devices");
 
-        for (var record of records)
+        if (records.length > 0)
         {
-            append_to_devices_table(device_table, record.DeviceId, record.last_heard_from);
+            var new_row = device_table.insertRow();
+            var cell = new_row.insertCell();
+            var text = document.createTextNode("Unique Identifier");
+            cell.appendChild(text);
+            cell = new_row.insertCell();
+            text = document.createTextNode("Last Heard From");
+            cell.appendChild(text);
+
+            for (var record of records)
+            {
+                append_to_devices_table(device_table, record.DeviceId, record.last_heard_from);
+            }
         }
     }
 

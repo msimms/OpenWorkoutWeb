@@ -27,15 +27,55 @@
 <script type="text/javascript" src="${root_url}/jquery-timepicker/jquery.timepicker.js"></script>
 <link rel="stylesheet" type="text/css" href="${root_url}/jquery-timepicker/jquery.timepicker.css" />
 
+
+<script>
+    function append_to_table(table, task_id, task_type, task_details, task_status)
+    {
+        var new_row = table.insertRow();
+
+        cell = new_row.insertCell();
+        text = document.createTextNode(task_id);
+        cell.appendChild(text);
+
+        cell = new_row.insertCell();
+        text = document.createTextNode(task_type);
+        cell.appendChild(text);
+
+        cell = new_row.insertCell();
+        text = document.createTextNode(task_details);
+        cell.appendChild(text);
+
+        cell = new_row.insertCell();
+        text = document.createTextNode(task_status);
+        cell.appendChild(text);
+    }
+
+    var process_task_statuses = function(records)
+    {
+        var table = document.getElementById("task_statuses");
+
+        for (var record of records)
+        {
+            append_to_table(table, record["task id"], record["task type"], record["task details"], record["task status"]);
+        }
+    }
+
+    function get_task_statuses()
+    {
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_task_statuses", cache: false, success: process_task_statuses, dataType: "json" });
+    }
+
+    get_task_statuses();
+</script>
+
 <section class="nav">
 ${nav}
 </section>
 
 <div class="block" id="block" style="width: 600px">
 	<h2>Status</h2>
-	<table>
-    <td><b>Task ID</b></td><td><b>Status</b></td><tr>
-	${table_str}
+	<table id="task_statuses">
+    <td><b>ID</b></td><td><b>Type</b></td><td><b>Details</b></td><td><b>Status</b></td><tr>
 	</table>
 </div>
 
