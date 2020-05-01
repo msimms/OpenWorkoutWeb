@@ -426,7 +426,7 @@ version: v1
             500: An internal exception was thrown.
     post:
 /get_workout_ical_url:
-    description:
+    description: Returns a link to the ical url for their planned workouts.
     get:
         responses:
             200: A URL string.
@@ -434,7 +434,7 @@ version: v1
             500: An internal exception was thrown.
     post:
 /get_location_description:
-    description:
+    description: Returns the political location that corresponds to an activity.
     get:
         responses:
             200:
@@ -443,16 +443,16 @@ version: v1
             500: An internal exception was thrown.
     post:
 /get_location_summary:
-    description:
+    description: Returns the summary of all political locations in which activities have occurred. Result is a JSON string.
     get:
         responses:
-            200:
+            200: A JSON formatted string.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
 /activity_id_from_hash:
-    description:
+    description: Given the activity ID, return sthe activity hash, or an error if not found. Only looks at the logged in user's activities.
     get:
         responses:
             200:
@@ -461,7 +461,7 @@ version: v1
             500: An internal exception was thrown.
     post:
 /activity_hash_from_id:
-    description:
+    description: Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities.
     get:
         responses:
             200:
@@ -470,46 +470,46 @@ version: v1
             500: An internal exception was thrown.
     post:
 /list_personal_records:
-    description:
+    description: Returns the user's personal records. Result is a JSON string.
     get:
         responses:
-            200:
+            200: A JSON formatted string.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
 /get_running_paces:
-    description:
+    description: Returns the user's estimated running paces. Result is a JSON string.
     get:
         responses:
-            200:
+            200: A JSON formatted string.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
 /get_distance_for_tag:
-    description:
+    description: Returns the amount of distance logged to activities with the given tag. Result is a JSON string.
     get:
         responses:
-            200:
+            200: A JSON formatted string.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
 /get_task_statuses:
-    description:
+    description: Returns a description of all deferred tasks for the logged in user. Result is a JSON string.
     get:
         responses:
-            200:
+            200: A JSON formatted string.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
 /get_record_progression:
-    description:
+    description: Returns an ordered list containing the time and activity ID of the user's record progression for the specified record and activity type, i.e. best running 5K. Result is a JSON string.
     get:
         responses:
-            200:
+            200: A JSON formatted string.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.

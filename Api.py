@@ -1464,6 +1464,7 @@ class Api(object):
         return True, json.dumps(tasks)
 
     def handle_get_record_progression(self, values):
+        """Returns an ordered list containing the time and activity ID of the user's record progression for the specified record and activity type, i.e. best running 5K. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_TYPE_KEY not in values:
