@@ -234,6 +234,10 @@ ${route}
 
 </div>
 
+<div class="overlay" id="overlay">
+    <div class="overlay_text" id="overlay_text">RACE</div>
+</div>
+
 <section class="summary">
 <ul id="summary">
 ${summary}
@@ -434,6 +438,22 @@ ${powerZones}
         }
     }
 
+    var process_tags = function(tags)
+    {
+        tags = eval(tags)
+        for (var tag in tags)
+        {
+            if (tags[tag] == "Race")
+                document.getElementById("overlay").style.display = "block";
+        }
+    }
+
+    function list_tags(tags)
+    {
+        var api_url = "${root_url}/api/1.0/list_tags?activity_id=${activityId}";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_tags, dataType: "text" });
+    }
+
     function create_tags(tags)
     {
         var the_url = "${root_url}/api/1.0/create_tags_on_activity";
@@ -442,9 +462,7 @@ ${powerZones}
 
         dict.push({["activity_id"] : "${activityId}"});
         for (var tag in tags)
-        {
             dict.push({["tag" + tag] : tags[tag]});
-        }
         if (!send_post_request(the_url, dict, result_text))
             alert(result_text.value);
     }
@@ -457,6 +475,8 @@ ${powerZones}
             create_tags(jQuery("#tags").val());
         });
     });
+
+    //list_tags();
 </script>
 
 <hr>

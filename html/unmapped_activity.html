@@ -200,9 +200,7 @@ ${zAxis}
 
         dict.push({["activity_id"] : "${activityId}"});
         for (var tag in tags)
-        {
             dict.push({["tag" + tag] : tags[tag]});
-        }
         if (!send_post_request(the_url, dict, result_text))
             alert(result_text.value);
     }
