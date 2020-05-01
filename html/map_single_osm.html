@@ -441,7 +441,7 @@ ${powerZones}
         }
     }
 
-    function list_tags(tags)
+    function list_tags()
     {
         var api_url = "${root_url}/api/1.0/list_tags?activity_id=${activityId}";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_tags, dataType: "text" });
