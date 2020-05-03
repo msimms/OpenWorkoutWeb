@@ -47,6 +47,7 @@ class RunPlanGenerator(object):
 
         goal_distance = inputs[Keys.GOAL_RUN_DISTANCE_KEY]
         goal_type = inputs[Keys.GOAL_TYPE_KEY]
+        interval_run_pace = inputs[Keys.INTERVAL_RUN_PACE]
         speed_run_pace = inputs[Keys.SPEED_RUN_PACE]
         tempo_run_pace = inputs[Keys.TEMPO_RUN_PACE]
         long_run_pace = inputs[Keys.LONG_RUN_PACE]
@@ -85,7 +86,7 @@ class RunPlanGenerator(object):
             interval_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_INTERVAL_SESSION, self.user_id)
             interval_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
             interval_run_workout.add_warmup(5 * 60)
-            interval_run_workout.add_interval(selected_interval_workout[0], selected_interval_workout[1], speed_run_pace, selected_interval_workout[1] * 2, easy_run_pace)
+            interval_run_workout.add_interval(selected_interval_workout[0], selected_interval_workout[1], interval_run_pace, selected_interval_workout[1] * 2, easy_run_pace)
             interval_run_workout.add_cooldown(5 * 60)
             workouts.append(interval_run_workout)
 

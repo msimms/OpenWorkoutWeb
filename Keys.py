@@ -207,6 +207,7 @@ LONG_RUN_PACE = "Long Run Pace"
 EASY_RUN_PACE = "Easy Run Pace"
 TEMPO_RUN_PACE = "Tempo Run Pace"
 SPEED_RUN_PACE = "Speed Run Pace"
+INTERVAL_RUN_PACE = "Interval Run Pace"
 
 # Keys used to manage gear.
 GEAR_KEY = "gear"
