@@ -269,10 +269,20 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
 
                 # Do a k-means analysis on the computed paces blocks so we can get rid of any outliers.
                 significant_intervals = []
-                tags = kmeans.kmeans_equally_space_centroids_1_d(self.speed_blocks, 2, 1, len(self.speed_blocks))
+                best_avg_error = 0
+                best_k = 0
+                best_tags = []
+                for k in range(2, 8):
+                    tags, avg_error = kmeans.kmeans_equally_space_centroids_1_d(self.speed_blocks, k, 1, len(self.speed_blocks))
+                    if best_k == 0 or avg_error <= best_avg_error:
+                        best_avg_error = avg_error
+                        best_k = k
+                        best_tags = tags
+
+                # Save off the significant peaks.
                 interval_index = 0
-                for tag in tags:
-                    if tag == 1:
+                for tag in best_tags:
+                    if tag >= 1:
                         significant_intervals.append(all_intervals[interval_index])
                     interval_index = interval_index + 1
 
