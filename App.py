@@ -619,24 +619,8 @@ class App(object):
         summary += "\t<li>Name: " + name + "</li>\n"
 
         # Add the location description.
-        if summary_data is not None:
-            if Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
-                summary += "\t<li>Location: " + App.render_array_reversed(summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]) + "</li>\n"
-
-        # Compute location-based things. Once I figure out more of the OSM API then I won't need this as it's already done client-side when using Google Maps.
-        if not self.google_maps_key:
-            location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
-            location_analyzer.append_locations(locations)
-
-            if location_analyzer.total_distance is not None:
-                value, value_units = Units.convert_to_distance_for_the_specified_unit_system(unit_system, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
-                summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
-
-            if location_analyzer.avg_speed is not None and location_analyzer.avg_speed > 0:
-                if is_foot_based_activity:
-                    summary += "\t<li>Avg. Pace: " + Units.convert_to_string_in_specified_unit_system(unit_system, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
-                else:
-                    summary += "\t<li>Avg. Speed: " + Units.convert_to_string_in_specified_unit_system(unit_system, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
+        if summary_data is not None and Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
+            summary += "\t<li>Location: " + App.render_array_reversed(summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]) + "</li>\n"
 
         # Build the detailed analysis table from data that was computed out-of-band and cached.
         details_str = ""

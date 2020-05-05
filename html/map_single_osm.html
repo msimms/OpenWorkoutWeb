@@ -70,9 +70,12 @@ ${nav}
     var last_lat = ${lastLat}
     var last_lon = ${lastLon}
 
-    function new_coord(x, y)
+    function append_to_summary_list(key, value)
     {
-        return new OpenLayers.LonLat(x, y);
+        var ul = document.getElementById("summary");
+        var li = document.createElement("li");
+        li.appendChild(document.createTextNode(key + " " + value));
+        ul.appendChild(li);
     }
 
     var append_to_track = function(response)
@@ -82,20 +85,20 @@ ${nav}
         if (response.length < 3)
             return;
 
-        var objList = JSON.parse(response);
-        if (objList == null)
+        var obj_list = JSON.parse(response);
+        if (obj_list == null)
             return;
-        if (objList.length == 0)
+        if (obj_list.length == 0)
             return;
 
         var coordinates = feature.getGeometry().getCoordinates();
-        for (var i = 0; i < objList.length; ++i)
+        for (var i = 0; i < obj_list.length; ++i)
         {
-            coordinates.push(new OpenLayers.LonLat(objList[i].latitude, objList[i].longitude));
+            coordinates.push(new OpenLayers.LonLat(obj_list[i].latitude, obj_list[i].longitude));
         }
 
-        last_lat = objList[objList.length - 1].latitude;
-        last_lon = objList[objList.length - 1].longitude;
+        last_lat = obj_list[obj_list.length - 1].latitude;
+        last_lon = obj_list[obj_list.length - 1].longitude;
     };
 
     var update_metadata = function(response)
@@ -112,17 +115,17 @@ ${nav}
 
         if (response.length >= 3)
         {
-            var objList = JSON.parse(response);
-            if (objList == null)
+            var obj_list = JSON.parse(response);
+            if (obj_list == null)
                 return;
 
-            for (var i = 0; i < objList.length; ++i)
+            for (var i = 0; i < obj_list.length; ++i)
             {
-                if ((objList[i].name != "Name") && (objList[i].name != "Avg. Speed"))
+                if ((obj_list[i].name != "Name") && (obj_list[i].name != "Avg. Speed"))
                 {
-                    content_string += objList[i].name;
+                    content_string += obj_list[i].name;
                     content_string += " = ";
-                    content_string += objList[i].value;
+                    content_string += obj_list[i].value;
                     content_string += "<br>";
                 }
             }
@@ -133,13 +136,13 @@ ${nav}
             '</div>' +
             '</div>';
 
-        var lonLat = new OpenLayers.LonLat(last_lon, last_lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
+        var lon_lat = new OpenLayers.LonLat(last_lon, last_lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
         var markers = new OpenLayers.Layer.Markers("Markers");
         map.addLayer(markers);    
-        markers.addMarker(new OpenLayers.Marker(lonLat));
+        markers.addMarker(new OpenLayers.Marker(lon_lat));
     };
 
-    var routeLoaded = function(response, options)
+    var route_loaded = function(response, options)
     {
         if (options.callback)
         {
@@ -172,17 +175,44 @@ ${nav}
         } );
 
         // Data source.... export the activity as GPX.
-        var vectorSource = new OpenLayers.Protocol.HTTP({
+        var gpx_format = new OpenLayers.Format.GPX();
+        var vector_source = new OpenLayers.Protocol.HTTP({
             url: "${root_url}/api/1.0/export_activity?activity_id=${activityId}&export_format=gpx",
-            format: new OpenLayers.Format.GPX()
+            format: gpx_format
         });
 
         // Add the layer with the GPX track.
+        proj = new OpenLayers.Projection("EPSG:4326");
         lgpx = new OpenLayers.Layer.Vector("", {
             strategies: [new OpenLayers.Strategy.Fixed()],
-            protocol: vectorSource,
+            protocol: vector_source,
             style: {strokeColor: "red", strokeWidth: 3, strokeOpacity: 0.75},
-            projection: new OpenLayers.Projection("EPSG:4326")
+            projection: proj
+        });
+        lgpx.events.register("loadend", lgpx, function() {
+            var features = lgpx.features[0];
+            var route_coordinates = [];
+            var components = features.geometry.components;
+
+            for (var i = 0; i < components.length; ++i) {
+                var lat_lon = OpenLayers.Projection.transform(components[i], 'EPSG:3857', 'EPSG:4326');
+                route_coordinates.push(lat_lon);
+            }
+
+            // Analyze the route, compute the total distance, avg. speed, etc.
+            var meters_traveled = total_distance_osm(route_coordinates);
+            var distance_traveled_str = convert_distance_to_unit_system_str("${unit_system}", meters_traveled);
+            append_to_summary_list("Distance", distance_traveled_str);
+            if (${is_foot_based_activity})
+            {
+                var pace_str = convert_distance_and_duration_to_pace_str("${unit_system}", meters_traveled, ${duration});
+                append_to_summary_list("Avg. Pace:", pace_str);
+            }
+            else
+            {
+                var speed_str = convert_distance_and_duration_to_speed_str("${unit_system}", meters_traveled, ${duration});
+                append_to_summary_list("Avg. Speed:", speed_str);
+            }
         });
         map.addLayer(lgpx);
 
@@ -194,23 +224,8 @@ ${nav}
         var lat = last_lat;
         var lon = last_lon;
         var zoom = 13;
-        var lonLat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
-        map.setCenter(lonLat, zoom);
-
-        // Analyze the route, compute the total distance, avg. speed, etc.
-        //var metersTraveled = total_distance_osm(routeCoordinates);
-        //var distance_traveled_str = convert_distance_to_unit_system_str("${unit_system}", meters_traveled);
-        //var pace_str = convert_distance_and_duration_to_pace_str("${unit_system}", meters_traveled, ${duration});
-        //if (${is_foot_based_activity})
-        //{
-        //    var pace_str = convert_distance_and_duration_to_pace_str("${unit_system}", meters_traveled, ${duration});
-        //    append_to_summary_list("Avg. Pace:", pace_str);
-        //}
-        //else
-        //{
-        //    var speed_str = convert_distance_and_duration_to_speed_str("${unit_system}", meters_traveled, ${duration});
-        //    append_to_summary_list("Avg. Speed:", speed_str);
-        //}
+        var lon_lat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
+        map.setCenter(lon_lat, zoom);
 
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: update_metadata, dataType: "text" });
     }
@@ -241,7 +256,7 @@ ${summary}
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
 <script type="text/javascript">
-	function drawGraph(data, title, color)
+	function draw_graph(data, title, color)
 	{
 		var margin = {top: 20, right: 20, bottom: 20, left: 50},
 			width = $("#charts").width() - margin.left - margin.right,
@@ -286,7 +301,7 @@ ${summary}
 			.text(title);
 	}
 
-	function drawBarChart(data, title, color)
+	function draw_bar_chart(data, title, color)
 	{
 		var margin = {top: 20, right: 20, bottom: 55, left: 50},
 			width = $("#charts").width() - margin.left - margin.right,
@@ -352,15 +367,15 @@ ${powerZones}
     ];
 
 	if (speeds.length > 0)
-		$(function() { drawGraph(speeds, "Speed", "DodgerBlue") });
+		$(function() { draw_graph(speeds, "Speed", "DodgerBlue") });
 	if (heartRates.length > 0)
-		$(function() { drawGraph(heartRates, "BPM", "FireBrick") });
+		$(function() { draw_graph(heartRates, "BPM", "FireBrick") });
 	if (cadences.length > 0)
-		$(function() { drawGraph(cadences, "RPM", "ForestGreen") });
+		$(function() { draw_graph(cadences, "RPM", "ForestGreen") });
 	if (powers.length > 0)
-		$(function() { drawGraph(powers, "Watts", "ForestGreen") });
+		$(function() { draw_graph(powers, "Watts", "ForestGreen") });
 	if (powerZones.length > 0)
-		$(function() { drawBarChart(powerZones, "Power Zone Distribution", "ForestGreen") });
+		$(function() { draw_bar_chart(powerZones, "Power Zone Distribution", "ForestGreen") });
 </script>
 
 </div>

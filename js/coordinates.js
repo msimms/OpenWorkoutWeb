@@ -75,6 +75,11 @@ function total_distance_osm(coordinates)
 
     for (var coordinate of coordinates)
     {
+        if (last_coordinate != null)
+        {
+            var meters_traveled = haversine_distance_ignore_altitude(coordinate.y, coordinate.x, last_coordinate.y, last_coordinate.x);
+            total_distance_meters += meters_traveled;
+        }
         last_coordinate = coordinate;
     }
     return total_distance_meters;
