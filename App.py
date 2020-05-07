@@ -45,7 +45,6 @@ except ImportError:
     from io import StringIO ## for Python 3
 
 import Keys
-import LocationAnalyzer
 import Api
 import BmiCalculator
 import DataMgr
