@@ -40,3 +40,6 @@ tempmod/
 
 # Session management
 sessions/
+
+# Celery
+celerybeat-schedule

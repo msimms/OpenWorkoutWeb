@@ -41,9 +41,9 @@ class RunPlanGenerator(object):
     def gen_workouts_for_next_week(self, inputs):
         """Generates the workouts for the next week, but doesn't schedule them."""
 
+        workouts = []
+
         # 3 Critical runs: Speed session, tempo run, and long run
-        # Long run: 10%/week increase for an experienced runner
-        # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
 
         goal_distance = inputs[Keys.GOAL_RUN_DISTANCE_KEY]
         goal_type = inputs[Keys.GOAL_TYPE_KEY]
@@ -54,13 +54,7 @@ class RunPlanGenerator(object):
         easy_run_pace = inputs[Keys.EASY_RUN_PACE]
         longest_run_in_four_weeks = inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY]
 
-        # Compute the longest run needed to accomplish the goal.
-        # This equation was derived by playing with trendlines in Apple Numbers.
-        # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.
-        max_run_distance = ((-0.002 * goal_distance) *  (-0.002 * goal_distance)) + (0.7 * goal_distance) + 4.4
-        max_run_distance = max_run_distance * 1000 # Convert from km to meters
-
-        # Handle situation in which the user hasn't run in four weeks
+        # Handle situation in which the user hasn't run in four weeks.
         if longest_run_in_four_weeks is None:
             raise Exception("No runs in the last four weeks.")
 
@@ -68,11 +62,18 @@ class RunPlanGenerator(object):
         if speed_run_pace is None or tempo_run_pace is None or long_run_pace is None or easy_run_pace is None:
             raise Exception("No run pace data.")
 
+        # Long run: 10%/week increase for an experienced runner
+        # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
+
+        # Compute the longest run needed to accomplish the goal.
+        # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.
+        # This equation was derived by playing with trendlines in a spreadsheet.
+        max_run_distance = ((-0.002 * goal_distance) *  (-0.002 * goal_distance)) + (0.7 * goal_distance) + 4.4
+        max_run_distance = max_run_distance * 1000 # Convert from km to meters
+
         # Handle situation in which the user is already meeting or exceeding the goal distance.
         if longest_run_in_four_weeks >= max_run_distance:
             longest_run_in_four_weeks = max_run_distance
-
-        workouts = []
 
         # The user cares about speed as well as completing the distance. Also note that we should add strikes to one of the other workouts.
         if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower():
@@ -99,15 +100,12 @@ class RunPlanGenerator(object):
             speed_run_workout.add_cooldown(5 * 60)
             workouts.append(speed_run_workout)
 
-        # The user only cares about completing the distance.
-        else:
-
-            # Add an easy run.
-            interval_distance = RunPlanGenerator.nearest_interval_distance(longest_run_in_four_weeks / 5)
-            easy_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RUN, self.user_id)
-            easy_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
-            easy_run_workout.add_interval(1, interval_distance, easy_run_pace, 0, 0)
-            workouts.append(easy_run_workout)
+        # Add an easy run.
+        interval_distance = RunPlanGenerator.nearest_interval_distance(longest_run_in_four_weeks / 5)
+        easy_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RUN, self.user_id)
+        easy_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
+        easy_run_workout.add_interval(1, interval_distance, easy_run_pace, 0, 0)
+        workouts.append(easy_run_workout)
 
         # Add a tempo run. Run should be 20-30 minutes in duration.
         interval_distance = RunPlanGenerator.nearest_interval_distance(30.0 * tempo_run_pace)
@@ -118,7 +116,7 @@ class RunPlanGenerator(object):
         tempo_run_workout.add_cooldown(5 * 60)
         workouts.append(tempo_run_workout)
 
-        # Add a long run
+        # Add a long run.
         long_run_distance = longest_run_in_four_weeks * 1.1
         if long_run_distance > max_run_distance:
             long_run_distance = max_run_distance 

@@ -65,6 +65,7 @@ class DataMgr(Importer.ActivityWriter):
         """Destructor"""
         self.analysis_scheduler = None
         self.import_scheduler = None
+        self.workout_plan_gen_scheduler = None
         self.database = None
 
     def total_users_count(self):
@@ -831,6 +832,12 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.delete_workout(user_id, workout_id)
 
+    def retrieve_users_without_scheduled_workouts(self):
+        """Returns a list of user IDs for users who have workout plans that need to be re-run."""
+        if self.database is None:
+            raise Exception("No database.")
+        return self.database.retrieve_users_without_scheduled_workouts()
+
     def create_gear(self, user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Create method for gear."""
         if self.database is None:
@@ -925,11 +932,11 @@ class DataMgr(Importer.ActivityWriter):
 
     def generate_workout_plan(self, user_id):
         """Generates/updates a workout plan for the user with the specified ID."""
-        if self.database is None:
-            raise Exception("No database.")
+        if self.workout_plan_gen_scheduler is None:
+            raise Exception("No workout scheduler.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        self.workout_plan_gen_scheduler.add_to_queue(user_id, self.track_workout_plan_task)
+        self.workout_plan_gen_scheduler.add_to_queue(user_id, self)
 
     def get_location_description(self, activity_id):
         """Returns the political location that corresponds to an activity."""

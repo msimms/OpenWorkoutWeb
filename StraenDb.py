@@ -30,6 +30,7 @@ import traceback
 import uuid
 from bson.objectid import ObjectId
 import pymongo
+import time
 import Database
 import InputChecker
 import Keys
@@ -1601,10 +1602,13 @@ class MongoDatabase(Database.Database):
                     workouts_doc[Keys.WORKOUT_PLAN_CALENDAR_ID_KEY] = str(uuid.uuid4()) # Create a calendar ID
 
                 # Make sure this workout isn't already in the list.
+                last_scheduled_workout = 0
                 workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
                 for workout in workouts_list:
                     if Keys.WORKOUT_ID_KEY in workout and workout[Keys.WORKOUT_ID_KEY] == workout_obj.workout_id:
                         return False
+                    if Keys.WORKOUT_SCHEDULED_TIME_KEY in workout and workout[Keys.WORKOUT_SCHEDULED_TIME_KEY] > last_scheduled_workout:
+                        last_scheduled_workout = workout[Keys.WORKOUT_SCHEDULED_TIME_KEY]
 
                 # Add the workout to the list.
                 workout = workout_obj.to_dict()
@@ -1612,6 +1616,7 @@ class MongoDatabase(Database.Database):
 
                 # Update and save the document.
                 workouts_doc[Keys.WORKOUT_LIST_KEY] = workouts_list
+                workouts_doc[Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY] = last_scheduled_workout
                 self.workouts_collection.save(workouts_doc)
                 return True
         except:
@@ -1776,6 +1781,21 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
+
+    def retrieve_users_without_scheduled_workouts(self):
+        """Returns a list of user IDs for users who have workout plans that need to be re-run."""
+        try:
+            user_ids = []
+            workout_docs = self.workouts_collection.find()
+            for workout_doc in workout_docs:
+                now = time.time()
+                if Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY in workout_doc and workout_doc[Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY] < now:
+                    user_id = workout_doc[Keys.WORKOUT_PLAN_USER_ID_KEY]
+                    user_ids = user_id
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return user_ids
 
     def create_gear(self, user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Create method for gear."""

@@ -25,5 +25,19 @@
 
 from __future__ import absolute_import
 import celery
+import DataMgr
+
 celery_worker = celery.Celery('straen_worker', include=['ActivityAnalyzer', 'ImportWorker', 'WorkoutPlanGenerator'])
 celery_worker.config_from_object('CeleryConfig')
+
+@celery_worker.task()
+def check_for_ungenerated_workout_plans():
+    """Checks for users that need their workout plan regenerated."""
+    data_mgr = DataMgr.DataMgr("", None, None, None)
+    user_ids = data_mgr.retrieve_users_without_scheduled_workouts()
+    #for user_id in user_ids:
+    #    data_mgr.generate_workout_plan(user_id)
+
+@celery_worker.on_after_configure.connect
+def setup_periodic_tasks(**kwargs):
+    celery_worker.add_periodic_task(60.0, check_for_ungenerated_workout_plans.s(), name='Check for workout plans that need to be re-generated.')
