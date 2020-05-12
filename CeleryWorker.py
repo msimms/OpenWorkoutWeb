@@ -42,4 +42,4 @@ def check_for_ungenerated_workout_plans():
 
 @celery_worker.on_after_configure.connect
 def setup_periodic_tasks(**kwargs):
-    celery_worker.add_periodic_task(60.0, check_for_ungenerated_workout_plans.s(), name='Check for workout plans that need to be re-generated.')
+    celery_worker.add_periodic_task(600.0, check_for_ungenerated_workout_plans.s(), name='Check for workout plans that need to be re-generated.')
