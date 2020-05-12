@@ -23,14 +23,6 @@
 # SOFTWARE.
 """Schedules computationally expensive analysis tasks"""
 
-import sys
-import traceback
-
-from bson.json_util import dumps
-from ActivityAnalyzer import analyze_activity
-
-import Keys
-
 class AnalysisScheduler(object):
     """Class for scheduling computationally expensive analysis tasks."""
 
@@ -39,6 +31,14 @@ class AnalysisScheduler(object):
         super(AnalysisScheduler, self).__init__()
 
     def add_to_queue(self, activity, activity_user_id, data_mgr):
+        import sys
+        import traceback
+
+        from bson.json_util import dumps
+        from ActivityAnalyzer import analyze_activity
+
+        import Keys
+
         """Adds the activity ID to the list of activities to be analyzed."""
         if not self.enabled:
             return

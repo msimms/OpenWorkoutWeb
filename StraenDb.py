@@ -1791,7 +1791,7 @@ class MongoDatabase(Database.Database):
                 now = time.time()
                 if Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY in workout_doc and workout_doc[Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY] < now:
                     user_id = workout_doc[Keys.WORKOUT_PLAN_USER_ID_KEY]
-                    user_ids = user_id
+                    user_ids.append(user_id)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

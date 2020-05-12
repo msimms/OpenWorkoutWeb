@@ -23,13 +23,6 @@
 # SOFTWARE.
 """Schedules computationally expensive import tasks"""
 
-import sys
-import traceback
-import Keys
-
-from bson.json_util import dumps
-from ImportWorker import import_activity
-
 class ImportScheduler(object):
     """Class for scheduling computationally expensive import tasks."""
 
@@ -38,6 +31,13 @@ class ImportScheduler(object):
 
     def add_to_queue(self, username, user_id, uploaded_file_data, uploaded_file_name, data_mgr):
         """Adds the activity ID to the list of activities to be analyzed."""
+        import sys
+        import traceback
+        import Keys
+
+        from bson.json_util import dumps
+        from ImportWorker import import_activity
+
         try:
             params = {}
             params['username'] = username
