@@ -1002,13 +1002,15 @@ class DataMgr(Importer.ActivityWriter):
         if all_activity_bests is not None:
             for activity_id in all_activity_bests:
                 activity_bests = all_activity_bests[activity_id]
-                if Keys.ACTIVITY_TYPE_KEY in activity_bests and Keys.ACTIVITY_TIME_KEY in activity_bests:
+                if activity_bests is not None and Keys.ACTIVITY_TYPE_KEY in activity_bests and Keys.ACTIVITY_TIME_KEY in activity_bests:
                     summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
 
         # Output is a dictionary for each sport type.
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
         running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
-        return cycling_bests, running_bests
+        cycling_summary = summarizer.get_summary_dictionary(Keys.TYPE_CYCLING_KEY)
+        running_summary = summarizer.get_summary_dictionary(Keys.TYPE_RUNNING_KEY)
+        return cycling_bests, running_bests, cycling_summary, running_summary
 
     def retrieve_bests_for_activity_type(self, user_id, activity_type, key):
         """Return a sorted list of all records for the given activity type and key."""

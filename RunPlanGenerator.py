@@ -53,6 +53,7 @@ class RunPlanGenerator(object):
         long_run_pace = inputs[Keys.LONG_RUN_PACE]
         easy_run_pace = inputs[Keys.EASY_RUN_PACE]
         longest_run_in_four_weeks = inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY]
+        avg_run_distance = inputs[Keys.AVG_RUNNING_DISTANCE]
 
         # Handle situation in which the user hasn't run in four weeks.
         if longest_run_in_four_weeks is None:
@@ -101,7 +102,7 @@ class RunPlanGenerator(object):
             workouts.append(speed_run_workout)
 
         # Add an easy run.
-        interval_distance = RunPlanGenerator.nearest_interval_distance(longest_run_in_four_weeks / 5)
+        interval_distance = RunPlanGenerator.nearest_interval_distance(avg_run_distance)
         easy_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RUN, self.user_id)
         easy_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
         easy_run_workout.add_interval(1, interval_distance, easy_run_pace, 0, 0)

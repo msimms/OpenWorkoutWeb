@@ -112,7 +112,7 @@ class WorkoutPlanGenerator(object):
         self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb)
 
         # Look through the user's six month records.
-        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.SIX_MONTHS)
+        cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.SIX_MONTHS)
 
         # Estimate running paces from the user's six month records.
         if running_bests is not None:
@@ -129,7 +129,7 @@ class WorkoutPlanGenerator(object):
                     self.data_mgr.store_user_estimated_ftp(user_id, threshold_power)
 
         # Look through the user's four week records.
-        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.FOUR_WEEKS)
+        cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.FOUR_WEEKS)
         if running_bests is not None:
             if Keys.LONGEST_DISTANCE in running_bests:
                 longest_run_in_four_weeks = running_bests[Keys.LONGEST_DISTANCE]
@@ -138,6 +138,18 @@ class WorkoutPlanGenerator(object):
         # Compute the user's age in years.
         birthday = int(self.user_mgr.retrieve_user_setting(user_id, Keys.BIRTHDAY_KEY))
         age_years = (now - birthday) / (365.25 * 24 * 60 * 60)
+
+        # Compute average running and cyclist distances.
+        avg_cycling_distance = 0.0
+        avg_running_distance = 0.0
+        if cycling_summary is not None:
+            if Keys.TOTAL_ACTIVITIES in cycling_summary and Keys.TOTAL_DISTANCE in cycling_summary:
+                if cycling_summary[Keys.TOTAL_ACTIVITIES] > 0.0:
+                    avg_cycling_distance = cycling_summary[Keys.TOTAL_DISTANCE] / cycling_summary[Keys.TOTAL_ACTIVITIES]
+        if running_summary is not None:
+            if Keys.TOTAL_ACTIVITIES in running_summary and Keys.TOTAL_DISTANCE in running_summary:
+                if running_summary[Keys.TOTAL_ACTIVITIES] > 0.0:
+                    avg_running_distance = running_summary[Keys.TOTAL_DISTANCE] / running_summary[Keys.TOTAL_ACTIVITIES]
 
         # Compute an experience level for the user.
         experience_level = 0
@@ -156,6 +168,8 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.GOAL_KEY] = goal
         inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
+        inputs[Keys.AVG_CYCLING_DISTANCE] = avg_cycling_distance
+        inputs[Keys.AVG_RUNNING_DISTANCE] = avg_running_distance
 
         # Adds the goal distances to the inputs.
         inputs = WorkoutPlanGenerator.calculate_goal_distances(inputs)
@@ -206,6 +220,8 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.GOAL_KEY])
         model_inputs.append(inputs[Keys.GOAL_TYPE_KEY])
         model_inputs.append(inputs[Keys.WEEKS_UNTIL_GOAL_KEY])
+        model_inputs.append(inputs[Keys.AVG_CYCLING_DISTANCE])
+        model_inputs.append(inputs[Keys.AVG_RUNNING_DISTANCE])
 
         workouts = []
         return workouts
