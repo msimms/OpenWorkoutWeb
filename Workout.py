@@ -202,8 +202,9 @@ class Workout(object):
             recovery_pace_minute = interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY]
 
             result += "Interval: "
-            result += str(num_repeats)
-            result += " x "
+            if num_repeats > 1:
+                result += str(num_repeats)
+                result += " x "
             result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
             result += " at "
             result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
