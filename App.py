@@ -125,6 +125,7 @@ class App(object):
         self.map_single_google_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
         self.map_multi_html_file = os.path.join(root_dir, HTML_DIR, 'map_multi_google.html')
         self.error_logged_in_html_file = os.path.join(root_dir, HTML_DIR, 'error_logged_in.html')
+        self.error_activity_html_file = os.path.join(root_dir, HTML_DIR, 'error_activity.html')
         self.ical_server = IcalServer.IcalServer(data_mgr, self.root_url)
 
         self.tempfile_dir = os.path.join(root_dir, 'tempfile')
@@ -552,10 +553,16 @@ class App(object):
         # Is the user logged in?
         logged_in = logged_in_user_id is not None
 
+        # Render the delete control.
+        delete_str = ""
+        if logged_in:
+            delete_str = App.render_delete_control()
+
+        # Sanity check.
         locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
         if locations is None or len(locations) == 0:
-            my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
+            my_template = Template(filename=self.error_activity_html_file, module_directory=self.tempmod_dir)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.", activityId=activity_id, delete=delete_str)
 
         route = ""
         center_lat = 0
@@ -678,11 +685,6 @@ class App(object):
         if logged_in:
             edit_title_str = "<h3>Edit</h3>"
             edit_str = App.render_edit_controls()
-
-        # Render the delete control.
-        delete_str = ""
-        if logged_in:
-            delete_str = App.render_delete_control()
 
         # Build the page title.
         if is_live:
