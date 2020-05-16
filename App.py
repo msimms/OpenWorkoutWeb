@@ -547,22 +547,25 @@ class App(object):
             result += str(item)
         return result
 
+    def render_page_for_errored_activity(self, activity_id, logged_in, belongs_to_current_user):
+        """Helper function for rendering an error page when attempting to view an activity with bad data."""
+        delete_str = ""
+        if belongs_to_current_user is not None:
+            delete_str = App.render_delete_control()
+
+        my_template = Template(filename=self.error_activity_html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.", activityId=activity_id, delete=delete_str)
+
     def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
 
         # Is the user logged in?
         logged_in = logged_in_user_id is not None
 
-        # Render the delete control.
-        delete_str = ""
-        if logged_in:
-            delete_str = App.render_delete_control()
-
         # Sanity check.
         locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
         if locations is None or len(locations) == 0:
-            my_template = Template(filename=self.error_activity_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.", activityId=activity_id, delete=delete_str)
+            return self.render_page_for_errored_activity(activity_id, logged_in, belongs_to_current_user)
 
         route = ""
         center_lat = 0
@@ -686,6 +689,11 @@ class App(object):
             edit_title_str = "<h3>Edit</h3>"
             edit_str = App.render_edit_controls()
 
+        # Render the delete control.
+        delete_str = ""
+        if belongs_to_current_user:
+            delete_str = App.render_delete_control()
+
         # Build the page title.
         if is_live:
             page_title = "Live Tracking"
@@ -709,8 +717,7 @@ class App(object):
             elif Keys.APP_ACCELEROMETER_KEY in activity or Keys.APP_SETS_KEY in activity:
                 return self.render_page_for_unmapped_activity(email, user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
             else:
-                my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
-                return my_template.render(nav=self.create_navbar(logged_in_user_id is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
+                return self.render_page_for_errored_activity(activity[Keys.ACTIVITY_ID_KEY], logged_in_user_id is not None, belongs_to_current_user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
