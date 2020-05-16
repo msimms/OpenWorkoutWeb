@@ -307,7 +307,7 @@ ${summary}
 			width = $("#charts").width() - margin.left - margin.right,
 			height = 250 - margin.top - margin.bottom;
 
-        var x = d3.scale.ordinal().domain([0,1,2,3,4,5]).rangeBands([0, width]);
+        var x = d3.scale.ordinal().domain([1,2,3,4,5,6]).rangeBands([0, width]);
         var y = d3.scale.linear().domain([0, d3.max(data)]).range([height, 0]);
 
 		var xAxis = d3.svg.axis().scale(x).orient("bottom");
