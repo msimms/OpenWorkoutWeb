@@ -59,6 +59,8 @@
 		var workout_list = [];
 		var the_url = "${root_url}/api/1.0/list_workouts";
 		var result_text = {};
+        var d = new Date();
+        var tz_offset = d.getTimezoneOffset() * 60;
 
 		if (send_get_request(the_url, result_text))
 		{
@@ -66,7 +68,7 @@
 			for (var i = 0; i < obj.length; i++)
 			{
 				var workout_obj = obj[i];
-				workout_obj['start'] = unix_time_to_iso_time(workout_obj['time']);
+				workout_obj['start'] = unix_time_to_iso_time(workout_obj['time'] + tz_offset);
                 workout_obj['color'] = 'Tomato';
 				workout_list.push(workout_obj);
 			}
