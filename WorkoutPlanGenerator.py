@@ -144,11 +144,11 @@ class WorkoutPlanGenerator(object):
         avg_running_distance = 0.0
         if cycling_summary is not None:
             if Keys.TOTAL_ACTIVITIES in cycling_summary and Keys.TOTAL_DISTANCE in cycling_summary:
-                if cycling_summary[Keys.TOTAL_ACTIVITIES] > 0.0:
+                if cycling_summary[Keys.TOTAL_ACTIVITIES] > 0:
                     avg_cycling_distance = cycling_summary[Keys.TOTAL_DISTANCE] / cycling_summary[Keys.TOTAL_ACTIVITIES]
         if running_summary is not None:
             if Keys.TOTAL_ACTIVITIES in running_summary and Keys.TOTAL_DISTANCE in running_summary:
-                if running_summary[Keys.TOTAL_ACTIVITIES] > 0.0:
+                if running_summary[Keys.TOTAL_ACTIVITIES] > 0:
                     avg_running_distance = running_summary[Keys.TOTAL_DISTANCE] / running_summary[Keys.TOTAL_ACTIVITIES]
 
         # Compute an experience level for the user.
