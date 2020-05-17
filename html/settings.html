@@ -26,11 +26,13 @@
 		var the_url = "${root_url}/api/1.0/update_settings";
 		var privacy = document.getElementById("privacy_options").value;
 		var units = document.getElementById("units").value;
+		var week_start = document.getElementById("week_start").value;
 		var dict = [];
 		var result_text = {};
 
 		dict.push({["default privacy"] : privacy});
 		dict.push({["preferred units"] : units});
+		dict.push({["preferred first day of week"] : week_start});
 		if (send_post_request(the_url, dict, result_text))
 			alert("Settings updated!");
 		else
@@ -151,14 +153,20 @@ ${nav}
 	<h2>Settings</h2>
 	<p>
 	<label for="privacy_options" class="checkin">Default Activity Privacy</label>
-	<select id="privacy_options" class="checkin" >
+	<select id="privacy_options" class="checkin">
 ${privacy_options}
 	</select>
 	</p>
 	<p>
 	<label for="units" class="checkin">Preferred Units</label>
-	<select id="units" class="checkin" >
+	<select id="units" class="checkin">
 ${unit_options}
+	</select>
+	</p>
+	<p>
+	<label for="week_start" class="checkin">Week Starts On</label>
+	<select id="week_start" class="checkin">
+${day_options}
 	</select>
 	</p>
 	<button type="button" onclick="return update_settings()">Update</button>

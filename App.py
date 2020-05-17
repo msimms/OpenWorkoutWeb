@@ -1345,6 +1345,7 @@ class App(object):
         # Get the current settings.
         selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, Keys.DEFAULT_PRIVACY)
         selected_units = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+        selected_first_day_of_week = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY)
 
         # Render the privacy option.
         privacy_options = "\t\t<option value=\"Public\""
@@ -1366,10 +1367,22 @@ class App(object):
             unit_options += " selected"
         unit_options += ">Standard</option>"
 
+        # Render the days of week.
+        day_options = ""
+        for day in Keys.DAYS_OF_WEEK:
+            day_options += "\t\t<option value=\""
+            day_options += day
+            day_options += "\""
+            if day is not None and day.lower() == selected_first_day_of_week:
+                day_options += " selected"
+            day_options += ">"
+            day_options += day
+            day_options += "</option>\n"
+
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'settings.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, privacy_options=privacy_options, unit_options=unit_options)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, privacy_options=privacy_options, unit_options=unit_options, day_options=day_options)
 
     @statistics
     def ical(self, calendar_id):

@@ -1179,6 +1179,13 @@ class Api(object):
                     raise ApiException.ApiMalformedRequestException("Invalid units value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY, preferred_units)
 
+            # Preferred first day of week.
+            elif decoded_key == Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY:
+                preferred_first_day_of_week = urllib.unquote_plus(values[key])
+                if not preferred_first_day_of_week in Keys.DAYS_OF_WEEK:
+                    raise ApiException.ApiMalformedRequestException("Invalid day value.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY, preferred_first_day_of_week)
+
             # Preferred long run day of the week.
             elif decoded_key == Keys.PREFERRED_LONG_RUN_DAY_KEY:
                 preferred_long_run_day = urllib.unquote_plus(values[key]).lower()
@@ -1497,6 +1504,16 @@ class Api(object):
             record[0] = Units.convert_to_string_in_specified_unit_system(unit_system, record[0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
         return True, json.dumps(records)
 
+    def handle_get_user_setting(self, values):
+        """Returns the value associated with the specified user setting."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.REQUESTED_SETTING not in values:
+            raise ApiException.ApiMalformedRequestException("Setting not specified.")
+
+        setting_value = self.user_mgr.retrieve_user_setting(self.user_id, values[Keys.REQUESTED_SETTING])
+        return True, setting_value
+
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
         if request == 'activity_track':
@@ -1547,6 +1564,8 @@ class Api(object):
             return self.handle_get_task_statuses(values)
         elif request == 'get_record_progression':
             return self.handle_get_record_progression(values)
+        elif request == 'get_user_setting':
+            return self.handle_get_user_setting(values)
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):

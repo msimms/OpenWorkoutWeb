@@ -53,6 +53,31 @@
 		return activity_list;
 	}
 
+    function get_preferred_first_day_of_week()
+    {
+        var the_url = "${root_url}/api/1.0/get_user_setting?requested%20setting=preferred%20first%20day%20of%20week";
+        var result_text = {};
+
+        if (send_get_request(the_url, result_text))
+        {
+            if (result_text.value.localeCompare("sunday") == 0)
+                return 0;
+            else if (result_text.value.localeCompare("monday") == 0)
+                return 1;
+            else if (result_text.value.localeCompare("tuesday") == 0)
+                return 2;
+            else if (result_text.value.localeCompare("wednesday") == 0)
+                return 3;
+            else if (result_text.value.localeCompare("thursday") == 0)
+                return 4;
+            else if (result_text.value.localeCompare("friday") == 0)
+                return 5;
+            else if (result_text.value.localeCompare("saturday") == 0)
+                return 6;
+        }
+        return 1;
+    }
+
 	$(document).ready(function()
 	{
 		$('#calendar').fullCalendar({
@@ -65,6 +90,7 @@
 			editable: false,
 			eventLimit: true, // allow "more" link when too many events
 			timezone: 'local',
+            firstDay: get_preferred_first_day_of_week(),
 			events: list_activities()
 		});
 

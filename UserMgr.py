@@ -303,6 +303,8 @@ class UserMgr(object):
                 result = Keys.ACTIVITY_VISIBILITY_PUBLIC
             elif key == Keys.PREFERRED_UNITS_KEY:
                 result = Keys.UNITS_STANDARD_KEY
+            elif key == Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY:
+                result = Keys.DAYS_OF_WEEK[0]
             elif key == Keys.GENDER_KEY:
                 result = Keys.GENDER_MALE_KEY
             elif key == Keys.HEIGHT_KEY:
