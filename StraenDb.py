@@ -212,18 +212,18 @@ class MongoDatabase(Database.Database):
         """Retrieve method for a user."""
         if api_key is None:
             self.log_error(MongoDatabase.retrieve_user_from_id.__name__ + ": Unexpected empty object: api_key")
-            return None, None
+            return None, None, None
 
         try:
             # Find the user.
             user = self.users_collection.find_one({Keys.API_KEYS: api_key})
             if user is not None:
-                return user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
-            return None, None
+                return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], user[Keys.REALNAME_KEY]
+            return None, None, None
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None, None
+        return None, None, None
 
     def update_user(self, user_id, username, realname, passhash):
         """Update method for a user."""

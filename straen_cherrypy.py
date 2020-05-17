@@ -17,6 +17,7 @@ import App
 import DataMgr
 import AnalysisScheduler
 import ImportScheduler
+import Keys
 import SessionMgr
 import UserMgr
 import WorkoutPlanGeneratorScheduler
@@ -531,12 +532,6 @@ class StraenWeb(object):
         """Endpoint for API calls."""
         response = ""
         try:
-            # Get the logged in user.
-            user_id = None
-            username = self.app.user_mgr.get_logged_in_user()
-            if username is not None:
-                user_id, _, _ = self.app.user_mgr.retrieve_user(username)
-
             # The the API params.
             if cherrypy.request.method == "GET":
                 verb = "GET"
@@ -549,6 +544,15 @@ class StraenWeb(object):
                     params = json.loads(params)
                 else:
                     params = []
+
+            # Get the logged in user, or lookup the user using the API key.
+            user_id = None
+            if Keys.API_KEY in params:
+                user_id, _, _ = self.app.user_mgr.retrieve_user_from_api_key(params[Keys.API_KEY])
+            else:
+                username = self.app.user_mgr.get_logged_in_user()
+                if username is not None:
+                    user_id, _, _ = self.app.user_mgr.retrieve_user(username)
 
             # Process the API request.
             if len(args) > 0:
