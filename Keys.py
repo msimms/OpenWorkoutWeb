@@ -40,6 +40,7 @@ REQUESTING_USER_KEY = "requesting_user"
 PR_KEY = "pr" # Personal record
 EMAIL_KEY = "email" # User's email
 TARGET_EMAIL_KEY = "target_email" # Email address of another user
+API_KEYS = "api keys" # List of API keys belonging to the user
 
 # User settings
 DEFAULT_PRIVACY = "default privacy"

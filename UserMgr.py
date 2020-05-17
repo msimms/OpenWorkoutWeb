@@ -127,6 +127,14 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         return self.database.retrieve_user_from_id(user_id)
 
+    def retrieve_user_from_api_key(self, api_key):
+        """Retrieve method for a user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if api_key is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_user_from_api_key(api_key)
+
     def retrieve_matched_users(self, name):
         """Returns a list of user names for users that match the specified regex."""
         if self.database is None:
