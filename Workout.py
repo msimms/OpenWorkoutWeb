@@ -201,16 +201,27 @@ class Workout(object):
             recovery_meters = interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY]
             recovery_pace_minute = interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY]
 
+            # Describe interval.
             result += "Interval: "
             if num_repeats > 1:
                 result += str(num_repeats)
                 result += " x "
-            result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+            if interval_meters > 1000:
+                result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+            else:
+                result += str(interval_meters)
+                result += " meters"
             result += " at "
             result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
+
+            # Describe recovery.
             if recovery_meters > 0:
                 result += " with "
-                result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                if recovery_meters > 1000:
+                    result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                else:
+                    result += str(recovery_meters)
+                    result += " meters"
                 result += " recovery at "
                 result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
             result += ".\n"
