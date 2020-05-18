@@ -152,7 +152,7 @@ class WorkoutPlanGenerator(object):
                     avg_running_distance = running_summary[Keys.TOTAL_DISTANCE] / running_summary[Keys.TOTAL_ACTIVITIES]
 
         # Compute an experience level for the user.
-        experience_level = 0
+        experience_level = self.user_mgr.retrieve_user_setting(user_id, Keys.EXPERIENCE_LEVEL_KEY)
 
         # Store all the inputs in a dictionary.
         if len(running_paces) == 0:

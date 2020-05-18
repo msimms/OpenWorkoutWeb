@@ -298,6 +298,8 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
 
         result = self.database.retrieve_user_setting(user_id, key)
+
+        # These are the default values:
         if result is None:
             if key == Keys.DEFAULT_PRIVACY:
                 result = Keys.ACTIVITY_VISIBILITY_PUBLIC
@@ -315,6 +317,8 @@ class UserMgr(object):
                 result = Keys.DEFAULT_BIRTHDAY
             elif key == Keys.GOAL_DATE_KEY:
                 result = int(time.time())
+            elif key == Keys.EXPERIENCE_LEVEL_KEY:
+                result = Keys.EXPERIENCE_LEVEL_BEGINNER
             else:
                 result = ""
 

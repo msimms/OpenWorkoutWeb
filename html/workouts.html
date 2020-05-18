@@ -58,6 +58,20 @@
             alert("An error occurred!");
     }
 
+    function set_exp_level()
+    {
+        var the_url = "${root_url}/api/1.0/update_settings";
+        var exp_level = document.getElementById("exp_level").value;
+        var dict = [];
+        var result_text = {};
+
+        dict.push({["Experience Level"] : exp_level});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Experience level updated!");
+        else
+            alert("An error occurred!");
+    }
+
     function generate_workout_plan()
     {
         var the_url = "${root_url}/api/1.0/generate_workout_plan";
@@ -246,6 +260,9 @@ ${preferred_long_run_day}
         </select><br>
         Goal Type: <select name="goal_type" id="goal_type" class="right" onchange="return set_goal_type()">
 ${goal_type}
+        </select><br>
+        Experience Level: <select name="exp_level" id="exp_level" class="right" onchange="return set_exp_level()">
+${exp_level}
         </select>
     </p>
 
