@@ -1200,6 +1200,13 @@ class Api(object):
                     raise ApiException.ApiMalformedRequestException("Invalid goal type.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_TYPE_KEY, goal_type)
 
+            # Experience level.
+            elif decoded_key == Keys.EXPERIENCE_LEVEL_KEY:
+                exp_level = urllib.unquote_plus(values[key])
+                if not exp_level in Keys.EXPERIENCE_LEVELS:
+                    raise ApiException.ApiMalformedRequestException("Invalid experience level.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.EXPERIENCE_LEVEL_KEY, exp_level)
+
             # Unknown
             else:
                 raise ApiException.ApiMalformedRequestException("Invalid user setting: " + decoded_key)
