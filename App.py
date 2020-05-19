@@ -991,22 +991,6 @@ class App(object):
         url_str = "<a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + display_str + "</a>"
         return url_str
 
-    def render_personal_record(self, unit_system, activity_type, record, record_name):
-        """Helper function that renders a single table row in the personal bests table."""
-        record_value = record[0]
-        activity_id = record[1]
-        record_str = Units.convert_to_string_in_specified_unit_system(unit_system, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
-        out_str = "<td>"
-        out_str += record_name
-        params = {}
-        params[Keys.ACTIVITY_TYPE_KEY] = activity_type
-        params[Keys.RECORD_NAME_KEY] = record_name
-        out_str += "</td><td>"
-        out_str += self.render_activity_href(activity_id, record_str)
-        out_str += "</td><td><a href=\"" + self.root_url + "/record_progression?"
-        out_str += urllib.urlencode(params) + "\">[...]</td><tr>\n"
-        return out_str
-
     @statistics
     def record_progression(self, activity_type, record_name):
         """Renders the list of records, in order of progression, for the specified user and record type."""
@@ -1316,25 +1300,10 @@ class App(object):
                     zone_index = zone_index + 1
                 power_zones += "</table>\n"
 
-        # Get the user's personal recorsd.
-        prs = ""
-        unit_system = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        record_groups = self.data_mgr.retrieve_user_personal_records(user_id)
-        for record_group in record_groups:
-            record_dict = record_groups[record_group]
-            if len(record_dict) > 0:
-                prs += "<h3>" + record_group + "</h3>\n"
-                prs += "<table>\n"
-                for record_name in record_dict:
-                    if record_name not in Keys.UNSUMMARIZABLE_KEYS:
-                        record = record_dict[record_name]
-                        prs += self.render_personal_record(unit_system, record_group, record, record_name)
-                prs += "</table>\n"
-
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, birthday=selected_birthday, weight=selected_weight_str, weight_units=weight_units_str, height=selected_height_str, height_units=height_units_str, gender_options=gender_options, resting_hr=resting_hr_str, bmi=bmi_str, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones, prs=prs)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, birthday=selected_birthday, weight=selected_weight_str, weight_units=weight_units_str, height=selected_height_str, height_units=height_units_str, gender_options=gender_options, resting_hr=resting_hr_str, bmi=bmi_str, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones)
 
     @statistics
     def settings(self):
