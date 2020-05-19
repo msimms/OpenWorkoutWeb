@@ -38,6 +38,25 @@ class RunPlanGenerator(object):
     def round_distance(distance):
         return float(math.ceil(distance / 100.0)) * 100.0
 
+    def gen_easy_run(self, pace, min_distance, max_distance):
+        """Utility function for creating an easy run of some random distance between min and max."""
+        run_distance = random.uniform(min_distance, max_distance)
+        interval_distance = RunPlanGenerator.nearest_interval_distance(run_distance)
+        easy_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RUN, self.user_id)
+        easy_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
+        easy_run_workout.add_interval(1, interval_distance, pace, 0, 0)
+        return easy_run_workout
+
+    def gen_tempo_run(self, tempo_run_pace):
+        """Utility function for creating a tempo workout."""
+        interval_distance = RunPlanGenerator.nearest_interval_distance(30.0 * tempo_run_pace)
+        tempo_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TEMPO_RUN, self.user_id)
+        tempo_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
+        tempo_run_workout.add_warmup(5 * 60)
+        tempo_run_workout.add_interval(1, interval_distance, tempo_run_pace, 0, 0)
+        tempo_run_workout.add_cooldown(5 * 60)
+        return tempo_run_workout
+
     def gen_workouts_for_next_week(self, inputs):
         """Generates the workouts for the next week, but doesn't schedule them."""
 
@@ -102,19 +121,11 @@ class RunPlanGenerator(object):
             workouts.append(speed_run_workout)
 
         # Add an easy run.
-        interval_distance = RunPlanGenerator.nearest_interval_distance(avg_run_distance)
-        easy_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RUN, self.user_id)
-        easy_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
-        easy_run_workout.add_interval(1, interval_distance, easy_run_pace, 0, 0)
+        easy_run_workout = self.gen_easy_run(easy_run_pace, avg_run_distance * 0.8, avg_run_distance * 1.2)
         workouts.append(easy_run_workout)
 
         # Add a tempo run. Run should be 20-30 minutes in duration.
-        interval_distance = RunPlanGenerator.nearest_interval_distance(30.0 * tempo_run_pace)
-        tempo_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TEMPO_RUN, self.user_id)
-        tempo_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
-        tempo_run_workout.add_warmup(5 * 60)
-        tempo_run_workout.add_interval(1, interval_distance, tempo_run_pace, 0, 0)
-        tempo_run_workout.add_cooldown(5 * 60)
+        tempo_run_workout = self.gen_tempo_run(tempo_run_pace)
         workouts.append(tempo_run_workout)
 
         # Add a long run.
