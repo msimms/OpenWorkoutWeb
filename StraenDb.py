@@ -801,9 +801,11 @@ class MongoDatabase(Database.Database):
     def retrieve_each_user_activity(self, context, user_id, callback_func):
         """Retrieves each user activity and calls the callback function for each one."""
         try:
-            activities = list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}))
-            for activity in activities:
-                callback_func(context, activity, user_id)
+            activities_cursor = self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id})
+            if activities_cursor is not None:
+                while activities_cursor.alive:
+                    activity = activities_cursor.next()
+                    callback_func(context, activity, user_id)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -835,9 +837,11 @@ class MongoDatabase(Database.Database):
     def retrieve_each_device_activity(self, context, user_id, device_str, callback_func):
         """Retrieves each device activity and calls the callback function for each one."""
         try:
-            activities = list(self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}))
-            for activity in activities:
-                callback_func(context, activity, user_id)
+            activities_cursor = self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            if activities_cursor is not None:
+                while activities_cursor.alive:
+                    activity = activities_cursor.next()
+                    callback_func(context, activity, user_id)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

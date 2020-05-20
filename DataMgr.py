@@ -634,13 +634,23 @@ class DataMgr(Importer.ActivityWriter):
 
     @staticmethod
     def distance_for_tag_cb(tag_distances, activity, user_id):
+        if tag_distances is None:
+            return
+        if activity is None:
+            return
+
+        # Load tags associated with this activity.
         activity_tags = None
         if Keys.ACTIVITY_TAGS_KEY in activity:
             activity_tags = activity[Keys.ACTIVITY_TAGS_KEY]
+
+        # No sense in proceeding if this activity does not have any tags.
         if activity_tags is None:
             return
 
+        # Retrieve distance for this activity.
         distance = DataMgr.distance_for_activity(activity)
+
         for distance_tag in tag_distances.keys():
             if distance_tag in activity_tags:
                 tag_distances[distance_tag] = tag_distances[distance_tag] + distance
@@ -654,9 +664,11 @@ class DataMgr(Importer.ActivityWriter):
         if tags is None:
             raise Exception("Bad parameter.")
 
+        # Initialize.
         tag_distances = {}
         for tag in tags:
             tag_distances[tag] = 0.0
+
         self.retrieve_each_user_activity(tag_distances, user_id, DataMgr.distance_for_tag_cb)
         return tag_distances
 
