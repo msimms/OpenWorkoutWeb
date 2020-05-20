@@ -85,6 +85,7 @@ WORKOUT_INTERVALS_KEY = "intervals"
 WORKOUT_COOLDOWN_KEY = "cooldown"
 WORKOUT_SCHEDULED_TIME_KEY = "scheduled time"
 WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY = "last scheduled workout time"
+WORKOUT_IN_TAPER_KEY = "taper"
 
 # Workout types
 WORKOUT_TYPE_REST = "Rest"

@@ -154,6 +154,14 @@ class WorkoutPlanGenerator(object):
         # Compute an experience level for the user.
         experience_level = self.user_mgr.retrieve_user_setting(user_id, Keys.EXPERIENCE_LEVEL_KEY)
 
+        # Are we in a taper?
+        if weeks_until_goal < 2 and goal_type == Keys.GOAL_MARATHON_RUN_KEY:
+            in_taper = 1
+        elif weeks_until_goal < 1:
+            in_taper = 1
+        else:
+            in_taper = 0
+
         # Store all the inputs in a dictionary.
         if len(running_paces) == 0:
             inputs[Keys.SPEED_RUN_PACE] = None
@@ -170,6 +178,7 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
         inputs[Keys.AVG_CYCLING_DISTANCE] = avg_cycling_distance
         inputs[Keys.AVG_RUNNING_DISTANCE] = avg_running_distance
+        inputs[Keys.WORKOUT_IN_TAPER_KEY] = in_taper
 
         # Adds the goal distances to the inputs.
         inputs = WorkoutPlanGenerator.calculate_goal_distances(inputs)
