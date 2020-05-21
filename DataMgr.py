@@ -874,6 +874,14 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_gear(user_id)
 
+    def retrieve_gear_defaults(self, user_id):
+        """Retrieve method for the gear that is, by default, associated with each activity type. Result is a JSON string."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        pass
+
     def retrieve_gear_of_specified_type_for_user(self, user_id, gear_type):
         """Retrieve method for the gear with the specified ID."""
         if self.database is None:
