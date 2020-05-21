@@ -36,7 +36,7 @@ tempmod/*
 
 # Temp directories
 tempfile/
-tempmod/
+tempmod*/
 
 # Session management
 sessions/

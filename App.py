@@ -117,7 +117,13 @@ class App(object):
         self.root_dir = root_dir
         self.root_url = root_url
         self.tempfile_dir = os.path.join(self.root_dir, 'tempfile')
-        self.tempmod_dir = os.path.join(self.root_dir, 'tempmod')
+
+        # We'll use different tempmod dirs for python2 and python3 so we can switch between them without frustration.
+        if sys.version_info[0] < 3:
+            self.tempmod_dir = os.path.join(self.root_dir, 'tempmod2')
+        else:
+            self.tempmod_dir = os.path.join(self.root_dir, 'tempmod3')
+
         self.google_maps_key = google_maps_key
         self.debug = debug
         self.unmapped_activity_html_file = os.path.join(root_dir, HTML_DIR, 'unmapped_activity.html')
