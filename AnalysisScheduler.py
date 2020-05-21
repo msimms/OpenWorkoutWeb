@@ -49,5 +49,5 @@ class AnalysisScheduler(object):
             analysis_task = analyze_activity.delay(dumps(activity))
             data_mgr.create_deferred_task(activity_user_id, Keys.ANALYSIS_TASK_KEY, analysis_task.task_id, None)
         except:
-            log_error(traceback.format_exc())
-            log_error(sys.exc_info()[0])
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])

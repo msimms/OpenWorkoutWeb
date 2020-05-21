@@ -54,5 +54,5 @@ class ImportScheduler(object):
             import_task = import_activity.delay(dumps(params))
             data_mgr.create_deferred_task(user_id, Keys.IMPORT_TASK_KEY, import_task.task_id, uploaded_file_name)
         except:
-            log_error(traceback.format_exc())
-            log_error(sys.exc_info()[0])
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
