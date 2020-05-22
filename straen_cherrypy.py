@@ -658,7 +658,10 @@ def main():
     markdown_logger.setLevel(logging.ERROR)
 
     # The direcory for session objects.
-    session_dir = os.path.join(root_dir, 'sessions')
+    if sys.version_info[0] < 3:
+        session_dir = os.path.join(root_dir, 'sessions2')
+    else:
+        session_dir = os.path.join(root_dir, 'sessions3')
     if not os.path.exists(session_dir):
         os.makedirs(session_dir)
 

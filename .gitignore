@@ -39,7 +39,7 @@ tempfile/
 tempmod*/
 
 # Session management
-sessions/
+sessions*/
 
 # Celery
 celerybeat-schedule
