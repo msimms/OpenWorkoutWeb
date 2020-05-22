@@ -183,7 +183,7 @@ class MongoDatabase(Database.Database):
         try:
             user = self.users_collection.find_one({Keys.USERNAME_KEY: username})
             if user is not None:
-                return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], user[Keys.REALNAME_KEY]
+                return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], str(user[Keys.REALNAME_KEY])
             return None, None, None
         except:
             self.log_error(traceback.format_exc())
