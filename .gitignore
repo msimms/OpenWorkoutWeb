@@ -43,3 +43,6 @@ sessions*/
 
 # Celery
 celerybeat-schedule
+
+# Key files
+*.pem
