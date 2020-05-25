@@ -636,7 +636,9 @@ class App(object):
 
         # Add the location description.
         if summary_data is not None and Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
-            summary += "\t<li>Location: " + App.render_array_reversed(summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]) + "</li>\n"
+            location_description = summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]
+            if len(location_description) > 0:
+                summary += "\t<li>Location: " + App.render_array_reversed(location_description) + "</li>\n"
 
         # Build the detailed analysis table from data that was computed out-of-band and cached.
         details_str = ""
