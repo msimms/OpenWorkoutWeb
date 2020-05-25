@@ -47,8 +47,7 @@
         cell.appendChild(a);
 
         cell = new_row.insertCell();
-        text = document.createTextNode(description);
-        cell.appendChild(text);
+        cell.appendChild(document.createTextNode(description));
 
         cell = new_row.insertCell();
         if (add_time > 0)

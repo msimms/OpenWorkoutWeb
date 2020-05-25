@@ -117,12 +117,10 @@
     {
         var new_row = table.insertRow();
         var cell = new_row.insertCell();
-        var text = document.createTextNode(row_name);
-        cell.appendChild(text);
+        cell.appendChild(document.createTextNode(row_name));
 
         cell = new_row.insertCell();
-        text = document.createTextNode(row_value);
-        cell.appendChild(text);
+        cell.appendChild(document.createTextNode(row_value));
     }
 
     var process_run_paces = function(records)
@@ -146,15 +144,13 @@
     {
         var new_row = table.insertRow();
         var cell = new_row.insertCell();
-        var text = document.createTextNode(row_name);
-        cell.appendChild(text);
+        cell.appendChild(document.createTextNode(row_name));
 
         if (row_value.length > 0)
         {
             cell = new_row.insertCell();
             var a = document.createElement('a');
-            var link_text = document.createTextNode(row_value[0]);
-            a.appendChild(link_text);
+            a.appendChild(document.createTextNode(row_value[0]));
             a.title = row_value;
             a.href = "${root_url}/activity/" + row_value[1];
             cell.appendChild(a);

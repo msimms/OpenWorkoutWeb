@@ -41,13 +41,13 @@
         var the_url = "${root_url}/api/1.0/create_service_record";
         var dict = [];
         var result_text = {};
-        var innerDiv = document.getElementById("new_gear_div");
-        var serviceTimeObj = new Date(document.getElementById("startDate").value);
-        var serviceTime = serviceTimeObj.getTime() / 1000;
+        var inner_div = document.getElementById("new_gear_div");
+        var service_time_obj = new Date(document.getElementById("start_date").value);
+        var service_time = service_time_obj.getTime() / 1000;
         var description = document.getElementById("Description").value;
 
         dict.push({["gear_id"] : "${gear_id}"});
-        dict.push({["date"] : serviceTime});
+        dict.push({["date"] : service_time});
         dict.push({["description"] : description});
 
         if (send_post_request(the_url, dict, result_text))
@@ -62,59 +62,59 @@
 
     function get_new_service_record_info()
     {
-        var outerDiv = document.getElementById("block");
-        var innerDiv = document.createElement('div');
-        innerDiv.id = "new_gear_div";
+        var outer_div = document.getElementById("new_service_record_block");
+        var inner_div = document.createElement('div');
+        inner_div.id = "new_gear_div";
 
         // Remove existing items, if any.
-        while (outerDiv.firstChild)
+        while (outer_div.firstChild)
         {
-            outerDiv.removeChild(outerDiv.firstChild);
+            outer_div.removeChild(outer_div.firstChild);
         }
 
         // Determine which data fields are needed.
         var fields = ["Description"];
 
+        // Add a line break.
+        outer_div.appendChild(document.createElement("hr"));
+        inner_div.appendChild(document.createElement("br"));
+
         // Add a label for the date picker.
-        var dateLabel = document.createTextNode("Date: ");
-        innerDiv.appendChild(dateLabel);
+        inner_div.appendChild(document.createTextNode("Date: "));
 
         // Add the date picker.
         var today = new Date();
-        var startDate = document.createElement('input');
-        startDate.type = "input";
-        startDate.id = "startDate";
-        startDate.className = "pickDate";
-        $(startDate).datepicker({showButtonPanel: true, defaultDate: today});
-        $(startDate).datepicker('setDate', today);
-        innerDiv.appendChild(startDate);
+        var start_date = document.createElement('input');
+        start_date.type = "input";
+        start_date.id = "start_date";
+        start_date.className = "pickDate";
+        $(start_date).datepicker({showButtonPanel: true, defaultDate: today});
+        $(start_date).datepicker('setDate', today);
+        inner_div.appendChild(start_date);
 
         // Add a line break.
-        var br = document.createElement("br");
-        innerDiv.appendChild(br);
+        inner_div.appendChild(document.createElement("br"));
 
         // Add the data fields.
         for (i = 0, len = fields.length; i < len; i++)
         {
-            add_text_entry_node(innerDiv, fields[i]);
+            add_text_entry_node(inner_div, fields[i]);
         }
 
         // Add to the div.
-        outerDiv.appendChild(innerDiv);
+        outer_div.appendChild(inner_div);
 
         // Create a save button.
-        var saveBtn = document.createElement('button');
-        var saveBtnText = document.createTextNode('Save');
-        saveBtn.appendChild(saveBtnText);
-        saveBtn.title = "Save";
-        saveBtn.addEventListener('click', function() { create_service_record(this); });
+        var save_btn = document.createElement('button');
+        save_btn.appendChild(document.createTextNode('Save'));
+        save_btn.title = "Save";
+        save_btn.addEventListener('click', function() { create_service_record(this); });
 
         // Add the save button to the screen.
-        outerDiv.appendChild(saveBtn);
+        outer_div.appendChild(save_btn);
 
         // Add a line break.
-        var hr = document.createElement("hr");
-        outerDiv.appendChild(hr);
+        outer_div.appendChild(document.createElement("hr"));
 
         return false;
     }
@@ -145,12 +145,10 @@
     {
         var new_row = table.insertRow();
         var cell = new_row.insertCell();
-        var text = document.createTextNode(unix_time_to_local_date_string(service_date));
-        cell.appendChild(text);
+        cell.appendChild(document.createTextNode(unix_time_to_local_date_string(service_date)));
 
         cell = new_row.insertCell();
-        text = document.createTextNode(description);
-        cell.appendChild(text);
+        cell.appendChild(document.createTextNode(description));
 
         var btn = document.createElement('button');
         var btn_txt = document.createTextNode('Delete');
@@ -227,9 +225,6 @@
 ${nav}
 </section>
 
-<div class="block" id="block" style="width: 600px">
-</div>
-
 <div class="profile" style="width: 600px">
 
     <h2 id="GearName"></h2>
@@ -247,6 +242,8 @@ ${nav}
             <td><b>Date</b></td><td><b>Description</b></td><td></td><tr>
         </table>
     </p>
+    <div class="block" id="new_service_record_block" style="width: 560px">
+    </div>
     <button type="button" onclick="return get_new_service_record_info()">Add Service Record</button>
 
 </div>
