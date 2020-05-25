@@ -128,6 +128,7 @@ class DataMgr(Importer.ActivityWriter):
 
         activities = self.database.retrieve_user_activity_list(user_id, None, None, None)
         for activity in activities:
+
             if Keys.ACTIVITY_TIME_KEY in activity:
 
                 # Get the activity start and end times.
@@ -157,6 +158,7 @@ class DataMgr(Importer.ActivityWriter):
             return None, None
         if activity_type is not None and len(activity_type) > 0:
             self.database.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
+            self.create_default_tags_on_activity(user_id, activity_type, activity_id)
         if user_id is not None:
             self.database.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_USER_ID_KEY, user_id, False)
         return device_str, activity_id
@@ -613,7 +615,7 @@ class DataMgr(Importer.ActivityWriter):
         return self.database.retrieve_tags(activity_id)
 
     def create_tags_on_activity(self, activity, tags):
-        """Adds a tag to an activity."""
+        """Adds tags to an activity."""
         if self.database is None:
             raise Exception("No database.")
         if activity is None:
@@ -621,6 +623,21 @@ class DataMgr(Importer.ActivityWriter):
         if tags is None:
             raise Exception("Bad parameter.")
         return self.database.create_tags_on_activity(activity, tags)
+
+    def create_default_tags_on_activity(self, user_id, activity_type, activity_id):
+        """Adds tags to an activity."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("Bad parameter.")
+
+        defaults = self.retrieve_gear_defaults(user_id)
+        for default in defaults:
+            if default[Keys.ACTIVITY_TYPE_KEY] == activity_type:
+                tags = []
+                tags.append(default[Keys.GEAR_NAME_KEY])
+                return self.database.create_tags_on_activity_by_id(activity_id, tags)
+        return False
 
     @staticmethod
     def distance_for_activity(activity):

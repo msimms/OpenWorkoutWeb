@@ -1499,6 +1499,29 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
+        
+    def create_tags_on_activity_by_id(self, activity_id, tags):
+        """Adds a tag to the specified activity."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_tags_on_activity_by_id.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if tags is None:
+            self.log_error(MongoDatabase.create_tags_on_activity_by_id.__name__ + ": Unexpected empty object: tags")
+            return False
+
+        try:
+            # Find the activity.
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found then add the tags.
+            if activity is not None:
+                activity[Keys.ACTIVITY_TAGS_KEY] = tags
+                self.activities_collection.save(activity)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
 
     def retrieve_tags(self, activity_id):
         """Retrieves all the tags for the specified activity."""
