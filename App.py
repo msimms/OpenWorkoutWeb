@@ -274,6 +274,7 @@ class App(object):
         all_tags.extend(activity_tags)
         all_tags.extend(default_tags)
         all_tags = list(set(all_tags))
+        all_tags.sort()
 
         tags_str = ""
         if all_tags is not None:
