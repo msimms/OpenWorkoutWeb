@@ -190,6 +190,7 @@ This feature is very much under development and will go through several iteratio
 ### 0.24
 * Bug fixes and performance optimizations.
 * More work on run workout plan generation.
+* Added gear defaults. [Feature Page](https://github.com/msimms/StraenWeb/issues/17)
 
 ## Tech
 This software uses several other source projects to work properly:
