@@ -1850,8 +1850,8 @@ class MongoDatabase(Database.Database):
         if activity_type is None:
             self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: activity_type")
             return False
-        if gear_type is None:
-            self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: gear_type")
+        if gear_name is None:
+            self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: gear_name")
             return False
 
         try:
@@ -1864,19 +1864,25 @@ class MongoDatabase(Database.Database):
 
                 # Update the gear list.
                 gear_defaults_list = []
+
+                # Remove any old items that are no longer relevant.
                 if Keys.GEAR_DEFAULTS_KEY in user:
                     gear_defaults_list = user[Keys.GEAR_DEFAULTS_KEY]
                     gear_index = 0
                     for gear in gear_defaults_list:
-                        if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
-                            gear[Keys.GEAR_TYPE_KEY] = activity_type
-                            gear[Keys.GEAR_NAME_KEY] = gear_name
+                        if Keys.ACTIVITY_TYPE_KEY in gear and gear[Keys.ACTIVITY_TYPE_KEY] == activity_type:
                             gear_defaults_list.pop(gear_index)
-                            gear_defaults_list.append(gear)
-                            user[Keys.GEAR_DEFAULTS_KEY] = gear_defaults_list
-                            self.users_collection.save(user)
-                            return True
                         gear_index = gear_index + 1
+
+                # Add the new item.
+                gear = {}
+                gear[Keys.ACTIVITY_TYPE_KEY] = activity_type
+                gear[Keys.GEAR_NAME_KEY] = gear_name
+                gear_defaults_list.append(gear)
+
+                user[Keys.GEAR_DEFAULTS_KEY] = gear_defaults_list
+                self.users_collection.save(user)
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

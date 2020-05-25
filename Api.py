@@ -1122,7 +1122,20 @@ class Api(object):
         """Called when an API message to update the gear a user wants to associate with an activity type, by default, is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        pass
+        if Keys.ACTIVITY_TYPE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.GEAR_NAME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        activity_type = unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
+        if not InputChecker.is_valid_decoded_str(activity_type):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        gear_name = unquote_plus(values[Keys.GEAR_NAME_KEY])
+        if not InputChecker.is_valid_decoded_str(gear_name):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        result = self.data_mgr.update_gear_defaults(self.user_id, activity_type, gear_name)
+        return result, ""
 
     def handle_delete_gear(self, values):
         """Called when an API message to delete gear for a user is received."""
@@ -1657,7 +1670,7 @@ class Api(object):
         elif request == 'update_gear':
             return self.handle_update_gear(values)
         elif request == 'update_gear_defaults':
-            return self.update_gear_defaults(values)
+            return self.handle_update_gear_defaults(values)
         elif request == 'delete_gear':
             return self.handle_delete_gear(values)
         elif request == 'create_service_record':

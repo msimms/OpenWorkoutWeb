@@ -27,9 +27,32 @@
 
 <script>
 
+    function update_gear_defaults(target)
+    {
+        var the_url = "${root_url}/api/1.0/update_gear_defaults";
+        var dict = [];
+        var result_text = {};
+        var inner_div = document.getElementById("new_gear_default_div");
+        var activity_type = document.getElementById("activity_type").value;
+        var gear = document.getElementById("gear").value;
+
+        dict.push({["activity_type"] : activity_type});
+        dict.push({["name"] : gear});
+
+        if (send_post_request(the_url, dict, result_text))
+        {
+            window.location.replace("${root_url}/profile");
+        }
+        else
+        {
+            alert(result_text.value);
+        }
+    }
+
     var process_activity_type_list = function(activity_type_list)
     {
-        activity_type_list = eval(activity_type_list)
+        activity_type_list = eval(activity_type_list);
+        activity_type_list.sort();
 
         var activity_type_select = document.getElementById("activity_type");
         for (var i = 0; i < activity_type_list.length; i++)
@@ -44,7 +67,8 @@
 
     var process_gear_list = function(gear_list)
     {
-        gear_list = eval(gear_list)
+        gear_list = eval(gear_list);
+        gear_list.sort();
 
         var gear_list_select = document.getElementById("gear");
         for (var i = 0; i < gear_list.length; i++)
@@ -73,7 +97,7 @@
     {
         var outer_div = document.getElementById("new_gear_default_block");
         var inner_div = document.createElement('div');
-        inner_div.id = "new_gear_div";
+        inner_div.id = "new_gear_default_div";
 
         // Remove existing items, if any.
         while (outer_div.firstChild)
@@ -105,7 +129,7 @@
         var save_btn = document.createElement('button');
         save_btn.appendChild(document.createTextNode('Save'));
         save_btn.title = "Save";
-        save_btn.addEventListener('click', function() { create_service_record(this); });
+        save_btn.addEventListener('click', function() { update_gear_defaults(this); });
 
         // Add the save button to the screen.
         outer_div.appendChild(save_btn);
@@ -258,20 +282,22 @@
         }
     }
 
-    function append_to_defaults_table(table, row_name, row_value)
+    function append_to_defaults_table(table, default_info)
     {
         var new_row = table.insertRow();
         var cell = new_row.insertCell();
-        cell.appendChild(document.createTextNode(row_name));
+        cell.appendChild(document.createTextNode(default_info.activity_type));
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(default_info.name));
     }
 
     var process_gear_defaults = function(records)
     {
         var defaults_table = document.getElementById("Defaults");
 
-        for (var key of records)
+        for (var record of records)
         {
-            append_to_defaults_table(defaults_table, key, records[key]);
+            append_to_defaults_table(defaults_table, record);
         }
     }
 

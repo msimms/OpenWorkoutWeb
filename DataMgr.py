@@ -874,14 +874,6 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_gear(user_id)
 
-    def retrieve_gear_defaults(self, user_id):
-        """Retrieve method for the gear that is, by default, associated with each activity type. Result is a JSON string."""
-        if self.database is None:
-            raise Exception("No database.")
-        if user_id is None:
-            raise Exception("Bad parameter.")
-        return self.database.retrieve_gear_defaults(user_id)
-
     def retrieve_gear_of_specified_type_for_user(self, user_id, gear_type):
         """Retrieve method for the gear with the specified ID."""
         if self.database is None:
@@ -922,6 +914,35 @@ class DataMgr(Importer.ActivityWriter):
         if gear_id is None:
             raise Exception("Bad parameter.")
         return self.database.delete_gear(user_id, gear_id)
+
+    def retrieve_gear_defaults(self, user_id):
+        """Retrieve method for the gear that is, by default, associated with each activity type. Result is a JSON string."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_gear_defaults(user_id)
+
+    def update_gear_defaults(self, user_id, activity_type, gear_name):
+        """Retrieve method for the gear that is, by default, associated with each activity type. Result is a JSON string."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if activity_type is None:
+            raise Exception("Bad parameter.")
+        if gear_name is None:
+            raise Exception("Bad parameter.")
+
+        user_gear = self.retrieve_gear(user_id)
+        found = False
+        for gear in user_gear:
+            if Keys.GEAR_NAME_KEY in gear and gear[Keys.GEAR_NAME_KEY] == gear_name:
+                found = True
+                break
+        if not found:
+            raise Exception("Invalid gear name.")
+        return self.database.update_gear_defaults(user_id, activity_type, gear_name)
 
     def create_service_record(self, user_id, gear_id, record_date, record_description):
         """Create method for gear service records."""
