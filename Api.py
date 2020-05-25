@@ -1118,6 +1118,12 @@ class Api(object):
         result = self.data_mgr.update_gear(self.user_id, gear_type, gear_name, gear_description, int(gear_add_time), int(gear_retire_time))
         return result, ""
 
+    def handle_update_gear_defaults(self, values):
+        """Called when an API message to update the gear a user wants to associate with an activity type, by default, is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        pass
+
     def handle_delete_gear(self, values):
         """Called when an API message to delete gear for a user is received."""
         if self.user_id is None:
@@ -1534,6 +1540,10 @@ class Api(object):
         setting_value = self.user_mgr.retrieve_user_setting(self.user_id, values[Keys.REQUESTED_SETTING])
         return True, setting_value
 
+    def handle_list_activity_types(self):
+        """Returns the list of all activity types the software understands."""
+        return True, json.dumps(self.data_mgr.retrieve_activity_types())
+
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
         if request == 'activity_track':
@@ -1588,6 +1598,8 @@ class Api(object):
             return self.handle_get_record_progression(values)
         elif request == 'get_user_setting':
             return self.handle_get_user_setting(values)
+        elif request == 'list_activity_types':
+            return self.handle_list_activity_types()
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):
@@ -1644,6 +1656,8 @@ class Api(object):
             return self.handle_create_gear(values)
         elif request == 'update_gear':
             return self.handle_update_gear(values)
+        elif request == 'update_gear_defaults':
+            return self.update_gear_defaults(values)
         elif request == 'delete_gear':
             return self.handle_delete_gear(values)
         elif request == 'create_service_record':

@@ -880,7 +880,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        pass
+        return self.database.retrieve_gear_defaults(user_id)
 
     def retrieve_gear_of_specified_type_for_user(self, user_id, gear_type):
         """Retrieve method for the gear with the specified ID."""
@@ -1163,12 +1163,10 @@ class DataMgr(Importer.ActivityWriter):
 
     def retrieve_activity_types(self):
         """Returns a the list of activity types that the software understands."""
-        types = []
-        types.append(Keys.TYPE_RUNNING_KEY)
-        types.append(Keys.TYPE_HIKING_KEY)
-        types.append(Keys.TYPE_CYCLING_KEY)
-        types.append(Keys.TYPE_OPEN_WATER_SWIMMING_KEY)
-        types.append(Keys.TYPE_POOL_SWIMMING_KEY)
-        types.append(Keys.TYPE_PULL_UP_KEY)
-        types.append(Keys.TYPE_PUSH_UP_KEY)
-        return types
+        all_activity_types = []
+        all_activity_types.extend(Keys.FOOT_BASED_ACTIVITIES)
+        all_activity_types.extend(Keys.BIKE_BASED_ACTIVITIES)
+        all_activity_types.extend(Keys.SWIMMING_ACTIVITIES)
+        all_activity_types.extend(Keys.STRENGTH_ACTIVITIES)
+        all_activity_types.append(Keys.TYPE_UNSPECIFIED_ACTIVITY)
+        return all_activity_types

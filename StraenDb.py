@@ -1818,6 +1818,70 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return user_ids
 
+    def retrieve_gear_defaults(self, user_id):
+        """Retrieve method for the gear with the specified ID."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_gear_defaults.__name__ + ": Unexpected empty object: user_id")
+            return None
+
+        try:
+            # Find the user's document.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user's document was found.
+            if user is not None:
+
+                # Read the gear list.
+                gear_defaults_list = []
+                if Keys.GEAR_DEFAULTS_KEY in user:
+                    gear_defaults_list = user[Keys.GEAR_DEFAULTS_KEY]
+                return gear_defaults_list
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return []
+
+    def update_gear_defaults(self, user_id, activity_type, gear_name):
+        """Retrieve method for the gear with the specified ID."""
+        if user_id is None:
+            self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if activity_type is None:
+            self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: activity_type")
+            return False
+        if gear_type is None:
+            self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: gear_type")
+            return False
+
+        try:
+            # Find the user's document.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user's document was found.
+            if user is not None:
+
+                # Update the gear list.
+                gear_defaults_list = []
+                if Keys.GEAR_DEFAULTS_KEY in user:
+                    gear_defaults_list = user[Keys.GEAR_DEFAULTS_KEY]
+                    gear_index = 0
+                    for gear in gear_defaults_list:
+                        if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
+                            gear[Keys.GEAR_TYPE_KEY] = activity_type
+                            gear[Keys.GEAR_NAME_KEY] = gear_name
+                            gear_defaults_list.pop(gear_index)
+                            gear_defaults_list.append(gear)
+                            user[Keys.GEAR_DEFAULTS_KEY] = gear_defaults_list
+                            self.users_collection.save(user)
+                            return True
+                        gear_index = gear_index + 1
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def create_gear(self, user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Create method for gear."""
         if user_id is None:

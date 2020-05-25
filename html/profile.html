@@ -27,6 +27,101 @@
 
 <script>
 
+    var process_activity_type_list = function(activity_type_list)
+    {
+        activity_type_list = eval(activity_type_list)
+
+        var activity_type_select = document.getElementById("activity_type");
+        for (var i = 0; i < activity_type_list.length; i++)
+        {
+            var activity_type = activity_type_list[i];
+            var option = document.createElement("option");
+            option.value = activity_type;
+            option.text = activity_type;
+            activity_type_select.appendChild(option);
+        }
+    }
+
+    var process_gear_list = function(gear_list)
+    {
+        gear_list = eval(gear_list)
+
+        var gear_list_select = document.getElementById("gear");
+        for (var i = 0; i < gear_list.length; i++)
+        {
+            var gear = gear_list[i];
+            var option = document.createElement("option");
+            option.value = gear.name;
+            option.text = gear.name;
+            gear_list_select.appendChild(option);
+        }
+    }
+
+    function list_activity_types()
+    {
+        var api_url = "${root_url}/api/1.0/list_activity_types";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_activity_type_list, dataType: "text" });
+    }
+
+    function list_gear()
+    {
+        var api_url = "${root_url}/api/1.0/list_gear";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_gear_list, dataType: "text" });
+    }
+
+    function add_default_gear_info()
+    {
+        var outer_div = document.getElementById("new_gear_default_block");
+        var inner_div = document.createElement('div');
+        inner_div.id = "new_gear_div";
+
+        // Remove existing items, if any.
+        while (outer_div.firstChild)
+        {
+            outer_div.removeChild(outer_div.firstChild);
+        }
+
+        // Add a line break.
+        outer_div.appendChild(document.createElement("hr"));
+        inner_div.appendChild(document.createElement("br"));
+
+        // Add the activity type selector.
+        type_select = document.createElement("select");
+        type_select.id = "activity_type";
+        inner_div.appendChild(type_select);
+
+        // Add the activity type selector.
+        gear_select = document.createElement("select");
+        gear_select.id = "gear";
+        inner_div.appendChild(gear_select);
+
+        // Add a line break.
+        inner_div.appendChild(document.createElement("br"));
+
+        // Add to the div.
+        outer_div.appendChild(inner_div);
+
+        // Create a save button.
+        var save_btn = document.createElement('button');
+        save_btn.appendChild(document.createTextNode('Save'));
+        save_btn.title = "Save";
+        save_btn.addEventListener('click', function() { create_service_record(this); });
+
+        // Add the save button to the screen.
+        outer_div.appendChild(save_btn);
+
+        // Add a line break.
+        outer_div.appendChild(document.createElement("hr"));
+
+        // Add activity types.
+        list_activity_types();
+
+        // Add gear to the gear list.
+        list_gear();
+
+        return false;
+    }
+
     function update_birthday()
     {
 		var the_url = "${root_url}/api/1.0/update_profile";
@@ -120,8 +215,7 @@
         {
             cell = new_row.insertCell();
             var a = document.createElement('a');
-            var link_text = document.createTextNode(row_value[0]);
-            a.appendChild(link_text);
+            a.appendChild(document.createTextNode(row_value[0]));
             a.title = row_value;
             a.href = "${root_url}/activity/" + row_value[1];
             cell.appendChild(a);
@@ -164,13 +258,37 @@
         }
     }
 
+    function append_to_defaults_table(table, row_name, row_value)
+    {
+        var new_row = table.insertRow();
+        var cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(row_name));
+    }
+
+    var process_gear_defaults = function(records)
+    {
+        var defaults_table = document.getElementById("Defaults");
+
+        for (var key of records)
+        {
+            append_to_defaults_table(defaults_table, key, records[key]);
+        }
+    }
+
     function get_personal_records()
     {
         var api_url = "${root_url}/api/1.0/list_personal_records";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_personal_records, dataType: "json" });
     }
 
+    function get_gear_defaults()
+    {
+        var api_url = "${root_url}/api/1.0/list_gear_defaults";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_gear_defaults, dataType: "json" });
+    }
+
     get_personal_records();
+    get_gear_defaults();
 </script>
 
 <section class="nav">
@@ -225,10 +343,16 @@ ${power_zones}
     <h3>Cycling</h3>
     <table id="Cycling">
     </table>
-
     <h3>Running</h3>
     <table id="Running">
     </table>
+	<hr>
+    <h2>Default Gear</h2>
+    <table id="Defaults">
+    </table>
+    <div class="block" id="new_gear_default_block" style="width: 560px">
+    </div>
+	<button type="button" onclick="return add_default_gear_info()">Add Default</button>
 </div>
 
 </body>
