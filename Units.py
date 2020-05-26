@@ -336,10 +336,10 @@ def convert_to_string_in_specified_unit_system(unit_system, in_value, in_distanc
         out_value, out_distance_units = convert_to_distance_for_the_specified_unit_system(unit_system, in_value, in_distance_units)
         out_value = "{:.2f} ".format(out_value) + get_distance_units_str(out_distance_units)
     elif label in Keys.SPEED_KEYS:
-        out_value, out_distance_units, out_time_units = convert_to_speed_for_the_specified_unit_system(unit_system, in_value, in_distance_units, in_time_units)        
+        out_value, out_distance_units, out_time_units = convert_to_speed_for_the_specified_unit_system(unit_system, in_value, in_distance_units, in_time_units)
         out_value = "{:.2f} ".format(out_value) + get_speed_units_str(out_distance_units, out_time_units)
     elif label in Keys.PACE_KEYS:
-        out_value, out_distance_units, out_time_units = convert_to_pace_for_the_specified_unit_system(unit_system, in_value, in_distance_units, in_time_units)        
+        out_value, out_distance_units, out_time_units = convert_to_pace_for_the_specified_unit_system(unit_system, in_value, in_distance_units, in_time_units)
         out_value = convert_minutes_to_mins_secs(out_value) + " " + get_pace_units_str(out_distance_units, out_time_units)
     elif label in Keys.HEART_RATE_KEYS:
         out_value = "{:.2f} ".format(in_value) + get_heart_rate_units_str()
@@ -349,4 +349,25 @@ def convert_to_string_in_specified_unit_system(unit_system, in_value, in_distanc
         out_value = "{:.2f} ".format(in_value) + get_power_units_str()
     else:
         out_value = str(in_value)
+    return out_value
+
+def convert_to_num_in_specified_unit_system(unit_system, in_value, in_distance_units, in_time_units, label):
+    """Generic unit conversion routine. Returns a number with the converted value."""
+    out_value = in_value
+    if label in Keys.TIME_KEYS:
+        out_value = convert_seconds_to_hours_mins_secs(in_value)
+    elif label in Keys.DISTANCE_KEYS:
+        out_value, _ = convert_to_distance_for_the_specified_unit_system(unit_system, in_value, in_distance_units)
+    elif label in Keys.SPEED_KEYS:
+        out_value, _, _ = convert_to_speed_for_the_specified_unit_system(unit_system, in_value, in_distance_units, in_time_units)
+    elif label in Keys.PACE_KEYS:
+        out_value, _, _ = convert_to_pace_for_the_specified_unit_system(unit_system, in_value, in_distance_units, in_time_units)
+    elif label in Keys.HEART_RATE_KEYS:
+        out_value = in_value
+    elif label in Keys.CADENCE_KEYS:
+        out_value = in_value
+    elif label in Keys.POWER_KEYS:
+        out_value = in_value
+    else:
+        out_value = in_value
     return out_value
