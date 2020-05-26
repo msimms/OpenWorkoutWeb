@@ -35,16 +35,16 @@
 		var dict = [];
 		var sets = [];
 		var result_text = {};
-		var innerDiv = document.getElementById("manual_entry_div");
+		var inner_div = document.getElementById("manual_entry_div");
 		var startDate = document.getElementById("startDate").value;
 		var startTime = document.getElementById("startTime").value;
 		var activityStartObj = new Date(startDate + " " + startTime);
 		var activityStart = activityStartObj.getTime() / 1000;
 		var activityType = document.getElementById("activity_type").value;
 
-		for (var i = 0; i < innerDiv.children.length; i++)
+		for (var i = 0; i < inner_div.children.length; i++)
 		{
-			var divChild = innerDiv.children[i];
+			var divChild = inner_div.children[i];
 
 			if (divChild.name == "Repititions")
 			{
@@ -72,14 +72,14 @@
 	function show_manual_entry_options()
 	{
 		var activityType = document.getElementById("activity_type").value;
-		var outerDiv = document.getElementById("block");
-		var innerDiv = document.createElement('div');
-		innerDiv.id = "manual_entry_div";
+		var outer_div = document.getElementById("block");
+		var inner_div = document.createElement('div');
+		inner_div.id = "manual_entry_div";
 
 		// Remove existing items, if any.
-		while (outerDiv.firstChild)
+		while (outer_div.firstChild)
 		{
-			outerDiv.removeChild(outerDiv.firstChild);
+			outer_div.removeChild(outer_div.firstChild);
 		}
 
 		// Determine which data fields are needed.
@@ -94,7 +94,7 @@
 
 		// Add a label for the date picker.
 		var dateLabel = document.createTextNode("Date: ");
-		innerDiv.appendChild(dateLabel);
+		inner_div.appendChild(dateLabel);
 
 		// Add the date picker.
 		var today = new Date();
@@ -104,11 +104,11 @@
 		startDate.className = "pickDate";
 		$(startDate).datepicker({showButtonPanel: true, defaultDate: today});
 		$(startDate).datepicker('setDate', today);
-		innerDiv.appendChild(startDate);
+		inner_div.appendChild(startDate);
 
 		// Add a label for the start time picker.
 		var dateLabel = document.createTextNode("Start Time: ");
-		innerDiv.appendChild(dateLabel);
+		inner_div.appendChild(dateLabel);
 
 		// Add the start time picker.
 		var startTime = document.createElement('input');
@@ -116,30 +116,29 @@
 		startTime.id = "startTime";
 		startTime.className = "pickTime"; 
 		$(startTime).timepicker({ 'timeFormat': 'h:i A' });
-		innerDiv.appendChild(startTime);
+		inner_div.appendChild(startTime);
 
 		// Add a line break.
 		var br = document.createElement("br");
-		innerDiv.appendChild(br);
+		inner_div.appendChild(br);
 
 		// Add the data fields.
 		for (i = 0, len = fields.length; i < len; i++)
 		{
-			add_number_entry_node(innerDiv, fields[i]);
+			add_number_entry_node(inner_div, fields[i]);
 		}
 
 		// Add to the div.
-		outerDiv.appendChild(innerDiv);
+		outer_div.appendChild(inner_div);
 
 		// Create a save button.
-		var saveBtn = document.createElement('button');
-		var saveBtnText = document.createTextNode('Save');
-		saveBtn.appendChild(saveBtnText);
-		saveBtn.title = "Save";
-		saveBtn.addEventListener('click', function() { save(this); });
+		var save_btn = document.createElement('button');
+		save_btn.appendChild(document.createTextNode('Save'));
+		save_btn.title = "Save";
+		save_btn.addEventListener('click', function() { save(this); });
 
 		// Add the save button to the screen.
-		outerDiv.appendChild(saveBtn);
+		outer_div.appendChild(save_btn);
 
 		return false;
 	}
@@ -212,7 +211,6 @@ ${nav}
 			{
 				upload_file_no_ui(file_list[i]);
 			}
-//            window.location.replace("${root_url}/task_status");
 		}
 
 		picker.addEventListener('change', e => {

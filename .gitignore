@@ -36,7 +36,14 @@ tempmod/*
 
 # Temp directories
 tempfile/
-tempmod/
+tempmod*/
 
 # Session management
-sessions/
+sessions*/
+
+# Celery
+celerybeat-schedule
+celerybeat-schedule.*
+
+# Key files
+*.pem

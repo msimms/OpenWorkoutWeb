@@ -43,6 +43,11 @@ class Summarizer(object):
         self.annual_open_water_swimming_bests = {} # Best times for each year (best mile, etc.)
         self.annual_pool_swimming_bests = {} # Best times for each year (best mile, etc.)
 
+        self.running_summary = {} # Summary data (total distance, etc.)
+        self.cycling_summary = {} # Summary data (total distance, etc.)
+        self.open_water_swimming_summary = {} # Summary data (total distance, etc.)
+        self.pool_swimming_summary = {} # Summary data (total distance, etc.)
+
         self.ftp_calc = FtpCalculator.FtpCalculator()
         self.hr_calc = HeartRateCalculator.HeartRateCalculator()
 
@@ -101,6 +106,18 @@ class Summarizer(object):
             return self.annual_pool_swimming_bests.keys()
         return {}
 
+    def get_summary_dictionary(self, activity_type):
+        """Returns the record dictionary that corresponds to the given activity type."""
+        if activity_type == Keys.TYPE_RUNNING_KEY:
+            return self.running_summary
+        elif activity_type == Keys.TYPE_CYCLING_KEY:
+            return self.cycling_summary
+        elif activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY:
+            return self.open_water_swimming_summary
+        elif activity_type == Keys.TYPE_POOL_SWIMMING_KEY:
+            return self.pool_swimming_summary
+        return {}
+
     def get_best_time(self, activity_type, record_name):
         """Returns the time associated with the specified record, or None if not found."""
         record_set = self.get_record_dictionary(activity_type)
@@ -151,6 +168,8 @@ class Summarizer(object):
         if old_value is None or Summarizer.is_better(summary_data_key, summary_data_value, old_value):
             record_set[summary_data_key] = [ summary_data_value, activity_id ]
 
+        # Update annual records
+
         # In what year was this activity?
         ts = time.gmtime(start_time)
 
@@ -163,6 +182,20 @@ class Summarizer(object):
         # If the old record is not set or this is better, then update.
         if old_value is None or Summarizer.is_better(summary_data_key, summary_data_value, old_value):
             record_set[summary_data_key] = [ summary_data_value, activity_id ]
+
+        # Update summary data.
+
+        # Get the record set that corresponds with the activity type.
+        record_set = self.get_summary_dictionary(activity_type)
+
+        # Update the distance total.
+        if summary_data_key == Keys.LONGEST_DISTANCE:
+            if Keys.TOTAL_DISTANCE in record_set and Keys.TOTAL_ACTIVITIES in record_set:
+                record_set[Keys.TOTAL_DISTANCE] = record_set[Keys.TOTAL_DISTANCE] + summary_data_value
+                record_set[Keys.TOTAL_ACTIVITIES] = record_set[Keys.TOTAL_ACTIVITIES] + 1
+            else:
+                record_set[Keys.TOTAL_DISTANCE] = summary_data_value
+                record_set[Keys.TOTAL_ACTIVITIES] = 1
 
     def add_activity_data(self, activity_id, activity_type, start_time, summary_data):
         """Submits an activity's metadata for summary analysis."""

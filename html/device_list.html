@@ -28,8 +28,8 @@
         var new_row = table.insertRow();
         var cell = new_row.insertCell();
         var a = document.createElement('a');
-        var link_text = document.createTextNode(device_id);
-        a.appendChild(link_text);
+
+        a.appendChild(document.createTextNode(device_id));
         a.title = device_id;
         a.href = "${root_url}/device/" + device_id;
         cell.appendChild(a);
@@ -50,11 +50,10 @@
         {
             var new_row = device_table.insertRow();
             var cell = new_row.insertCell();
-            var text = document.createTextNode("Unique Identifier");
-            cell.appendChild(text);
+
+            cell.appendChild(document.createTextNode("Unique Identifier"));
             cell = new_row.insertCell();
-            text = document.createTextNode("Last Heard From");
-            cell.appendChild(text);
+            cell.appendChild(document.createTextNode("Last Heard From"));
 
             for (var record of records)
             {

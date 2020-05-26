@@ -50,6 +50,7 @@ class TrainingPaceCalculator(object):
         paces[Keys.EASY_RUN_PACE] = easy_pace
         paces[Keys.TEMPO_RUN_PACE] = tempo_pace
         paces[Keys.SPEED_RUN_PACE] = speed_pace
+        paces[Keys.INTERVAL_RUN_PACE] = tempo_pace * 1.08
         return paces
 
     def calc_from_hr(self, max_hr, resting_hr):

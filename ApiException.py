@@ -23,11 +23,11 @@
 # SOFTWARE.
 """Exceptions thrown by a REST API."""
 
-class ApiException(Exception):
+class ApiException(BaseException):
     """Exception thrown by a REST API."""
 
     def __init__(self, code, message):
-        Exception.__init__(self, message)
+        BaseException.__init__(self, message)
         self.code = code
 
 class ApiMalformedRequestException(ApiException):

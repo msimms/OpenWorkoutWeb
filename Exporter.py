@@ -48,10 +48,10 @@ class Exporter(object):
             if current_reading is None:
                 current_reading = sensor_iter.next()
             else:
-                sensor_time = int(current_reading.keys()[0])
+                sensor_time = float(current_reading.keys()[0])
                 while sensor_time < time_ms:
                     current_reading = sensor_iter.next()
-                    sensor_time = int(current_reading.keys()[0])
+                    sensor_time = float(current_reading.keys()[0])
         except StopIteration:
             return None
         return current_reading

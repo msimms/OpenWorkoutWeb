@@ -25,6 +25,7 @@
 
 import bcrypt
 import time
+import sys
 import Keys
 import SessionMgr
 import StraenDb
@@ -73,9 +74,17 @@ class UserMgr(object):
         _, db_hash1, _ = self.database.retrieve_user(email)
         if db_hash1 is None:
             raise Exception("The user could not be found.")
-        db_hash2 = bcrypt.hashpw(password.encode('utf-8'), db_hash1.encode('utf-8'))
-        if db_hash1 != db_hash2:
-            raise Exception("The password is invalid.")
+
+        if sys.version_info[0] < 3:
+            db_hash2 = bcrypt.hashpw(password.encode('utf-8'), db_hash1.encode('utf-8'))
+            if db_hash1 != db_hash2:
+                raise Exception("The password is invalid.")
+        else:
+            if isinstance(password, str):
+                password = password.encode()
+            if isinstance(db_hash1, str):
+                db_hash1 = db_hash1.encode()
+            return bcrypt.checkpw(password, db_hash1)
         return True
 
     def create_user(self, email, realname, password1, password2, device_str):
@@ -126,6 +135,14 @@ class UserMgr(object):
         if user_id is None:
             raise Exception("Bad parameter.")
         return self.database.retrieve_user_from_id(user_id)
+
+    def retrieve_user_from_api_key(self, api_key):
+        """Retrieve method for a user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if api_key is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_user_from_api_key(api_key)
 
     def retrieve_matched_users(self, name):
         """Returns a list of user names for users that match the specified regex."""
@@ -290,11 +307,15 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
 
         result = self.database.retrieve_user_setting(user_id, key)
+
+        # These are the default values:
         if result is None:
             if key == Keys.DEFAULT_PRIVACY:
                 result = Keys.ACTIVITY_VISIBILITY_PUBLIC
             elif key == Keys.PREFERRED_UNITS_KEY:
                 result = Keys.UNITS_STANDARD_KEY
+            elif key == Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY:
+                result = Keys.DAYS_OF_WEEK[0]
             elif key == Keys.GENDER_KEY:
                 result = Keys.GENDER_MALE_KEY
             elif key == Keys.HEIGHT_KEY:
@@ -305,6 +326,8 @@ class UserMgr(object):
                 result = Keys.DEFAULT_BIRTHDAY
             elif key == Keys.GOAL_DATE_KEY:
                 result = int(time.time())
+            elif key == Keys.EXPERIENCE_LEVEL_KEY:
+                result = Keys.EXPERIENCE_LEVEL_BEGINNER
             else:
                 result = ""
 

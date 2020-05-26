@@ -24,7 +24,7 @@
 """Key strings for all key/value pairs used in the app"""
 
 # Keys associated with user management.
-SESSION_KEY = '_straen_username'
+SESSION_KEY = "_straen_username"
 DATABASE_ID_KEY = "_id"
 USERNAME_KEY = "username" # Login name for a user
 PASSWORD_KEY = "password" # User's password
@@ -40,12 +40,16 @@ REQUESTING_USER_KEY = "requesting_user"
 PR_KEY = "pr" # Personal record
 EMAIL_KEY = "email" # User's email
 TARGET_EMAIL_KEY = "target_email" # Email address of another user
+API_KEYS = "api keys" # List of API keys belonging to the user
+API_KEY = "api key" # API key being provided
 
 # User settings
+REQUESTED_SETTING = "requested setting"
 DEFAULT_PRIVACY = "default privacy"
 PREFERRED_UNITS_KEY = "preferred units"
 UNITS_METRIC_KEY = "metric"
 UNITS_STANDARD_KEY = "standard"
+PREFERRED_FIRST_DAY_OF_WEEK_KEY = "preferred first day of week"
 BIRTHDAY_KEY = "birthday"
 DEFAULT_BIRTHDAY = "315532800"
 HEIGHT_KEY = "height"
@@ -80,6 +84,8 @@ WORKOUT_WARMUP_KEY = "warmup"
 WORKOUT_INTERVALS_KEY = "intervals"
 WORKOUT_COOLDOWN_KEY = "cooldown"
 WORKOUT_SCHEDULED_TIME_KEY = "scheduled time"
+WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY = "last scheduled workout time"
+WORKOUT_IN_TAPER_KEY = "taper"
 
 # Workout types
 WORKOUT_TYPE_REST = "Rest"
@@ -93,6 +99,13 @@ WORKOUT_TYPE_MIDDLE_DISTANCE_RUN = "Middle Distance Run" # 2 hour run for advanc
 WORKOUT_TYPE_LONG_RUN = "Long Run"
 WORKOUT_TYPE_OPEN_WATER_SWIM = "Open Water Swim"
 WORKOUT_TYPE_POOL_WATER_SWIM = "Pool Swim"
+
+# Interval workouts
+INTERVAL_WORKOUT_REPEAT_KEY = "Repeat"
+INTERVAL_WORKOUT_DISTANCE_KEY = "Distance"
+INTERVAL_WORKOUT_PACE_KEY = "Pace"
+INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY = "Recovery Distance"
+INTERVAL_WORKOUT_RECOVERY_PACE_KEY = "Recovery Pace"
 
 # Keys associated with uploading data
 UPLOADED_FILE_NAME_KEY = "uploaded_file_name"
@@ -195,6 +208,9 @@ VARIABILITY_INDEX = "Variability Index"
 CLUSTER = "Cluster"
 TOTAL_DISTANCE = "Total Distance"
 LONGEST_DISTANCE = "Longest Distance"
+TOTAL_ACTIVITIES = "Total Activities"
+AVG_RUNNING_DISTANCE = "Average Running Distance"
+AVG_CYCLING_DISTANCE = "Average Cycling Distance"
 MILE_SPLITS = "Mile Splits"
 KM_SPLITS = "KM Splits"
 
@@ -207,9 +223,11 @@ LONG_RUN_PACE = "Long Run Pace"
 EASY_RUN_PACE = "Easy Run Pace"
 TEMPO_RUN_PACE = "Tempo Run Pace"
 SPEED_RUN_PACE = "Speed Run Pace"
+INTERVAL_RUN_PACE = "Interval Run Pace"
 
 # Keys used to manage gear.
 GEAR_KEY = "gear"
+GEAR_DEFAULTS_KEY = "gear_defaults"
 GEAR_ID_KEY = "gear_id"
 GEAR_TYPE_KEY = "type"
 GEAR_NAME_KEY = "name"
@@ -226,7 +244,7 @@ SERVICE_RECORD_ID_KEY = "service_id"
 SERVICE_RECORD_DATE_KEY = "date"
 SERVICE_RECORD_DESCRIPTION_KEY = "description"
 
-# Activity types
+# Activity types.
 TYPE_UNSPECIFIED_ACTIVITY = "Unknown"
 TYPE_RUNNING_KEY = "Running"
 TYPE_VIRTUAL_RUNNING_KEY = "Virtual Running"
@@ -244,18 +262,12 @@ TYPE_PUSH_UP_KEY = "Push Up"
 FOOT_BASED_ACTIVITIES = [ TYPE_RUNNING_KEY, TYPE_INDOOR_RUNNING_KEY, TYPE_VIRTUAL_RUNNING_KEY, TYPE_HIKING_KEY, TYPE_WALKING_KEY ]
 BIKE_BASED_ACTIVITIES = [ TYPE_CYCLING_KEY, TYPE_INDOOR_CYCLING_KEY, TYPE_VIRTUAL_CYCLING_KEY, TYPE_MOUNTAIN_BIKING_KEY ]
 SWIMMING_ACTIVITIES = [ TYPE_OPEN_WATER_SWIMMING_KEY, TYPE_POOL_SWIMMING_KEY ]
+STRENGTH_ACTIVITIES = [ TYPE_PULL_UP_KEY, TYPE_PUSH_UP_KEY ]
 
-# Activity names
+# Activity names.
 UNNAMED_ACTIVITY_TITLE = "Unnamed"
 
-# Interval workouts
-INTERVAL_REPEAT_KEY = "Repeat"
-INTERVAL_DISTANCE_KEY = "Distance"
-INTERVAL_PACE_KEY = "Pace"
-INTERVAL_RECOVERY_DISTANCE_KEY = "Recovery Distance"
-INTERVAL_RECOVERY_PACE_KEY = "Recovery Pace"
-
-# Goals
+# Goals.
 GOAL_KEY = "goal"
 GOAL_DATE_KEY = "goal_date"
 GOAL_SWIM_DISTANCE_KEY = "goal_swim_distance"
@@ -268,13 +280,17 @@ GOAL_15K_RUN_KEY = "15K Run"
 GOAL_HALF_MARATHON_RUN_KEY = "Half Marathon"
 GOAL_MARATHON_RUN_KEY = "Marathon"
 
-# Used by the workout plan generator
+# Used by the workout plan generator.
 LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"
 AGE_YEARS_KEY = "Age In Years"
-EXPERIENCE_LEVEL_KEY = "Experience Level"
 WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
+EXPERIENCE_LEVEL_KEY = "Experience Level"
+EXPERIENCE_LEVEL_BEGINNER = "Beginner"
+EXPERIENCE_LEVEL_INTERMEDIATE = "Intermediate"
+EXPERIENCE_LEVEL_ADVANCED = "Advanced"
+EXPERIENCE_LEVELS = [ EXPERIENCE_LEVEL_BEGINNER, EXPERIENCE_LEVEL_INTERMEDIATE, EXPERIENCE_LEVEL_ADVANCED ]
 
-# Used to track deferred tasks
+# Used to track deferred tasks.
 DEFERRED_TASKS_USER_ID = "user_id"
 TASKS_KEY = "tasks"
 TASK_ID_KEY = "task id"
@@ -288,16 +304,18 @@ TASK_STATUS_QUEUED = "Queued"
 TASK_STATUS_STARTED = "Started"
 TASK_STATUS_FINISHED = "Finished"
 
-# Things associated with deferred tasks
+# Things associated with deferred tasks.
 LOCAL_FILE_NAME = "local file name"
 
 TIME_KEYS = [ BEST_1K, BEST_MILE, BEST_5K, BEST_10K, BEST_15K, BEST_HALF_MARATHON, BEST_MARATHON, BEST_METRIC_CENTURY, BEST_CENTURY ]
-DISTANCE_KEYS = [ TOTAL_DISTANCE, LONGEST_DISTANCE ]
+DISTANCE_KEYS = [ TOTAL_DISTANCE, LONGEST_DISTANCE, AVG_RUNNING_DISTANCE, AVG_CYCLING_DISTANCE ]
 SPEED_KEYS = [ APP_CURRENT_SPEED_KEY, APP_AVG_SPEED_KEY, APP_MOVING_SPEED_KEY, APP_SPEED_VARIANCE_KEY, BEST_SPEED, APP_AVG_SPEED_KEY ]
-PACE_KEYS = [ APP_CURRENT_PACE_KEY, BEST_PACE, AVG_PACE, LONG_RUN_PACE, EASY_RUN_PACE, TEMPO_RUN_PACE, SPEED_RUN_PACE, INTERVAL_PACE_KEY ]
+PACE_KEYS = [ APP_CURRENT_PACE_KEY, BEST_PACE, AVG_PACE, LONG_RUN_PACE, EASY_RUN_PACE, TEMPO_RUN_PACE, SPEED_RUN_PACE, INTERVAL_RUN_PACE, INTERVAL_WORKOUT_PACE_KEY ]
 POWER_KEYS = [ AVG_POWER, MAX_POWER, BEST_5_SEC_POWER, BEST_12_MIN_POWER, BEST_20_MIN_POWER, BEST_1_HOUR_POWER, NORMALIZED_POWER, THRESHOLD_POWER ]
 HEART_RATE_KEYS = [ AVG_HEART_RATE, MAX_HEART_RATE ]
 CADENCE_KEYS = [ APP_CADENCE_KEY, AVG_CADENCE, MAX_CADENCE ]
 GOALS = [ GOAL_FITNESS_KEY, GOAL_5K_RUN_KEY, GOAL_10K_RUN_KEY, GOAL_15K_RUN_KEY, GOAL_HALF_MARATHON_RUN_KEY, GOAL_MARATHON_RUN_KEY ]
 
 UNSUMMARIZABLE_KEYS = [ APP_SPEED_VARIANCE_KEY, APP_DISTANCES_KEY, APP_LOCATIONS_KEY, ACTIVITY_TIME_KEY, ACTIVITY_TYPE_KEY, ACTIVITY_HASH_KEY, ACTIVITY_LOCATION_DESCRIPTION_KEY, ACTIVITY_INTERVALS, MILE_SPLITS, KM_SPLITS ]
+
+DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]

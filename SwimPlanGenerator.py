@@ -13,4 +13,10 @@ class SwimPlanGenerator(object):
 
     def gen_workouts_for_next_week(self, inputs):
         """Generates the workouts for the next week, but doesn't schedule them."""
-        return []
+
+        workouts = []
+
+        # Add critical workouts:
+        # Technique swim.
+
+        return workouts

@@ -32,6 +32,20 @@
 		background-color: teal;
 	}
 
+    div.tooltip
+    {
+        position: absolute;
+        text-align: center;
+        width: 60px;
+        height: 28px;
+        padding: 2px;
+        font: 12px sans-serif;        
+        background: lightsteelblue;
+        border: 0px;
+        border-radius: 8px;
+        pointer-events: none;
+    }
+
 	path
 	{
 		stroke: steelblue;
@@ -270,6 +284,30 @@ ${summary}
 				.attr("height", height + margin.top + margin.bottom)
 			.append("g")
 				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var div = d3.select("#charts")
+            .append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+        svg.selectAll("dot")    
+                .data(data)         
+            .enter().append("circle")                               
+                .attr("r", 5)       
+                .attr("cx", function(d) { return x(d.date); })       
+                .attr("cy", function(d) { return y(d.value); })     
+                .on("mouseover", function(d) {      
+                    div.transition()        
+                        .duration(200)      
+                        .style("opacity", .9);      
+                    div .html(formatTime(d.date) + "<br/>"  + d.value)  
+                        .style("left", (d3.event.pageX) + "px")     
+                        .style("top", (d3.event.pageY - 28) + "px");    
+                    })                  
+                .on("mouseout", function(d) {       
+                    div.transition()        
+                        .duration(500)      
+                        .style("opacity", 0);   
+                });
 
 		x.domain(d3.extent(data, function(d) { return d.date; }));
 		y.domain(d3.extent(data, function(d) { return d.value; }));
@@ -295,11 +333,13 @@ ${summary}
 
 	function draw_bar_chart(data, title, color)
 	{
+        var xVals = Array.apply(null, Array(data.length - 1)).map(function (x, i) { return i + 1; } );
+
 		var margin = {top: 20, right: 20, bottom: 55, left: 50},
 			width = $("#charts").width() - margin.left - margin.right,
 			height = 250 - margin.top - margin.bottom;
 
-        var x = d3.scale.ordinal().domain([0,1,2,3,4,5]).rangeBands([0, width]);
+        var x = d3.scale.ordinal().domain(xVals).rangeBands([0, width]);
         var y = d3.scale.linear().domain([0, d3.max(data)]).range([height, 0]);
 
 		var xAxis = d3.svg.axis().scale(x).orient("bottom");
@@ -357,6 +397,9 @@ ${powers}
     var powerZones = [
 ${powerZones}
     ];
+    var splits = [
+${splits}
+    ];
 
 	if (speeds.length > 0)
 		$(function() { draw_graph(speeds, "Speed", "DodgerBlue") });
@@ -368,6 +411,8 @@ ${powerZones}
 		$(function() { draw_graph(powers, "Watts", "ForestGreen") });
 	if (powerZones.length > 0)
 		$(function() { draw_bar_chart(powerZones, "Power Zone Distribution", "ForestGreen") });
+	if (splits.length > 0)
+		$(function() { draw_bar_chart(splits, "Split Times", "LightRed") });
 </script>
 
 </div>

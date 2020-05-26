@@ -45,7 +45,6 @@ except ImportError:
     from io import StringIO ## for Python 3
 
 import Keys
-import LocationAnalyzer
 import Api
 import BmiCalculator
 import DataMgr
@@ -118,7 +117,13 @@ class App(object):
         self.root_dir = root_dir
         self.root_url = root_url
         self.tempfile_dir = os.path.join(self.root_dir, 'tempfile')
-        self.tempmod_dir = os.path.join(self.root_dir, 'tempmod')
+
+        # We'll use different tempmod dirs for python2 and python3 so we can switch between them without frustration.
+        if sys.version_info[0] < 3:
+            self.tempmod_dir = os.path.join(self.root_dir, 'tempmod2')
+        else:
+            self.tempmod_dir = os.path.join(self.root_dir, 'tempmod3')
+
         self.google_maps_key = google_maps_key
         self.debug = debug
         self.unmapped_activity_html_file = os.path.join(root_dir, HTML_DIR, 'unmapped_activity.html')
@@ -126,6 +131,7 @@ class App(object):
         self.map_single_google_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
         self.map_multi_html_file = os.path.join(root_dir, HTML_DIR, 'map_multi_google.html')
         self.error_logged_in_html_file = os.path.join(root_dir, HTML_DIR, 'error_logged_in.html')
+        self.error_activity_html_file = os.path.join(root_dir, HTML_DIR, 'error_activity.html')
         self.ical_server = IcalServer.IcalServer(data_mgr, self.root_url)
 
         self.tempfile_dir = os.path.join(root_dir, 'tempfile')
@@ -268,6 +274,7 @@ class App(object):
         all_tags.extend(activity_tags)
         all_tags.extend(default_tags)
         all_tags = list(set(all_tags))
+        all_tags.sort()
 
         tags_str = ""
         if all_tags is not None:
@@ -438,21 +445,19 @@ class App(object):
         my_template = Template(filename=self.unmapped_activity_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, description=description_str, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
 
-    def render_metadata_for_page(self, key, activity):
+    def render_speed_graph_for_page(self, activity, unit_system):
         """Helper function for processing meatadata and formatting it for display."""
-        max_value = 0.0
         data_str = ""
         data = []
-        if key in activity:
-            data = activity[key]
+        if Keys.APP_CURRENT_SPEED_KEY in activity:
+            data = activity[Keys.APP_CURRENT_SPEED_KEY]
         if data is not None and isinstance(data, list):
             for datum in data:
                 time = datum.keys()[0]
-                value = float(datum.values()[0])
-                data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
-                if value > max_value:
-                    max_value = value
-        return data_str, max_value
+                value_num = float(datum.values()[0])
+                value_num, _, _ = Units.convert_to_speed_for_the_specified_unit_system(unit_system, value_num, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
+                data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value_num) + " },\n"
+        return data_str
 
     def render_description_for_page(self, activity):
         """Helper function for processing the activity description and formatting it for display."""
@@ -465,7 +470,6 @@ class App(object):
 
     def render_sensor_data_for_page(self, key, activity):
         """Helper function for processing sensor data and formatting it for display."""
-        max_value = 0.0
         data_str = ""
         data = []
         multiplier = 1.0
@@ -480,9 +484,7 @@ class App(object):
             time = datum.keys()[0]
             value = float(datum.values()[0]) * multiplier
             data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
-            if value > max_value:
-                max_value = value
-        return data_str, max_value
+        return data_str
 
     @staticmethod
     def render_intervals_str(intervals):
@@ -538,6 +540,18 @@ class App(object):
         return result
 
     @staticmethod
+    def render_difference_array(array):
+        """Helper function for converting an array (list) to a comma-separated string."""
+        result = ""
+        last = 0
+        for item in array:
+            if len(result) > 0:
+                result += ", "
+            result += str(item - last)
+            last = item
+        return result
+
+    @staticmethod
     def render_array_reversed(array):
         """Helper function for converting an array (list) to a comma-separated string."""
         result = ""
@@ -547,16 +561,25 @@ class App(object):
             result += str(item)
         return result
 
+    def render_page_for_errored_activity(self, activity_id, logged_in, belongs_to_current_user):
+        """Helper function for rendering an error page when attempting to view an activity with bad data."""
+        delete_str = ""
+        if belongs_to_current_user is not None:
+            delete_str = App.render_delete_control()
+
+        my_template = Template(filename=self.error_activity_html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.", activityId=activity_id, delete=delete_str)
+
     def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
 
         # Is the user logged in?
         logged_in = logged_in_user_id is not None
 
+        # Sanity check.
         locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
         if locations is None or len(locations) == 0:
-            my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
+            return self.render_page_for_errored_activity(activity_id, logged_in, belongs_to_current_user)
 
         route = ""
         center_lat = 0
@@ -577,22 +600,24 @@ class App(object):
             last_lon = last_loc[Keys.LOCATION_LON_KEY]
             duration = last_loc[Keys.LOCATION_TIME_KEY] - first_loc[Keys.LOCATION_TIME_KEY]
 
+        # User's preferred unit system.
+        if logged_in:
+            unit_system = self.user_mgr.retrieve_user_setting(logged_in_user_id, Keys.PREFERRED_UNITS_KEY)
+        else:
+            unit_system = Keys.UNITS_STANDARD_KEY
+
         # Get all the things.
         description_str = self.render_description_for_page(activity)
-        current_speeds_str, _ = self.render_metadata_for_page(Keys.APP_CURRENT_SPEED_KEY, activity)
-        heart_rates_str, max_heart_rate = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity)
-        cadences_str, max_cadence = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity)
-        powers_str, max_power = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity)
+        current_speeds_str = self.render_speed_graph_for_page(activity, unit_system)
+        heart_rates_str = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity)
+        cadences_str = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity)
+        powers_str = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity)
         name = App.render_activity_name(activity)
         activity_type = App.render_activity_type(activity)
         is_foot_based_activity = activity_type in Keys.FOOT_BASED_ACTIVITIES
         is_foot_based_activity_str = "false"
         if is_foot_based_activity:
             is_foot_based_activity_str = "true"
-        if logged_in:
-            unit_system = self.user_mgr.retrieve_user_setting(logged_in_user_id, Keys.PREFERRED_UNITS_KEY)
-        else:
-            unit_system = Keys.UNITS_STANDARD_KEY
 
         # Compute the power zones.
         power_zones_str = ""
@@ -619,27 +644,14 @@ class App(object):
         summary += "\t<li>Name: " + name + "</li>\n"
 
         # Add the location description.
-        if summary_data is not None:
-            if Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
-                summary += "\t<li>Location: " + App.render_array_reversed(summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]) + "</li>\n"
-
-        # Compute location-based things. Once I figure out more of the OSM API then I won't need this as it's already done client-side when using Google Maps.
-        if not self.google_maps_key:
-            location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
-            location_analyzer.append_locations(locations)
-
-            if location_analyzer.total_distance is not None:
-                value, value_units = Units.convert_to_distance_for_the_specified_unit_system(unit_system, location_analyzer.total_distance, Units.UNITS_DISTANCE_METERS)
-                summary += "\t<li>Distance: {:.2f} ".format(value) + Units.get_distance_units_str(value_units) + "</li>\n"
-
-            if location_analyzer.avg_speed is not None and location_analyzer.avg_speed > 0:
-                if is_foot_based_activity:
-                    summary += "\t<li>Avg. Pace: " + Units.convert_to_string_in_specified_unit_system(unit_system, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.AVG_PACE)
-                else:
-                    summary += "\t<li>Avg. Speed: " + Units.convert_to_string_in_specified_unit_system(unit_system, location_analyzer.avg_speed, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.APP_AVG_SPEED_KEY)
+        if summary_data is not None and Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
+            location_description = summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]
+            if len(location_description) > 0:
+                summary += "\t<li>Location: " + App.render_array_reversed(location_description) + "</li>\n"
 
         # Build the detailed analysis table from data that was computed out-of-band and cached.
         details_str = ""
+        splits_str = ""
         excluded_keys = Keys.UNSUMMARIZABLE_KEYS
         excluded_keys.append(Keys.LONGEST_DISTANCE)
         if summary_data is not None:
@@ -653,6 +665,12 @@ class App(object):
                     details_str += "<td><b>Intervals</b><td>"
                     details_str += App.render_intervals_str(summary_data[key])
                     details_str += "</td><tr>\n"
+                elif key == Keys.KM_SPLITS:
+                    if unit_system == Keys.UNITS_METRIC_KEY:
+                        splits_str = "\t\t" + App.render_difference_array(summary_data[key])
+                elif key == Keys.MILE_SPLITS:
+                    if unit_system == Keys.UNITS_STANDARD_KEY:
+                        splits_str = "\t\t" + App.render_difference_array(summary_data[key])
                 elif key not in excluded_keys:
                     details_str += "<td><b>"
                     details_str += key
@@ -698,7 +716,7 @@ class App(object):
 
         # Render the delete control.
         delete_str = ""
-        if logged_in:
+        if belongs_to_current_user:
             delete_str = App.render_delete_control()
 
         # Build the page title.
@@ -710,10 +728,10 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, routeLen=len(locations), activityId=activity_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
@@ -724,8 +742,7 @@ class App(object):
             elif Keys.APP_ACCELEROMETER_KEY in activity or Keys.APP_SETS_KEY in activity:
                 return self.render_page_for_unmapped_activity(email, user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
             else:
-                my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
-                return my_template.render(nav=self.create_navbar(logged_in_user_id is not None), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.")
+                return self.render_page_for_errored_activity(activity[Keys.ACTIVITY_ID_KEY], logged_in_user_id is not None, belongs_to_current_user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -922,11 +939,7 @@ class App(object):
         selected_activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
         if Keys.ACTIVITY_TYPE_KEY in activity:
             selected_activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
-        all_activity_types = []
-        all_activity_types.extend(Keys.FOOT_BASED_ACTIVITIES)
-        all_activity_types.extend(Keys.BIKE_BASED_ACTIVITIES)
-        all_activity_types.extend(Keys.SWIMMING_ACTIVITIES)
-        all_activity_types.append(Keys.TYPE_UNSPECIFIED_ACTIVITY)
+        all_activity_types = self.data_mgr.retrieve_activity_types()
         activity_type_options_str = ""
         for activity_type in all_activity_types:
             activity_type_options_str += "\t\t<option value=\"" + activity_type + "\""
@@ -999,22 +1012,6 @@ class App(object):
         url_str = "<a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + display_str + "</a>"
         return url_str
 
-    def render_personal_record(self, unit_system, activity_type, record, record_name):
-        """Helper function that renders a single table row in the personal bests table."""
-        record_value = record[0]
-        activity_id = record[1]
-        record_str = Units.convert_to_string_in_specified_unit_system(unit_system, record_value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
-        out_str = "<td>"
-        out_str += record_name
-        params = {}
-        params[Keys.ACTIVITY_TYPE_KEY] = activity_type
-        params[Keys.RECORD_NAME_KEY] = record_name
-        out_str += "</td><td>"
-        out_str += self.render_activity_href(activity_id, record_str)
-        out_str += "</td><td><a href=\"" + self.root_url + "/record_progression?"
-        out_str += urllib.urlencode(params) + "\">[...]</td><tr>\n"
-        return out_str
-
     @statistics
     def record_progression(self, activity_type, record_name):
         """Renders the list of records, in order of progression, for the specified user and record type."""
@@ -1070,7 +1067,7 @@ class App(object):
                 days_str += " selected"
             days_str += ">" + day + "</option>\n"
 
-        # Set the preferred long run of the week.
+        # Set the goal type.
         goal_types = [Keys.GOAL_TYPE_COMPLETION, Keys.GOAL_TYPE_SPEED]
         selected_goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
         goal_type_str = ""
@@ -1079,6 +1076,15 @@ class App(object):
             if selected_goal_type is not None and selected_goal_type.lower() == goal_type.lower():
                 goal_type_str += " selected"
             goal_type_str += ">" + goal_type + "</option>\n"
+
+        # Set the experience level.
+        exp_level_str = ""
+        selected_exp_level = self.user_mgr.retrieve_user_setting(user_id, Keys.EXPERIENCE_LEVEL_KEY)
+        for exp_level in Keys.EXPERIENCE_LEVELS:
+            exp_level_str += "\t\t\t<option value=\"" + exp_level + "\""
+            if selected_exp_level is not None and selected_exp_level.lower() == exp_level.lower():
+                exp_level_str += " selected"
+            exp_level_str += ">" + exp_level + "</option>\n"
 
         # The the calendar ID used with the iCal server.
         calendar_id_str = ""
@@ -1089,7 +1095,7 @@ class App(object):
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, goals=goals_str, goal_date=goal_date, preferred_long_run_day=days_str, goal_type=goal_type_str, calendar=calendar_id_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, goals=goals_str, goal_date=goal_date, preferred_long_run_day=days_str, goal_type=goal_type_str, exp_level=exp_level_str, calendar=calendar_id_str)
 
     @statistics
     def workout(self, workout_id):
@@ -1315,25 +1321,10 @@ class App(object):
                     zone_index = zone_index + 1
                 power_zones += "</table>\n"
 
-        # Get the user's personal recorsd.
-        prs = ""
-        unit_system = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        record_groups = self.data_mgr.retrieve_user_personal_records(user_id)
-        for record_group in record_groups:
-            record_dict = record_groups[record_group]
-            if len(record_dict) > 0:
-                prs += "<h3>" + record_group + "</h3>\n"
-                prs += "<table>\n"
-                for record_name in record_dict:
-                    if record_name not in Keys.UNSUMMARIZABLE_KEYS:
-                        record = record_dict[record_name]
-                        prs += self.render_personal_record(unit_system, record_group, record, record_name)
-                prs += "</table>\n"
-
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, birthday=selected_birthday, weight=selected_weight_str, weight_units=weight_units_str, height=selected_height_str, height_units=height_units_str, gender_options=gender_options, resting_hr=resting_hr_str, bmi=bmi_str, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones, prs=prs)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, birthday=selected_birthday, weight=selected_weight_str, weight_units=weight_units_str, height=selected_height_str, height_units=height_units_str, gender_options=gender_options, resting_hr=resting_hr_str, bmi=bmi_str, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones)
 
     @statistics
     def settings(self):
@@ -1353,6 +1344,7 @@ class App(object):
         # Get the current settings.
         selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, Keys.DEFAULT_PRIVACY)
         selected_units = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+        selected_first_day_of_week = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY)
 
         # Render the privacy option.
         privacy_options = "\t\t<option value=\"Public\""
@@ -1374,10 +1366,22 @@ class App(object):
             unit_options += " selected"
         unit_options += ">Standard</option>"
 
+        # Render the days of week.
+        day_options = ""
+        for day in Keys.DAYS_OF_WEEK:
+            day_options += "\t\t<option value=\""
+            day_options += day
+            day_options += "\""
+            if day is not None and day.lower() == selected_first_day_of_week:
+                day_options += " selected"
+            day_options += ">"
+            day_options += day
+            day_options += "</option>\n"
+
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'settings.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, privacy_options=privacy_options, unit_options=unit_options)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, privacy_options=privacy_options, unit_options=unit_options, day_options=day_options)
 
     @statistics
     def ical(self, calendar_id):

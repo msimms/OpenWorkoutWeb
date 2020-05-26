@@ -1,13 +1,27 @@
-# Copyright 2019 Michael J Simms
+# -*- coding: utf-8 -*-
+# 
+# # MIT License
+# 
+# Copyright (c) 2019 Mike Simms
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 """Schedules computationally expensive workout plan generation tasks"""
-
-import sys
-import traceback
-
-from bson.json_util import dumps
-from WorkoutPlanGenerator import generate_workout_plan
-
-import Keys
 
 class WorkoutPlanGeneratorScheduler(object):
     """Class for scheduling computationally expensive workout plan generation tasks."""
@@ -15,14 +29,14 @@ class WorkoutPlanGeneratorScheduler(object):
     def __init__(self):
         super(WorkoutPlanGeneratorScheduler, self).__init__()
 
-    def add_to_queue(self, user_id, track_func):
+    def add_to_queue(self, user_id, data_mgr):
         """Adds the user to the list of workout plans to be generated."""
+        from bson.json_util import dumps
+        from WorkoutPlanGenerator import generate_workout_plan
+
+        import Keys
+
         user_obj = {}
         user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
         plan_task = generate_workout_plan.delay(dumps(user_obj), None)
-        try:
-            if track_func is not None:
-                track_func(user_id, plan_task.task_id)
-        except:
-            print(traceback.format_exc())
-            print(sys.exc_info()[0])
+        data_mgr.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, plan_task.task_id, None)

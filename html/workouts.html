@@ -58,6 +58,20 @@
             alert("An error occurred!");
     }
 
+    function set_exp_level()
+    {
+        var the_url = "${root_url}/api/1.0/update_settings";
+        var exp_level = document.getElementById("exp_level").value;
+        var dict = [];
+        var result_text = {};
+
+        dict.push({["Experience Level"] : exp_level});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Experience level updated!");
+        else
+            alert("An error occurred!");
+    }
+
     function generate_workout_plan()
     {
         var the_url = "${root_url}/api/1.0/generate_workout_plan";
@@ -84,7 +98,7 @@
         dict.push({["goal"] : goal});
         dict.push({["goal_date"] : goalDate});
         if (send_post_request(the_url, dict, result_text))
-            window.location.reload();
+            alert("The workout plan is being generated and will be viewable on the My Activities page when done.");
         else
             alert(result_text.value);
     }
@@ -103,12 +117,10 @@
     {
         var new_row = table.insertRow();
         var cell = new_row.insertCell();
-        var text = document.createTextNode(row_name);
-        cell.appendChild(text);
+        cell.appendChild(document.createTextNode(row_name));
 
         cell = new_row.insertCell();
-        text = document.createTextNode(row_value);
-        cell.appendChild(text);
+        cell.appendChild(document.createTextNode(row_value));
     }
 
     var process_run_paces = function(records)
@@ -132,15 +144,13 @@
     {
         var new_row = table.insertRow();
         var cell = new_row.insertCell();
-        var text = document.createTextNode(row_name);
-        cell.appendChild(text);
+        cell.appendChild(document.createTextNode(row_name));
 
         if (row_value.length > 0)
         {
             cell = new_row.insertCell();
             var a = document.createElement('a');
-            var link_text = document.createTextNode(row_value[0]);
-            a.appendChild(link_text);
+            a.appendChild(document.createTextNode(row_value[0]));
             a.title = row_value;
             a.href = "${root_url}/activity/" + row_value[1];
             cell.appendChild(a);
@@ -246,6 +256,9 @@ ${preferred_long_run_day}
         </select><br>
         Goal Type: <select name="goal_type" id="goal_type" class="right" onchange="return set_goal_type()">
 ${goal_type}
+        </select><br>
+        Experience Level: <select name="exp_level" id="exp_level" class="right" onchange="return set_exp_level()">
+${exp_level}
         </select>
     </p>
 

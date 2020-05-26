@@ -322,13 +322,31 @@ version: v1
     description: Lists gear associated with the current user.
     get:
         responses:
-            200:
+            200: A JSON formatted string.
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
+/list_gear_defaults:
+    description: Lists the gear that is, by default, associated with each activity type.
+    get:
+        responses:
+            200: A JSON formatted string.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
 /update_gear:
     description: Updates the gear name or description.
+    get:
+    post:
+        responses:
+            200:
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+/update_gear_defaults:
+    description: Updates the gear a user wants to associate with an activity type, by default, is received.
     get:
     post:
         responses:
@@ -512,5 +530,21 @@ version: v1
             200: A JSON formatted string.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
+/get_user_setting:
+    description: Returns the value associated with the specified user setting.
+    get:
+        responses:
+            200: The value associated with the requested setting.
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
+/list_activity_types:
+    description: Returns the list of all activity types the software understands.
+    get:
+        responses:
+            200: The value associated with the requested setting.
             500: An internal exception was thrown.
     post:

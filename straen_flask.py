@@ -18,6 +18,7 @@ import App
 import DataMgr
 import AnalysisScheduler
 import ImportScheduler
+import Keys
 import SessionException
 import SessionMgr
 import UserMgr
@@ -474,12 +475,6 @@ def api(version, method):
     response = ""
     code = 200
     try:
-        # Get the logged in user.
-        user_id = None
-        username = g_app.user_mgr.get_logged_in_user()
-        if username is not None:
-            user_id, _, _ = g_app.user_mgr.retrieve_user(username)
-
         # The the API params.
         verb = "POST"
         if flask.request.method == 'GET':
@@ -489,6 +484,15 @@ def api(version, method):
             params = json.loads(flask.request.data)
         else:
             params = ""
+
+        # Get the logged in user, or lookup the user using the API key.
+        user_id = None
+        if Keys.API_KEY in params:
+            user_id, _, _ = self.app.user_mgr.retrieve_user_from_api_key(params[Keys.API_KEY])
+        else:
+            username = self.app.user_mgr.get_logged_in_user()
+            if username is not None:
+                user_id, _, _ = self.app.user_mgr.retrieve_user(username)
 
         # Process the API request.
         if version == '1.0':

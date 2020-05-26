@@ -65,6 +65,7 @@ class DataMgr(Importer.ActivityWriter):
         """Destructor"""
         self.analysis_scheduler = None
         self.import_scheduler = None
+        self.workout_plan_gen_scheduler = None
         self.database = None
 
     def total_users_count(self):
@@ -127,6 +128,7 @@ class DataMgr(Importer.ActivityWriter):
 
         activities = self.database.retrieve_user_activity_list(user_id, None, None, None)
         for activity in activities:
+
             if Keys.ACTIVITY_TIME_KEY in activity:
 
                 # Get the activity start and end times.
@@ -156,6 +158,7 @@ class DataMgr(Importer.ActivityWriter):
             return None, None
         if activity_type is not None and len(activity_type) > 0:
             self.database.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
+            self.create_default_tags_on_activity(user_id, activity_type, activity_id)
         if user_id is not None:
             self.database.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_USER_ID_KEY, user_id, False)
         return device_str, activity_id
@@ -612,7 +615,7 @@ class DataMgr(Importer.ActivityWriter):
         return self.database.retrieve_tags(activity_id)
 
     def create_tags_on_activity(self, activity, tags):
-        """Adds a tag to an activity."""
+        """Adds tags to an activity."""
         if self.database is None:
             raise Exception("No database.")
         if activity is None:
@@ -620,6 +623,21 @@ class DataMgr(Importer.ActivityWriter):
         if tags is None:
             raise Exception("Bad parameter.")
         return self.database.create_tags_on_activity(activity, tags)
+
+    def create_default_tags_on_activity(self, user_id, activity_type, activity_id):
+        """Adds tags to an activity."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("Bad parameter.")
+
+        defaults = self.retrieve_gear_defaults(user_id)
+        for default in defaults:
+            if default[Keys.ACTIVITY_TYPE_KEY] == activity_type:
+                tags = []
+                tags.append(default[Keys.GEAR_NAME_KEY])
+                return self.database.create_tags_on_activity_by_id(activity_id, tags)
+        return False
 
     @staticmethod
     def distance_for_activity(activity):
@@ -633,13 +651,23 @@ class DataMgr(Importer.ActivityWriter):
 
     @staticmethod
     def distance_for_tag_cb(tag_distances, activity, user_id):
+        if tag_distances is None:
+            return
+        if activity is None:
+            return
+
+        # Load tags associated with this activity.
         activity_tags = None
         if Keys.ACTIVITY_TAGS_KEY in activity:
             activity_tags = activity[Keys.ACTIVITY_TAGS_KEY]
+
+        # No sense in proceeding if this activity does not have any tags.
         if activity_tags is None:
             return
 
+        # Retrieve distance for this activity.
         distance = DataMgr.distance_for_activity(activity)
+
         for distance_tag in tag_distances.keys():
             if distance_tag in activity_tags:
                 tag_distances[distance_tag] = tag_distances[distance_tag] + distance
@@ -653,9 +681,11 @@ class DataMgr(Importer.ActivityWriter):
         if tags is None:
             raise Exception("Bad parameter.")
 
+        # Initialize.
         tag_distances = {}
         for tag in tags:
             tag_distances[tag] = 0.0
+
         self.retrieve_each_user_activity(tag_distances, user_id, DataMgr.distance_for_tag_cb)
         return tag_distances
 
@@ -831,6 +861,12 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.delete_workout(user_id, workout_id)
 
+    def retrieve_users_without_scheduled_workouts(self):
+        """Returns a list of user IDs for users who have workout plans that need to be re-run."""
+        if self.database is None:
+            raise Exception("No database.")
+        return self.database.retrieve_users_without_scheduled_workouts()
+
     def create_gear(self, user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Create method for gear."""
         if self.database is None:
@@ -896,6 +932,35 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.delete_gear(user_id, gear_id)
 
+    def retrieve_gear_defaults(self, user_id):
+        """Retrieve method for the gear that is, by default, associated with each activity type. Result is a JSON string."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_gear_defaults(user_id)
+
+    def update_gear_defaults(self, user_id, activity_type, gear_name):
+        """Retrieve method for the gear that is, by default, associated with each activity type. Result is a JSON string."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if activity_type is None:
+            raise Exception("Bad parameter.")
+        if gear_name is None:
+            raise Exception("Bad parameter.")
+
+        user_gear = self.retrieve_gear(user_id)
+        found = False
+        for gear in user_gear:
+            if Keys.GEAR_NAME_KEY in gear and gear[Keys.GEAR_NAME_KEY] == gear_name:
+                found = True
+                break
+        if not found:
+            raise Exception("Invalid gear name.")
+        return self.database.update_gear_defaults(user_id, activity_type, gear_name)
+
     def create_service_record(self, user_id, gear_id, record_date, record_description):
         """Create method for gear service records."""
         if self.database is None:
@@ -925,11 +990,11 @@ class DataMgr(Importer.ActivityWriter):
 
     def generate_workout_plan(self, user_id):
         """Generates/updates a workout plan for the user with the specified ID."""
-        if self.database is None:
-            raise Exception("No database.")
+        if self.workout_plan_gen_scheduler is None:
+            raise Exception("No workout scheduler.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        self.workout_plan_gen_scheduler.add_to_queue(user_id, self.track_workout_plan_task)
+        self.workout_plan_gen_scheduler.add_to_queue(user_id, self)
 
     def get_location_description(self, activity_id):
         """Returns the political location that corresponds to an activity."""
@@ -995,13 +1060,15 @@ class DataMgr(Importer.ActivityWriter):
         if all_activity_bests is not None:
             for activity_id in all_activity_bests:
                 activity_bests = all_activity_bests[activity_id]
-                if Keys.ACTIVITY_TYPE_KEY in activity_bests and Keys.ACTIVITY_TIME_KEY in activity_bests:
+                if activity_bests is not None and Keys.ACTIVITY_TYPE_KEY in activity_bests and Keys.ACTIVITY_TIME_KEY in activity_bests:
                     summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
 
         # Output is a dictionary for each sport type.
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
         running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
-        return cycling_bests, running_bests
+        cycling_summary = summarizer.get_summary_dictionary(Keys.TYPE_CYCLING_KEY)
+        running_summary = summarizer.get_summary_dictionary(Keys.TYPE_RUNNING_KEY)
+        return cycling_bests, running_bests, cycling_summary, running_summary
 
     def retrieve_bests_for_activity_type(self, user_id, activity_type, key):
         """Return a sorted list of all records for the given activity type and key."""
@@ -1134,12 +1201,10 @@ class DataMgr(Importer.ActivityWriter):
 
     def retrieve_activity_types(self):
         """Returns a the list of activity types that the software understands."""
-        types = []
-        types.append(Keys.TYPE_RUNNING_KEY)
-        types.append(Keys.TYPE_HIKING_KEY)
-        types.append(Keys.TYPE_CYCLING_KEY)
-        types.append(Keys.TYPE_OPEN_WATER_SWIMMING_KEY)
-        types.append(Keys.TYPE_POOL_SWIMMING_KEY)
-        types.append(Keys.TYPE_PULL_UP_KEY)
-        types.append(Keys.TYPE_PUSH_UP_KEY)
-        return types
+        all_activity_types = []
+        all_activity_types.extend(Keys.FOOT_BASED_ACTIVITIES)
+        all_activity_types.extend(Keys.BIKE_BASED_ACTIVITIES)
+        all_activity_types.extend(Keys.SWIMMING_ACTIVITIES)
+        all_activity_types.extend(Keys.STRENGTH_ACTIVITIES)
+        all_activity_types.append(Keys.TYPE_UNSPECIFIED_ACTIVITY)
+        return all_activity_types

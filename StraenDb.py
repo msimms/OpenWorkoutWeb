@@ -30,6 +30,7 @@ import traceback
 import uuid
 from bson.objectid import ObjectId
 import pymongo
+import time
 import Database
 import InputChecker
 import Keys
@@ -182,7 +183,7 @@ class MongoDatabase(Database.Database):
         try:
             user = self.users_collection.find_one({Keys.USERNAME_KEY: username})
             if user is not None:
-                return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], user[Keys.REALNAME_KEY]
+                return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], str(user[Keys.REALNAME_KEY])
             return None, None, None
         except:
             self.log_error(traceback.format_exc())
@@ -206,6 +207,23 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return None, None
+
+    def retrieve_user_from_api_key(self, api_key):
+        """Retrieve method for a user."""
+        if api_key is None:
+            self.log_error(MongoDatabase.retrieve_user_from_id.__name__ + ": Unexpected empty object: api_key")
+            return None, None, None
+
+        try:
+            # Find the user.
+            user = self.users_collection.find_one({Keys.API_KEYS: api_key})
+            if user is not None:
+                return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], user[Keys.REALNAME_KEY]
+            return None, None, None
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return None, None, None
 
     def update_user(self, user_id, username, realname, passhash):
         """Update method for a user."""
@@ -783,9 +801,11 @@ class MongoDatabase(Database.Database):
     def retrieve_each_user_activity(self, context, user_id, callback_func):
         """Retrieves each user activity and calls the callback function for each one."""
         try:
-            activities = list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}))
-            for activity in activities:
-                callback_func(context, activity, user_id)
+            activities_cursor = self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id})
+            if activities_cursor is not None:
+                while activities_cursor.alive:
+                    activity = activities_cursor.next()
+                    callback_func(context, activity, user_id)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -817,9 +837,11 @@ class MongoDatabase(Database.Database):
     def retrieve_each_device_activity(self, context, user_id, device_str, callback_func):
         """Retrieves each device activity and calls the callback function for each one."""
         try:
-            activities = list(self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}))
-            for activity in activities:
-                callback_func(context, activity, user_id)
+            activities_cursor = self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            if activities_cursor is not None:
+                while activities_cursor.alive:
+                    activity = activities_cursor.next()
+                    callback_func(context, activity, user_id)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1477,6 +1499,29 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
+        
+    def create_tags_on_activity_by_id(self, activity_id, tags):
+        """Adds a tag to the specified activity."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_tags_on_activity_by_id.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if tags is None:
+            self.log_error(MongoDatabase.create_tags_on_activity_by_id.__name__ + ": Unexpected empty object: tags")
+            return False
+
+        try:
+            # Find the activity.
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found then add the tags.
+            if activity is not None:
+                activity[Keys.ACTIVITY_TAGS_KEY] = tags
+                self.activities_collection.save(activity)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
 
     def retrieve_tags(self, activity_id):
         """Retrieves all the tags for the specified activity."""
@@ -1601,10 +1646,13 @@ class MongoDatabase(Database.Database):
                     workouts_doc[Keys.WORKOUT_PLAN_CALENDAR_ID_KEY] = str(uuid.uuid4()) # Create a calendar ID
 
                 # Make sure this workout isn't already in the list.
+                last_scheduled_workout = 0
                 workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
                 for workout in workouts_list:
                     if Keys.WORKOUT_ID_KEY in workout and workout[Keys.WORKOUT_ID_KEY] == workout_obj.workout_id:
                         return False
+                    if Keys.WORKOUT_SCHEDULED_TIME_KEY in workout and workout[Keys.WORKOUT_SCHEDULED_TIME_KEY] > last_scheduled_workout:
+                        last_scheduled_workout = workout[Keys.WORKOUT_SCHEDULED_TIME_KEY]
 
                 # Add the workout to the list.
                 workout = workout_obj.to_dict()
@@ -1612,6 +1660,7 @@ class MongoDatabase(Database.Database):
 
                 # Update and save the document.
                 workouts_doc[Keys.WORKOUT_LIST_KEY] = workouts_list
+                workouts_doc[Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY] = last_scheduled_workout
                 self.workouts_collection.save(workouts_doc)
                 return True
         except:
@@ -1772,6 +1821,91 @@ class MongoDatabase(Database.Database):
                 deleted_result = self.workouts_collection.delete_one({Keys.DATABASE_ID_KEY: workout_id_obj})
                 if deleted_result is not None:
                     return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_users_without_scheduled_workouts(self):
+        """Returns a list of user IDs for users who have workout plans that need to be re-run."""
+        try:
+            user_ids = []
+            now = time.time()
+            workout_docs = self.workouts_collection.find({Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY: {"$lt": now}})
+            for workout_doc in workout_docs:
+                if Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY in workout_doc and workout_doc[Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY] < now:
+                    user_id = workout_doc[Keys.WORKOUT_PLAN_USER_ID_KEY]
+                    user_ids.append(user_id)
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return user_ids
+
+    def retrieve_gear_defaults(self, user_id):
+        """Retrieve method for the gear with the specified ID."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_gear_defaults.__name__ + ": Unexpected empty object: user_id")
+            return None
+
+        try:
+            # Find the user's document.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user's document was found.
+            if user is not None:
+
+                # Read the gear list.
+                gear_defaults_list = []
+                if Keys.GEAR_DEFAULTS_KEY in user:
+                    gear_defaults_list = user[Keys.GEAR_DEFAULTS_KEY]
+                return gear_defaults_list
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return []
+
+    def update_gear_defaults(self, user_id, activity_type, gear_name):
+        """Retrieve method for the gear with the specified ID."""
+        if user_id is None:
+            self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if activity_type is None:
+            self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: activity_type")
+            return False
+        if gear_name is None:
+            self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: gear_name")
+            return False
+
+        try:
+            # Find the user's document.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user's document was found.
+            if user is not None:
+
+                # Update the gear list.
+                gear_defaults_list = []
+
+                # Remove any old items that are no longer relevant.
+                if Keys.GEAR_DEFAULTS_KEY in user:
+                    gear_defaults_list = user[Keys.GEAR_DEFAULTS_KEY]
+                    gear_index = 0
+                    for gear in gear_defaults_list:
+                        if Keys.ACTIVITY_TYPE_KEY in gear and gear[Keys.ACTIVITY_TYPE_KEY] == activity_type:
+                            gear_defaults_list.pop(gear_index)
+                        gear_index = gear_index + 1
+
+                # Add the new item.
+                gear = {}
+                gear[Keys.ACTIVITY_TYPE_KEY] = activity_type
+                gear[Keys.GEAR_NAME_KEY] = gear_name
+                gear_defaults_list.append(gear)
+
+                user[Keys.GEAR_DEFAULTS_KEY] = gear_defaults_list
+                self.users_collection.save(user)
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

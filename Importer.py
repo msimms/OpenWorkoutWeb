@@ -94,6 +94,8 @@ class Importer(object):
         elif lower_activity_type == Keys.TYPE_CYCLING_KEY.lower() or lower_activity_type == 'biking':
             if 'zwift' in file_name_parts:
                 return Keys.TYPE_VIRTUAL_CYCLING_KEY
+            if 'rgt' in file_name_parts and 'cyclng' in file_name_parts:
+                return Keys.TYPE_VIRTUAL_CYCLING_KEY
             return Keys.TYPE_CYCLING_KEY
         elif lower_activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY.lower():
             return Keys.TYPE_OPEN_WATER_SWIMMING_KEY

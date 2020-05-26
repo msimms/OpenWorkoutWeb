@@ -128,11 +128,11 @@ class Workout(object):
     def add_interval(self, repeat, distance, pace, recovery_distance, recovery_pace):
         """Appends an interval to the workout."""
         interval = {}
-        interval[Keys.INTERVAL_REPEAT_KEY] = int(repeat)
-        interval[Keys.INTERVAL_DISTANCE_KEY] = float(distance)
-        interval[Keys.INTERVAL_PACE_KEY] = float(pace)
-        interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY] = float(recovery_distance)
-        interval[Keys.INTERVAL_RECOVERY_PACE_KEY] = float(recovery_pace)
+        interval[Keys.INTERVAL_WORKOUT_REPEAT_KEY] = int(repeat)
+        interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY] = float(distance)
+        interval[Keys.INTERVAL_WORKOUT_PACE_KEY] = float(pace)
+        interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = float(recovery_distance)
+        interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = float(recovery_pace)
         self.intervals.append(interval)
 
     def export_to_zwo(self, file_name):
@@ -149,10 +149,10 @@ class Workout(object):
 
         # Add each interval.
         for interval in self.intervals:
-            interval_meters = interval[Keys.INTERVAL_DISTANCE_KEY]
-            interval_pace_minute = interval[Keys.INTERVAL_PACE_KEY]
-            recovery_meters = interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY]
-            recovery_pace_minute = interval[Keys.INTERVAL_RECOVERY_PACE_KEY]
+            interval_meters = interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY]
+            interval_pace_minute = interval[Keys.INTERVAL_WORKOUT_PACE_KEY]
+            recovery_meters = interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY]
+            recovery_pace_minute = interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY]
 
             # Convert distance and pace to time. Distance is given in meters/minute. The final result should be a whole number of seconds.
             on_duration = float(interval_meters) / ((interval_pace_minute) / 60.0)
@@ -162,7 +162,7 @@ class Workout(object):
             else:
                 recovery_duration = float(recovery_meters) / (float(recovery_pace_minute) / 60.0)
                 recovery_duration = int(recovery_duration)
-            writer.store_workout_intervals(interval[Keys.INTERVAL_REPEAT_KEY], on_duration, recovery_duration, None, 0)
+            writer.store_workout_intervals(interval[Keys.INTERVAL_WORKOUT_REPEAT_KEY], on_duration, recovery_duration, None, 0)
 
         # Add the cooldown (if applicable).
         if self.cooldown is not None:
@@ -195,23 +195,35 @@ class Workout(object):
 
         # Add each interval.
         for interval in self.intervals:
-            num_repeats = interval[Keys.INTERVAL_REPEAT_KEY]
-            interval_meters = interval[Keys.INTERVAL_DISTANCE_KEY]
-            interval_pace_minute = interval[Keys.INTERVAL_PACE_KEY]
-            recovery_meters = interval[Keys.INTERVAL_RECOVERY_DISTANCE_KEY]
-            recovery_pace_minute = interval[Keys.INTERVAL_RECOVERY_PACE_KEY]
+            num_repeats = interval[Keys.INTERVAL_WORKOUT_REPEAT_KEY]
+            interval_meters = interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY]
+            interval_pace_minute = interval[Keys.INTERVAL_WORKOUT_PACE_KEY]
+            recovery_meters = interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY]
+            recovery_pace_minute = interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY]
 
+            # Describe interval.
             result += "Interval: "
-            result += str(num_repeats)
-            result += " x "
-            result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+            if num_repeats > 1:
+                result += str(num_repeats)
+                result += " x "
+            if interval_meters > 1000:
+                result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+            else:
+                result += str(interval_meters)
+                result += " meters"
             result += " at "
-            result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
+            result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
+
+            # Describe recovery.
             if recovery_meters > 0:
                 result += " with "
-                result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                if recovery_meters > 1000:
+                    result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                else:
+                    result += str(recovery_meters)
+                    result += " meters"
                 result += " recovery at "
-                result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_PACE_KEY)
+                result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
             result += ".\n"
 
         # Add the cooldown (if applicable).

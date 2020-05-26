@@ -187,6 +187,12 @@ This feature is very much under development and will go through several iteratio
 ### 0.23
 * Bug fixes. Includes python2 and python3 fixes for the activity analyzer as well as fixes to managing activity tags.
 
+### 0.24
+* Bug fixes and performance optimizations.
+* More work on run workout plan generation.
+* Added gear defaults. [Feature Page](https://github.com/msimms/StraenWeb/issues/17)
+* Display mile and kilometer split times. [Feature Page](https://github.com/msimms/StraenWeb/issues/19)
+
 ## Tech
 This software uses several other source projects to work properly:
 

@@ -5,8 +5,8 @@ import calendar
 import json
 import logging
 import os
+import sys
 import time
-import urllib
 import uuid
 import ApiException
 import Exporter
@@ -14,6 +14,11 @@ import InputChecker
 import Keys
 import Units
 import TrainingPaceCalculator
+
+if sys.version_info[0] < 3:
+    from urllib import unquote_plus
+else:
+    from urllib.parse import unquote_plus
 
 class Api(object):
     """Class for managing API messages."""
@@ -335,11 +340,11 @@ class Api(object):
             raise ApiException.ApiAuthenticationException("Not activity owner.")
 
         if Keys.ACTIVITY_NAME_KEY in values:
-            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, urllib.unquote_plus(values[Keys.ACTIVITY_NAME_KEY]), False)
+            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, unquote_plus(values[Keys.ACTIVITY_NAME_KEY]), False)
         if Keys.ACTIVITY_TYPE_KEY in values:
-            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY]), False)
+            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, unquote_plus(values[Keys.ACTIVITY_TYPE_KEY]), False)
         if Keys.ACTIVITY_DESCRIPTION_KEY in values:
-            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_DESCRIPTION_KEY, urllib.unquote_plus(values[Keys.ACTIVITY_DESCRIPTION_KEY]), False)
+            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_DESCRIPTION_KEY, unquote_plus(values[Keys.ACTIVITY_DESCRIPTION_KEY]), False)
 
         return True, ""
 
@@ -353,16 +358,16 @@ class Api(object):
         if Keys.PASSWORD_KEY not in values:
             raise ApiException.ApiAuthenticationException("Password not specified.")
 
-        email = urllib.unquote_plus(values[Keys.USERNAME_KEY])
+        email = unquote_plus(values[Keys.USERNAME_KEY])
         if not InputChecker.is_email_address(email):
             raise ApiException.ApiAuthenticationException("Invalid email address.")
-        password = urllib.unquote_plus(values[Keys.PASSWORD_KEY])
+        password = unquote_plus(values[Keys.PASSWORD_KEY])
 
         if not self.user_mgr.authenticate_user(email, password):
             raise ApiException.ApiAuthenticationException("Authentication failed.")
 
         if Keys.DEVICE_KEY in values:
-            device_str = urllib.unquote_plus(values[Keys.DEVICE_KEY])
+            device_str = unquote_plus(values[Keys.DEVICE_KEY])
             result = self.user_mgr.create_user_device(email, device_str)
         else:
             result = True
@@ -384,17 +389,17 @@ class Api(object):
         if Keys.PASSWORD2_KEY not in values:
             raise ApiException.ApiAuthenticationException("Password confirmation not specified.")
 
-        email = urllib.unquote_plus(values[Keys.USERNAME_KEY])
+        email = unquote_plus(values[Keys.USERNAME_KEY])
         if not InputChecker.is_email_address(email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
-        realname = urllib.unquote_plus(values[Keys.REALNAME_KEY])
+        realname = unquote_plus(values[Keys.REALNAME_KEY])
         if not InputChecker.is_valid_decoded_str(realname):
             raise ApiException.ApiMalformedRequestException("Invalid name.")
-        password1 = urllib.unquote_plus(values[Keys.PASSWORD1_KEY])
-        password2 = urllib.unquote_plus(values[Keys.PASSWORD2_KEY])
+        password1 = unquote_plus(values[Keys.PASSWORD1_KEY])
+        password2 = unquote_plus(values[Keys.PASSWORD2_KEY])
 
         if Keys.DEVICE_KEY in values:
-            device_str = urllib.unquote_plus(values[Keys.DEVICE_KEY])
+            device_str = unquote_plus(values[Keys.DEVICE_KEY])
         else:
             device_str = ""
 
@@ -433,7 +438,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Decode the parameter.
-        new_username = urllib.unquote_plus(values['email'])
+        new_username = unquote_plus(values['email'])
 
         # Get the user details.
         user_id, _, user_realname = self.user_mgr.retrieve_user(current_username)
@@ -463,9 +468,9 @@ class Api(object):
         user_id, _, user_realname = self.user_mgr.retrieve_user(username)
 
         # The the old and new passwords from the request.
-        old_password = urllib.unquote_plus(values["old_password"])
-        new_password1 = urllib.unquote_plus(values["new_password1"])
-        new_password2 = urllib.unquote_plus(values["new_password2"])
+        old_password = unquote_plus(values["old_password"])
+        new_password1 = unquote_plus(values["new_password1"])
+        new_password2 = unquote_plus(values["new_password2"])
 
         # Reauthenticate the user.
         if not self.user_mgr.authenticate_user(username, old_password):
@@ -489,7 +494,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Reauthenticate the user.
-        password = urllib.unquote_plus(values[Keys.PASSWORD_KEY])
+        password = unquote_plus(values[Keys.PASSWORD_KEY])
         if not self.user_mgr.authenticate_user(username, password):
             raise Exception("Authentication failed.")
 
@@ -510,7 +515,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Reauthenticate the user.
-        password = urllib.unquote_plus(values[Keys.PASSWORD_KEY])
+        password = unquote_plus(values[Keys.PASSWORD_KEY])
         if not self.user_mgr.authenticate_user(username, password):
             raise Exception("Authentication failed.")
 
@@ -535,7 +540,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Reauthenticate the user.
-        password = urllib.unquote_plus(values[Keys.PASSWORD_KEY])
+        password = unquote_plus(values[Keys.PASSWORD_KEY])
         if not self.user_mgr.authenticate_user(username, password):
             raise Exception("Authentication failed.")
 
@@ -663,7 +668,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid start time.")
 
         # Add the activity to the database.
-        activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
+        activity_type = unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
         device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time))
         self.data_mgr.create_activity_metadata(activity_id, 0, Keys.APP_DISTANCE_KEY, float(values[Keys.APP_DISTANCE_KEY]), False)
         self.data_mgr.create_activity_metadata(activity_id, 0, Keys.APP_DURATION_KEY, float(values[Keys.APP_DURATION_KEY]), False)
@@ -687,7 +692,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Convert the array string to an actual array (note: I realize I could use eval for this, but that seems dangerous)
-        sets = urllib.unquote_plus(values[Keys.APP_SETS_KEY])
+        sets = unquote_plus(values[Keys.APP_SETS_KEY])
         if len(sets) <= 2:
             raise ApiException.ApiMalformedRequestException("Malformed set data.")
         sets = sets[1:-1] # Remove the brackets
@@ -712,7 +717,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid start time.")
 
         # Add the activity to the database.
-        activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
+        activity_type = unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
         device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time))
         self.data_mgr.create_activity_sets_and_reps_data(activity_id, new_sets)
 
@@ -725,7 +730,7 @@ class Api(object):
         if Keys.ACTIVITY_TYPE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity type not specified.")
 
-        activity_type = urllib.unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
+        activity_type = unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
         switcher = {
             Keys.TYPE_RUNNING_KEY : self.handle_add_time_and_distance_activity,
             Keys.TYPE_CYCLING_KEY : self.handle_add_time_and_distance_activity,
@@ -753,8 +758,8 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
 
         # Decode the parameters.
-        uploaded_file_name = urllib.unquote_plus(values[Keys.UPLOADED_FILE_NAME_KEY])
-        uploaded_file_data = urllib.unquote_plus(values[Keys.UPLOADED_FILE_DATA_KEY])
+        uploaded_file_name = unquote_plus(values[Keys.UPLOADED_FILE_NAME_KEY])
+        uploaded_file_data = unquote_plus(values[Keys.UPLOADED_FILE_DATA_KEY])
 
         # Check for empty.
         if len(uploaded_file_name) == 0:
@@ -782,7 +787,7 @@ class Api(object):
         tag_index = 0
         tag_name = Keys.ACTIVITY_TAG_KEY + str(tag_index)
         while tag_name in values:
-            tag = urllib.unquote_plus(values[tag_name])
+            tag = unquote_plus(values[tag_name])
             if not InputChecker.is_valid_decoded_str(tag):
                 raise ApiException.ApiMalformedRequestException("Invalid parameter.")
             tags.append(tag)
@@ -810,7 +815,7 @@ class Api(object):
         if 'searchname' not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        search_name = urllib.unquote_plus(values['searchname'])
+        search_name = unquote_plus(values['searchname'])
         search_name_len = len(search_name)
         if search_name_len < 3:
             raise ApiException.ApiMalformedRequestException("Search name is too short.")
@@ -846,7 +851,7 @@ class Api(object):
         if Keys.TARGET_EMAIL_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
+        target_email = unquote_plus(values[Keys.TARGET_EMAIL_KEY])
         if not InputChecker.is_email_address(target_email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
 
@@ -864,7 +869,7 @@ class Api(object):
         if Keys.TARGET_EMAIL_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
+        target_email = unquote_plus(values[Keys.TARGET_EMAIL_KEY])
         if not InputChecker.is_email_address(target_email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
 
@@ -882,7 +887,7 @@ class Api(object):
         if Keys.TARGET_EMAIL_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        target_email = urllib.unquote_plus(values[Keys.TARGET_EMAIL_KEY])
+        target_email = unquote_plus(values[Keys.TARGET_EMAIL_KEY])
         if not InputChecker.is_email_address(target_email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
 
@@ -904,7 +909,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        export_format = urllib.unquote_plus(values[Keys.ACTIVITY_EXPORT_FORMAT_KEY])
+        export_format = unquote_plus(values[Keys.ACTIVITY_EXPORT_FORMAT_KEY])
         if not export_format in ['csv', 'gpx', 'tcx']:
             raise ApiException.ApiMalformedRequestException("Invalid format.")
 
@@ -940,7 +945,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
+        tag = unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
         if not InputChecker.is_valid_decoded_str(tag):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if len(tag) == 0:
@@ -962,7 +967,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        tag = urllib.unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
+        tag = unquote_plus(values[Keys.ACTIVITY_TAG_KEY])
         if not InputChecker.is_valid_decoded_str(tag):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
@@ -997,7 +1002,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        comment = urllib.unquote_plus(values[Keys.ACTIVITY_COMMENT_KEY])
+        comment = unquote_plus(values[Keys.ACTIVITY_COMMENT_KEY])
         if not InputChecker.is_valid_decoded_str(comment):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
@@ -1032,13 +1037,13 @@ class Api(object):
         if Keys.GEAR_ADD_TIME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        gear_type = urllib.unquote_plus(values[Keys.GEAR_TYPE_KEY])
+        gear_type = unquote_plus(values[Keys.GEAR_TYPE_KEY])
         if not InputChecker.is_valid_decoded_str(gear_type):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
+        gear_name = unquote_plus(values[Keys.GEAR_NAME_KEY])
         if not InputChecker.is_valid_decoded_str(gear_name):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        gear_description = urllib.unquote_plus(values[Keys.GEAR_DESCRIPTION_KEY])
+        gear_description = unquote_plus(values[Keys.GEAR_DESCRIPTION_KEY])
         if not InputChecker.is_valid_decoded_str(gear_description):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
@@ -1066,6 +1071,14 @@ class Api(object):
         response = self.data_mgr.retrieve_gear(self.user_id)
         return True, json.dumps(response)
 
+    def handle_list_gear_defaults(self, values):
+        """Called when an API message to list the gear that is, by default, associated with each activity type. Result is a JSON string."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        response = self.data_mgr.retrieve_gear_defaults(self.user_id)
+        return True, json.dumps(response)
+
     def handle_update_gear(self, values):
         """Called when an API message to update gear for a user is received."""
         if self.user_id is None:
@@ -1079,13 +1092,13 @@ class Api(object):
         if Keys.GEAR_ADD_TIME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        gear_type = urllib.unquote_plus(values[Keys.GEAR_TYPE_KEY])
+        gear_type = unquote_plus(values[Keys.GEAR_TYPE_KEY])
         if not InputChecker.is_valid_decoded_str(gear_type):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        gear_name = urllib.unquote_plus(values[Keys.GEAR_NAME_KEY])
+        gear_name = unquote_plus(values[Keys.GEAR_NAME_KEY])
         if not InputChecker.is_valid_decoded_str(gear_name):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        gear_description = urllib.unquote_plus(values[Keys.GEAR_DESCRIPTION_KEY])
+        gear_description = unquote_plus(values[Keys.GEAR_DESCRIPTION_KEY])
         if not InputChecker.is_valid_decoded_str(gear_description):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
@@ -1103,6 +1116,25 @@ class Api(object):
             gear_retire_time = 0
 
         result = self.data_mgr.update_gear(self.user_id, gear_type, gear_name, gear_description, int(gear_add_time), int(gear_retire_time))
+        return result, ""
+
+    def handle_update_gear_defaults(self, values):
+        """Called when an API message to update the gear a user wants to associate with an activity type, by default, is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_TYPE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.GEAR_NAME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        activity_type = unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
+        if not InputChecker.is_valid_decoded_str(activity_type):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        gear_name = unquote_plus(values[Keys.GEAR_NAME_KEY])
+        if not InputChecker.is_valid_decoded_str(gear_name):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        result = self.data_mgr.update_gear_defaults(self.user_id, activity_type, gear_name)
         return result, ""
 
     def handle_delete_gear(self, values):
@@ -1132,7 +1164,7 @@ class Api(object):
         if not InputChecker.is_uuid(gear_id):
             raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
         service_date = values[Keys.SERVICE_RECORD_DATE_KEY]
-        description = urllib.unquote_plus(values[Keys.SERVICE_RECORD_DESCRIPTION_KEY])
+        description = unquote_plus(values[Keys.SERVICE_RECORD_DESCRIPTION_KEY])
 
         result = self.data_mgr.create_service_record(self.user_id, gear_id, service_date, description)
         return result, ""
@@ -1163,35 +1195,49 @@ class Api(object):
 
         # Update the user's setting.
         for key in values:
-            decoded_key = urllib.unquote_plus(key)
+            decoded_key = unquote_plus(key)
 
             # Default privacy/visibility.
             if decoded_key == Keys.DEFAULT_PRIVACY:
-                default_privacy = urllib.unquote_plus(values[key]).lower()
+                default_privacy = unquote_plus(values[key]).lower()
                 if not (default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE):
                     raise ApiException.ApiMalformedRequestException("Invalid visibility value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY, default_privacy)
             
             # Metric or imperial?
             elif decoded_key == Keys.PREFERRED_UNITS_KEY:
-                preferred_units = urllib.unquote_plus(values[key]).lower()
+                preferred_units = unquote_plus(values[key]).lower()
                 if not (preferred_units == Keys.UNITS_METRIC_KEY or preferred_units == Keys.UNITS_STANDARD_KEY):
                     raise ApiException.ApiMalformedRequestException("Invalid units value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY, preferred_units)
 
+            # Preferred first day of week.
+            elif decoded_key == Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY:
+                preferred_first_day_of_week = unquote_plus(values[key])
+                if not preferred_first_day_of_week in Keys.DAYS_OF_WEEK:
+                    raise ApiException.ApiMalformedRequestException("Invalid day value.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY, preferred_first_day_of_week)
+
             # Preferred long run day of the week.
             elif decoded_key == Keys.PREFERRED_LONG_RUN_DAY_KEY:
-                preferred_long_run_day = urllib.unquote_plus(values[key]).lower()
+                preferred_long_run_day = unquote_plus(values[key]).lower()
                 if not InputChecker.is_day_of_week(preferred_long_run_day):
                     raise ApiException.ApiMalformedRequestException("Invalid long run day.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day)
 
             # Goal type.
             elif decoded_key == Keys.GOAL_TYPE_KEY:
-                goal_type = urllib.unquote_plus(values[key])
+                goal_type = unquote_plus(values[key])
                 if not (goal_type == Keys.GOAL_TYPE_COMPLETION or goal_type == Keys.GOAL_TYPE_SPEED):
                     raise ApiException.ApiMalformedRequestException("Invalid goal type.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_TYPE_KEY, goal_type)
+
+            # Experience level.
+            elif decoded_key == Keys.EXPERIENCE_LEVEL_KEY:
+                exp_level = unquote_plus(values[key])
+                if not exp_level in Keys.EXPERIENCE_LEVELS:
+                    raise ApiException.ApiMalformedRequestException("Invalid experience level.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.EXPERIENCE_LEVEL_KEY, exp_level)
 
             # Unknown
             else:
@@ -1208,33 +1254,33 @@ class Api(object):
 
         # Update the user's profile.
         for key in values:
-            decoded_key = urllib.unquote_plus(key)
+            decoded_key = unquote_plus(key)
 
             # Gender
             if decoded_key == Keys.BIRTHDAY_KEY:
-                birthday = urllib.unquote_plus(values[key]).lower()
+                birthday = unquote_plus(values[key]).lower()
                 if not InputChecker.is_integer(birthday):
                     raise ApiException.ApiMalformedRequestException("Invalid birthday.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.BIRTHDAY_KEY, birthday)
             elif decoded_key == Keys.HEIGHT_KEY:
-                height = urllib.unquote_plus(values[key]).lower()
+                height = unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(height):
                     raise ApiException.ApiMalformedRequestException("Invalid height.")
                 height, _ = Units.convert_from_preferred_height_units(self.user_mgr, self.user_id, float(height))
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.HEIGHT_KEY, height)
             elif decoded_key == Keys.WEIGHT_KEY:
-                weight = urllib.unquote_plus(values[key]).lower()
+                weight = unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(weight):
                     raise ApiException.ApiMalformedRequestException("Invalid weight.")
                 weight, _ = Units.convert_from_preferred_mass_units(self.user_mgr, self.user_id, float(weight))
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.WEIGHT_KEY, weight)
             elif decoded_key == Keys.GENDER_KEY:
-                gender = urllib.unquote_plus(values[key]).lower()
+                gender = unquote_plus(values[key]).lower()
                 if not (gender == Keys.GENDER_MALE_KEY or gender == Keys.GENDER_FEMALE_KEY):
                     raise ApiException.ApiMalformedRequestException("Invalid gender value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GENDER_KEY, gender)
             elif decoded_key == Keys.RESTING_HEART_RATE_KEY:
-                resting_hr = urllib.unquote_plus(values[key]).lower()
+                resting_hr = unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(resting_hr):
                     raise ApiException.ApiMalformedRequestException("Invalid resting heart rate.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.RESTING_HEART_RATE_KEY, float(resting_hr))
@@ -1250,7 +1296,7 @@ class Api(object):
         if Keys.ACTIVITY_VISIBILITY_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Visibility not specified.")
 
-        visibility = urllib.unquote_plus(values[Keys.ACTIVITY_VISIBILITY_KEY])
+        visibility = unquote_plus(values[Keys.ACTIVITY_VISIBILITY_KEY])
         visibility = visibility.lower()
         if not (visibility == Keys.ACTIVITY_VISIBILITY_PUBLIC or visibility == Keys.ACTIVITY_VISIBILITY_PRIVATE):
             raise ApiException.ApiMalformedRequestException("Invalid visibility value.")
@@ -1286,8 +1332,8 @@ class Api(object):
         if Keys.GOAL_DATE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("A goal date was not specified.")
 
-        goal = urllib.unquote_plus(values[Keys.GOAL_KEY])
-        goal_date = urllib.unquote_plus(values[Keys.GOAL_DATE_KEY])
+        goal = unquote_plus(values[Keys.GOAL_KEY])
+        goal_date = unquote_plus(values[Keys.GOAL_DATE_KEY])
 
         self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
         self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
@@ -1401,7 +1447,8 @@ class Api(object):
             num_seconds = None
 
         unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
-        cycling_bests, running_bests = self.data_mgr.retrieve_recent_bests(self.user_id, num_seconds)
+        cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(self.user_id, num_seconds)
+
         for item in cycling_bests:
             seconds = cycling_bests[item][0]
             activity_id = cycling_bests[item][1]
@@ -1496,6 +1543,20 @@ class Api(object):
             record[0] = Units.convert_to_string_in_specified_unit_system(unit_system, record[0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
         return True, json.dumps(records)
 
+    def handle_get_user_setting(self, values):
+        """Returns the value associated with the specified user setting."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.REQUESTED_SETTING not in values:
+            raise ApiException.ApiMalformedRequestException("Setting not specified.")
+
+        setting_value = self.user_mgr.retrieve_user_setting(self.user_id, values[Keys.REQUESTED_SETTING])
+        return True, setting_value
+
+    def handle_list_activity_types(self):
+        """Returns the list of all activity types the software understands."""
+        return True, json.dumps(self.data_mgr.retrieve_activity_types())
+
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
         if request == 'activity_track':
@@ -1520,6 +1581,8 @@ class Api(object):
             return self.handle_list_comments(values)
         elif request == 'list_gear':
             return self.handle_list_gear(values)
+        elif request == 'list_gear_defaults':
+            return self.handle_list_gear_defaults(values)
         elif request == 'list_workouts':
             return self.handle_list_workouts(values)
         elif request == 'export_activity':
@@ -1546,6 +1609,10 @@ class Api(object):
             return self.handle_get_task_statuses(values)
         elif request == 'get_record_progression':
             return self.handle_get_record_progression(values)
+        elif request == 'get_user_setting':
+            return self.handle_get_user_setting(values)
+        elif request == 'list_activity_types':
+            return self.handle_list_activity_types()
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):
@@ -1602,6 +1669,8 @@ class Api(object):
             return self.handle_create_gear(values)
         elif request == 'update_gear':
             return self.handle_update_gear(values)
+        elif request == 'update_gear_defaults':
+            return self.handle_update_gear_defaults(values)
         elif request == 'delete_gear':
             return self.handle_delete_gear(values)
         elif request == 'create_service_record':

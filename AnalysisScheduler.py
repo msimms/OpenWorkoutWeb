@@ -23,30 +23,31 @@
 # SOFTWARE.
 """Schedules computationally expensive analysis tasks"""
 
+import logging
 import sys
 import traceback
-
-from bson.json_util import dumps
-from ActivityAnalyzer import analyze_activity
-
-import Keys
 
 class AnalysisScheduler(object):
     """Class for scheduling computationally expensive analysis tasks."""
 
     def __init__(self):
-        self.enabled = True
         super(AnalysisScheduler, self).__init__()
+
+    def log_error(self, log_str):
+        """Writes an error message to the log file."""
+        logger = logging.getLogger()
+        logger.error(log_str)
 
     def add_to_queue(self, activity, activity_user_id, data_mgr):
         """Adds the activity ID to the list of activities to be analyzed."""
-        if not self.enabled:
-            return
+        from bson.json_util import dumps
+        from ActivityAnalyzer import analyze_activity
+
+        import Keys
 
         try:
             analysis_task = analyze_activity.delay(dumps(activity))
-            if data_mgr is not None:
-                data_mgr.create_deferred_task(activity_user_id, Keys.ANALYSIS_TASK_KEY, analysis_task.task_id, None)
+            data_mgr.create_deferred_task(activity_user_id, Keys.ANALYSIS_TASK_KEY, analysis_task.task_id, None)
         except:
-            print(traceback.format_exc())
-            print(sys.exc_info()[0])
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
