@@ -333,11 +333,13 @@ ${summary}
 
 	function draw_bar_chart(data, title, color)
 	{
+        var xVals = Array.apply(null, Array(data.length - 1)).map(function (x, i) { return i + 1; } );
+
 		var margin = {top: 20, right: 20, bottom: 55, left: 50},
 			width = $("#charts").width() - margin.left - margin.right,
 			height = 250 - margin.top - margin.bottom;
 
-        var x = d3.scale.ordinal().domain([1,2,3,4,5,6]).rangeBands([0, width]);
+        var x = d3.scale.ordinal().domain(xVals).rangeBands([0, width]);
         var y = d3.scale.linear().domain([0, d3.max(data)]).range([height, 0]);
 
 		var xAxis = d3.svg.axis().scale(x).orient("bottom");
@@ -409,6 +411,8 @@ ${splits}
 		$(function() { draw_graph(powers, "Watts", "ForestGreen") });
 	if (powerZones.length > 0)
 		$(function() { draw_bar_chart(powerZones, "Power Zone Distribution", "ForestGreen") });
+	if (splits.length > 0)
+		$(function() { draw_bar_chart(splits, "Split Times", "LightRed") });
 </script>
 
 </div>

@@ -545,6 +545,18 @@ class App(object):
         return result
 
     @staticmethod
+    def render_difference_array(array):
+        """Helper function for converting an array (list) to a comma-separated string."""
+        result = ""
+        last = 0
+        for item in array:
+            if len(result) > 0:
+                result += ", "
+            result += str(item - last)
+            last = item
+        return result
+
+    @staticmethod
     def render_array_reversed(array):
         """Helper function for converting an array (list) to a comma-separated string."""
         result = ""
@@ -658,10 +670,10 @@ class App(object):
                     details_str += "</td><tr>\n"
                 elif key == Keys.KM_SPLITS:
                     if unit_system == Keys.UNITS_METRIC_KEY:
-                        splits_str = "\t\t" + App.render_array(summary_data[key])
+                        splits_str = "\t\t" + App.render_difference_array(summary_data[key])
                 elif key == Keys.MILE_SPLITS:
                     if unit_system == Keys.UNITS_STANDARD_KEY:
-                        splits_str = "\t\t" + App.render_array(summary_data[key])
+                        splits_str = "\t\t" + App.render_difference_array(summary_data[key])
                 elif key not in excluded_keys:
                     details_str += "<td><b>"
                     details_str += key
