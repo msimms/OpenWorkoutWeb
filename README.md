@@ -202,6 +202,7 @@ This software uses several other source projects to work properly:
 * [chosen](https://github.com/harvesthq/chosen) - A select box implementation that is used for the tag user interface.
 * [pymongo](https://github.com/mongodb/mongo-python-driver) - Python interface to mongodb.
 * [flask](http://flask.pocoo.org) - A microframework for developing python-based web apps (optional).
+* [python-fitparse](https://github.com/dtcooper/python-fitparse) - A library for parsing .FIT files.
 
 The app is written in a combination of Python, HTML, and JavaScript.
 
