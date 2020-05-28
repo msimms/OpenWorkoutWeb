@@ -269,7 +269,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No status.")
         return self.database.update_deferred_task(user_id, task_id, status)
 
-    def import_file(self, username, user_id, local_file_name, uploaded_file_name):
+    def import_file(self, username, user_id, uploaded_file_data, uploaded_file_name):
         """Imports the contents of a local file into the database."""
         if self.import_scheduler is None:
             raise Exception("No importer.")
@@ -277,11 +277,11 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No username.")
         if user_id is None:
             raise Exception("No user ID.")
-        if local_file_name is None:
-            raise Exception("No local file name.")
+        if uploaded_file_data is None:
+            raise Exception("No uploaded file data.")
         if uploaded_file_name is None:
             raise Exception("No uploaded file name.")
-        self.import_scheduler.add_to_queue(username, user_id, local_file_name, uploaded_file_name, self)
+        self.import_scheduler.add_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""

@@ -176,12 +176,6 @@ ${nav}
 
         function upload_file_no_ui(file_obj)
         {
-            if (file_obj.name.split('.').pop() == "fit")
-            {
-                alert("FIT files are not supported at this time.");
-                return;
-            }
-
             var reader = new FileReader();
 
             reader.onerror = function(event)

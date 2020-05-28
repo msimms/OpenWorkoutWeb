@@ -26,6 +26,7 @@
 import calendar
 import csv
 import datetime
+import fitparse
 import gpxpy
 import logging
 import os
@@ -108,6 +109,10 @@ class Importer(object):
 
     def import_gpx_file(self, username, user_id, file_name):
         """Imports the specified GPX file."""
+
+        # Sanity check.
+        if not os.path.isfile(file_name):
+            raise Exception("File does not exist.")
 
         # The GPX parser requires a file handle and not a file name.
         with open(file_name, 'r') as gpx_file:
@@ -205,6 +210,10 @@ class Importer(object):
 
     def import_tcx_file(self, username, user_id, file_name, original_file_name):
         """Imports the specified TCX file."""
+
+        # Sanity check.
+        if not os.path.isfile(file_name):
+            raise Exception("File does not exist.")
 
         # Parse the file.
         tree = objectify.parse(file_name)
@@ -311,8 +320,106 @@ class Importer(object):
         self.activity_writer.finish_activity(activity_id, end_time_unix)
         return True, device_str, activity_id
 
+    def import_fit_file(self, username, user_id, file_name, original_file_name):
+        """Imports the specified FIT file."""
+
+        # Sanity check.
+        if not os.path.isfile(file_name):
+            raise Exception("File does not exist.")
+
+        start_time_unix = 0
+        end_time_unix = 0
+
+        locations = []
+        cadences = []
+        heart_rate_readings = []
+        power_readings = []
+        temperatures = []
+
+        fit_file = fitparse.FitFile(file_name, data_processor=fitparse.StandardUnitsDataProcessor())
+        for message in fit_file.messages:
+
+            if not hasattr(message, 'fields'):
+                continue
+
+            fields = message.fields
+            message_data = {}
+            for field in fields:
+                message_data[field.name] = field.value
+
+            if 'timestamp' not in message_data:
+                continue
+
+            dt_obj = message_data['timestamp']
+            dt_tuple = dt_obj.timetuple()
+            dt_unix_seconds = calendar.timegm(dt_tuple)
+            dt_unix = dt_unix_seconds * 1000
+
+            # Update start and end times.
+            if start_time_unix == 0:
+                start_time_unix = dt_unix_seconds
+            end_time_unix = dt_unix_seconds
+
+            if 'position_long' in message_data and 'position_lat' in message_data:
+                location = []
+                location.append(dt_unix)
+                location.append(float(message_data['position_lat']))
+                location.append(float(message_data['position_long']))
+                if 'enhanced_altitude' in message_data:
+                    location.append(float(message_data['enhanced_altitude']))
+                locations.append(location)
+            if 'cadence' in message_data:
+                reading = []
+                reading.append(dt_unix)
+                reading.append(float(message_data['cadence']))
+                cadences.append(reading)
+            if 'heart_rate' in message_data:
+                reading = []
+                reading.append(dt_unix)
+                reading.append(float(message_data['heart_rate']))
+                heart_rate_readings.append(reading)
+            if 'power' in message_data:
+                reading = []
+                reading.append(dt_unix)
+                reading.append(float(message_data['power']))
+                power_readings.append(reading)
+            if 'temperature' in message_data:
+                reading = []
+                reading.append(dt_unix)
+                reading.append(float(message_data['temperature']))
+                temperatures.append(reading)
+
+        # Make sure this is not a duplicate activity.
+        if self.activity_writer.is_duplicate_activity(user_id, start_time_unix):
+            raise Exception("Duplicate activity.")
+
+        # Since we don't have anything else, use the file name as the name of the activity.
+        activity_name = os.path.splitext(os.path.basename(original_file_name))[0]
+
+        # Figure out the type of the activity.
+        normalized_activity_type = Importer.normalize_activity_type(activity_type, activity_name)
+
+        # Indicate the start of the activity.
+        device_str, activity_id = self.activity_writer.create_activity(username, user_id, activity_name, "", normalized_activity_type, start_time_unix)
+
+        # Write all the locations at once.
+        self.activity_writer.create_activity_locations(device_str, activity_id, locations)
+
+        # Write all the sensor readings at once.
+        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
+        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
+        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
+
+        # Let it be known that we are finished with this activity.
+        self.activity_writer.finish_activity(activity_id, end_time_unix)
+        return True, device_str, activity_id
+
     def import_accelerometer_csv_file(self, username, user_id, file_name):
         """Imports a CSV file containing accelerometer data."""
+
+        # Sanity check.
+        if not os.path.isfile(file_name):
+            raise Exception("File does not exist.")
 
         columns = []
         ts_list = []
@@ -360,6 +467,8 @@ class Importer(object):
                 return self.import_gpx_file(username, user_id, local_file_name)
             elif file_extension == '.tcx':
                 return self.import_tcx_file(username, user_id, local_file_name, original_file_name)
+            elif file_extension == '.fit':
+                return self.import_fit_file(username, user_id, local_file_name, original_file_name)
             elif file_extension == '.csv':
                 return self.import_accelerometer_csv_file(username, user_id, local_file_name)
         except:
