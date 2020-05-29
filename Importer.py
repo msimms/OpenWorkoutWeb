@@ -327,6 +327,8 @@ class Importer(object):
         if not os.path.isfile(file_name):
             raise Exception("File does not exist.")
 
+        activity_type = ''
+
         start_time_unix = 0
         end_time_unix = 0
 
@@ -343,9 +345,13 @@ class Importer(object):
                 continue
 
             fields = message.fields
+
             message_data = {}
             for field in fields:
                 message_data[field.name] = field.value
+
+            if 'sport' in message_data:
+                activity_type = message_data['sport']
 
             if 'timestamp' not in message_data:
                 continue
