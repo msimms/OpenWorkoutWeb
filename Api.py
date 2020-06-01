@@ -772,6 +772,38 @@ class Api(object):
 
         return True, ""
 
+    def handle_upload_activity_photo(self, values):
+        """Called when an API message to upload a photo to an activity is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.UPLOADED_FILE_NAME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("File name not specified.")
+        if Keys.UPLOADED_FILE_DATA_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("File data not specified.")
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        # Check for empty.
+        if len(uploaded_file_name) == 0:
+            raise ApiException.ApiMalformedRequestException('Empty file name.')
+        if len(uploaded_file_data) == 0:
+            raise ApiException.ApiMalformedRequestException('Empty file data for ' + uploaded_file_name + '.')
+
+        # Validate the activity ID.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # Parse the file and store it's contents in the database.
+        self.data_mgr.attach_photo_to_activity(username, self.user_id, uploaded_file_data, uploaded_file_name, activity_id)
+
+        return True, ""
+
     def handle_create_tags_on_activity(self, values):
         """Called when an API message to add a tag to an activity is received."""
         if self.user_id is None:
@@ -1643,6 +1675,8 @@ class Api(object):
             return self.handle_add_activity(values)
         elif request == 'upload_activity_file':
             return self.handle_upload_activity_file(values)
+        elif request == 'upload_activity_photo':
+            return self.handle_upload_activity_photo(values)
         elif request == 'create_tags_on_activity':
             return self.handle_create_tags_on_activity(values)
         elif request == 'delete_tag_from_activity':

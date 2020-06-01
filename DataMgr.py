@@ -283,6 +283,20 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No uploaded file name.")
         self.import_scheduler.add_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
 
+    def attach_photo_to_activity(username, user_id, uploaded_file_data, uploaded_file_name, activity_id):
+        """Imports a photo and associates it with an activity."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+        if uploaded_file_data is None:
+            raise Exception("No uploaded file data.")
+        if uploaded_file_name is None:
+            raise Exception("No uploaded file name.")
+        if activity_id is None:
+            raise Exception("No activity ID.")
+        pass
+
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
         if Keys.ACTIVITY_TIME_KEY in activity:
