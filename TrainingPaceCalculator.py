@@ -41,16 +41,18 @@ class TrainingPaceCalculator(object):
         easy_pace = vo2max * 0.7
         tempo_pace = vo2max * 0.88
         speed_pace = vo2max * 1.1
+        short_interval_pace = vo2max * 1.15
         long_run_pace = self.convert_vo2max_to_speed(long_run_pace)
         easy_pace = self.convert_vo2max_to_speed(easy_pace)
         tempo_pace = self.convert_vo2max_to_speed(tempo_pace)
         speed_pace = self.convert_vo2max_to_speed(speed_pace)
+        short_interval_pace = self.convert_vo2max_to_speed(short_interval_pace)
         paces = {}
         paces[Keys.LONG_RUN_PACE] = long_run_pace
         paces[Keys.EASY_RUN_PACE] = easy_pace
         paces[Keys.TEMPO_RUN_PACE] = tempo_pace
         paces[Keys.SPEED_RUN_PACE] = speed_pace
-        paces[Keys.INTERVAL_RUN_PACE] = tempo_pace * 1.08
+        paces[Keys.SHORT_INTERVAL_RUN_PACE] = short_interval_pace
         return paces
 
     def calc_from_hr(self, max_hr, resting_hr):
