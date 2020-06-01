@@ -44,7 +44,7 @@ class ActivityHasher(object):
 
         # Hash the sensor data. The order in which we hash sensor data needs to match the order in the mobile app.
         print("Hashing sensor data...")
-        sensor_types_to_analyze = [Keys.APP_ACCELEROMETER_KEY, Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]
+        sensor_types_to_analyze = [Keys.APP_ACCELEROMETER_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]
         for sensor_type in sensor_types_to_analyze:
             if sensor_type in self.activity:
                 print("Hashing " + sensor_type + " data...")
