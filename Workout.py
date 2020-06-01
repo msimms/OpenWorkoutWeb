@@ -135,10 +135,10 @@ class Workout(object):
         interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = float(recovery_pace)
         self.intervals.append(interval)
 
-    def export_to_zwo(self, file_name):
+    def export_to_zwo(self, name):
         """Creates a ZWO-formatted file that describes the workout."""
         writer = ZwoWriter.ZwoWriter()
-        writer.create_zwo(file_name)
+        writer.create_zwo(name)
         writer.store_description(self.type)
         writer.store_sport_type(self.sport_type)
         writer.start_workout()
@@ -172,9 +172,7 @@ class Workout(object):
         writer.close()
 
         file_data = writer.buffer()
-
-        with open(file_name, 'wt') as local_file:
-            local_file.write(file_data)
+        return file_data
 
     def export_to_text(self):
         """Creates a string that describes the workout."""
@@ -253,10 +251,7 @@ class Workout(object):
         result[Keys.WORKOUT_DESCRIPTION_KEY] = self.export_to_text()
         return json.dumps(result, ensure_ascii=False)
 
-    def export_to_ics(self, file_name):
-        """Creates a ICS-formatted file that describes the workout."""
+    def export_to_ics(self):
+        """Creates a ICS-formatted data string that describes the workout."""
         ics_writer = IcsWriter.IcsWriter()
-        file_data = ics_writer.create(self.workout_id, self.scheduled_time, self.scheduled_time, self.type, self.export_to_text())
-
-        with open(file_name, 'wt') as local_file:
-            local_file.write(file_data)
+        return ics_writer.create_event(self.workout_id, self.scheduled_time, self.scheduled_time, self.type, self.export_to_text())

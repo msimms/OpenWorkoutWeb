@@ -931,7 +931,7 @@ class Api(object):
         return True, ""
 
     def handle_export_activity(self, values):
-        """Called when an API message request to export an activity."""
+        """Called when an API message request to export an activity is received."""
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Missing activity ID parameter.")
         if Keys.ACTIVITY_EXPORT_FORMAT_KEY not in values:
@@ -952,6 +952,33 @@ class Api(object):
         exporter = Exporter.Exporter()
         result = exporter.export(activity, None, export_format)
 
+        return True, result
+
+    def handle_export_workout(self, values):
+        """Called when an API message request to export a workout description is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.WORKOUT_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Workout ID not specified.")
+        if Keys.WORKOUT_FORMAT_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Export format not specified.")
+
+        workout_id = values[Keys.WORKOUT_ID_KEY]
+        if not InputChecker.is_uuid(workout_id):
+            raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
+        export_format = values[Keys.WORKOUT_FORMAT_KEY]
+
+        # Get the workouts that belong to the logged in user.
+        workout = self.data_mgr.retrieve_workout(self.user_id, workout_id)
+        result = ""
+        if export_format == 'zwo':
+            result = workout.export_to_zwo(workout_id)
+        elif export_format == 'txt':
+            result = workout.export_to_text()
+        elif export_format == 'json':
+            result = workout.export_to_json_str()
+        elif export_format == 'ics':
+            result = workout.export_to_ics()
         return True, result
 
     def handle_claim_device(self, values):
@@ -1391,20 +1418,6 @@ class Api(object):
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
 
-    def handle_get_workout_description(self, values):
-        """Called when the user requests the description for a workout."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-
-        workout_id = values[Keys.WORKOUT_ID_KEY]
-        if not InputChecker.is_uuid(workout_id):
-            raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
-
-        # Get the workouts that belong to the logged in user.
-        workout = self.data_mgr.retrieve_workout(self.user_id, workout_id)
-        json_results = workout.export_to_json_str()
-        return True, json_results
-
     def handle_get_workout_ical_url(self, values):
         """Called when the user wants a link to the ical url for their planned workouts."""
         if self.user_id is None:
@@ -1619,8 +1632,8 @@ class Api(object):
             return self.handle_list_workouts(values)
         elif request == 'export_activity':
             return self.handle_export_activity(values)
-        elif request == 'get_workout_description':
-            return self.handle_get_workout_description(values)
+        elif request == 'export_workout':
+            return self.handle_export_workout(values)
         elif request == 'get_workout_ical_url':
             return self.handle_get_workout_ical_url(values)
         elif request == 'get_location_description':

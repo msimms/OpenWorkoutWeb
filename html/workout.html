@@ -31,7 +31,21 @@
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
-	var update_description = function(response)
+    function export_workout_to_zwo()
+    {
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=zwo", cache: false, success: function(response) {
+            create_local_file(response, "${workout_id}.zwo", "text/plain;charset=utf-8");
+        }, dataType: "text" });
+    }
+
+    function export_workout_to_ical()
+    {
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=ics", cache: false, success: function(response) {
+            create_local_file(response, "${workout_id}.ical", "text/plain;charset=utf-8");
+        }, dataType: "text" });
+    }
+
+	var process_workout_description = function(response)
 	{
 		if (response == null)
 			return;
@@ -53,7 +67,7 @@
 
 	$(document).ready(function()
 	{
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_workout_description?workout_id=${workout_id}", cache: false, success: update_description, dataType: "text" });
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=json", cache: false, success: process_workout_description, dataType: "text" });
 	});
 </script>
 
@@ -67,6 +81,9 @@ ${nav}
 
 <textarea id="description" rows="10" cols="250">
 </textarea> 
+
+<button type="button" onclick="return export_workout_to_zwo()">Export to ZWO</button><br>
+<button type="button" onclick="return export_workout_to_ical()">Export to iCal</button>
 
 </div>
 

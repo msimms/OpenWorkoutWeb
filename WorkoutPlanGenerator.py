@@ -369,11 +369,15 @@ def generate_workout_plan(user_str, format):
                 print(workout.export_to_json_str())
             elif format == 'ics':
                 tempfile_name = generate_temp_file_name(".ics")
-                workout.export_to_ics(tempfile_name)
+                ics_str = workout.export_to_ics()
+                with open(tempfile_name, 'wt') as local_file:
+                    local_file.write(ics_str)
                 print("Exported a workout to " + tempfile_name + ".")
             elif format == 'zwo':
                 tempfile_name = generate_temp_file_name(".zwo")
-                workout.export_to_zwo(tempfile_name)
+                zwo_str = workout.export_to_zwo(tempfile_name)
+                with open(tempfile_name, 'wt') as local_file:
+                    local_file.write(zwo_str)
                 print("Exported a workout to " + tempfile_name + ".")
 
     print("Workout plan generation finished.")
