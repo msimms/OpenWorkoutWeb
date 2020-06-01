@@ -352,7 +352,6 @@ class Importer(object):
 
             if 'sport' in message_data:
                 activity_type = message_data['sport']
-
             if 'timestamp' not in message_data:
                 continue
 
@@ -362,10 +361,15 @@ class Importer(object):
             dt_unix = dt_unix_seconds * 1000
 
             # Update start and end times.
-            if start_time_unix == 0:
+            if 'event_type' in message_data and message_data['event_type'] == 'start':
                 start_time_unix = dt_unix_seconds
             end_time_unix = dt_unix_seconds
 
+            # If the start has not been found yet, then continue.
+            if start_time_unix == 0:
+                continue
+
+            # Look for location and sensor data.
             if 'position_long' in message_data and 'position_lat' in message_data:
                 location = []
                 location.append(dt_unix)

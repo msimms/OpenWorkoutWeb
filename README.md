@@ -193,6 +193,9 @@ This feature is very much under development and will go through several iteratio
 * Added gear defaults. [Feature Page](https://github.com/msimms/StraenWeb/issues/17)
 * Display mile and kilometer split times. [Feature Page](https://github.com/msimms/StraenWeb/issues/19)
 
+### 0.25
+* Ability to import FIT files. [Feature Page](https://github.com/msimms/StraenWeb/issues/22)
+
 ## Tech
 This software uses several other source projects to work properly:
 
