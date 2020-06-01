@@ -140,10 +140,6 @@ class RunPlanGenerator(object):
         if speed_run_pace is None or tempo_run_pace is None or long_run_pace is None or easy_run_pace is None:
             raise Exception("No run pace data.")
 
-        # Keep track of the number of easy miles/kms and the number of hard miles/kms we're expecting the user to run so we can balance the two.
-        self.easy_distance_amount = 0.0
-        self.hard_distance_amount = 0.0
-
         # Long run: 10%/week increase for an experienced runner
         # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
 
@@ -172,6 +168,12 @@ class RunPlanGenerator(object):
         iter_count = 0
         done = False
         while not done:
+
+            workouts = []
+
+            # Keep track of the number of easy miles/kms and the number of hard miles/kms we're expecting the user to run so we can balance the two.
+            self.easy_distance_amount = 0.0
+            self.hard_distance_amount = 0.0
 
             # The user cares about speed as well as completing the distance. Also note that we should add strikes to one of the other workouts.
             if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower():
