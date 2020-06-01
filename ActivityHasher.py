@@ -42,9 +42,9 @@ class ActivityHasher(object):
                 h.update(longitude)
                 h.update(altitude)
 
-        # Hash the sensor data.
+        # Hash the sensor data. The order in which we hash sensor data needs to match the order in the mobile app.
         print("Hashing sensor data...")
-        sensor_types_to_analyze = SensorAnalyzerFactory.supported_sensor_types()
+        sensor_types_to_analyze = [Keys.APP_ACCELEROMETER_KEY, Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]
         for sensor_type in sensor_types_to_analyze:
             if sensor_type in self.activity:
                 print("Hashing " + sensor_type + " data...")
@@ -64,10 +64,10 @@ class ActivityHasher(object):
                 else:
                     for datum in self.activity[sensor_type]:
                         if sys.version_info[0] < 3:
-                            time = str(float(datum.keys()[0])).encode('utf-8')
+                            time = str(int(datum.keys()[0])).encode('utf-8')
                             value = self.floatToStr(float(datum.values()[0]))
                         else:
-                            time = str(float(list(datum.keys())[0])).encode('utf-8')
+                            time = str(int(list(datum.keys())[0])).encode('utf-8')
                             value = self.floatToStr(float(list(datum.values())[0]))
 
                         h.update(time)
