@@ -374,22 +374,22 @@ class Importer(object):
                 if 'enhanced_altitude' in message_data:
                     location.append(float(message_data['enhanced_altitude']))
                 locations.append(location)
-            if 'cadence' in message_data:
+            if 'cadence' in message_data and message_data['cadence'] is not None:
                 reading = []
                 reading.append(dt_unix)
                 reading.append(float(message_data['cadence']))
                 cadences.append(reading)
-            if 'heart_rate' in message_data:
+            if 'heart_rate' in message_data and message_data['heart_rate'] is not None:
                 reading = []
                 reading.append(dt_unix)
                 reading.append(float(message_data['heart_rate']))
                 heart_rate_readings.append(reading)
-            if 'power' in message_data:
+            if 'power' in message_data and message_data['power'] is not None:
                 reading = []
                 reading.append(dt_unix)
                 reading.append(float(message_data['power']))
                 power_readings.append(reading)
-            if 'temperature' in message_data:
+            if 'temperature' in message_data and message_data['temperature'] is not None:
                 reading = []
                 reading.append(dt_unix)
                 reading.append(float(message_data['temperature']))
