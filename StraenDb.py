@@ -839,9 +839,12 @@ class MongoDatabase(Database.Database):
         try:
             activities_cursor = self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if activities_cursor is not None:
-                while activities_cursor.alive:
-                    activity = activities_cursor.next()
-                    callback_func(context, activity, user_id)
+                try:
+                    while activities_cursor.alive:
+                        activity = activities_cursor.next()
+                        callback_func(context, activity, user_id)
+                except StopIteration:
+                    pass
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
