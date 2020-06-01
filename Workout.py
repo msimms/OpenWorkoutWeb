@@ -207,7 +207,7 @@ class Workout(object):
             if interval_meters > 1000:
                 result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
             else:
-                result += str(interval_meters)
+                result += str(int(interval_meters))
                 result += " meters"
             result += " at "
             result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
@@ -218,7 +218,7 @@ class Workout(object):
                 if recovery_meters > 1000:
                     result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
                 else:
-                    result += str(recovery_meters)
+                    result += str(int(recovery_meters))
                     result += " meters"
                 result += " recovery at "
                 result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
