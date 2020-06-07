@@ -524,9 +524,9 @@ class App(object):
         if Keys.ACTIVITY_TYPE_KEY in activity:
             activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
         else:
-            activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+            activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
         if len(activity_type) == 0:
-            activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+            activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
         return activity_type
 
     @staticmethod
@@ -936,7 +936,7 @@ class App(object):
             activity_name_str = activity[Keys.ACTIVITY_NAME_KEY]
 
         # Render the activity types selection.
-        selected_activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+        selected_activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
         if Keys.ACTIVITY_TYPE_KEY in activity:
             selected_activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
         all_activity_types = self.data_mgr.retrieve_activity_types()

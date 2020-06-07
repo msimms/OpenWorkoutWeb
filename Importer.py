@@ -105,7 +105,7 @@ class Importer(object):
         if 'walk' in file_name_parts or 'walking' in file_name_parts:
             return Keys.TYPE_WALKING_KEY
 
-        return Keys.TYPE_UNSPECIFIED_ACTIVITY
+        return Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
 
     def import_gpx_file(self, username, user_id, file_name):
         """Imports the specified GPX file."""
@@ -121,7 +121,7 @@ class Importer(object):
             gpx = gpxpy.parse(gpx_file)
 
             # Figure out the sport type.
-            sport_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+            sport_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
             if len(gpx.tracks) > 0:
                 sport_type = Importer.normalize_activity_type(gpx.tracks[0].type, file_name)
 

@@ -214,6 +214,12 @@ AVG_CYCLING_DISTANCE = "Average Cycling Distance"
 MILE_SPLITS = "Mile Splits"
 KM_SPLITS = "KM Splits"
 
+# Keys used for race time prediction.
+ESTIMATED_5K_KEY = "Estimated 5K"
+ESTIMATED_10K_KEY = "Estimated 10K"
+ESTIMATED_HALF_MARATHON_KEY = "Estimated Half Marathon"
+ESTIMATED_MARATHON_KEY = "Estimated Marathon"
+
 # API-only keys.
 SECONDS = "seconds"
 DEVICE_LAST_HEARD_FROM = "last_heard_from"
@@ -245,7 +251,7 @@ SERVICE_RECORD_DATE_KEY = "date"
 SERVICE_RECORD_DESCRIPTION_KEY = "description"
 
 # Activity types.
-TYPE_UNSPECIFIED_ACTIVITY = "Unknown"
+TYPE_UNSPECIFIED_ACTIVITY_KEY = "Unknown"
 TYPE_RUNNING_KEY = "Running"
 TYPE_VIRTUAL_RUNNING_KEY = "Virtual Running"
 TYPE_INDOOR_RUNNING_KEY = "Indoor Running"
