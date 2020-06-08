@@ -55,10 +55,11 @@ class Api(object):
 
         try:
             # Parse the metadata for the timestamp.
-            date_time = int(time.time() * 1000)
             if Keys.APP_TIME_KEY in json_obj:
                 time_str = json_obj[Keys.APP_TIME_KEY]
                 date_time = int(time_str)
+            else:
+                date_time = int(time.time() * 1000)
 
             # Parse the location data.
             try:
@@ -602,7 +603,7 @@ class Api(object):
         # Convert the activities list to an array of JSON objects for return to the client.
         if activities is not None and isinstance(activities, list):
             for activity in activities:
-                activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+                activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
                 activity_name = Keys.UNNAMED_ACTIVITY_TITLE
                 if Keys.ACTIVITY_TYPE_KEY in activity:
                     activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
@@ -1524,6 +1525,9 @@ class Api(object):
         for run_pace in run_paces:
             converted_paces[run_pace] = Units.convert_to_string_in_specified_unit_system(unit_system, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
         return True, json.dumps(converted_paces)
+
+    def handle_get_run_race_predictions(self, values):
+        pass
 
     def handle_get_distance_for_tag(self, values):
         """Returns the amount of distance logged to activities with the given tag. Result is a JSON string."""
