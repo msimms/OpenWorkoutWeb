@@ -91,7 +91,7 @@ WORKOUT_IN_TAPER_KEY = "taper"
 # Workout types
 WORKOUT_TYPE_REST = "Rest"
 WORKOUT_TYPE_EVENT = "Event"
-WORKOUT_TYPE_SPEED_RUN = "Speed Run"
+WORKOUT_TYPE_SPEED_RUN = "Speed Session"
 WORKOUT_TYPE_TEMPO_RUN = "Tempo Run"
 WORKOUT_TYPE_EASY_RUN = "Easy Run"
 WORKOUT_TYPE_HILL_REPEATS = "Hill Repeats" # 4-10 repeats, depending on skill level, done at 5K pace
@@ -228,7 +228,7 @@ DEVICE_LAST_HEARD_FROM = "last_heard_from"
 LONG_RUN_PACE = "Long Run Pace"
 EASY_RUN_PACE = "Easy Run Pace"
 TEMPO_RUN_PACE = "Tempo Run Pace"
-SPEED_RUN_PACE = "Speed Run Pace"
+SPEED_RUN_PACE = "Speed Session Pace"
 SHORT_INTERVAL_RUN_PACE = "Short Interval Run Pace"
 
 # Keys used to manage gear.
