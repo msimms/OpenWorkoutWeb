@@ -1493,7 +1493,7 @@ class Api(object):
             num_seconds = None
 
         unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
-        cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(self.user_id, num_seconds)
+        cycling_bests, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(self.user_id, num_seconds)
 
         for item in cycling_bests:
             seconds = cycling_bests[item][0]
