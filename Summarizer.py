@@ -97,7 +97,7 @@ class Summarizer(object):
         """Returns the time associated with the specified record, or None if not found."""
         record_set = self.get_record_dictionary(activity_type)
         if record_name in record_set:
-            time, activity_id = record_set[record_name]
+            time, _ = record_set[record_name]
             return time
         return None
 
@@ -105,14 +105,14 @@ class Summarizer(object):
         """Returns the time associated with the specified record, or None if not found."""
         record_set = self.get_annual_record_dictionary(activity_type, year)
         if record_name in record_set:
-            time, activity_id = record_set[record_name]
+            time, _ = record_set[record_name]
             return time
         return None
 
     def get_best_time_from_record_set(self, record_set, record_name):
         """Returns the time associated with the specified record, or None if not found."""
         if record_name in record_set:
-            time, activity_id = record_set[record_name]
+            time, _ = record_set[record_name]
             return time
         return None
 
@@ -146,7 +146,9 @@ class Summarizer(object):
         # Update the record set.
         self.set_record_dictionary(activity_type, record_set)
 
+        #
         # Update annual records
+        #
 
         # In what year was this activity?
         ts = time.gmtime(start_time)
@@ -164,7 +166,9 @@ class Summarizer(object):
         # Update the record set.
         self.set_annual_record_dictionary(activity_type, ts.tm_year, annual_record_set)
 
+        #
         # Update summary data.
+        #
 
         # Get the record set that corresponds with the activity type.
         summary_record_set = self.get_summary_dictionary(activity_type)

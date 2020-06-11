@@ -148,7 +148,7 @@ class RunPlanGenerator(object):
         long_run_pace = inputs[Keys.LONG_RUN_PACE]
         easy_run_pace = inputs[Keys.EASY_RUN_PACE]
         longest_run_in_four_weeks = inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY]
-        avg_run_distance = inputs[Keys.AVG_RUNNING_DISTANCE]
+        avg_run_distance = inputs[Keys.WORKOUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
         exp_level = inputs[Keys.EXPERIENCE_LEVEL_KEY]
 
         # Handle situation in which the user hasn't run in four weeks.
