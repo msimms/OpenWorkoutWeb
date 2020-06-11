@@ -38,6 +38,7 @@ from celery import states
 
 SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
 ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
+ONE_WEEK = (7.0 * 24.0 * 60.0 * 60.0)
 FOUR_WEEKS = (28.0 * 24.0 * 60.0 * 60.0)
 
 def get_activities_sort_key(item):
@@ -1074,8 +1075,30 @@ class DataMgr(Importer.ActivityWriter):
         if all_activity_bests is not None:
             for activity_id in all_activity_bests:
                 activity_bests = all_activity_bests[activity_id]
-                if activity_bests is not None and Keys.ACTIVITY_TYPE_KEY in activity_bests and Keys.ACTIVITY_TIME_KEY in activity_bests:
-                    summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
+                summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
+
+        # Output is a dictionary for each sport type.
+        cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
+        running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
+        cycling_summary = summarizer.get_summary_dictionary(Keys.TYPE_CYCLING_KEY)
+        running_summary = summarizer.get_summary_dictionary(Keys.TYPE_RUNNING_KEY)
+        return cycling_bests, running_bests, cycling_summary, running_summary
+
+    def retrieve_bounded_activity_bests_for_user(self, user_id, cutoff_time_lower, cutoff_time_higher):
+        """Return a dictionary of all best performances in the specified time frame."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        summarizer = Summarizer.Summarizer()
+
+        # Load cached summary data from all previous activities.
+        all_activity_bests = self.database.retrieve_bounded_activity_bests_for_user(user_id, cutoff_time_lower, cutoff_time_higher)
+        if all_activity_bests is not None:
+            for activity_id in all_activity_bests:
+                activity_bests = all_activity_bests[activity_id]
+                summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
 
         # Output is a dictionary for each sport type.
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)

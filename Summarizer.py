@@ -147,7 +147,7 @@ class Summarizer(object):
         self.set_record_dictionary(activity_type, record_set)
 
         #
-        # Update annual records
+        # Update annual records.
         #
 
         # In what year was this activity?
