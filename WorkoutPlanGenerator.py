@@ -86,6 +86,9 @@ class WorkoutPlanGenerator(object):
         now = time.time()
         weeks_until_goal = None # Number of weeks until the goal, or None if not applicable
         longest_run_in_four_weeks = None  # Longest run in the last four weeks
+        longest_run_week_1 = None
+        longest_run_week_2 = None
+        longest_run_week_3 = None
 
         # Analyze any unanalyzed activities.
         self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.FOUR_WEEKS)
@@ -130,10 +133,23 @@ class WorkoutPlanGenerator(object):
 
         # Look through the user's four week records.
         cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.FOUR_WEEKS)
-        if running_bests is not None:
-            if Keys.LONGEST_DISTANCE in running_bests:
-                longest_run_in_four_weeks = running_bests[Keys.LONGEST_DISTANCE]
-                longest_run_in_four_weeks = longest_run_in_four_weeks[0]
+        if running_bests is not None and Keys.LONGEST_DISTANCE in running_bests:
+            longest_run_in_four_weeks = running_bests[Keys.LONGEST_DISTANCE]
+            longest_run_in_four_weeks = longest_run_in_four_weeks[0]
+
+        # Get some data from prior weeks data.
+        _, running_bests_week_1, _, running_summary_week_1 = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.ONE_WEEK)
+        if running_bests_week_1 is not None and Keys.LONGEST_DISTANCE in running_bests_week_1:
+            longest_run_week_1 = running_bests_week_1[Keys.LONGEST_DISTANCE]
+            longest_run_week_1 = longest_run_week_1[0]
+        _, running_bests_week_2, _, running_summary_week_2 = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 2), now - (DataMgr.ONE_WEEK * 1))
+        if running_bests_week_2 is not None and Keys.LONGEST_DISTANCE in running_bests_week_2:
+            longest_run_week_2 = running_bests_week_2[Keys.LONGEST_DISTANCE]
+            longest_run_week_2 = longest_run_week_2[0]
+        _, running_bests_week_3, _, running_summary_week_3 = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 3), now - (DataMgr.ONE_WEEK * 2))
+        if running_bests_week_3 is not None and Keys.LONGEST_DISTANCE in running_bests_week_3:
+            longest_run_week_3 = running_bests_week_3[Keys.LONGEST_DISTANCE]
+            longest_run_week_3 = longest_run_week_3[0]
 
         # Compute the user's age in years.
         birthday = int(self.user_mgr.retrieve_user_setting(user_id, Keys.BIRTHDAY_KEY))
@@ -171,6 +187,9 @@ class WorkoutPlanGenerator(object):
         else:
             inputs = running_paces
         inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY] = longest_run_in_four_weeks
+        inputs[Keys.LONGEST_RUN_WEEK_1_KEY] = longest_run_week_1
+        inputs[Keys.LONGEST_RUN_WEEK_2_KEY] = longest_run_week_2
+        inputs[Keys.LONGEST_RUN_WEEK_3_KEY] = longest_run_week_3
         inputs[Keys.AGE_YEARS_KEY] = age_years
         inputs[Keys.EXPERIENCE_LEVEL_KEY] = experience_level
         inputs[Keys.GOAL_KEY] = goal
@@ -224,6 +243,9 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.TEMPO_RUN_PACE])
         model_inputs.append(inputs[Keys.LONG_RUN_PACE])
         model_inputs.append(inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY])
+        model_inputs.append(inputs[Keys.LONGEST_RUN_WEEK_1_KEY])
+        model_inputs.append(inputs[Keys.LONGEST_RUN_WEEK_2_KEY])
+        model_inputs.append(inputs[Keys.LONGEST_RUN_WEEK_3_KEY])
         model_inputs.append(inputs[Keys.AGE_YEARS_KEY])
         model_inputs.append(inputs[Keys.EXPERIENCE_LEVEL_KEY])
         model_inputs.append(inputs[Keys.GOAL_KEY])

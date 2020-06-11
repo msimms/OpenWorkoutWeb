@@ -148,6 +148,9 @@ class RunPlanGenerator(object):
         long_run_pace = inputs[Keys.LONG_RUN_PACE]
         easy_run_pace = inputs[Keys.EASY_RUN_PACE]
         longest_run_in_four_weeks = inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY]
+        longest_run_week_1 = inputs[Keys.LONGEST_RUN_WEEK_1_KEY]
+        longest_run_week_2 = inputs[Keys.LONGEST_RUN_WEEK_2_KEY]
+        longest_run_week_3 = inputs[Keys.LONGEST_RUN_WEEK_3_KEY]
         avg_run_distance = inputs[Keys.WORKOUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
         exp_level = inputs[Keys.EXPERIENCE_LEVEL_KEY]
 
@@ -170,6 +173,11 @@ class RunPlanGenerator(object):
         # Handle situation in which the user is already meeting or exceeding the goal distance.
         if longest_run_in_four_weeks >= max_run_distance:
             longest_run_in_four_weeks = max_run_distance
+
+        # If the long run has been increasing for the last three weeks then give the person a break.
+        if longest_run_week_1 and longest_run_week_2 and longest_run_week_3:
+            if longest_run_week_1 >= longest_run_week_2 and longest_run_week_2 >= longest_run_week_3:
+                longest_run_in_four_weeks *= 0.75
 
         # We'll reduce the number of reps someone has to do based on their experience level.
         rep_relief = 0

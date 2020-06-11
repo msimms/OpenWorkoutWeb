@@ -288,6 +288,9 @@ GOAL_MARATHON_RUN_KEY = "Marathon"
 
 # Used by the workout plan generator.
 LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"
+LONGEST_RUN_WEEK_1_KEY = "Longest Run Week 1"
+LONGEST_RUN_WEEK_2_KEY = "Longest Run Week 2"
+LONGEST_RUN_WEEK_3_KEY = "Longest Run Week 3"
 AGE_YEARS_KEY = "Age In Years"
 WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
 EXPERIENCE_LEVEL_KEY = "Experience Level"
