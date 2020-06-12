@@ -748,9 +748,9 @@ class MongoDatabase(Database.Database):
             return {}
 
         try:
-            bests = {}
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
             if user_records is not None:
+                bests = {}
                 for record in user_records:
                     if InputChecker.is_uuid(record):
                         bests[record] = user_records[record]
@@ -767,13 +767,35 @@ class MongoDatabase(Database.Database):
             return {}
 
         try:
-            bests = {}
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
             if user_records is not None:
+                bests = {}
                 for record in user_records:
                     if InputChecker.is_uuid(record):
                         activity_bests = user_records[record]
                         if (cutoff_time is None) or (activity_bests[Keys.ACTIVITY_TIME_KEY] > cutoff_time):
+                            bests[record] = activity_bests
+                return bests
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return {}
+
+    def retrieve_bounded_activity_bests_for_user(self, user_id, cutoff_time_lower, cutoff_time_higher):
+        """Retrieve method for a user's activity records. Only activities more recent than the specified cutoff time will be returned."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_bounded_activity_bests_for_user.__name__ + ": Unexpected empty object: user_id")
+            return {}
+
+        try:
+            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            if user_records is not None:
+                bests = {}
+                for record in user_records:
+                    if InputChecker.is_uuid(record):
+                        activity_bests = user_records[record]
+                        activity_time = activity_bests[Keys.ACTIVITY_TIME_KEY]
+                        if activity_time >= cutoff_time_lower and activity_time < cutoff_time_higher:
                             bests[record] = activity_bests
                 return bests
         except:
@@ -839,9 +861,12 @@ class MongoDatabase(Database.Database):
         try:
             activities_cursor = self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
             if activities_cursor is not None:
-                while activities_cursor.alive:
-                    activity = activities_cursor.next()
-                    callback_func(context, activity, user_id)
+                try:
+                    while activities_cursor.alive:
+                        activity = activities_cursor.next()
+                        callback_func(context, activity, user_id)
+                except StopIteration:
+                    pass
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

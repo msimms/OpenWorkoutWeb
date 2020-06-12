@@ -1,6 +1,8 @@
 # Copyright 2019 Michael J Simms
 """Generates a bike plan for the specifiied user."""
 
+import Keys
+
 class BikePlanGenerator(object):
     """Class for generating a bike plan for the specifiied user."""
 
@@ -18,5 +20,7 @@ class BikePlanGenerator(object):
 
         # Add critical workouts:
         # Long ride, culminating in (maybe) an overdistance ride.
+
+        avg_bike_distance = inputs[Keys.WORKOUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS]
 
         return workouts

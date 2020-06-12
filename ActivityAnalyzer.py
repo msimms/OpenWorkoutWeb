@@ -54,7 +54,7 @@ class ActivityAnalyzer(object):
             if Keys.ACTIVITY_TYPE_KEY in self.activity:
                 activity_type = self.activity[Keys.ACTIVITY_TYPE_KEY]
             else:
-                activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+                activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
 
             # Determine the activity user.
             activity_user_id = None

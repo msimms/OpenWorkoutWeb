@@ -55,10 +55,11 @@ class Api(object):
 
         try:
             # Parse the metadata for the timestamp.
-            date_time = int(time.time() * 1000)
             if Keys.APP_TIME_KEY in json_obj:
                 time_str = json_obj[Keys.APP_TIME_KEY]
                 date_time = int(time_str)
+            else:
+                date_time = int(time.time() * 1000)
 
             # Parse the location data.
             try:
@@ -602,7 +603,7 @@ class Api(object):
         # Convert the activities list to an array of JSON objects for return to the client.
         if activities is not None and isinstance(activities, list):
             for activity in activities:
-                activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY
+                activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
                 activity_name = Keys.UNNAMED_ACTIVITY_TITLE
                 if Keys.ACTIVITY_TYPE_KEY in activity:
                     activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
@@ -772,6 +773,38 @@ class Api(object):
 
         return True, ""
 
+    def handle_upload_activity_photo(self, values):
+        """Called when an API message to upload a photo to an activity is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.UPLOADED_FILE_NAME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("File name not specified.")
+        if Keys.UPLOADED_FILE_DATA_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("File data not specified.")
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        # Check for empty.
+        if len(uploaded_file_name) == 0:
+            raise ApiException.ApiMalformedRequestException('Empty file name.')
+        if len(uploaded_file_data) == 0:
+            raise ApiException.ApiMalformedRequestException('Empty file data for ' + uploaded_file_name + '.')
+
+        # Validate the activity ID.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # Parse the file and store it's contents in the database.
+        self.data_mgr.attach_photo_to_activity(username, self.user_id, uploaded_file_data, uploaded_file_name, activity_id)
+
+        return True, ""
+
     def handle_create_tags_on_activity(self, values):
         """Called when an API message to add a tag to an activity is received."""
         if self.user_id is None:
@@ -899,7 +932,7 @@ class Api(object):
         return True, ""
 
     def handle_export_activity(self, values):
-        """Called when an API message request to export an activity."""
+        """Called when an API message request to export an activity is received."""
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Missing activity ID parameter.")
         if Keys.ACTIVITY_EXPORT_FORMAT_KEY not in values:
@@ -920,6 +953,33 @@ class Api(object):
         exporter = Exporter.Exporter()
         result = exporter.export(activity, None, export_format)
 
+        return True, result
+
+    def handle_export_workout(self, values):
+        """Called when an API message request to export a workout description is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.WORKOUT_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Workout ID not specified.")
+        if Keys.WORKOUT_FORMAT_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Export format not specified.")
+
+        workout_id = values[Keys.WORKOUT_ID_KEY]
+        if not InputChecker.is_uuid(workout_id):
+            raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
+        export_format = values[Keys.WORKOUT_FORMAT_KEY]
+
+        # Get the workouts that belong to the logged in user.
+        workout = self.data_mgr.retrieve_workout(self.user_id, workout_id)
+        result = ""
+        if export_format == 'zwo':
+            result = workout.export_to_zwo(workout_id)
+        elif export_format == 'txt':
+            result = workout.export_to_text()
+        elif export_format == 'json':
+            result = workout.export_to_json_str()
+        elif export_format == 'ics':
+            result = workout.export_to_ics()
         return True, result
 
     def handle_claim_device(self, values):
@@ -1359,20 +1419,6 @@ class Api(object):
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
 
-    def handle_get_workout_description(self, values):
-        """Called when the user requests the description for a workout."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-
-        workout_id = values[Keys.WORKOUT_ID_KEY]
-        if not InputChecker.is_uuid(workout_id):
-            raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
-
-        # Get the workouts that belong to the logged in user.
-        workout = self.data_mgr.retrieve_workout(self.user_id, workout_id)
-        json_results = workout.export_to_json_str()
-        return True, json_results
-
     def handle_get_workout_ical_url(self, values):
         """Called when the user wants a link to the ical url for their planned workouts."""
         if self.user_id is None:
@@ -1447,7 +1493,7 @@ class Api(object):
             num_seconds = None
 
         unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
-        cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(self.user_id, num_seconds)
+        cycling_bests, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(self.user_id, num_seconds)
 
         for item in cycling_bests:
             seconds = cycling_bests[item][0]
@@ -1479,6 +1525,9 @@ class Api(object):
         for run_pace in run_paces:
             converted_paces[run_pace] = Units.convert_to_string_in_specified_unit_system(unit_system, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)
         return True, json.dumps(converted_paces)
+
+    def handle_get_run_race_predictions(self, values):
+        pass
 
     def handle_get_distance_for_tag(self, values):
         """Returns the amount of distance logged to activities with the given tag. Result is a JSON string."""
@@ -1587,8 +1636,8 @@ class Api(object):
             return self.handle_list_workouts(values)
         elif request == 'export_activity':
             return self.handle_export_activity(values)
-        elif request == 'get_workout_description':
-            return self.handle_get_workout_description(values)
+        elif request == 'export_workout':
+            return self.handle_export_workout(values)
         elif request == 'get_workout_ical_url':
             return self.handle_get_workout_ical_url(values)
         elif request == 'get_location_description':
@@ -1643,6 +1692,8 @@ class Api(object):
             return self.handle_add_activity(values)
         elif request == 'upload_activity_file':
             return self.handle_upload_activity_file(values)
+        elif request == 'upload_activity_photo':
+            return self.handle_upload_activity_photo(values)
         elif request == 'create_tags_on_activity':
             return self.handle_create_tags_on_activity(values)
         elif request == 'delete_tag_from_activity':

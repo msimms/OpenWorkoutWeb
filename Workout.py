@@ -135,10 +135,10 @@ class Workout(object):
         interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = float(recovery_pace)
         self.intervals.append(interval)
 
-    def export_to_zwo(self, file_name):
+    def export_to_zwo(self, name):
         """Creates a ZWO-formatted file that describes the workout."""
         writer = ZwoWriter.ZwoWriter()
-        writer.create_zwo(file_name)
+        writer.create_zwo(name)
         writer.store_description(self.type)
         writer.store_sport_type(self.sport_type)
         writer.start_workout()
@@ -172,9 +172,7 @@ class Workout(object):
         writer.close()
 
         file_data = writer.buffer()
-
-        with open(file_name, 'wt') as local_file:
-            local_file.write(file_data)
+        return file_data
 
     def export_to_text(self):
         """Creates a string that describes the workout."""
@@ -201,7 +199,7 @@ class Workout(object):
             recovery_meters = interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY]
             recovery_pace_minute = interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY]
 
-            # Describe interval.
+            # Describe the interval.
             result += "Interval: "
             if num_repeats > 1:
                 result += str(num_repeats)
@@ -209,18 +207,18 @@ class Workout(object):
             if interval_meters > 1000:
                 result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
             else:
-                result += str(interval_meters)
+                result += str(int(interval_meters))
                 result += " meters"
             result += " at "
             result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
 
-            # Describe recovery.
+            # Describe the recovery.
             if recovery_meters > 0:
                 result += " with "
                 if recovery_meters > 1000:
                     result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
                 else:
-                    result += str(recovery_meters)
+                    result += str(int(recovery_meters))
                     result += " meters"
                 result += " recovery at "
                 result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
@@ -235,14 +233,12 @@ class Workout(object):
         # Add an string that describes how this workout fits into the big picture.
         if self.type == Keys.WORKOUT_TYPE_SPEED_RUN:
             result += "Purpose: Speed sessions get you used to running at faster paces.\n"
-        elif self.type == Keys.WORKOUT_TYPE_INTERVAL_SESSION:
-            result += "Purpose: Interval sessions are designed to build speed and strength.\n"
         elif self.type == Keys.WORKOUT_TYPE_TEMPO_RUN:
             result += "Purpose: Tempo runs build a combination of speed and endurance. They should be performed at a pace you can hold for roughly one hour.\n"
         elif self.type == Keys.WORKOUT_TYPE_EASY_RUN:
             result += "Purpose: Easy runs build aerobic capacity while keeping the wear and tear on the body to a minimum.\n"
         elif self.type == Keys.WORKOUT_TYPE_LONG_RUN:
-            result += "Purpose: Long runs build develop endurance.\n"
+            result += "Purpose: Long runs build and develop endurance.\n"
 
         return result
 
@@ -253,10 +249,7 @@ class Workout(object):
         result[Keys.WORKOUT_DESCRIPTION_KEY] = self.export_to_text()
         return json.dumps(result, ensure_ascii=False)
 
-    def export_to_ics(self, file_name):
-        """Creates a ICS-formatted file that describes the workout."""
+    def export_to_ics(self):
+        """Creates a ICS-formatted data string that describes the workout."""
         ics_writer = IcsWriter.IcsWriter()
-        file_data = ics_writer.create(self.workout_id, self.scheduled_time, self.scheduled_time, self.type, self.export_to_text())
-
-        with open(file_name, 'wt') as local_file:
-            local_file.write(file_data)
+        return ics_writer.create_event(self.workout_id, self.scheduled_time, self.scheduled_time, self.type, self.export_to_text())

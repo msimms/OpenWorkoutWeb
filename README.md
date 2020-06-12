@@ -193,6 +193,11 @@ This feature is very much under development and will go through several iteratio
 * Added gear defaults. [Feature Page](https://github.com/msimms/StraenWeb/issues/17)
 * Display mile and kilometer split times. [Feature Page](https://github.com/msimms/StraenWeb/issues/19)
 
+### 0.25
+* Ability to import FIT files. [Feature Page](https://github.com/msimms/StraenWeb/issues/22)
+* Ability to export workouts in ZWO fomrat. [Feature Page](https://github.com/msimms/StraenWeb/issues/1)
+* More work on run workout plan generation.
+
 ## Tech
 This software uses several other source projects to work properly:
 
@@ -202,6 +207,7 @@ This software uses several other source projects to work properly:
 * [chosen](https://github.com/harvesthq/chosen) - A select box implementation that is used for the tag user interface.
 * [pymongo](https://github.com/mongodb/mongo-python-driver) - Python interface to mongodb.
 * [flask](http://flask.pocoo.org) - A microframework for developing python-based web apps (optional).
+* [python-fitparse](https://github.com/dtcooper/python-fitparse) - A library for parsing .FIT files.
 
 The app is written in a combination of Python, HTML, and JavaScript.
 

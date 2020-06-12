@@ -25,6 +25,7 @@
 
 from __future__ import absolute_import
 from CeleryWorker import celery_worker
+import base64
 import celery
 import json
 import logging
@@ -32,6 +33,7 @@ import os
 import sys
 import traceback
 import uuid
+import zlib
 import AnalysisScheduler
 import DataMgr
 import Importer
@@ -68,7 +70,12 @@ def import_activity(import_str):
         # Write the file.
         print("Write the data to a local file...")
         with open(local_file_name, 'wb') as local_file:
-            local_file.write(uploaded_file_data.encode("utf-8"))
+            print("Base64 decoding...")
+            decoded_file_data = base64.b64decode(uploaded_file_data)
+#            print("zlib decompressing...")
+#            decoded_file_data = zlib.decompress(decoded_file_data)
+            print("Writing...")
+            local_file.write(decoded_file_data)
 
         # Import the file into the database.            
         print("Import the data to the database...")

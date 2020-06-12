@@ -21,7 +21,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Summerizes a user's activities."""
+"""Summerizes a user's activities. Used for determining recent personal records."""
 
 import time
 import FtpCalculator
@@ -33,96 +33,71 @@ class Summarizer(object):
     """Class for summarizing a user's activities."""
 
     def __init__(self):
-        self.running_bests = {} # Best ever times (best mile, best 20 minute power, etc.)
-        self.cycling_bests = {} # Best ever times (best mile, best 20 minute power, etc.)
-        self.open_water_swimming_bests = {} # Best ever times (best mile, etc.)
-        self.pool_swimming_bests = {} # Best ever times (best mile, etc.)
-
-        self.annual_running_bests = {} # Best times for each year (best mile, best 20 minute power, etc.)
-        self.annual_cycling_bests = {} # Best times for each year (best mile, best 20 minute power, etc.)
-        self.annual_open_water_swimming_bests = {} # Best times for each year (best mile, etc.)
-        self.annual_pool_swimming_bests = {} # Best times for each year (best mile, etc.)
-
-        self.running_summary = {} # Summary data (total distance, etc.)
-        self.cycling_summary = {} # Summary data (total distance, etc.)
-        self.open_water_swimming_summary = {} # Summary data (total distance, etc.)
-        self.pool_swimming_summary = {} # Summary data (total distance, etc.)
+        self.bests = {} # Best ever times (best mile, best 20 minute power, etc.), dictionary of key/value pairs
+        self.annual_bests = {} # Best times for each year  (best mile, best 20 minute power, etc.), dictionary of dictionaries of key/value pairs
+        self.summaries = {} # Summary data (total distance, etc.)
 
         self.ftp_calc = FtpCalculator.FtpCalculator()
         self.hr_calc = HeartRateCalculator.HeartRateCalculator()
 
     def get_record_dictionary(self, activity_type):
         """Returns the record dictionary that corresponds to the given activity type."""
-        if activity_type == Keys.TYPE_RUNNING_KEY:
-            return self.running_bests
-        elif activity_type == Keys.TYPE_CYCLING_KEY:
-            return self.cycling_bests
-        elif activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY:
-            return self.open_water_swimming_bests
-        elif activity_type == Keys.TYPE_POOL_SWIMMING_KEY:
-            return self.pool_swimming_bests
+        if activity_type in self.bests:
+            return self.bests[activity_type]
         return {}
 
-    def set_record_dictionary(self, activity_type, bests):
+    def set_record_dictionary(self, activity_type, new_bests):
         """Sets the record dictionary that corresponds to the given activity type."""
-        if activity_type == Keys.TYPE_RUNNING_KEY:
-            self.running_bests = bests
-        elif activity_type == Keys.TYPE_CYCLING_KEY:
-            self.cycling_bests = bests
-        elif activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY:
-            self.open_water_swimming_bests = bests
-        elif activity_type == Keys.TYPE_POOL_SWIMMING_KEY:
-            self.pool_swimming_bests = bests
+        self.bests[activity_type] = new_bests
 
     def get_annual_record_dictionary(self, activity_type, year):
-        """Returns the record dictionary that corresponds to the given activity type."""
-        if activity_type == Keys.TYPE_RUNNING_KEY:
-            if year not in self.annual_running_bests:
-                self.annual_running_bests[year] = {}
-            return self.annual_running_bests[year]
-        elif activity_type == Keys.TYPE_CYCLING_KEY:
-            if year not in self.annual_cycling_bests:
-                self.annual_cycling_bests[year] = {}
-            return self.annual_cycling_bests[year]
-        elif activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY:
-            if year not in self.annual_open_water_swimming_bests:
-                self.annual_open_water_swimming_bests[year] = {}
-            return self.annual_open_water_swimming_bests[year]
-        elif activity_type == Keys.TYPE_POOL_SWIMMING_KEY:
-            if year not in self.annual_pool_swimming_bests:
-                self.annual_pool_swimming_bests[year] = {}
-            return self.annual_pool_swimming_bests[year]
-        return {}
+        """Returns the annual record dictionary that corresponds to the given activity type and year."""
 
-    def get_annual_record_years(self, activity_type):
-        """Returns the keys for the annual record dictionary that corresponds to the given activity type."""
-        if activity_type == Keys.TYPE_RUNNING_KEY:
-            return self.annual_running_bests.keys()
-        elif activity_type == Keys.TYPE_CYCLING_KEY:
-            return self.annual_cycling_bests.keys()
-        elif activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY:
-            return self.annual_open_water_swimming_bests.keys()
-        elif activity_type == Keys.TYPE_POOL_SWIMMING_KEY:
-            return self.annual_pool_swimming_bests.keys()
-        return {}
+        # Top level dictionary is the year.
+        if year not in self.annual_bests:
+            self.annual_bests[year] = {}
+        year_dictionary = self.annual_bests[year]
+
+        # Next dictionary is the activity type and it's records.
+        if activity_type in year_dictionary:
+            record_dictionary = year_dictionary[activity_type]
+        else:
+            record_dictionary = {}
+            year_dictionary[activity_type] = record_dictionary
+            self.annual_bests[year] = year_dictionary
+        return record_dictionary
+
+    def set_annual_record_dictionary(self, activity_type, year, record_dictionary):
+        """Set the annual record dictionary that corresponds to the given activity type and year."""
+
+        # Top level dictionary is the year.
+        if year not in self.annual_bests:
+            self.annual_bests[year] = {}
+        year_dictionary = self.annual_bests[year]
+
+        # Next dictionary is the activity type and it's records.
+        year_dictionary[activity_type] = record_dictionary
+        self.annual_bests[year] = year_dictionary
+
+    def get_annual_record_years(self):
+        """Returns the years for which we have records."""
+        return self.annual_bests.keys()
 
     def get_summary_dictionary(self, activity_type):
         """Returns the record dictionary that corresponds to the given activity type."""
-        if activity_type == Keys.TYPE_RUNNING_KEY:
-            return self.running_summary
-        elif activity_type == Keys.TYPE_CYCLING_KEY:
-            return self.cycling_summary
-        elif activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY:
-            return self.open_water_swimming_summary
-        elif activity_type == Keys.TYPE_POOL_SWIMMING_KEY:
-            return self.pool_swimming_summary
-        return {}
+        if activity_type not in self.summaries:
+            self.summaries[activity_type] = {}
+        return self.summaries[activity_type]
+
+    def set_summary_dictionary(self, activity_type, summary_dictionary):
+        """Returns the record dictionary that corresponds to the given activity type."""
+        self.summaries[activity_type] = summary_dictionary
 
     def get_best_time(self, activity_type, record_name):
         """Returns the time associated with the specified record, or None if not found."""
         record_set = self.get_record_dictionary(activity_type)
         if record_name in record_set:
-            time, activity_id = record_set[record_name]
+            time, _ = record_set[record_name]
             return time
         return None
 
@@ -130,14 +105,14 @@ class Summarizer(object):
         """Returns the time associated with the specified record, or None if not found."""
         record_set = self.get_annual_record_dictionary(activity_type, year)
         if record_name in record_set:
-            time, activity_id = record_set[record_name]
+            time, _ = record_set[record_name]
             return time
         return None
 
     def get_best_time_from_record_set(self, record_set, record_name):
         """Returns the time associated with the specified record, or None if not found."""
         if record_name in record_set:
-            time, activity_id = record_set[record_name]
+            time, _ = record_set[record_name]
             return time
         return None
 
@@ -168,34 +143,47 @@ class Summarizer(object):
         if old_value is None or Summarizer.is_better(summary_data_key, summary_data_value, old_value):
             record_set[summary_data_key] = [ summary_data_value, activity_id ]
 
-        # Update annual records
+        # Update the record set.
+        self.set_record_dictionary(activity_type, record_set)
+
+        #
+        # Update annual records.
+        #
 
         # In what year was this activity?
         ts = time.gmtime(start_time)
 
         # Get the record set that corresponds with the activity type.
-        record_set = self.get_annual_record_dictionary(activity_type, ts.tm_year)
+        annual_record_set = self.get_annual_record_dictionary(activity_type, ts.tm_year)
 
         # Find the old record.
-        old_value = self.get_best_time_from_record_set(record_set, summary_data_key)
+        old_value = self.get_best_time_from_record_set(annual_record_set, summary_data_key)
 
         # If the old record is not set or this is better, then update.
         if old_value is None or Summarizer.is_better(summary_data_key, summary_data_value, old_value):
-            record_set[summary_data_key] = [ summary_data_value, activity_id ]
+            annual_record_set[summary_data_key] = [ summary_data_value, activity_id ]
 
+        # Update the record set.
+        self.set_annual_record_dictionary(activity_type, ts.tm_year, annual_record_set)
+
+        #
         # Update summary data.
+        #
 
         # Get the record set that corresponds with the activity type.
-        record_set = self.get_summary_dictionary(activity_type)
+        summary_record_set = self.get_summary_dictionary(activity_type)
 
         # Update the distance total.
         if summary_data_key == Keys.LONGEST_DISTANCE:
-            if Keys.TOTAL_DISTANCE in record_set and Keys.TOTAL_ACTIVITIES in record_set:
-                record_set[Keys.TOTAL_DISTANCE] = record_set[Keys.TOTAL_DISTANCE] + summary_data_value
-                record_set[Keys.TOTAL_ACTIVITIES] = record_set[Keys.TOTAL_ACTIVITIES] + 1
+            if Keys.TOTAL_DISTANCE in summary_record_set and Keys.TOTAL_ACTIVITIES in summary_record_set:
+                summary_record_set[Keys.TOTAL_DISTANCE] = summary_record_set[Keys.TOTAL_DISTANCE] + summary_data_value
+                summary_record_set[Keys.TOTAL_ACTIVITIES] = summary_record_set[Keys.TOTAL_ACTIVITIES] + 1
             else:
-                record_set[Keys.TOTAL_DISTANCE] = summary_data_value
-                record_set[Keys.TOTAL_ACTIVITIES] = 1
+                summary_record_set[Keys.TOTAL_DISTANCE] = summary_data_value
+                summary_record_set[Keys.TOTAL_ACTIVITIES] = 1
+        
+        # Update the record set.
+        self.set_summary_dictionary(activity_type, summary_record_set)
 
     def add_activity_data(self, activity_id, activity_type, start_time, summary_data):
         """Submits an activity's metadata for summary analysis."""

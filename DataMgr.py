@@ -38,6 +38,7 @@ from celery import states
 
 SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
 ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
+ONE_WEEK = (7.0 * 24.0 * 60.0 * 60.0)
 FOUR_WEEKS = (28.0 * 24.0 * 60.0 * 60.0)
 
 def get_activities_sort_key(item):
@@ -269,7 +270,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No status.")
         return self.database.update_deferred_task(user_id, task_id, status)
 
-    def import_file(self, username, user_id, local_file_name, uploaded_file_name):
+    def import_file(self, username, user_id, uploaded_file_data, uploaded_file_name):
         """Imports the contents of a local file into the database."""
         if self.import_scheduler is None:
             raise Exception("No importer.")
@@ -277,11 +278,25 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No username.")
         if user_id is None:
             raise Exception("No user ID.")
-        if local_file_name is None:
-            raise Exception("No local file name.")
+        if uploaded_file_data is None:
+            raise Exception("No uploaded file data.")
         if uploaded_file_name is None:
             raise Exception("No uploaded file name.")
-        self.import_scheduler.add_to_queue(username, user_id, local_file_name, uploaded_file_name, self)
+        self.import_scheduler.add_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
+
+    def attach_photo_to_activity(username, user_id, uploaded_file_data, uploaded_file_name, activity_id):
+        """Imports a photo and associates it with an activity."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("No user ID.")
+        if uploaded_file_data is None:
+            raise Exception("No uploaded file data.")
+        if uploaded_file_name is None:
+            raise Exception("No uploaded file name.")
+        if activity_id is None:
+            raise Exception("No activity ID.")
+        pass
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
@@ -1060,8 +1075,30 @@ class DataMgr(Importer.ActivityWriter):
         if all_activity_bests is not None:
             for activity_id in all_activity_bests:
                 activity_bests = all_activity_bests[activity_id]
-                if activity_bests is not None and Keys.ACTIVITY_TYPE_KEY in activity_bests and Keys.ACTIVITY_TIME_KEY in activity_bests:
-                    summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
+                summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
+
+        # Output is a dictionary for each sport type.
+        cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
+        running_bests = summarizer.get_record_dictionary(Keys.TYPE_RUNNING_KEY)
+        cycling_summary = summarizer.get_summary_dictionary(Keys.TYPE_CYCLING_KEY)
+        running_summary = summarizer.get_summary_dictionary(Keys.TYPE_RUNNING_KEY)
+        return cycling_bests, running_bests, cycling_summary, running_summary
+
+    def retrieve_bounded_activity_bests_for_user(self, user_id, cutoff_time_lower, cutoff_time_higher):
+        """Return a dictionary of all best performances in the specified time frame."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        summarizer = Summarizer.Summarizer()
+
+        # Load cached summary data from all previous activities.
+        all_activity_bests = self.database.retrieve_bounded_activity_bests_for_user(user_id, cutoff_time_lower, cutoff_time_higher)
+        if all_activity_bests is not None:
+            for activity_id in all_activity_bests:
+                activity_bests = all_activity_bests[activity_id]
+                summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
 
         # Output is a dictionary for each sport type.
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
@@ -1206,5 +1243,5 @@ class DataMgr(Importer.ActivityWriter):
         all_activity_types.extend(Keys.BIKE_BASED_ACTIVITIES)
         all_activity_types.extend(Keys.SWIMMING_ACTIVITIES)
         all_activity_types.extend(Keys.STRENGTH_ACTIVITIES)
-        all_activity_types.append(Keys.TYPE_UNSPECIFIED_ACTIVITY)
+        all_activity_types.append(Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY)
         return all_activity_types
