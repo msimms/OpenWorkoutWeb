@@ -613,8 +613,8 @@ def main():
     googlemaps_key = config.get_google_maps_key()
 
     if config.is_https_enabled():
-        cert_file = args.get_certificate_file()
-        privkey_file = args.get_private_key_file()
+        cert_file = config.get_certificate_file()
+        privkey_file = config.get_private_key_file()
         print("Running HTTPS....")
         cherrypy.server.ssl_module = 'builtin'
         cherrypy.server.ssl_certificate = cert_file
