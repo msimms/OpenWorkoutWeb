@@ -67,7 +67,9 @@ class Config(object):
 
     def get_int(self, section, setting):
         value = self.get_str(section, setting)
-        return int(value)
+        if len(value) > 0:
+            return int(value)
+        return 0
 
     def is_debug_enabled(self):
         return self.get_bool('General', 'Debug')
