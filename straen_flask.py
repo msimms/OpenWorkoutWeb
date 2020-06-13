@@ -15,6 +15,7 @@ import flask
 import Api
 import ApiException
 import App
+import Config
 import DataMgr
 import AnalysisScheduler
 import ImportScheduler
@@ -534,12 +535,7 @@ def main():
 
     # Parse command line options.
     parser = argparse.ArgumentParser()
-    parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background.", required=False)
-    parser.add_argument("--profile", action="store_true", default=False, help="Enables application profiling.", required=False)
-    parser.add_argument("--host", default="", help="Host name on which users will access this website.", required=False)
-    parser.add_argument("--hostport", type=int, default=5000, help="Port on which users will access this website.", required=False)
-    parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS.", required=False)
-    parser.add_argument("--googlemapskey", default="", help="API key for Google Maps. If not provided OpenStreetMap will be used.", required=False)
+    parser.add_argument("--config", type=str, action="store", default="", help="The configuration file.", required=False)
 
     try:
         args = parser.parse_args()
@@ -547,21 +543,31 @@ def main():
         parser.error(e)
         sys.exit(1)
 
-    if args.https:
+    config = Config.Config()
+    if len(args.config) > 0:
+        config.load(args.config)
+
+    debug_enabled = config.is_debug_enabled()
+    profiling_enabled = config.is_profiling_enabled()
+    host = config.get_hostname()
+    hostport = config.get_hostport()
+    googlemaps_key = config.get_google_maps_key()
+
+    if config.is_https_enabled():
         protocol = "https"
     else:
         protocol = "http"
 
-    if len(args.host) == 0:
-        if args.debug:
-            args.host = "127.0.0.1"
+    if len(host) == 0:
+        if debug_enabled:
+            host = "127.0.0.1"
         else:
-            args.host = "straen-app.com"
-        print("Hostname not provided, will use " + args.host)
+            host = "straen-app.com"
+        print("Hostname not provided, will use " + host)
 
-    root_url = protocol + "://" + args.host
-    if args.hostport > 0:
-        root_url = root_url + ":" + str(args.hostport)
+    root_url = protocol + "://" + host
+    if hostport > 0:
+        root_url = root_url + ":" + str(hostport)
     print("Root URL is " + root_url)
 
     signal.signal(signal.SIGINT, signal_handler)
@@ -571,7 +577,7 @@ def main():
     session_mgr = SessionMgr.FlaskSessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr)
     data_mgr = DataMgr.DataMgr(root_url, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
-    g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, args.googlemapskey, args.profile, args.debug)
+    g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, googlemaps_key, profiling_enabled, debug_enabled)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
@@ -579,7 +585,7 @@ def main():
     markdown_logger = logging.getLogger("MARKDOWN")
     markdown_logger.setLevel(logging.ERROR)
 
-    g_flask_app.run(debug=args.debug)
+    g_flask_app.run(debug=debug_enabled)
 
 if __name__ == '__main__':
     main()

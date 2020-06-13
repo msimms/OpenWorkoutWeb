@@ -14,6 +14,7 @@ import traceback
 import Api
 import ApiException
 import App
+import Config
 import DataMgr
 import AnalysisScheduler
 import ImportScheduler
@@ -593,16 +594,7 @@ def main():
 
     # Parse command line options.
     parser = argparse.ArgumentParser()
-    parser.add_argument("--debug", action="store_true", default=False, help="Prevents the app from going into the background.", required=False)
-    parser.add_argument("--profile", action="store_true", default=False, help="Enables application profiling.", required=False)
-    parser.add_argument("--host", default="", help="Host name on which users will access this website.", required=False)
-    parser.add_argument("--hostport", type=int, default=0, help="Port on which users will access this website.", required=False)
-    parser.add_argument("--bind", default="127.0.0.1", help="Host name on which to bind.", required=False)
-    parser.add_argument("--bindport", type=int, default=8080, help="Port on which to bind.", required=False)
-    parser.add_argument("--https", action="store_true", default=False, help="Runs the app as HTTPS.", required=False)
-    parser.add_argument("--cert", default="cert.pem", help="Certificate file for HTTPS.", required=False)
-    parser.add_argument("--privkey", default="privkey.pem", help="Private Key file for HTTPS.", required=False)
-    parser.add_argument("--googlemapskey", default="", help="API key for Google Maps. If not provided OpenStreetMap will be used.", required=False)
+    parser.add_argument("--config", type=str, action="store", default="", help="The configuration file.", required=False)
 
     try:
         args = parser.parse_args()
@@ -610,31 +602,43 @@ def main():
         parser.error(e)
         sys.exit(1)
 
-    if args.https:
+    config = Config.Config()
+    if len(args.config) > 0:
+        config.load(args.config)
+
+    debug_enabled = config.is_debug_enabled()
+    profiling_enabled = config.is_profiling_enabled()
+    host = config.get_hostname()
+    hostport = config.get_hostport()
+    googlemaps_key = config.get_google_maps_key()
+
+    if config.is_https_enabled():
+        cert_file = args.get_certificate_file()
+        privkey_file = args.get_private_key_file()
         print("Running HTTPS....")
         cherrypy.server.ssl_module = 'builtin'
-        cherrypy.server.ssl_certificate = args.cert
-        print("Certificate File: " + args.cert)
-        cherrypy.server.ssl_private_key = args.privkey
-        print("Private Key File: " + args.privkey)
+        cherrypy.server.ssl_certificate = cert_file
+        print("Certificate File: " + cert_file)
+        cherrypy.server.ssl_private_key = privkey_file
+        print("Private Key File: " + privkey_file)
         protocol = "https"
     else:
         protocol = "http"
 
-    if len(args.host) == 0:
-        if args.debug:
-            args.host = "127.0.0.1"
+    if len(host) == 0:
+        if debug_enabled:
+            host = "127.0.0.1"
         else:
-            args.host = "straen-app.com"
-        print("Hostname not provided, will use " + args.host)
+            host = "straen-app.com"
+        print("Hostname not provided, will use " + host)
 
     root_dir = os.path.dirname(os.path.abspath(__file__))
-    root_url = protocol + "://" + args.host
-    if args.hostport > 0:
-        root_url = root_url + ":" + str(args.hostport)
+    root_url = protocol + "://" + host
+    if hostport > 0:
+        root_url = root_url + ":" + str(hostport)
     print("Root URL is " + root_url)
 
-    if not args.debug:
+    if not debug_enabled:
         Daemonizer(cherrypy.engine).subscribe()
 
     # Register the signal handler.
@@ -647,7 +651,7 @@ def main():
     session_mgr = SessionMgr.CherryPySessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr)
     data_mgr = DataMgr.DataMgr(root_url, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
-    backend = App.App(user_mgr, data_mgr, root_dir, root_url, args.googlemapskey, args.profile, args.debug)
+    backend = App.App(user_mgr, data_mgr, root_dir, root_url, googlemaps_key, profiling_enabled, debug_enabled)
     g_app = StraenWeb(backend)
 
     # Configure the error logger.
@@ -723,8 +727,8 @@ def main():
     }
 
     cherrypy.config.update({
-        'server.socket_host': args.bind,
-        'server.socket_port': args.bindport,
+        'server.socket_host': config.get_bindname(),
+        'server.socket_port': config.get_bindport(),
         'requests.show_tracebacks': False,
         'log.access_file': ACCESS_LOG})
 
