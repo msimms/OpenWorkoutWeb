@@ -661,7 +661,7 @@ class App(object):
                     value = summary_data[key]
                     details_str += Units.convert_to_string_in_specified_unit_system(unit_system, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE)
                     details_str += "</td><tr>\n"
-                elif key == Keys.ACTIVITY_INTERVALS:
+                elif key == Keys.ACTIVITY_INTERVALS_KEY:
                     details_str += "<td><b>Intervals</b><td>"
                     details_str += App.render_intervals_str(summary_data[key])
                     details_str += "</td><tr>\n"

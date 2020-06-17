@@ -23,6 +23,7 @@
 # SOFTWARE.
 """Data store abstraction"""
 
+import hashlib
 import time
 import uuid
 import FtpCalculator
@@ -296,7 +297,19 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No uploaded file name.")
         if activity_id is None:
             raise Exception("No activity ID.")
-        pass
+
+        # Hash the photo. This will prevent duplicates as well as give us a unique name.
+        h = hashlib.sha512()
+        h.update(uploaded_file_data)
+        hash_str = h.hexdigest()
+
+    def list_activity_photos(self, activity_id):
+        """Lists all photos associated with an activity. Response is a list of identifiers."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No activity ID.")
+        return self.database.list_activity_photos(activity_id)
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""

@@ -178,6 +178,33 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
+/retrieve_activity_photo:
+    description: Returns the specified activity photo.
+    get:
+        responses:
+            200: Empty string
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
+/list_activity_photos:
+    description: Lists all photos associated with an activity.
+    get:
+        responses:
+            200: Empty string
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
+/delete_activity_photo:
+    description: Deletes a photo and removes it from an activity.
+    get:
+    post:
+        responses:
+            200: Empty string
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
 /create_tags_on_activity:
     description: Sets the tags on an activity. Tags are provided in a dictionary {"tag0", "foo"|, {"tag1", "bar"), etc.
     get:

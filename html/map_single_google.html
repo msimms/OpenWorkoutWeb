@@ -483,6 +483,20 @@ ${splits}
         }
     }
 
+    var process_photos = function(photo_ids)
+    {
+        photo_ids = eval(photo_ids)
+        for (var photo_id in photo_ids)
+        {
+        }
+    }
+
+    function list_photos()
+    {
+        var api_url = "${root_url}/api/1.0/list_activity_photos?activity_id=${activityId}";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photos, dataType: "text" });
+    }
+
     var process_tags = function(tags)
     {
         tags = eval(tags)

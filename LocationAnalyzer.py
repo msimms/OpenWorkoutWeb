@@ -288,7 +288,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                             significant_intervals.append(all_intervals[interval_index])
                         interval_index = interval_index + 1
 
-                results[Keys.ACTIVITY_INTERVALS] = significant_intervals
+                results[Keys.ACTIVITY_INTERVALS_KEY] = significant_intervals
 
         # Insert the location into the analysis dictionary so that it gets cached.
         results[Keys.LONGEST_DISTANCE] = self.total_distance
