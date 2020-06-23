@@ -650,7 +650,10 @@ def main():
 
     session_mgr = SessionMgr.CherryPySessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr)
-    data_mgr = DataMgr.DataMgr(config, root_url, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
+    analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
+    import_scheduler = ImportScheduler.ImportScheduler()
+    workout_plan_gen = WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler()
+    data_mgr = DataMgr.DataMgr(config, root_url, analysis_scheduler, import_scheduler, workout_plan_gen)
     backend = App.App(user_mgr, data_mgr, root_dir, root_url, googlemaps_key, profiling_enabled, debug_enabled)
     g_app = StraenWeb(backend)
 
