@@ -576,7 +576,7 @@ def main():
 
     session_mgr = SessionMgr.FlaskSessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr)
-    data_mgr = DataMgr.DataMgr(root_url, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
+    data_mgr = DataMgr.DataMgr(config, root_url, AnalysisScheduler.AnalysisScheduler(), ImportScheduler.ImportScheduler(), WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
     g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, googlemaps_key, profiling_enabled, debug_enabled)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')

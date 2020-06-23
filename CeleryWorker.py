@@ -35,7 +35,7 @@ celery_worker.config_from_object('CeleryConfig')
 @celery_worker.task()
 def check_for_ungenerated_workout_plans():
     """Checks for users that need their workout plan regenerated."""
-    data_mgr = DataMgr.DataMgr("", None, None, WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
+    data_mgr = DataMgr.DataMgr(None, "", None, None, WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
     user_ids = data_mgr.retrieve_users_without_scheduled_workouts()
     for user_id in user_ids:
         data_mgr.generate_workout_plan(user_id)

@@ -103,3 +103,6 @@ class Config(object):
 
     def get_photos_dir(self):
         return self.get_str('Photos', 'Directory')
+
+    def get_broker_url(self):
+        return self.get_str('Celery', 'Broker URL')

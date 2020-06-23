@@ -51,7 +51,7 @@ def get_activities_sort_key(item):
 class DataMgr(Importer.ActivityWriter):
     """Data store abstraction"""
 
-    def __init__(self, root_url, analysis_scheduler, import_scheduler, workout_plan_gen_scheduler):
+    def __init__(self, config, root_url, analysis_scheduler, import_scheduler, workout_plan_gen_scheduler):
         self.database = StraenDb.MongoDatabase()
         self.database.connect()
         self.root_url = root_url
@@ -61,6 +61,8 @@ class DataMgr(Importer.ActivityWriter):
         self.map_search = None
         self.celery_worker = celery.Celery('straen_worker')
         self.celery_worker.config_from_object('CeleryConfig')
+        if config is not None:
+            self.celery_worker.conf.broker_url = config.get_broker_url()
         super(Importer.ActivityWriter, self).__init__()
 
     def terminate(self):

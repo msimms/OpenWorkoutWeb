@@ -36,7 +36,7 @@ class WorkoutPlanGenerator(object):
 
     def __init__(self, user_obj):
         self.user_obj = user_obj
-        self.data_mgr = DataMgr.DataMgr("", AnalysisScheduler.AnalysisScheduler(), None, None)
+        self.data_mgr = DataMgr.DataMgr(None, "", AnalysisScheduler.AnalysisScheduler(), None, None)
         self.user_mgr = UserMgr.UserMgr(None)
         super(WorkoutPlanGenerator, self).__init__()
 
