@@ -84,6 +84,10 @@ ${nav}
 	var info_window = null
 	var last_lat = ${lastLat}
 	var last_lon = ${lastLon}
+    var route_coordinates =
+    [
+${route}
+    ];
 
     function append_to_summary_list(key, value)
     {
@@ -115,9 +119,8 @@ ${nav}
 
 		for (var i = 0; i < obj_list.length; ++i)
 		{
-			var path = route_path.getPath();
-			routeCoordinates.push(new google.maps.LatLng(obj_list[i].latitude, obj_list[i].longitude));
-			route_path.setPath(routeCoordinates);
+			route_coordinates.push(new google.maps.LatLng(obj_list[i].latitude, obj_list[i].longitude));
+			route_path.setPath(route_coordinates);
 			route_path.setMap(map);
 		}
 
@@ -201,14 +204,9 @@ ${nav}
 
 		map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 
-		var routeCoordinates =
-		[
-${route}
-		];
-
 		route_path = new google.maps.Polyline
 		({
-			path: routeCoordinates,
+			path: route_coordinates,
 			geodesic: true,
 			strokeColor: '#FF0000',
 			strokeOpacity: 1.0,
@@ -219,7 +217,7 @@ ${route}
 		route_path.setMap(map);
 
         // Analyze the route, compute the total distance, avg. speed, etc.
-        var meters_traveled = total_distance_google(routeCoordinates);
+        var meters_traveled = total_distance_google(route_coordinates);
         var distance_traveled_str = convert_distance_to_unit_system_str("${unit_system}", meters_traveled);
         append_to_summary_list("Distance", distance_traveled_str);
         if (${is_foot_based_activity})
@@ -238,12 +236,13 @@ ${route}
 
 	var check_for_updates = function()
 	{
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=${routeLen}", cache: false, success: append_to_track, dataType: "application/json" });
+        var route_len = route_coordinates.length;
+		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=" + route_len, cache: false, success: append_to_track, dataType: "application/json" });
 		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", cache: false, success: update_metadata, dataType: "text" });
 	};
 
 	google.maps.event.addDomListener(window, 'load', initialize);
-	//setInterval(check_for_updates, 15000);
+	//setInterval(check_for_updates, 30000);
 </script>
 
 </div>
@@ -534,8 +533,6 @@ ${splits}
             create_tags(jQuery("#tags").val());
         });
     });
-
-    //list_tags();
 </script>
 
 <hr>

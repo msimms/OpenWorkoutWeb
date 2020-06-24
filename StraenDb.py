@@ -1155,24 +1155,6 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def retrieve_most_recent_activity_locations(self, activity_id, num):
-        """Returns the most recent 'num' locations for the specified activity."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_most_recent_activity_locations.__name__ + ": Unexpected empty object: activity_id")
-            return None
-        if num is None:
-            self.log_error(MongoDatabase.retrieve_most_recent_activity_locations.__name__ + ": Unexpected empty object: num")
-            return None
-
-        try:
-            locations = self.retrieve_activity_locations(activity_id)
-            locations.sort(key=retrieve_time_from_location)
-            return locations
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return None
-
     def create_activity_sensor_reading(self, activity_id, date_time, sensor_type, value):
         """Create method for a piece of sensor data, such as a heart rate or power meter reading."""
         if activity_id is None:

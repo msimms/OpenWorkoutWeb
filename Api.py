@@ -200,15 +200,24 @@ class Api(object):
         num_points = values[Keys.ACTIVITY_NUM_POINTS]
         if not InputChecker.is_integer(num_points):
             raise ApiException.ApiMalformedRequestException("Invalid number of points.")
+        num_points = int(num_points)
 
-        locations = self.data_mgr.retrieve_most_recent_activity_locations(activity_id, int(num_points))
+        # Get the activity from the database.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+
+        # Determine if the requesting user can view the activity.
+        if not self.activity_can_be_viewed(activity):
+            return self.error("The requested activity is not viewable to this user.")
 
         response = "["
 
-        for location in locations:
-            if len(response) > 1:
-                response += ","
-            response += json.dumps({"latitude": location.latitude, "longitude": location.longitude})
+        if Keys.APP_LOCATIONS_KEY in activity:
+
+            locations = activity[Keys.APP_LOCATIONS_KEY]
+            for location in locations[num_points:]:
+                if len(response) > 1:
+                    response += ","
+                response += json.dumps({Keys.LOCATION_LAT_KEY: location[Keys.LOCATION_LAT_KEY], Keys.LOCATION_LON_KEY: location[Keys.LOCATION_LON_KEY]})
 
         response += "]"
 

@@ -512,14 +512,6 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity_locations(activity_id)
 
-    def retrieve_most_recent_activity_locations(self, activity_id, num):
-        """Returns the most recent 'num' locations for the specified device and activity."""
-        if self.database is None:
-            raise Exception("No database.")
-        if activity_id is None or len(activity_id) == 0:
-            raise Exception("Bad parameter.")
-        return self.database.retrieve_most_recent_activity_locations(activity_id, num)
-
     def retrieve_activity_sensor_readings(self, key, activity_id):
         """Returns all the sensor data for the specified sensor for the given activity."""
         if self.database is None:
