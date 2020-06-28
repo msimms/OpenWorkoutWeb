@@ -1351,6 +1351,13 @@ class Api(object):
                     raise ApiException.ApiMalformedRequestException("Invalid long run day.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day)
 
+            # Goal.
+            elif decoded_key == Keys.GOAL_KEY:
+                goal = unquote_plus(values[key])
+                if not (goal in Keys.GOALS):
+                    raise ApiException.ApiMalformedRequestException("Invalid goal.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
+
             # Goal type.
             elif decoded_key == Keys.GOAL_TYPE_KEY:
                 goal_type = unquote_plus(values[key])
@@ -1459,6 +1466,9 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("A goal date was not specified.")
 
         goal = unquote_plus(values[Keys.GOAL_KEY])
+        if not (goal in Keys.GOALS):
+            raise ApiException.ApiMalformedRequestException("Invalid goal.")
+
         goal_date = unquote_plus(values[Keys.GOAL_DATE_KEY])
 
         self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)

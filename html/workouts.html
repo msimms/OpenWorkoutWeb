@@ -44,6 +44,20 @@
             alert("An error occurred!");
     }
 
+    function set_goal()
+    {
+        var the_url = "${root_url}/api/1.0/update_settings";
+        var goal = document.getElementById("goals").value;
+        var dict = [];
+        var result_text = {};
+
+        dict.push({["goal"] : goal});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Goal updated!");
+        else
+            alert("An error occurred!");
+    }
+
     function set_goal_type()
     {
         var the_url = "${root_url}/api/1.0/update_settings";
@@ -241,7 +255,7 @@ ${nav}
 
     <h2>Goal</h2>
     <p>
-		<select id="goals" name="goals">
+		<select name="goals" id="goals" onchange="return set_goal()">
 ${goals}
 		</select> on 
     	<input type="text" name="goalDate" id="goalDate">
