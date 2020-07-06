@@ -38,13 +38,18 @@ def main():
 
     gen = WorkoutPlanGenerator.WorkoutPlanGenerator(None)
 
+    # Load the test data.
     with open(args.file, 'r') as f:
         test_json = json.load(f)
         test_inputs = test_json["inputs"]
+
+        # Generate a plan for each test input.
         for test_input in test_inputs:
             print("Input: " + str(test_input))
             print("Output:")
-            gen.generate_workouts(0, test_input)
+            workouts = gen.generate_workouts(0, test_input)
+            for workout in workouts:
+                print(workout.export_to_text())
 
 
 if __name__ == "__main__":

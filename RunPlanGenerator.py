@@ -23,6 +23,10 @@ class RunPlanGenerator(object):
         return True
 
     @staticmethod
+    def valid_float(value):
+        return type(value) == float and value > 0.1
+
+    @staticmethod
     def find_nearest(array, value):
         array = np.asarray(array)
         idx = (np.abs(array - value)).argmin()
@@ -142,6 +146,17 @@ class RunPlanGenerator(object):
 
         return long_run_workout
 
+    def gen_free_run(self):
+        """Utility function for creating a free run workout."""
+
+        # Create the workout object.
+        long_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_FREE_RUN, self.user_id)
+        long_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
+        long_run_workout.add_interval(1, 5000, 0, 0, 0)
+        long_run_workout.needs_rest_day_afterwards = True
+
+        return long_run_workout
+
     def gen_workouts_for_next_week(self, inputs):
         """Generates the workouts for the next week, but doesn't schedule them."""
 
@@ -164,13 +179,13 @@ class RunPlanGenerator(object):
         exp_level = inputs[Keys.EXPERIENCE_LEVEL_KEY]
 
         # Handle situation in which the user hasn't run in four weeks.
-        if longest_run_in_four_weeks is None:
-            raise Exception("No runs in the last four weeks.")
+        if not RunPlanGenerator.valid_float(longest_run_in_four_weeks):
+            workouts.append(self.gen_free_run())
+            workouts.append(self.gen_free_run())
+            return workouts
 
         # No pace data?
-        if short_interval_run_pace is None or speed_run_pace is None or tempo_run_pace is None or long_run_pace is None or easy_run_pace is None:
-            raise Exception("No run pace data.")
-        if short_interval_run_pace == 0 or speed_run_pace == 0 or tempo_run_pace == 0 or long_run_pace == 0 or easy_run_pace == 0:
+        if not (RunPlanGenerator.valid_float(short_interval_run_pace) and RunPlanGenerator.valid_float(speed_run_pace) and RunPlanGenerator.valid_float(tempo_run_pace) and RunPlanGenerator.valid_float(long_run_pace) and RunPlanGenerator.valid_float(easy_run_pace)):
             raise Exception("No run pace data.")
 
         # Long run: 10%/week increase for an experienced runner

@@ -96,9 +96,10 @@ WORKOUT_TYPE_EVENT = "Event"
 WORKOUT_TYPE_SPEED_RUN = "Speed Session"
 WORKOUT_TYPE_TEMPO_RUN = "Tempo Run"
 WORKOUT_TYPE_EASY_RUN = "Easy Run"
+WORKOUT_TYPE_LONG_RUN = "Long Run"
+WORKOUT_TYPE_FREE_RUN = "Free Run" # A run at no specific pace
 WORKOUT_TYPE_HILL_REPEATS = "Hill Repeats" # 4-10 repeats, depending on skill level, done at 5K pace
 WORKOUT_TYPE_MIDDLE_DISTANCE_RUN = "Middle Distance Run" # 2 hour run for advanced distance runners
-WORKOUT_TYPE_LONG_RUN = "Long Run"
 WORKOUT_TYPE_OPEN_WATER_SWIM = "Open Water Swim"
 WORKOUT_TYPE_POOL_WATER_SWIM = "Pool Swim"
 
