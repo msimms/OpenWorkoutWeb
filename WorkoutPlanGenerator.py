@@ -244,9 +244,11 @@ class WorkoutPlanGenerator(object):
 
         # Convert the input dictionary to an array as required by tf.
         model_inputs = [ ]
+        model_inputs.append(inputs[Keys.SHORT_INTERVAL_RUN_PACE])
         model_inputs.append(inputs[Keys.SPEED_RUN_PACE])
         model_inputs.append(inputs[Keys.TEMPO_RUN_PACE])
         model_inputs.append(inputs[Keys.LONG_RUN_PACE])
+        model_inputs.append(inputs[Keys.EASY_RUN_PACE])
         model_inputs.append(inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY])
         model_inputs.append(inputs[Keys.LONGEST_RUN_WEEK_1_KEY])
         model_inputs.append(inputs[Keys.LONGEST_RUN_WEEK_2_KEY])

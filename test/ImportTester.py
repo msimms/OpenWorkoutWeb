@@ -212,8 +212,13 @@ def main():
 
     # Parse the command line arguments.
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dir", type=str, action="store", default=os.path.dirname(os.path.realpath(__file__)), help="Directory of files to be processed", required=True)
-    args = parser.parse_args()
+    parser.add_argument("--dir", type=str, action="store", default=os.path.dirname(os.path.realpath(__file__)), help="Directory of files to process", required=True)
+
+    try:
+        args = parser.parse_args()
+    except IOError as e:
+        parser.error(e)
+        sys.exit(1)
 
     store = TestActivityWriter()
     importer = Importer.Importer(store)

@@ -168,7 +168,9 @@ class RunPlanGenerator(object):
             raise Exception("No runs in the last four weeks.")
 
         # No pace data?
-        if speed_run_pace is None or tempo_run_pace is None or long_run_pace is None or easy_run_pace is None:
+        if short_interval_run_pace is None or speed_run_pace is None or tempo_run_pace is None or long_run_pace is None or easy_run_pace is None:
+            raise Exception("No run pace data.")
+        if short_interval_run_pace == 0 or speed_run_pace == 0 or tempo_run_pace == 0 or long_run_pace == 0 or easy_run_pace == 0:
             raise Exception("No run pace data.")
 
         # Long run: 10%/week increase for an experienced runner
