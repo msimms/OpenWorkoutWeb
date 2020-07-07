@@ -17,29 +17,16 @@ import WorkoutPlanGenerator
 
 ERROR_LOG = 'error.log'
 
-
-def main():
-    """Starts the tests."""
-
-    logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+def run_unit_tests(input_file_name):
+    """Entry point for the unit tests."""
 
     successes = []
     failures = []
 
-    # Parse the command line arguments.
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--file", type=str, action="store", default=os.path.dirname(os.path.realpath(__file__)), help="File to process", required=True)
-
-    try:
-        args = parser.parse_args()
-    except IOError as e:
-        parser.error(e)
-        sys.exit(1)
-
     gen = WorkoutPlanGenerator.WorkoutPlanGenerator(None)
 
     # Load the test data.
-    with open(args.file, 'r') as f:
+    with open(input_file_name, 'r') as f:
         test_json = json.load(f)
         test_inputs = test_json["inputs"]
 
@@ -51,6 +38,24 @@ def main():
             for workout in workouts:
                 print(workout.export_to_text())
 
+    return len(failures) == 0
+
+def main():
+    """Starts the tests."""
+
+    logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+    # Parse the command line arguments.
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--file", type=str, action="store", default=os.path.dirname(os.path.realpath(__file__)), help="File to process", required=True)
+
+    try:
+        args = parser.parse_args()
+    except IOError as e:
+        parser.error(e)
+        sys.exit(1)
+
+    run_unit_tests(args.file)
 
 if __name__ == "__main__":
     main()

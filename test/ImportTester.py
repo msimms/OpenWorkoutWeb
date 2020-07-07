@@ -202,23 +202,10 @@ def print_records(store, activity_type):
             zone_index = zone_index + 1
         print("\n")
 
-def main():
-    """Starts the tests."""
-
-    logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-
+def run_unit_tests():
+    """Entry point for the unit tests."""
     successes = []
     failures = []
-
-    # Parse the command line arguments.
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dir", type=str, action="store", default=os.path.dirname(os.path.realpath(__file__)), help="Directory of files to process", required=True)
-
-    try:
-        args = parser.parse_args()
-    except IOError as e:
-        parser.error(e)
-        sys.exit(1)
 
     store = TestActivityWriter()
     importer = Importer.Importer(store)
@@ -281,6 +268,25 @@ def main():
         print("Average time per sample: " + str(total_time / num_files_processed) + " seconds\n")
     else:
         print("No files processed.\n")
+
+    return len(failures) == 0
+
+def main():
+    """Starts the tests."""
+
+    logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+    # Parse the command line arguments.
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dir", type=str, action="store", default=os.path.dirname(os.path.realpath(__file__)), help="Directory of files to process", required=True)
+
+    try:
+        args = parser.parse_args()
+    except IOError as e:
+        parser.error(e)
+        sys.exit(1)
+
+
 
 if __name__ == "__main__":
     main()

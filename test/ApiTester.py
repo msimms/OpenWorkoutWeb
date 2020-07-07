@@ -31,6 +31,28 @@ def logout(root_url, cookie):
     payload = {'_straen_username': cookie}
     return send_post_request(url, payload)
 
+def run_unit_tests(url, username, password):
+    """Entry point for the unit tests."""
+
+    # Append the API path.
+    api_url = url + "/api/1.0/"
+
+    # Login.
+    print_test_title("Login")
+    code, cookie = login(api_url, username, password)
+    if code == 200:
+        print("Test passed!\n")
+    else:
+        print("Test failed!\n")
+
+    # Logout.
+    print_test_title("Logout")
+    code, result = logout(api_url, cookie)
+    if code == 200:
+        print("Test passed!\n")
+    else:
+        print("Test failed!\n")
+
 def main():
     # Parse command line options.
     parser = argparse.ArgumentParser()
@@ -44,24 +66,7 @@ def main():
         parser.error(e)
         sys.exit(1)
 
-    # Append the API path.
-    api_url = args.url + "/api/1.0/"
-
-    # Login.
-    print_test_title("Login")
-    code, cookie = login(api_url, args.username, args.password)
-    if code == 200:
-        print("Test passed!\n")
-    else:
-        print("Test failed!\n")
-
-    # Logout.
-    print_test_title("Logout")
-    code, result = logout(api_url, cookie)
-    if code == 200:
-        print("Test passed!\n")
-    else:
-        print("Test failed!\n")
+    run_unit_tests(args.url, args.username, args.password)
 
 if __name__ == "__main__":
     main()
