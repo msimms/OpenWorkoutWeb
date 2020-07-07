@@ -197,7 +197,7 @@ def print_records(store, activity_type):
     # Print annual records.
     years = store.summarizer.get_annual_record_years()
     for year in years:
-        print str(year) + ":"
+        print(str(year) + ":")
         bests = store.summarizer.get_annual_record_dictionary(activity_type, year)
         if len(bests) > 0:
             for key in bests:
