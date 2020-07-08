@@ -11,4 +11,7 @@ markdown
 unidecode
 scipy
 sklearn
+unidecode
 Celery
+tensorflow
+pandas
