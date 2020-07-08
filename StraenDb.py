@@ -1155,24 +1155,6 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def retrieve_most_recent_activity_locations(self, activity_id, num):
-        """Returns the most recent 'num' locations for the specified activity."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_most_recent_activity_locations.__name__ + ": Unexpected empty object: activity_id")
-            return None
-        if num is None:
-            self.log_error(MongoDatabase.retrieve_most_recent_activity_locations.__name__ + ": Unexpected empty object: num")
-            return None
-
-        try:
-            locations = self.retrieve_activity_locations(activity_id)
-            locations.sort(key=retrieve_time_from_location)
-            return locations
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return None
-
     def create_activity_sensor_reading(self, activity_id, date_time, sensor_type, value):
         """Create method for a piece of sensor data, such as a heart rate or power meter reading."""
         if activity_id is None:
@@ -1640,6 +1622,49 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return None
+
+    def list_activity_photos(self, activity_id):
+        """Lists all photos associated with an activity. Response is a list of identifiers."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.list_activity_photos.__name__ + ": Unexpected empty object: activity_id")
+            return []
+
+        try:
+            # Find the activity.
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found and contains comments.
+            if activity is not None and Keys.ACTIVITY_PHOTOS_KEY in activity:
+                return activity[Keys.ACTIVITY_PHOTOS_KEY]
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return []
+
+    def delete_activity_photo(self, activity_id, photo_id):
+        """Deletes the specified tag from the activity with the given ID."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.delete_activity_photo.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if photo_id is None:
+            self.log_error(MongoDatabase.delete_activity_photo.__name__ + ": Unexpected empty object: photo_id")
+            return False
+
+        try:
+            # Find the activity.
+            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+
+            # If the activity was found.
+            if activity is not None and Keys.ACTIVITY_PHOTOS_KEY in activity:
+                data = activity[Keys.ACTIVITY_PHOTOS_KEY]
+                data.remove(photo_id)
+                activity[Keys.ACTIVITY_PHOTOS_KEY] = data
+                self.activities_collection.save(activity)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
 
     def create_workout(self, user_id, workout_obj):
         """Create method for a workout."""

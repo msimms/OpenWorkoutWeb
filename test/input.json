@@ -1,0 +1,7 @@
+{ "inputs":
+    [
+        {"Short Interval Run Pace":0, "Speed Session Pace":0, "Tempo Run Pace":0, "Long Run Pace":0, "Easy Run Pace":0, "Longest Run In Four Weeks":0, "Longest Run Week 1":0, "Longest Run Week 2":0, "Longest Run Week 3":0, "Age In Years":40.0, "Experience Level":0, "goal":0, "goal type":"Completion", "goal_run_distance":0.0, "Weeks Until Goal":0, "Average Cycling Distance (Last 4 Weeks)":0, "Average Running Distance (Last 4 Weeks)":0},
+        {"Short Interval Run Pace":0, "Speed Session Pace":0, "Tempo Run Pace":0, "Long Run Pace":0, "Easy Run Pace":0, "Longest Run In Four Weeks":0, "Longest Run Week 1":0, "Longest Run Week 2":0, "Longest Run Week 3":0, "Age In Years":40.0, "Experience Level":0, "goal":"Marathon", "goal type":"Completion", "goal_run_distance":5000.0, "Weeks Until Goal":0, "Average Cycling Distance (Last 4 Weeks)":0, "Average Running Distance (Last 4 Weeks)":0},
+        {"Short Interval Run Pace":280.0, "Speed Session Pace":270.0, "Tempo Run Pace":230.0, "Long Run Pace":170.0, "Easy Run Pace":160.0, "Longest Run In Four Weeks":5000.0, "Longest Run Week 1":0, "Longest Run Week 2":3000.0, "Longest Run Week 3":5000.0, "Age In Years":40.0, "Experience Level":0, "goal":"Marathon", "goal type":"Completion", "goal_run_distance":5000.0, "Weeks Until Goal":0, "Average Cycling Distance (Last 4 Weeks)":0, "Average Running Distance (Last 4 Weeks)":0}
+    ]
+}

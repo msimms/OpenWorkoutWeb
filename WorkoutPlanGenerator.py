@@ -30,13 +30,14 @@ g_model = None
 
 METERS_PER_HALF_MARATHON = 13.1 * Units.METERS_PER_MILE
 METERS_PER_MARATHON = 26.2 * Units.METERS_PER_MILE
+METERS_PER_50_MILE = 50.0 * Units.METERS_PER_MILE
 
 class WorkoutPlanGenerator(object):
     """Class for performing the computationally expensive workout plan generation tasks."""
 
     def __init__(self, user_obj):
         self.user_obj = user_obj
-        self.data_mgr = DataMgr.DataMgr("", AnalysisScheduler.AnalysisScheduler(), None, None)
+        self.data_mgr = DataMgr.DataMgr(None, "", AnalysisScheduler.AnalysisScheduler(), None, None)
         self.user_mgr = UserMgr.UserMgr(None)
         super(WorkoutPlanGenerator, self).__init__()
 
@@ -69,6 +70,10 @@ class WorkoutPlanGenerator(object):
             inputs[Keys.GOAL_RUN_DISTANCE_KEY] = METERS_PER_HALF_MARATHON
         elif goal_lower == Keys.GOAL_MARATHON_RUN_KEY.lower():
             inputs[Keys.GOAL_RUN_DISTANCE_KEY] = METERS_PER_MARATHON
+        elif goal_lower == Keys.GOAL_50K_RUN_KEY.lower():
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 50000.0
+        elif goal_lower == Keys.GOAL_50_MILE_RUN_KEY.lower():
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = METERS_PER_50_MILE
 
         return inputs
 
@@ -239,9 +244,11 @@ class WorkoutPlanGenerator(object):
 
         # Convert the input dictionary to an array as required by tf.
         model_inputs = [ ]
+        model_inputs.append(inputs[Keys.SHORT_INTERVAL_RUN_PACE])
         model_inputs.append(inputs[Keys.SPEED_RUN_PACE])
         model_inputs.append(inputs[Keys.TEMPO_RUN_PACE])
         model_inputs.append(inputs[Keys.LONG_RUN_PACE])
+        model_inputs.append(inputs[Keys.EASY_RUN_PACE])
         model_inputs.append(inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY])
         model_inputs.append(inputs[Keys.LONGEST_RUN_WEEK_1_KEY])
         model_inputs.append(inputs[Keys.LONGEST_RUN_WEEK_2_KEY])

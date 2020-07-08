@@ -232,12 +232,12 @@ ${nav}
 
     var check_for_updates = function()
     {
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=${routeLen}", success: append_to_track, dataType: "application/json" });
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}", success: append_to_track, dataType: "application/json" });
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: update_metadata, dataType: "text" });
     };
 
     initialize();
-    //setInterval(check_for_updates, 15000);
+	//setInterval(check_for_updates, 30000);
 </script>
 
 </div>
@@ -453,6 +453,20 @@ ${splits}
         }
     }
 
+    var process_photos = function(photo_ids)
+    {
+        photo_ids = eval(photo_ids)
+        for (var photo_id in photo_ids)
+        {
+        }
+    }
+
+    function list_photos()
+    {
+        var api_url = "${root_url}/api/1.0/list_activity_photos?activity_id=${activityId}";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photos, dataType: "text" });
+    }
+
     var process_tags = function(tags)
     {
         tags = eval(tags)
@@ -490,8 +504,6 @@ ${splits}
             create_tags(jQuery("#tags").val());
         });
     });
-
-    //list_tags();
 </script>
 
 <hr>

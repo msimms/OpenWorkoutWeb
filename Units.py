@@ -296,7 +296,7 @@ def convert_seconds_to_hours_mins_secs(seconds_in):
     minutes = temp_seconds / 60
     hours = minutes / 60
     minutes = minutes % 60
-    out_str = "{:0>2d}:{:0>2d}:{:0>2d}".format(hours, minutes, seconds)
+    out_str = "{:0>2d}:{:0>2d}:{:0>2d}".format(int(hours), int(minutes), int(seconds))
     return out_str
 
 def convert_seconds_to_mins_secs(seconds_in):

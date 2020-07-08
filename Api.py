@@ -200,15 +200,24 @@ class Api(object):
         num_points = values[Keys.ACTIVITY_NUM_POINTS]
         if not InputChecker.is_integer(num_points):
             raise ApiException.ApiMalformedRequestException("Invalid number of points.")
+        num_points = int(num_points)
 
-        locations = self.data_mgr.retrieve_most_recent_activity_locations(activity_id, int(num_points))
+        # Get the activity from the database.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+
+        # Determine if the requesting user can view the activity.
+        if not self.activity_can_be_viewed(activity):
+            return self.error("The requested activity is not viewable to this user.")
 
         response = "["
 
-        for location in locations:
-            if len(response) > 1:
-                response += ","
-            response += json.dumps({"latitude": location.latitude, "longitude": location.longitude})
+        if Keys.APP_LOCATIONS_KEY in activity:
+
+            locations = activity[Keys.APP_LOCATIONS_KEY]
+            for location in locations[num_points:]:
+                if len(response) > 1:
+                    response += ","
+                response += json.dumps({Keys.LOCATION_LAT_KEY: location[Keys.LOCATION_LAT_KEY], Keys.LOCATION_LON_KEY: location[Keys.LOCATION_LON_KEY]})
 
         response += "]"
 
@@ -805,6 +814,56 @@ class Api(object):
 
         return True, ""
 
+    def handle_list_activity_photos(self, values):
+        """Lists all photos associated with an activity."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Validate the activity ID.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # List the IDs of each photo attached to this activity.
+        self.data_mgr.list_activity_photos(activity_id)
+
+        return True, ""
+
+    def handle_retrieve_activity_photo(self, values):
+        """Returns the specified activity photo."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_PHOTO_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Validate the photo ID.
+        activity_photo_id = values[Keys.ACTIVITY_PHOTO_ID_KEY]
+        if not InputChecker.is_uuid(activity_photo_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        return True, ""
+
+    def handle_delete_activity_photo(self, values):
+        """Called when an API message to delete a photo and remove it from an activity is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        # Validate the photo ID.
+        activity_photo_id = values[Keys.ACTIVITY_PHOTO_ID_KEY]
+        if not InputChecker.is_uuid(activity_photo_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        return True, ""
+
     def handle_create_tags_on_activity(self, values):
         """Called when an API message to add a tag to an activity is received."""
         if self.user_id is None:
@@ -812,6 +871,7 @@ class Api(object):
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Validate the activity ID.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
@@ -839,6 +899,12 @@ class Api(object):
         """Called when an API message to delete a tag from an activity is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Validate the activity ID.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
         return True, ""
 
     def handle_list_matched_users(self, values):
@@ -1285,6 +1351,13 @@ class Api(object):
                     raise ApiException.ApiMalformedRequestException("Invalid long run day.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day)
 
+            # Goal.
+            elif decoded_key == Keys.GOAL_KEY:
+                goal = unquote_plus(values[key])
+                if not (goal in Keys.GOALS):
+                    raise ApiException.ApiMalformedRequestException("Invalid goal.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
+
             # Goal type.
             elif decoded_key == Keys.GOAL_TYPE_KEY:
                 goal_type = unquote_plus(values[key])
@@ -1393,6 +1466,9 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("A goal date was not specified.")
 
         goal = unquote_plus(values[Keys.GOAL_KEY])
+        if not (goal in Keys.GOALS):
+            raise ApiException.ApiMalformedRequestException("Invalid goal.")
+
         goal_date = unquote_plus(values[Keys.GOAL_DATE_KEY])
 
         self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
@@ -1620,6 +1696,10 @@ class Api(object):
             return self.handle_list_activities(values, True)
         elif request == 'list_my_activities':
             return self.handle_list_activities(values, False)
+        elif request == 'list_activity_photos':
+            return self.handle_list_activity_photos(values)
+        elif request == 'retrieve_activity_photo':
+            return self.handle_retrieve_activity_photo(values)
         elif request == 'list_pending_friends':
             return self.list_pending_friends(values)
         elif request == 'list_friends':
@@ -1694,6 +1774,8 @@ class Api(object):
             return self.handle_upload_activity_file(values)
         elif request == 'upload_activity_photo':
             return self.handle_upload_activity_photo(values)
+        elif request == 'delete_activity_photo':
+            return self.handle_delete_activity_photo(values)
         elif request == 'create_tags_on_activity':
             return self.handle_create_tags_on_activity(values)
         elif request == 'delete_tag_from_activity':

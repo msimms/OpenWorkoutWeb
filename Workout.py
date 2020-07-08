@@ -177,7 +177,10 @@ class Workout(object):
     def export_to_text(self):
         """Creates a string that describes the workout."""
 
-        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+        if self.user_id:
+            unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+        else:
+            unit_system = Keys.UNITS_METRIC_KEY
 
         result  = "Workout Type: "
         result += self.type
@@ -209,8 +212,9 @@ class Workout(object):
             else:
                 result += str(int(interval_meters))
                 result += " meters"
-            result += " at "
-            result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
+            if interval_pace_minute > 0:
+                result += " at "
+                result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
 
             # Describe the recovery.
             if recovery_meters > 0:
@@ -239,6 +243,10 @@ class Workout(object):
             result += "Purpose: Easy runs build aerobic capacity while keeping the wear and tear on the body to a minimum.\n"
         elif self.type == Keys.WORKOUT_TYPE_LONG_RUN:
             result += "Purpose: Long runs build and develop endurance.\n"
+        elif self.type == Keys.WORKOUT_TYPE_FREE_RUN:
+            result += "Purpose: You should run this at a pace that feels comfortable for you.\n"
+        elif self.type == Keys.WORKOUT_TYPE_HILL_REPEATS:
+            result += "Purpose: Hill repeats build strength and improve speed.\n"
 
         return result
 

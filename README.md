@@ -199,6 +199,10 @@ This feature is very much under development and will go through several iteratio
 * Ability to export workouts in ZWO fomrat. [Feature Page](https://github.com/msimms/StraenWeb/issues/1)
 * More work on run workout plan generation.
 
+### 0.26
+* Replaced command line options with a configuration file. [Feature Page](https://github.com/msimms/StraenWeb/issues/24)
+* More work on run workout plan generation.
+
 ## Tech
 This software uses several other source projects to work properly:
 

@@ -1,4 +1,27 @@
-# Copyright 2017 Michael J Simms
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+# 
+# # MIT License
+# 
+# Copyright (c) 2020 Mike Simms
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 """Unit tests for file imports."""
 
 import argparse
@@ -174,7 +197,7 @@ def print_records(store, activity_type):
     # Print annual records.
     years = store.summarizer.get_annual_record_years()
     for year in years:
-        print str(year) + ":"
+        print(str(year) + ":")
         bests = store.summarizer.get_annual_record_dictionary(activity_type, year)
         if len(bests) > 0:
             for key in bests:
@@ -202,18 +225,10 @@ def print_records(store, activity_type):
             zone_index = zone_index + 1
         print("\n")
 
-def main():
-    """Starts the tests."""
-
-    logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-
+def run_unit_tests():
+    """Entry point for the unit tests."""
     successes = []
     failures = []
-
-    # Parse the command line arguments.
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dir", type=str, action="store", default=os.path.dirname(os.path.realpath(__file__)), help="Directory of files to be processed", required=True)
-    args = parser.parse_args()
 
     store = TestActivityWriter()
     importer = Importer.Importer(store)
@@ -276,6 +291,25 @@ def main():
         print("Average time per sample: " + str(total_time / num_files_processed) + " seconds\n")
     else:
         print("No files processed.\n")
+
+    return len(failures) == 0
+
+def main():
+    """Starts the tests."""
+
+    logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+    # Parse the command line arguments.
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--dir", type=str, action="store", default=os.path.dirname(os.path.realpath(__file__)), help="Directory of files to process", required=True)
+
+    try:
+        args = parser.parse_args()
+    except IOError as e:
+        parser.error(e)
+        sys.exit(1)
+
+
 
 if __name__ == "__main__":
     main()

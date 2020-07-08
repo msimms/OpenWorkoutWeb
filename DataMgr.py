@@ -23,6 +23,7 @@
 # SOFTWARE.
 """Data store abstraction"""
 
+import hashlib
 import time
 import uuid
 import FtpCalculator
@@ -50,9 +51,10 @@ def get_activities_sort_key(item):
 class DataMgr(Importer.ActivityWriter):
     """Data store abstraction"""
 
-    def __init__(self, root_url, analysis_scheduler, import_scheduler, workout_plan_gen_scheduler):
+    def __init__(self, config, root_url, analysis_scheduler, import_scheduler, workout_plan_gen_scheduler):
         self.database = StraenDb.MongoDatabase()
         self.database.connect()
+        self.config = config
         self.root_url = root_url
         self.analysis_scheduler = analysis_scheduler
         self.import_scheduler = import_scheduler
@@ -60,6 +62,8 @@ class DataMgr(Importer.ActivityWriter):
         self.map_search = None
         self.celery_worker = celery.Celery('straen_worker')
         self.celery_worker.config_from_object('CeleryConfig')
+        if config is not None:
+            self.celery_worker.conf.broker_url = config.get_broker_url()
         super(Importer.ActivityWriter, self).__init__()
 
     def terminate(self):
@@ -296,7 +300,19 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No uploaded file name.")
         if activity_id is None:
             raise Exception("No activity ID.")
-        pass
+
+        # Hash the photo. This will prevent duplicates as well as give us a unique name.
+        h = hashlib.sha512()
+        h.update(uploaded_file_data)
+        hash_str = h.hexdigest()
+
+    def list_activity_photos(self, activity_id):
+        """Lists all photos associated with an activity. Response is a list of identifiers."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No activity ID.")
+        return self.database.list_activity_photos(activity_id)
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
@@ -495,14 +511,6 @@ class DataMgr(Importer.ActivityWriter):
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity_locations(activity_id)
-
-    def retrieve_most_recent_activity_locations(self, activity_id, num):
-        """Returns the most recent 'num' locations for the specified device and activity."""
-        if self.database is None:
-            raise Exception("No database.")
-        if activity_id is None or len(activity_id) == 0:
-            raise Exception("Bad parameter.")
-        return self.database.retrieve_most_recent_activity_locations(activity_id, num)
 
     def retrieve_activity_sensor_readings(self, key, activity_id):
         """Returns all the sensor data for the specified sensor for the given activity."""
