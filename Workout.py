@@ -247,6 +247,12 @@ class Workout(object):
             result += "Purpose: You should run this at a pace that feels comfortable for you.\n"
         elif self.type == Keys.WORKOUT_TYPE_HILL_REPEATS:
             result += "Purpose: Hill repeats build strength and improve speed.\n"
+        elif self.type == Keys.WORKOUT_TYPE_SPEED_INTERVAL_RIDE:
+            result += "Purpose: Speed interval sessions get you used to riding at faster paces.\n"
+        elif self.type == Keys.WORKOUT_TYPE_TEMPO_RIDE:
+            result += "Purpose: Tempo rides build a combination of speed and endurance. They should be performed at an intensity you can hold for roughly one hour.\n"
+        elif self.type == Keys.WORKOUT_TYPE_EASY_RIDE:
+            result += "Purpose: Easy rides build aerobic capacity while keeping the wear and tear on the body to a minimum.\n"
 
         return result
 
