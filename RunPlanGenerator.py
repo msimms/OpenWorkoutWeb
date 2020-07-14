@@ -36,7 +36,7 @@ class RunPlanGenerator(object):
     def nearest_interval_distance(distance):
         """Given a distance, returns the nearest 'common' interval distance,"""
         """i.e., if given 407 meters, returns 400 meters, because no one runs 407 meter intervals."""
-        metric_intervals = [ 400, 800, 1000, 2000, 3000, 4000, 5000, 10000, 15000 ]
+        metric_intervals = [ 400, 800, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 15000 ]
         us_customary_intervals = [ 0.25, 0.5, 1.0 ]
         return RunPlanGenerator.find_nearest(metric_intervals, distance)
 
