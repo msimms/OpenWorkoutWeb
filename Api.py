@@ -1456,7 +1456,7 @@ class Api(object):
         self.data_mgr.analyze_activity(activity, activity_user_id)
         return True, ""
 
-    def handle_generate_workout_plan(self, values):
+    def handle_generate_workout_plan_for_user(self, values):
         """Called when the user wants to generate a workout plan."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -1473,7 +1473,23 @@ class Api(object):
 
         self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
         self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
-        self.data_mgr.generate_workout_plan(self.user_id)
+        self.data_mgr.generate_workout_plan_for_user(self.user_id)
+        return True, ""
+
+    def handle_generate_workout_plan_from_inputs(self, values):
+        """Called when the user wants to generate a workout plan."""
+        if Keys.GOAL_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("A goal was not specified.")
+        if Keys.GOAL_DATE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("A goal date was not specified.")
+
+        goal = unquote_plus(values[Keys.GOAL_KEY])
+        if not (goal in Keys.GOALS):
+            raise ApiException.ApiMalformedRequestException("Invalid goal.")
+
+        goal_date = unquote_plus(values[Keys.GOAL_DATE_KEY])
+
+        self.data_mgr.generate_workout_plan_from_inputs(self.user_id)
         return True, ""
 
     def handle_list_workouts(self, values):
@@ -1819,7 +1835,9 @@ class Api(object):
         elif request == 'refresh_analysis':
             return self.handle_refresh_analysis(values)
         elif request == 'generate_workout_plan':
-            return self.handle_generate_workout_plan(values)
+            return self.handle_generate_workout_plan_for_user(values)
+        elif request == 'generate_workout_plan_from_inputs':
+            return self.handle_generate_workout_plan_from_inputs(values)
         return False, ""
 
     def handle_api_1_0_request(self, verb, request, values):

@@ -176,6 +176,7 @@ class WorkoutPlanGenerator(object):
         experience_level = self.user_mgr.retrieve_user_setting(user_id, Keys.EXPERIENCE_LEVEL_KEY)
 
         # Are we in a taper?
+        # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
         if weeks_until_goal < 2 and goal_type == Keys.GOAL_MARATHON_RUN_KEY:
             in_taper = 1
         elif weeks_until_goal < 1:
@@ -200,9 +201,9 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.GOAL_KEY] = goal
         inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
-        inputs[Keys.WORKOUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = avg_cycling_distance
-        inputs[Keys.WORKOUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = avg_running_distance
-        inputs[Keys.WORKOUT_IN_TAPER_KEY] = in_taper
+        inputs[Keys.IN_TAPER_KEY] = in_taper
+        inputs[Keys.AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = avg_cycling_distance
+        inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = avg_running_distance
 
         # Adds the goal distances to the inputs.
         inputs = WorkoutPlanGenerator.calculate_goal_distances(inputs)
@@ -258,8 +259,9 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.GOAL_KEY])
         model_inputs.append(inputs[Keys.GOAL_TYPE_KEY])
         model_inputs.append(inputs[Keys.WEEKS_UNTIL_GOAL_KEY])
-        model_inputs.append(inputs[Keys.WORKOUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS])
-        model_inputs.append(inputs[Keys.WORKOUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS])
+        model_inputs.append(inputs[Keys.IN_TAPER_KEY])
+        model_inputs.append(inputs[Keys.AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS])
+        model_inputs.append(inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS])
 
         workouts = []
         return workouts
@@ -287,8 +289,8 @@ class WorkoutPlanGenerator(object):
             if not result:
                 print("Failed to save a workout to the database.")
 
-    def generate_plan(self, model):
-        """Entry point for workout plan generation. If a model is not provided then a simpler, non-neural network-based algorithm, is used instead."""
+    def generate_plan_for_user(self, model):
+        """Entry point for workout plan generation. If a model is not provided then a simpler algorithm is used instead."""
 
         # Sanity check.
         if self.user_obj is None:
@@ -314,6 +316,27 @@ class WorkoutPlanGenerator(object):
 
             # Save to the database.
             self.store_plan(user_id, workouts)
+        except:
+            self.log_error("Exception when generating a workout plan.")
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return workouts
+
+    def generate_plan_from_inputs(self, model, inputs):
+        """Entry point for workout plan generation. If a model is not provided then a simpler algorithm is used instead."""
+
+        # Sanity check.
+        if model is None:
+            self.log_error("Model not provided. Will use non-ML algorithm instead.")
+
+        workouts = []
+
+        try:
+            # Generate the workouts.
+            if model is None:
+                workouts = self.generate_workouts(None, inputs)
+            else:
+                workouts = self.generate_workouts_using_model(None, inputs, model)
         except:
             self.log_error("Exception when generating a workout plan.")
             self.log_error(traceback.format_exc())
@@ -375,9 +398,29 @@ def generate_temp_file_name(extension):
     tempfile_name = os.path.join(tempfile_dir, str(uuid.uuid4()))
     tempfile_name = tempfile_name + extension
     return tempfile_name
-    
+
+def export_workouts(workouts, format):
+    """Writes the workouts to disk in the specified format."""
+    for workout in workouts:
+        if format == 'text':
+            print(workout.export_to_text())
+        elif format == 'json':
+            print(workout.export_to_json_str())
+        elif format == 'ics':
+            tempfile_name = generate_temp_file_name(".ics")
+            ics_str = workout.export_to_ics()
+            with open(tempfile_name, 'wt') as local_file:
+                local_file.write(ics_str)
+            print("Exported a workout to " + tempfile_name + ".")
+        elif format == 'zwo':
+            tempfile_name = generate_temp_file_name(".zwo")
+            zwo_str = workout.export_to_zwo(tempfile_name)
+            with open(tempfile_name, 'wt') as local_file:
+                local_file.write(zwo_str)
+            print("Exported a workout to " + tempfile_name + ".")
+
 @celery_worker.task()
-def generate_workout_plan(user_str, format):
+def generate_workout_plan_for_user(user_str):
     """Entry point for the celery worker."""
     global g_model
 
@@ -385,29 +428,19 @@ def generate_workout_plan(user_str, format):
 
     user_obj = json.loads(user_str)
     generator = WorkoutPlanGenerator(user_obj)
+    generator.generate_plan_for_user(g_model)
 
-    # Generate the workouts.
-    workouts = generator.generate_plan(g_model)
+    print("Workout plan generation finished.")
 
-    # Export the workouts to local files, if requested.
-    if format is not None:
-        for workout in workouts:
-            if format == 'text':
-                print(workout.export_to_text())
-            elif format == 'json':
-                print(workout.export_to_json_str())
-            elif format == 'ics':
-                tempfile_name = generate_temp_file_name(".ics")
-                ics_str = workout.export_to_ics()
-                with open(tempfile_name, 'wt') as local_file:
-                    local_file.write(ics_str)
-                print("Exported a workout to " + tempfile_name + ".")
-            elif format == 'zwo':
-                tempfile_name = generate_temp_file_name(".zwo")
-                zwo_str = workout.export_to_zwo(tempfile_name)
-                with open(tempfile_name, 'wt') as local_file:
-                    local_file.write(zwo_str)
-                print("Exported a workout to " + tempfile_name + ".")
+@celery_worker.task()
+def generate_workout_plan_from_inputs(inputs):
+    """Entry point for the celery worker."""
+    global g_model
+
+    print("Starting workout plan generation...")
+
+    generator = WorkoutPlanGenerator(None)
+    generator.generate_plan_from_inputs(g_model, inputs)
 
     print("Workout plan generation finished.")
 
@@ -432,7 +465,7 @@ def main():
     if len(args.user_id) > 0:
         data = {}
         data['user_id'] = args.user_id
-        generate_workout_plan(json.dumps(data), args.format)
+        workouts = generate_workout_plan_for_user(json.dumps(data))
 
 
 if __name__ == "__main__":

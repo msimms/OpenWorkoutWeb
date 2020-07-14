@@ -46,20 +46,20 @@ def run_unit_tests(input_file_name):
     successes = []
     failures = []
 
-    gen = WorkoutPlanGenerator.WorkoutPlanGenerator(None)
-
     # Load the test data.
     with open(input_file_name, 'r') as f:
         test_json = json.load(f)
         test_inputs = test_json["inputs"]
+        generator = WorkoutPlanGenerator.WorkoutPlanGenerator(None)
 
         # Generate a plan for each test input.
         for test_input in test_inputs:
+
+            # Run the inputs through the workout generator.
             print("Input: " + str(test_input))
-            print("Output:")
-            workouts = gen.generate_workouts(0, test_input)
-            for workout in workouts:
-                print(workout.export_to_text())
+            workouts = generator.generate_plan_from_inputs(None, test_input)
+            print("Output: ")
+            WorkoutPlanGenerator.export_workouts(workouts, 'text')
 
     return len(failures) == 0
 

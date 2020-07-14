@@ -175,7 +175,8 @@ class RunPlanGenerator(object):
         longest_run_week_1 = inputs[Keys.LONGEST_RUN_WEEK_1_KEY]
         longest_run_week_2 = inputs[Keys.LONGEST_RUN_WEEK_2_KEY]
         longest_run_week_3 = inputs[Keys.LONGEST_RUN_WEEK_3_KEY]
-        avg_run_distance = inputs[Keys.WORKOUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
+        in_taper = inputs[Keys.IN_TAPER_KEY]
+        avg_run_distance = inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
         exp_level = inputs[Keys.EXPERIENCE_LEVEL_KEY]
 
         # Handle situation in which the user hasn't run in four weeks.
@@ -189,7 +190,6 @@ class RunPlanGenerator(object):
             raise Exception("No run pace data.")
 
         # Long run: 10%/week increase for an experienced runner
-        # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
 
         # Compute the longest run needed to accomplish the goal.
         # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.

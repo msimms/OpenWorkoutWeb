@@ -38,7 +38,7 @@ def check_for_ungenerated_workout_plans():
     data_mgr = DataMgr.DataMgr(None, "", None, None, WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
     user_ids = data_mgr.retrieve_users_without_scheduled_workouts()
     for user_id in user_ids:
-        data_mgr.generate_workout_plan(user_id)
+        data_mgr.generate_workout_plan_for_user(user_id)
 
 @celery_worker.on_after_configure.connect
 def setup_periodic_tasks(**kwargs):
