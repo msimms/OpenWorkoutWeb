@@ -33,11 +33,13 @@ class RunPlanGenerator(object):
         return array[idx]
 
     @staticmethod
-    def nearest_interval_distance(distance):
+    def nearest_interval_distance(distance, min_distance_in_meters):
         """Given a distance, returns the nearest 'common' interval distance,"""
         """i.e., if given 407 meters, returns 400 meters, because no one runs 407 meter intervals."""
-        metric_intervals = [ 400, 800, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 10000, 15000 ]
-        us_customary_intervals = [ 0.25, 0.5, 1.0 ]
+        if distance < min_distance_in_meters:
+            distance = min_distance_in_meters
+        metric_intervals = [ 400, 800, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 12000, 15000, 20000, 21000 ]
+        us_customary_intervals = [ 0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 3.1, 5.0, 6.0, 6.2, 8.0, 10.0, 12.0, 13.1 ]
         return RunPlanGenerator.find_nearest(metric_intervals, distance)
 
     @staticmethod
@@ -49,7 +51,7 @@ class RunPlanGenerator(object):
 
         # Roll the dice to figure out the distance.
         run_distance = random.uniform(min_distance, max_distance)
-        interval_distance = RunPlanGenerator.nearest_interval_distance(run_distance)
+        interval_distance = RunPlanGenerator.nearest_interval_distance(run_distance, 5000.0)
 
         # Create the workout object.
         easy_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RUN, self.user_id)
@@ -65,7 +67,7 @@ class RunPlanGenerator(object):
         """Utility function for creating a tempo workout."""
 
         temp_distance = 30.0 * tempo_run_pace
-        interval_distance = RunPlanGenerator.nearest_interval_distance(temp_distance)
+        interval_distance = RunPlanGenerator.nearest_interval_distance(temp_distance, 2000.0)
 
         warmup_duration = 5 * 60
         cooldown_duration = 10 * 60
