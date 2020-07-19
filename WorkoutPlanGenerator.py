@@ -188,6 +188,7 @@ class WorkoutPlanGenerator(object):
         if len(running_paces) == 0:
             inputs[Keys.SPEED_RUN_PACE] = None
             inputs[Keys.TEMPO_RUN_PACE] = None
+            inputs[Keys.FUNCTIONAL_THRESHOLD_PACE] = None
             inputs[Keys.LONG_RUN_PACE] = None
             inputs[Keys.EASY_RUN_PACE] = None
         else:
@@ -248,6 +249,7 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.SHORT_INTERVAL_RUN_PACE])
         model_inputs.append(inputs[Keys.SPEED_RUN_PACE])
         model_inputs.append(inputs[Keys.TEMPO_RUN_PACE])
+        model_inputs.append(inputs[Keys.FUNCTIONAL_THRESHOLD_PACE])
         model_inputs.append(inputs[Keys.LONG_RUN_PACE])
         model_inputs.append(inputs[Keys.EASY_RUN_PACE])
         model_inputs.append(inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY])

@@ -40,29 +40,35 @@ class TrainingPaceCalculator(object):
         long_run_pace = vo2max * 0.6
         easy_pace = vo2max * 0.7
         tempo_pace = vo2max * 0.88
+        functional_threshold_pace = vo2max * 1.0
         speed_pace = vo2max * 1.1
         short_interval_pace = vo2max * 1.15
+
         long_run_pace = self.convert_vo2max_to_speed(long_run_pace)
         easy_pace = self.convert_vo2max_to_speed(easy_pace)
         tempo_pace = self.convert_vo2max_to_speed(tempo_pace)
+        functional_threshold_pace = self.convert_vo2max_to_speed(functional_threshold_pace)
         speed_pace = self.convert_vo2max_to_speed(speed_pace)
         short_interval_pace = self.convert_vo2max_to_speed(short_interval_pace)
+
         paces = {}
         paces[Keys.LONG_RUN_PACE] = long_run_pace
         paces[Keys.EASY_RUN_PACE] = easy_pace
         paces[Keys.TEMPO_RUN_PACE] = tempo_pace
+        paces[Keys.FUNCTIONAL_THRESHOLD_PACE] = functional_threshold_pace
         paces[Keys.SPEED_RUN_PACE] = speed_pace
         paces[Keys.SHORT_INTERVAL_RUN_PACE] = short_interval_pace
+
         return paces
 
     def calc_from_hr(self, max_hr, resting_hr):
         """Give the athlete's maximum and resting heart rates, returns the suggested long run, easy run, tempo run, and speed run paces."""
-        v02maxCalc = VO2MaxCalculator.VO2MaxCalculator()
-        vo2max = v02maxCalc.estimate_vo2max_from_heart_rate(max_hr, resting_hr)
+        vo2maxCalc = VO2MaxCalculator.VO2MaxCalculator()
+        vo2max = vo2maxCalc.estimate_vo2max_from_heart_rate(max_hr, resting_hr)
         return self.calc_from_vo2max(vo2max)
 
     def calc_from_race_distance_in_meters(self, race_distance_meters, race_time_minutes):
         """Give the an athlete's recent race result, returns the suggested long run, easy run, tempo run, and speed run paces."""
-        v02maxCalc = VO2MaxCalculator.VO2MaxCalculator()
-        vo2max = v02maxCalc.estimate_vo2max_from_race_distance_in_meters(race_distance_meters, race_time_minutes)
+        vo2maxCalc = VO2MaxCalculator.VO2MaxCalculator()
+        vo2max = vo2maxCalc.estimate_vo2max_from_race_distance_in_meters(race_distance_meters, race_time_minutes)
         return self.calc_from_vo2max(vo2max)

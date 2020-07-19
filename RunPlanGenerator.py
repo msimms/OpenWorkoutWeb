@@ -46,11 +46,11 @@ class RunPlanGenerator(object):
     def round_distance(distance):
         return float(math.ceil(distance / 100.0)) * 100.0
 
-    def gen_easy_run(self, pace, min_distance, max_distance):
+    def gen_easy_run(self, pace, min_run_distance, max_run_distance):
         """Utility function for creating an easy run of some random distance between min and max."""
 
         # Roll the dice to figure out the distance.
-        run_distance = random.uniform(min_distance, max_distance)
+        run_distance = random.uniform(min_run_distance, max_run_distance)
         interval_distance = RunPlanGenerator.nearest_interval_distance(run_distance, 5000.0)
 
         # Create the workout object.
@@ -63,11 +63,15 @@ class RunPlanGenerator(object):
 
         return easy_run_workout
 
-    def gen_tempo_run(self, tempo_run_pace, easy_run_pace):
+    def gen_tempo_run(self, tempo_run_pace, easy_run_pace, max_run_distance):
         """Utility function for creating a tempo workout."""
 
         temp_distance = 30.0 * tempo_run_pace
         interval_distance = RunPlanGenerator.nearest_interval_distance(temp_distance, 2000.0)
+
+        # Sanity check.
+        if interval_distance > max_run_distance:
+            interval_distance = max_run_distance
 
         warmup_duration = 5 * 60
         cooldown_duration = 10 * 60
@@ -129,12 +133,15 @@ class RunPlanGenerator(object):
 
         return interval_run_workout
 
-    def gen_long_run(self, long_run_pace, longest_run_in_four_weeks, max_run_distance):
+    def gen_long_run(self, long_run_pace, longest_run_in_four_weeks, min_run_distance, max_run_distance):
         """Utility function for creating a long run workout."""
 
+        # Long run should be 10% longer than the previous long run, within the bounds provided by min and max.
         long_run_distance = longest_run_in_four_weeks * 1.1
         if long_run_distance > max_run_distance:
-            long_run_distance = max_run_distance 
+            long_run_distance = max_run_distance
+        if long_run_distance < min_run_distance:
+            long_run_distance = min_run_distance
         interval_distance = RunPlanGenerator.round_distance(long_run_distance)
 
         # Create the workout object.
@@ -169,6 +176,7 @@ class RunPlanGenerator(object):
         goal_distance = inputs[Keys.GOAL_RUN_DISTANCE_KEY]
         goal_type = inputs[Keys.GOAL_TYPE_KEY]
         short_interval_run_pace = inputs[Keys.SHORT_INTERVAL_RUN_PACE]
+        functional_threshold_pace = inputs[Keys.FUNCTIONAL_THRESHOLD_PACE]
         speed_run_pace = inputs[Keys.SPEED_RUN_PACE]
         tempo_run_pace = inputs[Keys.TEMPO_RUN_PACE]
         long_run_pace = inputs[Keys.LONG_RUN_PACE]
@@ -191,21 +199,28 @@ class RunPlanGenerator(object):
         if not (RunPlanGenerator.valid_float(short_interval_run_pace) and RunPlanGenerator.valid_float(speed_run_pace) and RunPlanGenerator.valid_float(tempo_run_pace) and RunPlanGenerator.valid_float(long_run_pace) and RunPlanGenerator.valid_float(easy_run_pace)):
             raise Exception("No run pace data.")
 
-        # Long run: 10%/week increase for an experienced runner
-
-        # Compute the longest run needed to accomplish the goal.
-        # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.
-        # This equation was derived by playing with trendlines in a spreadsheet.
-        max_run_distance = ((-0.002 * goal_distance) *  (-0.002 * goal_distance)) + (0.7 * goal_distance) + 4.4
-
-        # Handle situation in which the user is already meeting or exceeding the goal distance.
-        if longest_run_in_four_weeks >= max_run_distance:
-            longest_run_in_four_weeks = max_run_distance
-
         # If the long run has been increasing for the last three weeks then give the person a break.
         if longest_run_week_1 and longest_run_week_2 and longest_run_week_3:
             if longest_run_week_1 >= longest_run_week_2 and longest_run_week_2 >= longest_run_week_3:
                 longest_run_in_four_weeks *= 0.75
+
+        # Compute the longest run needed to accomplish the goal.
+        # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.
+        # This equation was derived by playing with trendlines in a spreadsheet.
+        max_long_run_distance = ((-0.002 * goal_distance) *  (-0.002 * goal_distance)) + (0.7 * goal_distance) + 4.4
+
+        # Handle situation in which the user is already meeting or exceeding the goal distance.
+        if longest_run_in_four_weeks >= max_long_run_distance:
+            longest_run_in_four_weeks = max_long_run_distance
+
+        # Distance ceilings for easy and tempo runs.
+        max_easy_run_distance = longest_run_in_four_weeks * 0.75
+        max_tempo_run_distance = longest_run_in_four_weeks * 0.50
+
+        # Don't make any runs (other than intervals, tempo runs, etc.) shorter than this.
+        min_run_distance = avg_run_distance * 0.5
+        if min_run_distance > max_easy_run_distance:
+            min_run_distance = max_easy_run_distance
 
         # We'll also set the percentage of easy miles/kms based on the experience level.
         if exp_level == Keys.EXPERIENCE_LEVEL_BEGINNER.lower():
@@ -235,36 +250,43 @@ class RunPlanGenerator(object):
                     interval_workout = self.gen_speed_run(short_interval_run_pace, speed_run_pace, easy_run_pace)
                     workouts.append(interval_workout)
                 else:
-                    easy_run_workout = self.gen_easy_run(easy_run_pace, avg_run_distance * 0.5, avg_run_distance * 1.5)
+                    easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
                     workouts.append(easy_run_workout)
 
             # The user only cares about completing the distance so just add another easy run.
             else:
 
                 # Add an easy run.
-                easy_run_workout = self.gen_easy_run(easy_run_pace, avg_run_distance * 0.5, avg_run_distance * 1.5)
+                easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
                 workouts.append(easy_run_workout)
 
             # Add an easy run.
-            easy_run_workout = self.gen_easy_run(easy_run_pace, avg_run_distance * 0.5, avg_run_distance * 1.2)
+            easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
             workouts.append(easy_run_workout)
 
             # Add a tempo run. Run should be 20-30 minutes in duration.
-            tempo_run_workout = self.gen_tempo_run(tempo_run_pace, easy_run_pace)
+            tempo_run_workout = self.gen_tempo_run(tempo_run_pace, easy_run_pace, max_tempo_run_distance)
             workouts.append(tempo_run_workout)
 
             # Add a long run.
-            long_run_workout = self.gen_long_run(long_run_pace, longest_run_in_four_weeks, max_run_distance)
+            long_run_workout = self.gen_long_run(long_run_pace, longest_run_in_four_weeks, min_run_distance, max_long_run_distance)
             workouts.append(long_run_workout)
 
+            # Keep track of the total distance as well as the easy distance to keep from planning too many intense miles/kms.
             total_distance = self.easy_distance_amount + self.hard_distance_amount
             easy_distance_percentage = self.easy_distance_amount / total_distance
+
+            # This is used to make sure we don't loop forever.
             iter_count = iter_count + 1
 
-            # Exit conditions
+            # Exit conditions:
             if iter_count >= 6:
                 done = True
             if easy_distance_percentage >= min_easy_distance_percentage:
                 done = True
+
+        # Calculate the total stress for each workout.
+        for workout in workouts:
+            workout.calculate_estimated_training_stress(functional_threshold_pace)
 
         return workouts

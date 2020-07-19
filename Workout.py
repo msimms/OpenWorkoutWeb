@@ -55,8 +55,8 @@ class Workout(object):
         self.warmup = {} # The warmup interval
         self.cooldown = {} # The cooldown interval
         self.intervals = [] # The workout intervals
+        self.estimated_training_stress = 0.0 # Estimated TSS, the highter, the more stresful
         self.needs_rest_day_afterwards = False # Used by the scheduler
-        self.can_be_doubled = False # Used by the scheduler to know whether or not this workout can be doubled up with other workouts
         self.workout_id = uuid.uuid4() # Unique identifier for the workout
 
     def __getitem__(self, key):
@@ -149,6 +149,8 @@ class Workout(object):
 
         # Add each interval.
         for interval in self.intervals:
+
+            # Get the details of the interval.
             interval_meters = interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY]
             interval_pace_minute = interval[Keys.INTERVAL_WORKOUT_PACE_KEY]
             recovery_meters = interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY]
@@ -196,6 +198,8 @@ class Workout(object):
 
         # Add each interval.
         for interval in self.intervals:
+
+            # Get the details of the interval.
             num_repeats = interval[Keys.INTERVAL_WORKOUT_REPEAT_KEY]
             interval_meters = interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY]
             interval_pace_minute = interval[Keys.INTERVAL_WORKOUT_PACE_KEY]
@@ -267,3 +271,39 @@ class Workout(object):
         """Creates a ICS-formatted data string that describes the workout."""
         ics_writer = IcsWriter.IcsWriter()
         return ics_writer.create_event(self.workout_id, self.scheduled_time, self.scheduled_time, self.type, self.export_to_text())
+
+    def calculate_interval_duration(self, interval_meters, interval_pace_meters_per_minute):
+        """Utility function for calculating the number of seconds for an interval."""
+        interval_duration_secs = interval_meters / (interval_pace_meters_per_minute / 60.0)
+        return interval_duration_secs
+
+    def calculate_estimated_training_stress(self, threshold_pace_minute):
+        """Computes the estimated training stress for this workout."""
+        """May be overridden by child classes, depending on the type of workout."""
+        workout_duration_secs = 0.0
+        avg_workout_pace = 0.0
+
+        for interval in self.intervals:
+
+            # Get the details of the interval.
+            num_repeats = interval[Keys.INTERVAL_WORKOUT_REPEAT_KEY]
+            interval_meters = interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY]
+            interval_pace_meters_per_minute = interval[Keys.INTERVAL_WORKOUT_PACE_KEY]
+            recovery_meters = interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY]
+            recovery_pace_meters_per_minute = interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY]
+
+            # Compute the work duration and the average pace.
+            if interval_meters > 0 and interval_pace_meters_per_minute > 0.0:
+                interval_duration_secs = num_repeats * self.calculate_interval_duration(interval_meters, interval_pace_meters_per_minute)
+                workout_duration_secs += interval_duration_secs
+                avg_workout_pace += (interval_pace_meters_per_minute * (interval_duration_secs / 60.0))
+            if recovery_meters > 0 and recovery_pace_meters_per_minute > 0.0:
+                interval_duration_secs = (num_repeats - 1) * self.calculate_interval_duration(recovery_meters, recovery_pace_meters_per_minute)
+                workout_duration_secs += interval_duration_secs
+                avg_workout_pace += (recovery_pace_meters_per_minute * (interval_duration_secs / 60.0))
+
+        if workout_duration_secs > 0.0:
+            avg_workout_pace = avg_workout_pace / workout_duration_secs
+
+        self.estimated_training_stress = ((workout_duration_secs * avg_workout_pace) / (threshold_pace_minute * 60.0)) * 100.0
+        return self.estimated_training_stress

@@ -250,8 +250,9 @@ DEVICE_LAST_HEARD_FROM = "last_heard_from"
 LONG_RUN_PACE = "Long Run Pace"
 EASY_RUN_PACE = "Easy Run Pace"
 TEMPO_RUN_PACE = "Tempo Run Pace"
-SPEED_RUN_PACE = "Speed Session Pace"
-SHORT_INTERVAL_RUN_PACE = "Short Interval Run Pace"
+SPEED_RUN_PACE = "Speed Session Pace" # Pace for medium distance interfals
+SHORT_INTERVAL_RUN_PACE = "Short Interval Run Pace" # Pace for shorter track intervals
+FUNCTIONAL_THRESHOLD_PACE = "Functional Threshold Pace" # Pace that could be held for one hour, max effort
 
 # Keys used to manage gear.
 GEAR_KEY = "gear"
