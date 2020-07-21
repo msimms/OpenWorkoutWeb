@@ -90,7 +90,7 @@ class Workout(object):
             output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = time.mktime(self.scheduled_time.timetuple())
         else:
             output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = None
-        output[Keys.Keys.WORKOUT_ESTIMATED_STRESS] = self.estimated_training_stress
+        output[Keys.WORKOUT_ESTIMATED_STRESS] = self.estimated_training_stress
         return output
 
     def from_dict(self, input):
