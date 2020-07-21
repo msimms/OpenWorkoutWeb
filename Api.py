@@ -240,6 +240,9 @@ class Api(object):
         if not self.activity_can_be_viewed(activity):
             return self.error("The requested activity is not viewable to this user.")
 
+        # Is this is a foot based activity? Need to know so we can display steps per minute instead of revs per minute.
+        is_foot_based = False
+
         response = "["
 
         if Keys.ACTIVITY_NAME_KEY in activity:
@@ -252,6 +255,7 @@ class Api(object):
         if Keys.ACTIVITY_TYPE_KEY in activity:
             activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
             if activity_type is not None and len(activity_type) > 0:
+                is_foot_based = activity_type in Keys.FOOT_BASED_ACTIVITIES
                 if len(response) > 1:
                     response += ","
                 response += json.dumps({"name": "Type", "value": activity_type})
@@ -315,7 +319,10 @@ class Api(object):
                     response += ","
                 cadence = cadences[-1]
                 value = float(cadence.values()[0])
-                response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} rpm".format(value)})
+                if is_foot_based:
+                    response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} spm".format(value * 2.0)})
+                else:
+                    response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} rpm".format(value)})
 
         if Keys.APP_POWER_KEY in activity:
             powers = activity[Keys.APP_POWER_KEY]
