@@ -1042,17 +1042,19 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
         export_format = values[Keys.WORKOUT_FORMAT_KEY]
 
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+
         # Get the workouts that belong to the logged in user.
         workout = self.data_mgr.retrieve_workout(self.user_id, workout_id)
         result = ""
         if export_format == 'zwo':
             result = workout.export_to_zwo(workout_id)
         elif export_format == 'txt':
-            result = workout.export_to_text()
+            result = workout.export_to_text(unit_system)
         elif export_format == 'json':
-            result = workout.export_to_json_str()
+            result = workout.export_to_json_str(unit_system)
         elif export_format == 'ics':
-            result = workout.export_to_ics()
+            result = workout.export_to_ics(unit_system)
         return True, result
 
     def handle_claim_device(self, values):

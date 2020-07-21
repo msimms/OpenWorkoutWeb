@@ -103,8 +103,7 @@ class RunPlanGenerator(object):
 
         # Build a collection of possible run interval sessions, sorted by target distance. Order is { min reps, max reps, distance in meters }.
         possible_workouts = [ [ 4, 6, 100 ], [ 4, 6, 200 ], [ 4, 6, 400 ], [ 4, 6, 600 ], [ 2, 4, 800 ], [ 2, 4, 1000 ], [ 2, 4, 1600 ] ]
-        selected_interval_workout_index = random.randint(0, len(possible_workouts) - 1)
-        selected_interval_workout = possible_workouts[selected_interval_workout_index]
+        selected_interval_workout = random.choice(possible_workouts)
 
         # Determine the pace for this workout.
         if selected_interval_workout[REP_DISTANCE_INDEX] < 1000:
@@ -148,7 +147,6 @@ class RunPlanGenerator(object):
         long_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_LONG_RUN, self.user_id)
         long_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
         long_run_workout.add_interval(1, interval_distance, long_run_pace, 0, 0)
-        long_run_workout.needs_rest_day_afterwards = True
 
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
         self.easy_distance_amount += interval_distance
@@ -162,7 +160,6 @@ class RunPlanGenerator(object):
         long_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_FREE_RUN, self.user_id)
         long_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
         long_run_workout.add_interval(1, 5000, 0, 0, 0)
-        long_run_workout.needs_rest_day_afterwards = True
 
         return long_run_workout
 

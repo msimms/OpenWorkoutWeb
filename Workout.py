@@ -47,16 +47,14 @@ class Workout(object):
     """Class that describes a workout to be performed."""
 
     def __init__(self, user_id):
-        self.user_id = user_id
-        self.user_mgr = UserMgr.UserMgr(None)
         self.type = ""
+        self.user_id = user_id
         self.sport_type = ""
         self.scheduled_time = None # The time at which this workout is to be performed
         self.warmup = {} # The warmup interval
         self.cooldown = {} # The cooldown interval
         self.intervals = [] # The workout intervals
-        self.estimated_training_stress = 0.0 # Estimated TSS, the highter, the more stresful
-        self.needs_rest_day_afterwards = False # Used by the scheduler
+        self.estimated_training_stress = None # Estimated TSS, the highter, the more stresful
         self.workout_id = uuid.uuid4() # Unique identifier for the workout
 
     def __getitem__(self, key):
@@ -75,6 +73,8 @@ class Workout(object):
         if key == Keys.WORKOUT_SCHEDULED_TIME_KEY and self.scheduled_time is not None:
             dt = time.mktime(self.scheduled_time.timetuple())
             return datetime.datetime(dt.year, dt.month, dt.day)
+        if key == Keys.WORKOUT_ESTIMATED_STRESS:
+            return self.estimated_training_stress
         return None
 
     def to_dict(self):
@@ -90,6 +90,7 @@ class Workout(object):
             output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = time.mktime(self.scheduled_time.timetuple())
         else:
             output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = None
+        output[Keys.Keys.WORKOUT_ESTIMATED_STRESS] = self.estimated_training_stress
         return output
 
     def from_dict(self, input):
@@ -108,6 +109,8 @@ class Workout(object):
             self.intervals = input[Keys.WORKOUT_INTERVALS_KEY]
         if Keys.WORKOUT_SCHEDULED_TIME_KEY in input and input[Keys.WORKOUT_SCHEDULED_TIME_KEY] is not None:
             self.scheduled_time = datetime.datetime.fromtimestamp(input[Keys.WORKOUT_SCHEDULED_TIME_KEY]).date()
+        if Keys.WORKOUT_ESTIMATED_STRESS in input:
+            self.estimated_training_stress = input[Keys.WORKOUT_ESTIMATED_STRESS]
 
     def add_warmup(self, seconds):
         """Defines the workout warmup."""
@@ -176,13 +179,8 @@ class Workout(object):
         file_data = writer.buffer()
         return file_data
 
-    def export_to_text(self):
+    def export_to_text(self, unit_system):
         """Creates a string that describes the workout."""
-
-        if self.user_id:
-            unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
-        else:
-            unit_system = Keys.UNITS_METRIC_KEY
 
         result  = "Workout Type: "
         result += self.type
@@ -258,19 +256,25 @@ class Workout(object):
         elif self.type == Keys.WORKOUT_TYPE_EASY_RIDE:
             result += "Purpose: Easy rides build aerobic capacity while keeping the wear and tear on the body to a minimum.\n"
 
+        if self.estimated_training_stress is not None:
+            stress_str = "{:.1f}".format(self.estimated_training_stress)
+            result += "Estimated Training Stres: "
+            result += stress_str
+            result += "\n"
+
         return result
 
-    def export_to_json_str(self):
+    def export_to_json_str(self, unit_system):
         """Creates a JSON string that describes the workout."""
         result = self.to_dict()
         result[Keys.WORKOUT_ID_KEY] = str(self.workout_id)
-        result[Keys.WORKOUT_DESCRIPTION_KEY] = self.export_to_text()
+        result[Keys.WORKOUT_DESCRIPTION_KEY] = self.export_to_text(unit_system)
         return json.dumps(result, ensure_ascii=False)
 
-    def export_to_ics(self):
+    def export_to_ics(self, unit_system):
         """Creates a ICS-formatted data string that describes the workout."""
         ics_writer = IcsWriter.IcsWriter()
-        return ics_writer.create_event(self.workout_id, self.scheduled_time, self.scheduled_time, self.type, self.export_to_text())
+        return ics_writer.create_event(self.workout_id, self.scheduled_time, self.scheduled_time, self.type, self.export_to_text(unit_system))
 
     def calculate_interval_duration(self, interval_meters, interval_pace_meters_per_minute):
         """Utility function for calculating the number of seconds for an interval."""
@@ -306,4 +310,3 @@ class Workout(object):
             avg_workout_pace = avg_workout_pace / workout_duration_secs
 
         self.estimated_training_stress = ((workout_duration_secs * avg_workout_pace) / (threshold_pace_minute * 60.0)) * 100.0
-        return self.estimated_training_stress

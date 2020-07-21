@@ -405,12 +405,12 @@ def export_workouts(workouts, format):
     """Writes the workouts to disk in the specified format."""
     for workout in workouts:
         if format == 'text':
-            print(workout.export_to_text())
+            print(workout.export_to_text(Keys.UNITS_METRIC_KEY))
         elif format == 'json':
-            print(workout.export_to_json_str())
+            print(workout.export_to_json_str(Keys.UNITS_METRIC_KEY))
         elif format == 'ics':
             tempfile_name = generate_temp_file_name(".ics")
-            ics_str = workout.export_to_ics()
+            ics_str = workout.export_to_ics(Keys.UNITS_METRIC_KEY)
             with open(tempfile_name, 'wt') as local_file:
                 local_file.write(ics_str)
             print("Exported a workout to " + tempfile_name + ".")

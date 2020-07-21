@@ -30,7 +30,8 @@ import Keys
 class IcalServer(object):
     """Handles ical calendar requests."""
 
-    def __init__(self, data_mgr, root_url):
+    def __init__(self, user_mgr, data_mgr, root_url):
+        self.user_mgr = user_mgr
         self.data_mgr = data_mgr
         self.root_url = root_url
         super(IcalServer, self).__init__()
@@ -51,6 +52,7 @@ class IcalServer(object):
         response += "METHOD:PUBLISH\r\n"
 
         for workout in workouts:
+            unit_system = self.user_mgr.retrieve_user_setting(workout.user_id, Keys.PREFERRED_UNITS_KEY)
             start_time = workout.scheduled_time
             if start_time is not None:
                 summary  = workout.export_to_text().replace("\n", "\\n")
