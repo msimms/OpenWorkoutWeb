@@ -17,6 +17,7 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 libmathdir = os.path.join(currentdir, 'LibMath', 'python')
 sys.path.insert(0, libmathdir)
 import signals
+import statistics
 
 class WorkoutScheduler(object):
     """Organizes workouts."""
@@ -40,6 +41,7 @@ class WorkoutScheduler(object):
 
         smoothed_scores = signals.smooth(daily_stress_scores, 2)
         avg_smoothed_scores = sum(smoothed_scores) / len(smoothed_scores)
+        stdev_smoothed_scores = statistics.stddev(daily_stress_scores, avg_smoothed_scores)
         return avg_smoothed_scores
 
     def list_schedulable_days(self, week):
@@ -66,13 +68,13 @@ class WorkoutScheduler(object):
             if workout.scheduled_time is None:
 
                 # Walk the weeks list and find a list of possible days on which to do the workout.
-                possible_days = self.list_schedulable_days(week)
+                possible_days = self.list_schedulable_days(scheduled_week)
 
                 # Pick one of the days from the candidate list.
                 if len(possible_days) > 0:
                     day_index = possible_days[int(len(possible_days) / 2)]
                     workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
-                    week[day_index] = workout
+                    scheduled_week[day_index] = workout
 
         return scheduled_workouts, scheduled_week
 
@@ -88,13 +90,13 @@ class WorkoutScheduler(object):
             if workout.scheduled_time is None:
 
                 # Walk the weeks list and find a list of possible days on which to do the workout.
-                possible_days = self.list_schedulable_days(week)
+                possible_days = self.list_schedulable_days(scheduled_week)
 
                 # Pick one of the days from the candidate list.
                 if len(possible_days) > 0:
                     day_index = random.choice(possible_days)
                     workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
-                    week[day_index] = workout
+                    scheduled_week[day_index] = workout
 
         return scheduled_workouts, scheduled_week
 
@@ -132,12 +134,12 @@ class WorkoutScheduler(object):
 
         # Try and best the first arrangement, by randomly re-arranging the schedule
         # and seeing if we can get a better score.
-        #for i in range(1, 10):
-        #    new_schedule, new_week = self.random_scheduler(workouts, week, start_time)
-        #    new_schedule_score = self.score_schedule(new_week)
-        #    if new_schedule_score < best_schedule_score:
-        #        best_schedule = new_schedule
-        #        best_week = new_week
-        #        best_schedule_score = new_schedule_score
+        for i in range(1, 10):
+            new_schedule, new_week = self.random_scheduler(workouts, week, start_time)
+            new_schedule_score = self.score_schedule(new_week)
+            if new_schedule_score < best_schedule_score:
+                best_schedule = new_schedule
+                best_week = new_week
+                best_schedule_score = new_schedule_score
 
         return best_schedule

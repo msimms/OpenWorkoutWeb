@@ -29,12 +29,6 @@ import sys
 import time
 import Keys
 
-# Locate and load the statistics module (the functions we're using in are made obsolete in Python 3, but we want to work in Python 2, also)
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-libmathdir = os.path.join(currentdir, 'LibMath', 'python')
-sys.path.insert(0, libmathdir)
-import statistics
-
 class HeartRateCalculator(object):
     """Estimates maximum heart rate and calculates heart rate training zones"""
 
@@ -46,7 +40,7 @@ class HeartRateCalculator(object):
     def estimate_max_hr(self, age_in_years):
         """To be called after adding data with 'add_activity_data', estimates the user's maximum heart rate."""
         if len(self.rates) > 0:
-            return statistics.mean(self.rates)
+            return sum(self.rates) / len(self.rates)
         return 207.0 - (0.7 * age_in_years) # Source: Gellish, 2007
 
     def training_zones(self, max_hr):
