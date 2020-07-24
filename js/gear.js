@@ -77,6 +77,27 @@ function delete_gear(root_url, gear_id)
     }
 }
 
+function retire_gear(root_url, gear_id)
+{
+    if (confirm('Are you sure you want to do this?'))
+    {
+        var the_url = root_url + "/api/1.0/retire_gear";
+        var dict = [];
+        var result_text = {};
+
+        dict.push({["gear_id"] : gear_id});
+
+        if (send_post_request(the_url, dict, result_text))
+        {
+            window.location.replace(root_url + "/gear");
+        }
+        else
+        {
+            alert(result_text.value);
+        }
+    }
+}
+
 function get_new_gear_info(root_url, gear_type)
 {
     var outer_div = document.getElementById("block");

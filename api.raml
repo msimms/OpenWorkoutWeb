@@ -408,6 +408,15 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
+/retire_gear:
+    description: Marks the specified gear as retired.
+    get:
+    post:
+        responses:
+            200:
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
 /create_service_record:
     description: Appends service information for a piece of gear (intended for tracking bicycle service data).
     get:

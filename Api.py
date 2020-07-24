@@ -1218,6 +1218,8 @@ class Api(object):
         """Called when an API message to update gear for a user is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+        if Keys.GEAR_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.GEAR_TYPE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.GEAR_NAME_KEY not in values:
@@ -1227,6 +1229,9 @@ class Api(object):
         if Keys.GEAR_ADD_TIME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        gear_id = values[Keys.GEAR_ID_KEY]
+        if not InputChecker.is_uuid(gear_id):
+            raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
         gear_type = unquote_plus(values[Keys.GEAR_TYPE_KEY])
         if not InputChecker.is_valid_decoded_str(gear_type):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -1250,7 +1255,7 @@ class Api(object):
         else:
             gear_retire_time = 0
 
-        result = self.data_mgr.update_gear(self.user_id, gear_type, gear_name, gear_description, int(gear_add_time), int(gear_retire_time))
+        result = self.data_mgr.update_gear(self.user_id, gear_id, gear_type, gear_name, gear_description, int(gear_add_time), int(gear_retire_time))
         return result, ""
 
     def handle_update_gear_defaults(self, values):
@@ -1284,6 +1289,20 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
 
         result = self.data_mgr.delete_gear(self.user_id, gear_id)
+        return result, ""
+
+    def handle_retire_gear(self, values):
+        """Called when an API message to retire gear for a user is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.GEAR_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        gear_id = values[Keys.GEAR_ID_KEY]
+        if not InputChecker.is_uuid(gear_id):
+            raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
+
+        result = self.data_mgr.update_gear(self.user_id, gear_id, None, None, None, None, time.time())
         return result, ""
 
     def handle_create_service_record(self, values):
@@ -1831,6 +1850,8 @@ class Api(object):
             return self.handle_update_gear_defaults(values)
         elif request == 'delete_gear':
             return self.handle_delete_gear(values)
+        elif request == 'retire_gear':
+            return self.handle_retire_gear(values)
         elif request == 'create_service_record':
             return self.handle_create_service_record(values)
         elif request == 'delete_service_record':

@@ -58,10 +58,20 @@
 
         cell = new_row.insertCell();
         if (retire_time > 0)
+        {
             text = document.createTextNode(unix_time_to_local_date_string(retire_time));
+            cell.appendChild(text);
+        }
         else
-            text = document.createTextNode("");
-        cell.appendChild(text);
+        {
+            var btn = document.createElement('button');
+            var btn_txt = document.createTextNode('Retire');
+            btn.appendChild(btn_txt);
+            btn.title = "Retire";
+            btn.style = "color:black";
+            btn.addEventListener('click', function() { retire_gear("${root_url}", gear_id); });
+            cell.appendChild(btn);
+        }
 
         var btn = document.createElement('button');
         var btn_txt = document.createTextNode('Delete');

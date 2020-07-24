@@ -2036,12 +2036,6 @@ class MongoDatabase(Database.Database):
         if gear_id is None:
             self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: gear_id")
             return False
-        if gear_type is None:
-            self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: gear_type")
-            return False
-        if gear_name is None:
-            self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: gear_name")
-            return False
 
         try:
             # Find the user's document.
@@ -2058,11 +2052,16 @@ class MongoDatabase(Database.Database):
                     gear_index = 0
                     for gear in gear_list:
                         if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
-                            gear[Keys.GEAR_TYPE_KEY] = gear_type
-                            gear[Keys.GEAR_NAME_KEY] = gear_name
-                            gear[Keys.GEAR_DESCRIPTION_KEY] = gear_description
-                            gear[Keys.GEAR_ADD_TIME_KEY] = int(gear_add_time)
-                            gear[Keys.GEAR_RETIRE_TIME_KEY] = int(gear_retire_time)
+                            if gear_type is not None:
+                                gear[Keys.GEAR_TYPE_KEY] = gear_type
+                            if gear_name is not None:
+                                gear[Keys.GEAR_NAME_KEY] = gear_name
+                            if gear_description is not None:
+                                gear[Keys.GEAR_DESCRIPTION_KEY] = gear_description
+                            if gear_add_time is not None:
+                                gear[Keys.GEAR_ADD_TIME_KEY] = int(gear_add_time)
+                            if gear_retire_time is not None:
+                                gear[Keys.GEAR_RETIRE_TIME_KEY] = int(gear_retire_time)
                             gear_list.pop(gear_index)
                             gear_list.append(gear)
                             user[Keys.GEAR_KEY] = gear_list
