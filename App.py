@@ -337,6 +337,17 @@ class App(object):
         delete_str = "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\">Delete</button></td><tr>\n"
         return delete_str
 
+    @staticmethod
+    def get_time_value_from_list_item(item, py_version):
+        """Utility function because this logic appears in too many places."""
+        if py_version < 3:
+            time = int(float(item.keys()[0]))
+            value = float(item.values()[0])
+        else:
+            time = int(float(list(item.keys())[0]))
+            value = float(list(item.values())[0])
+        return time, value
+
     def render_page_for_unmapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_username, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific un-mapped activity."""
 
@@ -454,13 +465,7 @@ class App(object):
         if data is not None and isinstance(data, list):
             py_version = sys.version_info[0]
             for datum in data:
-                if py_version < 3:
-                    time = int(float(datum.keys()[0]))
-                    value_num = float(datum.values()[0])
-                else:
-                    time = int(float(list(datum.keys())[0]))
-                    value_num = float(list(datum.values())[0])
-                    
+                time, value_num = App.get_time_value_from_list_item(datum, py_version)                    
                 value_num, _, _ = Units.convert_to_speed_for_the_specified_unit_system(unit_system, value_num, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
                 data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value_num) + " },\n"
         return data_str
@@ -488,12 +493,8 @@ class App(object):
         if key in activity:
             data = activity[key]
         for datum in data:
-            if py_version < 3:
-                time = int(float(datum.keys()[0]))
-                value = float(datum.values()[0])
-            else:
-                time = int(float(list(datum.keys())[0]))
-                value = float(list(datum.values())[0]) * multiplier
+            time, value = App.get_time_value_from_list_item(datum, py_version)                    
+            value = value * multiplier
             data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
         return data_str
 
