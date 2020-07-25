@@ -530,6 +530,7 @@ class MongoDatabase(Database.Database):
             # Things we don't need.
             exclude_keys = self.list_excluded_user_keys()
 
+            # Find the user's friends list.
             friends_list = []
             friends = self.users_collection.find({Keys.FRIENDS_KEY: user_id}, exclude_keys)
             for friend in friends:
@@ -646,9 +647,10 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's records collection.
-            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            user_id_str = str(user_id)
+            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id_str})
             if user_records is None:
-                post = {Keys.RECORDS_USER_ID: user_id, Keys.PERSONAL_RECORDS: records}
+                post = {Keys.RECORDS_USER_ID: user_id_str, Keys.PERSONAL_RECORDS: records}
                 self.records_collection.insert(post)
                 return True
         except:
@@ -664,7 +666,8 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's records collection.
-            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            user_id_str = str(user_id)
+            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id_str})
             if user_records is not None and Keys.PERSONAL_RECORDS in user_records:
                 return user_records[Keys.PERSONAL_RECORDS]
         except:
@@ -683,7 +686,8 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's records collection.
-            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            user_id_str = str(user_id)
+            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id_str})
             if user_records is not None:
                 user_records[Keys.PERSONAL_RECORDS] = records
                 self.records_collection.save(user_records)
@@ -701,7 +705,8 @@ class MongoDatabase(Database.Database):
 
         try:
             # Delete the user's records collection.
-            deleted_result = self.records_collection.delete_one({Keys.RECORDS_USER_ID: user_id})
+            user_id_str = str(user_id)
+            deleted_result = self.records_collection.delete_one({Keys.RECORDS_USER_ID: user_id_str})
             if deleted_result is not None:
                 return True
         except:
@@ -939,6 +944,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
 
             # If the activity was not found then create it.
@@ -1069,6 +1075,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
 
             # If the activity was not found then create it.
@@ -1107,6 +1114,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
 
             # If the activity was not found then create it.
@@ -1374,6 +1382,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Find the activity.
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
 
             # If the activity was not found then create it.
