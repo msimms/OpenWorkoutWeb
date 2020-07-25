@@ -193,7 +193,7 @@ ${nav}
                 dict.push({["uploaded_file_data"] : encoded_data});
 
                 if (send_post_request(the_url, dict, result_text))
-                    update_file_status(file_obj.name, "Uploaded");
+                    update_file_status(file_obj.name, "Uploaded (Processing)");
                 else
                     alert(result_text.value);
             }

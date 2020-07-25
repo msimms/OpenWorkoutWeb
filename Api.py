@@ -240,6 +240,9 @@ class Api(object):
         if not self.activity_can_be_viewed(activity):
             return self.error("The requested activity is not viewable to this user.")
 
+        # Is this is a foot based activity? Need to know so we can display steps per minute instead of revs per minute.
+        is_foot_based = False
+
         response = "["
 
         if Keys.ACTIVITY_NAME_KEY in activity:
@@ -252,6 +255,7 @@ class Api(object):
         if Keys.ACTIVITY_TYPE_KEY in activity:
             activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
             if activity_type is not None and len(activity_type) > 0:
+                is_foot_based = activity_type in Keys.FOOT_BASED_ACTIVITIES
                 if len(response) > 1:
                     response += ","
                 response += json.dumps({"name": "Type", "value": activity_type})
@@ -315,7 +319,10 @@ class Api(object):
                     response += ","
                 cadence = cadences[-1]
                 value = float(cadence.values()[0])
-                response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} rpm".format(value)})
+                if is_foot_based:
+                    response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} spm".format(value * 2.0)})
+                else:
+                    response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} rpm".format(value)})
 
         if Keys.APP_POWER_KEY in activity:
             powers = activity[Keys.APP_POWER_KEY]
@@ -1035,17 +1042,19 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
         export_format = values[Keys.WORKOUT_FORMAT_KEY]
 
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+
         # Get the workouts that belong to the logged in user.
         workout = self.data_mgr.retrieve_workout(self.user_id, workout_id)
         result = ""
         if export_format == 'zwo':
             result = workout.export_to_zwo(workout_id)
         elif export_format == 'txt':
-            result = workout.export_to_text()
+            result = workout.export_to_text(unit_system)
         elif export_format == 'json':
-            result = workout.export_to_json_str()
+            result = workout.export_to_json_str(unit_system)
         elif export_format == 'ics':
-            result = workout.export_to_ics()
+            result = workout.export_to_ics(unit_system)
         return True, result
 
     def handle_claim_device(self, values):
@@ -1209,6 +1218,8 @@ class Api(object):
         """Called when an API message to update gear for a user is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+        if Keys.GEAR_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.GEAR_TYPE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.GEAR_NAME_KEY not in values:
@@ -1218,6 +1229,9 @@ class Api(object):
         if Keys.GEAR_ADD_TIME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        gear_id = values[Keys.GEAR_ID_KEY]
+        if not InputChecker.is_uuid(gear_id):
+            raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
         gear_type = unquote_plus(values[Keys.GEAR_TYPE_KEY])
         if not InputChecker.is_valid_decoded_str(gear_type):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -1241,7 +1255,7 @@ class Api(object):
         else:
             gear_retire_time = 0
 
-        result = self.data_mgr.update_gear(self.user_id, gear_type, gear_name, gear_description, int(gear_add_time), int(gear_retire_time))
+        result = self.data_mgr.update_gear(self.user_id, gear_id, gear_type, gear_name, gear_description, int(gear_add_time), int(gear_retire_time))
         return result, ""
 
     def handle_update_gear_defaults(self, values):
@@ -1275,6 +1289,20 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
 
         result = self.data_mgr.delete_gear(self.user_id, gear_id)
+        return result, ""
+
+    def handle_retire_gear(self, values):
+        """Called when an API message to retire gear for a user is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.GEAR_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        gear_id = values[Keys.GEAR_ID_KEY]
+        if not InputChecker.is_uuid(gear_id):
+            raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
+
+        result = self.data_mgr.update_gear(self.user_id, gear_id, None, None, None, None, time.time())
         return result, ""
 
     def handle_create_service_record(self, values):
@@ -1456,7 +1484,7 @@ class Api(object):
         self.data_mgr.analyze_activity(activity, activity_user_id)
         return True, ""
 
-    def handle_generate_workout_plan(self, values):
+    def handle_generate_workout_plan_for_user(self, values):
         """Called when the user wants to generate a workout plan."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -1473,7 +1501,23 @@ class Api(object):
 
         self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
         self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
-        self.data_mgr.generate_workout_plan(self.user_id)
+        self.data_mgr.generate_workout_plan_for_user(self.user_id)
+        return True, ""
+
+    def handle_generate_workout_plan_from_inputs(self, values):
+        """Called when the user wants to generate a workout plan."""
+        if Keys.GOAL_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("A goal was not specified.")
+        if Keys.GOAL_DATE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("A goal date was not specified.")
+
+        goal = unquote_plus(values[Keys.GOAL_KEY])
+        if not (goal in Keys.GOALS):
+            raise ApiException.ApiMalformedRequestException("Invalid goal.")
+
+        goal_date = unquote_plus(values[Keys.GOAL_DATE_KEY])
+
+        self.data_mgr.generate_workout_plan_from_inputs(self.user_id)
         return True, ""
 
     def handle_list_workouts(self, values):
@@ -1806,6 +1850,8 @@ class Api(object):
             return self.handle_update_gear_defaults(values)
         elif request == 'delete_gear':
             return self.handle_delete_gear(values)
+        elif request == 'retire_gear':
+            return self.handle_retire_gear(values)
         elif request == 'create_service_record':
             return self.handle_create_service_record(values)
         elif request == 'delete_service_record':
@@ -1819,7 +1865,9 @@ class Api(object):
         elif request == 'refresh_analysis':
             return self.handle_refresh_analysis(values)
         elif request == 'generate_workout_plan':
-            return self.handle_generate_workout_plan(values)
+            return self.handle_generate_workout_plan_for_user(values)
+        elif request == 'generate_workout_plan_from_inputs':
+            return self.handle_generate_workout_plan_from_inputs(values)
         return False, ""
 
     def handle_api_1_0_request(self, verb, request, values):

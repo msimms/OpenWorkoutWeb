@@ -38,7 +38,7 @@ class AnalysisScheduler(object):
         logger = logging.getLogger()
         logger.error(log_str)
 
-    def add_to_queue(self, activity, activity_user_id, data_mgr):
+    def add_activity_to_queue(self, activity, activity_user_id, data_mgr):
         """Adds the activity ID to the list of activities to be analyzed."""
         from bson.json_util import dumps
         from ActivityAnalyzer import analyze_activity

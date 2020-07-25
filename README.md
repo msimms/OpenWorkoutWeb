@@ -3,7 +3,7 @@
 ![](https://travis-ci.com/msimms/StraenWeb.svg?branch=master)
 
 # StraenWeb
-Workout tracking website and companion to the Straen mobile app. This is very much a work-in-progress, and is being done as a spare-time project, so set your expectations appropriately.
+Workout tracking website and optional companion to the Straen mobile app. This is very much a work-in-progress and is being done as a spare-time project, so set your expectations appropriately.
 
 ## Rationale
 Why develop a workout tracker when there are so many closed-source options available?
@@ -11,7 +11,7 @@ Why develop a workout tracker when there are so many closed-source options avail
 * I needed a companion website to the mobile app of the same name that I developed. I needed this to make the live tracking feature possible.
 * Other workout trackers do not support strength-based exercises, such as pull-ups and push-ups (press-ups).
 * I think users should have control over their own data and this is only possible with an open source application.
-* There are some analytical ideas that I have that none of the major activity tracking websites perform.
+* There are some analytical ideas that I have which none of the major activity tracking websites perform.
 * I want to do some experiments with automatically generating workout plans. This will serve as the platform for this idea.
 * Education. For the experience in performing full-stack software development: dealing with website deployment and scalability, and security issues.
 
@@ -27,7 +27,6 @@ Straen is the Welsh word for stress and exercise is a (positive) form of stress.
 * Import from other services.
 * Better graphics.
 * Replace Google Maps with Open Street Map.
-* Equipment tracking.
 * More analytics.
 
 [Full bug and feature tracking](https://github.com/msimms/StraenWeb/issues).
@@ -46,6 +45,7 @@ python setup.py
 
 ## Execution
 The software is designed to work within multiple frameworks. Currently, cherrypy and flask are supported.
+It is also designed to work with both python2 and python3.
 
 To run the web service under the cherrypy framework:
 ```
@@ -202,6 +202,11 @@ This feature is very much under development and will go through several iteratio
 ### 0.26
 * Replaced command line options with a configuration file. [Feature Page](https://github.com/msimms/StraenWeb/issues/24)
 * More work on run workout plan generation.
+
+### 0.27
+* Bug fixes and performance optimizations.
+* More work on run workout plan generation.
+* Added the ability to retire gear.
 
 ## Tech
 This software uses several other source projects to work properly:

@@ -86,9 +86,24 @@ WORKOUT_INTERVALS_KEY = "intervals"
 WORKOUT_COOLDOWN_KEY = "cooldown"
 WORKOUT_SCHEDULED_TIME_KEY = "scheduled time"
 WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY = "last scheduled workout time"
-WORKOUT_IN_TAPER_KEY = "taper"
-WORKOUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
-WORKOUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
+WORKOUT_ESTIMATED_STRESS = "estimated stress score"
+
+# Used by the workout plan generator.
+LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"
+LONGEST_RUN_WEEK_1_KEY = "Longest Run Week 1"
+LONGEST_RUN_WEEK_2_KEY = "Longest Run Week 2"
+LONGEST_RUN_WEEK_3_KEY = "Longest Run Week 3"
+AGE_YEARS_KEY = "Age In Years"
+EXPERIENCE_LEVEL_KEY = "Experience Level"
+EXPERIENCE_LEVEL_BEGINNER = "Beginner"
+EXPERIENCE_LEVEL_INTERMEDIATE = "Intermediate"
+EXPERIENCE_LEVEL_ADVANCED = "Advanced"
+EXPERIENCE_LEVELS = [ EXPERIENCE_LEVEL_BEGINNER, EXPERIENCE_LEVEL_INTERMEDIATE, EXPERIENCE_LEVEL_ADVANCED ]
+WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
+IN_TAPER_KEY = "taper"
+AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
+AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
+WORKOUT_PLAN_INPUTS = [ LONGEST_RUN_IN_FOUR_WEEKS_KEY, LONGEST_RUN_WEEK_1_KEY, LONGEST_RUN_WEEK_2_KEY, LONGEST_RUN_WEEK_3_KEY, AGE_YEARS_KEY, EXPERIENCE_LEVEL_KEY, WEEKS_UNTIL_GOAL_KEY ]
 
 # Workout types
 WORKOUT_TYPE_REST = "Rest"
@@ -100,6 +115,9 @@ WORKOUT_TYPE_LONG_RUN = "Long Run"
 WORKOUT_TYPE_FREE_RUN = "Free Run" # A run at no specific pace
 WORKOUT_TYPE_HILL_REPEATS = "Hill Repeats" # 4-10 repeats, depending on skill level, done at 5K pace
 WORKOUT_TYPE_MIDDLE_DISTANCE_RUN = "Middle Distance Run" # 2 hour run for advanced distance runners
+WORKOUT_TYPE_SPEED_INTERVAL_RIDE = "Speed Interval Ride"
+WORKOUT_TYPE_TEMPO_RIDE = "Tempo Ride"
+WORKOUT_TYPE_EASY_RIDE = "Easy Ride"
 WORKOUT_TYPE_OPEN_WATER_SWIM = "Open Water Swim"
 WORKOUT_TYPE_POOL_WATER_SWIM = "Pool Swim"
 
@@ -182,40 +200,42 @@ ACTIVITY_PHOTO_ID_KEY = "photo_id" # Unique identifier for a specific photo
 ACTIVITY_PHOTOS_KEY = "photos" # List of all photo IDs
 
 # Keys used to summarize activity data.
-BEST_SPEED = "Best Speed"
-BEST_PACE = "Best Pace"
-BEST_1K = "Best 1K"
-BEST_MILE = "Best Mile"
-BEST_5K = "Best 5K"
-BEST_10K = "Best 10K"
-BEST_15K = "Best 15K"
-BEST_HALF_MARATHON = "Best Half Marathon"
-BEST_MARATHON = "Best Marathon"
-BEST_METRIC_CENTURY = "Best Metric Century"
-BEST_CENTURY = "Best Century"
-BEST_5_SEC_POWER = "5 Second Power"
-BEST_12_MIN_POWER = "12 Minute Power"
-BEST_20_MIN_POWER = "20 Minute Power"
-BEST_1_HOUR_POWER = "1 Hour Power"
-MAX_POWER = "Maximum Power"
-MAX_HEART_RATE = "Maximum Heart Rate"
+BEST_SPEED = "Best Speed" # Highest speed seen during the activity
+BEST_PACE = "Best Pace" # Fastest pace seen during the activity
+BEST_1K = "Best 1K" # Fastest 1K segment (can be anywhere in the activity)
+BEST_MILE = "Best Mile" # Fastest mile segment (can be anywhere in the activity)
+BEST_5K = "Best 5K" # Fastest 5K segment (can be anywhere in the activity)
+BEST_10K = "Best 10K" # Fastest 10K segment (can be anywhere in the activity)
+BEST_15K = "Best 15K" # Fastest 15K segment (can be anywhere in the activity)
+BEST_HALF_MARATHON = "Best Half Marathon" # Fastest half marathon segment (can be anywhere in the activity)
+BEST_MARATHON = "Best Marathon" # Fastest marathon segment (can be anywhere in the activity)
+BEST_METRIC_CENTURY = "Best Metric Century" # Fastest 100K segment (can be anywhere in the activity)
+BEST_CENTURY = "Best Century" # Fastest 100 mile segment (can be anywhere in the activity)
+BEST_5_SEC_POWER = "5 Second Power" # Highest average power seen over 5 seconds
+BEST_12_MIN_POWER = "12 Minute Power" # Highest average power seen over 12 minutes
+BEST_20_MIN_POWER = "20 Minute Power" # Highest average power seen over 20 minutes
+BEST_1_HOUR_POWER = "1 Hour Power" # Highest average power seen over 1 hour
+MAX_POWER = "Maximum Power" # Highest power detected during the activity
+MAX_HEART_RATE = "Maximum Heart Rate" # Highest heart rate detected during the activity
 MAX_CADENCE = "Maximum Cadence"
-AVG_PACE = "Average Pace"
-AVG_POWER = "Average Power"
-AVG_HEART_RATE = "Average Heart Rate"
-AVG_CADENCE = "Average Cadence"
+AVG_PACE = "Average Pace" # Average pace of the activity
+AVG_POWER = "Average Power" # Average power (watts) held during the activity
+AVG_HEART_RATE = "Average Heart Rate" # Average heart rate (bpm) held during the activity
+AVG_CADENCE = "Average Cadence" # Average cadence (rpm or spm) held during the activity
+STEPS_PER_MINUTE = "Steps Per Minute" # Cadence for foot based activity
+AVG_STEPS_PER_MINUTE = "Average Steps Per Minute" # Average cadence for foot based activity
 NORMALIZED_POWER = "Normalized Power"
 THRESHOLD_POWER = "Threshold Power"
 INTENSITY_FACTOR = "Intensity Factor"
 TSS = "TSS" # Training Stress Score
-RTSS = "rTSS" # Run Training Stress Score
+ESTIMATED_TSS = "Estimated TSS" # Estimated Training Stress Score
 VARIABILITY_INDEX = "Variability Index"
 CLUSTER = "Cluster"
 TOTAL_DISTANCE = "Total Distance"
 LONGEST_DISTANCE = "Longest Distance"
 TOTAL_ACTIVITIES = "Total Activities"
-MILE_SPLITS = "Mile Splits"
-KM_SPLITS = "KM Splits"
+MILE_SPLITS = "Mile Splits" # List of mile splits
+KM_SPLITS = "KM Splits" # List of kilometer splits
 
 # Keys used for race time prediction.
 ESTIMATED_5K_KEY = "Estimated 5K"
@@ -231,8 +251,9 @@ DEVICE_LAST_HEARD_FROM = "last_heard_from"
 LONG_RUN_PACE = "Long Run Pace"
 EASY_RUN_PACE = "Easy Run Pace"
 TEMPO_RUN_PACE = "Tempo Run Pace"
-SPEED_RUN_PACE = "Speed Session Pace"
-SHORT_INTERVAL_RUN_PACE = "Short Interval Run Pace"
+SPEED_RUN_PACE = "Speed Session Pace" # Pace for medium distance interfals
+SHORT_INTERVAL_RUN_PACE = "Short Interval Run Pace" # Pace for shorter track intervals
+FUNCTIONAL_THRESHOLD_PACE = "Functional Threshold Pace" # Pace that could be held for one hour, max effort
 
 # Keys used to manage gear.
 GEAR_KEY = "gear"
@@ -291,19 +312,6 @@ GOAL_MARATHON_RUN_KEY = "Marathon"
 GOAL_50K_RUN_KEY = "50K Run"
 GOAL_50_MILE_RUN_KEY = "50 Mile Run"
 
-# Used by the workout plan generator.
-LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"
-LONGEST_RUN_WEEK_1_KEY = "Longest Run Week 1"
-LONGEST_RUN_WEEK_2_KEY = "Longest Run Week 2"
-LONGEST_RUN_WEEK_3_KEY = "Longest Run Week 3"
-AGE_YEARS_KEY = "Age In Years"
-WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
-EXPERIENCE_LEVEL_KEY = "Experience Level"
-EXPERIENCE_LEVEL_BEGINNER = "Beginner"
-EXPERIENCE_LEVEL_INTERMEDIATE = "Intermediate"
-EXPERIENCE_LEVEL_ADVANCED = "Advanced"
-EXPERIENCE_LEVELS = [ EXPERIENCE_LEVEL_BEGINNER, EXPERIENCE_LEVEL_INTERMEDIATE, EXPERIENCE_LEVEL_ADVANCED ]
-
 # Used to track deferred tasks.
 DEFERRED_TASKS_USER_ID = "user_id"
 TASKS_KEY = "tasks"
@@ -324,10 +332,11 @@ LOCAL_FILE_NAME = "local file name"
 TIME_KEYS = [ BEST_1K, BEST_MILE, BEST_5K, BEST_10K, BEST_15K, BEST_HALF_MARATHON, BEST_MARATHON, BEST_METRIC_CENTURY, BEST_CENTURY ]
 DISTANCE_KEYS = [ TOTAL_DISTANCE, LONGEST_DISTANCE ]
 SPEED_KEYS = [ APP_CURRENT_SPEED_KEY, APP_AVG_SPEED_KEY, APP_MOVING_SPEED_KEY, APP_SPEED_VARIANCE_KEY, BEST_SPEED, APP_AVG_SPEED_KEY ]
-PACE_KEYS = [ APP_CURRENT_PACE_KEY, BEST_PACE, AVG_PACE, LONG_RUN_PACE, EASY_RUN_PACE, TEMPO_RUN_PACE, SPEED_RUN_PACE, SHORT_INTERVAL_RUN_PACE, INTERVAL_WORKOUT_PACE_KEY ]
+PACE_KEYS = [ APP_CURRENT_PACE_KEY, BEST_PACE, AVG_PACE, LONG_RUN_PACE, EASY_RUN_PACE, TEMPO_RUN_PACE, SPEED_RUN_PACE, SHORT_INTERVAL_RUN_PACE, FUNCTIONAL_THRESHOLD_PACE, INTERVAL_WORKOUT_PACE_KEY ]
 POWER_KEYS = [ AVG_POWER, MAX_POWER, BEST_5_SEC_POWER, BEST_12_MIN_POWER, BEST_20_MIN_POWER, BEST_1_HOUR_POWER, NORMALIZED_POWER, THRESHOLD_POWER ]
 HEART_RATE_KEYS = [ AVG_HEART_RATE, MAX_HEART_RATE ]
 CADENCE_KEYS = [ APP_CADENCE_KEY, AVG_CADENCE, MAX_CADENCE ]
+RUNNING_CADENCE_KEYS = [ STEPS_PER_MINUTE, AVG_STEPS_PER_MINUTE ]
 GOALS = [ GOAL_FITNESS_KEY, GOAL_5K_RUN_KEY, GOAL_10K_RUN_KEY, GOAL_15K_RUN_KEY, GOAL_HALF_MARATHON_RUN_KEY, GOAL_MARATHON_RUN_KEY, GOAL_50K_RUN_KEY, GOAL_50_MILE_RUN_KEY ]
 
 UNSUMMARIZABLE_KEYS = [ APP_SPEED_VARIANCE_KEY, APP_DISTANCES_KEY, APP_LOCATIONS_KEY, ACTIVITY_TIME_KEY, ACTIVITY_TYPE_KEY, ACTIVITY_HASH_KEY, ACTIVITY_LOCATION_DESCRIPTION_KEY, ACTIVITY_INTERVALS_KEY, MILE_SPLITS, KM_SPLITS ]

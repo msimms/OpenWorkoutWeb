@@ -11,12 +11,6 @@ import Keys
 import SensorAnalyzer
 import Units
 
-# Locate and load the statistics module (the functions we're using in are made obsolete in Python 3, but we want to work in Python 2, also)
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-libmathdir = os.path.join(currentdir, 'LibMath', 'python')
-sys.path.insert(0, libmathdir)
-import statistics
-
 class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on power data."""
 
@@ -45,7 +39,8 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
         # Update the buffers needed for the normalized power calculation.
         if date_time - self.current_30_sec_buf_start_time > 30000:
             if len(self.current_30_sec_buf) > 0:
-                self.np_buf.append(statistics.mean(self.current_30_sec_buf))
+                avg_norm_power = sum(self.current_30_sec_buf) / len(self.current_30_sec_buf)
+                self.np_buf.append(avg_norm_power)
                 self.current_30_sec_buf = []
             self.current_30_sec_buf_start_time = date_time
         self.current_30_sec_buf.append(value)
@@ -95,7 +90,7 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 self.np_buf.pop(0)
 
                 # Needs this for the variability index calculation.
-                ap = statistics.mean(self.np_buf)
+                ap = sum(self.np_buf) / len(self.np_buf)
 
                 # Raise all items to the fourth power.
                 for idx, item in enumerate(self.np_buf):
@@ -103,7 +98,7 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
                     self.np_buf[idx] = item
 
                 # Average the values that were raised to the fourth.
-                ap2 = statistics.mean(self.np_buf)
+                ap2 = sum(self.np_buf) / len(self.np_buf)
 
                 # Take the fourth root.
                 np = pow(ap2, 0.25)

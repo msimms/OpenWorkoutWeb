@@ -38,7 +38,7 @@ class ImportScheduler(object):
         logger = logging.getLogger()
         logger.error(log_str)
 
-    def add_to_queue(self, username, user_id, uploaded_file_data, uploaded_file_name, data_mgr):
+    def add_file_to_queue(self, username, user_id, uploaded_file_data, uploaded_file_name, data_mgr):
         """Adds the activity ID to the list of activities to be analyzed."""
         from bson.json_util import dumps
         from ImportWorker import import_activity
@@ -51,6 +51,7 @@ class ImportScheduler(object):
             params['user_id'] = user_id
             params['uploaded_file_data'] = uploaded_file_data
             params['uploaded_file_name'] = uploaded_file_name
+
             import_task = import_activity.delay(dumps(params))
             data_mgr.create_deferred_task(user_id, Keys.IMPORT_TASK_KEY, import_task.task_id, uploaded_file_name)
         except:

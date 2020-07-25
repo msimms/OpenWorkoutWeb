@@ -323,6 +323,10 @@ def get_cadence_units_str():
     """Returns the units in which cadence is displayed."""
     return "rpm"
 
+def get_running_cadence_units_str():
+    """Returns the units in which running cadence is displayed."""
+    return "spm"
+
 def get_power_units_str():
     """Returns the units in which power is displayed."""
     return "watts"
@@ -345,6 +349,8 @@ def convert_to_string_in_specified_unit_system(unit_system, in_value, in_distanc
         out_value = "{:.2f} ".format(in_value) + get_heart_rate_units_str()
     elif label in Keys.CADENCE_KEYS:
         out_value = "{:.2f} ".format(in_value) + get_cadence_units_str()
+    elif label in Keys.RUNNING_CADENCE_KEYS:
+        out_value = "{:.2f} ".format(in_value) + get_running_cadence_units_str()
     elif label in Keys.POWER_KEYS:
         out_value = "{:.2f} ".format(in_value) + get_power_units_str()
     else:
@@ -365,6 +371,8 @@ def convert_to_num_in_specified_unit_system(unit_system, in_value, in_distance_u
     elif label in Keys.HEART_RATE_KEYS:
         out_value = in_value
     elif label in Keys.CADENCE_KEYS:
+        out_value = in_value
+    elif label in Keys.RUNNING_CADENCE_KEYS:
         out_value = in_value
     elif label in Keys.POWER_KEYS:
         out_value = in_value

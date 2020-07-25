@@ -25,6 +25,7 @@
 """Unit tests for workout plan generation."""
 
 import argparse
+import datetime
 import inspect
 import json
 import logging
@@ -37,6 +38,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 import Keys
 import WorkoutPlanGenerator
+import WorkoutScheduler
 
 ERROR_LOG = 'error.log'
 
@@ -46,20 +48,39 @@ def run_unit_tests(input_file_name):
     successes = []
     failures = []
 
-    gen = WorkoutPlanGenerator.WorkoutPlanGenerator(None)
-
     # Load the test data.
     with open(input_file_name, 'r') as f:
         test_json = json.load(f)
         test_inputs = test_json["inputs"]
 
+        generator = WorkoutPlanGenerator.WorkoutPlanGenerator(None)
+        scheduler = WorkoutScheduler.WorkoutScheduler(None)
+
+        today = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0).date()
+        start_time = today + datetime.timedelta(days=7-today.weekday())
+
         # Generate a plan for each test input.
         for test_input in test_inputs:
-            print("Input: " + str(test_input))
-            print("Output:")
-            workouts = gen.generate_workouts(0, test_input)
-            for workout in workouts:
-                print(workout.export_to_text())
+
+            # Run the inputs through the workout generator.
+            print("-" * 40)
+            print("Input: ")
+            print("-" * 40)
+            print(test_input)
+            print("-" * 40)
+            print("Generating workouts...")
+            print("-" * 40)
+            workouts = generator.generate_plan_from_inputs(None, test_input)
+            print("-" * 40)
+            print("Exporting workouts...")
+            print("-" * 40)
+            WorkoutPlanGenerator.export_workouts(workouts, 'text')
+            print("-" * 40)
+            print("Scheduling workouts...")
+            print("-" * 40)
+            schedule = scheduler.schedule_workouts(workouts, start_time)
+            for workout in schedule:
+                print(workout.export_to_text(Keys.UNITS_METRIC_KEY))
 
     return len(failures) == 0
 

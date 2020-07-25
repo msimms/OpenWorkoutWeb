@@ -88,7 +88,7 @@ class DataMgr(Importer.ActivityWriter):
     def analyze_activity(self, activity, activity_user_id):
         """Schedules the specified activity for analysis."""
         activity[Keys.ACTIVITY_USER_ID_KEY] = activity_user_id
-        self.analysis_scheduler.add_to_queue(activity, activity_user_id, self)
+        self.analysis_scheduler.add_activity_to_queue(activity, activity_user_id, self)
 
     def compute_activity_end_time(self, activity):
         """Examines the activity and computes the time at which the activity ended."""
@@ -286,7 +286,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No uploaded file data.")
         if uploaded_file_name is None:
             raise Exception("No uploaded file name.")
-        self.import_scheduler.add_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
+        self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
 
     def attach_photo_to_activity(username, user_id, uploaded_file_data, uploaded_file_name, activity_id):
         """Imports a photo and associates it with an activity."""
@@ -931,19 +931,15 @@ class DataMgr(Importer.ActivityWriter):
                     final_gear_list.append(gear)
         return final_gear_list
 
-    def update_gear(self, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
+    def update_gear(self, user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Retrieve method for the gear with the specified ID."""
         if self.database is None:
             raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
         if gear_id is None:
             raise Exception("Bad parameter.")
-        if gear_type is None:
-            raise Exception("Bad parameter.")
-        if gear_name is None:
-            raise Exception("Bad parameter.")
-        if gear_description is None:
-            raise Exception("Bad parameter.")
-        return self.database.update_gear(gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+        return self.database.update_gear(user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
 
     def delete_gear(self, user_id, gear_id):
         """Delete method for the gear with the specified ID."""
@@ -1011,13 +1007,21 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.delete_service_record(user_id, gear_id, service_record_id)
 
-    def generate_workout_plan(self, user_id):
+    def generate_workout_plan_for_user(self, user_id):
         """Generates/updates a workout plan for the user with the specified ID."""
         if self.workout_plan_gen_scheduler is None:
             raise Exception("No workout scheduler.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        self.workout_plan_gen_scheduler.add_to_queue(user_id, self)
+        self.workout_plan_gen_scheduler.add_user_to_queue(user_id, self)
+
+    def generate_workout_plan_from_inputs(self, inputs):
+        """Generates a workout plan from the specified inputs."""
+        if self.workout_plan_gen_scheduler is None:
+            raise Exception("No workout scheduler.")
+        if inputs is None:
+            raise Exception("Bad parameter.")
+        self.workout_plan_gen_scheduler.add_inputs_to_queue(inputs, self)
 
     def get_location_description(self, activity_id):
         """Returns the political location that corresponds to an activity."""

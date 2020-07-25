@@ -112,7 +112,7 @@
         dict.push({["goal"] : goal});
         dict.push({["goal_date"] : goalDate});
         if (send_post_request(the_url, dict, result_text))
-            alert("The workout plan is being generated and will be viewable on the My Activities page when done.");
+            alert("The workout plan is being generated and will be viewable on the My Activities page when complete.");
         else
             alert(result_text.value);
     }
