@@ -452,9 +452,15 @@ class App(object):
         if Keys.APP_CURRENT_SPEED_KEY in activity:
             data = activity[Keys.APP_CURRENT_SPEED_KEY]
         if data is not None and isinstance(data, list):
+            py_version = sys.version_info[0]
             for datum in data:
-                time = datum.keys()[0]
-                value_num = float(datum.values()[0])
+                if py_version < 3:
+                    time = int(float(datum.keys()[0]))
+                    value_num = float(datum.values()[0])
+                else:
+                    time = int(float(list(datum.keys())[0]))
+                    value_num = float(list(datum.values())[0])
+                    
                 value_num, _, _ = Units.convert_to_speed_for_the_specified_unit_system(unit_system, value_num, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
                 data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value_num) + " },\n"
         return data_str
@@ -473,6 +479,7 @@ class App(object):
         data_str = ""
         data = []
         multiplier = 1.0
+        py_version = sys.version_info[0]
         if Keys.ACTIVITY_TYPE_KEY in activity:
             activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
             if activity_type in Keys.FOOT_BASED_ACTIVITIES:
@@ -481,8 +488,12 @@ class App(object):
         if key in activity:
             data = activity[key]
         for datum in data:
-            time = datum.keys()[0]
-            value = float(datum.values()[0]) * multiplier
+            if py_version < 3:
+                time = int(float(datum.keys()[0]))
+                value = float(datum.values()[0])
+            else:
+                time = int(float(list(datum.keys())[0]))
+                value = float(list(datum.values())[0]) * multiplier
             data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
         return data_str
 
