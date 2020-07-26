@@ -791,6 +791,12 @@ class MongoDatabase(Database.Database):
         if user_id is None:
             self.log_error(MongoDatabase.retrieve_bounded_activity_bests_for_user.__name__ + ": Unexpected empty object: user_id")
             return {}
+        if cutoff_time_lower is None:
+            self.log_error(MongoDatabase.retrieve_bounded_activity_bests_for_user.__name__ + ": Unexpected empty object: cutoff_time_lower")
+            return {}
+        if cutoff_time_higher is None:
+            self.log_error(MongoDatabase.retrieve_bounded_activity_bests_for_user.__name__ + ": Unexpected empty object: cutoff_time_higher")
+            return {}
 
         try:
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
@@ -807,6 +813,29 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return {}
+
+    def delete_activity_best_for_user(self, user_id, activity_id):
+        """Delete method for a user's personal records for a given activity."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_activity_best_for_user.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if activity_id is None:
+            self.log_error(MongoDatabase.delete_activity_best_for_user.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.delete_activity_best_for_user.__name__ + ": Invalid object: activity_id")
+            return False
+
+        try:
+            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            if user_records is not None:
+                user_records.pop(activity_id)
+                self.records_collection.save(user_records)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
 
     def retrieve_user_activity_list(self, user_id, start, num_results, exclude_keys):
         """Retrieves the list of activities associated with the specified user."""
@@ -1464,8 +1493,11 @@ class MongoDatabase(Database.Database):
             activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
 
             # If the activity was found.
-            if activity is not None:
-                pass
+            if activity is not None and Keys.ACTIVITY_SUMMARY_KEY in activity:
+                # Currently left out for performance reasons.
+                #activity[Keys.ACTIVITY_SUMMARY_KEY] = {}
+                #self.activities_collection.save(activity)
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

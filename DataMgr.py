@@ -478,11 +478,17 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity(activity_id)
 
-    def delete_activity(self, object_id):
+    def delete_activity(self, object_id, user_id, activity_id):
         """Delete the activity with the specified object ID."""
         if self.database is None:
             raise Exception("No database.")
-        return self.database.delete_activity(object_id)
+        if object_id is None:
+            raise Exception("Bad parameter.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if activity_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.delete_activity(object_id) and self.database.delete_activity_best_for_user(user_id, activity_id)
 
     def retrieve_activity_visibility(self, device_str, activity_id):
         """Returns the visibility setting for the specified activity."""

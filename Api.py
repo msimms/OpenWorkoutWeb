@@ -651,7 +651,7 @@ class Api(object):
         for activity in activities:
             if Keys.ACTIVITY_ID_KEY in activity:
                 if activity[Keys.ACTIVITY_ID_KEY] == activity_id:
-                    self.data_mgr.delete_activity(activity['_id'])
+                    self.data_mgr.delete_activity(activity['_id'], self.user_id, activity_id)
                     deleted = True
                     break
 
