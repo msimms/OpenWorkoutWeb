@@ -1352,11 +1352,11 @@ class Api(object):
             decoded_key = unquote_plus(key)
 
             # Default privacy/visibility.
-            if decoded_key == Keys.DEFAULT_PRIVACY:
+            if decoded_key == Keys.DEFAULT_PRIVACY_KEY:
                 default_privacy = unquote_plus(values[key]).lower()
                 if not (default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE):
                     raise ApiException.ApiMalformedRequestException("Invalid visibility value.")
-                result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY, default_privacy)
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY_KEY, default_privacy)
             
             # Metric or imperial?
             elif decoded_key == Keys.PREFERRED_UNITS_KEY:
@@ -1716,10 +1716,10 @@ class Api(object):
         """Returns the value associated with the specified user setting."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        if Keys.REQUESTED_SETTING not in values:
+        if Keys.REQUESTED_SETTING_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Setting not specified.")
 
-        setting_value = self.user_mgr.retrieve_user_setting(self.user_id, values[Keys.REQUESTED_SETTING])
+        setting_value = self.user_mgr.retrieve_user_setting(self.user_id, values[Keys.REQUESTED_SETTING_KEY])
         return True, setting_value
 
     def handle_list_activity_types(self):

@@ -121,7 +121,7 @@ class MongoDatabase(Database.Database):
         exclude_keys[Keys.FRIEND_REQUESTS_KEY] = False
         exclude_keys[Keys.FRIENDS_KEY] = False
         exclude_keys[Keys.PR_KEY] = False
-        exclude_keys[Keys.DEFAULT_PRIVACY] = False
+        exclude_keys[Keys.DEFAULT_PRIVACY_KEY] = False
         exclude_keys[Keys.PREFERRED_UNITS_KEY] = False
         return exclude_keys
 
@@ -147,7 +147,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            post = {Keys.USERNAME_KEY: username, Keys.REALNAME_KEY: realname, Keys.HASH_KEY: passhash, Keys.DEVICES_KEY: [], Keys.FRIENDS_KEY: [], Keys.DEFAULT_PRIVACY: Keys.ACTIVITY_VISIBILITY_PUBLIC}
+            post = {Keys.USERNAME_KEY: username, Keys.REALNAME_KEY: realname, Keys.HASH_KEY: passhash, Keys.DEVICES_KEY: [], Keys.FRIENDS_KEY: [], Keys.DEFAULT_PRIVACY_KEY: Keys.ACTIVITY_VISIBILITY_PUBLIC}
             self.users_collection.insert(post)
             return True
         except:
@@ -650,7 +650,7 @@ class MongoDatabase(Database.Database):
             user_id_str = str(user_id)
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id_str})
             if user_records is None:
-                post = {Keys.RECORDS_USER_ID: user_id_str, Keys.PERSONAL_RECORDS: records}
+                post = {Keys.RECORDS_USER_ID: user_id_str, Keys.PERSONAL_RECORDS_KEY: records}
                 self.records_collection.insert(post)
                 return True
         except:
@@ -668,15 +668,15 @@ class MongoDatabase(Database.Database):
             # Find the user's records collection.
             user_id_str = str(user_id)
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id_str})
-            if user_records is not None and Keys.PERSONAL_RECORDS in user_records:
-                return user_records[Keys.PERSONAL_RECORDS]
+            if user_records is not None and Keys.PERSONAL_RECORDS_KEY in user_records:
+                return user_records[Keys.PERSONAL_RECORDS_KEY]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return {}
 
     def update_user_personal_records(self, user_id, records):
-        """Create method for a user's personal record."""
+        """Create method for a user's personal record. These are the bests across all activities. Activity records are the bests for individual activities."""
         if user_id is None:
             self.log_error(MongoDatabase.update_user_personal_records.__name__ + ": Unexpected empty object: user_id")
             return False
@@ -689,7 +689,7 @@ class MongoDatabase(Database.Database):
             user_id_str = str(user_id)
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id_str})
             if user_records is not None:
-                user_records[Keys.PERSONAL_RECORDS] = records
+                user_records[Keys.PERSONAL_RECORDS_KEY] = records
                 self.records_collection.save(user_records)
                 return True
         except:

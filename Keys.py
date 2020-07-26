@@ -44,18 +44,18 @@ API_KEYS = "api keys" # List of API keys belonging to the user
 API_KEY = "api key" # API key being provided
 
 # User settings
-REQUESTED_SETTING = "requested setting"
-DEFAULT_PRIVACY = "default privacy"
+REQUESTED_SETTING_KEY = "requested setting"
+DEFAULT_PRIVACY_KEY = "default privacy"
 PREFERRED_UNITS_KEY = "preferred units"
 UNITS_METRIC_KEY = "metric"
 UNITS_STANDARD_KEY = "standard"
 PREFERRED_FIRST_DAY_OF_WEEK_KEY = "preferred first day of week"
 BIRTHDAY_KEY = "birthday"
-DEFAULT_BIRTHDAY = "315532800"
+DEFAULT_BIRTHDAY_KEY = "315532800"
 HEIGHT_KEY = "height"
-DEFAULT_HEIGHT = "1.8"
+DEFAULT_HEIGHT_KEY = "1.8"
 WEIGHT_KEY = "weight" # User's weight (kilograms)
-DEFAULT_WEIGHT = "70"
+DEFAULT_WEIGHT_KEY = "70"
 GENDER_KEY = "gender"
 GENDER_MALE_KEY = "male"
 GENDER_FEMALE_KEY = "female"
@@ -70,7 +70,7 @@ GOAL_TYPE_SPEED = "Speed"
 # Personal records
 RECORDS_USER_ID = "user_id"
 RECORD_NAME_KEY = "record_name"
-PERSONAL_RECORDS = "records"
+PERSONAL_RECORDS_KEY = "records"
 
 # Workout plans
 WORKOUT_PLAN_USER_ID_KEY = "user_id"
@@ -86,7 +86,7 @@ WORKOUT_INTERVALS_KEY = "intervals"
 WORKOUT_COOLDOWN_KEY = "cooldown"
 WORKOUT_SCHEDULED_TIME_KEY = "scheduled time"
 WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY = "last scheduled workout time"
-WORKOUT_ESTIMATED_STRESS = "estimated stress score"
+WORKOUT_ESTIMATED_STRESS_KEY = "estimated stress score"
 
 # Used by the workout plan generator.
 LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"

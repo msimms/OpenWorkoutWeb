@@ -1354,7 +1354,7 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Get the current settings.
-        selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, Keys.DEFAULT_PRIVACY)
+        selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, Keys.DEFAULT_PRIVACY_KEY)
         selected_units = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
         selected_first_day_of_week = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY)
 

@@ -310,7 +310,7 @@ class UserMgr(object):
 
         # These are the default values:
         if result is None:
-            if key == Keys.DEFAULT_PRIVACY:
+            if key == Keys.DEFAULT_PRIVACY_KEY:
                 result = Keys.ACTIVITY_VISIBILITY_PUBLIC
             elif key == Keys.PREFERRED_UNITS_KEY:
                 result = Keys.UNITS_STANDARD_KEY
@@ -319,11 +319,11 @@ class UserMgr(object):
             elif key == Keys.GENDER_KEY:
                 result = Keys.GENDER_MALE_KEY
             elif key == Keys.HEIGHT_KEY:
-                result = Keys.DEFAULT_HEIGHT
+                result = Keys.DEFAULT_HEIGHT_KEY
             elif key == Keys.WEIGHT_KEY:
-                result = Keys.DEFAULT_WEIGHT
+                result = Keys.DEFAULT_WEIGHT_KEY
             elif key == Keys.BIRTHDAY_KEY:
-                result = Keys.DEFAULT_BIRTHDAY
+                result = Keys.DEFAULT_BIRTHDAY_KEY
             elif key == Keys.GOAL_DATE_KEY:
                 result = int(time.time())
             elif key == Keys.EXPERIENCE_LEVEL_KEY:
