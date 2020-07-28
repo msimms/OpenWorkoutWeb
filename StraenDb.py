@@ -697,10 +697,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def delete_user_personal_records(self, user_id):
-        """Create method for a user's personal record."""
+    def delete_all_user_personal_records(self, user_id):
+        """Delete method for a user's personal record. Deletes the entire personal record cache."""
         if user_id is None:
-            self.log_error(MongoDatabase.delete_user_personal_records.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.delete_all_user_personal_records.__name__ + ": Unexpected empty object: user_id")
             return False
 
         try:

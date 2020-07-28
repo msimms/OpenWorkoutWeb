@@ -471,6 +471,15 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
+/refresh_personal_records:
+    description: Refreshes the cache of personal records in the event it may have become corrupted by deleting activities, or changing activity types.
+    get:
+    post:
+        responses:
+            200: Empty string
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
 /generate_workout_plan:
     description: Schedules workout plan generation. Will generate workouts for the week.
     get:

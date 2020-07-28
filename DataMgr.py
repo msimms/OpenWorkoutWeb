@@ -488,7 +488,14 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if activity_id is None:
             raise Exception("Bad parameter.")
-        return self.database.delete_activity(object_id) and self.database.delete_activity_best_for_user(user_id, activity_id)
+
+        # Delete the activity as well as the cache of the PRs performed during that activity.
+        result = self.database.delete_activity(object_id) and self.database.delete_activity_best_for_user(user_id, activity_id)
+
+        # Recreate the user's all-time PR list as the previous one could have contained data from the now deleted activity.
+        if result:
+            result = self.refresh_user_personal_records(user_id)
+        return result
 
     def retrieve_activity_visibility(self, device_str, activity_id):
         """Returns the visibility setting for the specified activity."""
@@ -771,8 +778,9 @@ class DataMgr(Importer.ActivityWriter):
             goal_date = None
         return goal, goal_date
 
-    def update_bests_for_activity(self, user_id, activity_id, activity_type, activity_time, bests):
-        """Update method for a user's personal record."""
+    def update_activity_bests_and_personal_records(self, user_id, activity_id, activity_type, activity_time, bests):
+        """Update method for a user's personal records. Caches the bests from the given activity and updates"""
+        """the personal record cache, if appropriate."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
@@ -786,10 +794,10 @@ class DataMgr(Importer.ActivityWriter):
         if bests is None:
             raise Exception("Bad parameter.")
 
-        # This object will keep track of the PRs.
+        # This object will keep track of the personal records.
         summarizer = Summarizer.Summarizer()
 
-        # Load existing PRs.
+        # Load existing personal records from the PR cache.
         all_personal_records = self.database.retrieve_user_personal_records(user_id)
         for record_activity_type in all_personal_records.keys():
             summarizer.set_record_dictionary(record_activity_type, all_personal_records[record_activity_type])
@@ -798,7 +806,7 @@ class DataMgr(Importer.ActivityWriter):
         # Add data from the new activity.
         summarizer.add_activity_data(activity_id, activity_type, activity_time, bests)
  
-        # Create or update the PR list.
+        # Create or update the personal records cache.
         all_personal_records[activity_type] = summarizer.get_record_dictionary(activity_type)
         if do_update:
             self.database.update_user_personal_records(user_id, all_personal_records)
@@ -816,13 +824,32 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_user_personal_records(user_id)
 
-    def delete_user_personal_records(self, user_id):
+    def delete_all_user_personal_records(self, user_id):
         """Delete method for a user's personal record."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        return self.database.delete_user_personal_records(user_id)
+        return self.database.delete_all_user_personal_records(user_id)
+
+    def refresh_user_personal_records(self, user_id):
+        """Delete method for a user's personal record."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        # This object will keep track of the personal records.
+        summarizer = Summarizer.Summarizer()
+
+        # Load existing personal records from the PR cache.
+        activity_bests = self.database.retrieve_activity_bests_for_user(user_id)
+        for activity_id in activity_bests.keys():
+            bests = activity_bests[activity_id]
+            activity_type = bests[Keys.APP_TYPE_KEY]
+
+        # TODO
+        return False
 
     def create_workout(self, user_id, workout_obj):
         """Create method for a workout."""
