@@ -209,6 +209,7 @@ This feature is very much under development and will go through several iteratio
 
 ### 0.28
 * Bug fixes with respect to python3
+* Added a 404 page for the cherrypy front end.
 
 ## Tech
 This software uses several other source projects to work properly:
