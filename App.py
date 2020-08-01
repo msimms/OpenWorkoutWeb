@@ -826,6 +826,16 @@ class App(object):
             pass
         return ""
 
+    def render_page_not_found(self):
+        """Renders the 404 error page."""
+        try:
+            error_html_file = os.path.join(self.root_dir, HTML_DIR, 'error_404.html')
+            my_template = Template(filename=error_html_file, module_directory=self.tempmod_dir)
+            return my_template.render(product=PRODUCT_NAME, root_url=self.root_url)
+        except:
+            pass
+        return ""
+
     @statistics
     def live_activity(self, activity, activity_user):
         """Renders the map page for the specified (in progress) activity."""

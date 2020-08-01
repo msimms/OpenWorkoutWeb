@@ -161,6 +161,15 @@ class StraenWeb(object):
         return self.app.render_error("")
 
     @cherrypy.expose
+    def error_404(self, status, message, traceback, version):
+        """Renders the 404 error page."""
+        try:
+            return self.app.render_page_not_found()
+        except:
+            pass
+        return self.app.render_error("")
+
+    @cherrypy.expose
     def live(self, device_str):
         """Renders the map page for the current activity from a single device."""
         try:
@@ -733,6 +742,7 @@ def main():
         'server.socket_host': config.get_bindname(),
         'server.socket_port': config.get_bindport(),
         'requests.show_tracebacks': False,
+        'error_page.404': g_app.error_404,
         'log.access_file': ACCESS_LOG})
 
     reload_feature = ReloadFeature(cherrypy.engine)
