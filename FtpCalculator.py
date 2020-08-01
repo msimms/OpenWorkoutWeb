@@ -11,7 +11,7 @@ class FtpCalculator(object):
     def __init__(self):
         self.best_20min = []
         self.best_1hr = []
-        self.cutoff_time = time.time() - ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
+        self.cutoff_time = time.time() - ((365.25 / 2.0) * 24.0 * 60.0 * 60.0) # last six months
         super(FtpCalculator, self).__init__()
 
     def estimate(self):
