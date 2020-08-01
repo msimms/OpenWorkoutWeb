@@ -2284,14 +2284,17 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Make sure we're dealing with a string.
+            user_id_str = str(user_id)
+
             # Find the user's tasks document.
-            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id_str})
 
             # If the user's tasks document was not found then create it.
             if user_tasks is None:
                 post = {Keys.DEFERRED_TASKS_USER_ID: user_id}
                 self.tasks_collection.insert(post)
-                user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+                user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id_str})
 
             # If the user's tasks document was found.
             if user_tasks is not None:
@@ -2327,8 +2330,11 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
+            # Make sure we're dealing with a string.
+            user_id_str = str(user_id)
+
             # Find the user's tasks document.
-            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id_str})
 
             # If the user's tasks document was found.
             if user_tasks is not None and Keys.TASKS_KEY in user_tasks:
@@ -2351,8 +2357,11 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Make sure we're dealing with a string.
+            user_id_str = str(user_id)
+
             # Find the user's tasks document.
-            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id_str})
 
             # If the user's tasks document was found.
             if user_tasks is not None and Keys.TASKS_KEY in user_tasks:
