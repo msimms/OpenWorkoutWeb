@@ -16,6 +16,7 @@ class FtpCalculator(object):
 
     def estimate(self):
         """To be called after adding data with 'add_activity_data', estimates the user's FTP."""
+        """Source: https://www.youtube.com/watch?v=kmxhVO5H-f8"""
         max_20min_adjusted = 0.0
         max_1hr = 0.0
         if len(self.best_20min) > 0:
