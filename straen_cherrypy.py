@@ -538,6 +538,16 @@ class StraenWeb(object):
         return self.error()
 
     @cherrypy.expose
+    def api_keys(self):
+        """Renders the api key management page."""
+        result = ""
+        try:
+            result = self.app.api_keys()
+        except:
+            result = self.error()
+        return result
+
+    @cherrypy.expose
     def api(self, *args, **kw):
         """Endpoint for API calls."""
         response = ""

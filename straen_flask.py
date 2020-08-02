@@ -470,6 +470,16 @@ def ical(calendar_id):
         result = g_app.render_error()
     return result
 
+@g_flask_app.route('/api_keys')
+def api_keys(self):
+    """Renders the api key management page."""
+    result = ""
+    try:
+        result = self.app.api_keys()
+    except:
+        result = self.error()
+    return result
+
 @g_flask_app.route('/api/<version>/<method>', methods = ['GET','POST'])
 def api(version, method):
     """Endpoint for API calls."""
