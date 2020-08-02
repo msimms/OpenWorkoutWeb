@@ -38,6 +38,7 @@ class WorkoutPlanGeneratorScheduler(object):
 
         user_obj = {}
         user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
+
         plan_task = generate_workout_plan_for_user.delay(dumps(user_obj))
         data_mgr.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, plan_task.task_id, None)
 
@@ -47,3 +48,4 @@ class WorkoutPlanGeneratorScheduler(object):
         from WorkoutPlanGenerator import generate_workout_plan_from_inputs
 
         plan_task = generate_workout_plan_from_inputs.delay(dumps(user_obj))
+        data_mgr.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, plan_task.task_id, None)
