@@ -337,6 +337,14 @@ class UserMgr(object):
             return result        
         return result.lower()
 
+    def retrieve_api_keys(self, user_id):
+        """Retrieve method for the user's API keys."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_api_keys(user_id)
+
     def get_activity_user(self, activity):
         """Returns the user record that corresponds with the given activity."""
         if Keys.ACTIVITY_USER_ID_KEY in activity:

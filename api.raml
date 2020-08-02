@@ -596,6 +596,15 @@ version: v1
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
+/get_api_keys:
+    description: Returns the API keys associated witht he logged in user.
+    get:
+        responses:
+            200: A JSON formatted string.
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
 /list_activity_types:
     description: Returns the list of all activity types the software understands.
     get:

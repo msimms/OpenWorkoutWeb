@@ -1731,6 +1731,14 @@ class Api(object):
         setting_value = self.user_mgr.retrieve_user_setting(self.user_id, values[Keys.REQUESTED_SETTING_KEY])
         return True, setting_value
 
+    def handle_get_api_keys(self, values):
+        """Returns a list of API keys assigned to the current user."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        keys = self.user_mgr.retrieve_api_keys(self.user_id)
+        return True, json.dumps(keys)
+
     def handle_list_activity_types(self):
         """Returns the list of all activity types the software understands."""
         return True, json.dumps(self.data_mgr.retrieve_activity_types())
@@ -1793,6 +1801,8 @@ class Api(object):
             return self.handle_get_record_progression(values)
         elif request == 'get_user_setting':
             return self.handle_get_user_setting(values)
+        elif request == 'get_api_keys':
+            return self.handle_get_api_keys(values)
         elif request == 'list_activity_types':
             return self.handle_list_activity_types()
         return False, ""

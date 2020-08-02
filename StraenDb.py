@@ -229,7 +229,7 @@ class MongoDatabase(Database.Database):
         """Update method for a user."""
         if user_id is None:
             self.log_error(MongoDatabase.update_user.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if username is None:
             self.log_error(MongoDatabase.update_user.__name__ + ": Unexpected empty object: username")
             return False
@@ -380,7 +380,7 @@ class MongoDatabase(Database.Database):
         """Appends a user to the friends list of the user with the specified id."""
         if user_id is None:
             self.log_error(MongoDatabase.create_pending_friend_request.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if target_id is None:
             self.log_error(MongoDatabase.create_pending_friend_request.__name__ + ": Unexpected empty object: target_id")
             return False
@@ -450,7 +450,7 @@ class MongoDatabase(Database.Database):
         """Appends a user to the friends list of the user with the specified id."""
         if user_id is None:
             self.log_error(MongoDatabase.delete_pending_friend_request.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if target_id is None:
             self.log_error(MongoDatabase.delete_pending_friend_request.__name__ + ": Unexpected empty object: target_id")
             return False
@@ -479,7 +479,7 @@ class MongoDatabase(Database.Database):
         """Appends a user to the friends list of the user with the specified id."""
         if user_id is None:
             self.log_error(MongoDatabase.create_friend.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if target_id is None:
             self.log_error(MongoDatabase.create_friend.__name__ + ": Unexpected empty object: target_id")
             return False
@@ -546,7 +546,7 @@ class MongoDatabase(Database.Database):
         """Removes the users from each other's friends lists."""
         if user_id is None:
             self.log_error(MongoDatabase.delete_friend.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if target_id is None:
             self.log_error(MongoDatabase.delete_friend.__name__ + ": Unexpected empty object: target_id")
             return False
@@ -1896,7 +1896,7 @@ class MongoDatabase(Database.Database):
         """Delete method for the workout with the specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.delete_workout.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if workout_id is None:
             self.log_error(MongoDatabase.delete_workout.__name__ + ": Unexpected empty object: workout_id")
             return False
@@ -1960,7 +1960,7 @@ class MongoDatabase(Database.Database):
         """Retrieve method for the gear with the specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if activity_type is None:
             self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: activity_type")
             return False
@@ -2073,7 +2073,7 @@ class MongoDatabase(Database.Database):
         """Retrieve method for the gear with the specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if gear_id is None:
             self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: gear_id")
             return False
@@ -2118,7 +2118,7 @@ class MongoDatabase(Database.Database):
         """Delete method for the gear with the specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if gear_id is None:
             self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: gear_id")
             return False
@@ -2152,7 +2152,7 @@ class MongoDatabase(Database.Database):
         """Delete method for the gear with the specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
 
         try:
             # Find the user's document.
@@ -2176,7 +2176,7 @@ class MongoDatabase(Database.Database):
         """Create method for gear service records."""
         if user_id is None:
             self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if gear_id is None:
             self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: gear_id")
             return False
@@ -2228,7 +2228,7 @@ class MongoDatabase(Database.Database):
         """Delete method for the service record with the specified user and gear ID."""
         if user_id is None:
             self.log_error(MongoDatabase.delete_service_record.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if gear_id is None:
             self.log_error(MongoDatabase.delete_service_record.__name__ + ": Unexpected empty object: gear_id")
             return False
@@ -2272,7 +2272,7 @@ class MongoDatabase(Database.Database):
         """Create method for tracking a deferred task, such as a file import or activity analysis."""
         if user_id is None:
             self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if task_type is None:
             self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: task_type")
             return False
@@ -2348,7 +2348,7 @@ class MongoDatabase(Database.Database):
         """Updated method for deferred task status."""
         if user_id is None:
             self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if task_id is None:
             self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: task_id")
             return False
@@ -2378,3 +2378,21 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
+
+    def retrieve_api_keys(self, user_id):
+        """Retrieve method for API keys."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_api_keys.__name__ + ": Unexpected empty object: user_id")
+            return None
+
+        try:
+            # Find the user.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            if user is not None and Keys.API_KEYS in user:
+                return user[Keys.API_KEYS]
+            return []
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return []
