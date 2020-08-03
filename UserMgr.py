@@ -37,9 +37,9 @@ class UserMgr(object):
     """Class for managing user accounts"""
 
     def __init__(self, session_mgr):
+        self.session_mgr = session_mgr
         self.database = StraenDb.MongoDatabase()
         self.database.connect()
-        self.session_mgr = session_mgr
         super(UserMgr, self).__init__()
 
     def terminate(self):

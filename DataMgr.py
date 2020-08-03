@@ -52,13 +52,13 @@ class DataMgr(Importer.ActivityWriter):
     """Data store abstraction"""
 
     def __init__(self, config, root_url, analysis_scheduler, import_scheduler, workout_plan_gen_scheduler):
-        self.database = StraenDb.MongoDatabase()
-        self.database.connect()
         self.config = config
         self.root_url = root_url
         self.analysis_scheduler = analysis_scheduler
         self.import_scheduler = import_scheduler
         self.workout_plan_gen_scheduler = workout_plan_gen_scheduler
+        self.database = StraenDb.MongoDatabase()
+        self.database.connect()
         self.map_search = None
         self.celery_worker = celery.Celery('straen_worker')
         self.celery_worker.config_from_object('CeleryConfig')
