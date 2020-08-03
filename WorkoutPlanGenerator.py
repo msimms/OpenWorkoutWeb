@@ -421,7 +421,7 @@ def export_workouts(workouts, format):
                 local_file.write(zwo_str)
             print("Exported a workout to " + tempfile_name + ".")
 
-@celery_worker.task()
+@celery_worker.task(ignore_result=True)
 def generate_workout_plan_for_user(user_str):
     """Entry point for the celery worker."""
     global g_model

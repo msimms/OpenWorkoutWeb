@@ -45,7 +45,7 @@ def log_error(log_str):
     if logger is not None:
         logger.debug(log_str)
 
-@celery_worker.task()
+@celery_worker.task(ignore_result=True)
 def import_activity(import_str):
     local_file_name = ""
 

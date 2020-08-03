@@ -153,7 +153,7 @@ class ActivityAnalyzer(object):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
 
-@celery_worker.task()
+@celery_worker.task(ignore_result=True)
 def analyze_activity(activity_str):
     print("Starting activity analysis...")
     activity_obj = json.loads(activity_str)
