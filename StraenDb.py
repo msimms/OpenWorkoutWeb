@@ -2379,6 +2379,34 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def create_api_key(self, user_id, key):
+        """Create method for an API key."""
+        if user_id is None:
+            self.log_error(MongoDatabase.create_api_key.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if key is None:
+            self.log_error(MongoDatabase.create_api_key.__name__ + ": Unexpected empty object: key")
+            return False
+
+        try:
+            # Find the user.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user was found.
+            if user is not None:
+                key_list = []
+                if Keys.API_KEYS in user:
+                    key_list = user[Keys.API_KEYS]
+                key_list.append(key)
+                user[Keys.API_KEYS] = key_list
+                self.users_collection.save(user)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def retrieve_api_keys(self, user_id):
         """Retrieve method for API keys."""
         if user_id is None:
@@ -2396,3 +2424,30 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return []
+
+    def delete_api_key(self, user_id, key):
+        """Delete method for an API key."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_api_key.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if key is None:
+            self.log_error(MongoDatabase.delete_api_key.__name__ + ": Unexpected empty object: key")
+            return False
+
+        try:
+            # Find the user.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user was found.
+            if user is not None:
+                if Keys.API_KEYS in user:
+                    key_list = user[Keys.API_KEYS]
+                    key_list.remove(key)
+                    user[Keys.API_KEYS] = key_list
+                    self.users_collection.save(user)
+                    return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
