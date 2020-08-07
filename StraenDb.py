@@ -181,7 +181,10 @@ class MongoDatabase(Database.Database):
             return None, None, None
 
         try:
-            user = self.users_collection.find_one({Keys.USERNAME_KEY: username})
+            # Find the user.
+            user = self.users_collection.find_one({Keys.USERNAME_KEY: username}, {Keys.DATABASE_ID_KEY, Keys.HASH_KEY, Keys.REALNAME_KEY})
+
+            # If the user was found.
             if user is not None:
                 return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], str(user[Keys.REALNAME_KEY])
             return None, None, None
@@ -199,7 +202,9 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj}, {Keys.USERNAME_KEY, Keys.REALNAME_KEY})
+
+            # If the user was found.
             if user is not None:
                 return user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
             return None, None
@@ -216,7 +221,11 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user.
-            user = self.users_collection.find_one({Keys.API_KEYS: api_key})
+            query = { Keys.API_KEYS: { Keys.API_KEY: str(api_key), Keys.API_KEY_RATE : int(1000) } }
+            result_keys = { Keys.DATABASE_ID_KEY, Keys.HASH_KEY, Keys.REALNAME_KEY }
+            user = self.users_collection.find_one(query, result_keys)
+
+            # If the user was found.
             if user is not None:
                 return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], user[Keys.REALNAME_KEY]
             return None, None, None
@@ -247,6 +256,8 @@ class MongoDatabase(Database.Database):
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+
+            # If the user was found.
             if user is not None:
                 user[Keys.USERNAME_KEY] = username
                 user[Keys.REALNAME_KEY] = realname
@@ -340,7 +351,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj}, {Keys.DEVICES_KEY})
 
             # Read the devices list.
             if user is not None and Keys.DEVICES_KEY in user:
@@ -649,6 +660,8 @@ class MongoDatabase(Database.Database):
             # Find the user's records collection.
             user_id_str = str(user_id)
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id_str})
+
+            # If the collection was found.
             if user_records is None:
                 post = {Keys.RECORDS_USER_ID: user_id_str, Keys.PERSONAL_RECORDS_KEY: records}
                 self.records_collection.insert(post)
@@ -668,6 +681,8 @@ class MongoDatabase(Database.Database):
             # Find the user's records collection.
             user_id_str = str(user_id)
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id_str})
+
+            # If the collection was found.
             if user_records is not None and Keys.PERSONAL_RECORDS_KEY in user_records:
                 return user_records[Keys.PERSONAL_RECORDS_KEY]
         except:
@@ -688,6 +703,8 @@ class MongoDatabase(Database.Database):
             # Find the user's records collection.
             user_id_str = str(user_id)
             user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id_str})
+
+            # If the collection was found.
             if user_records is not None:
                 user_records[Keys.PERSONAL_RECORDS_KEY] = records
                 self.records_collection.save(user_records)
@@ -2379,13 +2396,16 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_api_key(self, user_id, key):
+    def create_api_key(self, user_id, key, rate):
         """Create method for an API key."""
         if user_id is None:
             self.log_error(MongoDatabase.create_api_key.__name__ + ": Unexpected empty object: user_id")
             return False
         if key is None:
             self.log_error(MongoDatabase.create_api_key.__name__ + ": Unexpected empty object: key")
+            return False
+        if rate is None:
+            self.log_error(MongoDatabase.create_api_key.__name__ + ": Unexpected empty object: rate")
             return False
 
         try:
@@ -2398,7 +2418,8 @@ class MongoDatabase(Database.Database):
                 key_list = []
                 if Keys.API_KEYS in user:
                     key_list = user[Keys.API_KEYS]
-                key_list.append(key)
+                key_dict = { Keys.API_KEY: str(key), Keys.API_KEY_RATE: int(rate) }
+                key_list.append(key_dict)
                 user[Keys.API_KEYS] = key_list
                 self.users_collection.save(user)
                 return True
@@ -2416,7 +2437,9 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj}, {Keys.API_KEYS})
+
+            # If the user was found.
             if user is not None and Keys.API_KEYS in user:
                 return user[Keys.API_KEYS]
             return []
@@ -2440,13 +2463,19 @@ class MongoDatabase(Database.Database):
             user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
 
             # If the user was found.
-            if user is not None:
-                if Keys.API_KEYS in user:
-                    key_list = user[Keys.API_KEYS]
-                    key_list.remove(key)
-                    user[Keys.API_KEYS] = key_list
-                    self.users_collection.save(user)
-                    return True
+            if user is not None and Keys.API_KEYS in user:
+
+                # Make sure we're dealing with a string.
+                key_str = str(key)
+
+                key_list = user[Keys.API_KEYS]
+                for item in key_list:
+                    if item[Keys.API_KEY] == key_str:
+                        key_list.remove(item)
+                        break
+                user[Keys.API_KEYS] = key_list
+                self.users_collection.save(user)
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

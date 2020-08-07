@@ -41,7 +41,8 @@ PR_KEY = "pr" # Personal record
 EMAIL_KEY = "email" # User's email
 TARGET_EMAIL_KEY = "target_email" # Email address of another user
 API_KEYS = "api keys" # List of API keys belonging to the user
-API_KEY = "api key" # API key being provided
+API_KEY = "key" # API key being provided
+API_KEY_RATE = "rate" # The maximum number of requests allowed per day for the provided key
 
 # User settings
 REQUESTED_SETTING_KEY = "requested setting"

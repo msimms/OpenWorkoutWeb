@@ -27,8 +27,19 @@
     {
         var keys_table = document.getElementById("Keys");
 
+        var new_row = keys_table.insertRow();
+        var cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode("API Key"));
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode("Maximum Queries Per Day"));
+
         for (var key_record of records)
         {
+            var new_row = keys_table.insertRow();
+            var cell = new_row.insertCell();
+            cell.appendChild(document.createTextNode(key_record.key));
+            cell = new_row.insertCell();
+            cell.appendChild(document.createTextNode(key_record.rate));
         }
     }
 

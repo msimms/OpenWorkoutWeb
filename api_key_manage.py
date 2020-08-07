@@ -28,18 +28,24 @@ import uuid
 import sys
 import StraenDb
 
-def create_key(username):
+def create_key(username, rate):
     db = StraenDb.MongoDatabase()
     db.connect()
     user_id, _, _ = db.retrieve_user(username)
-    return db.create_api_key(user_id, uuid.uuid4())
+    key = uuid.uuid4()
+    return db.create_api_key(user_id, key, rate)
+
+def list_keys(username):
+    db = StraenDb.MongoDatabase()
+    db.connect()
+    user_id, _, _ = db.retrieve_user(username)
+    return db.retrieve_api_keys(user_id)
 
 def revoke_key(key):
     db = StraenDb.MongoDatabase()
     db.connect()
-    key_obj = uuid.UUID(key)
-    user_id, _, _ = db.retrieve_user_from_api_key(key_obj)
-    return db.delete_api_key(user_id, key_obj)
+    user_id, _, _ = db.retrieve_user_from_api_key(key)
+    return db.delete_api_key(user_id, key)
 
 if __name__ == "__main__":
 
@@ -47,7 +53,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--user", type=str, action="store", default="", help="The name of the user for whom to create an API key", required=False)
     parser.add_argument("--key", type=str, action="store", default="", help="The API key to revoke", required=False)
+    parser.add_argument("--rate", type=int, action="store", default="0", help="The maximum number of requests per day", required=False)
     parser.add_argument("--create-key", action="store_true", default=False, help="Creates a key for the specified user.", required=False)
+    parser.add_argument("--list-keys", action="store_true", default=False, help="Lists keys owned by the specified user.", required=False)
     parser.add_argument("--revoke-key", action="store_true", default=False, help="Revokes the specified key.", required=False)
 
     try:
@@ -57,10 +65,13 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if args.create_key:
-        if create_key(args.user):
+        if create_key(args.user, args.rate):
             print("Key created.")
         else:
             print("Failed to create key.")
+    if args.list_keys:
+        keys = list_keys(args.user)
+        print(keys)
     if args.revoke_key:
         if revoke_key(args.key):
             print("Key revoked.")
