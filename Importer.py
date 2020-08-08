@@ -370,7 +370,7 @@ class Importer(object):
                 continue
 
             # Look for location and sensor data.
-            if 'position_long' in message_data and 'position_lat' in message_data:
+            if 'position_long' in message_data and 'position_lat' in message_data and message_data['position_lat'] is not None and message_data['position_long'] is not None:
                 location = []
                 location.append(dt_unix)
                 location.append(float(message_data['position_lat']))
