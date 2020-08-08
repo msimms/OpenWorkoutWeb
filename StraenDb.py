@@ -351,7 +351,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj}, {Keys.DEVICES_KEY})
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
 
             # Read the devices list.
             if user is not None and Keys.DEVICES_KEY in user:
