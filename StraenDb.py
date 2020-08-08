@@ -182,7 +182,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user.
-            user = self.users_collection.find_one({Keys.USERNAME_KEY: username}, {Keys.DATABASE_ID_KEY, Keys.HASH_KEY, Keys.REALNAME_KEY})
+            user = self.users_collection.find_one({Keys.USERNAME_KEY: username})
 
             # If the user was found.
             if user is not None:
@@ -202,7 +202,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj}, {Keys.USERNAME_KEY, Keys.REALNAME_KEY})
+            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
 
             # If the user was found.
             if user is not None:
