@@ -959,6 +959,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
+            # Make sure the activity name is a string.
+            activty_name = str(activty_name)
+
+            # Create the activity.
             post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_NAME_KEY: activty_name, Keys.ACTIVITY_TIME_KEY: date_time, Keys.ACTIVITY_DEVICE_STR_KEY: device_str, Keys.ACTIVITY_VISIBILITY_KEY: "public", Keys.ACTIVITY_LOCATIONS_KEY: [] }
             self.activities_collection.insert(post)
             return True
