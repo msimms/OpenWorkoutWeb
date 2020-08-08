@@ -68,7 +68,7 @@ def import_activity(import_str):
         local_file_name = local_file_name + uploaded_file_ext
 
         # Write the file.
-        print("Write the data to a local file...")
+        print("Writing the data to a local file...")
         with open(local_file_name, 'wb') as local_file:
             print("Base64 decoding...")
             decoded_file_data = base64.b64decode(uploaded_file_data)
@@ -78,14 +78,14 @@ def import_activity(import_str):
             local_file.write(decoded_file_data)
 
         # Import the file into the database.            
-        print("Import the data to the database...")
+        print("Importing the data to the database...")
         data_mgr = DataMgr.DataMgr(None, "", None, None, None)
         importer = Importer.Importer(data_mgr)
         success, _, activity_id = importer.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
 
         # If the import was successful, then schedule the activity for analysis.
         if success:
-            print("Import was successful, perform analysis...")
+            print("Importing was successful, perform analysis...")
             analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
             activity = data_mgr.retrieve_activity(activity_id)
             analysis_scheduler.add_activity_to_queue(activity, user_id, data_mgr)
