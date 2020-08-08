@@ -630,6 +630,7 @@ class Api(object):
                     url = self.root_url + "/activity/" + activity[Keys.ACTIVITY_ID_KEY]
                     temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time': int(activity[Keys.ACTIVITY_TIME_KEY])}
                 matched_activities.append(temp_activity)
+
         json_result = json.dumps(matched_activities, ensure_ascii=False)
         return True, json_result
 

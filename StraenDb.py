@@ -1340,7 +1340,8 @@ class MongoDatabase(Database.Database):
 
                 # Make sure we're working with a number, if the value is supposed to be a number.
                 try:
-                    value = float(value)
+                    if not key in [ Keys.ACTIVITY_NAME_KEY, Keys.ACTIVITY_TYPE_KEY, Keys.ACTIVITY_DESCRIPTION_KEY ]:
+                        value = float(value)
                 except ValueError:
                     pass
 
