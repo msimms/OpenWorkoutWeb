@@ -15,8 +15,8 @@ class RunPlanGenerator(object):
 
     def __init__(self, user_id):
         self.user_id = user_id
-        self.easy_distance_amount = 0.0
-        self.hard_distance_amount = 0.0
+        self.easy_distance_total_meters = 0.0
+        self.hard_distance_total_meters = 0.0
 
     def is_workout_plan_possible(self, inputs):
         """Returns TRUE if we can actually generate a plan with the given contraints."""
@@ -51,15 +51,18 @@ class RunPlanGenerator(object):
 
         # Roll the dice to figure out the distance.
         run_distance = random.uniform(min_run_distance, max_run_distance)
-        interval_distance = RunPlanGenerator.nearest_interval_distance(run_distance, 5000.0)
+        if run_distance > 1000:
+            interval_distance_meters = round(run_distance, -3)
+        else:
+            interval_distance_meters = round(run_distance, -2)
 
         # Create the workout object.
         easy_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RUN, self.user_id)
         easy_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
-        easy_run_workout.add_interval(1, interval_distance, pace, 0, 0)
+        easy_run_workout.add_interval(1, interval_distance_meters, pace, 0, 0)
 
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        self.easy_distance_amount += interval_distance
+        self.easy_distance_total_meters += interval_distance_meters
 
         return easy_run_workout
 
@@ -67,26 +70,26 @@ class RunPlanGenerator(object):
         """Utility function for creating a tempo workout."""
 
         temp_distance = 30.0 * tempo_run_pace
-        interval_distance = RunPlanGenerator.nearest_interval_distance(temp_distance, 2000.0)
+        interval_distance_meters = RunPlanGenerator.nearest_interval_distance(temp_distance, 2000.0)
 
         # Sanity check.
-        if interval_distance > max_run_distance:
-            interval_distance = max_run_distance
+        if interval_distance_meters > max_run_distance:
+            interval_distance_meters = max_run_distance
 
-        warmup_duration = 5 * 60
+        warmup_duration = 10 * 60
         cooldown_duration = 10 * 60
 
         # Create the workout object.
         tempo_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TEMPO_RUN, self.user_id)
         tempo_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
         tempo_run_workout.add_warmup(warmup_duration)
-        tempo_run_workout.add_interval(1, interval_distance, tempo_run_pace, 0, 0)
+        tempo_run_workout.add_interval(1, interval_distance_meters, tempo_run_pace, 0, 0)
         tempo_run_workout.add_cooldown(cooldown_duration)
 
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        self.easy_distance_amount += (warmup_duration / easy_run_pace)
-        self.easy_distance_amount += (cooldown_duration / easy_run_pace)
-        self.hard_distance_amount += interval_distance
+        self.easy_distance_total_meters += (warmup_duration / easy_run_pace)
+        self.easy_distance_total_meters += (cooldown_duration / easy_run_pace)
+        self.hard_distance_total_meters += interval_distance_meters
 
         return tempo_run_workout
 
@@ -107,28 +110,29 @@ class RunPlanGenerator(object):
 
         # Determine the pace for this workout.
         if selected_interval_workout[REP_DISTANCE_INDEX] < 1000:
-            selected_pace = short_interval_run_pace
+            interval_pace = short_interval_run_pace
         else:
-            selected_pace = speed_run_pace
+            interval_pace = speed_run_pace
 
         # Determine the number of reps for this workout.
         selected_reps = random.randint(selected_interval_workout[MIN_REPS_INDEX], selected_interval_workout[MAX_REPS_INDEX])
 
         # Determine the distance for this workout.
-        selected_distance = selected_interval_workout[REP_DISTANCE_INDEX]
+        interval_distance = selected_interval_workout[REP_DISTANCE_INDEX]
+        rest_interval_distance = interval_distance * 2
 
         # Create the workout object.
         interval_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_RUN, self.user_id)
         interval_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
         interval_run_workout.add_warmup(warmup_duration)
-        interval_run_workout.add_interval(selected_reps, selected_distance, selected_pace, selected_distance * 2, easy_run_pace)
+        interval_run_workout.add_interval(selected_reps, interval_distance, interval_pace, rest_interval_distance, easy_run_pace)
         interval_run_workout.add_cooldown(cooldown_duration)
 
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        self.easy_distance_amount += (warmup_duration / easy_run_pace)
-        self.easy_distance_amount += (cooldown_duration / easy_run_pace)
-        self.easy_distance_amount += ((selected_reps - 1) * (selected_distance * 2))
-        self.hard_distance_amount += (selected_reps * selected_distance)
+        self.easy_distance_total_meters += (warmup_duration / easy_run_pace)
+        self.easy_distance_total_meters += (cooldown_duration / easy_run_pace)
+        self.easy_distance_total_meters += ((selected_reps - 1) * rest_interval_distance)
+        self.hard_distance_total_meters += (selected_reps * interval_distance)
 
         return interval_run_workout
 
@@ -141,15 +145,15 @@ class RunPlanGenerator(object):
             long_run_distance = max_run_distance
         if long_run_distance < min_run_distance:
             long_run_distance = min_run_distance
-        interval_distance = RunPlanGenerator.round_distance(long_run_distance)
+        interval_distance_meters = RunPlanGenerator.round_distance(long_run_distance)
 
         # Create the workout object.
         long_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_LONG_RUN, self.user_id)
         long_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
-        long_run_workout.add_interval(1, interval_distance, long_run_pace, 0, 0)
+        long_run_workout.add_interval(1, interval_distance_meters, long_run_pace, 0, 0)
 
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        self.easy_distance_amount += interval_distance
+        self.easy_distance_total_meters += interval_distance_meters
 
         return long_run_workout
 
@@ -232,8 +236,8 @@ class RunPlanGenerator(object):
             workouts = []
 
             # Keep track of the number of easy miles/kms and the number of hard miles/kms we're expecting the user to run so we can balance the two.
-            self.easy_distance_amount = 0.0
-            self.hard_distance_amount = 0.0
+            self.easy_distance_total_meters = 0.0
+            self.hard_distance_total_meters = 0.0
 
             # The user cares about speed as well as completing the distance. Also note that we should add strikes to one of the other workouts.
             if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower():
@@ -270,8 +274,8 @@ class RunPlanGenerator(object):
             workouts.append(long_run_workout)
 
             # Keep track of the total distance as well as the easy distance to keep from planning too many intense miles/kms.
-            total_distance = self.easy_distance_amount + self.hard_distance_amount
-            easy_distance_percentage = self.easy_distance_amount / total_distance
+            total_distance = self.easy_distance_total_meters + self.hard_distance_total_meters
+            easy_distance_percentage = self.easy_distance_total_meters / total_distance
 
             # This is used to make sure we don't loop forever.
             iter_count = iter_count + 1
