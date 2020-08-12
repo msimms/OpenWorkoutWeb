@@ -1056,6 +1056,16 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         self.workout_plan_gen_scheduler.add_inputs_to_queue(inputs, self)
 
+    def merge_gpx_files(self, user_id, uploaded_file1_data, uploaded_file2_data):
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if uploaded_file1_data is None:
+            raise Exception("Bad parameter.")
+        if uploaded_file2_data is None:
+            raise Exception("Bad parameter.")
+
+        merge_tool = GpxMerge.GpxMerge()
+
     def get_location_description(self, activity_id):
         """Returns the political location that corresponds to an activity."""
         if self.database is None:

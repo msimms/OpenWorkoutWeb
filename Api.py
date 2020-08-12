@@ -1530,6 +1530,29 @@ class Api(object):
         self.data_mgr.generate_workout_plan_from_inputs(self.user_id)
         return True, ""
 
+    def handle_merge_gpx_files(self, values):
+        """Takes two GPX files and attempts to merge them."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.UPLOADED_FILE1_DATA_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("File data not specified.")
+        if Keys.UPLOADED_FILE2_DATA_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("File data not specified.")
+
+        # Decode the parameters.
+        uploaded_file1_data = unquote_plus(values[Keys.UPLOADED_FILE1_DATA_KEY])
+        uploaded_file2_data = unquote_plus(values[Keys.UPLOADED_FILE2_DATA_KEY])
+
+        # Check for empty.
+        if len(uploaded_file1_data) == 0:
+            raise ApiException.ApiMalformedRequestException('Empty file data.')
+        if len(uploaded_file2_data) == 0:
+            raise ApiException.ApiMalformedRequestException('Empty file data.')
+
+        # Parse the file and store it's contents in the database.
+        merged_data = self.data_mgr.merge_gpx_files(self.user_id, uploaded_file1_data, uploaded_file2_data)
+        return True, merged_data
+
     def handle_list_workouts(self, values):
         """Called when the user wants wants a list of their planned workouts. Result is a JSON string."""
         if self.user_id is None:
@@ -1890,6 +1913,8 @@ class Api(object):
             return self.handle_generate_workout_plan_for_user(values)
         elif request == 'generate_workout_plan_from_inputs':
             return self.handle_generate_workout_plan_from_inputs(values)
+        elif request == 'merge_gpx_files':
+            return self.handle_merge_gpx_files(values)
         return False, ""
 
     def handle_api_1_0_request(self, verb, request, values):

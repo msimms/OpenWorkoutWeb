@@ -132,6 +132,8 @@ INTERVAL_WORKOUT_RECOVERY_PACE_KEY = "Recovery Pace"
 # Keys associated with uploading data
 UPLOADED_FILE_NAME_KEY = "uploaded_file_name"
 UPLOADED_FILE_DATA_KEY = "uploaded_file_data"
+UPLOADED_FILE1_DATA_KEY = "uploaded_file1_data"
+UPLOADED_FILE2_DATA_KEY = "uploaded_file2_data"
 
 # Keys inherited from the mobile app. Some of these are also used by the web app.
 APP_NAME_KEY = "Name"
