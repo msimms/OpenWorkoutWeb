@@ -105,7 +105,7 @@ class RunPlanGenerator(object):
         cooldown_duration = 10 * 60
 
         # Build a collection of possible run interval sessions, sorted by target distance. Order is { min reps, max reps, distance in meters }.
-        possible_workouts = [ [ 4, 6, 100 ], [ 4, 6, 200 ], [ 4, 6, 400 ], [ 4, 6, 600 ], [ 2, 4, 800 ], [ 2, 4, 1000 ], [ 2, 4, 1600 ] ]
+        possible_workouts = [ [ 4, 8, 100 ], [ 4, 8, 200 ], [ 4, 8, 400 ], [ 4, 6, 600 ], [ 2, 4, 800 ], [ 2, 4, 1000 ], [ 2, 4, 1600 ] ]
         selected_interval_workout = random.choice(possible_workouts)
 
         # Determine the pace for this workout.
@@ -115,7 +115,7 @@ class RunPlanGenerator(object):
             interval_pace = speed_run_pace
 
         # Determine the number of reps for this workout.
-        selected_reps = random.randint(selected_interval_workout[MIN_REPS_INDEX], selected_interval_workout[MAX_REPS_INDEX])
+        selected_reps = random.choice(range(selected_interval_workout[MIN_REPS_INDEX], selected_interval_workout[MAX_REPS_INDEX], 2))
 
         # Determine the distance for this workout.
         interval_distance = selected_interval_workout[REP_DISTANCE_INDEX]
