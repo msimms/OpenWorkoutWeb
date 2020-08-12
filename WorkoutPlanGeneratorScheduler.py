@@ -23,6 +23,8 @@
 # SOFTWARE.
 """Schedules computationally expensive workout plan generation tasks"""
 
+import uuid
+
 class WorkoutPlanGeneratorScheduler(object):
     """Class for scheduling computationally expensive workout plan generation tasks."""
 
@@ -39,13 +41,15 @@ class WorkoutPlanGeneratorScheduler(object):
         user_obj = {}
         user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
 
-        plan_task = generate_workout_plan_for_user.delay(dumps(user_obj))
-        data_mgr.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, plan_task.task_id, None)
+        internal_task_id = uuid.uuid4()
+        plan_task = generate_workout_plan_for_user.delay(dumps(user_obj), internal_task_id)
+        data_mgr.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, plan_task.task_id, internal_task_id, None)
 
     def add_inputs_to_queue(self, inputs, data_mgr):
         """Adds the input data set to the list of workout plans to be generated."""
         from bson.json_util import dumps
         from WorkoutPlanGenerator import generate_workout_plan_from_inputs
 
-        plan_task = generate_workout_plan_from_inputs.delay(dumps(user_obj))
-        data_mgr.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, plan_task.task_id, None)
+        internal_task_id = uuid.uuid4()
+        plan_task = generate_workout_plan_from_inputs.delay(dumps(user_obj), internal_task_id)
+        data_mgr.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, plan_task.task_id, internal_task_id, None)

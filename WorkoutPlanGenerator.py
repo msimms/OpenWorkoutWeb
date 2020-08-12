@@ -429,7 +429,7 @@ def export_workouts(workouts, format):
             print("Exported a workout to " + tempfile_name + ".")
 
 @celery_worker.task(ignore_result=True)
-def generate_workout_plan_for_user(user_str):
+def generate_workout_plan_for_user(user_str, internal_task_id):
     """Entry point for the celery worker."""
     global g_model
 
@@ -442,7 +442,7 @@ def generate_workout_plan_for_user(user_str):
     print("Workout plan generation finished.")
 
 @celery_worker.task()
-def generate_workout_plan_from_inputs(inputs):
+def generate_workout_plan_from_inputs(inputs, internal_task_id):
     """Entry point for the celery worker."""
     global g_model
 

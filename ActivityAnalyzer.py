@@ -19,8 +19,9 @@ import SensorAnalyzerFactory
 class ActivityAnalyzer(object):
     """Class for performing the computationally expensive activity analysis task."""
 
-    def __init__(self, activity):
+    def __init__(self, activity, internal_task_id):
         self.activity = activity
+        self.internal_task_id = internal_task_id # For tracking the status of the analysis
         self.summary_data = {}
         self.speed_graph = None
         root_dir = os.path.dirname(os.path.abspath(__file__))
@@ -65,6 +66,9 @@ class ActivityAnalyzer(object):
             if activity_user_id is None:
                 self.log_error("The activity user ID was not provided.")
                 return
+
+            # Update the status of the analysis in the database.
+            self.data_mgr.update_deferred_task(activity_user_id, self.internal_task_id, Keys.TASK_STATUS_STARTED)
 
             # Make sure the activity start time is set.
             self.data_mgr.update_activity_start_time(self.activity)
@@ -148,16 +152,19 @@ class ActivityAnalyzer(object):
                     self.log_error("Error returned when updating personal records.")
             else:
                 self.log_error("Activity time not provided. Cannot update personal records.")
+
+            # Update the status of the analysis in the database.
+            self.data_mgr.update_deferred_task(activity_user_id, self.internal_task_id, Keys.TASK_STATUS_FINISHED)
         except:
             self.log_error("Exception when analyzing activity data: " + str(self.summary_data))
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
 
 @celery_worker.task(ignore_result=True)
-def analyze_activity(activity_str):
+def analyze_activity(activity_str, internal_task_id):
     print("Starting activity analysis...")
     activity_obj = json.loads(activity_str)
-    analyzer = ActivityAnalyzer(activity_obj)
+    analyzer = ActivityAnalyzer(activity_obj, internal_task_id)
     analyzer.perform_analysis()
     print("Activity analysis finished")
 

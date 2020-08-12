@@ -242,7 +242,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity ID.")
         return self.database.create_activity_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
 
-    def create_deferred_task(self, user_id, task_type, task_id, details):
+    def create_deferred_task(self, user_id, task_type, celery_task_id, internal_task_id, details):
         """Called by the importer to store data associated with an ongoing import task."""
         if self.database is None:
             raise Exception("No database.")
@@ -250,9 +250,11 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No user ID.")
         if task_type is None:
             raise Exception("No task type.")
-        if task_id is None:
-            raise Exception("No task ID.")
-        return self.database.create_deferred_task(user_id, task_type, task_id, details, Keys.TASK_STATUS_QUEUED)
+        if celery_task_id is None:
+            raise Exception("No celery task ID.")
+        if internal_task_id is None:
+            raise Exception("No internal task ID.")
+        return self.database.create_deferred_task(user_id, task_type, celery_task_id, internal_task_id, details, Keys.TASK_STATUS_QUEUED)
 
     def retrieve_deferred_tasks(self, user_id):
         """Returns a list of all incomplete tasks."""
@@ -262,17 +264,17 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No user ID.")
         return self.database.retrieve_deferred_tasks(user_id)
 
-    def update_deferred_task(self, user_id, task_id, status):
+    def update_deferred_task(self, user_id, internal_task_id, status):
         """Returns a list of all incomplete tasks."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("No user ID.")
-        if task_id is None:
-            raise Exception("No task ID.")
+        if internal_task_id is None:
+            raise Exception("No internal task ID.")
         if status is None:
             raise Exception("No status.")
-        return self.database.update_deferred_task(user_id, task_id, status)
+        return self.database.update_deferred_task(user_id, internal_task_id, status)
 
     def import_file(self, username, user_id, uploaded_file_data, uploaded_file_name):
         """Imports the contents of a local file into the database."""

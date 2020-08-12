@@ -2298,7 +2298,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_deferred_task(self, user_id, task_type, task_id, details, status):
+    def create_deferred_task(self, user_id, task_type, celery_task_id, internal_task_id, details, status):
         """Create method for tracking a deferred task, such as a file import or activity analysis."""
         if user_id is None:
             self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: user_id")
@@ -2306,8 +2306,11 @@ class MongoDatabase(Database.Database):
         if task_type is None:
             self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: task_type")
             return False
-        if task_id is None:
-            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: task_id")
+        if celery_task_id is None:
+            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: celery_task_id")
+            return False
+        if internal_task_id is None:
+            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: internal_task_id")
             return False
         if status is None:
             self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: status")
@@ -2322,7 +2325,7 @@ class MongoDatabase(Database.Database):
 
             # If the user's tasks document was not found then create it.
             if user_tasks is None:
-                post = {Keys.DEFERRED_TASKS_USER_ID: user_id}
+                post = { Keys.DEFERRED_TASKS_USER_ID: user_id }
                 self.tasks_collection.insert(post)
                 user_tasks = self.tasks_collection.find_one({ Keys.DEFERRED_TASKS_USER_ID: user_id_str })
 
@@ -2336,7 +2339,8 @@ class MongoDatabase(Database.Database):
 
                 # Create an entry for the new task.
                 task = {}
-                task[Keys.TASK_ID_KEY] = task_id
+                task[Keys.TASK_CELERY_ID_KEY] = str(celery_task_id)
+                task[Keys.TASK_INTERNAL_ID_KEY] = str(internal_task_id)
                 task[Keys.TASK_TYPE_KEY] = task_type
                 task[Keys.TASK_DETAILS_KEY] = details
                 task[Keys.TASK_STATUS_KEY] = status
@@ -2374,21 +2378,22 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return []
 
-    def update_deferred_task(self, user_id, task_id, status):
+    def update_deferred_task(self, user_id, internal_task_id, status):
         """Updated method for deferred task status."""
         if user_id is None:
             self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: user_id")
             return False
-        if task_id is None:
-            self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: task_id")
+        if internal_task_id is None:
+            self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: internal_task_id")
             return False
         if status is None:
             self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: status")
             return False
 
         try:
-            # Make sure we're dealing with a string.
+            # Make sure we're dealing with strings.
             user_id_str = str(user_id)
+            internal_task_id_str = str(internal_task_id)
 
             # Find the user's tasks document.
             user_tasks = self.tasks_collection.find_one({ Keys.DEFERRED_TASKS_USER_ID: user_id_str })
@@ -2397,9 +2402,10 @@ class MongoDatabase(Database.Database):
             if user_tasks is not None and Keys.TASKS_KEY in user_tasks:
 
                 # Find and update the record.
-                for task in user_tasks:
-                    if Keys.TASK_ID_KEY in task and task[Keys.TASK_ID_KEY] == task_id:
+                for task in user_tasks[Keys.TASKS_KEY]:
+                    if Keys.TASK_INTERNAL_ID_KEY in task and task[Keys.TASK_INTERNAL_ID_KEY] == internal_task_id_str:
                         task[Keys.TASK_STATUS_KEY] = status
+                        break
 
                 # Update the database.
                 self.tasks_collection.save(user_tasks)
