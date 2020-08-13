@@ -786,9 +786,9 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException('Empty file data for ' + uploaded_file_name + '.')
 
         # Parse the file and store it's contents in the database.
-        self.data_mgr.import_file(username, self.user_id, uploaded_file_data, uploaded_file_name)
+        task_id = self.data_mgr.import_file(username, self.user_id, uploaded_file_data, uploaded_file_name)
 
-        return True, ""
+        return True, str(task_id)
 
     def handle_upload_activity_photo(self, values):
         """Called when an API message to upload a photo to an activity is received."""

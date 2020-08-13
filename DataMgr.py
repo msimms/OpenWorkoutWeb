@@ -288,7 +288,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No uploaded file data.")
         if uploaded_file_name is None:
             raise Exception("No uploaded file name.")
-        self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
+        return self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
 
     def attach_photo_to_activity(username, user_id, uploaded_file_data, uploaded_file_name, activity_id):
         """Imports a photo and associates it with an activity."""

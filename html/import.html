@@ -159,6 +159,7 @@ ${nav}
 	<script>
 		let picker = document.getElementById('picker');
 		let file_list = [];
+        let file_tasks = {};
 
         function update_file_status(file_name, status_text)
         {
@@ -172,6 +173,11 @@ ${nav}
                     break;
                 }
             }
+        }
+
+        function monitor_file_status(file_name, task_id)
+        {
+            file_tasks[task_id] = file_name;
         }
 
         function upload_file_no_ui(file_obj)
@@ -193,9 +199,14 @@ ${nav}
                 dict.push({["uploaded_file_data"] : encoded_data});
 
                 if (send_post_request(the_url, dict, result_text))
+                {
                     update_file_status(file_obj.name, "Uploaded (Queued For Processing)");
+                    monitor_file_status(file_obj.name, result_text);
+                }
                 else
+                {
                     alert(result_text.value);
+                }
             }
             reader.readAsBinaryString(file_obj);
         }
@@ -224,6 +235,24 @@ ${nav}
 				file_list.push(file);
 			};
 		});
+
+        var process_task_statuses = function(records)
+        {
+            for (var record of records)
+            {
+                if (record['internal task id'] in file_tasks)
+                {
+                    update_file_status(record["task details"], record["task status"]);
+                }
+            }
+        }
+
+        var check_for_updates = function()
+        {
+            $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_task_statuses", cache: false, success: process_task_statuses, dataType: "json" });
+        }
+
+        setInterval(check_for_updates, 5000);
 	</script>
 
 	<hr>
