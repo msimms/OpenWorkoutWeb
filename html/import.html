@@ -201,7 +201,7 @@ ${nav}
                 if (send_post_request(the_url, dict, result_text))
                 {
                     update_file_status(file_obj.name, "Uploaded (Queued For Processing)");
-                    monitor_file_status(file_obj.name, result_text);
+                    monitor_file_status(file_obj.name, result_text.value);
                 }
                 else
                 {
