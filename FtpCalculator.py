@@ -2,6 +2,7 @@
 """Estimates the user's Functional Threshold Power based on activity summary data."""
 
 import time
+import sys
 import Keys
 
 class FtpCalculator(object):
@@ -10,11 +11,12 @@ class FtpCalculator(object):
     def __init__(self):
         self.best_20min = []
         self.best_1hr = []
-        self.cutoff_time = time.time() - ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
+        self.cutoff_time = time.time() - ((365.25 / 2.0) * 24.0 * 60.0 * 60.0) # last six months
         super(FtpCalculator, self).__init__()
 
     def estimate(self):
         """To be called after adding data with 'add_activity_data', estimates the user's FTP."""
+        """Source: https://www.youtube.com/watch?v=kmxhVO5H-f8"""
         max_20min_adjusted = 0.0
         max_1hr = 0.0
         if len(self.best_20min) > 0:
@@ -46,8 +48,14 @@ class FtpCalculator(object):
         """Takes the list of power readings and determines how many belong in each power zone, based on the user's FTP."""
         zones = self.power_training_zones(ftp)
         distribution = [0.0] * (len(zones) + 1)
+        py_version = sys.version_info[0]
         for datum in powers:
-            value = float(datum.values()[0])
+
+            if py_version < 3:
+                value = float(datum.values()[0])
+            else:
+                value = float(list(datum.values())[0])
+
             index = 0
             found = False
             for zone_cutoff in zones:

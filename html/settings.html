@@ -71,6 +71,11 @@
 			alert("An error occurred!");
 	}
 
+    function manage_api_keys()
+    {
+        window.location.replace("${root_url}/api_keys");
+    }
+
 	function delete_gear()
 	{
 		if (confirm('Are you sure you want to do this?'))
@@ -170,6 +175,9 @@ ${day_options}
 	</select>
 	</p>
 	<button type="button" onclick="return update_settings()">Update</button>
+	<hr>
+	<h2>API Keys</h2>
+	<button type="button" onclick="return manage_api_keys()" style="color:black">Manage API Keys</button><br>
 	<hr>
 	<h2>Email</h2>
 	<p>New Email Address: <input type="text" id="new_email"><br></p>

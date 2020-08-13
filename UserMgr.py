@@ -37,9 +37,9 @@ class UserMgr(object):
     """Class for managing user accounts"""
 
     def __init__(self, session_mgr):
+        self.session_mgr = session_mgr
         self.database = StraenDb.MongoDatabase()
         self.database.connect()
-        self.session_mgr = session_mgr
         super(UserMgr, self).__init__()
 
     def terminate(self):
@@ -310,7 +310,7 @@ class UserMgr(object):
 
         # These are the default values:
         if result is None:
-            if key == Keys.DEFAULT_PRIVACY:
+            if key == Keys.DEFAULT_PRIVACY_KEY:
                 result = Keys.ACTIVITY_VISIBILITY_PUBLIC
             elif key == Keys.PREFERRED_UNITS_KEY:
                 result = Keys.UNITS_STANDARD_KEY
@@ -319,11 +319,11 @@ class UserMgr(object):
             elif key == Keys.GENDER_KEY:
                 result = Keys.GENDER_MALE_KEY
             elif key == Keys.HEIGHT_KEY:
-                result = Keys.DEFAULT_HEIGHT
+                result = Keys.DEFAULT_HEIGHT_KEY
             elif key == Keys.WEIGHT_KEY:
-                result = Keys.DEFAULT_WEIGHT
+                result = Keys.DEFAULT_WEIGHT_KEY
             elif key == Keys.BIRTHDAY_KEY:
-                result = Keys.DEFAULT_BIRTHDAY
+                result = Keys.DEFAULT_BIRTHDAY_KEY
             elif key == Keys.GOAL_DATE_KEY:
                 result = int(time.time())
             elif key == Keys.EXPERIENCE_LEVEL_KEY:
@@ -336,6 +336,14 @@ class UserMgr(object):
         if isinstance(result, int):
             return result        
         return result.lower()
+
+    def retrieve_api_keys(self, user_id):
+        """Retrieve method for the user's API keys."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_api_keys(user_id)
 
     def get_activity_user(self, activity):
         """Returns the user record that corresponds with the given activity."""

@@ -337,6 +337,17 @@ class App(object):
         delete_str = "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\">Delete</button></td><tr>\n"
         return delete_str
 
+    @staticmethod
+    def get_time_value_from_list_item(item, py_version):
+        """Utility function because this logic appears in too many places."""
+        if py_version < 3:
+            time = int(float(item.keys()[0]))
+            value = float(item.values()[0])
+        else:
+            time = int(float(list(item.keys())[0]))
+            value = float(list(item.values())[0])
+        return time, value
+
     def render_page_for_unmapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_username, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific un-mapped activity."""
 
@@ -452,9 +463,9 @@ class App(object):
         if Keys.APP_CURRENT_SPEED_KEY in activity:
             data = activity[Keys.APP_CURRENT_SPEED_KEY]
         if data is not None and isinstance(data, list):
+            py_version = sys.version_info[0]
             for datum in data:
-                time = datum.keys()[0]
-                value_num = float(datum.values()[0])
+                time, value_num = App.get_time_value_from_list_item(datum, py_version)                    
                 value_num, _, _ = Units.convert_to_speed_for_the_specified_unit_system(unit_system, value_num, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
                 data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value_num) + " },\n"
         return data_str
@@ -473,6 +484,7 @@ class App(object):
         data_str = ""
         data = []
         multiplier = 1.0
+        py_version = sys.version_info[0]
         if Keys.ACTIVITY_TYPE_KEY in activity:
             activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
             if activity_type in Keys.FOOT_BASED_ACTIVITIES:
@@ -481,8 +493,8 @@ class App(object):
         if key in activity:
             data = activity[key]
         for datum in data:
-            time = datum.keys()[0]
-            value = float(datum.values()[0]) * multiplier
+            time, value = App.get_time_value_from_list_item(datum, py_version)                    
+            value = value * multiplier
             data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
         return data_str
 
@@ -810,6 +822,16 @@ class App(object):
             if error_str is None:
                 error_str = "Internal Error."
             return my_template.render(product=PRODUCT_NAME, root_url=self.root_url, error=error_str)
+        except:
+            pass
+        return ""
+
+    def render_page_not_found(self):
+        """Renders the 404 error page."""
+        try:
+            error_html_file = os.path.join(self.root_dir, HTML_DIR, 'error_404.html')
+            my_template = Template(filename=error_html_file, module_directory=self.tempmod_dir)
+            return my_template.render(product=PRODUCT_NAME, root_url=self.root_url)
         except:
             pass
         return ""
@@ -1342,7 +1364,7 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Get the current settings.
-        selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, Keys.DEFAULT_PRIVACY)
+        selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, Keys.DEFAULT_PRIVACY_KEY)
         selected_units = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
         selected_first_day_of_week = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY)
 
@@ -1446,11 +1468,14 @@ class App(object):
     @statistics
     def about(self):
         """Renders the about page."""
-        about_html_file = os.path.join(self.root_dir, HTML_DIR, 'about.html')
-        my_template = Template(filename=about_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(product=PRODUCT_NAME, root_url=self.root_url)
+        return self.render_simple_page('about.html')
 
     @statistics
     def status(self):
         """Renders the status page. Used as a simple way to tell if the site is up."""
         return "Up"
+
+    @statistics
+    def api_keys(self):
+        """Renders the api key management page."""
+        return self.render_simple_page('api_keys.html')

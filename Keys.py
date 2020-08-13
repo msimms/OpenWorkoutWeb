@@ -41,21 +41,22 @@ PR_KEY = "pr" # Personal record
 EMAIL_KEY = "email" # User's email
 TARGET_EMAIL_KEY = "target_email" # Email address of another user
 API_KEYS = "api keys" # List of API keys belonging to the user
-API_KEY = "api key" # API key being provided
+API_KEY = "key" # API key being provided
+API_KEY_RATE = "rate" # The maximum number of requests allowed per day for the provided key
 
 # User settings
-REQUESTED_SETTING = "requested setting"
-DEFAULT_PRIVACY = "default privacy"
+REQUESTED_SETTING_KEY = "requested setting"
+DEFAULT_PRIVACY_KEY = "default privacy"
 PREFERRED_UNITS_KEY = "preferred units"
 UNITS_METRIC_KEY = "metric"
 UNITS_STANDARD_KEY = "standard"
 PREFERRED_FIRST_DAY_OF_WEEK_KEY = "preferred first day of week"
 BIRTHDAY_KEY = "birthday"
-DEFAULT_BIRTHDAY = "315532800"
+DEFAULT_BIRTHDAY_KEY = "315532800"
 HEIGHT_KEY = "height"
-DEFAULT_HEIGHT = "1.8"
+DEFAULT_HEIGHT_KEY = "1.8"
 WEIGHT_KEY = "weight" # User's weight (kilograms)
-DEFAULT_WEIGHT = "70"
+DEFAULT_WEIGHT_KEY = "70"
 GENDER_KEY = "gender"
 GENDER_MALE_KEY = "male"
 GENDER_FEMALE_KEY = "female"
@@ -70,7 +71,7 @@ GOAL_TYPE_SPEED = "Speed"
 # Personal records
 RECORDS_USER_ID = "user_id"
 RECORD_NAME_KEY = "record_name"
-PERSONAL_RECORDS = "records"
+PERSONAL_RECORDS_KEY = "records"
 
 # Workout plans
 WORKOUT_PLAN_USER_ID_KEY = "user_id"
@@ -86,7 +87,7 @@ WORKOUT_INTERVALS_KEY = "intervals"
 WORKOUT_COOLDOWN_KEY = "cooldown"
 WORKOUT_SCHEDULED_TIME_KEY = "scheduled time"
 WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY = "last scheduled workout time"
-WORKOUT_ESTIMATED_STRESS = "estimated stress score"
+WORKOUT_ESTIMATED_STRESS_KEY = "estimated stress score"
 
 # Used by the workout plan generator.
 LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"
@@ -100,7 +101,7 @@ EXPERIENCE_LEVEL_INTERMEDIATE = "Intermediate"
 EXPERIENCE_LEVEL_ADVANCED = "Advanced"
 EXPERIENCE_LEVELS = [ EXPERIENCE_LEVEL_BEGINNER, EXPERIENCE_LEVEL_INTERMEDIATE, EXPERIENCE_LEVEL_ADVANCED ]
 WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
-IN_TAPER_KEY = "taper"
+IN_TAPER_KEY = "Is In Taper"
 AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
 AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
 WORKOUT_PLAN_INPUTS = [ LONGEST_RUN_IN_FOUR_WEEKS_KEY, LONGEST_RUN_WEEK_1_KEY, LONGEST_RUN_WEEK_2_KEY, LONGEST_RUN_WEEK_3_KEY, AGE_YEARS_KEY, EXPERIENCE_LEVEL_KEY, WEEKS_UNTIL_GOAL_KEY ]
@@ -131,6 +132,8 @@ INTERVAL_WORKOUT_RECOVERY_PACE_KEY = "Recovery Pace"
 # Keys associated with uploading data
 UPLOADED_FILE_NAME_KEY = "uploaded_file_name"
 UPLOADED_FILE_DATA_KEY = "uploaded_file_data"
+UPLOADED_FILE1_DATA_KEY = "uploaded_file1_data"
+UPLOADED_FILE2_DATA_KEY = "uploaded_file2_data"
 
 # Keys inherited from the mobile app. Some of these are also used by the web app.
 APP_NAME_KEY = "Name"
@@ -315,7 +318,8 @@ GOAL_50_MILE_RUN_KEY = "50 Mile Run"
 # Used to track deferred tasks.
 DEFERRED_TASKS_USER_ID = "user_id"
 TASKS_KEY = "tasks"
-TASK_ID_KEY = "task id"
+TASK_CELERY_ID_KEY = "celery task id"
+TASK_INTERNAL_ID_KEY = "internal task id"
 TASK_TYPE_KEY = "task type"
 TASK_DETAILS_KEY = "task details"
 TASK_STATUS_KEY = "task status"

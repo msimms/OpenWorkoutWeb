@@ -49,12 +49,12 @@ It is also designed to work with both python2 and python3.
 
 To run the web service under the cherrypy framework:
 ```
-python start_cherrpy.py [--debug] [--host <hostname>] [--hostport <hostport>] [--googlemapskey <key>]
+python straen_cherrypy.py --config ~/Code/Scripts/DevOps/zaius/straen.config
 ```
 
 To run the web service under the flask framework:
 ```
-python start_flask.py [--debug] [--host <hostname>] [--hostport <hostport>] [--googlemapskey <key>]
+python start_flask.py --config ~/Code/Scripts/DevOps/zaius/straen.config
 ```
 
 *If a Google Maps key is not provided, OpenStreetMap will be used instead.*
@@ -68,6 +68,9 @@ The software architecture makes it possible to use this system with different fr
 ## Workout Plans
 
 This feature is very much under development and will go through several iterations before being ready for general use. The idea is to use the athlete's existing data to generate workouts to help in reaching future goals.
+
+## How To
+For instructional material, consult the [Wiki](https://github.com/msimms/StraenWeb/wiki)
 
 ## Version History
 
@@ -208,6 +211,11 @@ This feature is very much under development and will go through several iteratio
 * More work on run workout plan generation.
 * Added the ability to retire gear.
 
+### 0.28
+* Bug fixes with respect to python3
+* Added a 404 page for the cherrypy front end.
+* More work on run workout plan generation.
+
 ## Tech
 This software uses several other source projects to work properly:
 
@@ -223,9 +231,6 @@ The app is written in a combination of Python, HTML, and JavaScript.
 
 ## Social
 Twitter: [@StraenApp](https://twitter.com/StraenApp)
-
-## How To
-For instructional material, consult the [Wiki](https://github.com/msimms/StraenWeb/wiki)
 
 ## License
 Currently proprietary (though there are some source files that are under the MIT license). However I am considering moving the source code to either an MIT or MPL license.

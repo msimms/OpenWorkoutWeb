@@ -539,8 +539,8 @@ class Api(object):
         # Delete all the user's activities.
         self.data_mgr.delete_user_activities(self.user_id)
 
-        # Delete all the user's personal records.
-        self.data_mgr.delete_user_personal_records(self.user_id)
+        # Delete the cache of the user's personal records.
+        self.data_mgr.delete_all_user_personal_records(self.user_id)
 
         return True, ""
 
@@ -630,6 +630,7 @@ class Api(object):
                     url = self.root_url + "/activity/" + activity[Keys.ACTIVITY_ID_KEY]
                     temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time': int(activity[Keys.ACTIVITY_TIME_KEY])}
                 matched_activities.append(temp_activity)
+
         json_result = json.dumps(matched_activities, ensure_ascii=False)
         return True, json_result
 
@@ -651,7 +652,7 @@ class Api(object):
         for activity in activities:
             if Keys.ACTIVITY_ID_KEY in activity:
                 if activity[Keys.ACTIVITY_ID_KEY] == activity_id:
-                    self.data_mgr.delete_activity(activity['_id'])
+                    self.data_mgr.delete_activity(activity['_id'], self.user_id, activity_id)
                     deleted = True
                     break
 
@@ -785,9 +786,9 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException('Empty file data for ' + uploaded_file_name + '.')
 
         # Parse the file and store it's contents in the database.
-        self.data_mgr.import_file(username, self.user_id, uploaded_file_data, uploaded_file_name)
+        task_id = self.data_mgr.import_file(username, self.user_id, uploaded_file_data, uploaded_file_name)
 
-        return True, ""
+        return True, str(task_id)
 
     def handle_upload_activity_photo(self, values):
         """Called when an API message to upload a photo to an activity is received."""
@@ -1352,11 +1353,11 @@ class Api(object):
             decoded_key = unquote_plus(key)
 
             # Default privacy/visibility.
-            if decoded_key == Keys.DEFAULT_PRIVACY:
+            if decoded_key == Keys.DEFAULT_PRIVACY_KEY:
                 default_privacy = unquote_plus(values[key]).lower()
                 if not (default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE):
                     raise ApiException.ApiMalformedRequestException("Invalid visibility value.")
-                result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY, default_privacy)
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY_KEY, default_privacy)
             
             # Metric or imperial?
             elif decoded_key == Keys.PREFERRED_UNITS_KEY:
@@ -1484,6 +1485,15 @@ class Api(object):
         self.data_mgr.analyze_activity(activity, activity_user_id)
         return True, ""
 
+    def handle_refresh_personal_records(self, values):
+        """Called when the user wants to refresh the list of personal records, in the event"""
+        """it may have become corrupted by deleting activities, or changing activity types."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        self.data_mgr.refresh_user_personal_records(self.user_id)
+        return True, ""
+
     def handle_generate_workout_plan_for_user(self, values):
         """Called when the user wants to generate a workout plan."""
         if self.user_id is None:
@@ -1519,6 +1529,29 @@ class Api(object):
 
         self.data_mgr.generate_workout_plan_from_inputs(self.user_id)
         return True, ""
+
+    def handle_merge_gpx_files(self, values):
+        """Takes two GPX files and attempts to merge them."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.UPLOADED_FILE1_DATA_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("File data not specified.")
+        if Keys.UPLOADED_FILE2_DATA_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("File data not specified.")
+
+        # Decode the parameters.
+        uploaded_file1_data = unquote_plus(values[Keys.UPLOADED_FILE1_DATA_KEY])
+        uploaded_file2_data = unquote_plus(values[Keys.UPLOADED_FILE2_DATA_KEY])
+
+        # Check for empty.
+        if len(uploaded_file1_data) == 0:
+            raise ApiException.ApiMalformedRequestException('Empty file data.')
+        if len(uploaded_file2_data) == 0:
+            raise ApiException.ApiMalformedRequestException('Empty file data.')
+
+        # Parse the file and store it's contents in the database.
+        merged_data = self.data_mgr.merge_gpx_files(self.user_id, uploaded_file1_data, uploaded_file2_data)
+        return True, merged_data
 
     def handle_list_workouts(self, values):
         """Called when the user wants wants a list of their planned workouts. Result is a JSON string."""
@@ -1716,11 +1749,19 @@ class Api(object):
         """Returns the value associated with the specified user setting."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        if Keys.REQUESTED_SETTING not in values:
+        if Keys.REQUESTED_SETTING_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Setting not specified.")
 
-        setting_value = self.user_mgr.retrieve_user_setting(self.user_id, values[Keys.REQUESTED_SETTING])
+        setting_value = self.user_mgr.retrieve_user_setting(self.user_id, values[Keys.REQUESTED_SETTING_KEY])
         return True, setting_value
+
+    def handle_get_api_keys(self, values):
+        """Returns a list of API keys assigned to the current user."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        keys = self.user_mgr.retrieve_api_keys(self.user_id)
+        return True, json.dumps(keys)
 
     def handle_list_activity_types(self):
         """Returns the list of all activity types the software understands."""
@@ -1784,6 +1825,8 @@ class Api(object):
             return self.handle_get_record_progression(values)
         elif request == 'get_user_setting':
             return self.handle_get_user_setting(values)
+        elif request == 'get_api_keys':
+            return self.handle_get_api_keys(values)
         elif request == 'list_activity_types':
             return self.handle_list_activity_types()
         return False, ""
@@ -1864,10 +1907,14 @@ class Api(object):
             return self.handle_update_visibility(values)
         elif request == 'refresh_analysis':
             return self.handle_refresh_analysis(values)
+        elif request == 'refresh_personal_records':
+            return self.handle_refresh_personal_records(values)
         elif request == 'generate_workout_plan':
             return self.handle_generate_workout_plan_for_user(values)
         elif request == 'generate_workout_plan_from_inputs':
             return self.handle_generate_workout_plan_from_inputs(values)
+        elif request == 'merge_gpx_files':
+            return self.handle_merge_gpx_files(values)
         return False, ""
 
     def handle_api_1_0_request(self, verb, request, values):

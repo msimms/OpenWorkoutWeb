@@ -37,6 +37,7 @@ import zlib
 import AnalysisScheduler
 import DataMgr
 import Importer
+import Keys
 
 def log_error(log_str):
     """Writes an error message to the log file."""
@@ -45,8 +46,8 @@ def log_error(log_str):
     if logger is not None:
         logger.debug(log_str)
 
-@celery_worker.task()
-def import_activity(import_str):
+@celery_worker.task(ignore_result=True)
+def import_activity(import_str, internal_task_id):
     local_file_name = ""
 
     try:
@@ -55,6 +56,8 @@ def import_activity(import_str):
         user_id = import_obj['user_id']
         uploaded_file_data = import_obj['uploaded_file_data']
         uploaded_file_name = import_obj['uploaded_file_name']
+        data_mgr = DataMgr.DataMgr(None, "", None, None, None)
+        importer = Importer.Importer(data_mgr)
 
         # Generate a random name for the local file.
         print("Generating local file name...")
@@ -68,7 +71,7 @@ def import_activity(import_str):
         local_file_name = local_file_name + uploaded_file_ext
 
         # Write the file.
-        print("Write the data to a local file...")
+        print("Writing the data to a local file...")
         with open(local_file_name, 'wb') as local_file:
             print("Base64 decoding...")
             decoded_file_data = base64.b64decode(uploaded_file_data)
@@ -77,15 +80,21 @@ def import_activity(import_str):
             print("Writing...")
             local_file.write(decoded_file_data)
 
+        # Update the status of the analysis in the database.
+        print("Updating status...")
+        data_mgr.update_deferred_task(user_id, internal_task_id, Keys.TASK_STATUS_STARTED)
+
         # Import the file into the database.            
-        print("Import the data to the database...")
-        data_mgr = DataMgr.DataMgr(None, "", None, None, None)
-        importer = Importer.Importer(data_mgr)
+        print("Importing the data to the database...")
         success, _, activity_id = importer.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
+
+        # Update the status of the analysis in the database.
+        print("Updating status...")
+        data_mgr.update_deferred_task(user_id, internal_task_id, Keys.TASK_STATUS_FINISHED)
 
         # If the import was successful, then schedule the activity for analysis.
         if success:
-            print("Import was successful, perform analysis...")
+            print("Importing was successful, perform analysis...")
             analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
             activity = data_mgr.retrieve_activity(activity_id)
             analysis_scheduler.add_activity_to_queue(activity, user_id, data_mgr)

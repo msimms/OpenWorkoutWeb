@@ -121,7 +121,7 @@ class MongoDatabase(Database.Database):
         exclude_keys[Keys.FRIEND_REQUESTS_KEY] = False
         exclude_keys[Keys.FRIENDS_KEY] = False
         exclude_keys[Keys.PR_KEY] = False
-        exclude_keys[Keys.DEFAULT_PRIVACY] = False
+        exclude_keys[Keys.DEFAULT_PRIVACY_KEY] = False
         exclude_keys[Keys.PREFERRED_UNITS_KEY] = False
         return exclude_keys
 
@@ -147,7 +147,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            post = {Keys.USERNAME_KEY: username, Keys.REALNAME_KEY: realname, Keys.HASH_KEY: passhash, Keys.DEVICES_KEY: [], Keys.FRIENDS_KEY: [], Keys.DEFAULT_PRIVACY: Keys.ACTIVITY_VISIBILITY_PUBLIC}
+            post = {Keys.USERNAME_KEY: username, Keys.REALNAME_KEY: realname, Keys.HASH_KEY: passhash, Keys.DEVICES_KEY: [], Keys.FRIENDS_KEY: [], Keys.DEFAULT_PRIVACY_KEY: Keys.ACTIVITY_VISIBILITY_PUBLIC}
             self.users_collection.insert(post)
             return True
         except:
@@ -165,7 +165,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            return self.users_collection.find_one({Keys.USERNAME_KEY: username})
+            return self.users_collection.find_one({ Keys.USERNAME_KEY: username })
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -181,7 +181,11 @@ class MongoDatabase(Database.Database):
             return None, None, None
 
         try:
-            user = self.users_collection.find_one({Keys.USERNAME_KEY: username})
+            # Find the user.
+            result_keys = { Keys.DATABASE_ID_KEY: 1, Keys.HASH_KEY: 1, Keys.REALNAME_KEY: 1 }
+            user = self.users_collection.find_one({ Keys.USERNAME_KEY: username }, result_keys)
+
+            # If the user was found.
             if user is not None:
                 return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], str(user[Keys.REALNAME_KEY])
             return None, None, None
@@ -199,7 +203,10 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            result_keys = { Keys.USERNAME_KEY: 1, Keys.REALNAME_KEY: 1 }
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj }, result_keys)
+
+            # If the user was found.
             if user is not None:
                 return user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
             return None, None
@@ -216,7 +223,11 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user.
-            user = self.users_collection.find_one({Keys.API_KEYS: api_key})
+            query = { Keys.API_KEYS: { Keys.API_KEY: str(api_key), Keys.API_KEY_RATE : int(1000) } }
+            result_keys = { Keys.DATABASE_ID_KEY: 1, Keys.HASH_KEY: 1, Keys.REALNAME_KEY: 1 }
+            user = self.users_collection.find_one(query, result_keys)
+
+            # If the user was found.
             if user is not None:
                 return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], user[Keys.REALNAME_KEY]
             return None, None, None
@@ -229,7 +240,7 @@ class MongoDatabase(Database.Database):
         """Update method for a user."""
         if user_id is None:
             self.log_error(MongoDatabase.update_user.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if username is None:
             self.log_error(MongoDatabase.update_user.__name__ + ": Unexpected empty object: username")
             return False
@@ -246,7 +257,9 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+
+            # If the user was found.
             if user is not None:
                 user[Keys.USERNAME_KEY] = username
                 user[Keys.REALNAME_KEY] = realname
@@ -267,7 +280,7 @@ class MongoDatabase(Database.Database):
 
         try:
             user_id_obj = ObjectId(str(user_id))
-            deleted_result = self.users_collection.delete_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            deleted_result = self.users_collection.delete_one({ Keys.DATABASE_ID_KEY: user_id_obj })
             if deleted_result is not None:
                 return True
         except:
@@ -287,11 +300,12 @@ class MongoDatabase(Database.Database):
             return user_list
 
         try:
-            matched_usernames = self.users_collection.find({Keys.USERNAME_KEY: {"$regex": username}})
+            matched_usernames = self.users_collection.find({ Keys.USERNAME_KEY: { "$regex": username } })
             if matched_usernames is not None:
                 for matched_user in matched_usernames:
                     user_list.append(matched_user[Keys.USERNAME_KEY])
-            matched_realnames = self.users_collection.find({Keys.REALNAME_KEY: {"$regex": username}})
+
+            matched_realnames = self.users_collection.find({ Keys.REALNAME_KEY: { "$regex": username } })
             if matched_realnames is not None:
                 for matched_user in matched_realnames:
                     username = matched_user[Keys.USERNAME_KEY]
@@ -314,7 +328,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # Read the devices list.
             devices = []
@@ -340,7 +354,8 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            result_keys = { Keys.DEVICES_KEY: 1 }
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj }, result_keys)
 
             # Read the devices list.
             if user is not None and Keys.DEVICES_KEY in user:
@@ -356,7 +371,7 @@ class MongoDatabase(Database.Database):
             return False, "Device string not provided."
 
         try:
-            return self.users_collection.find_one({Keys.DEVICES_KEY: device_str})
+            return self.users_collection.find_one({ Keys.DEVICES_KEY: device_str })
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -369,7 +384,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            self.activities_collection.remove({Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            self.activities_collection.remove({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
             return True
         except:
             self.log_error(traceback.format_exc())
@@ -380,7 +395,7 @@ class MongoDatabase(Database.Database):
         """Appends a user to the friends list of the user with the specified id."""
         if user_id is None:
             self.log_error(MongoDatabase.create_pending_friend_request.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if target_id is None:
             self.log_error(MongoDatabase.create_pending_friend_request.__name__ + ": Unexpected empty object: target_id")
             return False
@@ -388,7 +403,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user whose friendship is being requested.
             user_id_obj = ObjectId(str(target_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If the user was found then add the target user to the pending friends list.
             if user is not None:
@@ -417,7 +432,7 @@ class MongoDatabase(Database.Database):
 
             # Find the users whose friendship we have requested.
             pending_friends_list = []
-            pending_friends = self.users_collection.find({Keys.FRIEND_REQUESTS_KEY: user_id}, exclude_keys)
+            pending_friends = self.users_collection.find({ Keys.FRIEND_REQUESTS_KEY: user_id }, exclude_keys)
             for pending_friend in pending_friends:
                 pending_friend[Keys.DATABASE_ID_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
                 pending_friend[Keys.REQUESTING_USER_KEY] = "self"
@@ -425,7 +440,7 @@ class MongoDatabase(Database.Database):
 
             # Find the users who have requested our friendship.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If we found ourselves.
             if user is not None:
@@ -434,7 +449,7 @@ class MongoDatabase(Database.Database):
                     temp_friend_id_list = user[Keys.FRIEND_REQUESTS_KEY]
                 for temp_friend_id in temp_friend_id_list:
                     temp_friend_id_obj = ObjectId(str(temp_friend_id))
-                    pending_friend = self.users_collection.find_one({Keys.DATABASE_ID_KEY: temp_friend_id_obj}, exclude_keys)
+                    pending_friend = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: temp_friend_id_obj }, exclude_keys)
                     if pending_friend is not None:
                         pending_friend[Keys.DATABASE_ID_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
                         pending_friend[Keys.REQUESTING_USER_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
@@ -450,7 +465,7 @@ class MongoDatabase(Database.Database):
         """Appends a user to the friends list of the user with the specified id."""
         if user_id is None:
             self.log_error(MongoDatabase.delete_pending_friend_request.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if target_id is None:
             self.log_error(MongoDatabase.delete_pending_friend_request.__name__ + ": Unexpected empty object: target_id")
             return False
@@ -458,7 +473,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user whose friendship is being requested.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If the user was found then add the target user to the pending friends list.
             if user is not None:
@@ -479,7 +494,7 @@ class MongoDatabase(Database.Database):
         """Appends a user to the friends list of the user with the specified id."""
         if user_id is None:
             self.log_error(MongoDatabase.create_friend.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if target_id is None:
             self.log_error(MongoDatabase.create_friend.__name__ + ": Unexpected empty object: target_id")
             return False
@@ -487,11 +502,11 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # Find the target user.
             target_user_id_obj = ObjectId(str(target_id))
-            target_user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: target_user_id_obj})
+            target_user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: target_user_id_obj })
 
             # If the users were found then add each other to their friends lists.
             if user is not None and target_user is not None:
@@ -530,8 +545,9 @@ class MongoDatabase(Database.Database):
             # Things we don't need.
             exclude_keys = self.list_excluded_user_keys()
 
+            # Find the user's friends list.
             friends_list = []
-            friends = self.users_collection.find({Keys.FRIENDS_KEY: user_id}, exclude_keys)
+            friends = self.users_collection.find({ Keys.FRIENDS_KEY: user_id }, exclude_keys)
             for friend in friends:
                 friend[Keys.DATABASE_ID_KEY] = str(friend[Keys.DATABASE_ID_KEY])
                 friends_list.append(friend)
@@ -545,7 +561,7 @@ class MongoDatabase(Database.Database):
         """Removes the users from each other's friends lists."""
         if user_id is None:
             self.log_error(MongoDatabase.delete_friend.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if target_id is None:
             self.log_error(MongoDatabase.delete_friend.__name__ + ": Unexpected empty object: target_id")
             return False
@@ -553,11 +569,11 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # Find the target user.
             target_user_id_obj = ObjectId(str(target_id))
-            target_user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: target_user_id_obj})
+            target_user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: target_user_id_obj })
 
             # If the users were found then add each other to their friends lists.
             if user is not None and target_user is not None:
@@ -601,7 +617,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If the user was found.
             if user is not None:
@@ -625,7 +641,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # Find the setting.
             if user is not None and key in user:
@@ -646,9 +662,12 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's records collection.
-            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            user_id_str = str(user_id)
+            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id_str })
+
+            # If the collection was found.
             if user_records is None:
-                post = {Keys.RECORDS_USER_ID: user_id, Keys.PERSONAL_RECORDS: records}
+                post = {Keys.RECORDS_USER_ID: user_id_str, Keys.PERSONAL_RECORDS_KEY: records}
                 self.records_collection.insert(post)
                 return True
         except:
@@ -664,16 +683,19 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's records collection.
-            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
-            if user_records is not None and Keys.PERSONAL_RECORDS in user_records:
-                return user_records[Keys.PERSONAL_RECORDS]
+            user_id_str = str(user_id)
+            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id_str })
+
+            # If the collection was found.
+            if user_records is not None and Keys.PERSONAL_RECORDS_KEY in user_records:
+                return user_records[Keys.PERSONAL_RECORDS_KEY]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return {}
 
     def update_user_personal_records(self, user_id, records):
-        """Create method for a user's personal record."""
+        """Create method for a user's personal record. These are the bests across all activities. Activity records are the bests for individual activities."""
         if user_id is None:
             self.log_error(MongoDatabase.update_user_personal_records.__name__ + ": Unexpected empty object: user_id")
             return False
@@ -683,9 +705,12 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's records collection.
-            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            user_id_str = str(user_id)
+            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id_str })
+
+            # If the collection was found.
             if user_records is not None:
-                user_records[Keys.PERSONAL_RECORDS] = records
+                user_records[Keys.PERSONAL_RECORDS_KEY] = records
                 self.records_collection.save(user_records)
                 return True
         except:
@@ -693,15 +718,16 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def delete_user_personal_records(self, user_id):
-        """Create method for a user's personal record."""
+    def delete_all_user_personal_records(self, user_id):
+        """Delete method for a user's personal record. Deletes the entire personal record cache."""
         if user_id is None:
-            self.log_error(MongoDatabase.delete_user_personal_records.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.delete_all_user_personal_records.__name__ + ": Unexpected empty object: user_id")
             return False
 
         try:
             # Delete the user's records collection.
-            deleted_result = self.records_collection.delete_one({Keys.RECORDS_USER_ID: user_id})
+            user_id_str = str(user_id)
+            deleted_result = self.records_collection.delete_one({Keys.RECORDS_USER_ID: user_id_str})
             if deleted_result is not None:
                 return True
         except:
@@ -729,7 +755,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's records collection.
-            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
             if user_records is not None:
                 bests[Keys.ACTIVITY_TYPE_KEY] = activity_type
                 bests[Keys.ACTIVITY_TIME_KEY] = activity_time
@@ -748,7 +774,7 @@ class MongoDatabase(Database.Database):
             return {}
 
         try:
-            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
             if user_records is not None:
                 bests = {}
                 for record in user_records:
@@ -767,7 +793,7 @@ class MongoDatabase(Database.Database):
             return {}
 
         try:
-            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
             if user_records is not None:
                 bests = {}
                 for record in user_records:
@@ -786,9 +812,15 @@ class MongoDatabase(Database.Database):
         if user_id is None:
             self.log_error(MongoDatabase.retrieve_bounded_activity_bests_for_user.__name__ + ": Unexpected empty object: user_id")
             return {}
+        if cutoff_time_lower is None:
+            self.log_error(MongoDatabase.retrieve_bounded_activity_bests_for_user.__name__ + ": Unexpected empty object: cutoff_time_lower")
+            return {}
+        if cutoff_time_higher is None:
+            self.log_error(MongoDatabase.retrieve_bounded_activity_bests_for_user.__name__ + ": Unexpected empty object: cutoff_time_higher")
+            return {}
 
         try:
-            user_records = self.records_collection.find_one({Keys.RECORDS_USER_ID: user_id})
+            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
             if user_records is not None:
                 bests = {}
                 for record in user_records:
@@ -803,6 +835,29 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return {}
 
+    def delete_activity_best_for_user(self, user_id, activity_id):
+        """Delete method for a user's personal records for a given activity."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_activity_best_for_user.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if activity_id is None:
+            self.log_error(MongoDatabase.delete_activity_best_for_user.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.delete_activity_best_for_user.__name__ + ": Invalid object: activity_id")
+            return False
+
+        try:
+            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
+            if user_records is not None:
+                user_records.pop(activity_id)
+                self.records_collection.save(user_records)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def retrieve_user_activity_list(self, user_id, start, num_results, exclude_keys):
         """Retrieves the list of activities associated with the specified user."""
         if num_results is not None and num_results <= 0:
@@ -810,11 +865,11 @@ class MongoDatabase(Database.Database):
 
         try:
             if start is None and num_results is None:
-                return list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
+                return list(self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
             elif num_results is None:
-                return list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start))
+                return list(self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start))
             else:
-                return list(self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start).limit(num_results))
+                return list(self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start).limit(num_results))
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -823,7 +878,7 @@ class MongoDatabase(Database.Database):
     def retrieve_each_user_activity(self, context, user_id, callback_func):
         """Retrieves each user activity and calls the callback function for each one."""
         try:
-            activities_cursor = self.activities_collection.find({Keys.ACTIVITY_USER_ID_KEY: user_id})
+            activities_cursor = self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id })
             if activities_cursor is not None:
                 while activities_cursor.alive:
                     activity = activities_cursor.next()
@@ -846,11 +901,11 @@ class MongoDatabase(Database.Database):
             exclude_keys = self.list_excluded_activity_keys()
 
             if start is None and num_results is None:
-                return list(self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
+                return list(self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
             elif num_results is None:
-                return list(self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start))
+                return list(self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start))
             else:
-                return list(self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start).limit(num_results))
+                return list(self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start).limit(num_results))
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -859,7 +914,7 @@ class MongoDatabase(Database.Database):
     def retrieve_each_device_activity(self, context, user_id, device_str, callback_func):
         """Retrieves each device activity and calls the callback function for each one."""
         try:
-            activities_cursor = self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            activities_cursor = self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
             if activities_cursor is not None:
                 try:
                     while activities_cursor.alive:
@@ -879,7 +934,7 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
-            device_activities = self.activities_collection.find({Keys.ACTIVITY_DEVICE_STR_KEY: device_str}).sort(Keys.DATABASE_ID_KEY, -1).limit(1)
+            device_activities = self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }).sort(Keys.DATABASE_ID_KEY, -1).limit(1)
             if device_activities is not None and device_activities.count() > 0:
                 activity = device_activities.next()
                 return activity
@@ -904,7 +959,11 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            post = {Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_NAME_KEY: activty_name, Keys.ACTIVITY_TIME_KEY: date_time, Keys.ACTIVITY_DEVICE_STR_KEY: device_str, Keys.ACTIVITY_VISIBILITY_KEY: "public", Keys.ACTIVITY_LOCATIONS_KEY: []}
+            # Make sure the activity name is a string.
+            activty_name = str(activty_name)
+
+            # Create the activity.
+            post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_NAME_KEY: activty_name, Keys.ACTIVITY_TIME_KEY: date_time, Keys.ACTIVITY_DEVICE_STR_KEY: device_str, Keys.ACTIVITY_VISIBILITY_KEY: "public", Keys.ACTIVITY_LOCATIONS_KEY: [] }
             self.activities_collection.insert(post)
             return True
         except:
@@ -920,7 +979,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            return self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: re.compile(activity_id, re.IGNORECASE)})
+            return self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: re.compile(activity_id, re.IGNORECASE) })
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -939,13 +998,14 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            # Find the activity.
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
 
             # If the activity was not found then create it.
             if activity is None:
                 first_location = locations[0]
                 if self.create_activity(activity_id, "", first_location[0] / 1000, device_str):
-                    activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+                    activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
 
             # If the activity was found.
             if activity is not None:
@@ -1016,7 +1076,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found and it has a visibility setting.
             if activity is not None and Keys.ACTIVITY_VISIBILITY_KEY in activity:
@@ -1038,7 +1098,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found.
             if activity is not None:
@@ -1069,12 +1129,13 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            # Find the activity.
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
 
             # If the activity was not found then create it.
             if activity is None:
                 if self.create_activity(activity_id, "", date_time / 1000, device_str):
-                    activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+                    activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
 
             # If the activity was found.
             if activity is not None:
@@ -1107,13 +1168,14 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            # Find the activity.
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
 
             # If the activity was not found then create it.
             if activity is None:
                 first_location = locations[0]
                 if self.create_activity(activity_id, "", first_location[0] / 1000, device_str):
-                    activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+                    activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
 
             # If the activity was found.
             if activity is not None:
@@ -1143,7 +1205,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found and it has location data.
             if activity is not None and Keys.ACTIVITY_LOCATIONS_KEY in activity:
@@ -1172,7 +1234,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found.
             if activity is not None:
@@ -1206,7 +1268,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found.
             if activity is not None:
@@ -1239,7 +1301,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found and if it has data for the specified sensor type.
             if activity is not None and sensor_type in activity:
@@ -1271,14 +1333,15 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found.
             if activity is not None:
 
                 # Make sure we're working with a number, if the value is supposed to be a number.
                 try:
-                    value = float(value)
+                    if not key in [ Keys.ACTIVITY_NAME_KEY, Keys.ACTIVITY_TYPE_KEY, Keys.ACTIVITY_DESCRIPTION_KEY ]:
+                        value = float(value)
                 except ValueError:
                     pass
 
@@ -1319,7 +1382,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found.
             if activity is not None:
@@ -1349,7 +1412,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found.
             if activity is not None:
@@ -1374,13 +1437,14 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+            # Find the activity.
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
 
             # If the activity was not found then create it.
             if activity is None:
                 first_accel = accels[0]
                 if self.create_activity(activity_id, "", first_accel[0] / 1000, device_str):
-                    activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str})
+                    activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
 
             # If the activity was found.
             if activity is not None:
@@ -1414,7 +1478,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found.
             if activity is not None:
@@ -1434,7 +1498,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found.
             if activity is not None and Keys.ACTIVITY_SUMMARY_KEY in activity:
@@ -1452,11 +1516,14 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found.
-            if activity is not None:
-                pass
+            if activity is not None and Keys.ACTIVITY_SUMMARY_KEY in activity:
+                # Currently left out for performance reasons.
+                #activity[Keys.ACTIVITY_SUMMARY_KEY] = {}
+                #self.activities_collection.save(activity)
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1473,7 +1540,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found.
             if activity is not None:
@@ -1518,7 +1585,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found then add the tags.
             if activity is not None:
@@ -1538,7 +1605,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found and contains tags.
             if activity is not None and Keys.ACTIVITY_TAGS_KEY in activity:
@@ -1559,7 +1626,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found.
             if activity is not None and Keys.ACTIVITY_TAGS_KEY in activity:
@@ -1587,14 +1654,14 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found.
             if activity is not None:
                 data = []
                 if Keys.ACTIVITY_COMMENTS_KEY in activity:
                     data = activity[Keys.ACTIVITY_COMMENTS_KEY]
-                entry_dict = {Keys.ACTIVITY_COMMENTER_ID_KEY: commenter_id, Keys.ACTIVITY_COMMENT_KEY: comment}
+                entry_dict = { Keys.ACTIVITY_COMMENTER_ID_KEY: commenter_id, Keys.ACTIVITY_COMMENT_KEY: comment }
                 entry_str = json.dumps(entry_dict)
                 data.append(entry_str)
                 activity[Keys.ACTIVITY_COMMENTS_KEY] = data
@@ -1613,7 +1680,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found and contains comments.
             if activity is not None and Keys.ACTIVITY_COMMENTS_KEY in activity:
@@ -1631,7 +1698,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found and contains comments.
             if activity is not None and Keys.ACTIVITY_PHOTOS_KEY in activity:
@@ -1652,7 +1719,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the activity.
-            activity = self.activities_collection.find_one({Keys.ACTIVITY_ID_KEY: activity_id})
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
             # If the activity was found.
             if activity is not None and Keys.ACTIVITY_PHOTOS_KEY in activity:
@@ -1677,7 +1744,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's workouts document.
-            workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+            workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
 
             # If the workouts document was not found then create it.
             if workouts_doc is None:
@@ -1686,7 +1753,7 @@ class MongoDatabase(Database.Database):
                 post[Keys.WORKOUT_PLAN_CALENDAR_ID_KEY] = str(uuid.uuid4()) # Create a calendar ID
                 post[Keys.WORKOUT_LIST_KEY] = []
                 self.workouts_collection.insert(post)
-                workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+                workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
 
             # If the workouts document was found (or created).
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
@@ -1729,7 +1796,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's workouts document.
-            workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+            workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
 
             # If the workouts document was found.
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
@@ -1756,7 +1823,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's workouts document.
-            workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+            workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
 
             # If the workouts document was found.
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
@@ -1780,7 +1847,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's workouts document.
-            workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+            workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
 
             # If the workouts document was found and it has a calendar ID.
             if workouts_doc is not None and Keys.WORKOUT_PLAN_CALENDAR_ID_KEY in workouts_doc:
@@ -1800,7 +1867,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's document with the specified calendar ID.
-            workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_CALENDAR_ID_KEY: calendar_id})
+            workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_CALENDAR_ID_KEY: calendar_id })
 
             # If the workouts document was found then return the workouts list.
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc and Keys.WORKOUT_PLAN_USER_ID_KEY in workouts_doc:
@@ -1827,7 +1894,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's workouts document.
-            workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+            workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
 
             # If the workouts document was not found then create it.
             if workouts_doc is None:
@@ -1835,7 +1902,7 @@ class MongoDatabase(Database.Database):
                 post[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
                 post[Keys.WORKOUT_LIST_KEY] = []
                 self.workouts_collection.insert(post)
-                workouts_doc = self.workouts_collection.find_one({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+                workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
 
             # If the workouts document was found (or created).
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
@@ -1855,20 +1922,20 @@ class MongoDatabase(Database.Database):
         """Delete method for the workout with the specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.delete_workout.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if workout_id is None:
             self.log_error(MongoDatabase.delete_workout.__name__ + ": Unexpected empty object: workout_id")
             return False
 
         try:
             # Find the user's workouts document.
-            workouts_doc = self.workouts_collection.find({Keys.WORKOUT_PLAN_USER_ID_KEY: user_id})
+            workouts_doc = self.workouts_collection.find({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
 
             # If the workouts document was found and it contains the specified workout.
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
                 workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
                 
-                deleted_result = self.workouts_collection.delete_one({Keys.DATABASE_ID_KEY: workout_id_obj})
+                deleted_result = self.workouts_collection.delete_one({ Keys.DATABASE_ID_KEY: workout_id_obj })
                 if deleted_result is not None:
                     return True
         except:
@@ -1881,7 +1948,7 @@ class MongoDatabase(Database.Database):
         try:
             user_ids = []
             now = time.time()
-            workout_docs = self.workouts_collection.find({Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY: {"$lt": now}})
+            workout_docs = self.workouts_collection.find({ Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY: { "$lt": now } })
             for workout_doc in workout_docs:
                 if Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY in workout_doc and workout_doc[Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY] < now:
                     user_id = workout_doc[Keys.WORKOUT_PLAN_USER_ID_KEY]
@@ -1900,7 +1967,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If the user's document was found.
             if user is not None:
@@ -1919,7 +1986,7 @@ class MongoDatabase(Database.Database):
         """Retrieve method for the gear with the specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if activity_type is None:
             self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: activity_type")
             return False
@@ -1930,7 +1997,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If the user's document was found.
             if user is not None:
@@ -1979,7 +2046,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If the user's document was found.
             if user is not None:
@@ -2013,7 +2080,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If the user's document was found.
             if user is not None:
@@ -2032,7 +2099,7 @@ class MongoDatabase(Database.Database):
         """Retrieve method for the gear with the specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if gear_id is None:
             self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: gear_id")
             return False
@@ -2040,7 +2107,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If the user's document was found.
             if user is not None:
@@ -2077,7 +2144,7 @@ class MongoDatabase(Database.Database):
         """Delete method for the gear with the specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if gear_id is None:
             self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: gear_id")
             return False
@@ -2085,7 +2152,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If the user's document was found.
             if user is not None:
@@ -2111,12 +2178,12 @@ class MongoDatabase(Database.Database):
         """Delete method for the gear with the specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
 
         try:
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If the user's document was found.
             if user is not None:
@@ -2135,7 +2202,7 @@ class MongoDatabase(Database.Database):
         """Create method for gear service records."""
         if user_id is None:
             self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if gear_id is None:
             self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: gear_id")
             return False
@@ -2152,7 +2219,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If the user's document was found.
             if user is not None:
@@ -2187,7 +2254,7 @@ class MongoDatabase(Database.Database):
         """Delete method for the service record with the specified user and gear ID."""
         if user_id is None:
             self.log_error(MongoDatabase.delete_service_record.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if gear_id is None:
             self.log_error(MongoDatabase.delete_service_record.__name__ + ": Unexpected empty object: gear_id")
             return False
@@ -2198,7 +2265,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user's document.
             user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({Keys.DATABASE_ID_KEY: user_id_obj})
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If the user's document was found.
             if user is not None:
@@ -2212,45 +2279,55 @@ class MongoDatabase(Database.Database):
                     for gear in gear_list:
                         if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
                             if Keys.GEAR_SERVICE_HISTORY in gear:
+
                                 service_history = gear[Keys.GEAR_SERVICE_HISTORY]
                                 record_index = 0
+
                                 for service_record in service_history:
                                     if Keys.SERVICE_RECORD_ID_KEY in service_record and service_record[Keys.SERVICE_RECORD_ID_KEY] == service_record_id:
+
                                         service_history.pop(record_index)
                                         gear[Keys.GEAR_SERVICE_HISTORY] = service_history
 
                                         self.users_collection.save(user)
                                         return True
+
                                     record_index = record_index + 1
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_deferred_task(self, user_id, task_type, task_id, details, status):
+    def create_deferred_task(self, user_id, task_type, celery_task_id, internal_task_id, details, status):
         """Create method for tracking a deferred task, such as a file import or activity analysis."""
         if user_id is None:
             self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return False
         if task_type is None:
             self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: task_type")
             return False
-        if task_id is None:
-            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: task_id")
+        if celery_task_id is None:
+            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: celery_task_id")
+            return False
+        if internal_task_id is None:
+            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: internal_task_id")
             return False
         if status is None:
             self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: status")
             return False
 
         try:
+            # Make sure we're dealing with a string.
+            user_id_str = str(user_id)
+
             # Find the user's tasks document.
-            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            user_tasks = self.tasks_collection.find_one({ Keys.DEFERRED_TASKS_USER_ID: user_id_str })
 
             # If the user's tasks document was not found then create it.
             if user_tasks is None:
-                post = {Keys.DEFERRED_TASKS_USER_ID: user_id}
+                post = { Keys.DEFERRED_TASKS_USER_ID: user_id }
                 self.tasks_collection.insert(post)
-                user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+                user_tasks = self.tasks_collection.find_one({ Keys.DEFERRED_TASKS_USER_ID: user_id_str })
 
             # If the user's tasks document was found.
             if user_tasks is not None:
@@ -2262,7 +2339,8 @@ class MongoDatabase(Database.Database):
 
                 # Create an entry for the new task.
                 task = {}
-                task[Keys.TASK_ID_KEY] = task_id
+                task[Keys.TASK_CELERY_ID_KEY] = str(celery_task_id)
+                task[Keys.TASK_INTERNAL_ID_KEY] = str(internal_task_id)
                 task[Keys.TASK_TYPE_KEY] = task_type
                 task[Keys.TASK_DETAILS_KEY] = details
                 task[Keys.TASK_STATUS_KEY] = status
@@ -2286,8 +2364,11 @@ class MongoDatabase(Database.Database):
             return None
 
         try:
+            # Make sure we're dealing with a string.
+            user_id_str = str(user_id)
+
             # Find the user's tasks document.
-            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            user_tasks = self.tasks_collection.find_one({ Keys.DEFERRED_TASKS_USER_ID: user_id_str })
 
             # If the user's tasks document was found.
             if user_tasks is not None and Keys.TASKS_KEY in user_tasks:
@@ -2297,32 +2378,122 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return []
 
-    def update_deferred_task(self, user_id, task_id, status):
+    def update_deferred_task(self, user_id, internal_task_id, status):
         """Updated method for deferred task status."""
         if user_id is None:
             self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: user_id")
-            return None
-        if task_id is None:
-            self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: task_id")
+            return False
+        if internal_task_id is None:
+            self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: internal_task_id")
             return False
         if status is None:
             self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: status")
             return False
 
         try:
+            # Make sure we're dealing with strings.
+            user_id_str = str(user_id)
+            internal_task_id_str = str(internal_task_id)
+
             # Find the user's tasks document.
-            user_tasks = self.tasks_collection.find_one({Keys.DEFERRED_TASKS_USER_ID: user_id})
+            user_tasks = self.tasks_collection.find_one({ Keys.DEFERRED_TASKS_USER_ID: user_id_str })
 
             # If the user's tasks document was found.
             if user_tasks is not None and Keys.TASKS_KEY in user_tasks:
 
                 # Find and update the record.
-                for task in user_tasks:
-                    if Keys.TASK_ID_KEY in task and task[Keys.TASK_ID_KEY] == task_id:
+                for task in user_tasks[Keys.TASKS_KEY]:
+                    if Keys.TASK_INTERNAL_ID_KEY in task and task[Keys.TASK_INTERNAL_ID_KEY] == internal_task_id_str:
                         task[Keys.TASK_STATUS_KEY] = status
+                        break
 
                 # Update the database.
                 self.tasks_collection.save(user_tasks)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def create_api_key(self, user_id, key, rate):
+        """Create method for an API key."""
+        if user_id is None:
+            self.log_error(MongoDatabase.create_api_key.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if key is None:
+            self.log_error(MongoDatabase.create_api_key.__name__ + ": Unexpected empty object: key")
+            return False
+        if rate is None:
+            self.log_error(MongoDatabase.create_api_key.__name__ + ": Unexpected empty object: rate")
+            return False
+
+        try:
+            # Find the user.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+
+            # If the user was found.
+            if user is not None:
+                key_list = []
+                if Keys.API_KEYS in user:
+                    key_list = user[Keys.API_KEYS]
+                key_dict = { Keys.API_KEY: str(key), Keys.API_KEY_RATE: int(rate) }
+                key_list.append(key_dict)
+                user[Keys.API_KEYS] = key_list
+                self.users_collection.save(user)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_api_keys(self, user_id):
+        """Retrieve method for API keys."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_api_keys.__name__ + ": Unexpected empty object: user_id")
+            return None
+
+        try:
+            # Find the user.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj}, { Keys.API_KEYS: 1 })
+
+            # If the user was found.
+            if user is not None and Keys.API_KEYS in user:
+                return user[Keys.API_KEYS]
+            return []
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return []
+
+    def delete_api_key(self, user_id, key):
+        """Delete method for an API key."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_api_key.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if key is None:
+            self.log_error(MongoDatabase.delete_api_key.__name__ + ": Unexpected empty object: key")
+            return False
+
+        try:
+            # Find the user.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+
+            # If the user was found.
+            if user is not None and Keys.API_KEYS in user:
+
+                # Make sure we're dealing with a string.
+                key_str = str(key)
+
+                key_list = user[Keys.API_KEYS]
+                for item in key_list:
+                    if item[Keys.API_KEY] == key_str:
+                        key_list.remove(item)
+                        break
+                user[Keys.API_KEYS] = key_list
+                self.users_collection.save(user)
                 return True
         except:
             self.log_error(traceback.format_exc())

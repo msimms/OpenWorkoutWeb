@@ -52,13 +52,13 @@ class DataMgr(Importer.ActivityWriter):
     """Data store abstraction"""
 
     def __init__(self, config, root_url, analysis_scheduler, import_scheduler, workout_plan_gen_scheduler):
-        self.database = StraenDb.MongoDatabase()
-        self.database.connect()
         self.config = config
         self.root_url = root_url
         self.analysis_scheduler = analysis_scheduler
         self.import_scheduler = import_scheduler
         self.workout_plan_gen_scheduler = workout_plan_gen_scheduler
+        self.database = StraenDb.MongoDatabase()
+        self.database.connect()
         self.map_search = None
         self.celery_worker = celery.Celery('straen_worker')
         self.celery_worker.config_from_object('CeleryConfig')
@@ -242,7 +242,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity ID.")
         return self.database.create_activity_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
 
-    def create_deferred_task(self, user_id, task_type, task_id, details):
+    def create_deferred_task(self, user_id, task_type, celery_task_id, internal_task_id, details):
         """Called by the importer to store data associated with an ongoing import task."""
         if self.database is None:
             raise Exception("No database.")
@@ -250,9 +250,11 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No user ID.")
         if task_type is None:
             raise Exception("No task type.")
-        if task_id is None:
-            raise Exception("No task ID.")
-        return self.database.create_deferred_task(user_id, task_type, task_id, details, Keys.TASK_STATUS_QUEUED)
+        if celery_task_id is None:
+            raise Exception("No celery task ID.")
+        if internal_task_id is None:
+            raise Exception("No internal task ID.")
+        return self.database.create_deferred_task(user_id, task_type, celery_task_id, internal_task_id, details, Keys.TASK_STATUS_QUEUED)
 
     def retrieve_deferred_tasks(self, user_id):
         """Returns a list of all incomplete tasks."""
@@ -262,17 +264,17 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No user ID.")
         return self.database.retrieve_deferred_tasks(user_id)
 
-    def update_deferred_task(self, user_id, task_id, status):
+    def update_deferred_task(self, user_id, internal_task_id, status):
         """Returns a list of all incomplete tasks."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("No user ID.")
-        if task_id is None:
-            raise Exception("No task ID.")
+        if internal_task_id is None:
+            raise Exception("No internal task ID.")
         if status is None:
             raise Exception("No status.")
-        return self.database.update_deferred_task(user_id, task_id, status)
+        return self.database.update_deferred_task(user_id, internal_task_id, status)
 
     def import_file(self, username, user_id, uploaded_file_data, uploaded_file_name):
         """Imports the contents of a local file into the database."""
@@ -286,7 +288,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No uploaded file data.")
         if uploaded_file_name is None:
             raise Exception("No uploaded file name.")
-        self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
+        return self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
 
     def attach_photo_to_activity(username, user_id, uploaded_file_data, uploaded_file_name, activity_id):
         """Imports a photo and associates it with an activity."""
@@ -478,11 +480,24 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity(activity_id)
 
-    def delete_activity(self, object_id):
+    def delete_activity(self, object_id, user_id, activity_id):
         """Delete the activity with the specified object ID."""
         if self.database is None:
             raise Exception("No database.")
-        return self.database.delete_activity(object_id)
+        if object_id is None:
+            raise Exception("Bad parameter.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if activity_id is None:
+            raise Exception("Bad parameter.")
+
+        # Delete the activity as well as the cache of the PRs performed during that activity.
+        result = self.database.delete_activity(object_id) and self.database.delete_activity_best_for_user(user_id, activity_id)
+
+        # Recreate the user's all-time PR list as the previous one could have contained data from the now deleted activity.
+        if result:
+            result = self.refresh_user_personal_records(user_id)
+        return result
 
     def retrieve_activity_visibility(self, device_str, activity_id):
         """Returns the visibility setting for the specified activity."""
@@ -765,8 +780,9 @@ class DataMgr(Importer.ActivityWriter):
             goal_date = None
         return goal, goal_date
 
-    def update_bests_for_activity(self, user_id, activity_id, activity_type, activity_time, bests):
-        """Update method for a user's personal record."""
+    def update_activity_bests_and_personal_records(self, user_id, activity_id, activity_type, activity_time, bests):
+        """Update method for a user's personal records. Caches the bests from the given activity and updates"""
+        """the personal record cache, if appropriate."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
@@ -780,10 +796,10 @@ class DataMgr(Importer.ActivityWriter):
         if bests is None:
             raise Exception("Bad parameter.")
 
-        # This object will keep track of the PRs.
+        # This object will keep track of the personal records.
         summarizer = Summarizer.Summarizer()
 
-        # Load existing PRs.
+        # Load existing personal records from the PR cache.
         all_personal_records = self.database.retrieve_user_personal_records(user_id)
         for record_activity_type in all_personal_records.keys():
             summarizer.set_record_dictionary(record_activity_type, all_personal_records[record_activity_type])
@@ -792,7 +808,7 @@ class DataMgr(Importer.ActivityWriter):
         # Add data from the new activity.
         summarizer.add_activity_data(activity_id, activity_type, activity_time, bests)
  
-        # Create or update the PR list.
+        # Create or update the personal records cache.
         all_personal_records[activity_type] = summarizer.get_record_dictionary(activity_type)
         if do_update:
             self.database.update_user_personal_records(user_id, all_personal_records)
@@ -810,13 +826,32 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_user_personal_records(user_id)
 
-    def delete_user_personal_records(self, user_id):
+    def delete_all_user_personal_records(self, user_id):
         """Delete method for a user's personal record."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        return self.database.delete_user_personal_records(user_id)
+        return self.database.delete_all_user_personal_records(user_id)
+
+    def refresh_user_personal_records(self, user_id):
+        """Delete method for a user's personal record."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        # This object will keep track of the personal records.
+        summarizer = Summarizer.Summarizer()
+
+        # Load existing personal records from the PR cache.
+        activity_bests = self.database.retrieve_activity_bests_for_user(user_id)
+        for activity_id in activity_bests.keys():
+            bests = activity_bests[activity_id]
+            activity_type = bests[Keys.APP_TYPE_KEY]
+
+        # TODO
+        return False
 
     def create_workout(self, user_id, workout_obj):
         """Create method for a workout."""
@@ -1022,6 +1057,16 @@ class DataMgr(Importer.ActivityWriter):
         if inputs is None:
             raise Exception("Bad parameter.")
         self.workout_plan_gen_scheduler.add_inputs_to_queue(inputs, self)
+
+    def merge_gpx_files(self, user_id, uploaded_file1_data, uploaded_file2_data):
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if uploaded_file1_data is None:
+            raise Exception("Bad parameter.")
+        if uploaded_file2_data is None:
+            raise Exception("Bad parameter.")
+
+        merge_tool = GpxMerge.GpxMerge()
 
     def get_location_description(self, activity_id):
         """Returns the political location that corresponds to an activity."""

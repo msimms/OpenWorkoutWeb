@@ -26,6 +26,7 @@
 import logging
 import sys
 import traceback
+import uuid
 
 class ImportScheduler(object):
     """Class for scheduling computationally expensive import tasks."""
@@ -52,8 +53,11 @@ class ImportScheduler(object):
             params['uploaded_file_data'] = uploaded_file_data
             params['uploaded_file_name'] = uploaded_file_name
 
-            import_task = import_activity.delay(dumps(params))
-            data_mgr.create_deferred_task(user_id, Keys.IMPORT_TASK_KEY, import_task.task_id, uploaded_file_name)
+            internal_task_id = uuid.uuid4()
+            import_task = import_activity.delay(dumps(params), internal_task_id)
+            data_mgr.create_deferred_task(user_id, Keys.IMPORT_TASK_KEY, import_task.task_id, internal_task_id, uploaded_file_name)
+            return internal_task_id
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
+        return None

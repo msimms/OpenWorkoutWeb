@@ -86,8 +86,6 @@ class WorkoutPlanGenerator(object):
     def calculate_inputs(self, user_id):
         """Looks through the user's data and calculates the algorithm's inputs."""
 
-        inputs = {}
-
         now = time.time()
         weeks_until_goal = None # Number of weeks until the goal, or None if not applicable
         longest_run_in_four_weeks = None  # Longest run in the last four weeks
@@ -113,14 +111,16 @@ class WorkoutPlanGenerator(object):
             # Convert the goal time into weeks.
             weeks_until_goal = (goal_date - now) / (7 * 24 * 60 * 60)
 
-        # Is the user interested in just completion, or do they care about pace/speed?
+        # Is the user interested in just completion, or do they care about performance (i.e. pace/speed)?
         goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
 
         # This will trigger the callback for each of the user's activities.
         self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb)
 
+        # Need cycling FTP and run training paces.
+
         # Look through the user's six month records.
-        cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.SIX_MONTHS)
+        cycling_bests, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.SIX_MONTHS)
 
         # Estimate running paces from the user's six month records.
         if running_bests is not None:
@@ -129,12 +129,17 @@ class WorkoutPlanGenerator(object):
             running_paces = {}
 
         # Estimate an FTP from the last six months of cycling data.
+        threshold_power = 0.0
         if cycling_bests is not None:
             if Keys.THRESHOLD_POWER in cycling_bests:
                 threshold_power = cycling_bests[Keys.THRESHOLD_POWER]
                 best_recent_threshold_power = self.data_mgr.retrieve_user_estimated_ftp(user_id)
                 if best_recent_threshold_power is None or threshold_power > best_recent_threshold_power:
                     self.data_mgr.store_user_estimated_ftp(user_id, threshold_power)
+                else:
+                    threshold_power = best_recent_threshold_power
+
+        # Need last four weeks averages and bests.
 
         # Look through the user's four week records.
         cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.FOUR_WEEKS)
@@ -185,6 +190,7 @@ class WorkoutPlanGenerator(object):
             in_taper = 0
 
         # Store all the inputs in a dictionary.
+        inputs = {}
         if len(running_paces) == 0:
             inputs[Keys.SPEED_RUN_PACE] = None
             inputs[Keys.TEMPO_RUN_PACE] = None
@@ -203,8 +209,9 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
         inputs[Keys.IN_TAPER_KEY] = in_taper
-        inputs[Keys.AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = avg_cycling_distance
         inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = avg_running_distance
+        inputs[Keys.AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = avg_cycling_distance
+        inputs[Keys.THRESHOLD_POWER] = threshold_power
 
         # Adds the goal distances to the inputs.
         inputs = WorkoutPlanGenerator.calculate_goal_distances(inputs)
@@ -262,8 +269,8 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.GOAL_TYPE_KEY])
         model_inputs.append(inputs[Keys.WEEKS_UNTIL_GOAL_KEY])
         model_inputs.append(inputs[Keys.IN_TAPER_KEY])
-        model_inputs.append(inputs[Keys.AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS])
+        model_inputs.append(inputs[Keys.AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS])
 
         workouts = []
         return workouts
@@ -421,8 +428,8 @@ def export_workouts(workouts, format):
                 local_file.write(zwo_str)
             print("Exported a workout to " + tempfile_name + ".")
 
-@celery_worker.task()
-def generate_workout_plan_for_user(user_str):
+@celery_worker.task(ignore_result=True)
+def generate_workout_plan_for_user(user_str, internal_task_id):
     """Entry point for the celery worker."""
     global g_model
 
@@ -435,7 +442,7 @@ def generate_workout_plan_for_user(user_str):
     print("Workout plan generation finished.")
 
 @celery_worker.task()
-def generate_workout_plan_from_inputs(inputs):
+def generate_workout_plan_from_inputs(inputs, internal_task_id):
     """Entry point for the celery worker."""
     global g_model
 

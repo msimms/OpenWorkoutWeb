@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+<title>${product} - ${name}</title>
+
+<link rel="stylesheet" href="${root_url}/css/normalize.css">
+<link rel="stylesheet" href="${root_url}/css/site.css">
+
+<meta charset="UTF-8">
+<meta name="description" content="Lists all API keys owned by the logged in user">
+<meta name="keywords" content="device list">
+
+</head>
+
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+
+<body>
+
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+
+<script>
+    var process_keys = function(records)
+    {
+        var keys_table = document.getElementById("Keys");
+
+        var new_row = keys_table.insertRow();
+        var cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode("API Key"));
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode("Maximum Queries Per Day"));
+
+        for (var key_record of records)
+        {
+            var new_row = keys_table.insertRow();
+            var cell = new_row.insertCell();
+            cell.appendChild(document.createTextNode(key_record.key));
+            cell = new_row.insertCell();
+            cell.appendChild(document.createTextNode(key_record.rate));
+        }
+    }
+
+    function get_keys()
+    {
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_api_keys", cache: false, success: process_keys, dataType: "json" });
+    }
+
+    get_keys();
+</script>
+
+<section class="nav">
+${nav}
+</section>
+
+<div class="device_list">
+    <div style="width: 800px">
+        <p>
+            <table id="Keys">
+            </table>
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

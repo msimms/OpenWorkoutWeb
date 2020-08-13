@@ -26,6 +26,7 @@
 import logging
 import sys
 import traceback
+import uuid
 
 class AnalysisScheduler(object):
     """Class for scheduling computationally expensive analysis tasks."""
@@ -46,8 +47,13 @@ class AnalysisScheduler(object):
         import Keys
 
         try:
-            analysis_task = analyze_activity.delay(dumps(activity))
-            data_mgr.create_deferred_task(activity_user_id, Keys.ANALYSIS_TASK_KEY, analysis_task.task_id, None)
+            activity_str = dumps(activity)
+            internal_task_id = uuid.uuid4()
+            analysis_task = analyze_activity.delay(activity_str, internal_task_id)
+            #analysis_task = analyze_activity.apply_async(queue='default', args=(activity_str))
+            data_mgr.create_deferred_task(activity_user_id, Keys.ANALYSIS_TASK_KEY, analysis_task.task_id, internal_task_id, None)
+            return internal_task_id
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
+        return None
