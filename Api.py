@@ -839,6 +839,11 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
+        # Only the activity's owner should be able to do this.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
+
         # Parse the file and store it's contents in the database.
         self.data_mgr.attach_photo_to_activity(username, self.user_id, uploaded_file_data, uploaded_file_name, activity_id)
 
@@ -865,8 +870,15 @@ class Api(object):
         """Returns the specified activity photo."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.ACTIVITY_PHOTO_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Validate the activity ID.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         # Validate the photo ID.
         activity_photo_id = values[Keys.ACTIVITY_PHOTO_ID_KEY]
@@ -881,16 +893,28 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.ACTIVITY_PHOTO_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
         if username is None:
             raise ApiException.ApiNotLoggedInException()
 
+        # Validate the activity ID.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
         # Validate the photo ID.
         activity_photo_id = values[Keys.ACTIVITY_PHOTO_ID_KEY]
         if not InputChecker.is_uuid(activity_photo_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # Only the activity's owner should be able to do this.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
 
         return True, ""
 

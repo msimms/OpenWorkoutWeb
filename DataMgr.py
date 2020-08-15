@@ -24,6 +24,7 @@
 """Data store abstraction"""
 
 import hashlib
+import os
 import time
 import uuid
 import FtpCalculator
@@ -300,6 +301,8 @@ class DataMgr(Importer.ActivityWriter):
         """Imports a photo and associates it with an activity."""
         if self.database is None:
             raise Exception("No database.")
+        if self.config is None:
+            raise Exception("No configuration object.")
         if user_id is None:
             raise Exception("No user ID.")
         if uploaded_file_data is None:
@@ -313,6 +316,20 @@ class DataMgr(Importer.ActivityWriter):
         h = hashlib.sha512()
         h.update(uploaded_file_data)
         hash_str = h.hexdigest()
+
+        # Create the directory, if it does not already exist.
+        photos_dir = self.config.get_photos_dir()
+        user_photos_dir = os.path.join(photos_dir, str(user_id))
+        if not os.path.exists(user_photos_dir):
+            os.makedirs(user_photos_dir)
+
+        # Save the file to the user's photos directory.
+        local_file_name = os.path.join(user_photos_dir, hash_str)
+        with open(local_file_name, 'wb') as local_file:
+            local_file.write(uploaded_file_data)
+            return True
+
+        return False
 
     def list_activity_photos(self, activity_id):
         """Lists all photos associated with an activity. Response is a list of identifiers."""

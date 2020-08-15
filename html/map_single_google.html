@@ -482,11 +482,17 @@ ${splits}
         }
     }
 
+    var process_photo = function(photo_data)
+    {
+    }
+
     var process_photos = function(photo_ids)
     {
         photo_ids = eval(photo_ids)
         for (var photo_id in photo_ids)
         {
+            var api_url = "${root_url}/api/1.0/handle_retrieve_activity_photo?activity_id=${activityId}&photo_id=" + photo_id;
+            $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photo, dataType: "binary" });
         }
     }
 
@@ -533,6 +539,8 @@ ${splits}
             create_tags(jQuery("#tags").val());
         });
     });
+
+    list_photos();
 </script>
 
 <hr>
