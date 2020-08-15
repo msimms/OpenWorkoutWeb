@@ -265,6 +265,9 @@ class Api(object):
         # Is this is a foot based activity? Need to know so we can display steps per minute instead of revs per minute.
         is_foot_based = False
 
+        # Need to know which version of python we're working with.
+        py_version = sys.version_info[0]
+
         response = "["
 
         if Keys.ACTIVITY_NAME_KEY in activity:
@@ -304,7 +307,10 @@ class Api(object):
                 if len(response) > 1:
                     response += ","
                 distance = distances[-1]
-                value = float(distance.values()[0])
+                if py_version < 3:
+                    value = float(distance.values()[0])
+                else:
+                    value = float(list(distance.values())[0])
                 response += json.dumps({"name": Keys.APP_DISTANCE_KEY, "value": "{:.2f}".format(value)})
 
         if Keys.APP_AVG_SPEED_KEY in activity:
@@ -313,7 +319,10 @@ class Api(object):
                 if len(response) > 1:
                     response += ","
                 speed = avg_speeds[-1]
-                value = float(speed.values()[0])
+                if py_version < 3:
+                    value = float(speed.values()[0])
+                else:
+                    value = float(list(speed.values())[0])
                 response += json.dumps({"name": Keys.APP_AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
 
         if Keys.APP_MOVING_SPEED_KEY in activity:
@@ -322,7 +331,10 @@ class Api(object):
                 if len(response) > 1:
                     response += ","
                 speed = moving_speeds[-1]
-                value = float(speed.values()[0])
+                if py_version < 3:
+                    value = float(speed.values()[0])
+                else:
+                    value = float(list(speed.values())[0])
                 response += json.dumps({"name": Keys.APP_MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
 
         if Keys.APP_HEART_RATE_KEY in activity:
@@ -331,7 +343,10 @@ class Api(object):
                 if len(response) > 1:
                     response += ","
                 heart_rate = heart_rates[-1]
-                value = float(heart_rate.values()[0])
+                if py_version < 3:
+                    value = float(heart_rate.values()[0])
+                else:
+                    value = float(list(heart_rate.values())[0])
                 response += json.dumps({"name": Keys.APP_HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
 
         if Keys.APP_CADENCE_KEY in activity:
@@ -340,7 +355,10 @@ class Api(object):
                 if len(response) > 1:
                     response += ","
                 cadence = cadences[-1]
-                value = float(cadence.values()[0])
+                if py_version < 3:
+                    value = float(cadence.values()[0])
+                else:
+                    value = float(list(cadence.values())[0])
                 if is_foot_based:
                     response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} spm".format(value * 2.0)})
                 else:
@@ -352,7 +370,10 @@ class Api(object):
                 if len(response) > 1:
                     response += ","
                 power = powers[-1]
-                value = float(power.values()[0])
+                if py_version < 3:
+                    value = float(power.values()[0])
+                else:
+                    value = float(list(power.values())[0])
                 response += json.dumps({"name": Keys.APP_POWER_KEY, "value": "{:.2f} watts".format(value)})
 
         response += "]"
