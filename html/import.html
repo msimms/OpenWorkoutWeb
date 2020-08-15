@@ -213,10 +213,17 @@ ${nav}
 
 		function upload_dir()
 		{
-			for (var i = 0; i < file_list.length; i++)
-			{
-				upload_file_no_ui(file_list[i]);
-			}
+            if (file_list.length > 0)
+            {
+                for (var i = 0; i < file_list.length; i++)
+                {
+                    upload_file_no_ui(file_list[i]);
+                }
+            }
+            else
+            {
+                alert("No files have been specified.");
+            }
 		}
 
 		picker.addEventListener('change', e => {
