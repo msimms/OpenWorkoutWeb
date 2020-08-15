@@ -849,6 +849,11 @@ class Api(object):
         if username is None:
             raise ApiException.ApiNotLoggedInException()
 
+        # Is the user allowed to upload photos?
+        can_upload = self.user_mgr.retrieve_user_setting(self.user_id, Keys.CAN_UPLOAD_PHOTOS_KEY)
+        if not can_upload:
+            raise ApiException.ApiAuthenticationException("User is not authorized to upload photos.")
+
         # Check for empty.
         if len(uploaded_file_name) == 0:
             raise ApiException.ApiMalformedRequestException('Empty file name.')
@@ -866,9 +871,9 @@ class Api(object):
             raise ApiException.ApiAuthenticationException("Not activity owner.")
 
         # Parse the file and store it's contents in the database.
-        self.data_mgr.attach_photo_to_activity(username, self.user_id, uploaded_file_data, uploaded_file_name, activity_id)
+        result = self.data_mgr.attach_photo_to_activity(username, self.user_id, uploaded_file_data, uploaded_file_name, activity_id)
 
-        return True, ""
+        return result, ""
 
     def handle_list_activity_photos(self, values):
         """Lists all photos associated with an activity."""

@@ -1690,6 +1690,33 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def create_activity_photo(self, user_id, photo_hash):
+        """Create method for an activity photo."""
+        if user_id is None:
+            self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if photo_hash is None:
+            self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Unexpected empty object: photo_hash")
+            return False
+
+        try:
+            # Find the activity.
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+
+            # If the activity was found.
+            if activity is not None:
+                photos = []
+                if Keys.ACTIVITY_PHOTOS_KEY in activity:
+                    photos = activity[Keys.ACTIVITY_PHOTOS_KEY]
+                photos.append(photo_hash)
+                activity[Keys.ACTIVITY_PHOTOS_KEY] = photos
+                self.activities_collection.save(activity)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def list_activity_photos(self, activity_id):
         """Lists all photos associated with an activity. Response is a list of identifiers."""
         if activity_id is None:
@@ -1723,9 +1750,9 @@ class MongoDatabase(Database.Database):
 
             # If the activity was found.
             if activity is not None and Keys.ACTIVITY_PHOTOS_KEY in activity:
-                data = activity[Keys.ACTIVITY_PHOTOS_KEY]
+                photos = activity[Keys.ACTIVITY_PHOTOS_KEY]
                 data.remove(photo_id)
-                activity[Keys.ACTIVITY_PHOTOS_KEY] = data
+                activity[Keys.ACTIVITY_PHOTOS_KEY] = photos
                 self.activities_collection.save(activity)
                 return True
         except:

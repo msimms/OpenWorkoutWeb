@@ -67,6 +67,7 @@ PREFERRED_LONG_RUN_DAY_KEY = "preferred long run day" # Day of the week on which
 GOAL_TYPE_KEY = "goal type" # Extra info about the user's goal, such as whether they care about speed or just finishing a race
 GOAL_TYPE_COMPLETION = "Completion"
 GOAL_TYPE_SPEED = "Speed"
+CAN_UPLOAD_PHOTOS_KEY = "can upload photos"
 
 # Personal records
 RECORDS_USER_ID = "user_id"

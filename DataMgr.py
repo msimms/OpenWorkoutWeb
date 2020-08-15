@@ -324,12 +324,17 @@ class DataMgr(Importer.ActivityWriter):
             os.makedirs(user_photos_dir)
 
         # Save the file to the user's photos directory.
-        local_file_name = os.path.join(user_photos_dir, hash_str)
-        with open(local_file_name, 'wb') as local_file:
-            local_file.write(uploaded_file_data)
-            return True
+        try:
+            local_file_name = os.path.join(user_photos_dir, hash_str)
+            with open(local_file_name, 'wb') as local_file:
+                local_file.write(uploaded_file_data)
+        except:
+            raise Exception("Could not save the photo.")
 
-        return False
+        # Attach the hash to the activity.
+        result = self.database.create_activity_photo(user_id, hash_str)
+
+        return result
 
     def list_activity_photos(self, activity_id):
         """Lists all photos associated with an activity. Response is a list of identifiers."""
