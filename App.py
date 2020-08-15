@@ -438,13 +438,13 @@ class App(object):
         # List the edit controls.
         edit_title_str = ""
         edit_str = ""
-        if logged_in:
+        if belongs_to_current_user:
             edit_title_str = "<h3>Edit</h3>"
             edit_str = App.render_edit_controls()
 
         # Render the delete control.
         delete_str = ""
-        if logged_in:
+        if belongs_to_current_user:
             delete_str = App.render_delete_control()
 
         # Build the page title.
@@ -722,7 +722,7 @@ class App(object):
         # List the edit controls.
         edit_title_str = ""
         edit_str = ""
-        if logged_in:
+        if belongs_to_current_user:
             edit_title_str = "<h3>Edit</h3>"
             edit_str = App.render_edit_controls()
 
