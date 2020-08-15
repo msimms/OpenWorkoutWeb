@@ -2415,6 +2415,33 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def delete_finished_deferred_tasks(self):
+        """Delete method for removing deferred tasks that are completed."""
+        try:
+            # Find the user's tasks document.
+            user_tasks_list = self.tasks_collection.find({})
+
+            # For each user's task lists.
+            for user_tasks in user_tasks_list:
+
+                if Keys.TASKS_KEY in user_tasks:
+
+                    # Find and update the record.
+                    new_list = []
+                    for task in user_tasks[Keys.TASKS_KEY]:
+                        if task[Keys.TASK_STATUS_KEY] != Keys.TASK_STATUS_FINISHED:
+                            new_list.append(task)
+                    user_tasks[Keys.TASKS_KEY] = new_list
+
+                    # Update the database.
+                    self.tasks_collection.save(user_tasks)
+
+            return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def create_api_key(self, user_id, key, rate):
         """Create method for an API key."""
         if user_id is None:

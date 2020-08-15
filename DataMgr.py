@@ -276,6 +276,12 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No status.")
         return self.database.update_deferred_task(user_id, internal_task_id, status)
 
+    def prune_deferred_tasks_list(self):
+        """Removes all completed tasks from the list."""
+        if self.database is None:
+            raise Exception("No database.")
+        return self.database.delete_finished_deferred_tasks()
+
     def import_file(self, username, user_id, uploaded_file_data, uploaded_file_name):
         """Imports the contents of a local file into the database."""
         if self.import_scheduler is None:
