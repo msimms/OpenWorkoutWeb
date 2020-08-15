@@ -123,8 +123,11 @@ ${nav}
             {
                 if ((obj_list[i].name != "Name") && (obj_list[i].name != "Avg. Speed"))
                 {
-                    content_string += obj_list[i].name;
-                    content_string += " = ";
+                    if (obj_list[i].name != "Type")
+                    {
+                        content_string += obj_list[i].name;
+                        content_string += " = ";
+                    }
                     content_string += obj_list[i].value;
                     content_string += "<br>";
                 }
