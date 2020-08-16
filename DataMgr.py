@@ -297,7 +297,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No uploaded file name.")
         return self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
 
-    def attach_photo_to_activity(username, user_id, uploaded_file_data, uploaded_file_name, activity_id):
+    def attach_photo_to_activity(self, user_id, uploaded_file_data, uploaded_file_name, activity_id):
         """Imports a photo and associates it with an activity."""
         if self.database is None:
             raise Exception("No database.")
@@ -307,8 +307,6 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No user ID.")
         if uploaded_file_data is None:
             raise Exception("No uploaded file data.")
-        if uploaded_file_name is None:
-            raise Exception("No uploaded file name.")
         if activity_id is None:
             raise Exception("No activity ID.")
 
@@ -317,8 +315,12 @@ class DataMgr(Importer.ActivityWriter):
         h.update(uploaded_file_data)
         hash_str = h.hexdigest()
 
-        # Create the directory, if it does not already exist.
+        # Where are we storing photos?
         photos_dir = self.config.get_photos_dir()
+        if len(photos_dir) == 0:
+            raise Exception("No photos directory.")
+
+        # Create the directory, if it does not already exist.
         user_photos_dir = os.path.join(photos_dir, str(user_id))
         if not os.path.exists(user_photos_dir):
             os.makedirs(user_photos_dir)
@@ -332,7 +334,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Could not save the photo.")
 
         # Attach the hash to the activity.
-        result = self.database.create_activity_photo(user_id, hash_str)
+        result = self.database.create_activity_photo(user_id, activity_id, hash_str)
 
         return result
 

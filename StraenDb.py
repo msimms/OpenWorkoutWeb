@@ -1690,10 +1690,13 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_activity_photo(self, user_id, photo_hash):
+    def create_activity_photo(self, user_id, activity_id, photo_hash):
         """Create method for an activity photo."""
         if user_id is None:
             self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Unexpected empty object: activity_id")
             return False
         if photo_hash is None:
             self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Unexpected empty object: photo_hash")
@@ -1705,10 +1708,17 @@ class MongoDatabase(Database.Database):
 
             # If the activity was found.
             if activity is not None:
+
+                # Append the hash of the photo to the photos list.
                 photos = []
                 if Keys.ACTIVITY_PHOTOS_KEY in activity:
                     photos = activity[Keys.ACTIVITY_PHOTOS_KEY]
                 photos.append(photo_hash)
+
+                # Remove duplicates.
+                photos = list(dict.fromkeys(photos))
+
+                # Save the updated activity.
                 activity[Keys.ACTIVITY_PHOTOS_KEY] = photos
                 self.activities_collection.save(activity)
                 return True
