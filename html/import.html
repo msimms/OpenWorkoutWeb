@@ -151,15 +151,16 @@ ${nav}
 <div class="import" style="width: 600px">
 	<h2>Import File(s)</h2>
 
-	<input type="file" id="picker" name="file_list" webkitdirectory multiple><br>
+	<input type="file" id="picker" name="file_list" class="modern_button" webkitdirectory multiple><br>
+
     <table class="import" id="upload_table">
     </table>
-	<button type="button" onclick="return upload_dir()">Upload</button><br>
+	<button type="button" onclick="return upload_selected_files()">Upload</button><br>
 
 	<script>
 		let picker = document.getElementById('picker');
 		let file_list = [];
-        let file_tasks = {};
+        let file_tasks = {}; // Associates the task ID returned by the server with the file being uploaded
 
         function update_file_status(file_name, status_text)
         {
@@ -180,7 +181,7 @@ ${nav}
             file_tasks[task_id] = file_name;
         }
 
-        function upload_file_no_ui(file_obj)
+        function upload_file(file_obj)
         {
             var reader = new FileReader();
 
@@ -211,13 +212,13 @@ ${nav}
             reader.readAsBinaryString(file_obj);
         }
 
-		function upload_dir()
+		function upload_selected_files()
 		{
             if (file_list.length > 0)
             {
                 for (var i = 0; i < file_list.length; i++)
                 {
-                    upload_file_no_ui(file_list[i]);
+                    upload_file(file_list[i]);
                 }
             }
             else
@@ -234,6 +235,7 @@ ${nav}
                 let new_row = upload_table.insertRow();
                 let cell = new_row.insertCell();
                 let text = document.createTextNode(file.name);
+
                 cell.appendChild(text);
                 cell = new_row.insertCell();
                 text = document.createTextNode("Waiting");

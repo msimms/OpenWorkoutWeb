@@ -646,7 +646,7 @@ class App(object):
             self.data_mgr.analyze_activity(activity, activity_user_id)
 
         # Start with the activity type.
-        summary = "\t<li>Activity Type: " + activity_type + "</li>\n"
+        summary = "\t<li>" + activity_type + "</li>\n"
 
         # Add the activity date.
         if Keys.ACTIVITY_TIME_KEY in activity:
