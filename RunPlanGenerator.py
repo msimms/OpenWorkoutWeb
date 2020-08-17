@@ -4,11 +4,15 @@
 import math
 import numpy as np
 import random
+from scipy.stats import norm
 
 import Keys
 import TrainingPaceCalculator
+import Units
 import Workout
 import WorkoutFactory
+
+METERS_PER_HALF_MARATHON = 13.1 * Units.METERS_PER_MILE
 
 class RunPlanGenerator(object):
     """Class for generating a run plan for the specifiied user."""
@@ -93,7 +97,7 @@ class RunPlanGenerator(object):
 
         return tempo_run_workout
 
-    def gen_speed_run(self, short_interval_run_pace, speed_run_pace, easy_run_pace):
+    def gen_speed_run(self, short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance):
         """Utility function for creating a speed/interval workout."""
 
         # Constants.
@@ -106,7 +110,27 @@ class RunPlanGenerator(object):
 
         # Build a collection of possible run interval sessions, sorted by target distance. Order is { min reps, max reps, distance in meters }.
         possible_workouts = [ [ 4, 8, 100 ], [ 4, 8, 200 ], [ 4, 8, 400 ], [ 4, 6, 600 ], [ 2, 4, 800 ], [ 2, 4, 1000 ], [ 2, 4, 1600 ] ]
-        selected_interval_workout = random.choice(possible_workouts)
+
+        # Build a probability density function for selecting the workout. Longer goals should tend towards longer intervals and so on.
+        num_possible_workouts = len(possible_workouts)
+        x = np.arange(0, num_possible_workouts, 1)
+        center_index = num_possible_workouts / 2
+        densities = norm.pdf(x, loc=center_index)
+        total_densities = sum(densities)
+        if total_densities < 1.0:
+            densities[center_index] += (1.0 - total_densities)
+
+        # If the goal is less than a 10K then favor the shorter interval workouts. If greater than a 1/2 marathon, favor the longer.
+        if goal_distance < 10000:
+            mod_densities = np.append(densities[-1], densities[0:len(densities)-1])
+        elif goal_distance > METERS_PER_HALF_MARATHON:
+            mod_densities = np.append(densities[1:len(densities)], densities[0])
+        else:
+            mod_densities = densities
+
+        # Select the workout.
+        selected_interval_workout_index = np.random.choice(x, p=mod_densities)
+        selected_interval_workout = possible_workouts[selected_interval_workout_index]
 
         # Determine the pace for this workout.
         if selected_interval_workout[REP_DISTANCE_INDEX] < 1000:
@@ -115,7 +139,7 @@ class RunPlanGenerator(object):
             interval_pace = speed_run_pace
 
         # Determine the number of reps for this workout.
-        selected_reps = random.choice(range(selected_interval_workout[MIN_REPS_INDEX], selected_interval_workout[MAX_REPS_INDEX], 2))
+        selected_reps = np.random.choice(range(selected_interval_workout[MIN_REPS_INDEX], selected_interval_workout[MAX_REPS_INDEX], 2))
 
         # Determine the distance for this workout.
         interval_distance = selected_interval_workout[REP_DISTANCE_INDEX]
@@ -243,12 +267,12 @@ class RunPlanGenerator(object):
             if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower():
 
                 # Add an interval/speed session.
-                interval_workout = self.gen_speed_run(short_interval_run_pace, speed_run_pace, easy_run_pace)
+                interval_workout = self.gen_speed_run(short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance)
                 workouts.append(interval_workout)
 
                 # (Maybe) add another interval/speed session, unless it's pushing us over our allowed amount of hard distance for the week.
                 if iter_count <= 1:
-                    interval_workout = self.gen_speed_run(short_interval_run_pace, speed_run_pace, easy_run_pace)
+                    interval_workout = self.gen_speed_run(short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance)
                     workouts.append(interval_workout)
                 else:
                     easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
