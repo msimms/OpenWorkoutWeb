@@ -287,6 +287,8 @@ class DataMgr(Importer.ActivityWriter):
         """Imports the contents of a local file into the database."""
         if self.import_scheduler is None:
             raise Exception("No importer.")
+        if self.config is None:
+            raise Exception("No configuration object.")
         if username is None:
             raise Exception("No username.")
         if user_id is None:
@@ -295,6 +297,11 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No uploaded file data.")
         if uploaded_file_name is None:
             raise Exception("No uploaded file name.")
+
+        # Check the file size.
+        if len(uploaded_file_data) > self.config.get_import_max_file_size():
+            raise Exception("The file is too large.")
+
         return self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
 
     def attach_photo_to_activity(self, user_id, uploaded_file_data, uploaded_file_name, activity_id):

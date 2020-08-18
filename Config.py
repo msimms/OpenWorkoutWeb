@@ -107,5 +107,8 @@ class Config(object):
     def get_photos_max_file_size(self):
         return self.get_int('Photos', 'Max File Size')
 
+    def get_import_max_file_size(self):
+        return self.get_int('Import', 'Max File Size')
+
     def get_broker_url(self):
         return self.get_str('Celery', 'Broker URL')
