@@ -218,6 +218,7 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 
 ### 0.29
 * Bug fixes.
+* More work on run workout plan generation.
 
 ## Tech
 This software uses several other source projects to work properly:
