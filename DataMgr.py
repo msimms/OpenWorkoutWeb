@@ -310,6 +310,10 @@ class DataMgr(Importer.ActivityWriter):
         if activity_id is None:
             raise Exception("No activity ID.")
 
+        # Check the file size.
+        if len(uploaded_file_data) > self.config.get_photos_max_file_size():
+            raise Exception("The file is too large.")
+
         # Hash the photo. This will prevent duplicates as well as give us a unique name.
         h = hashlib.sha512()
         h.update(uploaded_file_data)
