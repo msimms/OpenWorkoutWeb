@@ -648,18 +648,18 @@ class App(object):
         # Start with the activity type.
         summary = "\t<li>" + activity_type + "</li>\n"
 
-        # Add the activity date.
-        if Keys.ACTIVITY_TIME_KEY in activity:
-            summary += "\t<li>Start Time: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script></li>\n"
-
-        # Add the activity name.
-        summary += "\t<li>Name: " + name + "</li>\n"
-
         # Add the location description.
         if summary_data is not None and Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
             location_description = summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]
             if len(location_description) > 0:
-                summary += "\t<li>Location: " + App.render_array_reversed(location_description) + "</li>\n"
+                summary += "\t<li>" + App.render_array_reversed(location_description) + "</li>\n"
+
+        # Add the activity date.
+        if Keys.ACTIVITY_TIME_KEY in activity:
+            summary += "\t<li>Start: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script></li>\n"
+
+        # Add the activity name.
+        summary += "\t<li>Name: " + name + "</li>\n"
 
         # Build the detailed analysis table from data that was computed out-of-band and cached.
         details_str = ""
