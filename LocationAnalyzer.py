@@ -16,10 +16,14 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 libmathdir = os.path.join(currentdir, 'LibMath', 'python')
 sys.path.insert(0, libmathdir)
 import distance
-import kmeans
 import peaks
 import signals
 import statistics
+
+# Stuff we need for kmeans
+from sklearn.cluster import KMeans
+from scipy.spatial.distance import cdist
+import numpy as np
 
 METERS_PER_HALF_MARATHON = 13.1 * Units.METERS_PER_MILE
 METERS_PER_MARATHON = 26.2 * Units.METERS_PER_MILE
@@ -247,48 +251,71 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         # Let the base class perform the analysis first.
         results = SensorAnalyzer.SensorAnalyzer.analyze(self)
 
-        # Do pace analysis.
+        # Do a pace analysis.
         if len(self.speed_graph) > 1:
 
             # Compute the speed/pace variation. This will tell us how consistent the pace was.
             speed_variance = statistics.variance(self.speed_graph, self.avg_speed)
             results[Keys.APP_SPEED_VARIANCE_KEY] = speed_variance
+            results[Keys.ACTIVITY_INTERVALS_KEY] = [] # This will get overriden if interval efforts are found.
 
-            # Smooth the speed graph to take out some of the GPS jitter.
-            smoothed_graph = signals.smooth(self.speed_graph, 4)
-            if len(smoothed_graph) > 1:
-    
-                # Find peaks in the speed graph.
-                peak_list = peaks.find_peaks_in_numeric_array(smoothed_graph, 0.5)
+            # Don't look for peaks unless the variance was high. Cutoff selected via experimentation.
+            if speed_variance > 0.25:
 
-                # Examine the lines between the peaks.
-                all_intervals = []
-                for peak in peak_list:
-                    interval = self.examine_interval_peak(peak.left_trough.x, peak.right_trough.x)
-                    all_intervals.append(interval)
+                # Smooth the speed graph to take out some of the GPS jitter.
+                smoothed_graph = signals.smooth(self.speed_graph, 4)
+                if len(smoothed_graph) > 1:
+        
+                    # Find peaks in the speed graph. We're looking for intervals.
+                    peak_list = peaks.find_peaks_in_numeric_array(smoothed_graph, 0.5)
 
-                # Do a k-means analysis on the computed paces blocks so we can get rid of any outliers.
-                num_speed_blocks = len(self.speed_blocks)
-                significant_intervals = []
-                best_avg_error = 0
-                best_k = 0
-                best_tags = []
-                if num_speed_blocks > 1:
-                    for k in range(2, 8):
-                        tags, avg_error = kmeans.kmeans_equally_space_centroids_1_d(self.speed_blocks, k, 1, num_speed_blocks)
-                        if best_k == 0 or avg_error <= best_avg_error:
-                            best_avg_error = avg_error
-                            best_k = k
-                            best_tags = tags
+                    # Examine the lines between the peaks. Extract pertinant data, such as avg speed/pace and set it aside.
+                    # This data is used later when generating the report.
+                    all_intervals = []
+                    for peak in peak_list:
+                        interval = self.examine_interval_peak(peak.left_trough.x, peak.right_trough.x)
+                        all_intervals.append(interval)
 
-                    # Save off the significant peaks.
-                    interval_index = 0
-                    for tag in best_tags:
-                        if tag >= 1:
-                            significant_intervals.append(all_intervals[interval_index])
-                        interval_index = interval_index + 1
+                    # Do a k-means analysis on the computed speed/pace blocks so we can get rid of any outliers.
+                    num_speed_blocks = len(self.speed_blocks)
+                    if num_speed_blocks > 1:
 
-                results[Keys.ACTIVITY_INTERVALS_KEY] = significant_intervals
+                        # Make the data two dimensional because this is needed for the k means algorithm.
+                        x1 = np.array(self.speed_blocks)
+                        x2 = np.array([1] * num_speed_blocks)
+                        X = np.array(list(zip(x1, x2))).reshape(num_speed_blocks, 2)
+
+                        # Determine the maximum value of k.
+                        max_k = 10
+                        if num_speed_blocks < max_k:
+                            max_k = num_speed_blocks
+
+                        # Run k means for each possible k.
+                        best_k = 0
+                        best_labels = []
+                        steepest_slope = 0
+                        distortions = []
+                        for k in range(1, max_k):
+                            kmeans_model = KMeans(n_clusters=k).fit(X)
+                            distortions.append(sum(np.min(cdist(X, kmeans_model.cluster_centers_, 'euclidean'), axis = 1)) / X.shape[0])
+
+                            # Use the elbow method to find the best value for k.
+                            if len(distortions) > 1:
+                                slope = (distortions[k-1] + distortions[k-2]) / 2
+                                if best_k == 0 or slope > steepest_slope:
+                                    best_k = k
+                                    best_labels = kmeans_model.labels_
+                                    steepest_slope = slope
+
+                        # Save off the significant peaks.
+                        interval_index = 0
+                        significant_intervals = []
+                        for label in best_labels:
+                            if label >= 1:
+                                significant_intervals.append(all_intervals[interval_index])
+                            interval_index = interval_index + 1
+
+                    results[Keys.ACTIVITY_INTERVALS_KEY] = significant_intervals
 
         # Insert the location into the analysis dictionary so that it gets cached.
         results[Keys.LONGEST_DISTANCE] = self.total_distance

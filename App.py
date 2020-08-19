@@ -501,9 +501,11 @@ class App(object):
     @staticmethod
     def render_intervals_str(intervals):
         """Helper function for building a description from the raw intervals description."""
+        if intervals is None:
+            return "None"
         num_intervals = len(intervals)
         if num_intervals <= 0:
-            return ""
+            return "None"
 
         avg_interval_duration = 0.0
         avg_interval_length = 0.0
