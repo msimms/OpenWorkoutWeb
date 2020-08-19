@@ -283,6 +283,16 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         return self.database.delete_finished_deferred_tasks()
 
+    def create_uploaded_file(self, activity_id, file_data):
+        """Create method for an uploaded activity file."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No activity_id")
+        if file_data is None:
+            raise Exception("No file data")
+        return self.database.create_uploaded_file(activity_id, file_data)
+
     def import_file(self, username, user_id, uploaded_file_data, uploaded_file_name):
         """Imports the contents of a local file into the database."""
         if self.import_scheduler is None:
@@ -892,7 +902,7 @@ class DataMgr(Importer.ActivityWriter):
             activity_type = bests[Keys.APP_TYPE_KEY]
 
         # TODO
-        return False
+        return True
 
     def create_workout(self, user_id, workout_obj):
         """Create method for a workout."""
