@@ -2502,6 +2502,21 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def delete_uploaded_file(self, activity_id):
+        """Delete method for an uploaded file associated with an activity."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.delete_uploaded_file.__name__ + ": Unexpected empty object: activity_id")
+            return False
+
+        try:
+            deleted_result = self.uploads_collection.delete_one({ Keys.ACTIVITY_ID_KEY: str(activity_id) })
+            if deleted_result is not None:
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def create_api_key(self, user_id, key, rate):
         """Create method for an API key."""
         if user_id is None:

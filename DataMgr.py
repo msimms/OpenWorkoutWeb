@@ -545,9 +545,14 @@ class DataMgr(Importer.ActivityWriter):
         # Delete the activity as well as the cache of the PRs performed during that activity.
         result = self.database.delete_activity(object_id) and self.database.delete_activity_best_for_user(user_id, activity_id)
 
-        # Recreate the user's all-time PR list as the previous one could have contained data from the now deleted activity.
         if result:
+
+            # Delete the uploaded file (if any).
+            self.database.delete_uploaded_file(activity_id)
+
+            # Recreate the user's all-time PR list as the previous one could have contained data from the now deleted activity.
             result = self.refresh_user_personal_records(user_id)
+
         return result
 
     def retrieve_activity_visibility(self, device_str, activity_id):
