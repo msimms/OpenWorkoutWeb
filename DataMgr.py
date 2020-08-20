@@ -899,7 +899,8 @@ class DataMgr(Importer.ActivityWriter):
         activity_bests = self.database.retrieve_activity_bests_for_user(user_id)
         for activity_id in activity_bests.keys():
             bests = activity_bests[activity_id]
-            activity_type = bests[Keys.APP_TYPE_KEY]
+            if Keys.APP_TYPE_KEY in bests:
+                activity_type = bests[Keys.APP_TYPE_KEY]
 
         # TODO
         return True

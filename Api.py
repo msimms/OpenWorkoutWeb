@@ -690,14 +690,12 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         # Get the activities that belong to the logged in user.
-        activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None)
         deleted = False
+        activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None)
         for activity in activities:
-            if Keys.ACTIVITY_ID_KEY in activity:
-                if activity[Keys.ACTIVITY_ID_KEY] == activity_id:
-                    self.data_mgr.delete_activity(activity['_id'], self.user_id, activity_id)
-                    deleted = True
-                    break
+            if Keys.ACTIVITY_ID_KEY in activity and activity[Keys.ACTIVITY_ID_KEY] == activity_id:
+                deleted = self.data_mgr.delete_activity(activity['_id'], self.user_id, activity_id)
+                break
 
         # Did we find it?
         if not deleted:
