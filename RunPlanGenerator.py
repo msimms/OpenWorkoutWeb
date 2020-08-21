@@ -42,7 +42,7 @@ class RunPlanGenerator(object):
         """i.e., if given 407 meters, returns 400 meters, because no one runs 407 meter intervals."""
         if distance < min_distance_in_meters:
             distance = min_distance_in_meters
-        metric_intervals = [ 400, 800, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 12000, 15000, 20000, 21000 ]
+        metric_intervals = [ 400, 800, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 12000, 15000, 20000, 21000, 25000 ]
         us_customary_intervals = [ 0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 3.1, 5.0, 6.0, 6.2, 8.0, 10.0, 12.0, 13.1 ]
         return RunPlanGenerator.find_nearest(metric_intervals, distance)
 
@@ -53,12 +53,15 @@ class RunPlanGenerator(object):
     def gen_easy_run(self, pace, min_run_distance, max_run_distance):
         """Utility function for creating an easy run of some random distance between min and max."""
 
+        # An easy run needs to be at least a couple of kilometers.
+        if min_run_distance < 2000:
+            min_run_distance = 2000
+        if max_run_distance < 2000:
+            max_run_distance = 2000
+
         # Roll the dice to figure out the distance.
         run_distance = random.uniform(min_run_distance, max_run_distance)
-        if run_distance > 1000:
-            interval_distance_meters = round(run_distance, -3)
-        else:
-            interval_distance_meters = round(run_distance, -2)
+        interval_distance_meters = round(run_distance, -3)
 
         # Create the workout object.
         easy_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RUN, self.user_id)
@@ -79,6 +82,8 @@ class RunPlanGenerator(object):
         # Sanity check.
         if interval_distance_meters > max_run_distance:
             interval_distance_meters = max_run_distance
+        if interval_distance_meters < 1000:
+            interval_distance_meters = 1000
 
         warmup_duration = 10 * 60
         cooldown_duration = 10 * 60
@@ -239,8 +244,12 @@ class RunPlanGenerator(object):
             longest_run_in_four_weeks = max_long_run_distance
 
         # Distance ceilings for easy and tempo runs.
-        max_easy_run_distance = longest_run_in_four_weeks * 0.75
-        max_tempo_run_distance = longest_run_in_four_weeks * 0.50
+        if exp_level == Keys.EXPERIENCE_LEVEL_BEGINNER.lower():
+            max_easy_run_distance = longest_run_in_four_weeks * 0.60
+            max_tempo_run_distance = longest_run_in_four_weeks * 0.40
+        else:
+            max_easy_run_distance = longest_run_in_four_weeks * 0.75
+            max_tempo_run_distance = longest_run_in_four_weeks * 0.50
 
         # Don't make any runs (other than intervals, tempo runs, etc.) shorter than this.
         min_run_distance = avg_run_distance * 0.5
@@ -249,9 +258,11 @@ class RunPlanGenerator(object):
 
         # We'll also set the percentage of easy miles/kms based on the experience level.
         if exp_level == Keys.EXPERIENCE_LEVEL_BEGINNER.lower():
-            min_easy_distance_percentage = 0.9
+            min_easy_distance_percentage = 0.90
+        elif exp_level == Keys.EXPERIENCE_LEVEL_INTERMEDIATE.lower():
+            min_easy_distance_percentage = 0.80
         else:
-            min_easy_distance_percentage = 0.8
+            min_easy_distance_percentage = 0.75
 
         iter_count = 0
         done = False
@@ -263,27 +274,9 @@ class RunPlanGenerator(object):
             self.easy_distance_total_meters = 0.0
             self.hard_distance_total_meters = 0.0
 
-            # The user cares about speed as well as completing the distance. Also note that we should add strikes to one of the other workouts.
-            if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower():
-
-                # Add an interval/speed session.
-                interval_workout = self.gen_speed_run(short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance)
-                workouts.append(interval_workout)
-
-                # (Maybe) add another interval/speed session, unless it's pushing us over our allowed amount of hard distance for the week.
-                if iter_count <= 1:
-                    interval_workout = self.gen_speed_run(short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance)
-                    workouts.append(interval_workout)
-                else:
-                    easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
-                    workouts.append(easy_run_workout)
-
-            # The user only cares about completing the distance so just add another easy run.
-            else:
-
-                # Add an easy run.
-                easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
-                workouts.append(easy_run_workout)
+            # Add a long run.
+            long_run_workout = self.gen_long_run(long_run_pace, longest_run_in_four_weeks, min_run_distance, max_long_run_distance)
+            workouts.append(long_run_workout)
 
             # Add an easy run.
             easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
@@ -293,9 +286,16 @@ class RunPlanGenerator(object):
             tempo_run_workout = self.gen_tempo_run(tempo_run_pace, easy_run_pace, max_tempo_run_distance)
             workouts.append(tempo_run_workout)
 
-            # Add a long run.
-            long_run_workout = self.gen_long_run(long_run_pace, longest_run_in_four_weeks, min_run_distance, max_long_run_distance)
-            workouts.append(long_run_workout)
+            # The user cares about speed as well as completing the distance. Also note that we should add strikes to one of the other workouts.
+            if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower():
+
+                # Add an interval/speed session.
+                interval_workout = self.gen_speed_run(short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance)
+                workouts.append(interval_workout)
+
+            # Add an easy run.
+            easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
+            workouts.append(easy_run_workout)
 
             # Keep track of the total distance as well as the easy distance to keep from planning too many intense miles/kms.
             total_distance = self.easy_distance_total_meters + self.hard_distance_total_meters
