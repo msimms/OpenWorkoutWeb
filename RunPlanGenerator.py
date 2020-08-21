@@ -119,7 +119,7 @@ class RunPlanGenerator(object):
         # Build a probability density function for selecting the workout. Longer goals should tend towards longer intervals and so on.
         num_possible_workouts = len(possible_workouts)
         x = np.arange(0, num_possible_workouts, 1)
-        center_index = num_possible_workouts / 2
+        center_index = int(num_possible_workouts / 2)
         densities = norm.pdf(x, loc=center_index)
         total_densities = sum(densities)
         if total_densities < 1.0:
