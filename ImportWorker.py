@@ -88,6 +88,10 @@ def import_activity(import_str, internal_task_id):
         print("Importing the data to the database...")
         success, _, activity_id = importer.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
 
+        # Save the file to the database.
+        if success:
+            data_mgr.create_uploaded_file(activity_id, decoded_file_data)
+
         # Update the status of the analysis in the database.
         print("Updating status...")
         data_mgr.update_deferred_task(user_id, internal_task_id, Keys.TASK_STATUS_FINISHED)

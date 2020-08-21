@@ -438,13 +438,13 @@ class App(object):
         # List the edit controls.
         edit_title_str = ""
         edit_str = ""
-        if logged_in:
+        if belongs_to_current_user:
             edit_title_str = "<h3>Edit</h3>"
             edit_str = App.render_edit_controls()
 
         # Render the delete control.
         delete_str = ""
-        if logged_in:
+        if belongs_to_current_user:
             delete_str = App.render_delete_control()
 
         # Build the page title.
@@ -501,9 +501,11 @@ class App(object):
     @staticmethod
     def render_intervals_str(intervals):
         """Helper function for building a description from the raw intervals description."""
+        if intervals is None:
+            return "None"
         num_intervals = len(intervals)
         if num_intervals <= 0:
-            return ""
+            return "None"
 
         avg_interval_duration = 0.0
         avg_interval_length = 0.0
@@ -646,20 +648,20 @@ class App(object):
             self.data_mgr.analyze_activity(activity, activity_user_id)
 
         # Start with the activity type.
-        summary = "\t<li>Activity Type: " + activity_type + "</li>\n"
-
-        # Add the activity date.
-        if Keys.ACTIVITY_TIME_KEY in activity:
-            summary += "\t<li>Start Time: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script></li>\n"
-
-        # Add the activity name.
-        summary += "\t<li>Name: " + name + "</li>\n"
+        summary = "\t<li>" + activity_type + "</li>\n"
 
         # Add the location description.
         if summary_data is not None and Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
             location_description = summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]
             if len(location_description) > 0:
-                summary += "\t<li>Location: " + App.render_array_reversed(location_description) + "</li>\n"
+                summary += "\t<li>" + App.render_array_reversed(location_description) + "</li>\n"
+
+        # Add the activity date.
+        if Keys.ACTIVITY_TIME_KEY in activity:
+            summary += "\t<li>Start: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script></li>\n"
+
+        # Add the activity name.
+        summary += "\t<li>Name: " + name + "</li>\n"
 
         # Build the detailed analysis table from data that was computed out-of-band and cached.
         details_str = ""
@@ -722,7 +724,7 @@ class App(object):
         # List the edit controls.
         edit_title_str = ""
         edit_str = ""
-        if logged_in:
+        if belongs_to_current_user:
             edit_title_str = "<h3>Edit</h3>"
             edit_str = App.render_edit_controls()
 

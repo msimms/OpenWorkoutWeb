@@ -599,6 +599,7 @@ class StraenWeb(object):
             self.log_error(response)
             cherrypy.response.status = 500
         except:
+            response = "Unspecified error."
             cherrypy.response.status = 500
         return response
 

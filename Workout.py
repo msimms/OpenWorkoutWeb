@@ -258,7 +258,7 @@ class Workout(object):
 
         if self.estimated_training_stress is not None:
             stress_str = "{:.1f}".format(self.estimated_training_stress)
-            result += "Estimated Training Stres: "
+            result += "Estimated Training Stress: "
             result += stress_str
             result += "\n"
 

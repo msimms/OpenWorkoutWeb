@@ -20,7 +20,6 @@
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
-
     function update_activity_metadata()
     {
 		var the_url = "${root_url}/api/1.0/update_activity_metadata";
@@ -40,7 +39,6 @@
 		else
 			alert("An error occurred!");
     }
-
 </script>
 
 <section class="nav">
@@ -58,9 +56,73 @@ ${activity_type_options}
 	<hr>
 	<h2>Description</h2>
 	<textarea id="description" rows="10" cols="82">${description}</textarea>
+    <br>
+	<button type="button" id="update" onclick="return update_activity_metadata()">Update</button>
+    <hr>
+	<h2>Photos</h2>
+	<input type="file" id="picker" class="modern_button" name="file_list" webkitdirectory multiple><br>
 	<br>
-	<button type="button" onclick="return update_activity_metadata()">Update</button>
+    <table class="import" id="upload_table">
+    </table>
+
+	<script>
+		let picker = document.getElementById('picker');
+		let selected_file_list = [];
+
+        function upload_file(file_obj)
+        {
+            var reader = new FileReader();
+
+            reader.onerror = function(event)
+            {
+                reader.abort();
+            };
+            reader.onload = function(e)
+            {
+                var the_url = "${root_url}/api/1.0/upload_activity_photo?${activity_id}";
+                var dict = [];
+                var result_text = {};
+                var encoded_data = btoa(reader.result);
+
+                dict.push({["uploaded_file_data"] : encoded_data});
+        		dict.push({["activity_id"] : "${activity_id}"});
+
+                if (send_post_request(the_url, dict, result_text))
+                {
+                }
+                else
+                {
+                    alert(result_text.value);
+                }
+            }
+            reader.readAsBinaryString(file_obj);
+        }
+
+		function upload_selected_files()
+		{
+            if (selected_file_list.length > 0)
+            {
+                for (var i = 0; i < selected_file_list.length; i++)
+                {
+                    upload_file(selected_file_list[i]);
+                }
+            }
+            else
+            {
+                alert("No files have been specified.");
+            }
+		}
+
+		picker.addEventListener('change', e => {
+			for (let file of Array.from(e.target.files))
+			{
+				selected_file_list.push(file);
+			};
+            upload_selected_files();
+		});
+	</script>
 </div>
+
 
 </body>
 </html>

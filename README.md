@@ -69,7 +69,8 @@ The software architecture makes it possible to use this system with different fr
 
 This feature is very much under development and will go through several iterations before being ready for general use. The idea is to use the athlete's existing data to generate workouts to help in reaching future goals.
 
-## How To
+## User Guide
+
 For instructional material, consult the [Wiki](https://github.com/msimms/StraenWeb/wiki)
 
 ## Version History
@@ -212,8 +213,14 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 * Added the ability to retire gear.
 
 ### 0.28
-* Bug fixes with respect to python3
+* Bug fixes with respect to python3.
 * Added a 404 page for the cherrypy front end.
+* More work on run workout plan generation.
+
+### 0.29
+* Bug fixes.
+* Work towards saving photos.
+* Now saving the final that was uploaded and not just the data that was extracted from it.
 * More work on run workout plan generation.
 
 ## Tech

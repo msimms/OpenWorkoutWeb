@@ -81,6 +81,9 @@ class Importer(object):
     @staticmethod
     def normalize_activity_type(activity_type, file_name):
         """Takes the various activity names that appear in GPX and TCX files and normalizes to the ones used in this app."""
+        if activity_type is None:
+            return Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
+
         lower_activity_type = activity_type.lower()
         file_name_parts = file_name.lower().split(' ')
 

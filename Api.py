@@ -1,4 +1,26 @@
-# Copyright 2017 Michael J Simms
+# -*- coding: utf-8 -*-
+# 
+# # MIT License
+# 
+# Copyright (c) 2017 Mike Simms
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 """API request handlers"""
 
 import calendar
@@ -243,6 +265,9 @@ class Api(object):
         # Is this is a foot based activity? Need to know so we can display steps per minute instead of revs per minute.
         is_foot_based = False
 
+        # Need to know which version of python we're working with.
+        py_version = sys.version_info[0]
+
         response = "["
 
         if Keys.ACTIVITY_NAME_KEY in activity:
@@ -282,7 +307,10 @@ class Api(object):
                 if len(response) > 1:
                     response += ","
                 distance = distances[-1]
-                value = float(distance.values()[0])
+                if py_version < 3:
+                    value = float(distance.values()[0])
+                else:
+                    value = float(list(distance.values())[0])
                 response += json.dumps({"name": Keys.APP_DISTANCE_KEY, "value": "{:.2f}".format(value)})
 
         if Keys.APP_AVG_SPEED_KEY in activity:
@@ -291,7 +319,10 @@ class Api(object):
                 if len(response) > 1:
                     response += ","
                 speed = avg_speeds[-1]
-                value = float(speed.values()[0])
+                if py_version < 3:
+                    value = float(speed.values()[0])
+                else:
+                    value = float(list(speed.values())[0])
                 response += json.dumps({"name": Keys.APP_AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
 
         if Keys.APP_MOVING_SPEED_KEY in activity:
@@ -300,7 +331,10 @@ class Api(object):
                 if len(response) > 1:
                     response += ","
                 speed = moving_speeds[-1]
-                value = float(speed.values()[0])
+                if py_version < 3:
+                    value = float(speed.values()[0])
+                else:
+                    value = float(list(speed.values())[0])
                 response += json.dumps({"name": Keys.APP_MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
 
         if Keys.APP_HEART_RATE_KEY in activity:
@@ -309,7 +343,10 @@ class Api(object):
                 if len(response) > 1:
                     response += ","
                 heart_rate = heart_rates[-1]
-                value = float(heart_rate.values()[0])
+                if py_version < 3:
+                    value = float(heart_rate.values()[0])
+                else:
+                    value = float(list(heart_rate.values())[0])
                 response += json.dumps({"name": Keys.APP_HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
 
         if Keys.APP_CADENCE_KEY in activity:
@@ -318,7 +355,10 @@ class Api(object):
                 if len(response) > 1:
                     response += ","
                 cadence = cadences[-1]
-                value = float(cadence.values()[0])
+                if py_version < 3:
+                    value = float(cadence.values()[0])
+                else:
+                    value = float(list(cadence.values())[0])
                 if is_foot_based:
                     response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} spm".format(value * 2.0)})
                 else:
@@ -330,7 +370,10 @@ class Api(object):
                 if len(response) > 1:
                     response += ","
                 power = powers[-1]
-                value = float(power.values()[0])
+                if py_version < 3:
+                    value = float(power.values()[0])
+                else:
+                    value = float(list(power.values())[0])
                 response += json.dumps({"name": Keys.APP_POWER_KEY, "value": "{:.2f} watts".format(value)})
 
         response += "]"
@@ -647,14 +690,12 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         # Get the activities that belong to the logged in user.
-        activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None)
         deleted = False
+        activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None)
         for activity in activities:
-            if Keys.ACTIVITY_ID_KEY in activity:
-                if activity[Keys.ACTIVITY_ID_KEY] == activity_id:
-                    self.data_mgr.delete_activity(activity['_id'], self.user_id, activity_id)
-                    deleted = True
-                    break
+            if Keys.ACTIVITY_ID_KEY in activity and activity[Keys.ACTIVITY_ID_KEY] == activity_id:
+                deleted = self.data_mgr.delete_activity(activity['_id'], self.user_id, activity_id)
+                break
 
         # Did we find it?
         if not deleted:
@@ -794,8 +835,6 @@ class Api(object):
         """Called when an API message to upload a photo to an activity is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        if Keys.UPLOADED_FILE_NAME_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("File name not specified.")
         if Keys.UPLOADED_FILE_DATA_KEY not in values:
             raise ApiException.ApiMalformedRequestException("File data not specified.")
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -806,21 +845,32 @@ class Api(object):
         if username is None:
             raise ApiException.ApiNotLoggedInException()
 
+        # Is the user allowed to upload photos?
+        can_upload = self.user_mgr.retrieve_user_setting(self.user_id, Keys.CAN_UPLOAD_PHOTOS_KEY)
+        if not can_upload:
+            raise ApiException.ApiAuthenticationException("User is not authorized to upload photos.")
+
+        # Decode the parameters.
+        uploaded_file_data = unquote_plus(values[Keys.UPLOADED_FILE_DATA_KEY])
+
         # Check for empty.
-        if len(uploaded_file_name) == 0:
-            raise ApiException.ApiMalformedRequestException('Empty file name.')
         if len(uploaded_file_data) == 0:
-            raise ApiException.ApiMalformedRequestException('Empty file data for ' + uploaded_file_name + '.')
+            raise ApiException.ApiMalformedRequestException('Empty file data.')
 
         # Validate the activity ID.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        # Parse the file and store it's contents in the database.
-        self.data_mgr.attach_photo_to_activity(username, self.user_id, uploaded_file_data, uploaded_file_name, activity_id)
+        # Only the activity's owner should be able to do this.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
 
-        return True, ""
+        # Parse the file and store it's contents in the database.
+        result = self.data_mgr.attach_photo_to_activity(username, self.user_id, uploaded_file_data, activity_id)
+
+        return result, ""
 
     def handle_list_activity_photos(self, values):
         """Lists all photos associated with an activity."""
@@ -843,8 +893,15 @@ class Api(object):
         """Returns the specified activity photo."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.ACTIVITY_PHOTO_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Validate the activity ID.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         # Validate the photo ID.
         activity_photo_id = values[Keys.ACTIVITY_PHOTO_ID_KEY]
@@ -859,16 +916,28 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.ACTIVITY_PHOTO_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
         if username is None:
             raise ApiException.ApiNotLoggedInException()
 
+        # Validate the activity ID.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
         # Validate the photo ID.
         activity_photo_id = values[Keys.ACTIVITY_PHOTO_ID_KEY]
         if not InputChecker.is_uuid(activity_photo_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # Only the activity's owner should be able to do this.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
 
         return True, ""
 

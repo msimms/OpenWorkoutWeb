@@ -29,6 +29,7 @@ import sys
 import traceback
 import uuid
 from bson.objectid import ObjectId
+from bson import Binary
 import pymongo
 import time
 import Database
@@ -64,6 +65,7 @@ class MongoDatabase(Database.Database):
     activities_collection = None
     workouts_collection = None
     tasks_collectoin = None
+    uploads_collection = None
 
     def __init__(self):
         Database.Database.__init__(self)
@@ -78,6 +80,7 @@ class MongoDatabase(Database.Database):
             self.records_collection = self.database['records']
             self.workouts_collection = self.database['workouts']
             self.tasks_collection = self.database['tasks']
+            self.uploads_collection = self.database['uploads']
             return True
         except pymongo.errors.ConnectionFailure as e:
             self.log_error("Could not connect to MongoDB: %s" % e)
@@ -1452,6 +1455,7 @@ class MongoDatabase(Database.Database):
                 if Keys.APP_ACCELEROMETER_KEY in activity:
                     accel_list = activity[Keys.APP_ACCELEROMETER_KEY]
                 for accel in accels:
+
                     # Make sure time values are monotonically increasing.
                     if accel_list and int(accel_list[-1][Keys.ACCELEROMETER_TIME_KEY]) > accel[0]:
                         self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Received out-of-order time value.")
@@ -1520,6 +1524,7 @@ class MongoDatabase(Database.Database):
 
             # If the activity was found.
             if activity is not None and Keys.ACTIVITY_SUMMARY_KEY in activity:
+
                 # Currently left out for performance reasons.
                 #activity[Keys.ACTIVITY_SUMMARY_KEY] = {}
                 #self.activities_collection.save(activity)
@@ -1690,6 +1695,43 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def create_activity_photo(self, user_id, activity_id, photo_hash):
+        """Create method for an activity photo."""
+        if user_id is None:
+            self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if photo_hash is None:
+            self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Unexpected empty object: photo_hash")
+            return False
+
+        try:
+            # Find the activity.
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+
+            # If the activity was found.
+            if activity is not None:
+
+                # Append the hash of the photo to the photos list.
+                photos = []
+                if Keys.ACTIVITY_PHOTOS_KEY in activity:
+                    photos = activity[Keys.ACTIVITY_PHOTOS_KEY]
+                photos.append(photo_hash)
+
+                # Remove duplicates.
+                photos = list(dict.fromkeys(photos))
+
+                # Save the updated activity.
+                activity[Keys.ACTIVITY_PHOTOS_KEY] = photos
+                self.activities_collection.save(activity)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def list_activity_photos(self, activity_id):
         """Lists all photos associated with an activity. Response is a list of identifiers."""
         if activity_id is None:
@@ -1723,9 +1765,9 @@ class MongoDatabase(Database.Database):
 
             # If the activity was found.
             if activity is not None and Keys.ACTIVITY_PHOTOS_KEY in activity:
-                data = activity[Keys.ACTIVITY_PHOTOS_KEY]
+                photos = activity[Keys.ACTIVITY_PHOTOS_KEY]
                 data.remove(photo_id)
-                activity[Keys.ACTIVITY_PHOTOS_KEY] = data
+                activity[Keys.ACTIVITY_PHOTOS_KEY] = photos
                 self.activities_collection.save(activity)
                 return True
         except:
@@ -2409,6 +2451,66 @@ class MongoDatabase(Database.Database):
 
                 # Update the database.
                 self.tasks_collection.save(user_tasks)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def delete_finished_deferred_tasks(self):
+        """Delete method for removing deferred tasks that are completed."""
+        try:
+            # Find the user's tasks document.
+            user_tasks_list = self.tasks_collection.find({})
+
+            # For each user's task lists.
+            for user_tasks in user_tasks_list:
+
+                if Keys.TASKS_KEY in user_tasks:
+
+                    # Find and update the record.
+                    new_list = []
+                    for task in user_tasks[Keys.TASKS_KEY]:
+                        if task[Keys.TASK_STATUS_KEY] != Keys.TASK_STATUS_FINISHED:
+                            new_list.append(task)
+                    user_tasks[Keys.TASKS_KEY] = new_list
+
+                    # Update the database.
+                    self.tasks_collection.save(user_tasks)
+
+            return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def create_uploaded_file(self, activity_id, file_data):
+        """Create method for an uploaded activity file."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_uploaded_file.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if file_data is None:
+            self.log_error(MongoDatabase.create_uploaded_file.__name__ + ": Unexpected empty object: file_data")
+            return False
+
+        try:
+            post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.UPLOADED_FILE_DATA_KEY: Binary(file_data) }
+            self.uploads_collection.insert(post)
+            return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def delete_uploaded_file(self, activity_id):
+        """Delete method for an uploaded file associated with an activity."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.delete_uploaded_file.__name__ + ": Unexpected empty object: activity_id")
+            return False
+
+        try:
+            deleted_result = self.uploads_collection.delete_one({ Keys.ACTIVITY_ID_KEY: str(activity_id) })
+            if deleted_result is not None:
                 return True
         except:
             self.log_error(traceback.format_exc())

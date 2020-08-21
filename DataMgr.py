@@ -24,6 +24,7 @@
 """Data store abstraction"""
 
 import hashlib
+import os
 import time
 import uuid
 import FtpCalculator
@@ -276,10 +277,28 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No status.")
         return self.database.update_deferred_task(user_id, internal_task_id, status)
 
+    def prune_deferred_tasks_list(self):
+        """Removes all completed tasks from the list."""
+        if self.database is None:
+            raise Exception("No database.")
+        return self.database.delete_finished_deferred_tasks()
+
+    def create_uploaded_file(self, activity_id, file_data):
+        """Create method for an uploaded activity file."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No activity_id")
+        if file_data is None:
+            raise Exception("No file data")
+        return self.database.create_uploaded_file(activity_id, file_data)
+
     def import_file(self, username, user_id, uploaded_file_data, uploaded_file_name):
         """Imports the contents of a local file into the database."""
         if self.import_scheduler is None:
             raise Exception("No importer.")
+        if self.config is None:
+            raise Exception("No configuration object.")
         if username is None:
             raise Exception("No username.")
         if user_id is None:
@@ -288,25 +307,57 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No uploaded file data.")
         if uploaded_file_name is None:
             raise Exception("No uploaded file name.")
+
+        # Check the file size.
+        if len(uploaded_file_data) > self.config.get_import_max_file_size():
+            raise Exception("The file is too large.")
+
         return self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
 
-    def attach_photo_to_activity(username, user_id, uploaded_file_data, uploaded_file_name, activity_id):
+    def attach_photo_to_activity(self, user_id, uploaded_file_data, uploaded_file_name, activity_id):
         """Imports a photo and associates it with an activity."""
         if self.database is None:
             raise Exception("No database.")
+        if self.config is None:
+            raise Exception("No configuration object.")
         if user_id is None:
             raise Exception("No user ID.")
         if uploaded_file_data is None:
             raise Exception("No uploaded file data.")
-        if uploaded_file_name is None:
-            raise Exception("No uploaded file name.")
         if activity_id is None:
             raise Exception("No activity ID.")
+
+        # Check the file size.
+        if len(uploaded_file_data) > self.config.get_photos_max_file_size():
+            raise Exception("The file is too large.")
 
         # Hash the photo. This will prevent duplicates as well as give us a unique name.
         h = hashlib.sha512()
         h.update(uploaded_file_data)
         hash_str = h.hexdigest()
+
+        # Where are we storing photos?
+        photos_dir = self.config.get_photos_dir()
+        if len(photos_dir) == 0:
+            raise Exception("No photos directory.")
+
+        # Create the directory, if it does not already exist.
+        user_photos_dir = os.path.join(photos_dir, str(user_id))
+        if not os.path.exists(user_photos_dir):
+            os.makedirs(user_photos_dir)
+
+        # Save the file to the user's photos directory.
+        try:
+            local_file_name = os.path.join(user_photos_dir, hash_str)
+            with open(local_file_name, 'wb') as local_file:
+                local_file.write(uploaded_file_data)
+        except:
+            raise Exception("Could not save the photo.")
+
+        # Attach the hash to the activity.
+        result = self.database.create_activity_photo(user_id, activity_id, hash_str)
+
+        return result
 
     def list_activity_photos(self, activity_id):
         """Lists all photos associated with an activity. Response is a list of identifiers."""
@@ -494,9 +545,14 @@ class DataMgr(Importer.ActivityWriter):
         # Delete the activity as well as the cache of the PRs performed during that activity.
         result = self.database.delete_activity(object_id) and self.database.delete_activity_best_for_user(user_id, activity_id)
 
-        # Recreate the user's all-time PR list as the previous one could have contained data from the now deleted activity.
         if result:
+
+            # Delete the uploaded file (if any).
+            self.database.delete_uploaded_file(activity_id)
+
+            # Recreate the user's all-time PR list as the previous one could have contained data from the now deleted activity.
             result = self.refresh_user_personal_records(user_id)
+
         return result
 
     def retrieve_activity_visibility(self, device_str, activity_id):
@@ -848,10 +904,11 @@ class DataMgr(Importer.ActivityWriter):
         activity_bests = self.database.retrieve_activity_bests_for_user(user_id)
         for activity_id in activity_bests.keys():
             bests = activity_bests[activity_id]
-            activity_type = bests[Keys.APP_TYPE_KEY]
+            if Keys.APP_TYPE_KEY in bests:
+                activity_type = bests[Keys.APP_TYPE_KEY]
 
         # TODO
-        return False
+        return True
 
     def create_workout(self, user_id, workout_obj):
         """Create method for a workout."""

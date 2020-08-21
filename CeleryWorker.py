@@ -40,6 +40,13 @@ def check_for_ungenerated_workout_plans():
     for user_id in user_ids:
         data_mgr.generate_workout_plan_for_user(user_id)
 
+@celery_worker.task()
+def prune_deferred_tasks_list():
+    """Checks for users that need their workout plan regenerated."""
+    data_mgr = DataMgr.DataMgr(None, "", None, None, None)
+    data_mgr.prune_deferred_tasks_list()
+
 @celery_worker.on_after_configure.connect
 def setup_periodic_tasks(**kwargs):
     celery_worker.add_periodic_task(600.0, check_for_ungenerated_workout_plans.s(), name='Check for workout plans that need to be re-generated.')
+    celery_worker.add_periodic_task(600.0, prune_deferred_tasks_list.s(), name='Removes completed tasks from the deferred tasks list.')
