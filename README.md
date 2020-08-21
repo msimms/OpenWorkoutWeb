@@ -218,6 +218,8 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 
 ### 0.29
 * Bug fixes.
+* Work towards saving photos.
+* Now saving the final that was uploaded and not just the data that was extracted from it.
 * More work on run workout plan generation.
 
 ## Tech
