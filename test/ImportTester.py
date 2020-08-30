@@ -109,6 +109,14 @@ class TestActivityWriter(Importer.ActivityWriter):
         for value in values:
             self.create_activity_sensor_reading(activity_id, value[0], sensor_type, value[1]) 
 
+    def create_activity_event(self, activity_id, event):
+        """Inherited from ActivityWriter. 'event' is a dictionary describing an event."""
+        pass
+
+    def create_activity_events(self, activity_id, events):
+        """Inherited from ActivityWriter. 'events' is an array of dictionaries in which each dictionary describes an event."""
+        pass
+
     def finish_activity(self, activity_id, end_time):
         """Inherited from ActivityWriter. Called for post-processing."""
 

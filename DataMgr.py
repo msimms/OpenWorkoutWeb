@@ -203,6 +203,26 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity ID.")
         return self.database.create_activity_sensor_readings(activity_id, sensor_type, values)
 
+    def create_activity_event(self, activity_id, event):
+        """Inherited from ActivityWriter. 'event' is a dictionary describing an event."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No activity ID.")
+        if event is None:
+            raise Exception("No event.")
+        return self.database.create_activity_events(activity_id, event)
+
+    def create_activity_events(self, activity_id, events):
+        """Inherited from ActivityWriter. 'events' is an array of dictionaries in which each dictionary describes an event."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No activity ID.")
+        if events is None:
+            raise Exception("No events.")
+        return self.database.create_activity_events(activity_id, events)
+
     def create_activity_metadata(self, activity_id, date_time, key, value, create_list):
         """Create method for activity metadata."""
         if self.database is None:

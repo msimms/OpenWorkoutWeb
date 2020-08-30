@@ -1144,12 +1144,15 @@ class MongoDatabase(Database.Database):
             if activity is not None:
                 location_list = []
 
+                # Get the existing list.
                 if Keys.ACTIVITY_LOCATIONS_KEY in activity:
                     location_list = activity[Keys.ACTIVITY_LOCATIONS_KEY]
 
                 value = {Keys.LOCATION_TIME_KEY: date_time, Keys.LOCATION_LAT_KEY: latitude, Keys.LOCATION_LON_KEY: longitude, Keys.LOCATION_ALT_KEY: altitude}
                 location_list.append(value)
                 location_list.sort(key=retrieve_time_from_location)
+
+                # Save the changes.
                 activity[Keys.ACTIVITY_LOCATIONS_KEY] = location_list
                 self.activities_collection.save(activity)
                 return True
@@ -1184,6 +1187,7 @@ class MongoDatabase(Database.Database):
             if activity is not None:
                 location_list = []
 
+                # Get the existing list.
                 if Keys.ACTIVITY_LOCATIONS_KEY in activity:
                     location_list = activity[Keys.ACTIVITY_LOCATIONS_KEY]
 
@@ -1192,6 +1196,8 @@ class MongoDatabase(Database.Database):
                     location_list.append(value)
 
                 location_list.sort(key=retrieve_time_from_location)
+
+                # Save the changes.
                 activity[Keys.ACTIVITY_LOCATIONS_KEY] = location_list
                 self.activities_collection.save(activity)
                 return True
@@ -1243,12 +1249,15 @@ class MongoDatabase(Database.Database):
             if activity is not None:
                 value_list = []
 
+                # Get the existing list.
                 if sensor_type in activity:
                     value_list = activity[sensor_type]
 
                 time_value_pair = {str(date_time): float(value)}
                 value_list.append(time_value_pair)
                 value_list.sort(key=retrieve_time_from_time_value_pair)
+
+                # Save the changes.
                 activity[sensor_type] = value_list
                 self.activities_collection.save(activity)
                 return True
@@ -1277,6 +1286,7 @@ class MongoDatabase(Database.Database):
             if activity is not None:
                 value_list = []
 
+                # Get the existing list.
                 if sensor_type in activity:
                     value_list = activity[sensor_type]
 
@@ -1285,6 +1295,8 @@ class MongoDatabase(Database.Database):
                     value_list.append(time_value_pair)
 
                 value_list.sort(key=retrieve_time_from_time_value_pair)
+
+                # Save the changes.
                 activity[sensor_type] = value_list
                 self.activities_collection.save(activity)
                 return True
@@ -1311,6 +1323,72 @@ class MongoDatabase(Database.Database):
                 sensor_data = activity[sensor_type]
                 sensor_data.sort(key=retrieve_time_from_time_value_pair)
                 return sensor_data
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def create_activity_event(self, activity_id, event):
+        """Inherited from ActivityWriter. 'events' is an array of dictionaries in which each dictionary describes an event."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_activity_event.__name__ + ": Unexpected empty object: activity_id")
+            return None
+        if event is None:
+            self.log_error(MongoDatabase.create_activity_event.__name__ + ": Unexpected empty object: event")
+            return None
+
+        try:
+            # Find the activity.
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+
+            # If the activity was found and if it has data for the specified sensor type.
+            if activity is not None:
+                events_list = []
+
+                # Get the existing list.
+                if Keys.APP_EVENTS_KEY in activity:
+                    events_list = activity[Keys.APP_EVENTS_KEY]
+
+                # Update the list.
+                events_list.append(event)
+
+                # Save the changes.
+                activity[Keys.APP_EVENTS_KEY] = events_list
+                self.activities_collection.save(activity)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return None
+
+    def create_activity_events(self, activity_id, events):
+        """Inherited from ActivityWriter. 'events' is an array of dictionaries in which each dictionary describes an event."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_activity_events.__name__ + ": Unexpected empty object: activity_id")
+            return None
+        if events is None:
+            self.log_error(MongoDatabase.create_activity_events.__name__ + ": Unexpected empty object: events")
+            return None
+
+        try:
+            # Find the activity.
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+
+            # If the activity was found and if it has data for the specified sensor type.
+            if activity is not None:
+                events_list = []
+
+                # Get the existing list.
+                if Keys.APP_EVENTS_KEY in activity:
+                    events_list = activity[Keys.APP_EVENTS_KEY]
+
+                # Update the list.
+                events_list.extend(events)
+
+                # Save the changes.
+                activity[Keys.APP_EVENTS_KEY] = events_list
+                self.activities_collection.save(activity)
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
