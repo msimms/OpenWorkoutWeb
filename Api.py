@@ -1636,7 +1636,7 @@ class Api(object):
             for workout in workouts:
                 if workout.scheduled_time is not None and workout.workout_id is not None and workout.type is not None:
                     url = self.root_url + "/workout/" + str(workout.workout_id)
-                    temp_workout = {'title': workout.type, 'url': url, 'time': calendar.timegm(workout.scheduled_time.timetuple()), 'id': str(workout.workout_id)}
+                    temp_workout = {'title': workout.type, 'url': url, 'scheduled time': calendar.timegm(workout.scheduled_time.timetuple()), 'id': str(workout.workout_id)}
                     matched_workouts.append(temp_workout)
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
