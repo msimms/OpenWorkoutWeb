@@ -54,7 +54,7 @@ class Workout(object):
         self.warmup = {} # The warmup interval
         self.cooldown = {} # The cooldown interval
         self.intervals = [] # The workout intervals
-        self.estimated_training_stress = None # Estimated TSS, the highter, the more stresful
+        self.estimated_training_stress = None # Estimated training stress, the highter, the more stresful
         self.workout_id = uuid.uuid4() # Unique identifier for the workout
 
     def __getitem__(self, key):
@@ -88,9 +88,8 @@ class Workout(object):
         output[Keys.WORKOUT_INTERVALS_KEY] = self.intervals
         if self.scheduled_time is not None:
             output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = time.mktime(self.scheduled_time.timetuple())
-        else:
-            output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = None
-        output[Keys.WORKOUT_ESTIMATED_STRESS_KEY] = self.estimated_training_stress
+        if self.estimated_training_stress is not None:
+            output[Keys.WORKOUT_ESTIMATED_STRESS_KEY] = self.estimated_training_stress
         return output
 
     def from_dict(self, input):
@@ -267,8 +266,8 @@ class Workout(object):
     def export_to_json_str(self, unit_system):
         """Creates a JSON string that describes the workout."""
         result = self.to_dict()
-        result[Keys.WORKOUT_ID_KEY] = str(self.workout_id)
-        result[Keys.WORKOUT_DESCRIPTION_KEY] = self.export_to_text(unit_system)
+        result[Keys.WORKOUT_ID_KEY] = str(self.workout_id) # UUIDs aren't serializable, so convert it to a string.
+        result[Keys.WORKOUT_DESCRIPTION_KEY] = self.export_to_text(unit_system).replace('\n', '\\n')
         return json.dumps(result, ensure_ascii=False)
 
     def export_to_ics(self, unit_system):
