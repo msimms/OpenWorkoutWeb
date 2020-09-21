@@ -58,6 +58,35 @@
             alert("An error occurred!");
     }
 
+    function set_goal_date()
+    {
+        var the_url = "${root_url}/api/1.0/update_settings";
+        var goal_date_obj = document.getElementById("goal_date");
+        var goal_date = 0;
+        var dict = [];
+        var result_text = {};
+
+        if (goal_date_obj.value == "")
+        {
+            if (goal_date_obj.placeholder == "")
+            {
+                alert("A goal date was not specified.");
+                return;
+            }
+            goal_date = Date.parse(goal_date_obj.placeholder) / 1000;
+        }
+        else
+        {
+            goal_date = Date.parse(goal_date_obj.value) / 1000;
+        }
+
+        dict.push({["goal_date"] : goal_date});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Goal date updated!");
+        else
+            alert("An error occurred!");
+    }
+
     function set_goal_type()
     {
         var the_url = "${root_url}/api/1.0/update_settings";
@@ -89,28 +118,9 @@
     function generate_workout_plan()
     {
         var the_url = "${root_url}/api/1.0/generate_workout_plan";
-        var goal = document.getElementById("goals").value;
-        var goalDateObj = document.getElementById("goalDate");
-        var goalDate = 0;
         var dict = [];
         var result_text = {};
 
-        if (goalDateObj.value == "")
-        {
-            if (goalDateObj.placeholder == "")
-            {
-                alert("A goal date was not specified.");
-                return;
-            }
-            goalDate = Date.parse(goalDateObj.placeholder) / 1000;
-        }
-        else
-        {
-            goalDate = Date.parse(goalDateObj.value) / 1000;
-        }
-
-        dict.push({["goal"] : goal});
-        dict.push({["goal_date"] : goalDate});
         if (send_post_request(the_url, dict, result_text))
             alert("The workout plan is being generated and will be viewable on the My Activities page when complete.");
         else
@@ -119,12 +129,12 @@
 
     $(function()
     {
-        $('#goalDate').datepicker({
+        $('#goal_date').datepicker({
             changeYear: true,
             changeMonth: true
         });
         var n = new Date(${goal_date} * 1000);
-        document.getElementsByName('goalDate')[0].placeholder=n.toLocaleDateString();
+        document.getElementsByName('goal_date')[0].placeholder=n.toLocaleDateString();
     });
 
     function append_to_paces_table(table, row_name, row_value)
@@ -258,7 +268,7 @@ ${nav}
 		<select name="goals" id="goals" onchange="return set_goal()">
 ${goals}
 		</select> on 
-    	<input type="text" name="goalDate" id="goalDate">
+    	<input type="text" name="goal_date" id="goal_date" onchange="return set_goal_date()">
     </p>
 
 	<hr>

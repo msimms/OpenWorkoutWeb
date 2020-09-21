@@ -1456,6 +1456,13 @@ class Api(object):
                     raise ApiException.ApiMalformedRequestException("Invalid goal.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
 
+            # Goal date.
+            elif decoded_key == Keys.GOAL_DATE_KEY:
+                goal_date = unquote_plus(values[key])
+                if not InputChecker.is_integer(goal_date):
+                    raise ApiException.ApiMalformedRequestException("Invalid goal date.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
+
             # Goal type.
             elif decoded_key == Keys.GOAL_TYPE_KEY:
                 goal_type = unquote_plus(values[key])
@@ -1487,29 +1494,37 @@ class Api(object):
         for key in values:
             decoded_key = unquote_plus(key)
 
-            # Gender
+            # Birthday.
             if decoded_key == Keys.BIRTHDAY_KEY:
                 birthday = unquote_plus(values[key]).lower()
                 if not InputChecker.is_integer(birthday):
                     raise ApiException.ApiMalformedRequestException("Invalid birthday.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.BIRTHDAY_KEY, birthday)
+
+            # Height.
             elif decoded_key == Keys.HEIGHT_KEY:
                 height = unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(height):
                     raise ApiException.ApiMalformedRequestException("Invalid height.")
                 height, _ = Units.convert_from_preferred_height_units(self.user_mgr, self.user_id, float(height))
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.HEIGHT_KEY, height)
+
+            # Weight.
             elif decoded_key == Keys.WEIGHT_KEY:
                 weight = unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(weight):
                     raise ApiException.ApiMalformedRequestException("Invalid weight.")
                 weight, _ = Units.convert_from_preferred_mass_units(self.user_mgr, self.user_id, float(weight))
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.WEIGHT_KEY, weight)
+
+            # Gender.
             elif decoded_key == Keys.GENDER_KEY:
                 gender = unquote_plus(values[key]).lower()
                 if not (gender == Keys.GENDER_MALE_KEY or gender == Keys.GENDER_FEMALE_KEY):
                     raise ApiException.ApiMalformedRequestException("Invalid gender value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GENDER_KEY, gender)
+
+            # Resting Heart Rate.
             elif decoded_key == Keys.RESTING_HEART_RATE_KEY:
                 resting_hr = unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(resting_hr):
@@ -1567,19 +1582,7 @@ class Api(object):
         """Called when the user wants to generate a workout plan."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        if Keys.GOAL_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("A goal was not specified.")
-        if Keys.GOAL_DATE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("A goal date was not specified.")
 
-        goal = unquote_plus(values[Keys.GOAL_KEY])
-        if not (goal in Keys.GOALS):
-            raise ApiException.ApiMalformedRequestException("Invalid goal.")
-
-        goal_date = unquote_plus(values[Keys.GOAL_DATE_KEY])
-
-        self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
-        self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
         self.data_mgr.generate_workout_plan_for_user(self.user_id)
         return True, ""
 
