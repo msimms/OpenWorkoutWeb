@@ -316,25 +316,40 @@ class UserMgr(object):
                 result = Keys.UNITS_STANDARD_KEY
             elif key == Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY:
                 result = Keys.DAYS_OF_WEEK[0]
-            elif key == Keys.GENDER_KEY:
-                result = Keys.GENDER_MALE_KEY
+            elif key == Keys.BIRTHDAY_KEY:
+                result = Keys.DEFAULT_BIRTHDAY_KEY
             elif key == Keys.HEIGHT_KEY:
                 result = Keys.DEFAULT_HEIGHT_KEY
             elif key == Keys.WEIGHT_KEY:
                 result = Keys.DEFAULT_WEIGHT_KEY
-            elif key == Keys.BIRTHDAY_KEY:
-                result = Keys.DEFAULT_BIRTHDAY_KEY
+            elif key == Keys.GENDER_KEY:
+                result = Keys.GENDER_MALE_KEY
+            elif key == Keys.RESTING_HEART_RATE_KEY:
+                result = 0
+            elif key == Keys.ESTIMATED_MAX_HEART_RATE_KEY:
+                result = 0
+            elif key == Keys.ESTIMATED_FTP_KEY:
+                result = 0
             elif key == Keys.GOAL_DATE_KEY:
                 result = int(time.time())
+            elif key == Keys.GOAL_TYPE_KEY:
+                result = Keys.GOAL_TYPE_COMPLETION
             elif key == Keys.EXPERIENCE_LEVEL_KEY:
                 result = Keys.EXPERIENCE_LEVEL_BEGINNER
+            elif key == Keys.CAN_UPLOAD_PHOTOS_KEY:
+                result = False
             else:
                 result = ""
 
+        # Return numbers and bools now so that we can handle strings differently.
         if isinstance(result, float):
             return result
         if isinstance(result, int):
-            return result        
+            return result
+        if isinstance(result, bool):
+            return result
+
+        # Return all strings as lowercase, just to keep things simple.
         return result.lower()
 
     def retrieve_api_keys(self, user_id):
