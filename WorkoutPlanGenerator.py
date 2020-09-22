@@ -209,6 +209,7 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
         inputs[Keys.IN_TAPER_KEY] = in_taper
+        inputs[Keys.NUM_WEEKS_BUILDING_KEY] = 0
         inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = avg_running_distance
         inputs[Keys.AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = avg_cycling_distance
         inputs[Keys.THRESHOLD_POWER] = threshold_power
@@ -269,6 +270,7 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.GOAL_TYPE_KEY])
         model_inputs.append(inputs[Keys.WEEKS_UNTIL_GOAL_KEY])
         model_inputs.append(inputs[Keys.IN_TAPER_KEY])
+        model_inputs.append(inputs[Keys.NUM_WEEKS_BUILDING_KEY])
         model_inputs.append(inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS])
 

@@ -122,7 +122,7 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
                         # Compute the training stress score (TSS = (t * NP * IF) / (FTP * 36)).
                         t = (self.end_time - self.start_time) / 1000.0
                         tss = (t * np * intfac) / (ftp[0] * 36)
-                        results[Keys.TSS] = tss
+                        results[Keys.TRAINING_STRESS] = tss
 
             #
             # Compute the threshold power from this workout. Maybe we have a new estimated FTP?

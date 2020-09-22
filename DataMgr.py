@@ -390,13 +390,14 @@ class DataMgr(Importer.ActivityWriter):
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
         if Keys.ACTIVITY_TIME_KEY in activity:
-            return
+            return activity[Keys.ACTIVITY_TIME_KEY]
 
         if Keys.ACTIVITY_LOCATIONS_KEY in activity:
             locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
         else:
             locations = self.retrieve_activity_locations(activity[Keys.ACTIVITY_ID_KEY])
 
+        time_num = 0
         if len(locations) > 0:
             first_loc = locations[0]
             if Keys.LOCATION_TIME_KEY in first_loc:
@@ -404,6 +405,7 @@ class DataMgr(Importer.ActivityWriter):
                 activity_id = activity[Keys.ACTIVITY_ID_KEY]
                 activity[Keys.ACTIVITY_TIME_KEY] = time_num
                 self.create_activity_metadata(activity_id, time_num, Keys.ACTIVITY_TIME_KEY, time_num, False)
+        return time_num
 
     def update_moving_activity(self, device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict):
         """Updates locations, sensor readings, and metadata associated with a moving activity. Provided as a performance improvement over making several database updates."""
