@@ -297,6 +297,41 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         return self.database.update_user_setting(user_id, key, value)
 
+    def default_user_setting(self, key):
+        """Returns the default value for the specified setting."""
+        if key is None or len(key) == 0:
+            raise Exception("Bad parameter.")
+
+        if key == Keys.DEFAULT_PRIVACY_KEY:
+            return Keys.ACTIVITY_VISIBILITY_PUBLIC
+        if key == Keys.PREFERRED_UNITS_KEY:
+            return Keys.UNITS_STANDARD_KEY
+        if key == Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY:
+            return Keys.DAYS_OF_WEEK[0]
+        if key == Keys.BIRTHDAY_KEY:
+            return Keys.DEFAULT_BIRTHDAY_KEY
+        if key == Keys.HEIGHT_KEY:
+            return Keys.DEFAULT_HEIGHT_KEY
+        if key == Keys.WEIGHT_KEY:
+            return Keys.DEFAULT_WEIGHT_KEY
+        if key == Keys.GENDER_KEY:
+            return Keys.GENDER_MALE_KEY
+        if key == Keys.RESTING_HEART_RATE_KEY:
+            return 0
+        if key == Keys.ESTIMATED_MAX_HEART_RATE_KEY:
+            return 0
+        if key == Keys.ESTIMATED_FTP_KEY:
+            return 0
+        if key == Keys.GOAL_DATE_KEY:
+            return int(time.time())
+        if key == Keys.GOAL_TYPE_KEY:
+            return Keys.GOAL_TYPE_COMPLETION
+        if key == Keys.EXPERIENCE_LEVEL_KEY:
+            return Keys.EXPERIENCE_LEVEL_BEGINNER
+        if key == Keys.CAN_UPLOAD_PHOTOS_KEY:
+            return False
+        return ""
+
     def retrieve_user_setting(self, user_id, key):
         """Retrieve method for user preferences."""
         if self.database is None:
@@ -306,40 +341,12 @@ class UserMgr(object):
         if key is None or len(key) == 0:
             raise Exception("Bad parameter.")
 
+        # What's in the database?
         result = self.database.retrieve_user_setting(user_id, key)
 
         # These are the default values:
         if result is None:
-            if key == Keys.DEFAULT_PRIVACY_KEY:
-                result = Keys.ACTIVITY_VISIBILITY_PUBLIC
-            elif key == Keys.PREFERRED_UNITS_KEY:
-                result = Keys.UNITS_STANDARD_KEY
-            elif key == Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY:
-                result = Keys.DAYS_OF_WEEK[0]
-            elif key == Keys.BIRTHDAY_KEY:
-                result = Keys.DEFAULT_BIRTHDAY_KEY
-            elif key == Keys.HEIGHT_KEY:
-                result = Keys.DEFAULT_HEIGHT_KEY
-            elif key == Keys.WEIGHT_KEY:
-                result = Keys.DEFAULT_WEIGHT_KEY
-            elif key == Keys.GENDER_KEY:
-                result = Keys.GENDER_MALE_KEY
-            elif key == Keys.RESTING_HEART_RATE_KEY:
-                result = 0
-            elif key == Keys.ESTIMATED_MAX_HEART_RATE_KEY:
-                result = 0
-            elif key == Keys.ESTIMATED_FTP_KEY:
-                result = 0
-            elif key == Keys.GOAL_DATE_KEY:
-                result = int(time.time())
-            elif key == Keys.GOAL_TYPE_KEY:
-                result = Keys.GOAL_TYPE_COMPLETION
-            elif key == Keys.EXPERIENCE_LEVEL_KEY:
-                result = Keys.EXPERIENCE_LEVEL_BEGINNER
-            elif key == Keys.CAN_UPLOAD_PHOTOS_KEY:
-                result = False
-            else:
-                result = ""
+            result = self.default_user_setting(key)
 
         # Return numbers and bools now so that we can handle strings differently.
         if isinstance(result, float):
@@ -351,6 +358,19 @@ class UserMgr(object):
 
         # Return all strings as lowercase, just to keep things simple.
         return result.lower()
+
+    def retrieve_user_settings(self, user_id, keys):
+        """Retrieve method for user preferences."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if keys is None or len(keys) == 0:
+            raise Exception("Bad parameter.")
+
+        # What's in the database?
+        results = self.database.retrieve_user_settings(user_id, keys)
+        return results
 
     def retrieve_api_keys(self, user_id):
         """Retrieve method for the user's API keys."""

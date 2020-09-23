@@ -654,6 +654,32 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def retrieve_user_settings(self, user_id, keys):
+        """Retrieve method for user preferences."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_user_settings.__name__ + ": Unexpected empty object: user_id")
+            return None
+        if keys is None:
+            self.log_error(MongoDatabase.retrieve_user_settings.__name__ + ": Unexpected empty object: keys")
+            return None
+
+        try:
+            # Find the user.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+
+            # Find the settings.
+            results = []
+            if user is not None:
+                for key in keys:
+                    if key in user:
+                        results.append({key: user[key]})
+                return results
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return None
+
     def create_user_personal_records(self, user_id, records):
         """Create method for a user's personal record."""
         if user_id is None:

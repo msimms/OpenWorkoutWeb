@@ -46,6 +46,7 @@ API_KEY_RATE = "rate" # The maximum number of requests allowed per day for the p
 
 # User settings
 REQUESTED_SETTING_KEY = "requested setting"
+REQUESTED_SETTINGS_KEY = "requested settings" # For requesting a list of settings (more efficient than requesting settings one by one)
 DEFAULT_PRIVACY_KEY = "default privacy"
 PREFERRED_UNITS_KEY = "preferred units"
 UNITS_METRIC_KEY = "metric"

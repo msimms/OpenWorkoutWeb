@@ -1824,10 +1824,22 @@ class Api(object):
         if Keys.REQUESTED_SETTING_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Setting not specified.")
 
-        setting_value = self.user_mgr.retrieve_user_setting(self.user_id, values[Keys.REQUESTED_SETTING_KEY])
-        return True, setting_value
+        setting = values[Keys.REQUESTED_SETTING_KEY]
+        setting_value = self.user_mgr.retrieve_user_setting(self.user_id, setting)
+        return True, str(setting_value)
 
-    def handle_get_api_keys(self, values):
+    def handle_get_user_settings(self, values):
+        """Returns the value associated with the specified user settings. Settings are a list of strings."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.REQUESTED_SETTINGS_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Settings not specified.")
+
+        settings = values[Keys.REQUESTED_SETTINGS_KEY].split(',')
+        setting_values = self.user_mgr.retrieve_user_settings(self.user_id, settings)
+        return True, json.dumps(setting_values)
+
+    def handle_get_api_keys(self):
         """Returns a list of API keys assigned to the current user."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -1897,8 +1909,10 @@ class Api(object):
             return self.handle_get_record_progression(values)
         elif request == 'get_user_setting':
             return self.handle_get_user_setting(values)
+        elif request == 'get_user_settings':
+            return self.handle_get_user_settings(values)
         elif request == 'get_api_keys':
-            return self.handle_get_api_keys(values)
+            return self.handle_get_api_keys()
         elif request == 'list_activity_types':
             return self.handle_list_activity_types()
         return False, ""

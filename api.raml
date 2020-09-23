@@ -596,6 +596,15 @@ version: v1
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
+/get_user_settings:
+    description: Returns a JSON list of values associated with the specified user settings. Input is a comma-separated list.
+    get:
+        responses:
+            200: The value associated with the requested setting.
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
 /get_api_keys:
     description: Returns the API keys associated witht he logged in user.
     get:
