@@ -150,11 +150,15 @@
     var process_run_paces = function(records)
     {
         var paces_table = document.getElementById("RunPaces");
-        var paces_keys = Object.keys(records)
+        var new_records = Object.keys(records).reduce(function(obj, key){
+            obj[ records[key] ] = key;
+            return obj;
+        },{});
+        var paces_keys = Object.keys(new_records).sort();
 
         for (var key of paces_keys)
         {
-            append_to_paces_table(paces_table, key, records[key]);
+            append_to_paces_table(paces_table, new_records[key], key);
         }
     }
 
