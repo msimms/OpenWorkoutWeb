@@ -1304,59 +1304,7 @@ class App(object):
     @statistics
     def settings(self):
         """Renders the user's settings page."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Get the current settings.
-        selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, Keys.DEFAULT_PRIVACY_KEY)
-        selected_units = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        selected_first_day_of_week = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY)
-
-        # Render the privacy option.
-        privacy_options = "\t\t<option value=\"Public\""
-        if selected_default_privacy is not None and selected_default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC:
-            privacy_options += " selected"
-        privacy_options += ">Public</option>\n"
-        privacy_options += "\t\t<option value=\"Private\""
-        if selected_default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE:
-            privacy_options += " selected"
-        privacy_options += ">Private</option>"
-
-        # Render the units
-        unit_options = "\t\t<option value=\"Metric\""
-        if selected_units is not None and selected_units == Keys.UNITS_METRIC_KEY:
-            unit_options += " selected"
-        unit_options += ">Metric</option>\n"
-        unit_options += "\t\t<option value=\"Standard\""
-        if selected_units is not None and selected_units == Keys.UNITS_STANDARD_KEY:
-            unit_options += " selected"
-        unit_options += ">Standard</option>"
-
-        # Render the days of week.
-        day_options = ""
-        for day in Keys.DAYS_OF_WEEK:
-            day_options += "\t\t<option value=\""
-            day_options += day
-            day_options += "\""
-            if day is not None and day.lower() == selected_first_day_of_week:
-                day_options += " selected"
-            day_options += ">"
-            day_options += day
-            day_options += "</option>\n"
-
-        # Render from the template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'settings.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, privacy_options=privacy_options, unit_options=unit_options, day_options=day_options)
+        return self.render_simple_page('settings.html')
 
     @statistics
     def ical(self, calendar_id):

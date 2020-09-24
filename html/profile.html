@@ -319,46 +319,49 @@
             {
                 units = value;
             }
-            else
-            {
-                var element = document.getElementById(key);
+        }
+    
+        for (var record of records)
+        {
+            var key = Object.keys(record)[0];
+            var value = record[key];
+            var element = document.getElementById(key);
 
-                if (element)
+            if (element)
+            {
+                if (key == "height")
                 {
-                    if (key == "height")
+                    if (units == "standard")
                     {
-                        if (units == "standard")
-                        {
-                            value *= 39.37008;
-                            height_units_obj.value = "inches";
-                        }
-                        else
-                            height_units_obj.value = "meters";
-                        element.value = value.toFixed(1);
+                        value *= 39.37008;
+                        height_units_obj.value = "inches";
                     }
-                    else if (key == "weight")
+                    else
+                        height_units_obj.value = "meters";
+                    element.value = value.toFixed(1);
+                }
+                else if (key == "weight")
+                {
+                    if (units == "standard")
                     {
-                        if (units == "standard")
-                        {
-                            value *= 2.2;
-                            weight_units_obj.value = "pounds";
-                        }
-                        else
-                            weight_units_obj.value = "kilograms";
-                        element.value = value.toFixed(1);
+                        value *= 2.2;
+                        weight_units_obj.value = "pounds";
                     }
-                    else if (key == "birthday")
-                    {
-                        var n = new Date(value * 1000);
-                        element.placeholder=n.toLocaleDateString();
-                    }
-                    else if (key == "gender")
-                    {
-                        if (value == "male")
-                            element.selectedIndex = 0;
-                        else
-                            element.selectedIndex = 1;
-                    }
+                    else
+                        weight_units_obj.value = "kilograms";
+                    element.value = value.toFixed(1);
+                }
+                else if (key == "birthday")
+                {
+                    var n = new Date(value * 1000);
+                    element.placeholder=n.toLocaleDateString();
+                }
+                else if (key == "gender")
+                {
+                    if (value == "male")
+                        element.selectedIndex = 0;
+                    else
+                        element.selectedIndex = 1;
                 }
             }
         }

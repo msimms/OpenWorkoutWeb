@@ -349,11 +349,7 @@ class UserMgr(object):
             result = self.default_user_setting(key)
 
         # Return numbers and bools now so that we can handle strings differently.
-        if isinstance(result, float):
-            return result
-        if isinstance(result, int):
-            return result
-        if isinstance(result, bool):
+        if isinstance(result, float) or isinstance(result, int) or isinstance(result, bool):
             return result
 
         # Return all strings as lowercase, just to keep things simple.
@@ -379,7 +375,8 @@ class UserMgr(object):
                     found = True
                     break
             if not found:
-                results.append({key:self.default_user_setting(key)})
+                result = self.default_user_setting(key)
+                results.append({key:result})
 
         return results
 
