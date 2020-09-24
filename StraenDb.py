@@ -647,7 +647,7 @@ class MongoDatabase(Database.Database):
             user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # Find the setting.
-            if user is not None and key in user:
+            if user is not None and key in user and key in Keys.USER_SETTINGS:
                 return user[key]
         except:
             self.log_error(traceback.format_exc())
@@ -672,7 +672,7 @@ class MongoDatabase(Database.Database):
             results = []
             if user is not None:
                 for key in keys:
-                    if key in user:
+                    if key in user and key in Keys.USER_SETTINGS:
                         results.append({key: user[key]})
                 return results
         except:

@@ -44,6 +44,42 @@ API_KEYS = "api keys" # List of API keys belonging to the user
 API_KEY = "key" # API key being provided
 API_KEY_RATE = "rate" # The maximum number of requests allowed per day for the provided key
 
+# Goals.
+GOAL_KEY = "goal"
+GOAL_DATE_KEY = "goal_date"
+GOAL_SWIM_DISTANCE_KEY = "goal_swim_distance"
+GOAL_BIKE_DISTANCE_KEY = "goal_bike_distance"
+GOAL_RUN_DISTANCE_KEY = "goal_run_distance"
+GOAL_FITNESS_KEY = "Fitness"
+GOAL_5K_RUN_KEY = "5K Run"
+GOAL_10K_RUN_KEY = "10K Run"
+GOAL_15K_RUN_KEY = "15K Run"
+GOAL_HALF_MARATHON_RUN_KEY = "Half Marathon"
+GOAL_MARATHON_RUN_KEY = "Marathon"
+GOAL_50K_RUN_KEY = "50K Run"
+GOAL_50_MILE_RUN_KEY = "50 Mile Run"
+GOAL_TYPE_KEY = "goal type" # Extra info about the user's goal, such as whether they care about speed or just finishing a race
+GOAL_TYPE_COMPLETION = "Completion"
+GOAL_TYPE_SPEED = "Speed"
+
+# Used by the workout plan generator.
+LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"
+LONGEST_RUN_WEEK_1_KEY = "Longest Run Week 1"
+LONGEST_RUN_WEEK_2_KEY = "Longest Run Week 2"
+LONGEST_RUN_WEEK_3_KEY = "Longest Run Week 3"
+AGE_YEARS_KEY = "Age In Years"
+EXPERIENCE_LEVEL_KEY = "Experience Level"
+EXPERIENCE_LEVEL_BEGINNER = "Beginner"
+EXPERIENCE_LEVEL_INTERMEDIATE = "Intermediate"
+EXPERIENCE_LEVEL_ADVANCED = "Advanced"
+EXPERIENCE_LEVELS = [ EXPERIENCE_LEVEL_BEGINNER, EXPERIENCE_LEVEL_INTERMEDIATE, EXPERIENCE_LEVEL_ADVANCED ]
+WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
+IN_TAPER_KEY = "Is In Taper"
+NUM_WEEKS_BUILDING_KEY = "Num Weeks Building" # The number of consecutive weeks with increasing training stress
+AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
+AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
+WORKOUT_PLAN_INPUTS = [ LONGEST_RUN_IN_FOUR_WEEKS_KEY, LONGEST_RUN_WEEK_1_KEY, LONGEST_RUN_WEEK_2_KEY, LONGEST_RUN_WEEK_3_KEY, AGE_YEARS_KEY, EXPERIENCE_LEVEL_KEY, WEEKS_UNTIL_GOAL_KEY ]
+
 # User settings
 REQUESTED_SETTING_KEY = "requested setting"
 REQUESTED_SETTINGS_KEY = "requested settings" # For requesting a list of settings (more efficient than requesting settings one by one)
@@ -65,10 +101,8 @@ RESTING_HEART_RATE_KEY = "resting heart rate"
 ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate"
 ESTIMATED_FTP_KEY = "estimated ftp"
 PREFERRED_LONG_RUN_DAY_KEY = "preferred long run day" # Day of the week on which the user prefers to do their long runs
-GOAL_TYPE_KEY = "goal type" # Extra info about the user's goal, such as whether they care about speed or just finishing a race
-GOAL_TYPE_COMPLETION = "Completion"
-GOAL_TYPE_SPEED = "Speed"
 CAN_UPLOAD_PHOTOS_KEY = "can upload photos"
+USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, PREFERRED_UNITS_KEY, PREFERRED_FIRST_DAY_OF_WEEK_KEY, BIRTHDAY_KEY, HEIGHT_KEY, WEIGHT_KEY, GENDER_KEY, RESTING_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_FTP_KEY, GOAL_DATE_KEY, GOAL_TYPE_KEY, EXPERIENCE_LEVEL_KEY, CAN_UPLOAD_PHOTOS_KEY ]
 
 # Personal records
 RECORDS_USER_ID = "user_id"
@@ -90,24 +124,6 @@ WORKOUT_COOLDOWN_KEY = "cooldown"
 WORKOUT_SCHEDULED_TIME_KEY = "scheduled time"
 WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY = "last scheduled workout time"
 WORKOUT_ESTIMATED_STRESS_KEY = "estimated stress score"
-
-# Used by the workout plan generator.
-LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"
-LONGEST_RUN_WEEK_1_KEY = "Longest Run Week 1"
-LONGEST_RUN_WEEK_2_KEY = "Longest Run Week 2"
-LONGEST_RUN_WEEK_3_KEY = "Longest Run Week 3"
-AGE_YEARS_KEY = "Age In Years"
-EXPERIENCE_LEVEL_KEY = "Experience Level"
-EXPERIENCE_LEVEL_BEGINNER = "Beginner"
-EXPERIENCE_LEVEL_INTERMEDIATE = "Intermediate"
-EXPERIENCE_LEVEL_ADVANCED = "Advanced"
-EXPERIENCE_LEVELS = [ EXPERIENCE_LEVEL_BEGINNER, EXPERIENCE_LEVEL_INTERMEDIATE, EXPERIENCE_LEVEL_ADVANCED ]
-WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
-IN_TAPER_KEY = "Is In Taper"
-NUM_WEEKS_BUILDING_KEY = "Num Weeks Building" # The number of consecutive weeks with increasing training stress
-AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
-AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
-WORKOUT_PLAN_INPUTS = [ LONGEST_RUN_IN_FOUR_WEEKS_KEY, LONGEST_RUN_WEEK_1_KEY, LONGEST_RUN_WEEK_2_KEY, LONGEST_RUN_WEEK_3_KEY, AGE_YEARS_KEY, EXPERIENCE_LEVEL_KEY, WEEKS_UNTIL_GOAL_KEY ]
 
 # Workout types
 WORKOUT_TYPE_REST = "Rest"
@@ -307,21 +323,6 @@ STRENGTH_ACTIVITIES = [ TYPE_PULL_UP_KEY, TYPE_PUSH_UP_KEY ]
 
 # Activity names.
 UNNAMED_ACTIVITY_TITLE = "Unnamed"
-
-# Goals.
-GOAL_KEY = "goal"
-GOAL_DATE_KEY = "goal_date"
-GOAL_SWIM_DISTANCE_KEY = "goal_swim_distance"
-GOAL_BIKE_DISTANCE_KEY = "goal_bike_distance"
-GOAL_RUN_DISTANCE_KEY = "goal_run_distance"
-GOAL_FITNESS_KEY = "Fitness"
-GOAL_5K_RUN_KEY = "5K Run"
-GOAL_10K_RUN_KEY = "10K Run"
-GOAL_15K_RUN_KEY = "15K Run"
-GOAL_HALF_MARATHON_RUN_KEY = "Half Marathon"
-GOAL_MARATHON_RUN_KEY = "Marathon"
-GOAL_50K_RUN_KEY = "50K Run"
-GOAL_50_MILE_RUN_KEY = "50 Mile Run"
 
 # Used to track deferred tasks.
 DEFERRED_TASKS_USER_ID = "user_id"
