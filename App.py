@@ -1245,57 +1245,8 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Get the current settings.
-        selected_birthday = self.user_mgr.retrieve_user_setting(user_id, Keys.BIRTHDAY_KEY)
-        selected_height_metric = self.user_mgr.retrieve_user_setting(user_id, Keys.HEIGHT_KEY)
-        selected_weight_metric = self.user_mgr.retrieve_user_setting(user_id, Keys.WEIGHT_KEY)
-        selected_gender = self.user_mgr.retrieve_user_setting(user_id, Keys.GENDER_KEY)
         selected_resting_hr = self.user_mgr.retrieve_user_setting(user_id, Keys.RESTING_HEART_RATE_KEY)
         estimated_max_hr = self.user_mgr.retrieve_user_setting(user_id, Keys.ESTIMATED_MAX_HEART_RATE_KEY)
-
-        # Render the user's height.
-        if isinstance(selected_height_metric, float):
-            selected_height_pref, height_units = Units.convert_to_preferred_height_units(self.user_mgr, user_id, selected_height_metric, Units.UNITS_DISTANCE_METERS)
-            selected_height_str = "{:.1f}".format(selected_height_pref)
-            height_units_str = Units.get_distance_units_str(height_units)
-        else:
-            selected_height_metric = None
-            selected_height_str = ""
-            height_units_str = Units.get_preferred_height_units_str(self.user_mgr, user_id)
-
-        # Render the user's weight.
-        if isinstance(selected_weight_metric, float):
-            selected_weight_pref, weight_units = Units.convert_to_preferred_mass_units(self.user_mgr, user_id, selected_weight_metric, Units.UNITS_MASS_KG)
-            selected_weight_str = "{:.1f}".format(selected_weight_pref)
-            weight_units_str = Units.get_mass_units_str(weight_units)
-        else:
-            selected_weight_metric = None
-            selected_weight_str = ""
-            weight_units_str = Units.get_preferred_mass_units_str(self.user_mgr, user_id)
-
-        # Render the gender option.
-        gender_options = "\t\t<option value=\"Male\""
-        if selected_gender == Keys.GENDER_MALE_KEY:
-            gender_options += " selected"
-        gender_options += ">Male</option>\n"
-        gender_options += "\t\t<option value=\"Female\""
-        if selected_gender == Keys.GENDER_FEMALE_KEY:
-            gender_options += " selected"
-        gender_options += ">Female</option>"
-
-        # Render the user's resting heart rate.
-        if isinstance(selected_resting_hr, float):
-            resting_hr_str = "{:.1f}".format(selected_resting_hr)
-        else:
-            resting_hr_str = ""
-            selected_resting_hr = None
-
-        # Get the user's BMI.
-        if selected_height_metric and selected_weight_metric:
-            calc = BmiCalculator.BmiCalculator()
-            bmi = calc.estimate_bmi(selected_weight_metric, selected_height_metric)
-            bmi_str = "{:.1f}".format(bmi)
-        else:
-            bmi_str = "Not calculated."
     
         # Get the user's VO2Max.
         if estimated_max_hr and isinstance(estimated_max_hr, float) and selected_resting_hr and isinstance(estimated_max_hr, float):
@@ -1348,7 +1299,7 @@ class App(object):
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, birthday=selected_birthday, weight=selected_weight_str, weight_units=weight_units_str, height=selected_height_str, height_units=height_units_str, gender_options=gender_options, resting_hr=resting_hr_str, bmi=bmi_str, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones)
 
     @statistics
     def settings(self):

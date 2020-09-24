@@ -370,6 +370,17 @@ class UserMgr(object):
 
         # What's in the database?
         results = self.database.retrieve_user_settings(user_id, keys)
+
+        # Add defaults for anything no in the database.
+        for key in keys:
+            found = False
+            for result in results:
+                if key in result.keys():
+                    found = True
+                    break
+            if not found:
+                results.append({key:self.default_user_setting(key)})
+
         return results
 
     def retrieve_api_keys(self, user_id):
