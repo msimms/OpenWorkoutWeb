@@ -1881,14 +1881,16 @@ class Api(object):
 
     def handle_list_hr_zones(self, values):
         """Returns heart rate zones corresponding to the specified resting heart rate value."""
-        if Keys.RESTING_HEART_RATE_KEY not in values:
+        if Keys.ESTIMATED_MAX_HEART_RATE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("FTP not specified.")
 
-        resting_hr = values[Keys.RESTING_HEART_RATE_KEY]
-        if not InputChecker.is_float(resting_hr):
+        max_hr = values[Keys.ESTIMATED_MAX_HEART_RATE_KEY]
+        if not InputChecker.is_float(max_hr):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if not max_hr < 1.0:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        zones = self.data_mgr.retrieve_heart_rate_zones(float(resting_hr))
+        zones = self.data_mgr.retrieve_heart_rate_zones(float(max_hr))
         return True, json.dumps(zones)
 
     def handle_list_api_keys(self):

@@ -239,11 +239,11 @@
 
         if (row_value.length > 0)
         {
-            cell = new_row.insertCell();
             var a = document.createElement('a');
             a.appendChild(document.createTextNode(row_value[0]));
             a.title = row_value;
             a.href = "${root_url}/activity/" + row_value[1];
+            cell = new_row.insertCell();
             cell.appendChild(a);
         }
     }
@@ -385,6 +385,9 @@
                 }
                 else if (key == "resting heart rate")
                 {
+                }
+                else if (key == "estimated max heart rate")
+                {
                     get_hr_zones(value);
                 }
             }
@@ -439,10 +442,10 @@
                 zone_low = zone;
             }
         }
-        else
-        {
-            var error_str = "No heart rate data exists.";
-        }
+    }
+
+    var process_hr_zones_error = function()
+    {
     }
 
     var process_ftp = function(record)
@@ -490,7 +493,7 @@
 
     function get_user_settings()
     {
-        var api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=preferred%20units,height,weight,birthday,gender,resting%20heart%20rate";
+        var api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=preferred%20units,height,weight,birthday,gender,resting%20heart%20rate,estimated%20max%20heart%20rate";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
@@ -515,7 +518,7 @@
     function get_hr_zones(resting_hr)
     {
         var api_url = "${root_url}/api/1.0/list_hr_zones?resting%20heart%20rate=" + resting_hr;
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_hr_zones, dataType: "json" });
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_hr_zones, error: process_hr_zones_error, dataType: "json" });
     }
 
     get_personal_records();
@@ -532,16 +535,16 @@ ${nav}
 
 <div class="profile" style="width: 600px">
 	<h2>Birthday</h2>
-	<input type="text" name="birthday" id="birthday"><br>
-	<button type="button" onclick="return update_birthday()">Update</button>
+    <input type="text" name="birthday" id="birthday"><br>
+    <button type="button" onclick="return update_birthday()">Update</button>
 	<hr>
 	<h2>Height</h2>
-	<input type="text" id="height" value="Not set"> <input style="border:0" type="text" id="height_units" readonly></input><br>
-	<button type="button" onclick="return update_height()">Update</button>
+    <input type="text" id="height" value="Not set"> <input style="border:0" type="text" id="height_units" readonly></input><br>
+    <button type="button" onclick="return update_height()">Update</button>
 	<hr>
 	<h2>Weight</h2>
-	<input type="text" id="weight" value="Not set"> <input style="border:0" type="text" id="weight_units" readonly></input><br>
-	<button type="button" onclick="return update_weight()">Update</button>
+    <input type="text" id="weight" value="Not set"> <input style="border:0" type="text" id="weight_units" readonly></input><br>
+    <button type="button" onclick="return update_weight()">Update</button>
 	<hr>
 	<h2>Gender</h2><br>
 	<select id="gender" class="checkin" >
@@ -551,43 +554,49 @@ ${nav}
 	<button type="button" onclick="return update_gender()">Update</button>
 	<hr>
 	<h2>Resting Heart Rate</h2>
-	<input type="text" id="resting heart rate" value="Not set"> bpm<br>
-	<button type="button" onclick="return update_resting_hr()">Update</button>
+        <input type="text" id="resting heart rate" value="Not set"> bpm<br>
+        <button type="button" onclick="return update_resting_hr()">Update</button>
 	<hr>
 	<h2>BMI</h2>
     <p>
         Your Body Mass Index is your weight relative to your height.
     </p>
-        <input style="border:0" type="text" id="bmi" readonly></input>
+    <input style="border:0" type="text" id="bmi" readonly></input>
 	<hr>
 	<h2>VO2 Max</h2>
-        <input style="border:0" type="text" id="vo2_max" readonly></input>
+    <input style="border:0" type="text" id="vo2_max" readonly></input>
 	<hr>
 	<h2>Estimated Functional Threshold Power (FTP)</h2>
     <p>
         Functional Threshold Power is the amount of power that you can exert over one hour at maximum effort. It is estimated from recent activity.
     </p>
-        <input style="border:0" type="text" id="ftp" readonly></input>
+    <input style="border:0" type="text" id="ftp" readonly></input>
 	<hr>
 	<h2>Heart Rate Zones</h2>
-        <table id="hr_zones">
-        </table>
+    <p>
+        Heart rate zones are based on estimated maximum heart rate.
+    </p>
+    <table id="hr_zones">
+    </table>
 	<hr>
 	<h2>Power Training Zones</h2>
-        <table id="power_zones">
-        </table>
+    <p>
+        Power zones are based on estimated FTP.
+    </p>
+    <table id="power_zones">
+    </table>
 	<hr>
 	<h2>Personal Records</h2>
     <h3>Cycling</h3>
-        <table id="Cycling">
-        </table>
+    <table id="Cycling">
+    </table>
     <h3>Running</h3>
-        <table id="Running">
-        </table>
+    <table id="Running">
+    </table>
 	<hr>
     <h2>Default Gear</h2>
-        <table id="Defaults">
-        </table>
+    <table id="Defaults">
+    </table>
     <div class="block" id="new_gear_default_block" style="width: 560px">
     </div>
 	<button type="button" onclick="return add_default_gear_info()">Add Default</button>
