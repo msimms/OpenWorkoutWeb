@@ -45,7 +45,7 @@
 
     function get_keys()
     {
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_api_keys", cache: false, success: process_keys, dataType: "json" });
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_api_keys", cache: false, success: process_keys, dataType: "json" });
     }
 
     get_keys();

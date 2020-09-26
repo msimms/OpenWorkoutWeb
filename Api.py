@@ -1867,7 +1867,31 @@ class Api(object):
         bmi = self.data_mgr.estimate_bmi(weight_metric, height_metric)
         return True, json.dumps(bmi)
 
-    def handle_get_api_keys(self):
+    def handle_list_power_zones(self, values):
+        """Returns power zones corresponding to the specified FTP value."""
+        if Keys.ESTIMATED_FTP_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("FTP not specified.")
+
+        ftp = values[Keys.ESTIMATED_FTP_KEY]
+        if not InputChecker.is_float(ftp):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        zones = self.data_mgr.retrieve_power_training_zones(float(ftp))
+        return True, json.dumps(zones)
+
+    def handle_list_hr_zones(self, values):
+        """Returns heart rate zones corresponding to the specified resting heart rate value."""
+        if Keys.RESTING_HEART_RATE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("FTP not specified.")
+
+        resting_hr = values[Keys.RESTING_HEART_RATE_KEY]
+        if not InputChecker.is_float(resting_hr):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        zones = self.data_mgr.retrieve_heart_rate_zones(float(resting_hr))
+        return True, json.dumps(zones)
+
+    def handle_list_api_keys(self):
         """Returns a list of API keys assigned to the current user."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -1945,8 +1969,12 @@ class Api(object):
             return self.handle_estimate_ftp()
         elif request == 'estimate_bmi':
             return self.handle_estimate_bmi()
-        elif request == 'get_api_keys':
-            return self.handle_get_api_keys()
+        elif request == 'list_power_zones':
+            return self.handle_list_power_zones(values)
+        elif request == 'list_hr_zones':
+            return self.handle_list_hr_zones(values)
+        elif request == 'list_api_keys':
+            return self.handle_list_api_keys()
         elif request == 'list_activity_types':
             return self.handle_list_activity_types()
         return False, ""

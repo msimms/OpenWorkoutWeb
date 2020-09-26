@@ -1230,59 +1230,7 @@ class App(object):
     @statistics
     def profile(self):
         """Renders the user's profile page."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Get the current settings.
-        estimated_max_hr = self.user_mgr.retrieve_user_setting(user_id, Keys.ESTIMATED_MAX_HEART_RATE_KEY)
-
-        # Get the user's heart rate zones.
-        hr_zones = "No heart rate data exists."
-        if isinstance(estimated_max_hr, float):
-            zones = self.data_mgr.retrieve_heart_rate_zones(estimated_max_hr)
-            if len(zones) > 0:
-                hr_zones = "<table>\n"
-                zone_index = 0
-                for zone in zones:
-                    hr_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
-                    if zone_index == 0:
-                        hr_zones += "0 bpm to {:.1f} bpm</td><tr>\n".format(zone)
-                    else:
-                        hr_zones += "{:.1f} bpm to {:.1f} bpm</td><tr>\n".format(zones[zone_index - 1], zone)
-                    hr_zones += "</td><tr>\n"
-                    zone_index = zone_index + 1
-                hr_zones += "</table>\n"
-
-        # Get the user's cycling power training zones.
-        power_zones = "Cycling power zones cannot be calculated until the user's FTP (functional threshold power) is set."
-        ftp = self.data_mgr.retrieve_user_estimated_ftp(user_id)
-        if isinstance(ftp, float):
-            zones = self.data_mgr.retrieve_power_training_zones(ftp)
-            if len(zones) > 0:
-                power_zones = "<table>\n"
-                zone_index = 0
-                for zone in zones:
-                    power_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
-                    if zone_index == 0:
-                        power_zones += "0 watts to {:.1f} watts</td><tr>".format(zone)
-                    else:
-                        power_zones += "{:.1f} watts to {:.1f} watts</td><tr>\n".format(zones[zone_index - 1], zone)
-                    zone_index = zone_index + 1
-                power_zones += "</table>\n"
-
-        # Render from the template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, hr_zones=hr_zones, power_zones=power_zones)
+        return self.render_simple_page('profile.html')
 
     @statistics
     def settings(self):
