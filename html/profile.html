@@ -367,6 +367,34 @@
         }
     }
 
+    var process_vo2_max = function(vo2max)
+    {
+        var vo2_max_elem = document.getElementById("vo2_max");
+
+        if (vo2max == 0)
+            vo2_max_elem.value = "Not calculated";
+        else
+            vo2_max_elem.value = vo2max.toFixed(1);
+    }
+
+    var process_ftp = function(record)
+    {
+        var ftp_elem = document.getElementById("ftp");
+        var key = Object.keys(record)[0];
+        var ftp = record[key];
+        ftp_elem.value = ftp.toFixed(1) + " watts";
+    }
+
+    var process_bmi = function(bmi)
+    {
+        var bmi_elem = document.getElementById("bmi");
+
+        if (bmi == 0)
+            bmi_elem.value = "Not calculated";
+        else
+            bmi_elem.value = bmi.toFixed(1);
+    }
+
     function get_personal_records()
     {
         var api_url = "${root_url}/api/1.0/list_personal_records";
@@ -385,9 +413,30 @@
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
+    function get_vo2_max()
+    {
+        var api_url = "${root_url}/api/1.0/estimate_vo2_max";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_vo2_max, dataType: "json" });
+    }
+
+    function get_ftp()
+    {
+        var api_url = "${root_url}/api/1.0/estimate_ftp";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_ftp, dataType: "json" });
+    }
+
+    function get_bmi()
+    {
+        var api_url = "${root_url}/api/1.0/estimate_bmi";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_bmi, dataType: "json" });
+    }
+
     get_personal_records();
     get_gear_defaults();
     get_user_settings();
+    get_vo2_max();
+    get_ftp();
+    get_bmi();
 </script>
 
 <section class="nav">
@@ -422,15 +471,16 @@ ${nav}
     <p>
         Your Body Mass Index is your weight relative to your height.
     </p>
+        <input style="border:0" type="text" id="bmi" readonly></input>
 	<hr>
 	<h2>VO2 Max</h2>
-${vo2max}
+        <input style="border:0" type="text" id="vo2_max" readonly></input>
 	<hr>
 	<h2>Estimated Functional Threshold Power (FTP)</h2>
     <p>
         Functional Threshold Power is the amount of power that you can exert over one hour at maximum effort. It is estimated from recent activity.
     </p>
-${ftp}
+        <input style="border:0" type="text" id="ftp" readonly></input>
 	<hr>
 	<h2>Heart Rate Zones</h2>
 ${hr_zones}

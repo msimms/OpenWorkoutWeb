@@ -27,6 +27,7 @@ import hashlib
 import os
 import time
 import uuid
+import BmiCalculator
 import FtpCalculator
 import HeartRateCalculator
 import Importer
@@ -35,6 +36,7 @@ import MapSearch
 import StraenDb
 import Summarizer
 import TrainingPaceCalculator
+import VO2MaxCalculator
 import celery
 from celery import states
 
@@ -1381,3 +1383,15 @@ class DataMgr(Importer.ActivityWriter):
         all_activity_types.extend(Keys.STRENGTH_ACTIVITIES)
         all_activity_types.append(Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY)
         return all_activity_types
+
+    def estimate_vo2_max(self, resting_hr, max_hr):
+        """Estimates VO2 Max, based on resting and max heart rates."""
+        calc = VO2MaxCalculator.VO2MaxCalculator()
+        estimated_vo2_max = calc.estimate_vo2max_from_heart_rate(resting_hr, max_hr)
+        return estimated_vo2_max
+
+    def estimate_bmi(self, weight_metric, height_metric):
+        """Estimates BMI."""
+        calc = BmiCalculator.BmiCalculator()
+        bmi = calc.estimate_bmi(weight_metric, height_metric)
+        return bmi

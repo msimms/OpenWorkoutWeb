@@ -30,6 +30,8 @@ class VO2MaxCalculator(object):
         super(VO2MaxCalculator, self).__init__()
 
     def estimate_vo2max_from_heart_rate(self, max_hr, resting_hr):
+        if resting_hr == 0:
+            return 0
         return 15.3 * (max_hr / resting_hr)
 
     def estimate_vo2max_from_race_distance_in_meters(self, race_distance_meters, race_time_minutes):

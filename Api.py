@@ -1839,6 +1839,34 @@ class Api(object):
         setting_values = self.user_mgr.retrieve_user_settings(self.user_id, settings)
         return True, json.dumps(setting_values)
 
+    def handle_estimate_vo2_max(self):
+        """Returns the user's estimated VO2 Max, based on their resting and max heart rates."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        resting_hr = self.user_mgr.retrieve_user_setting(self.user_id, Keys.RESTING_HEART_RATE_KEY)
+        estimated_max_hr = self.user_mgr.retrieve_user_setting(self.user_id, Keys.ESTIMATED_MAX_HEART_RATE_KEY)
+        estimated_vo2_max = self.data_mgr.estimate_vo2_max(resting_hr, estimated_max_hr)
+        return True, json.dumps(estimated_vo2_max)
+
+    def handle_estimate_ftp(self):
+        """Returns the user's estimated FTP."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        ftp = self.data_mgr.retrieve_user_estimated_ftp(self.user_id)
+        return True, json.dumps(ftp)
+
+    def handle_estimate_bmi(self):
+        """Returns the user's estimated BMI."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        weight_metric = self.user_mgr.retrieve_user_setting(self.user_id, Keys.WEIGHT_KEY)
+        height_metric = self.user_mgr.retrieve_user_setting(self.user_id, Keys.HEIGHT_KEY)
+        bmi = self.data_mgr.estimate_bmi(weight_metric, height_metric)
+        return True, json.dumps(bmi)
+
     def handle_get_api_keys(self):
         """Returns a list of API keys assigned to the current user."""
         if self.user_id is None:
@@ -1911,6 +1939,12 @@ class Api(object):
             return self.handle_get_user_setting(values)
         elif request == 'get_user_settings':
             return self.handle_get_user_settings(values)
+        elif request == 'estimate_vo2_max':
+            return self.handle_estimate_vo2_max()
+        elif request == 'estimate_ftp':
+            return self.handle_estimate_ftp()
+        elif request == 'estimate_bmi':
+            return self.handle_estimate_bmi()
         elif request == 'get_api_keys':
             return self.handle_get_api_keys()
         elif request == 'list_activity_types':

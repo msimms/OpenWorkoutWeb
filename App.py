@@ -46,13 +46,11 @@ except ImportError:
 
 import Keys
 import Api
-import BmiCalculator
 import DataMgr
 import IcalServer
 import InputChecker
 import Units
 import UserMgr
-import VO2MaxCalculator
 
 from dateutil.tz import tzlocal
 from mako.lookup import TemplateLookup
@@ -1245,23 +1243,7 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Get the current settings.
-        selected_resting_hr = self.user_mgr.retrieve_user_setting(user_id, Keys.RESTING_HEART_RATE_KEY)
         estimated_max_hr = self.user_mgr.retrieve_user_setting(user_id, Keys.ESTIMATED_MAX_HEART_RATE_KEY)
-    
-        # Get the user's VO2Max.
-        if estimated_max_hr and isinstance(estimated_max_hr, float) and selected_resting_hr and isinstance(estimated_max_hr, float):
-            calc = VO2MaxCalculator.VO2MaxCalculator()
-            vo2max_str = calc.estimate_vo2max_from_heart_rate(estimated_max_hr, selected_resting_hr)
-            vo2max = "{:.1f}".format(vo2max_str)
-        else:
-            vo2max = "Not calculated."
-
-        # Get the user's FTP.
-        ftp = self.data_mgr.retrieve_user_estimated_ftp(user_id)
-        if ftp is None:
-            ftp_str = "Cycling activities with power data that was recorded in the last six months must be uploaded before your FTP can be estimated."
-        else:
-            ftp_str = "{:.1f} watts".format(ftp[0])
 
         # Get the user's heart rate zones.
         hr_zones = "No heart rate data exists."
@@ -1282,6 +1264,7 @@ class App(object):
 
         # Get the user's cycling power training zones.
         power_zones = "Cycling power zones cannot be calculated until the user's FTP (functional threshold power) is set."
+        ftp = self.data_mgr.retrieve_user_estimated_ftp(user_id)
         if isinstance(ftp, float):
             zones = self.data_mgr.retrieve_power_training_zones(ftp)
             if len(zones) > 0:
@@ -1299,7 +1282,7 @@ class App(object):
         # Render from the template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, hr_zones=hr_zones, power_zones=power_zones)
 
     @statistics
     def settings(self):
