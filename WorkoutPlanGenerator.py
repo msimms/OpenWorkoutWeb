@@ -476,7 +476,7 @@ def main():
     if len(args.user_id) > 0:
         data = {}
         data['user_id'] = args.user_id
-        workouts = generate_workout_plan_for_user(json.dumps(data))
+        workouts = generate_workout_plan_for_user(json.dumps(data), None)
 
 
 if __name__ == "__main__":
