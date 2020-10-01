@@ -51,10 +51,10 @@
 
     var process_activity_type_list = function(activity_type_list)
     {
+        var activity_type_select = document.getElementById("activity_type");
+
         activity_type_list = eval(activity_type_list);
         activity_type_list.sort();
-
-        var activity_type_select = document.getElementById("activity_type");
 
         for (var i = 0; i < activity_type_list.length; i++)
         {
@@ -69,10 +69,10 @@
 
     var process_gear_list = function(gear_list)
     {
+        var gear_list_select = document.getElementById("gear");
+
         gear_list = eval(gear_list);
         gear_list.sort();
-
-        var gear_list_select = document.getElementById("gear");
 
         for (var i = 0; i < gear_list.length; i++)
         {
@@ -101,6 +101,7 @@
     {
         var outer_div = document.getElementById("new_gear_default_block");
         var inner_div = document.createElement('div');
+
         inner_div.id = "new_gear_default_div";
 
         // Remove existing items, if any.
@@ -240,6 +241,7 @@
         if (row_value.length > 0)
         {
             var a = document.createElement('a');
+
             a.appendChild(document.createTextNode(row_value[0]));
             a.title = row_value;
             a.href = "${root_url}/activity/" + row_value[1];
@@ -330,6 +332,7 @@
         var height_units_obj = document.getElementById("height_units");
         var weight_units_obj = document.getElementById("weight_units");
 
+        // We need to know the unit system first.
         for (var record of records)
         {
             var key = Object.keys(record)[0];

@@ -47,9 +47,6 @@ API_KEY_RATE = "rate" # The maximum number of requests allowed per day for the p
 # Goals.
 GOAL_KEY = "goal"
 GOAL_DATE_KEY = "goal_date"
-GOAL_SWIM_DISTANCE_KEY = "goal_swim_distance"
-GOAL_BIKE_DISTANCE_KEY = "goal_bike_distance"
-GOAL_RUN_DISTANCE_KEY = "goal_run_distance"
 GOAL_FITNESS_KEY = "Fitness"
 GOAL_5K_RUN_KEY = "5K Run"
 GOAL_10K_RUN_KEY = "10K Run"
@@ -61,6 +58,11 @@ GOAL_50_MILE_RUN_KEY = "50 Mile Run"
 GOAL_TYPE_KEY = "goal type" # Extra info about the user's goal, such as whether they care about speed or just finishing a race
 GOAL_TYPE_COMPLETION = "Completion"
 GOAL_TYPE_SPEED = "Speed"
+
+# Goal attributes used by the workout plan generator.
+GOAL_SWIM_DISTANCE_KEY = "goal_swim_distance"
+GOAL_BIKE_DISTANCE_KEY = "goal_bike_distance"
+GOAL_RUN_DISTANCE_KEY = "goal_run_distance"
 
 # Used by the workout plan generator.
 LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"

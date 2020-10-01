@@ -33,6 +33,7 @@ import time
 import uuid
 import IcsWriter
 import Keys
+import TrainingStressCalculator
 import Units
 import UserMgr
 import ZwoWriter
@@ -308,4 +309,4 @@ class Workout(object):
         if workout_duration_secs > 0.0:
             avg_workout_pace = avg_workout_pace / workout_duration_secs
 
-        self.estimated_training_stress = ((workout_duration_secs * avg_workout_pace) / (threshold_pace_minute * 60.0)) * 100.0
+        self.estimated_training_stress = TrainingStressCalculator.estimate_training_stress(workout_duration_secs, avg_workout_pace, threshold_pace_minute)

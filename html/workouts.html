@@ -47,7 +47,7 @@
     function set_goal()
     {
         var the_url = "${root_url}/api/1.0/update_settings";
-        var goal = document.getElementById("goals").value;
+        var goal = document.getElementById("goal").value;
         var dict = [];
         var result_text = {};
 
@@ -133,8 +133,6 @@
             changeYear: true,
             changeMonth: true
         });
-        var n = new Date(${goal_date} * 1000);
-        document.getElementsByName('goal_date')[0].placeholder=n.toLocaleDateString();
     });
 
     function append_to_paces_table(table, row_name, row_value)
@@ -172,12 +170,14 @@
     {
         var new_row = table.insertRow();
         var cell = new_row.insertCell();
+
         cell.appendChild(document.createTextNode(row_name));
 
         if (row_value.length > 0)
         {
-            cell = new_row.insertCell();
             var a = document.createElement('a');
+
+            cell = new_row.insertCell();
             a.appendChild(document.createTextNode(row_value[0]));
             a.title = row_value;
             a.href = "${root_url}/activity/" + row_value[1];
@@ -224,6 +224,83 @@
         }
     }
 
+    var process_user_settings = function(records)
+    {
+        for (var record of records)
+        {
+            var key = Object.keys(record)[0];
+            var value = record[key];
+
+            if (key == "goal")
+            {
+                var element = document.getElementById(key);
+
+                if (value == "Fitness")
+                    element.selectedIndex = 0;
+                else if (value == "5K Run")
+                    element.selectedIndex = 1;
+                else if (value == "10K Run")
+                    element.selectedIndex = 2;
+                else if (value == "15K Run")
+                    element.selectedIndex = 3;
+                else if (value == "Half Marathon")
+                    element.selectedIndex = 4;
+                else if (value == "Marathon")
+                    element.selectedIndex = 5;
+                else if (value == "50K Run")
+                    element.selectedIndex = 6;
+                else if (value == "50 Mile Run")
+                    element.selectedIndex = 7;
+            }
+            else if (key == "goal_date")
+            {
+                var element = document.getElementById(key);
+                var n = new Date(value * 1000);
+
+                element.placeholder=n.toLocaleDateString();
+            }
+            else if (key == "goal type")
+            {
+                var element = document.getElementById("goal_type");
+
+                if (value == "Completion")
+                    element.selectedIndex = 0;
+                else if (value == "Speed")
+                    element.selectedIndex = 1;
+            }
+            else if (key == "preferred long run day")
+            {
+                var element = document.getElementById("preferred_long_run_day");
+
+                if (value == "sunday")
+                    element.selectedIndex = 0;
+                else if (value == "monday")
+                    element.selectedIndex = 1;
+                else if (value == "tuesday")
+                    element.selectedIndex = 2;
+                else if (value == "wednesday")
+                    element.selectedIndex = 3;
+                else if (value == "thursday")
+                    element.selectedIndex = 4;
+                else if (value == "friday")
+                    element.selectedIndex = 5;
+                else if (value == "saturday")
+                    element.selectedIndex = 6;
+            }
+            else if (key == "Experience Level")
+            {
+                var element = document.getElementById("exp_level");
+
+                if (value == "Beginner")
+                    element.selectedIndex = 0;
+                else if (value == "Intermediate")
+                    element.selectedIndex = 1;
+                else if (value == "Advanced")
+                    element.selectedIndex = 2;
+            }
+        }
+    }
+
     function get_personal_records()
     {
         var six_months = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0);
@@ -231,7 +308,14 @@
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_personal_records, dataType: "json" });
     }
 
+    function get_user_settings()
+    {
+        var api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal,goal_date,goal%20type,preferred%20long%20run%20day,Experience%20Level";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
+    }
+
     get_personal_records();
+    get_user_settings();
 </script>
 
 <section class="nav">
@@ -266,11 +350,17 @@ ${nav}
     </p>
 
 	<hr>
-
     <h2>Goal</h2>
     <p>
-		<select name="goals" id="goals" onchange="return set_goal()">
-${goals}
+		<select name="goal" id="goal" class="right" onchange="return set_goal()">
+            <option value="Fitness">Fitness</option>
+            <option value="5K Run">5K Run</option>
+            <option value="10K Run">10K Run</option>
+            <option value="15K Run">15K Run</option>
+            <option value="Half Marathon">Half Marathon</option>
+            <option value="Marathon">Marathon</option>
+            <option value="50K Run">50K Run</option>
+            <option value="50 Mile Run">50 Mile Run</option>
 		</select> on 
     	<input type="text" name="goal_date" id="goal_date" onchange="return set_goal_date()">
     </p>
@@ -280,13 +370,22 @@ ${goals}
     <h2>Preferences</h2>
     <p>
         Preferred Long Run Day: <select name="preferred_long_run_day" id="preferred_long_run_day" class="right" value="Weekday" onchange="return set_preferred_long_run_day()">
-${preferred_long_run_day}
+            <option value="Sunday">Sunday</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
         </select><br>
         Goal Type: <select name="goal_type" id="goal_type" class="right" onchange="return set_goal_type()">
-${goal_type}
+            <option value="Completion">Completion</option>
+            <option value="Speed">Speed</option>
         </select><br>
         Experience Level: <select name="exp_level" id="exp_level" class="right" onchange="return set_exp_level()">
-${exp_level}
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
         </select>
     </p>
 

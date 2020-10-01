@@ -1069,45 +1069,6 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
-        # Set the default goals based on previous selections.
-        goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
-        goal_date = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY)
-        if goal_date is not None:
-            goals_str = ""
-            for possible_goal in Keys.GOALS:
-                goals_str += "\t\t\t<option value=\"" + possible_goal + "\""
-                if goal is not None and possible_goal.lower() == goal.lower():
-                    goals_str += " selected"
-                goals_str += ">" + possible_goal + "</option>\n"
-
-        # Set the preferred long run of the week.
-        selected_preferred_long_run_day = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY)
-        days_str = ""
-        for day in InputChecker.days_of_week:
-            days_str += "\t\t\t<option value=\"" + day + "\""
-            if selected_preferred_long_run_day is not None and selected_preferred_long_run_day.lower() == day.lower():
-                days_str += " selected"
-            days_str += ">" + day + "</option>\n"
-
-        # Set the goal type.
-        goal_types = [Keys.GOAL_TYPE_COMPLETION, Keys.GOAL_TYPE_SPEED]
-        selected_goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
-        goal_type_str = ""
-        for goal_type in goal_types:
-            goal_type_str += "\t\t\t<option value=\"" + goal_type + "\""
-            if selected_goal_type is not None and selected_goal_type.lower() == goal_type.lower():
-                goal_type_str += " selected"
-            goal_type_str += ">" + goal_type + "</option>\n"
-
-        # Set the experience level.
-        exp_level_str = ""
-        selected_exp_level = self.user_mgr.retrieve_user_setting(user_id, Keys.EXPERIENCE_LEVEL_KEY)
-        for exp_level in Keys.EXPERIENCE_LEVELS:
-            exp_level_str += "\t\t\t<option value=\"" + exp_level + "\""
-            if selected_exp_level is not None and selected_exp_level.lower() == exp_level.lower():
-                exp_level_str += " selected"
-            exp_level_str += ">" + exp_level + "</option>\n"
-
         # The the calendar ID used with the iCal server.
         calendar_id_str = ""
         calendar_id = self.data_mgr.retrieve_workouts_calendar_id_for_user(user_id)
@@ -1117,7 +1078,7 @@ class App(object):
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, goals=goals_str, goal_date=goal_date, preferred_long_run_day=days_str, goal_type=goal_type_str, exp_level=exp_level_str, calendar=calendar_id_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, calendar=calendar_id_str)
 
     @statistics
     def workout(self, workout_id):
