@@ -705,7 +705,7 @@ class DataMgr(Importer.ActivityWriter):
         tags = self.list_default_tags()
         gear_list = self.retrieve_gear(user_id)
         show_shoes = activity_type in Keys.FOOT_BASED_ACTIVITIES
-        show_bikes = activity_type in Keys.BIKE_BASED_ACTIVITIES
+        show_bikes = activity_type in Keys.CYCLING_ACTIVITIES
         if activity_type == Keys.TYPE_RUNNING_KEY:
             tags.append("Long Run")
         for gear in gear_list:
@@ -1378,7 +1378,7 @@ class DataMgr(Importer.ActivityWriter):
         """Returns a the list of activity types that the software understands."""
         all_activity_types = []
         all_activity_types.extend(Keys.FOOT_BASED_ACTIVITIES)
-        all_activity_types.extend(Keys.BIKE_BASED_ACTIVITIES)
+        all_activity_types.extend(Keys.CYCLING_ACTIVITIES)
         all_activity_types.extend(Keys.SWIMMING_ACTIVITIES)
         all_activity_types.extend(Keys.STRENGTH_ACTIVITIES)
         all_activity_types.append(Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY)

@@ -33,3 +33,12 @@ class TrainingStressCalculator(object):
     def estimate_training_stress(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour):
         stress = ((workout_duration_secs * avg_workout_pace_meters_per_sec) / threshold_pace_meters_per_hour) * 100.0
         return stress
+
+    @staticmethod
+    def calculate_training_stress_from_power(workout_duration_secs, np, ftp):
+        # Compute the intensity factor (IF = NP / FTP).
+        intfac = np / ftp
+
+        # Compute the training stress score (TSS = (t * NP * IF) / (FTP * 36)).
+        tss = (workout_duration_secs * np * intfac) / (ftp * 36)
+        return intfac, tss
