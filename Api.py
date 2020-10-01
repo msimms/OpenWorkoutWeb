@@ -631,7 +631,7 @@ class Api(object):
             device_info[Keys.APP_DEVICE_ID_KEY] = device_id
             activity = self.data_mgr.retrieve_most_recent_activity_for_device(device_id)
             if activity is not None:
-                device_info[Keys.DEVICE_LAST_HEARD_FROM] = activity[Keys.ACTIVITY_TIME_KEY]
+                device_info[Keys.DEVICE_LAST_HEARD_FROM] = activity[Keys.ACTIVITY_START_TIME_KEY]
             else:
                 device_info[Keys.DEVICE_LAST_HEARD_FROM] = 0
             devices.append(device_info)
@@ -669,9 +669,9 @@ class Api(object):
                 if Keys.ACTIVITY_NAME_KEY in activity:
                     activity_name = activity[Keys.ACTIVITY_NAME_KEY]
 
-                if Keys.ACTIVITY_TIME_KEY in activity and Keys.ACTIVITY_ID_KEY in activity:
+                if Keys.ACTIVITY_START_TIME_KEY in activity and Keys.ACTIVITY_ID_KEY in activity:
                     url = self.root_url + "/activity/" + activity[Keys.ACTIVITY_ID_KEY]
-                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time': int(activity[Keys.ACTIVITY_TIME_KEY])}
+                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time': int(activity[Keys.ACTIVITY_START_TIME_KEY])}
                 matched_activities.append(temp_activity)
 
         json_result = json.dumps(matched_activities, ensure_ascii=False)
@@ -711,7 +711,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Distance not specified.")
         if Keys.APP_DURATION_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Duration not specified.")
-        if Keys.ACTIVITY_TIME_KEY not in values:
+        if Keys.ACTIVITY_START_TIME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity start time not specified.")
         if Keys.ACTIVITY_TYPE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity type not specified.")
@@ -722,7 +722,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Validate the activity start time.
-        start_time = values[Keys.ACTIVITY_TIME_KEY]
+        start_time = values[Keys.ACTIVITY_START_TIME_KEY]
         if not InputChecker.is_integer(start_time):
             raise ApiException.ApiMalformedRequestException("Invalid start time.")
 
@@ -740,7 +740,7 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
         if Keys.APP_SETS_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Sets not specified.")
-        if Keys.ACTIVITY_TIME_KEY not in values:
+        if Keys.ACTIVITY_START_TIME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity start time not specified.")
         if Keys.ACTIVITY_TYPE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity type not specified.")
@@ -771,7 +771,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Set data was not specified.")
 
         # Validate the activity start time.
-        start_time = values[Keys.ACTIVITY_TIME_KEY]
+        start_time = values[Keys.ACTIVITY_START_TIME_KEY]
         if not InputChecker.is_integer(start_time):
             raise ApiException.ApiMalformedRequestException("Invalid start time.")
 

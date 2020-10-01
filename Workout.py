@@ -281,11 +281,11 @@ class Workout(object):
         interval_duration_secs = interval_meters / (interval_pace_meters_per_minute / 60.0)
         return interval_duration_secs
 
-    def calculate_estimated_training_stress(self, threshold_pace_minute):
+    def calculate_estimated_training_stress(self, threshold_pace_meters_per_minute):
         """Computes the estimated training stress for this workout."""
         """May be overridden by child classes, depending on the type of workout."""
         workout_duration_secs = 0.0
-        avg_workout_pace = 0.0
+        avg_workout_pace_meters_per_sec = 0.0
 
         for interval in self.intervals:
 
@@ -300,14 +300,14 @@ class Workout(object):
             if interval_meters > 0 and interval_pace_meters_per_minute > 0.0:
                 interval_duration_secs = num_repeats * self.calculate_interval_duration(interval_meters, interval_pace_meters_per_minute)
                 workout_duration_secs += interval_duration_secs
-                avg_workout_pace += (interval_pace_meters_per_minute * (interval_duration_secs / 60.0))
+                avg_workout_pace_meters_per_sec += (interval_pace_meters_per_minute * (interval_duration_secs / 60.0))
             if recovery_meters > 0 and recovery_pace_meters_per_minute > 0.0:
                 interval_duration_secs = (num_repeats - 1) * self.calculate_interval_duration(recovery_meters, recovery_pace_meters_per_minute)
                 workout_duration_secs += interval_duration_secs
-                avg_workout_pace += (recovery_pace_meters_per_minute * (interval_duration_secs / 60.0))
+                avg_workout_pace_meters_per_sec += (recovery_pace_meters_per_minute * (interval_duration_secs / 60.0))
 
         if workout_duration_secs > 0.0:
-            avg_workout_pace = avg_workout_pace / workout_duration_secs
+            avg_workout_pace_meters_per_sec = avg_workout_pace_meters_per_sec / workout_duration_secs
 
         calc = TrainingStressCalculator.TrainingStressCalculator()
-        self.estimated_training_stress = calc.estimate_training_stress(workout_duration_secs, avg_workout_pace, threshold_pace_minute)
+        self.estimated_training_stress = calc.estimate_training_stress(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_minute * 60.0)

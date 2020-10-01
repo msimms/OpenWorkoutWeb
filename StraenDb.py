@@ -787,7 +787,7 @@ class MongoDatabase(Database.Database):
             user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
             if user_records is not None:
                 bests[Keys.ACTIVITY_TYPE_KEY] = activity_type
-                bests[Keys.ACTIVITY_TIME_KEY] = activity_time
+                bests[Keys.ACTIVITY_START_TIME_KEY] = activity_time
                 user_records[activity_id] = bests
                 self.records_collection.save(user_records)
                 return True
@@ -828,7 +828,7 @@ class MongoDatabase(Database.Database):
                 for record in user_records:
                     if InputChecker.is_uuid(record):
                         activity_bests = user_records[record]
-                        if (cutoff_time is None) or (activity_bests[Keys.ACTIVITY_TIME_KEY] > cutoff_time):
+                        if (cutoff_time is None) or (activity_bests[Keys.ACTIVITY_START_TIME_KEY] > cutoff_time):
                             bests[record] = activity_bests
                 return bests
         except:
@@ -855,7 +855,7 @@ class MongoDatabase(Database.Database):
                 for record in user_records:
                     if InputChecker.is_uuid(record):
                         activity_bests = user_records[record]
-                        activity_time = activity_bests[Keys.ACTIVITY_TIME_KEY]
+                        activity_time = activity_bests[Keys.ACTIVITY_START_TIME_KEY]
                         if activity_time >= cutoff_time_lower and activity_time < cutoff_time_higher:
                             bests[record] = activity_bests
                 return bests
@@ -992,7 +992,7 @@ class MongoDatabase(Database.Database):
             activty_name = str(activty_name)
 
             # Create the activity.
-            post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_NAME_KEY: activty_name, Keys.ACTIVITY_TIME_KEY: date_time, Keys.ACTIVITY_DEVICE_STR_KEY: device_str, Keys.ACTIVITY_VISIBILITY_KEY: "public", Keys.ACTIVITY_LOCATIONS_KEY: [] }
+            post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_NAME_KEY: activty_name, Keys.ACTIVITY_START_TIME_KEY: date_time, Keys.ACTIVITY_DEVICE_STR_KEY: device_str, Keys.ACTIVITY_VISIBILITY_KEY: "public", Keys.ACTIVITY_LOCATIONS_KEY: [] }
             self.activities_collection.insert(post)
             return True
         except:

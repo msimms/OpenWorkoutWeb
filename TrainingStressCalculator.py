@@ -30,5 +30,6 @@ class TrainingStressCalculator(object):
         super(TrainingStressCalculator, self).__init__()
 
     @staticmethod
-    def estimate_training_stress(workout_duration_secs, avg_workout_pace, threshold_pace_minute):
-        return ((workout_duration_secs * avg_workout_pace) / (threshold_pace_minute * 60.0)) * 100.0
+    def estimate_training_stress(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour):
+        stress = ((workout_duration_secs * avg_workout_pace_meters_per_sec) / threshold_pace_meters_per_hour) * 100.0
+        return stress

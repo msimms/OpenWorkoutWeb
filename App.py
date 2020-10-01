@@ -405,8 +405,8 @@ class App(object):
         summary += "\t<li>Name: " + name + "</li>\n"
 
         # Add the activity date.
-        if Keys.ACTIVITY_TIME_KEY in activity:
-            summary += "\t<li>Start Time: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script></li>\n"
+        if Keys.ACTIVITY_START_TIME_KEY in activity:
+            summary += "\t<li>Start Time: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_START_TIME_KEY]) + "))</script></li>\n"
 
         # Close the summary list.
         summary += "</ul>\n"
@@ -655,8 +655,8 @@ class App(object):
                 summary += "\t<li>" + App.render_array_reversed(location_description) + "</li>\n"
 
         # Add the activity date.
-        if Keys.ACTIVITY_TIME_KEY in activity:
-            summary += "\t<li>Start: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script></li>\n"
+        if Keys.ACTIVITY_START_TIME_KEY in activity:
+            summary += "\t<li>Start: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_START_TIME_KEY]) + "))</script></li>\n"
 
         # Add the activity name.
         summary += "\t<li>Name: " + name + "</li>\n"
