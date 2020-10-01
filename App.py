@@ -1057,28 +1057,7 @@ class App(object):
     @statistics
     def workouts(self):
         """Renders the workouts view."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # The the calendar ID used with the iCal server.
-        calendar_id_str = ""
-        calendar_id = self.data_mgr.retrieve_workouts_calendar_id_for_user(user_id)
-        if calendar_id is not None:
-            calendar_id_str = "These workouts are also available by via iCal by subscribing to your iCal workouts calendar: " + self.render_calendar_server_href(calendar_id) + "." 
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, calendar=calendar_id_str)
+        return self.render_simple_page('workouts.html')
 
     @statistics
     def workout(self, workout_id):
