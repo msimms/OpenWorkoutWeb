@@ -60,9 +60,9 @@ GOAL_TYPE_COMPLETION = "Completion"
 GOAL_TYPE_SPEED = "Speed"
 
 # Goal attributes used by the workout plan generator.
-GOAL_SWIM_DISTANCE_KEY = "goal_swim_distance"
-GOAL_BIKE_DISTANCE_KEY = "goal_bike_distance"
-GOAL_RUN_DISTANCE_KEY = "goal_run_distance"
+GOAL_SWIM_DISTANCE_KEY = "Goal Swim Distance"
+GOAL_BIKE_DISTANCE_KEY = "Goal Bike Distance"
+GOAL_RUN_DISTANCE_KEY = "Goal Run Distance"
 
 # Used by the workout plan generator.
 LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"
