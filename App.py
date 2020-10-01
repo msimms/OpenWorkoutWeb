@@ -1023,17 +1023,6 @@ class App(object):
         """Renders the list of all activities the specified user is allowed to view."""
         return self.render_simple_page('all_activities.html')
 
-    def render_calendar_server_href(self, calendar_id):
-        """Helper function that renders an href for the user's ical."""
-        url_str = self.root_url + "/ical/" + calendar_id
-        url_str = "<a href=\"" + self.root_url + "/ical/" + calendar_id + "\">" + url_str + "</a>"
-        return url_str
-
-    def render_activity_href(self, activity_id, display_str):
-        """Helper function that renders an activity href."""
-        url_str = "<a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + display_str + "</a>"
-        return url_str
-
     @statistics
     def record_progression(self, activity_type, record_name):
         """Renders the list of records, in order of progression, for the specified user and record type."""
