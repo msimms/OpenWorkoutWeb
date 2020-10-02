@@ -29,6 +29,7 @@ class WorkoutScheduler(object):
     def score_schedule(self, week):
         """Computes a score for the schedule, based on the daily stress scores."""
         """A better schedule is one with a more even distribution of stress."""
+        """Lower is better."""
 
         # Compute the average daily stress.
         daily_stress_scores = [0.0] * 7
@@ -42,7 +43,7 @@ class WorkoutScheduler(object):
         smoothed_scores = signals.smooth(daily_stress_scores, 2)
         avg_smoothed_scores = sum(smoothed_scores) / len(smoothed_scores)
         stdev_smoothed_scores = statistics.stddev(daily_stress_scores, avg_smoothed_scores)
-        return avg_smoothed_scores
+        return stdev_smoothed_scores
 
     def list_schedulable_days(self, week):
         """Utility function for listing the days of the week for which no workout is currently schedule."""
