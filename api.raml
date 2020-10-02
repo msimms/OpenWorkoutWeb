@@ -596,7 +596,59 @@ version: v1
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
-/get_api_keys:
+/get_user_settings:
+    description: Returns a JSON list of values associated with the specified user settings. Input is a comma-separated list.
+    get:
+        responses:
+            200: The value associated with the requested setting.
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
+/estimate_vo2_max:
+    description: Returns the user's estimated VO2 Max.
+    get:
+        responses:
+            200: The value associated with the requested setting.
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
+/estimate_vo2_ftp:
+    description: Returns the user's estimated FTP.
+    get:
+        responses:
+            200: The value associated with the requested setting.
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
+/estimate_vo2_bmi:
+    description: Returns the user's estimated BMI.
+    get:
+        responses:
+            200: The value associated with the requested setting.
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
+/list_power_zones:
+    description: 
+    get:
+        responses:
+            200: The value associated with the requested setting.
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            500: An internal exception was thrown.
+    post:
+/list_hr_zones:
+    description: 
+    get:
+        responses:
+            200: The value associated with the requested setting.
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            500: An internal exception was thrown.
+    post:
+/list_api_keys:
     description: Returns the API keys associated witht he logged in user.
     get:
         responses:

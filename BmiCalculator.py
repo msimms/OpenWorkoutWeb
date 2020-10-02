@@ -34,5 +34,8 @@ class BmiCalculator(object):
 
     def estimate_bmi(self, weight_kg, height_m):
         """Simple BMI estimation based on height and weight."""
+        if height_m == 0:
+            return 0
+
         # bmi = kg / m2
         return weight_kg / (height_m * height_m)

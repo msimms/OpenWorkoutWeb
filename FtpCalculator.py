@@ -98,7 +98,7 @@ class FtpCalculator(object):
             return
 
         # Only intersted in cycling activities.
-        if activity_type not in Keys.BIKE_BASED_ACTIVITIES:
+        if activity_type not in Keys.CYCLING_ACTIVITIES:
             return
 
         if Keys.BEST_20_MIN_POWER in summary_data:

@@ -9,6 +9,7 @@ import DataMgr
 import FtpCalculator
 import Keys
 import SensorAnalyzer
+import TrainingStressCalculator
 import Units
 
 class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
@@ -115,14 +116,12 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
                     ftp = self.data_mgr.retrieve_user_estimated_ftp(self.activity_user_id)
                     if ftp is not None:
 
-                        # Compute the intensity factor (IF = NP / FTP).
-                        intfac = np / ftp[0]
-                        results[Keys.INTENSITY_FACTOR] = intfac
-
-                        # Compute the training stress score (TSS = (t * NP * IF) / (FTP * 36)).
+                        # Compute the intensity factor and TSS.
                         t = (self.end_time - self.start_time) / 1000.0
-                        tss = (t * np * intfac) / (ftp[0] * 36)
-                        results[Keys.TSS] = tss
+                        calc = TrainingStressCalculator.TrainingStressCalculator()
+                        intfac, tss = calc.calculate_training_stress_from_power(t, np, ftp[0])
+                        results[Keys.INTENSITY_FACTOR] = intfac
+                        results[Keys.TRAINING_STRESS] = tss
 
             #
             # Compute the threshold power from this workout. Maybe we have a new estimated FTP?

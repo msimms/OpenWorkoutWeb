@@ -223,6 +223,11 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 * Now saving the final that was uploaded and not just the data that was extracted from it.
 * More work on run workout plan generation.
 
+### 0.30
+* Bug fixes and performance optimizations.
+* Moved more logic to the client.
+* More work on run workout plan generation, specifically updating the scheduler.
+
 ## Tech
 This software uses several other source projects to work properly:
 

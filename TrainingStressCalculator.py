@@ -2,7 +2,7 @@
 # 
 # # MIT License
 # 
-# Copyright (c) 2019 Mike Simms
+# Copyright (c) 2020 Mike Simms
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,21 +21,24 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Estimates VO2Max."""
+"""Encapsulates equations for calculating workout intensity."""
 
-class VO2MaxCalculator(object):
-    """Estimates VO2Max"""
+class TrainingStressCalculator(object):
+    """Encapsulates equations for calculating workout intensity."""
 
     def __init__(self):
-        super(VO2MaxCalculator, self).__init__()
+        super(TrainingStressCalculator, self).__init__()
 
     @staticmethod
-    def estimate_vo2max_from_heart_rate(max_hr, resting_hr):
-        if resting_hr == 0:
-            return 0
-        return 15.3 * (max_hr / resting_hr)
+    def estimate_training_stress(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour):
+        stress = ((workout_duration_secs * avg_workout_pace_meters_per_sec) / threshold_pace_meters_per_hour) * 100.0
+        return stress
 
     @staticmethod
-    def estimate_vo2max_from_race_distance_in_meters(race_distance_meters, race_time_minutes):
-        speed = race_distance_meters / race_time_minutes
-        return -4.60 + 0.182258 * speed + 0.000104 * speed * speed
+    def calculate_training_stress_from_power(workout_duration_secs, np, ftp):
+        # Compute the intensity factor (IF = NP / FTP).
+        intfac = np / ftp
+
+        # Compute the training stress score (TSS = (t * NP * IF) / (FTP * 36)).
+        tss = (workout_duration_secs * np * intfac) / (ftp * 36)
+        return intfac, tss

@@ -15,6 +15,8 @@ import DataMgr
 import Keys
 import LocationAnalyzer
 import SensorAnalyzerFactory
+import TrainingStressCalculator
+import UserMgr
 
 class ActivityAnalyzer(object):
     """Class for performing the computationally expensive activity analysis task."""
@@ -71,7 +73,8 @@ class ActivityAnalyzer(object):
             self.data_mgr.update_deferred_task(activity_user_id, self.internal_task_id, Keys.TASK_STATUS_STARTED)
 
             # Make sure the activity start time is set.
-            self.data_mgr.update_activity_start_time(self.activity)
+            start_time_secs = self.data_mgr.update_activity_start_time(self.activity)
+            end_time_ms = 0
 
             # Hash the activity.
             print("Hashing the activity...")
@@ -87,11 +90,11 @@ class ActivityAnalyzer(object):
                 location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
                 locations = self.activity[Keys.ACTIVITY_LOCATIONS_KEY]
                 for location in locations:
-                    date_time = location[Keys.LOCATION_TIME_KEY]
+                    end_time_ms = location[Keys.LOCATION_TIME_KEY]
                     latitude = location[Keys.LOCATION_LAT_KEY]
                     longitude = location[Keys.LOCATION_LON_KEY]
                     altitude = location[Keys.LOCATION_ALT_KEY]
-                    location_analyzer.append_location(date_time, latitude, longitude, altitude)
+                    location_analyzer.append_location(end_time_ms, latitude, longitude, altitude)
                     location_analyzer.update_speeds()
                     self.should_yield()
                 self.summary_data.update(location_analyzer.analyze())
@@ -115,10 +118,13 @@ class ActivityAnalyzer(object):
 
             # The following require us to have an activity ID.
             if Keys.ACTIVITY_ID_KEY in self.activity:
+
+                # Unique identifier for the activity.
                 activity_id = self.activity[Keys.ACTIVITY_ID_KEY]
 
                 # Create a current speed graph - if one has not already been created.
                 if Keys.APP_CURRENT_SPEED_KEY not in self.activity and location_analyzer is not None:
+
                     print("Creating speed graph...")
                     self.speed_graph = location_analyzer.create_speed_graph()
 
@@ -135,6 +141,34 @@ class ActivityAnalyzer(object):
                 print("Computing location description...")
                 location_description = self.data_mgr.get_location_description(activity_id)
                 self.summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY] = location_description
+                self.should_yield()
+
+                # Was a stress score calculated (i.e., did the activity have power data from which stress could be computed)?
+                # If not, estimate a stress score.
+                print("Computing training stress...")
+                end_time_secs = end_time_ms / 1000
+
+                # If activity duration and distance have been calculated.
+                if start_time_secs > 0 and end_time_secs > 0 and end_time_secs > start_time_secs and len(location_analyzer.distance_buf) > 0:
+
+                    # These are used by both cycling and running stress calculations.
+                    distance_entry = location_analyzer.distance_buf[-1]
+                    workout_duration_secs = end_time_secs - start_time_secs
+                    avg_workout_pace_meters_per_sec =  distance_entry[2] / workout_duration_secs
+
+                    # Running activity.
+                    if activity_type in Keys.RUNNING_ACTIVITIES:
+                        _, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(activity_user_id, DataMgr.SIX_MONTHS)
+                        run_paces = self.data_mgr.compute_run_training_paces(activity_user_id, running_bests)
+                        if Keys.FUNCTIONAL_THRESHOLD_PACE in run_paces:
+                            threshold_pace_meters_per_hour = run_paces[Keys.FUNCTIONAL_THRESHOLD_PACE] * 60.0
+                            calc = TrainingStressCalculator.TrainingStressCalculator()
+                            stress = calc.estimate_training_stress(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour)
+                            self.summary_data[Keys.TRAINING_STRESS] = stress
+
+                    # Cycling activity
+                    elif activity_type in Keys.CYCLING_ACTIVITIES:
+                        pass
 
                 # Store the results.
                 print("Storing the activity summary...")
@@ -145,9 +179,9 @@ class ActivityAnalyzer(object):
             self.should_yield()
 
             # Update personal bests.
-            if Keys.ACTIVITY_TIME_KEY in self.activity:
+            if Keys.ACTIVITY_START_TIME_KEY in self.activity:
                 print("Updating personal bests...")
-                activity_time = self.activity[Keys.ACTIVITY_TIME_KEY]
+                activity_time = self.activity[Keys.ACTIVITY_START_TIME_KEY]
                 if not self.data_mgr.update_activity_bests_and_personal_records(activity_user_id, activity_id, activity_type, activity_time, self.summary_data):
                     self.log_error("Error returned when updating personal records.")
             else:

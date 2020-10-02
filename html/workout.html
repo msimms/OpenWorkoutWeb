@@ -47,21 +47,18 @@
 
 	var process_workout_description = function(response)
 	{
-		if (response == null)
-			return;
-
-		if (response.length >= 3)
+		if (response && response.length >= 3)
         {
             var obj_list = JSON.parse(response);
             if (obj_list == null)
                 return;
 
-    		var elem = document.getElementById("type");
-            elem.textContent = obj_list.type;
+            document.getElementById("type").textContent = obj_list.type;
 
-    		elem = document.getElementById("description");
             var description = obj_list.description;
-            elem.textContent = description;
+            description = description.split("\\n").join("<br>");
+    		var elem = document.getElementById("description");
+            elem.innerHTML = description;
         }
 	};
 
@@ -79,8 +76,8 @@ ${nav}
 
 <h2 id="type"></h2>
 
-<textarea id="description" rows="10" cols="250">
-</textarea> 
+<p id="description">
+</p> 
 
 <button type="button" onclick="return export_workout_to_zwo()">Export to ZWO</button><br>
 <button type="button" onclick="return export_workout_to_ical()">Export to iCal</button>

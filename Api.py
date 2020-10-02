@@ -631,7 +631,7 @@ class Api(object):
             device_info[Keys.APP_DEVICE_ID_KEY] = device_id
             activity = self.data_mgr.retrieve_most_recent_activity_for_device(device_id)
             if activity is not None:
-                device_info[Keys.DEVICE_LAST_HEARD_FROM] = activity[Keys.ACTIVITY_TIME_KEY]
+                device_info[Keys.DEVICE_LAST_HEARD_FROM] = activity[Keys.ACTIVITY_START_TIME_KEY]
             else:
                 device_info[Keys.DEVICE_LAST_HEARD_FROM] = 0
             devices.append(device_info)
@@ -669,9 +669,9 @@ class Api(object):
                 if Keys.ACTIVITY_NAME_KEY in activity:
                     activity_name = activity[Keys.ACTIVITY_NAME_KEY]
 
-                if Keys.ACTIVITY_TIME_KEY in activity and Keys.ACTIVITY_ID_KEY in activity:
+                if Keys.ACTIVITY_START_TIME_KEY in activity and Keys.ACTIVITY_ID_KEY in activity:
                     url = self.root_url + "/activity/" + activity[Keys.ACTIVITY_ID_KEY]
-                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time': int(activity[Keys.ACTIVITY_TIME_KEY])}
+                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time': int(activity[Keys.ACTIVITY_START_TIME_KEY])}
                 matched_activities.append(temp_activity)
 
         json_result = json.dumps(matched_activities, ensure_ascii=False)
@@ -711,7 +711,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Distance not specified.")
         if Keys.APP_DURATION_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Duration not specified.")
-        if Keys.ACTIVITY_TIME_KEY not in values:
+        if Keys.ACTIVITY_START_TIME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity start time not specified.")
         if Keys.ACTIVITY_TYPE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity type not specified.")
@@ -722,7 +722,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Validate the activity start time.
-        start_time = values[Keys.ACTIVITY_TIME_KEY]
+        start_time = values[Keys.ACTIVITY_START_TIME_KEY]
         if not InputChecker.is_integer(start_time):
             raise ApiException.ApiMalformedRequestException("Invalid start time.")
 
@@ -740,7 +740,7 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
         if Keys.APP_SETS_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Sets not specified.")
-        if Keys.ACTIVITY_TIME_KEY not in values:
+        if Keys.ACTIVITY_START_TIME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity start time not specified.")
         if Keys.ACTIVITY_TYPE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity type not specified.")
@@ -771,7 +771,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Set data was not specified.")
 
         # Validate the activity start time.
-        start_time = values[Keys.ACTIVITY_TIME_KEY]
+        start_time = values[Keys.ACTIVITY_START_TIME_KEY]
         if not InputChecker.is_integer(start_time):
             raise ApiException.ApiMalformedRequestException("Invalid start time.")
 
@@ -1456,6 +1456,13 @@ class Api(object):
                     raise ApiException.ApiMalformedRequestException("Invalid goal.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
 
+            # Goal date.
+            elif decoded_key == Keys.GOAL_DATE_KEY:
+                goal_date = unquote_plus(values[key])
+                if not InputChecker.is_integer(goal_date):
+                    raise ApiException.ApiMalformedRequestException("Invalid goal date.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
+
             # Goal type.
             elif decoded_key == Keys.GOAL_TYPE_KEY:
                 goal_type = unquote_plus(values[key])
@@ -1487,29 +1494,37 @@ class Api(object):
         for key in values:
             decoded_key = unquote_plus(key)
 
-            # Gender
+            # Birthday.
             if decoded_key == Keys.BIRTHDAY_KEY:
                 birthday = unquote_plus(values[key]).lower()
                 if not InputChecker.is_integer(birthday):
                     raise ApiException.ApiMalformedRequestException("Invalid birthday.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.BIRTHDAY_KEY, birthday)
+
+            # Height.
             elif decoded_key == Keys.HEIGHT_KEY:
                 height = unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(height):
                     raise ApiException.ApiMalformedRequestException("Invalid height.")
                 height, _ = Units.convert_from_preferred_height_units(self.user_mgr, self.user_id, float(height))
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.HEIGHT_KEY, height)
+
+            # Weight.
             elif decoded_key == Keys.WEIGHT_KEY:
                 weight = unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(weight):
                     raise ApiException.ApiMalformedRequestException("Invalid weight.")
                 weight, _ = Units.convert_from_preferred_mass_units(self.user_mgr, self.user_id, float(weight))
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.WEIGHT_KEY, weight)
+
+            # Gender.
             elif decoded_key == Keys.GENDER_KEY:
                 gender = unquote_plus(values[key]).lower()
                 if not (gender == Keys.GENDER_MALE_KEY or gender == Keys.GENDER_FEMALE_KEY):
                     raise ApiException.ApiMalformedRequestException("Invalid gender value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GENDER_KEY, gender)
+
+            # Resting Heart Rate.
             elif decoded_key == Keys.RESTING_HEART_RATE_KEY:
                 resting_hr = unquote_plus(values[key]).lower()
                 if not InputChecker.is_float(resting_hr):
@@ -1567,19 +1582,7 @@ class Api(object):
         """Called when the user wants to generate a workout plan."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        if Keys.GOAL_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("A goal was not specified.")
-        if Keys.GOAL_DATE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("A goal date was not specified.")
 
-        goal = unquote_plus(values[Keys.GOAL_KEY])
-        if not (goal in Keys.GOALS):
-            raise ApiException.ApiMalformedRequestException("Invalid goal.")
-
-        goal_date = unquote_plus(values[Keys.GOAL_DATE_KEY])
-
-        self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
-        self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
         self.data_mgr.generate_workout_plan_for_user(self.user_id)
         return True, ""
 
@@ -1636,7 +1639,7 @@ class Api(object):
             for workout in workouts:
                 if workout.scheduled_time is not None and workout.workout_id is not None and workout.type is not None:
                     url = self.root_url + "/workout/" + str(workout.workout_id)
-                    temp_workout = {'title': workout.type, 'url': url, 'time': calendar.timegm(workout.scheduled_time.timetuple())}
+                    temp_workout = {Keys.WORKOUT_TYPE_KEY: workout.type, 'url': url, Keys.WORKOUT_SCHEDULED_TIME_KEY: calendar.timegm(workout.scheduled_time.timetuple()), Keys.WORKOUT_ID_KEY: str(workout.workout_id)}
                     matched_workouts.append(temp_workout)
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
@@ -1821,10 +1824,76 @@ class Api(object):
         if Keys.REQUESTED_SETTING_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Setting not specified.")
 
-        setting_value = self.user_mgr.retrieve_user_setting(self.user_id, values[Keys.REQUESTED_SETTING_KEY])
-        return True, setting_value
+        setting = values[Keys.REQUESTED_SETTING_KEY]
+        setting_value = self.user_mgr.retrieve_user_setting(self.user_id, setting)
+        return True, str(setting_value)
 
-    def handle_get_api_keys(self, values):
+    def handle_get_user_settings(self, values):
+        """Returns the value associated with the specified user settings. Settings are a list of strings."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.REQUESTED_SETTINGS_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Settings not specified.")
+
+        settings = values[Keys.REQUESTED_SETTINGS_KEY].split(',')
+        setting_values = self.user_mgr.retrieve_user_settings(self.user_id, settings)
+        return True, json.dumps(setting_values)
+
+    def handle_estimate_vo2_max(self):
+        """Returns the user's estimated VO2 Max, based on their resting and max heart rates."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        resting_hr = self.user_mgr.retrieve_user_setting(self.user_id, Keys.RESTING_HEART_RATE_KEY)
+        estimated_max_hr = self.user_mgr.retrieve_user_setting(self.user_id, Keys.ESTIMATED_MAX_HEART_RATE_KEY)
+        estimated_vo2_max = self.data_mgr.estimate_vo2_max(resting_hr, estimated_max_hr)
+        return True, json.dumps(estimated_vo2_max)
+
+    def handle_estimate_ftp(self):
+        """Returns the user's estimated FTP."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        ftp = self.data_mgr.retrieve_user_estimated_ftp(self.user_id)
+        return True, json.dumps(ftp)
+
+    def handle_estimate_bmi(self):
+        """Returns the user's estimated BMI."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        weight_metric = self.user_mgr.retrieve_user_setting(self.user_id, Keys.WEIGHT_KEY)
+        height_metric = self.user_mgr.retrieve_user_setting(self.user_id, Keys.HEIGHT_KEY)
+        bmi = self.data_mgr.estimate_bmi(weight_metric, height_metric)
+        return True, json.dumps(bmi)
+
+    def handle_list_power_zones(self, values):
+        """Returns power zones corresponding to the specified FTP value."""
+        if Keys.ESTIMATED_FTP_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("FTP not specified.")
+
+        ftp = values[Keys.ESTIMATED_FTP_KEY]
+        if not InputChecker.is_float(ftp):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        zones = self.data_mgr.retrieve_power_training_zones(float(ftp))
+        return True, json.dumps(zones)
+
+    def handle_list_hr_zones(self, values):
+        """Returns heart rate zones corresponding to the specified resting heart rate value."""
+        if Keys.ESTIMATED_MAX_HEART_RATE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("FTP not specified.")
+
+        max_hr = values[Keys.ESTIMATED_MAX_HEART_RATE_KEY]
+        if not InputChecker.is_float(max_hr):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if not max_hr < 1.0:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        zones = self.data_mgr.retrieve_heart_rate_zones(float(max_hr))
+        return True, json.dumps(zones)
+
+    def handle_list_api_keys(self):
         """Returns a list of API keys assigned to the current user."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -1894,8 +1963,20 @@ class Api(object):
             return self.handle_get_record_progression(values)
         elif request == 'get_user_setting':
             return self.handle_get_user_setting(values)
-        elif request == 'get_api_keys':
-            return self.handle_get_api_keys(values)
+        elif request == 'get_user_settings':
+            return self.handle_get_user_settings(values)
+        elif request == 'estimate_vo2_max':
+            return self.handle_estimate_vo2_max()
+        elif request == 'estimate_ftp':
+            return self.handle_estimate_ftp()
+        elif request == 'estimate_bmi':
+            return self.handle_estimate_bmi()
+        elif request == 'list_power_zones':
+            return self.handle_list_power_zones(values)
+        elif request == 'list_hr_zones':
+            return self.handle_list_hr_zones(values)
+        elif request == 'list_api_keys':
+            return self.handle_list_api_keys()
         elif request == 'list_activity_types':
             return self.handle_list_activity_types()
         return False, ""

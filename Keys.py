@@ -44,8 +44,47 @@ API_KEYS = "api keys" # List of API keys belonging to the user
 API_KEY = "key" # API key being provided
 API_KEY_RATE = "rate" # The maximum number of requests allowed per day for the provided key
 
+# Goals.
+GOAL_KEY = "goal"
+GOAL_DATE_KEY = "goal_date"
+GOAL_FITNESS_KEY = "Fitness"
+GOAL_5K_RUN_KEY = "5K Run"
+GOAL_10K_RUN_KEY = "10K Run"
+GOAL_15K_RUN_KEY = "15K Run"
+GOAL_HALF_MARATHON_RUN_KEY = "Half Marathon"
+GOAL_MARATHON_RUN_KEY = "Marathon"
+GOAL_50K_RUN_KEY = "50K Run"
+GOAL_50_MILE_RUN_KEY = "50 Mile Run"
+GOAL_TYPE_KEY = "goal type" # Extra info about the user's goal, such as whether they care about speed or just finishing a race
+GOAL_TYPE_COMPLETION = "Completion"
+GOAL_TYPE_SPEED = "Speed"
+
+# Goal attributes used by the workout plan generator.
+GOAL_SWIM_DISTANCE_KEY = "Goal Swim Distance"
+GOAL_BIKE_DISTANCE_KEY = "Goal Bike Distance"
+GOAL_RUN_DISTANCE_KEY = "Goal Run Distance"
+
+# Used by the workout plan generator.
+LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"
+LONGEST_RUN_WEEK_1_KEY = "Longest Run Week 1"
+LONGEST_RUN_WEEK_2_KEY = "Longest Run Week 2"
+LONGEST_RUN_WEEK_3_KEY = "Longest Run Week 3"
+AGE_YEARS_KEY = "Age In Years"
+EXPERIENCE_LEVEL_KEY = "Experience Level"
+EXPERIENCE_LEVEL_BEGINNER = "Beginner"
+EXPERIENCE_LEVEL_INTERMEDIATE = "Intermediate"
+EXPERIENCE_LEVEL_ADVANCED = "Advanced"
+EXPERIENCE_LEVELS = [ EXPERIENCE_LEVEL_BEGINNER, EXPERIENCE_LEVEL_INTERMEDIATE, EXPERIENCE_LEVEL_ADVANCED ]
+WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
+IN_TAPER_KEY = "Is In Taper"
+NUM_WEEKS_BUILDING_KEY = "Num Weeks Building" # The number of consecutive weeks with increasing training stress
+AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
+AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
+WORKOUT_PLAN_INPUTS = [ LONGEST_RUN_IN_FOUR_WEEKS_KEY, LONGEST_RUN_WEEK_1_KEY, LONGEST_RUN_WEEK_2_KEY, LONGEST_RUN_WEEK_3_KEY, AGE_YEARS_KEY, EXPERIENCE_LEVEL_KEY, WEEKS_UNTIL_GOAL_KEY ]
+
 # User settings
 REQUESTED_SETTING_KEY = "requested setting"
+REQUESTED_SETTINGS_KEY = "requested settings" # For requesting a list of settings (more efficient than requesting settings one by one)
 DEFAULT_PRIVACY_KEY = "default privacy"
 PREFERRED_UNITS_KEY = "preferred units"
 UNITS_METRIC_KEY = "metric"
@@ -64,10 +103,8 @@ RESTING_HEART_RATE_KEY = "resting heart rate"
 ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate"
 ESTIMATED_FTP_KEY = "estimated ftp"
 PREFERRED_LONG_RUN_DAY_KEY = "preferred long run day" # Day of the week on which the user prefers to do their long runs
-GOAL_TYPE_KEY = "goal type" # Extra info about the user's goal, such as whether they care about speed or just finishing a race
-GOAL_TYPE_COMPLETION = "Completion"
-GOAL_TYPE_SPEED = "Speed"
 CAN_UPLOAD_PHOTOS_KEY = "can upload photos"
+USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, PREFERRED_UNITS_KEY, PREFERRED_FIRST_DAY_OF_WEEK_KEY, BIRTHDAY_KEY, HEIGHT_KEY, WEIGHT_KEY, GENDER_KEY, RESTING_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_FTP_KEY, GOAL_KEY, GOAL_DATE_KEY, GOAL_TYPE_KEY, EXPERIENCE_LEVEL_KEY, PREFERRED_LONG_RUN_DAY_KEY, CAN_UPLOAD_PHOTOS_KEY ]
 
 # Personal records
 RECORDS_USER_ID = "user_id"
@@ -89,23 +126,6 @@ WORKOUT_COOLDOWN_KEY = "cooldown"
 WORKOUT_SCHEDULED_TIME_KEY = "scheduled time"
 WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY = "last scheduled workout time"
 WORKOUT_ESTIMATED_STRESS_KEY = "estimated stress score"
-
-# Used by the workout plan generator.
-LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"
-LONGEST_RUN_WEEK_1_KEY = "Longest Run Week 1"
-LONGEST_RUN_WEEK_2_KEY = "Longest Run Week 2"
-LONGEST_RUN_WEEK_3_KEY = "Longest Run Week 3"
-AGE_YEARS_KEY = "Age In Years"
-EXPERIENCE_LEVEL_KEY = "Experience Level"
-EXPERIENCE_LEVEL_BEGINNER = "Beginner"
-EXPERIENCE_LEVEL_INTERMEDIATE = "Intermediate"
-EXPERIENCE_LEVEL_ADVANCED = "Advanced"
-EXPERIENCE_LEVELS = [ EXPERIENCE_LEVEL_BEGINNER, EXPERIENCE_LEVEL_INTERMEDIATE, EXPERIENCE_LEVEL_ADVANCED ]
-WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
-IN_TAPER_KEY = "Is In Taper"
-AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
-AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
-WORKOUT_PLAN_INPUTS = [ LONGEST_RUN_IN_FOUR_WEEKS_KEY, LONGEST_RUN_WEEK_1_KEY, LONGEST_RUN_WEEK_2_KEY, LONGEST_RUN_WEEK_3_KEY, AGE_YEARS_KEY, EXPERIENCE_LEVEL_KEY, WEEKS_UNTIL_GOAL_KEY ]
 
 # Workout types
 WORKOUT_TYPE_REST = "Rest"
@@ -155,6 +175,8 @@ APP_HEART_RATE_KEY = "Heart Rate"  # Raw heart rate list.
 APP_AVG_HEART_RATE_KEY = "Average Heart Rate" # Computed average heart rate.
 APP_CURRENT_PACE_KEY = "Current Pace" # Computed pace list.
 APP_POWER_KEY = "Power" # Raw power data list.
+APP_TEMPERATURE_KEY = "Temperature" # Raw temperature data
+APP_EVENTS_KEY = "Events" # Raw event data (gear shifts, etc.)
 APP_SETS_KEY = "Sets"
 APP_DISTANCES_KEY = "distances" # Distance between data points.
 APP_LOCATIONS_KEY = "locations" # Raw position data.
@@ -185,7 +207,7 @@ ACTIVITY_USER_ID_KEY = "user_id"
 ACTIVITY_DEVICE_STR_KEY = "device_str"
 ACTIVITY_LOCATIONS_KEY = "locations"
 ACTIVITY_NAME_KEY = "name"
-ACTIVITY_TIME_KEY = "time"
+ACTIVITY_START_TIME_KEY = "time"
 ACTIVITY_END_TIME_KEY = "end_time"
 ACTIVITY_VISIBILITY_KEY = "visibility"
 ACTIVITY_VISIBILITY_PUBLIC = "public"
@@ -221,7 +243,7 @@ BEST_20_MIN_POWER = "20 Minute Power" # Highest average power seen over 20 minut
 BEST_1_HOUR_POWER = "1 Hour Power" # Highest average power seen over 1 hour
 MAX_POWER = "Maximum Power" # Highest power detected during the activity
 MAX_HEART_RATE = "Maximum Heart Rate" # Highest heart rate detected during the activity
-MAX_CADENCE = "Maximum Cadence"
+MAX_CADENCE = "Maximum Cadence" # Highest recorded cadence
 AVG_PACE = "Average Pace" # Average pace of the activity
 AVG_POWER = "Average Power" # Average power (watts) held during the activity
 AVG_HEART_RATE = "Average Heart Rate" # Average heart rate (bpm) held during the activity
@@ -231,12 +253,12 @@ AVG_STEPS_PER_MINUTE = "Average Steps Per Minute" # Average cadence for foot bas
 NORMALIZED_POWER = "Normalized Power"
 THRESHOLD_POWER = "Threshold Power"
 INTENSITY_FACTOR = "Intensity Factor"
-TSS = "TSS" # Training Stress Score
-ESTIMATED_TSS = "Estimated TSS" # Estimated Training Stress Score
+TRAINING_STRESS = "TSS" # Training Stress Score
+ESTIMATED_TRAINING_STRESS = "Estimated Training Stress" # Estimated training stress, for activities that don't have power data
 VARIABILITY_INDEX = "Variability Index"
 CLUSTER = "Cluster"
-TOTAL_DISTANCE = "Total Distance"
-LONGEST_DISTANCE = "Longest Distance"
+TOTAL_DISTANCE = "Total Distance" # Distance for an activity
+LONGEST_DISTANCE = "Longest Distance" # Longest distance, when summarizing activities
 TOTAL_ACTIVITIES = "Total Activities"
 MILE_SPLITS = "Mile Splits" # List of mile splits
 KM_SPLITS = "KM Splits" # List of kilometer splits
@@ -293,28 +315,16 @@ TYPE_OPEN_WATER_SWIMMING_KEY = "Open Water Swimming"
 TYPE_POOL_SWIMMING_KEY = "Pool Swimming"
 TYPE_PULL_UP_KEY = "Pull Up"
 TYPE_PUSH_UP_KEY = "Push Up"
+
+# Activity type groups.
+RUNNING_ACTIVITIES = [ TYPE_RUNNING_KEY, TYPE_INDOOR_RUNNING_KEY, TYPE_VIRTUAL_RUNNING_KEY ] 
 FOOT_BASED_ACTIVITIES = [ TYPE_RUNNING_KEY, TYPE_INDOOR_RUNNING_KEY, TYPE_VIRTUAL_RUNNING_KEY, TYPE_HIKING_KEY, TYPE_WALKING_KEY ]
-BIKE_BASED_ACTIVITIES = [ TYPE_CYCLING_KEY, TYPE_INDOOR_CYCLING_KEY, TYPE_VIRTUAL_CYCLING_KEY, TYPE_MOUNTAIN_BIKING_KEY ]
+CYCLING_ACTIVITIES = [ TYPE_CYCLING_KEY, TYPE_INDOOR_CYCLING_KEY, TYPE_VIRTUAL_CYCLING_KEY, TYPE_MOUNTAIN_BIKING_KEY ]
 SWIMMING_ACTIVITIES = [ TYPE_OPEN_WATER_SWIMMING_KEY, TYPE_POOL_SWIMMING_KEY ]
 STRENGTH_ACTIVITIES = [ TYPE_PULL_UP_KEY, TYPE_PUSH_UP_KEY ]
 
 # Activity names.
 UNNAMED_ACTIVITY_TITLE = "Unnamed"
-
-# Goals.
-GOAL_KEY = "goal"
-GOAL_DATE_KEY = "goal_date"
-GOAL_SWIM_DISTANCE_KEY = "goal_swim_distance"
-GOAL_BIKE_DISTANCE_KEY = "goal_bike_distance"
-GOAL_RUN_DISTANCE_KEY = "goal_run_distance"
-GOAL_FITNESS_KEY = "Fitness"
-GOAL_5K_RUN_KEY = "5K Run"
-GOAL_10K_RUN_KEY = "10K Run"
-GOAL_15K_RUN_KEY = "15K Run"
-GOAL_HALF_MARATHON_RUN_KEY = "Half Marathon"
-GOAL_MARATHON_RUN_KEY = "Marathon"
-GOAL_50K_RUN_KEY = "50K Run"
-GOAL_50_MILE_RUN_KEY = "50 Mile Run"
 
 # Used to track deferred tasks.
 DEFERRED_TASKS_USER_ID = "user_id"
@@ -336,7 +346,7 @@ LOCAL_FILE_NAME = "local file name"
 
 TIME_KEYS = [ BEST_1K, BEST_MILE, BEST_5K, BEST_10K, BEST_15K, BEST_HALF_MARATHON, BEST_MARATHON, BEST_METRIC_CENTURY, BEST_CENTURY ]
 DISTANCE_KEYS = [ TOTAL_DISTANCE, LONGEST_DISTANCE ]
-SPEED_KEYS = [ APP_CURRENT_SPEED_KEY, APP_AVG_SPEED_KEY, APP_MOVING_SPEED_KEY, APP_SPEED_VARIANCE_KEY, BEST_SPEED, APP_AVG_SPEED_KEY ]
+SPEED_KEYS = [ APP_CURRENT_SPEED_KEY, APP_AVG_SPEED_KEY, APP_MOVING_SPEED_KEY, APP_SPEED_VARIANCE_KEY, BEST_SPEED ]
 PACE_KEYS = [ APP_CURRENT_PACE_KEY, BEST_PACE, AVG_PACE, LONG_RUN_PACE, EASY_RUN_PACE, TEMPO_RUN_PACE, SPEED_RUN_PACE, SHORT_INTERVAL_RUN_PACE, FUNCTIONAL_THRESHOLD_PACE, INTERVAL_WORKOUT_PACE_KEY ]
 POWER_KEYS = [ AVG_POWER, MAX_POWER, BEST_5_SEC_POWER, BEST_12_MIN_POWER, BEST_20_MIN_POWER, BEST_1_HOUR_POWER, NORMALIZED_POWER, THRESHOLD_POWER ]
 HEART_RATE_KEYS = [ AVG_HEART_RATE, MAX_HEART_RATE ]
@@ -344,6 +354,6 @@ CADENCE_KEYS = [ APP_CADENCE_KEY, AVG_CADENCE, MAX_CADENCE ]
 RUNNING_CADENCE_KEYS = [ STEPS_PER_MINUTE, AVG_STEPS_PER_MINUTE ]
 GOALS = [ GOAL_FITNESS_KEY, GOAL_5K_RUN_KEY, GOAL_10K_RUN_KEY, GOAL_15K_RUN_KEY, GOAL_HALF_MARATHON_RUN_KEY, GOAL_MARATHON_RUN_KEY, GOAL_50K_RUN_KEY, GOAL_50_MILE_RUN_KEY ]
 
-UNSUMMARIZABLE_KEYS = [ APP_SPEED_VARIANCE_KEY, APP_DISTANCES_KEY, APP_LOCATIONS_KEY, ACTIVITY_TIME_KEY, ACTIVITY_TYPE_KEY, ACTIVITY_HASH_KEY, ACTIVITY_LOCATION_DESCRIPTION_KEY, ACTIVITY_INTERVALS_KEY, MILE_SPLITS, KM_SPLITS ]
+UNSUMMARIZABLE_KEYS = [ APP_SPEED_VARIANCE_KEY, APP_DISTANCES_KEY, APP_LOCATIONS_KEY, ACTIVITY_START_TIME_KEY, ACTIVITY_TYPE_KEY, ACTIVITY_HASH_KEY, ACTIVITY_LOCATION_DESCRIPTION_KEY, ACTIVITY_INTERVALS_KEY, MILE_SPLITS, KM_SPLITS ]
 
 DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]

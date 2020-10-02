@@ -27,6 +27,7 @@ import hashlib
 import os
 import time
 import uuid
+import BmiCalculator
 import FtpCalculator
 import HeartRateCalculator
 import Importer
@@ -35,6 +36,7 @@ import MapSearch
 import StraenDb
 import Summarizer
 import TrainingPaceCalculator
+import VO2MaxCalculator
 import celery
 from celery import states
 
@@ -45,8 +47,8 @@ FOUR_WEEKS = (28.0 * 24.0 * 60.0 * 60.0)
 
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
-    if Keys.ACTIVITY_TIME_KEY in item:
-        return item[Keys.ACTIVITY_TIME_KEY]
+    if Keys.ACTIVITY_START_TIME_KEY in item:
+        return item[Keys.ACTIVITY_START_TIME_KEY]
     return 0
 
 class DataMgr(Importer.ActivityWriter):
@@ -118,7 +120,7 @@ class DataMgr(Importer.ActivityWriter):
 
         # If we couldn't find anything with a time then just duplicate the start time, assuming it's a manually entered workout or something.
         if end_time is None:
-            end_time = activity[Keys.ACTIVITY_TIME_KEY]
+            end_time = activity[Keys.ACTIVITY_START_TIME_KEY]
 
         # Store the end time, so we don't have to go through this again.
         if end_time is not None:
@@ -135,10 +137,10 @@ class DataMgr(Importer.ActivityWriter):
         activities = self.database.retrieve_user_activity_list(user_id, None, None, None)
         for activity in activities:
 
-            if Keys.ACTIVITY_TIME_KEY in activity:
+            if Keys.ACTIVITY_START_TIME_KEY in activity:
 
                 # Get the activity start and end times.
-                activity_start_time = activity[Keys.ACTIVITY_TIME_KEY]
+                activity_start_time = activity[Keys.ACTIVITY_START_TIME_KEY]
                 if Keys.ACTIVITY_END_TIME_KEY not in activity:
                     activity_end_time = self.compute_and_store_activity_end_time(activity)
                 else:
@@ -202,6 +204,26 @@ class DataMgr(Importer.ActivityWriter):
         if activity_id is None:
             raise Exception("No activity ID.")
         return self.database.create_activity_sensor_readings(activity_id, sensor_type, values)
+
+    def create_activity_event(self, activity_id, event):
+        """Inherited from ActivityWriter. 'event' is a dictionary describing an event."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No activity ID.")
+        if event is None:
+            raise Exception("No event.")
+        return self.database.create_activity_events(activity_id, event)
+
+    def create_activity_events(self, activity_id, events):
+        """Inherited from ActivityWriter. 'events' is an array of dictionaries in which each dictionary describes an event."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No activity ID.")
+        if events is None:
+            raise Exception("No events.")
+        return self.database.create_activity_events(activity_id, events)
 
     def create_activity_metadata(self, activity_id, date_time, key, value, create_list):
         """Create method for activity metadata."""
@@ -369,21 +391,23 @@ class DataMgr(Importer.ActivityWriter):
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
-        if Keys.ACTIVITY_TIME_KEY in activity:
-            return
+        if Keys.ACTIVITY_START_TIME_KEY in activity:
+            return activity[Keys.ACTIVITY_START_TIME_KEY]
 
         if Keys.ACTIVITY_LOCATIONS_KEY in activity:
             locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
         else:
             locations = self.retrieve_activity_locations(activity[Keys.ACTIVITY_ID_KEY])
 
+        time_num = 0
         if len(locations) > 0:
             first_loc = locations[0]
             if Keys.LOCATION_TIME_KEY in first_loc:
                 time_num = first_loc[Keys.LOCATION_TIME_KEY] / 1000 # Milliseconds to seconds
                 activity_id = activity[Keys.ACTIVITY_ID_KEY]
-                activity[Keys.ACTIVITY_TIME_KEY] = time_num
-                self.create_activity_metadata(activity_id, time_num, Keys.ACTIVITY_TIME_KEY, time_num, False)
+                activity[Keys.ACTIVITY_START_TIME_KEY] = time_num
+                self.create_activity_metadata(activity_id, time_num, Keys.ACTIVITY_START_TIME_KEY, time_num, False)
+        return time_num
 
     def update_moving_activity(self, device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict):
         """Updates locations, sensor readings, and metadata associated with a moving activity. Provided as a performance improvement over making several database updates."""
@@ -626,9 +650,9 @@ class DataMgr(Importer.ActivityWriter):
             if device_activity is not None:
                 if most_recent_activity is None:
                     most_recent_activity = device_activity
-                elif Keys.ACTIVITY_TIME_KEY in device_activity and Keys.ACTIVITY_TIME_KEY in most_recent_activity:
-                    curr_activity_time = device_activity[Keys.ACTIVITY_TIME_KEY]
-                    prev_activity_time = most_recent_activity[Keys.ACTIVITY_TIME_KEY]
+                elif Keys.ACTIVITY_START_TIME_KEY in device_activity and Keys.ACTIVITY_START_TIME_KEY in most_recent_activity:
+                    curr_activity_time = device_activity[Keys.ACTIVITY_START_TIME_KEY]
+                    prev_activity_time = most_recent_activity[Keys.ACTIVITY_START_TIME_KEY]
                     if curr_activity_time > prev_activity_time:
                         most_recent_activity = device_activity
         return most_recent_activity
@@ -681,7 +705,7 @@ class DataMgr(Importer.ActivityWriter):
         tags = self.list_default_tags()
         gear_list = self.retrieve_gear(user_id)
         show_shoes = activity_type in Keys.FOOT_BASED_ACTIVITIES
-        show_bikes = activity_type in Keys.BIKE_BASED_ACTIVITIES
+        show_bikes = activity_type in Keys.CYCLING_ACTIVITIES
         if activity_type == Keys.TYPE_RUNNING_KEY:
             tags.append("Long Run")
         for gear in gear_list:
@@ -1189,7 +1213,7 @@ class DataMgr(Importer.ActivityWriter):
         if all_activity_bests is not None:
             for activity_id in all_activity_bests:
                 activity_bests = all_activity_bests[activity_id]
-                summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
+                summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_START_TIME_KEY], activity_bests)
 
         # Output is a dictionary for each sport type.
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
@@ -1212,7 +1236,7 @@ class DataMgr(Importer.ActivityWriter):
         if all_activity_bests is not None:
             for activity_id in all_activity_bests:
                 activity_bests = all_activity_bests[activity_id]
-                summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_TIME_KEY], activity_bests)
+                summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_START_TIME_KEY], activity_bests)
 
         # Output is a dictionary for each sport type.
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
@@ -1276,8 +1300,8 @@ class DataMgr(Importer.ActivityWriter):
 
         for activity in all_activities:
             activity_id = activity[Keys.ACTIVITY_ID_KEY]
-            if Keys.ACTIVITY_TIME_KEY in activity:
-                activity_time = activity[Keys.ACTIVITY_TIME_KEY]
+            if Keys.ACTIVITY_START_TIME_KEY in activity:
+                activity_time = activity[Keys.ACTIVITY_START_TIME_KEY]
                 if cutoff_time is None or activity_time > cutoff_time:
                     if activity_id not in all_activity_bests:
                         num_unanalyzed = num_unanalyzed + 1
@@ -1328,11 +1352,11 @@ class DataMgr(Importer.ActivityWriter):
     def compute_run_training_paces(self, user_id, running_bests):
         """Computes the user's run training paces by searching the list of running 'bests' for the fastest 5K."""
         run_paces = {}
-        calc = TrainingPaceCalculator.TrainingPaceCalculator()
         if Keys.BEST_5K in running_bests:
-            best_time = running_bests[Keys.BEST_5K]
-            best_time_secs = best_time[0] / 60
-            run_paces = calc.calc_from_race_distance_in_meters(5000, best_time_secs)
+            best_time_secs = running_bests[Keys.BEST_5K]
+            best_time_mins = best_time_secs[0] / 60
+            calc = TrainingPaceCalculator.TrainingPaceCalculator()
+            run_paces = calc.calc_from_race_distance_in_meters(5000, best_time_mins)
         return run_paces
 
     def compute_power_zone_distribution(self, ftp, powers):
@@ -1354,8 +1378,20 @@ class DataMgr(Importer.ActivityWriter):
         """Returns a the list of activity types that the software understands."""
         all_activity_types = []
         all_activity_types.extend(Keys.FOOT_BASED_ACTIVITIES)
-        all_activity_types.extend(Keys.BIKE_BASED_ACTIVITIES)
+        all_activity_types.extend(Keys.CYCLING_ACTIVITIES)
         all_activity_types.extend(Keys.SWIMMING_ACTIVITIES)
         all_activity_types.extend(Keys.STRENGTH_ACTIVITIES)
         all_activity_types.append(Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY)
         return all_activity_types
+
+    def estimate_vo2_max(self, resting_hr, max_hr):
+        """Estimates VO2 Max, based on resting and max heart rates."""
+        calc = VO2MaxCalculator.VO2MaxCalculator()
+        estimated_vo2_max = calc.estimate_vo2max_from_heart_rate(resting_hr, max_hr)
+        return estimated_vo2_max
+
+    def estimate_bmi(self, weight_metric, height_metric):
+        """Estimates BMI."""
+        calc = BmiCalculator.BmiCalculator()
+        bmi = calc.estimate_bmi(weight_metric, height_metric)
+        return bmi

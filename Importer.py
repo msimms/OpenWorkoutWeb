@@ -67,6 +67,14 @@ class ActivityWriter(object):
         """Pure virtual method for processing multiple sensor readings. 'values' is an array of arrays in the form [time, value]."""
         pass
 
+    def create_activity_event(self, activity_id, event):
+        """Pure virtual method for processing an event reading. 'event' is a dictionary describing an event."""
+        pass
+
+    def create_activity_events(self, activity_id, events):
+        """Pure virtual method for processing multiple event readings. 'events' is an array of dictionaries in which each dictionary describes an event."""
+        pass
+
     def finish_activity(self, activity_id, end_time):
         """Pure virtual method for any post-processing."""
         pass
@@ -340,6 +348,7 @@ class Importer(object):
         heart_rate_readings = []
         power_readings = []
         temperatures = []
+        events = []
 
         fit_file = fitparse.FitFile(file_name, data_processor=fitparse.StandardUnitsDataProcessor())
         for message in fit_file.messages:
@@ -401,6 +410,8 @@ class Importer(object):
                 reading.append(dt_unix)
                 reading.append(float(message_data['temperature']))
                 temperatures.append(reading)
+            if 'event' in message_data and message_data['event'] is not None:
+                events.append(message_data)
 
         # Make sure this is not a duplicate activity.
         if self.activity_writer.is_duplicate_activity(user_id, start_time_unix):
@@ -422,6 +433,8 @@ class Importer(object):
         self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
         self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
         self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
+        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_TEMPERATURE_KEY, temperatures)
+        self.activity_writer.create_activity_events(activity_id, events)
 
         # Let it be known that we are finished with this activity.
         self.activity_writer.finish_activity(activity_id, end_time_unix)

@@ -46,13 +46,11 @@ except ImportError:
 
 import Keys
 import Api
-import BmiCalculator
 import DataMgr
 import IcalServer
 import InputChecker
 import Units
 import UserMgr
-import VO2MaxCalculator
 
 from dateutil.tz import tzlocal
 from mako.lookup import TemplateLookup
@@ -407,8 +405,8 @@ class App(object):
         summary += "\t<li>Name: " + name + "</li>\n"
 
         # Add the activity date.
-        if Keys.ACTIVITY_TIME_KEY in activity:
-            summary += "\t<li>Start Time: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script></li>\n"
+        if Keys.ACTIVITY_START_TIME_KEY in activity:
+            summary += "\t<li>Start Time: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_START_TIME_KEY]) + "))</script></li>\n"
 
         # Close the summary list.
         summary += "</ul>\n"
@@ -657,8 +655,8 @@ class App(object):
                 summary += "\t<li>" + App.render_array_reversed(location_description) + "</li>\n"
 
         # Add the activity date.
-        if Keys.ACTIVITY_TIME_KEY in activity:
-            summary += "\t<li>Start: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_TIME_KEY]) + "))</script></li>\n"
+        if Keys.ACTIVITY_START_TIME_KEY in activity:
+            summary += "\t<li>Start: <script>document.write(unix_time_to_local_string(" + str(activity[Keys.ACTIVITY_START_TIME_KEY]) + "))</script></li>\n"
 
         # Add the activity name.
         summary += "\t<li>Name: " + name + "</li>\n"
@@ -1025,17 +1023,6 @@ class App(object):
         """Renders the list of all activities the specified user is allowed to view."""
         return self.render_simple_page('all_activities.html')
 
-    def render_calendar_server_href(self, calendar_id):
-        """Helper function that renders an href for the user's ical."""
-        url_str = self.root_url + "/ical/" + calendar_id
-        url_str = "<a href=\"" + self.root_url + "/ical/" + calendar_id + "\">" + url_str + "</a>"
-        return url_str
-
-    def render_activity_href(self, activity_id, display_str):
-        """Helper function that renders an activity href."""
-        url_str = "<a href=\"" + self.root_url + "/activity/" + activity_id + "\">" + display_str + "</a>"
-        return url_str
-
     @statistics
     def record_progression(self, activity_type, record_name):
         """Renders the list of records, in order of progression, for the specified user and record type."""
@@ -1059,67 +1046,7 @@ class App(object):
     @statistics
     def workouts(self):
         """Renders the workouts view."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Set the default goals based on previous selections.
-        goal = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_KEY)
-        goal_date = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY)
-        if goal_date is not None:
-            goals_str = ""
-            for possible_goal in Keys.GOALS:
-                goals_str += "\t\t\t<option value=\"" + possible_goal + "\""
-                if goal is not None and possible_goal.lower() == goal.lower():
-                    goals_str += " selected"
-                goals_str += ">" + possible_goal + "</option>\n"
-
-        # Set the preferred long run of the week.
-        selected_preferred_long_run_day = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY)
-        days_str = ""
-        for day in InputChecker.days_of_week:
-            days_str += "\t\t\t<option value=\"" + day + "\""
-            if selected_preferred_long_run_day is not None and selected_preferred_long_run_day.lower() == day.lower():
-                days_str += " selected"
-            days_str += ">" + day + "</option>\n"
-
-        # Set the goal type.
-        goal_types = [Keys.GOAL_TYPE_COMPLETION, Keys.GOAL_TYPE_SPEED]
-        selected_goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
-        goal_type_str = ""
-        for goal_type in goal_types:
-            goal_type_str += "\t\t\t<option value=\"" + goal_type + "\""
-            if selected_goal_type is not None and selected_goal_type.lower() == goal_type.lower():
-                goal_type_str += " selected"
-            goal_type_str += ">" + goal_type + "</option>\n"
-
-        # Set the experience level.
-        exp_level_str = ""
-        selected_exp_level = self.user_mgr.retrieve_user_setting(user_id, Keys.EXPERIENCE_LEVEL_KEY)
-        for exp_level in Keys.EXPERIENCE_LEVELS:
-            exp_level_str += "\t\t\t<option value=\"" + exp_level + "\""
-            if selected_exp_level is not None and selected_exp_level.lower() == exp_level.lower():
-                exp_level_str += " selected"
-            exp_level_str += ">" + exp_level + "</option>\n"
-
-        # The the calendar ID used with the iCal server.
-        calendar_id_str = ""
-        calendar_id = self.data_mgr.retrieve_workouts_calendar_id_for_user(user_id)
-        if calendar_id is not None:
-            calendar_id_str = "These workouts are also available by via iCal by subscribing to your iCal workouts calendar: " + self.render_calendar_server_href(calendar_id) + "." 
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'workouts.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, goals=goals_str, goal_date=goal_date, preferred_long_run_day=days_str, goal_type=goal_type_str, exp_level=exp_level_str, calendar=calendar_id_str)
+        return self.render_simple_page('workouts.html')
 
     @statistics
     def workout(self, workout_id):
@@ -1232,180 +1159,12 @@ class App(object):
     @statistics
     def profile(self):
         """Renders the user's profile page."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Get the current settings.
-        selected_birthday = self.user_mgr.retrieve_user_setting(user_id, Keys.BIRTHDAY_KEY)
-        selected_height_metric = self.user_mgr.retrieve_user_setting(user_id, Keys.HEIGHT_KEY)
-        selected_weight_metric = self.user_mgr.retrieve_user_setting(user_id, Keys.WEIGHT_KEY)
-        selected_gender = self.user_mgr.retrieve_user_setting(user_id, Keys.GENDER_KEY)
-        selected_resting_hr = self.user_mgr.retrieve_user_setting(user_id, Keys.RESTING_HEART_RATE_KEY)
-        estimated_max_hr = self.user_mgr.retrieve_user_setting(user_id, Keys.ESTIMATED_MAX_HEART_RATE_KEY)
-
-        # Render the user's height.
-        if isinstance(selected_height_metric, float):
-            selected_height_pref, height_units = Units.convert_to_preferred_height_units(self.user_mgr, user_id, selected_height_metric, Units.UNITS_DISTANCE_METERS)
-            selected_height_str = "{:.1f}".format(selected_height_pref)
-            height_units_str = Units.get_distance_units_str(height_units)
-        else:
-            selected_height_metric = None
-            selected_height_str = ""
-            height_units_str = Units.get_preferred_height_units_str(self.user_mgr, user_id)
-
-        # Render the user's weight.
-        if isinstance(selected_weight_metric, float):
-            selected_weight_pref, weight_units = Units.convert_to_preferred_mass_units(self.user_mgr, user_id, selected_weight_metric, Units.UNITS_MASS_KG)
-            selected_weight_str = "{:.1f}".format(selected_weight_pref)
-            weight_units_str = Units.get_mass_units_str(weight_units)
-        else:
-            selected_weight_metric = None
-            selected_weight_str = ""
-            weight_units_str = Units.get_preferred_mass_units_str(self.user_mgr, user_id)
-
-        # Render the gender option.
-        gender_options = "\t\t<option value=\"Male\""
-        if selected_gender == Keys.GENDER_MALE_KEY:
-            gender_options += " selected"
-        gender_options += ">Male</option>\n"
-        gender_options += "\t\t<option value=\"Female\""
-        if selected_gender == Keys.GENDER_FEMALE_KEY:
-            gender_options += " selected"
-        gender_options += ">Female</option>"
-
-        # Render the user's resting heart rate.
-        if isinstance(selected_resting_hr, float):
-            resting_hr_str = "{:.1f}".format(selected_resting_hr)
-        else:
-            resting_hr_str = ""
-            selected_resting_hr = None
-
-        # Get the user's BMI.
-        if selected_height_metric and selected_weight_metric:
-            calc = BmiCalculator.BmiCalculator()
-            bmi = calc.estimate_bmi(selected_weight_metric, selected_height_metric)
-            bmi_str = "{:.1f}".format(bmi)
-        else:
-            bmi_str = "Not calculated."
-    
-        # Get the user's VO2Max.
-        if selected_resting_hr and isinstance(estimated_max_hr, float):
-            calc = VO2MaxCalculator.VO2MaxCalculator()
-            vo2max_str = calc.estimate_vo2max_from_heart_rate(estimated_max_hr, selected_resting_hr)
-            vo2max = "{:.1f}".format(vo2max_str)
-        else:
-            vo2max = "Not calculated."
-
-        # Get the user's FTP.
-        ftp = self.data_mgr.retrieve_user_estimated_ftp(user_id)
-        if ftp is None:
-            ftp_str = "Cycling activities with power data that was recorded in the last six months must be uploaded before your FTP can be estimated."
-        else:
-            ftp_str = "{:.1f} watts".format(ftp[0])
-
-        # Get the user's heart rate zones.
-        hr_zones = "No heart rate data exists."
-        if isinstance(estimated_max_hr, float):
-            zones = self.data_mgr.retrieve_heart_rate_zones(estimated_max_hr)
-            if len(zones) > 0:
-                hr_zones = "<table>\n"
-                zone_index = 0
-                for zone in zones:
-                    hr_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
-                    if zone_index == 0:
-                        hr_zones += "0 bpm to {:.1f} bpm</td><tr>\n".format(zone)
-                    else:
-                        hr_zones += "{:.1f} bpm to {:.1f} bpm</td><tr>\n".format(zones[zone_index - 1], zone)
-                    hr_zones += "</td><tr>\n"
-                    zone_index = zone_index + 1
-                hr_zones += "</table>\n"
-
-        # Get the user's cycling power training zones.
-        power_zones = "Cycling power zones cannot be calculated until the user's FTP (functional threshold power) is set."
-        if isinstance(ftp, float):
-            zones = self.data_mgr.retrieve_power_training_zones(ftp)
-            if len(zones) > 0:
-                power_zones = "<table>\n"
-                zone_index = 0
-                for zone in zones:
-                    power_zones += "<td>Zone " + str(zone_index + 1) + "</td><td>"
-                    if zone_index == 0:
-                        power_zones += "0 watts to {:.1f} watts</td><tr>".format(zone)
-                    else:
-                        power_zones += "{:.1f} watts to {:.1f} watts</td><tr>\n".format(zones[zone_index - 1], zone)
-                    zone_index = zone_index + 1
-                power_zones += "</table>\n"
-
-        # Render from the template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'profile.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, birthday=selected_birthday, weight=selected_weight_str, weight_units=weight_units_str, height=selected_height_str, height_units=height_units_str, gender_options=gender_options, resting_hr=resting_hr_str, bmi=bmi_str, vo2max=vo2max, ftp=ftp_str, hr_zones=hr_zones, power_zones=power_zones)
+        return self.render_simple_page('profile.html')
 
     @statistics
     def settings(self):
         """Renders the user's settings page."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Get the current settings.
-        selected_default_privacy = self.user_mgr.retrieve_user_setting(user_id, Keys.DEFAULT_PRIVACY_KEY)
-        selected_units = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-        selected_first_day_of_week = self.user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY)
-
-        # Render the privacy option.
-        privacy_options = "\t\t<option value=\"Public\""
-        if selected_default_privacy is not None and selected_default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC:
-            privacy_options += " selected"
-        privacy_options += ">Public</option>\n"
-        privacy_options += "\t\t<option value=\"Private\""
-        if selected_default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE:
-            privacy_options += " selected"
-        privacy_options += ">Private</option>"
-
-        # Render the units
-        unit_options = "\t\t<option value=\"Metric\""
-        if selected_units is not None and selected_units == Keys.UNITS_METRIC_KEY:
-            unit_options += " selected"
-        unit_options += ">Metric</option>\n"
-        unit_options += "\t\t<option value=\"Standard\""
-        if selected_units is not None and selected_units == Keys.UNITS_STANDARD_KEY:
-            unit_options += " selected"
-        unit_options += ">Standard</option>"
-
-        # Render the days of week.
-        day_options = ""
-        for day in Keys.DAYS_OF_WEEK:
-            day_options += "\t\t<option value=\""
-            day_options += day
-            day_options += "\""
-            if day is not None and day.lower() == selected_first_day_of_week:
-                day_options += " selected"
-            day_options += ">"
-            day_options += day
-            day_options += "</option>\n"
-
-        # Render from the template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'settings.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, privacy_options=privacy_options, unit_options=unit_options, day_options=day_options)
+        return self.render_simple_page('settings.html')
 
     @statistics
     def ical(self, calendar_id):

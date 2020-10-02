@@ -51,14 +51,16 @@
 
     var process_activity_type_list = function(activity_type_list)
     {
+        var activity_type_select = document.getElementById("activity_type");
+
         activity_type_list = eval(activity_type_list);
         activity_type_list.sort();
 
-        var activity_type_select = document.getElementById("activity_type");
         for (var i = 0; i < activity_type_list.length; i++)
         {
             var activity_type = activity_type_list[i];
             var option = document.createElement("option");
+
             option.value = activity_type;
             option.text = activity_type;
             activity_type_select.appendChild(option);
@@ -67,14 +69,16 @@
 
     var process_gear_list = function(gear_list)
     {
+        var gear_list_select = document.getElementById("gear");
+
         gear_list = eval(gear_list);
         gear_list.sort();
 
-        var gear_list_select = document.getElementById("gear");
         for (var i = 0; i < gear_list.length; i++)
         {
             var gear = gear_list[i];
             var option = document.createElement("option");
+
             option.value = gear.name;
             option.text = gear.name;
             gear_list_select.appendChild(option);
@@ -97,6 +101,7 @@
     {
         var outer_div = document.getElementById("new_gear_default_block");
         var inner_div = document.createElement('div');
+
         inner_div.id = "new_gear_default_div";
 
         // Remove existing items, if any.
@@ -206,11 +211,11 @@
 	function update_resting_hr()
 	{
 		var the_url = "${root_url}/api/1.0/update_profile";
-		var weight = document.getElementById("resting_hr").value;
+		var resting_hr = document.getElementById("resting heart rate").value;
 		var dict = [];
 		var result_text = {};
 
-		dict.push({["resting heart rate"] : weight});
+		dict.push({["resting heart rate"] : resting_hr});
 		if (send_post_request(the_url, dict, result_text))
 			alert("Resting heart rate updated!");
 		else
@@ -224,8 +229,6 @@
             changeYear: true,
             changeMonth: true
         });
-		var n = new Date(${birthday} * 1000);
-		document.getElementsByName('birthday')[0].placeholder=n.toLocaleDateString();
 	});
 
     function append_to_pr_table(table, row_name, row_value)
@@ -237,11 +240,12 @@
 
         if (row_value.length > 0)
         {
-            cell = new_row.insertCell();
             var a = document.createElement('a');
+
             a.appendChild(document.createTextNode(row_value[0]));
             a.title = row_value;
             a.href = "${root_url}/activity/" + row_value[1];
+            cell = new_row.insertCell();
             cell.appendChild(a);
         }
     }
@@ -286,9 +290,30 @@
     {
         var new_row = table.insertRow();
         var cell = new_row.insertCell();
+
         cell.appendChild(document.createTextNode(default_info.activity_type));
         cell = new_row.insertCell();
         cell.appendChild(document.createTextNode(default_info.name));
+    }
+
+    function append_to_power_zones_table(table, zone_num, zone_low, zone_high)
+    {
+        var new_row = table.insertRow();
+        var cell = new_row.insertCell();
+
+        cell.appendChild(document.createTextNode("Zone " + zone_num));
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(zone_low.toFixed(0) + " watts to " + zone_high.toFixed(0) + " watts"));
+    }
+
+    function append_to_hr_zones_table(table, zone_num, zone_low, zone_high)
+    {
+        var new_row = table.insertRow();
+        var cell = new_row.insertCell();
+
+        cell.appendChild(document.createTextNode("Zone " + zone_num));
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(zone_low.toFixed(0) + " bpm to " + zone_high.toFixed(0) + " bpm"));
     }
 
     var process_gear_defaults = function(records)
@@ -299,6 +324,162 @@
         {
             append_to_defaults_table(defaults_table, record);
         }
+    }
+
+    var process_user_settings = function(records)
+    {
+        var units = "metric";
+        var height_units_obj = document.getElementById("height_units");
+        var weight_units_obj = document.getElementById("weight_units");
+
+        // We need to know the unit system first.
+        for (var record of records)
+        {
+            var key = Object.keys(record)[0];
+            var value = record[key];
+
+            if (key == "preferred units")
+            {
+                units = value;
+            }
+        }
+    
+        for (var record of records)
+        {
+            var key = Object.keys(record)[0];
+            var value = record[key];
+            var element = document.getElementById(key);
+
+            if (element)
+            {
+                if (key == "height")
+                {
+                    if (units == "standard")
+                    {
+                        value *= 39.37008;
+                        height_units_obj.value = "inches";
+                    }
+                    else
+                        height_units_obj.value = "meters";
+                    element.value = value.toFixed(1);
+                }
+                else if (key == "weight")
+                {
+                    if (units == "standard")
+                    {
+                        value *= 2.2;
+                        weight_units_obj.value = "pounds";
+                    }
+                    else
+                        weight_units_obj.value = "kilograms";
+                    element.value = value.toFixed(1);
+                }
+                else if (key == "birthday")
+                {
+                    var n = new Date(value * 1000);
+                    element.placeholder=n.toLocaleDateString();
+                }
+                else if (key == "gender")
+                {
+                    if (value == "male")
+                        element.selectedIndex = 0;
+                    else
+                        element.selectedIndex = 1;
+                }
+                else if (key == "resting heart rate")
+                {
+                }
+                else if (key == "estimated max heart rate")
+                {
+                    get_hr_zones(value);
+                }
+            }
+        }
+    }
+
+    var process_vo2_max = function(vo2max)
+    {
+        var vo2_max_elem = document.getElementById("vo2_max");
+
+        if (vo2max == 0)
+            vo2_max_elem.value = "Not calculated";
+        else
+            vo2_max_elem.value = vo2max.toFixed(1);
+    }
+
+    var process_power_zones = function(zones)
+    {
+        var zones_elem = document.getElementById("power_zones");
+
+        if (zones.length > 0)
+        {
+            var zone_num = 1;
+            var zone_low = 1;
+
+            for (var zone of zones)
+            {
+                append_to_power_zones_table(zones_elem, zone_num, zone_low, zone);
+                zone_num++;
+                zone_low = zone;
+            }
+        }
+        else
+        {
+            var error_str = "Cycling power zones cannot be calculated until the user's FTP (functional threshold power) is set.";
+        }
+    }
+
+    var process_hr_zones = function(zones)
+    {
+        var zones_elem = document.getElementById("hr_zones");
+
+        if (zones.length > 0)
+        {
+            var zone_num = 1;
+            var zone_low = 1;
+
+            for (var zone of zones)
+            {
+                append_to_hr_zones_table(zones_elem, zone_num, zone_low, zone);
+                zone_num++;
+                zone_low = zone;
+            }
+        }
+    }
+
+    var process_hr_zones_error = function()
+    {
+    }
+
+    var process_ftp = function(record)
+    {
+        var ftp_elem = document.getElementById("ftp");
+
+        if (record.length > 0)
+        {
+            var key = Object.keys(record)[0];
+            var ftp = record[key];
+            var api_url = "${root_url}/api/1.0/list_power_zones?estimated%20ftp=" + ftp;
+
+            ftp_elem.value = ftp.toFixed(1) + " watts";
+
+            $.ajax({ type: 'GET', url: api_url, cache: false, success: process_power_zones, dataType: "json" });
+        }
+        else
+        {
+            var error_str = "Cycling activities with power data that was recorded in the last six months must be uploaded before your FTP can be estimated.";
+            ftp_elem.value = error_str;
+        }
+    }
+
+    var process_bmi = function(bmi)
+    {
+        var bmi_elem = document.getElementById("bmi");
+
+        if (bmi == 0)
+            bmi_elem.value = "Not calculated";
+        else
+            bmi_elem.value = bmi.toFixed(1);
     }
 
     function get_personal_records()
@@ -313,8 +494,42 @@
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_gear_defaults, dataType: "json" });
     }
 
+    function get_user_settings()
+    {
+        var api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=preferred%20units,height,weight,birthday,gender,resting%20heart%20rate,estimated%20max%20heart%20rate";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
+    }
+
+    function get_vo2_max()
+    {
+        var api_url = "${root_url}/api/1.0/estimate_vo2_max";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_vo2_max, dataType: "json" });
+    }
+
+    function get_ftp()
+    {
+        var api_url = "${root_url}/api/1.0/estimate_ftp";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_ftp, dataType: "json" });
+    }
+
+    function get_bmi()
+    {
+        var api_url = "${root_url}/api/1.0/estimate_bmi";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_bmi, dataType: "json" });
+    }
+
+    function get_hr_zones(resting_hr)
+    {
+        var api_url = "${root_url}/api/1.0/list_hr_zones?resting%20heart%20rate=" + resting_hr;
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_hr_zones, error: process_hr_zones_error, dataType: "json" });
+    }
+
     get_personal_records();
     get_gear_defaults();
+    get_user_settings();
+    get_vo2_max();
+    get_ftp();
+    get_bmi();
 </script>
 
 <section class="nav">
@@ -323,47 +538,56 @@ ${nav}
 
 <div class="profile" style="width: 600px">
 	<h2>Birthday</h2>
-	<input type="text" name="birthday" id="birthday"><br>
-	<button type="button" onclick="return update_birthday()">Update</button>
+    <input type="text" name="birthday" id="birthday"><br>
+    <button type="button" onclick="return update_birthday()">Update</button>
 	<hr>
 	<h2>Height</h2>
-	<input type="text" id="height" value="${height}"> ${height_units}<br>
-	<button type="button" onclick="return update_height()">Update</button>
+    <input type="text" id="height" value="Not set"> <input style="border:0" type="text" id="height_units" readonly></input><br>
+    <button type="button" onclick="return update_height()">Update</button>
 	<hr>
 	<h2>Weight</h2>
-	<input type="text" id="weight" value="${weight}"> ${weight_units}<br>
-	<button type="button" onclick="return update_weight()">Update</button>
+    <input type="text" id="weight" value="Not set"> <input style="border:0" type="text" id="weight_units" readonly></input><br>
+    <button type="button" onclick="return update_weight()">Update</button>
 	<hr>
 	<h2>Gender</h2><br>
 	<select id="gender" class="checkin" >
-${gender_options}
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
 	</select><br>
 	<button type="button" onclick="return update_gender()">Update</button>
 	<hr>
 	<h2>Resting Heart Rate</h2>
-	<input type="text" id="resting_hr" value="${resting_hr}"> bpm<br>
-	<button type="button" onclick="return update_resting_hr()">Update</button>
+        <input type="text" id="resting heart rate" value="Not set"> bpm<br>
+        <button type="button" onclick="return update_resting_hr()">Update</button>
 	<hr>
 	<h2>BMI</h2>
     <p>
         Your Body Mass Index is your weight relative to your height.
     </p>
-${bmi}
+    <input style="border:0" type="text" id="bmi" readonly></input>
 	<hr>
 	<h2>VO2 Max</h2>
-${vo2max}
+    <input style="border:0" type="text" id="vo2_max" readonly></input>
 	<hr>
 	<h2>Estimated Functional Threshold Power (FTP)</h2>
     <p>
         Functional Threshold Power is the amount of power that you can exert over one hour at maximum effort. It is estimated from recent activity.
     </p>
-${ftp}
+    <input style="border:0" type="text" id="ftp" readonly></input>
 	<hr>
 	<h2>Heart Rate Zones</h2>
-${hr_zones}
+    <p>
+        Heart rate zones are based on estimated maximum heart rate.
+    </p>
+    <table id="hr_zones">
+    </table>
 	<hr>
 	<h2>Power Training Zones</h2>
-${power_zones}
+    <p>
+        Power zones are based on estimated FTP.
+    </p>
+    <table id="power_zones">
+    </table>
 	<hr>
 	<h2>Personal Records</h2>
     <h3>Cycling</h3>
