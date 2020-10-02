@@ -38,9 +38,11 @@
 		if (send_get_request(the_url, result_text))
 		{
 			var obj = JSON.parse(result_text.value);
+
 			for (var i = 0; i < obj.length; i++)
 			{
 				var activity_obj = obj[i];
+
 				activity_obj['start'] = unix_time_to_iso_time(activity_obj['time']);
 				activity_list.push(activity_obj);
 			}
