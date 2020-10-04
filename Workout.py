@@ -216,7 +216,7 @@ class Workout(object):
                     result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_METRIC_KEY, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
                     result += " ("
                     result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
-                    result += " )"
+                    result += ")"
             else:
                 result += str(int(interval_meters))
                 result += " meters"
@@ -228,7 +228,7 @@ class Workout(object):
                     result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_METRIC_KEY, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
                     result += " ("
                     result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
-                    result += " )"
+                    result += ")"
 
             # Describe the recovery.
             if recovery_meters > 0:
@@ -240,7 +240,7 @@ class Workout(object):
                         result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_METRIC_KEY, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
                         result += " ("
                         result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
-                        result += " )"
+                        result += ")"
                 else:
                     result += str(int(recovery_meters))
                     result += " meters"
@@ -251,7 +251,7 @@ class Workout(object):
                     result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_METRIC_KEY, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
                     result += " ("
                     result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
-                    result += " )"
+                    result += ")"
             result += ".\n"
 
         # Add the cooldown (if applicable).
