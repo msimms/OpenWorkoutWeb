@@ -114,7 +114,7 @@ class RunPlanGenerator(object):
         cooldown_duration = 10 * 60
 
         # Build a collection of possible run interval sessions, sorted by target distance. Order is { min reps, max reps, distance in meters }.
-        possible_workouts = [ [ 4, 8, 100 ], [ 4, 8, 200 ], [ 4, 8, 400 ], [ 4, 6, 600 ], [ 2, 4, 800 ], [ 2, 4, 1000 ], [ 2, 4, 1600 ] ]
+        possible_workouts = [ [ 4, 8, 100 ], [ 4, 8, 200 ], [ 4, 8, 400 ], [ 4, 8, 600 ], [ 2, 8, 800 ], [ 2, 4, 1000 ], [ 2, 4, 1600 ] ]
 
         # Build a probability density function for selecting the workout. Longer goals should tend towards longer intervals and so on.
         num_possible_workouts = len(possible_workouts)
