@@ -146,9 +146,11 @@ class RunPlanGenerator(object):
         # Determine the number of reps for this workout.
         selected_reps = np.random.choice(range(selected_interval_workout[MIN_REPS_INDEX], selected_interval_workout[MAX_REPS_INDEX], 2))
 
-        # Determine the distance for this workout.
+        # Fetch the distance for this workout.
         interval_distance = selected_interval_workout[REP_DISTANCE_INDEX]
-        rest_interval_distance = interval_distance * 2
+
+        # Determine the rest interval distance. This will be some multiplier of the interval.
+        rest_interval_distance = interval_distance * np.random.choice([1, 1.5, 2])
 
         # Create the workout object.
         interval_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_RUN, self.user_id)
