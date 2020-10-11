@@ -326,7 +326,7 @@ class Workout(object):
                 workout_duration_secs += interval_duration_secs
                 avg_workout_pace_meters_per_sec += (interval_pace_meters_per_minute * (interval_duration_secs / 60.0))
             if recovery_meters > 0 and recovery_pace_meters_per_minute > 0.0:
-                interval_duration_secs = (num_repeats - 1) * self.calculate_interval_duration(recovery_meters, recovery_pace_meters_per_minute)
+                interval_duration_secs = num_repeats * self.calculate_interval_duration(recovery_meters, recovery_pace_meters_per_minute)
                 workout_duration_secs += interval_duration_secs
                 avg_workout_pace_meters_per_sec += (recovery_pace_meters_per_minute * (interval_duration_secs / 60.0))
 
