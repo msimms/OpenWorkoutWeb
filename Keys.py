@@ -80,6 +80,8 @@ IN_TAPER_KEY = "Is In Taper"
 NUM_WEEKS_BUILDING_KEY = "Num Weeks Building" # The number of consecutive weeks with increasing training stress
 AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
 AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
+NUM_RUNS_LAST_FOUR_WEEKS = "Number of Runs (Last 4 Weeks)"
+NUM_RIDES_LAST_FOUR_WEEKS = "Number of Rides (Last 4 Weeks)"
 WORKOUT_PLAN_INPUTS = [ LONGEST_RUN_IN_FOUR_WEEKS_KEY, LONGEST_RUN_WEEK_1_KEY, LONGEST_RUN_WEEK_2_KEY, LONGEST_RUN_WEEK_3_KEY, AGE_YEARS_KEY, EXPERIENCE_LEVEL_KEY, WEEKS_UNTIL_GOAL_KEY ]
 
 # User settings
@@ -259,7 +261,8 @@ VARIABILITY_INDEX = "Variability Index"
 CLUSTER = "Cluster"
 TOTAL_DISTANCE = "Total Distance" # Distance for an activity
 LONGEST_DISTANCE = "Longest Distance" # Longest distance, when summarizing activities
-TOTAL_ACTIVITIES = "Total Activities"
+TOTAL_ACTIVITIES = "Total Activities" # Number of activities logged over the specified time
+TOTAL_TRAINING_STRESS = "Total Training Stress" # Sum of the training stress for each activity within the specified time
 MILE_SPLITS = "Mile Splits" # List of mile splits
 KM_SPLITS = "KM Splits" # List of kilometer splits
 

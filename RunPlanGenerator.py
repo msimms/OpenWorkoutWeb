@@ -219,10 +219,17 @@ class RunPlanGenerator(object):
         longest_run_week_3 = inputs[Keys.LONGEST_RUN_WEEK_3_KEY]
         in_taper = inputs[Keys.IN_TAPER_KEY]
         avg_run_distance = inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
+        num_runs = inputs[Keys.NUM_RUNS_LAST_FOUR_WEEKS]
         exp_level = inputs[Keys.EXPERIENCE_LEVEL_KEY]
 
         # Handle situation in which the user hasn't run in four weeks.
         if not RunPlanGenerator.valid_float(longest_run_in_four_weeks):
+            workouts.append(self.gen_free_run())
+            workouts.append(self.gen_free_run())
+            return workouts
+        
+        # Handle situation in which the user hasn't run *much* in the last four weeks.
+        if num_runs is None or num_runs < 4:
             workouts.append(self.gen_free_run())
             workouts.append(self.gen_free_run())
             return workouts

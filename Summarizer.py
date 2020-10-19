@@ -173,15 +173,29 @@ class Summarizer(object):
         # Get the record set that corresponds with the activity type.
         summary_record_set = self.get_summary_dictionary(activity_type)
 
-        # Update the distance total.
+        # Update the distance and activity totals.
         if summary_data_key == Keys.LONGEST_DISTANCE:
-            if Keys.TOTAL_DISTANCE in summary_record_set and Keys.TOTAL_ACTIVITIES in summary_record_set:
+
+            # Update total distance.
+            if Keys.TOTAL_DISTANCE in summary_record_set:
                 summary_record_set[Keys.TOTAL_DISTANCE] = summary_record_set[Keys.TOTAL_DISTANCE] + summary_data_value
-                summary_record_set[Keys.TOTAL_ACTIVITIES] = summary_record_set[Keys.TOTAL_ACTIVITIES] + 1
             else:
                 summary_record_set[Keys.TOTAL_DISTANCE] = summary_data_value
+
+            # Update activity count.
+            if Keys.TOTAL_ACTIVITIES in summary_record_set:
+                summary_record_set[Keys.TOTAL_ACTIVITIES] = summary_record_set[Keys.TOTAL_ACTIVITIES] + 1
+            else:
                 summary_record_set[Keys.TOTAL_ACTIVITIES] = 1
-        
+
+        # Update training stress sum.
+        if summary_data_key == Keys.TRAINING_STRESS:
+
+            if Keys.TOTAL_TRAINING_STRESS in summary_record_set:
+                summary_record_set[Keys.TOTAL_TRAINING_STRESS] = summary_record_set[Keys.TOTAL_TRAINING_STRESS] + summary_data_value
+            else:
+                summary_record_set[Keys.TOTAL_TRAINING_STRESS] = summary_data_value
+
         # Update the record set.
         self.set_summary_dictionary(activity_type, summary_record_set)
 

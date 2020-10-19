@@ -117,7 +117,9 @@ class WorkoutPlanGenerator(object):
         # This will trigger the callback for each of the user's activities.
         self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb)
 
+        #
         # Need cycling FTP and run training paces.
+        #
 
         # Look through the user's six month records.
         cycling_bests, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.SIX_MONTHS)
@@ -130,16 +132,18 @@ class WorkoutPlanGenerator(object):
 
         # Estimate an FTP from the last six months of cycling data.
         threshold_power = 0.0
-        if cycling_bests is not None:
-            if Keys.THRESHOLD_POWER in cycling_bests:
-                threshold_power = cycling_bests[Keys.THRESHOLD_POWER]
-                best_recent_threshold_power = self.data_mgr.retrieve_user_estimated_ftp(user_id)
-                if best_recent_threshold_power is None or threshold_power > best_recent_threshold_power:
-                    self.data_mgr.store_user_estimated_ftp(user_id, threshold_power)
-                else:
-                    threshold_power = best_recent_threshold_power
+        if cycling_bests is not None and Keys.THRESHOLD_POWER in cycling_bests:
+            threshold_power = cycling_bests[Keys.THRESHOLD_POWER][0]
+            best_recent_threshold_power = self.data_mgr.retrieve_user_estimated_ftp(user_id)
+            best_recent_threshold_power = best_recent_threshold_power[0]
+            if best_recent_threshold_power is None or threshold_power > best_recent_threshold_power:
+                self.data_mgr.store_user_estimated_ftp(user_id, threshold_power)
+            else:
+                threshold_power = best_recent_threshold_power
 
+        #
         # Need last four weeks averages and bests.
+        #
 
         # Look through the user's four week records.
         cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.FOUR_WEEKS)
@@ -148,15 +152,15 @@ class WorkoutPlanGenerator(object):
             longest_run_in_four_weeks = longest_run_in_four_weeks[0]
 
         # Get some data from prior weeks data.
-        _, running_bests_week_1, _, running_summary_week_1 = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.ONE_WEEK)
+        cycling_bests_week1, running_bests_week_1, cycling_summary_week_1, running_summary_week_1 = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.ONE_WEEK)
         if running_bests_week_1 is not None and Keys.LONGEST_DISTANCE in running_bests_week_1:
             longest_run_week_1 = running_bests_week_1[Keys.LONGEST_DISTANCE]
             longest_run_week_1 = longest_run_week_1[0]
-        _, running_bests_week_2, _, running_summary_week_2 = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 2), now - (DataMgr.ONE_WEEK * 1))
+        cycling_bests_week2, running_bests_week_2, cycling_summary_week_2, running_summary_week_2 = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 2), now - (DataMgr.ONE_WEEK * 1))
         if running_bests_week_2 is not None and Keys.LONGEST_DISTANCE in running_bests_week_2:
             longest_run_week_2 = running_bests_week_2[Keys.LONGEST_DISTANCE]
             longest_run_week_2 = longest_run_week_2[0]
-        _, running_bests_week_3, _, running_summary_week_3 = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 3), now - (DataMgr.ONE_WEEK * 2))
+        cycling_bests_week3, running_bests_week_3, cycling_summary_week_3, running_summary_week_3 = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 3), now - (DataMgr.ONE_WEEK * 2))
         if running_bests_week_3 is not None and Keys.LONGEST_DISTANCE in running_bests_week_3:
             longest_run_week_3 = running_bests_week_3[Keys.LONGEST_DISTANCE]
             longest_run_week_3 = longest_run_week_3[0]
@@ -165,17 +169,19 @@ class WorkoutPlanGenerator(object):
         birthday = int(self.user_mgr.retrieve_user_setting(user_id, Keys.BIRTHDAY_KEY))
         age_years = (now - birthday) / (365.25 * 24 * 60 * 60)
 
-        # Compute average running and cyclist distances.
+        # Compute average running and cycling distances.
         avg_cycling_distance = 0.0
         avg_running_distance = 0.0
-        if cycling_summary is not None:
-            if Keys.TOTAL_ACTIVITIES in cycling_summary and Keys.TOTAL_DISTANCE in cycling_summary:
-                if cycling_summary[Keys.TOTAL_ACTIVITIES] > 0:
-                    avg_cycling_distance = cycling_summary[Keys.TOTAL_DISTANCE] / cycling_summary[Keys.TOTAL_ACTIVITIES]
-        if running_summary is not None:
-            if Keys.TOTAL_ACTIVITIES in running_summary and Keys.TOTAL_DISTANCE in running_summary:
-                if running_summary[Keys.TOTAL_ACTIVITIES] > 0:
-                    avg_running_distance = running_summary[Keys.TOTAL_DISTANCE] / running_summary[Keys.TOTAL_ACTIVITIES]
+        num_rides = 0.0
+        num_runs = 0.0
+        if cycling_summary is not None and Keys.TOTAL_ACTIVITIES in cycling_summary and Keys.TOTAL_DISTANCE in cycling_summary:
+            if cycling_summary[Keys.TOTAL_ACTIVITIES] > 0:
+                num_rides = cycling_summary[Keys.TOTAL_ACTIVITIES]
+                avg_cycling_distance = cycling_summary[Keys.TOTAL_DISTANCE] / num_rides
+        if running_summary is not None and Keys.TOTAL_ACTIVITIES in running_summary and Keys.TOTAL_DISTANCE in running_summary:
+            if running_summary[Keys.TOTAL_ACTIVITIES] > 0:
+                num_runs = running_summary[Keys.TOTAL_ACTIVITIES]
+                avg_running_distance = running_summary[Keys.TOTAL_DISTANCE] / num_runs
 
         # Compute an experience level for the user.
         experience_level = self.user_mgr.retrieve_user_setting(user_id, Keys.EXPERIENCE_LEVEL_KEY)
@@ -212,6 +218,8 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.NUM_WEEKS_BUILDING_KEY] = 0
         inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = avg_running_distance
         inputs[Keys.AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = avg_cycling_distance
+        inputs[Keys.NUM_RUNS_LAST_FOUR_WEEKS] = num_runs
+        inputs[Keys.NUM_RIDES_LAST_FOUR_WEEKS] = num_rides
         inputs[Keys.THRESHOLD_POWER] = threshold_power
 
         # Adds the goal distances to the inputs.
@@ -273,6 +281,9 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.NUM_WEEKS_BUILDING_KEY])
         model_inputs.append(inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS])
+        model_inputs.append(inputs[Keys.NUM_RUNS_LAST_FOUR_WEEKS])
+        model_inputs.append(inputs[Keys.NUM_RIDES_LAST_FOUR_WEEKS])
+        model_inputs.append(inputs[Keys.THRESHOLD_POWER])
 
         workouts = []
         return workouts
