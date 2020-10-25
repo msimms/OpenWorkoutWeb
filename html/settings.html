@@ -218,30 +218,30 @@ ${nav}
 <div class="settings" style="width: 600px">
 	<h2>Settings</h2>
 	<p>
-	<label for="privacy_options" class="checkin">Default Activity Privacy</label>
-	<select id="privacy_options" class="checkin">
-        <option value="Public">Public</option>
-        <option value="Private">Private</option>
-	</select>
+        <label for="privacy_options">Default Activity Privacy</label>
+        <select id="privacy_options">
+            <option value="Public">Public</option>
+            <option value="Private">Private</option>
+        </select>
 	</p>
 	<p>
-	<label for="units" class="checkin">Preferred Units</label>
-	<select id="units" class="checkin">
-        <option value="Metric">Metric</option>
-        <option value="Standard">Standard</option>
-	</select>
+        <label for="units">Preferred Units</label>
+        <select id="units">
+            <option value="Metric">Metric</option>
+            <option value="Standard">Standard</option>
+        </select>
 	</p>
 	<p>
-	<label for="week_start" class="checkin">Week Starts On</label>
-	<select id="week_start" class="checkin">
-        <option value="Sunday">Sunday</option>
-        <option value="Monday">Monday</option>
-        <option value="Tuesday">Tuesday</option>
-        <option value="Wednesday">Wednesday</option>
-        <option value="Thursday">Thursday</option>
-        <option value="Friday">Friday</option>
-        <option value="Saturday">Saturday</option>
-	</select>
+        <label for="week_start">Week Starts On</label>
+        <select id="week_start">
+            <option value="Sunday">Sunday</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+        </select>
 	</p>
 	<button type="button" onclick="return update_settings()">Update</button>
 	<hr>
@@ -250,8 +250,8 @@ ${nav}
 	<hr>
 	<h2>Email</h2>
 	<p>New Email Address: <input type="text" id="new_email"><br></p>
-	<button type="button" onclick="return update_email()">Update</button>
-	<p><b>Note:</b> Your email address is only used for login authentication.</p>
+    <button type="button" onclick="return update_email()">Update</button>
+    <p><b>Note:</b> Your email address is only used for login authentication.</p>
 	<hr>
 	<h2>Password</h2>
 	<p>Current Password: <input type="password" id="current_password"><br></p>
