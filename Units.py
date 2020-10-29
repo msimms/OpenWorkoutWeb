@@ -333,6 +333,7 @@ def get_power_units_str():
 
 def convert_to_string_in_specified_unit_system(unit_system, in_value, in_distance_units, in_time_units, label):
     """Generic unit conversion routine. Returns a string with the converted number and units."""
+    """Call this function when you need to make something pretty before displaying it to the user."""
     out_value = in_value
     if label in Keys.TIME_KEYS:
         out_value = convert_seconds_to_hours_mins_secs(in_value)
@@ -353,6 +354,12 @@ def convert_to_string_in_specified_unit_system(unit_system, in_value, in_distanc
         out_value = "{:.2f} ".format(in_value) + get_running_cadence_units_str()
     elif label in Keys.POWER_KEYS:
         out_value = "{:.2f} ".format(in_value) + get_power_units_str()
+    elif label in Keys.TRAINING_STRESS_SCORES:
+        out_value = "{:.2f} ".format(in_value)
+    elif label == Keys.VARIABILITY_INDEX:
+        out_value = "{:.2f} ".format(in_value)
+    elif label == Keys.INTENSITY_FACTOR:
+        out_value = "{:.2f} ".format(in_value)
     else:
         out_value = str(in_value)
     return out_value
