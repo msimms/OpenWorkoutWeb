@@ -28,6 +28,7 @@ import inspect
 import os
 
 import ApiTester
+import CsvToJson
 import ImportTester
 import WorkoutPlanTester
 
@@ -35,7 +36,10 @@ testdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()
 
 
 def main():
-    WorkoutPlanTester.run_unit_tests(os.path.join(testdir, "input.json"))
+    csv_file_name = os.path.join(testdir, "WorkoutTrainingInputs.csv")
+    json_file_name = os.path.join(testdir, "input.json")
+    CsvToJson.make_json(csv_file_name, json_file_name)
+    WorkoutPlanTester.run_unit_tests(json_file_name)
 
 if __name__ == "__main__":
     main()

@@ -114,7 +114,7 @@ class RunPlanGenerator(object):
         cooldown_duration = 10 * 60
 
         # Build a collection of possible run interval sessions, sorted by target distance. Order is { min reps, max reps, distance in meters }.
-        possible_workouts = [ [ 4, 8, 100 ], [ 4, 8, 200 ], [ 4, 8, 400 ], [ 4, 6, 600 ], [ 2, 4, 800 ], [ 2, 4, 1000 ], [ 2, 4, 1600 ] ]
+        possible_workouts = [ [ 4, 8, 100 ], [ 4, 8, 200 ], [ 4, 8, 400 ], [ 4, 8, 600 ], [ 2, 8, 800 ], [ 2, 4, 1000 ], [ 2, 4, 1600 ] ]
 
         # Build a probability density function for selecting the workout. Longer goals should tend towards longer intervals and so on.
         num_possible_workouts = len(possible_workouts)
@@ -146,9 +146,11 @@ class RunPlanGenerator(object):
         # Determine the number of reps for this workout.
         selected_reps = np.random.choice(range(selected_interval_workout[MIN_REPS_INDEX], selected_interval_workout[MAX_REPS_INDEX], 2))
 
-        # Determine the distance for this workout.
+        # Fetch the distance for this workout.
         interval_distance = selected_interval_workout[REP_DISTANCE_INDEX]
-        rest_interval_distance = interval_distance * 2
+
+        # Determine the rest interval distance. This will be some multiplier of the interval.
+        rest_interval_distance = interval_distance * np.random.choice([1, 1.5, 2])
 
         # Create the workout object.
         interval_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_RUN, self.user_id)
@@ -217,10 +219,17 @@ class RunPlanGenerator(object):
         longest_run_week_3 = inputs[Keys.LONGEST_RUN_WEEK_3_KEY]
         in_taper = inputs[Keys.IN_TAPER_KEY]
         avg_run_distance = inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
+        num_runs = inputs[Keys.NUM_RUNS_LAST_FOUR_WEEKS]
         exp_level = inputs[Keys.EXPERIENCE_LEVEL_KEY]
 
         # Handle situation in which the user hasn't run in four weeks.
         if not RunPlanGenerator.valid_float(longest_run_in_four_weeks):
+            workouts.append(self.gen_free_run())
+            workouts.append(self.gen_free_run())
+            return workouts
+        
+        # Handle situation in which the user hasn't run *much* in the last four weeks.
+        if num_runs is None or num_runs < 4:
             workouts.append(self.gen_free_run())
             workouts.append(self.gen_free_run())
             return workouts

@@ -47,3 +47,7 @@ celerybeat-schedule.*
 
 # Key files
 *.pem
+
+# Auto generated test files
+test/input.json
+

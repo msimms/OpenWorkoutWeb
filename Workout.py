@@ -210,24 +210,48 @@ class Workout(object):
                 result += str(num_repeats)
                 result += " x "
             if interval_meters > 1000:
-                result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                if unit_system:
+                    result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                else:
+                    result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_METRIC_KEY, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                    result += " ("
+                    result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                    result += ")"
             else:
                 result += str(int(interval_meters))
                 result += " meters"
             if interval_pace_minute > 0:
                 result += " at "
-                result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
+                if unit_system:
+                    result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
+                else:
+                    result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_METRIC_KEY, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
+                    result += " ("
+                    result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
+                    result += ")"
 
             # Describe the recovery.
             if recovery_meters > 0:
                 result += " with "
                 if recovery_meters > 1000:
-                    result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                    if unit_system:
+                        result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                    else:
+                        result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_METRIC_KEY, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                        result += " ("
+                        result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, recovery_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+                        result += ")"
                 else:
                     result += str(int(recovery_meters))
                     result += " meters"
                 result += " recovery at "
-                result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
+                if unit_system:
+                    result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
+                else:
+                    result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_METRIC_KEY, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
+                    result += " ("
+                    result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, recovery_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
+                    result += ")"
             result += ".\n"
 
         # Add the cooldown (if applicable).
@@ -249,6 +273,8 @@ class Workout(object):
             result += "Purpose: You should run this at a pace that feels comfortable for you.\n"
         elif self.type == Keys.WORKOUT_TYPE_HILL_REPEATS:
             result += "Purpose: Hill repeats build strength and improve speed.\n"
+        elif self.type == Keys.WORKOUT_TYPE_FARTLEK_RUN:
+            result += "Purpose: Fartlek sessions combine speed and endurance without the formal structure of a traditional interval workout.\n"
         elif self.type == Keys.WORKOUT_TYPE_SPEED_INTERVAL_RIDE:
             result += "Purpose: Speed interval sessions get you used to riding at faster paces.\n"
         elif self.type == Keys.WORKOUT_TYPE_TEMPO_RIDE:
@@ -302,7 +328,7 @@ class Workout(object):
                 workout_duration_secs += interval_duration_secs
                 avg_workout_pace_meters_per_sec += (interval_pace_meters_per_minute * (interval_duration_secs / 60.0))
             if recovery_meters > 0 and recovery_pace_meters_per_minute > 0.0:
-                interval_duration_secs = (num_repeats - 1) * self.calculate_interval_duration(recovery_meters, recovery_pace_meters_per_minute)
+                interval_duration_secs = num_repeats * self.calculate_interval_duration(recovery_meters, recovery_pace_meters_per_minute)
                 workout_duration_secs += interval_duration_secs
                 avg_workout_pace_meters_per_sec += (recovery_pace_meters_per_minute * (interval_duration_secs / 60.0))
 

@@ -63,7 +63,7 @@ def is_uuid(test_str):
 
 def is_integer(test_str):
     """Returns True if the string appears to be a valid integer."""
-    try: 
+    try:
         int(test_str)
         return True
     except ValueError:
@@ -72,7 +72,7 @@ def is_integer(test_str):
 
 def is_float(test_str):
     """Returns True if the string appears to be a valid float."""
-    try: 
+    try:
         float(test_str)
         return True
     except ValueError:
@@ -81,7 +81,7 @@ def is_float(test_str):
 
 def is_hex_str(test_str):
     """Returns True if the string appears to be a valid hexidecimal string."""
-    try: 
+    try:
         return True
     except ValueError:
         pass

@@ -40,15 +40,25 @@ class Summarizer(object):
         self.ftp_calc = FtpCalculator.FtpCalculator()
         self.hr_calc = HeartRateCalculator.HeartRateCalculator()
 
+    def normalize_activity_type(self, activity_type):
+        """Allows us to group activities such as running and virtual running together, for example."""
+        if activity_type in Keys.RUNNING_ACTIVITIES:
+            return Keys.TYPE_RUNNING_KEY
+        if activity_type in Keys.CYCLING_ACTIVITIES:
+            return Keys.TYPE_CYCLING_KEY
+        return activity_type
+
     def get_record_dictionary(self, activity_type):
         """Returns the record dictionary that corresponds to the given activity type."""
-        if activity_type in self.bests:
-            return self.bests[activity_type]
+        norm_activity_type = self.normalize_activity_type(activity_type)
+        if norm_activity_type in self.bests:
+            return self.bests[norm_activity_type]
         return {}
 
     def set_record_dictionary(self, activity_type, new_bests):
         """Sets the record dictionary that corresponds to the given activity type."""
-        self.bests[activity_type] = new_bests
+        norm_activity_type = self.normalize_activity_type(activity_type)
+        self.bests[norm_activity_type] = new_bests
 
     def get_annual_record_dictionary(self, activity_type, year):
         """Returns the annual record dictionary that corresponds to the given activity type and year."""
@@ -59,11 +69,12 @@ class Summarizer(object):
         year_dictionary = self.annual_bests[year]
 
         # Next dictionary is the activity type and it's records.
-        if activity_type in year_dictionary:
-            record_dictionary = year_dictionary[activity_type]
+        norm_activity_type = self.normalize_activity_type(activity_type)
+        if norm_activity_type in year_dictionary:
+            record_dictionary = year_dictionary[norm_activity_type]
         else:
             record_dictionary = {}
-            year_dictionary[activity_type] = record_dictionary
+            year_dictionary[norm_activity_type] = record_dictionary
             self.annual_bests[year] = year_dictionary
         return record_dictionary
 
@@ -76,7 +87,8 @@ class Summarizer(object):
         year_dictionary = self.annual_bests[year]
 
         # Next dictionary is the activity type and it's records.
-        year_dictionary[activity_type] = record_dictionary
+        norm_activity_type = self.normalize_activity_type(activity_type)
+        year_dictionary[norm_activity_type] = record_dictionary
         self.annual_bests[year] = year_dictionary
 
     def get_annual_record_years(self):
@@ -85,13 +97,15 @@ class Summarizer(object):
 
     def get_summary_dictionary(self, activity_type):
         """Returns the record dictionary that corresponds to the given activity type."""
-        if activity_type not in self.summaries:
-            self.summaries[activity_type] = {}
-        return self.summaries[activity_type]
+        norm_activity_type = self.normalize_activity_type(activity_type)
+        if norm_activity_type not in self.summaries:
+            self.summaries[norm_activity_type] = {}
+        return self.summaries[norm_activity_type]
 
     def set_summary_dictionary(self, activity_type, summary_dictionary):
         """Returns the record dictionary that corresponds to the given activity type."""
-        self.summaries[activity_type] = summary_dictionary
+        norm_activity_type = self.normalize_activity_type(activity_type)
+        self.summaries[norm_activity_type] = summary_dictionary
 
     def get_best_time(self, activity_type, record_name):
         """Returns the time associated with the specified record, or None if not found."""
@@ -121,6 +135,8 @@ class Summarizer(object):
         if key in Keys.TIME_KEYS: # Lower is better
             return lhs < rhs
         elif key in Keys.SPEED_KEYS or key in Keys.POWER_KEYS or key in Keys.DISTANCE_KEYS: # Higher is better
+            return lhs > rhs
+        elif key == Keys.TRAINING_STRESS:
             return lhs > rhs
         return False
 
@@ -173,15 +189,29 @@ class Summarizer(object):
         # Get the record set that corresponds with the activity type.
         summary_record_set = self.get_summary_dictionary(activity_type)
 
-        # Update the distance total.
+        # Update the distance and activity totals.
         if summary_data_key == Keys.LONGEST_DISTANCE:
-            if Keys.TOTAL_DISTANCE in summary_record_set and Keys.TOTAL_ACTIVITIES in summary_record_set:
+
+            # Update total distance.
+            if Keys.TOTAL_DISTANCE in summary_record_set:
                 summary_record_set[Keys.TOTAL_DISTANCE] = summary_record_set[Keys.TOTAL_DISTANCE] + summary_data_value
-                summary_record_set[Keys.TOTAL_ACTIVITIES] = summary_record_set[Keys.TOTAL_ACTIVITIES] + 1
             else:
                 summary_record_set[Keys.TOTAL_DISTANCE] = summary_data_value
+
+            # Update activity count.
+            if Keys.TOTAL_ACTIVITIES in summary_record_set:
+                summary_record_set[Keys.TOTAL_ACTIVITIES] = summary_record_set[Keys.TOTAL_ACTIVITIES] + 1
+            else:
                 summary_record_set[Keys.TOTAL_ACTIVITIES] = 1
-        
+
+        # Update training stress sum.
+        if summary_data_key == Keys.TRAINING_STRESS:
+
+            if Keys.TOTAL_TRAINING_STRESS in summary_record_set:
+                summary_record_set[Keys.TOTAL_TRAINING_STRESS] = summary_record_set[Keys.TOTAL_TRAINING_STRESS] + summary_data_value
+            else:
+                summary_record_set[Keys.TOTAL_TRAINING_STRESS] = summary_data_value
+
         # Update the record set.
         self.set_summary_dictionary(activity_type, summary_record_set)
 

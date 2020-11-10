@@ -55,7 +55,7 @@ class IcalServer(object):
             unit_system = self.user_mgr.retrieve_user_setting(workout.user_id, Keys.PREFERRED_UNITS_KEY)
             start_time = workout.scheduled_time
             if start_time is not None:
-                summary  = workout.export_to_text(Keys.UNITS_METRIC_KEY).replace("\n", "\\n")
+                summary  = workout.export_to_text(None).replace("\n", "\\n")
                 summary += "\\n"
                 summary += self.root_url + "/workout/" + str(workout.workout_id)
                 response += ics_writer.create_event(workout.workout_id, start_time, start_time, workout.type, summary)
