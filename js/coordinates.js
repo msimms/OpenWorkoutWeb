@@ -99,6 +99,11 @@ function convert_distance_to_unit_system_str(unit_system, meters_traveled)
 
 function convert_distance_and_duration_to_pace_str(unit_system, meters_traveled, duration_ms)
 {
+    if (meters_traveled == 0)
+    {
+        return "--";
+    }
+
     var pace = 0.0;
     var units = "";
 
@@ -123,6 +128,11 @@ function convert_distance_and_duration_to_pace_str(unit_system, meters_traveled,
 
 function convert_distance_and_duration_to_speed_str(unit_system, meters_traveled, duration_ms)
 {
+    if (meters_traveled == 0)
+    {
+        return "--";
+    }
+
     var speed = 0.0;
     var units = "";
 
