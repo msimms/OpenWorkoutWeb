@@ -699,7 +699,7 @@ class Api(object):
 
         # Did we find it?
         if not deleted:
-            raise Exception("An error occurred. Nothing deleted.")
+            raise Exception("An error occurred. Nothing was deleted.")
 
         return True, ""
 

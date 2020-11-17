@@ -567,9 +567,12 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         # Delete the activity as well as the cache of the PRs performed during that activity.
-        result = self.database.delete_activity(object_id) and self.database.delete_activity_best_for_user(user_id, activity_id)
+        result = self.database.delete_activity(object_id)
 
         if result:
+
+            # Delete the activity bests (there might not be any), so don't bother checking the return code.
+            self.database.delete_activity_best_for_user(user_id, activity_id)
 
             # Delete the uploaded file (if any).
             self.database.delete_uploaded_file(activity_id)
