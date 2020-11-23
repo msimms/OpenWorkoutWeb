@@ -137,7 +137,7 @@ class WorkoutPlanGenerator(object):
             best_recent_threshold_power = self.data_mgr.retrieve_user_estimated_ftp(user_id)
             best_recent_threshold_power = best_recent_threshold_power[0]
             if best_recent_threshold_power is None or threshold_power > best_recent_threshold_power:
-                self.data_mgr.store_user_estimated_ftp(user_id, threshold_power)
+                self.data_mgr.store_user_estimated_ftp(user_id, cycling_bests[Keys.THRESHOLD_POWER])
             else:
                 threshold_power = best_recent_threshold_power
 
