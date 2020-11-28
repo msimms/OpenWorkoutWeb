@@ -30,6 +30,7 @@ hex = "[a-fA-F0-9]"
 uuid = re.compile(hex + "{8}-" + hex + "{4}-" + hex + "{4}-" + hex + "{4}-" + hex + "{12}")
 alphanums = re.compile(r"[\w-]*$")
 safe = re.compile(r"[\w_ \(\)%'&,/.+-]*$")
+emoji = re.compile(r"(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])")
 email_addr = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
@@ -46,6 +47,7 @@ def is_timestamp(test_str):
     return True
 
 def is_day_of_week(test_str):
+    """Returns True if the string is the name of a day of the week, case insensitive."""
     test_str_lower = test_str.lower()
     for day in days_of_week:
         if day.lower() == test_str_lower:
