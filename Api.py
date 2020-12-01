@@ -423,8 +423,11 @@ class Api(object):
             raise ApiException.ApiAuthenticationException("Invalid email address.")
         password = unquote_plus(values[Keys.PASSWORD_KEY])
 
-        if not self.user_mgr.authenticate_user(email, password):
-            raise ApiException.ApiAuthenticationException("Authentication failed.")
+        try:
+            if not self.user_mgr.authenticate_user(email, password):
+                raise ApiException.ApiAuthenticationException("Authentication failed.")
+        except Exception as e:
+            raise ApiException.ApiAuthenticationException(str(e))
 
         if Keys.DEVICE_KEY in values:
             device_str = unquote_plus(values[Keys.DEVICE_KEY])
@@ -463,7 +466,10 @@ class Api(object):
         else:
             device_str = ""
 
-        if not self.user_mgr.create_user(email, realname, password1, password2, device_str):
+        try:
+            if not self.user_mgr.create_user(email, realname, password1, password2, device_str):
+                raise Exception("User creation failed.")
+        except:
             raise Exception("User creation failed.")
 
         cookie = self.user_mgr.create_new_session(email)

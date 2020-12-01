@@ -591,13 +591,14 @@ class StraenWeb(object):
                     cherrypy.response.status = 400
             else:
                 cherrypy.response.status = 400
-        except ApiException as e:
-            self.log_error(e.message)
+        except ApiException.ApiException as e:
+            response = e.message
             cherrypy.response.status = e.code
+            self.log_error(str(e))
         except Exception as e:
-            response = str(e.args[0])
-            self.log_error(response)
+            response = "Unhandled error."
             cherrypy.response.status = 500
+            self.log_error(str(e))
         except:
             response = "Unspecified error."
             cherrypy.response.status = 500
