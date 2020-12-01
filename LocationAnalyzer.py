@@ -277,6 +277,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                         all_intervals.append(interval)
 
                     # Do a k-means analysis on the computed speed/pace blocks so we can get rid of any outliers.
+                    significant_intervals = []
                     num_speed_blocks = len(self.speed_blocks)
                     if num_speed_blocks > 1:
 
@@ -309,7 +310,6 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
 
                         # Save off the significant peaks.
                         interval_index = 0
-                        significant_intervals = []
                         for label in best_labels:
                             if label >= 1:
                                 significant_intervals.append(all_intervals[interval_index])
