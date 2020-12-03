@@ -149,19 +149,23 @@ class Exporter(object):
         done = False
         while not done:
             try:
+                # Get the next location.
                 current_location = location_iter.next()
                 current_lat = current_location[Keys.LOCATION_LAT_KEY]
                 current_lon = current_location[Keys.LOCATION_LON_KEY]
                 current_alt = current_location[Keys.LOCATION_ALT_KEY]
                 current_time = current_location[Keys.LOCATION_TIME_KEY]
 
+                # Get the next sensor readings.
                 nearest_cadence = self.nearest_sensor_reading(current_time, nearest_cadence, cadence_iter)
                 nearest_hr = self.nearest_sensor_reading(current_time, nearest_hr, hr_iter)
                 nearest_temp = self.nearest_sensor_reading(current_time, nearest_temp, temp_iter)
                 nearest_power = self.nearest_sensor_reading(current_time, nearest_power, power_iter)
 
+                # Write the next location.
                 writer.start_trackpoint(current_lat, current_lon, current_alt, current_time)
 
+                # Write any associated sensor readings.
                 if nearest_cadence or nearest_hr:
                     writer.start_extensions()
                     writer.start_trackpoint_extensions()
@@ -238,12 +242,14 @@ class Exporter(object):
             while not done:
 
                 try:
+                    # Get the next location.
                     current_location = location_iter.next()
                     current_lat = current_location[Keys.LOCATION_LAT_KEY]
                     current_lon = current_location[Keys.LOCATION_LON_KEY]
                     current_alt = current_location[Keys.LOCATION_ALT_KEY]
                     current_time = current_location[Keys.LOCATION_TIME_KEY]
 
+                    # Get the next sensor readings.
                     nearest_cadence = self.nearest_sensor_reading(current_time, nearest_cadence, cadence_iter)
                     nearest_hr = self.nearest_sensor_reading(current_time, nearest_hr, hr_iter)
                     nearest_temp = self.nearest_sensor_reading(current_time, nearest_temp, temp_iter)
