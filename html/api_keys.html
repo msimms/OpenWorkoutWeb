@@ -23,6 +23,22 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 
 <script>
+    function generate_new_api_key()
+    {
+        var the_url = "${root_url}/api/1.0/generate_api_key";
+        var dict = [];
+        var result_text = {};
+
+        if (send_post_request(the_url, dict, result_text))
+        {
+            window.location.replace("${root_url}/api_keys");
+        }
+        else
+        {
+            alert(result_text.value);
+        }
+    }
+
     var process_keys = function(records)
     {
         var keys_table = document.getElementById("Keys");
@@ -62,6 +78,7 @@ ${nav}
             </table>
         </p>
     </div>
+	<button type="button" onclick="return generate_new_api_key()">Generate New Key</button>
 </div>
 
 </body>

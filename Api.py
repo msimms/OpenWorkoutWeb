@@ -1608,6 +1608,14 @@ class Api(object):
         self.data_mgr.generate_workout_plan_from_inputs(self.user_id)
         return True, ""
 
+    def handle_generate_api_key(self, values):
+        """Generates a new API key for the specified user."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        self.data_mgr.generate_api_key_for_user(self.user_id)
+        return True, ""
+
     def handle_merge_gpx_files(self, values):
         """Takes two GPX files and attempts to merge them."""
         if self.user_id is None:
@@ -2069,6 +2077,8 @@ class Api(object):
             return self.handle_generate_workout_plan_for_user(values)
         elif request == 'generate_workout_plan_from_inputs':
             return self.handle_generate_workout_plan_from_inputs(values)
+        elif request == 'generate_api_key':
+            return self.handle_generate_api_key(values)
         elif request == 'merge_gpx_files':
             return self.handle_merge_gpx_files(values)
         return False, ""

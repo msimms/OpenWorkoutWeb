@@ -1142,6 +1142,16 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         self.workout_plan_gen_scheduler.add_inputs_to_queue(inputs, self)
 
+    def generate_api_key_for_user(self, user_id):
+        """Generates a new API key for the specified user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        key = uuid.uuid4()
+        rate = 100
+        return self.database.create_api_key(user_id, key, rate)
+
     def merge_gpx_files(self, user_id, uploaded_file1_data, uploaded_file2_data):
         if user_id is None:
             raise Exception("Bad parameter.")
