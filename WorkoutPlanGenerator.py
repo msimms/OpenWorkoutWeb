@@ -135,11 +135,12 @@ class WorkoutPlanGenerator(object):
         if cycling_bests is not None and Keys.THRESHOLD_POWER in cycling_bests:
             threshold_power = cycling_bests[Keys.THRESHOLD_POWER][0]
             best_recent_threshold_power = self.data_mgr.retrieve_user_estimated_ftp(user_id)
-            best_recent_threshold_power = best_recent_threshold_power[0]
-            if best_recent_threshold_power is None or threshold_power > best_recent_threshold_power:
-                self.data_mgr.store_user_estimated_ftp(user_id, cycling_bests[Keys.THRESHOLD_POWER])
-            else:
-                threshold_power = best_recent_threshold_power
+            if best_recent_threshold_power:
+                best_recent_threshold_power = best_recent_threshold_power[0]
+                if best_recent_threshold_power is None or threshold_power > best_recent_threshold_power:
+                    self.data_mgr.store_user_estimated_ftp(user_id, cycling_bests[Keys.THRESHOLD_POWER])
+                else:
+                    threshold_power = best_recent_threshold_power
 
         #
         # Need last four weeks averages and bests.
