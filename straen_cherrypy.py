@@ -568,8 +568,21 @@ class StraenWeb(object):
             # Get the logged in user, or lookup the user using the API key.
             user_id = None
             if Keys.API_KEY in params:
-                user_id, _, _ = self.app.user_mgr.retrieve_user_from_api_key(params[Keys.API_KEY])
+
+                # Session key
+                key = params[Keys.API_KEY]
+
+                # Which user is associated with this key?
+                user_id, _, _, max_rate = self.app.user_mgr.retrieve_user_from_api_key(key)
+                if user_id is not None:
+
+                    # Make sure the key is not being abused.
+                    if not self.app.data_mgr.check_api_rate(key, max_rate):
+                        user_id = None
+                        response = "Excessive API requests."
             else:
+
+                # API key not provided, check the session key.
                 username = self.app.user_mgr.get_logged_in_user()
                 if username is not None:
                     user_id, _, _ = self.app.user_mgr.retrieve_user(username)

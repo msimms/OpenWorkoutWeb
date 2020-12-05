@@ -226,18 +226,19 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user.
-            query = { Keys.API_KEYS: { Keys.API_KEY: str(api_key), Keys.API_KEY_RATE : int(1000) } }
+            rate = 100
+            query = { Keys.API_KEYS: { Keys.API_KEY: str(api_key), Keys.API_KEY_RATE : rate } }
             result_keys = { Keys.DATABASE_ID_KEY: 1, Keys.HASH_KEY: 1, Keys.REALNAME_KEY: 1 }
             user = self.users_collection.find_one(query, result_keys)
 
             # If the user was found.
             if user is not None:
-                return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], user[Keys.REALNAME_KEY]
-            return None, None, None
+                return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], user[Keys.REALNAME_KEY], rate
+            return None, None, None, rate
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None, None, None
+        return None, None, None, None
 
     def update_user(self, user_id, username, realname, passhash):
         """Update method for a user."""

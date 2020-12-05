@@ -25,6 +25,7 @@
 
 import hashlib
 import os
+import threading
 import time
 import uuid
 import BmiCalculator
@@ -44,6 +45,9 @@ SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
 ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
 ONE_WEEK = (7.0 * 24.0 * 60.0 * 60.0)
 FOUR_WEEKS = (28.0 * 24.0 * 60.0 * 60.0)
+
+g_api_key_rate_lock = threading.Lock()
+g_api_key_rates = {}
 
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
@@ -1148,9 +1152,39 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        key = uuid.uuid4()
-        rate = 100
-        return self.database.create_api_key(user_id, key, rate)
+
+        key = str(uuid.uuid4()) # Create the API key
+        rate = 100 # Only allow 100 requests per day
+        return self.database.create_api_key(user_id, key, rate), key
+
+    def delete_api_key(self, user_id, api_key):
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if api_key is None:
+            raise Exception("Bad parameter.")
+        return self.database.delete_api_key(user_id, api_key)
+
+    def check_api_rate(self, api_key, max_rate):
+        """Verifies that the API key is not being overused."""
+        """Returns TRUE if it is fine to process the request, FALSE otherwise."""
+        if self.database is None:
+            raise Exception("No database.")
+        if api_key is None:
+            raise Exception("Bad parameter.")
+
+        result = True
+        g_api_key_rate_lock.acquire()
+        try:
+            current_rate = g_api_key_rates[api_key]
+            result = current_rate <= max_rate
+            g_api_key_rates[api_key] = current_rate + 1
+        except:
+            g_api_key_rates[api_key] = 1
+        finally:
+            g_api_key_rate_lock.release()
+        return result
 
     def merge_gpx_files(self, user_id, uploaded_file1_data, uploaded_file2_data):
         if user_id is None:

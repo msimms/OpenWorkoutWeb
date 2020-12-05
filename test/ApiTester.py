@@ -76,6 +76,17 @@ def login_status(root_url, cookie):
     url = root_url + "login_status"
     return send_get_request(url, {}, cookie)
 
+def generate_api_key(root_url, cookie):
+    """Generates a new API key."""
+    url = root_url + "generate_api_key"
+    return send_post_request(url, {}, cookie)
+
+def delete_api_key(root_url, api_key, cookie):
+    """Deletes an API key."""
+    url = root_url + "delete_api_key"
+    payload = {'key': api_key}
+    return send_post_request(url, payload, cookie)
+
 def logout(root_url, cookie):
     """Ends the existing session."""
     url = root_url + "logout"
@@ -107,6 +118,22 @@ def run_unit_tests(url, username, password, realname):
         print("Test passed!\n")
     else:
         raise Exception("Login status check failed.")
+
+    # Generate an API key.
+    print_test_title("Generate an API Key")
+    code, api_key, _ = generate_api_key(api_url, cookies)
+    if code == 200:
+        print("Test passed! API key is {0}\n".format(api_key))
+    else:
+        raise Exception("Failed to generate an API key.")
+
+    # Delete the API key.
+    print_test_title("Delete the API Key")
+    code, _, _ = delete_api_key(api_url, api_key, cookies)
+    if code == 200:
+        print("Test passed! API key {0} was deleted\n".format(api_key))
+    else:
+        raise Exception("Failed to delete the API key.")
 
     # Logout.
     print_test_title("Logout")

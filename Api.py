@@ -610,7 +610,7 @@ class Api(object):
         if not self.user_mgr.authenticate_user(username, password):
             raise Exception("Authentication failed.")
 
-        # Delete all the user's activities.
+        # Delete all of the user's activities.
         self.data_mgr.delete_user_activities(self.user_id)
 
         # Delete the user.
@@ -1613,8 +1613,19 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        self.data_mgr.generate_api_key_for_user(self.user_id)
-        return True, ""
+        result, api_key = self.data_mgr.generate_api_key_for_user(self.user_id)
+        return result, api_key
+
+    def handle_delete_api_key(self, values):
+        """Deletes the specified API key."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.API_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("A key was not specified.")
+
+        api_key = values[Keys.API_KEY]
+        result = self.data_mgr.delete_api_key(self.user_id, api_key)
+        return result, api_key
 
     def handle_merge_gpx_files(self, values):
         """Takes two GPX files and attempts to merge them."""
@@ -2079,6 +2090,8 @@ class Api(object):
             return self.handle_generate_workout_plan_from_inputs(values)
         elif request == 'generate_api_key':
             return self.handle_generate_api_key(values)
+        elif request == 'delete_api_key':
+            return self.handle_delete_api_key(values)
         elif request == 'merge_gpx_files':
             return self.handle_merge_gpx_files(values)
         return False, ""
