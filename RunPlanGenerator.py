@@ -114,22 +114,27 @@ class RunPlanGenerator(object):
         cooldown_duration = 10 * 60
 
         # Build a collection of possible run interval sessions, sorted by target distance. Order is { min reps, max reps, distance in meters }.
-        possible_workouts = [ [ 4, 8, 100 ], [ 4, 8, 200 ], [ 4, 8, 400 ], [ 4, 8, 600 ], [ 2, 8, 800 ], [ 2, 4, 1000 ], [ 2, 4, 1600 ] ]
+        possible_workouts = [ [ 4, 8, 100 ], [ 4, 8, 200 ], [ 4, 8, 400 ], [ 4, 8, 600 ], [ 2, 8, 800 ], [ 2, 6, 1000 ], [ 2, 4, 1600 ] ]
 
         # Build a probability density function for selecting the workout. Longer goals should tend towards longer intervals and so on.
         num_possible_workouts = len(possible_workouts)
         x = np.arange(0, num_possible_workouts, 1)
         center_index = int(num_possible_workouts / 2)
         densities = norm.pdf(x, loc=center_index)
+
+        # Make sure the densities array adds up to one.
         total_densities = sum(densities)
         if total_densities < 1.0:
             densities[center_index] += (1.0 - total_densities)
 
         # If the goal is less than a 10K then favor the shorter interval workouts. If greater than a 1/2 marathon, favor the longer.
         if goal_distance < 10000:
-            mod_densities = np.append(densities[-1], densities[0:len(densities)-1])
-        elif goal_distance > METERS_PER_HALF_MARATHON:
             mod_densities = np.append(densities[1:len(densities)], densities[0])
+        elif goal_distance >= METERS_PER_MARATHON:
+            mod_densities = np.append(densities[-1], densities[0:len(densities)-1])
+            mod_densities = np.append(densities[-1], densities[0:len(densities)-1])
+        elif goal_distance >= METERS_PER_HALF_MARATHON:
+            mod_densities = np.append(densities[-1], densities[0:len(densities)-1])
         else:
             mod_densities = densities
 
