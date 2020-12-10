@@ -3,7 +3,7 @@
 function set_background_style(background_id)
 {
     var section = document.getElementById(background_id);
-    var img_index = Math.floor(Math.random() * 6) + 2;
+    var img_index = Math.floor(Math.random() * 7) + 1;
     var img_str = 'url("../images/main_background' + img_index + '.jpg")';
     section.style.backgroundImage = img_str;
 }
