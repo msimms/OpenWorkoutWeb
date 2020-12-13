@@ -13,6 +13,7 @@ import Workout
 import WorkoutFactory
 
 METERS_PER_HALF_MARATHON = 13.1 * Units.METERS_PER_MILE
+METERS_PER_MARATHON = 26.2 * Units.METERS_PER_MILE
 
 class RunPlanGenerator(object):
     """Class for generating a run plan for the specifiied user."""
