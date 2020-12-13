@@ -291,7 +291,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No user ID.")
         return self.database.retrieve_deferred_tasks(user_id)
 
-    def update_deferred_task(self, user_id, internal_task_id, status):
+    def update_deferred_task(self, user_id, internal_task_id, activity_id, status):
         """Returns a list of all incomplete tasks."""
         if self.database is None:
             raise Exception("No database.")
@@ -301,7 +301,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No internal task ID.")
         if status is None:
             raise Exception("No status.")
-        return self.database.update_deferred_task(user_id, internal_task_id, status)
+        return self.database.update_deferred_task(user_id, internal_task_id, activity_id, status)
 
     def prune_deferred_tasks_list(self):
         """Removes all completed tasks from the list."""

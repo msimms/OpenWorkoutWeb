@@ -2525,7 +2525,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return []
 
-    def update_deferred_task(self, user_id, internal_task_id, status):
+    def update_deferred_task(self, user_id, internal_task_id, activity_id, status):
         """Updated method for deferred task status."""
         if user_id is None:
             self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: user_id")
@@ -2551,6 +2551,7 @@ class MongoDatabase(Database.Database):
                 # Find and update the record.
                 for task in user_tasks[Keys.TASKS_KEY]:
                     if Keys.TASK_INTERNAL_ID_KEY in task and task[Keys.TASK_INTERNAL_ID_KEY] == internal_task_id_str:
+                        task[Keys.TASK_ACTIVITY_ID_KEY] = activity_id
                         task[Keys.TASK_STATUS_KEY] = status
                         break
 
