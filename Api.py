@@ -874,7 +874,10 @@ class Api(object):
             raise ApiException.ApiAuthenticationException("Not activity owner.")
 
         # Parse the file and store it's contents in the database.
-        result = self.data_mgr.attach_photo_to_activity(username, self.user_id, uploaded_file_data, activity_id)
+        try:
+            result = self.data_mgr.attach_photo_to_activity(self.user_id, uploaded_file_data, activity_id)
+        except Exception as e:
+            raise ApiException.ApiMalformedRequestException(str(e))
 
         return result, ""
 

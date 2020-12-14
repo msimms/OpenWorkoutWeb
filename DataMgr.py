@@ -23,6 +23,7 @@
 # SOFTWARE.
 """Data store abstraction"""
 
+import base64
 import hashlib
 import os
 import threading
@@ -340,7 +341,7 @@ class DataMgr(Importer.ActivityWriter):
 
         return self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
 
-    def attach_photo_to_activity(self, user_id, uploaded_file_data, uploaded_file_name, activity_id):
+    def attach_photo_to_activity(self, user_id, uploaded_file_data, activity_id):
         """Imports a photo and associates it with an activity."""
         if self.database is None:
             raise Exception("No database.")
@@ -353,13 +354,16 @@ class DataMgr(Importer.ActivityWriter):
         if activity_id is None:
             raise Exception("No activity ID.")
 
+        # Decode the uplaoded data.
+        decoded_file_data = base64.b64decode(uploaded_file_data)
+
         # Check the file size.
-        if len(uploaded_file_data) > self.config.get_photos_max_file_size():
+        if len(decoded_file_data) > self.config.get_photos_max_file_size():
             raise Exception("The file is too large.")
 
         # Hash the photo. This will prevent duplicates as well as give us a unique name.
         h = hashlib.sha512()
-        h.update(uploaded_file_data)
+        h.update(str(decoded_file_data).encode('utf-8'))
         hash_str = h.hexdigest()
 
         # Where are we storing photos?
@@ -368,7 +372,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No photos directory.")
 
         # Create the directory, if it does not already exist.
-        user_photos_dir = os.path.join(photos_dir, str(user_id))
+        user_photos_dir = os.path.join(os.path.normpath(os.path.expanduser(photos_dir)), str(user_id))
         if not os.path.exists(user_photos_dir):
             os.makedirs(user_photos_dir)
 
@@ -376,7 +380,7 @@ class DataMgr(Importer.ActivityWriter):
         try:
             local_file_name = os.path.join(user_photos_dir, hash_str)
             with open(local_file_name, 'wb') as local_file:
-                local_file.write(uploaded_file_data)
+                local_file.write(decoded_file_data)
         except:
             raise Exception("Could not save the photo.")
 
