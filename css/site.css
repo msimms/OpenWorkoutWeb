@@ -179,6 +179,10 @@ select {
 	font-size: 120%;
 }
 
+.empty div {
+	margin: 0px;
+}
+
 div {
 	margin: 10px;
 }
