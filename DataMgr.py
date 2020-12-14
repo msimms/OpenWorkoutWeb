@@ -379,8 +379,9 @@ class DataMgr(Importer.ActivityWriter):
         # Save the file to the user's photos directory.
         try:
             local_file_name = os.path.join(user_photos_dir, hash_str)
-            with open(local_file_name, 'wb') as local_file:
-                local_file.write(decoded_file_data)
+            if not os.path.isfile(local_file_name):
+                with open(local_file_name, 'wb') as local_file:
+                    local_file.write(decoded_file_data)
         except:
             raise Exception("Could not save the photo.")
 
