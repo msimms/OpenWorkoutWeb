@@ -894,9 +894,10 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         # List the IDs of each photo attached to this activity.
-        self.data_mgr.list_activity_photos(activity_id)
-
-        return True, ""
+        result = {}
+        result["photo ids"] = self.data_mgr.list_activity_photos(activity_id)
+        json_result = json.dumps(result, ensure_ascii=False)
+        return True, json_result
 
     def handle_retrieve_activity_photo(self, values):
         """Returns the specified activity photo."""
