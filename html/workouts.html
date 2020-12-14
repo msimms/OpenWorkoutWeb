@@ -30,6 +30,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
 
 <script>
+
     function set_preferred_long_run_day()
     {
         var the_url = "${root_url}/api/1.0/update_settings";
@@ -330,99 +331,102 @@
     get_personal_records();
     get_user_settings();
     get_calendar_url();
+
 </script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="block" id="block" style="width: 600px">
+<section>
+    <div class="block" style="width: 600px">
 
-    <h2>Six Month Bests</h2>
-    <p>
-        Workouts are calculated using paces computed from the last six months of activity.
-    </p>
-    <p>
-        <h3>Cycling</h3>
-        <table id="Cycling">
-        </table>
+        <h2>Six Month Bests</h2>
+        <p>
+            Workouts are calculated using paces computed from the last six months of activity.
+        </p>
+        <p>
+            <h3>Cycling</h3>
+            <table id="Cycling">
+            </table>
 
-        <h3>Running</h3>
-        <table id="Running">
-        </table>
-    </p>
+            <h3>Running</h3>
+            <table id="Running">
+            </table>
+        </p>
 
-	<hr>
+        <hr>
 
-    <h2>Training Paces For Running</h2>
-    <p>
-        Run workouts will reference these paces, calculated from the last six months of activity.
-    </p>
-    <p>
-        <table id="RunPaces">
-        </table>
-    </p>
+        <h2>Training Paces For Running</h2>
+        <p>
+            Run workouts will reference these paces, calculated from the last six months of activity.
+        </p>
+        <p>
+            <table id="RunPaces">
+            </table>
+        </p>
 
-	<hr>
-    <h2>Goal</h2>
-    <p>
-		<select name="goal" id="goal" class="right" onchange="return set_goal()">
-            <option value="Fitness">Fitness</option>
-            <option value="5K Run">5K Run</option>
-            <option value="10K Run">10K Run</option>
-            <option value="15K Run">15K Run</option>
-            <option value="Half Marathon">Half Marathon</option>
-            <option value="Marathon">Marathon</option>
-            <option value="50K Run">50K Run</option>
-            <option value="50 Mile Run">50 Mile Run</option>
-		</select> on 
-    	<input type="text" name="goal_date" id="goal_date" onchange="return set_goal_date()">
-    </p>
+        <hr>
+        <h2>Goal</h2>
+        <p>
+            <select name="goal" id="goal" class="right" onchange="return set_goal()">
+                <option value="Fitness">Fitness</option>
+                <option value="5K Run">5K Run</option>
+                <option value="10K Run">10K Run</option>
+                <option value="15K Run">15K Run</option>
+                <option value="Half Marathon">Half Marathon</option>
+                <option value="Marathon">Marathon</option>
+                <option value="50K Run">50K Run</option>
+                <option value="50 Mile Run">50 Mile Run</option>
+            </select> on 
+            <input type="text" name="goal_date" id="goal_date" onchange="return set_goal_date()">
+        </p>
 
-	<hr>
+        <hr>
 
-    <h2>Preferences</h2>
-    <p>
-        Preferred Long Run Day: <select name="preferred_long_run_day" id="preferred_long_run_day" class="right" value="Weekday" onchange="return set_preferred_long_run_day()">
-            <option value="Sunday">Sunday</option>
-            <option value="Monday">Monday</option>
-            <option value="Tuesday">Tuesday</option>
-            <option value="Wednesday">Wednesday</option>
-            <option value="Thursday">Thursday</option>
-            <option value="Friday">Friday</option>
-            <option value="Saturday">Saturday</option>
-        </select><br>
-        Goal Type: <select name="goal_type" id="goal_type" class="right" onchange="return set_goal_type()">
-            <option value="Completion">Completion</option>
-            <option value="Speed">Speed</option>
-        </select><br>
-        Experience Level: <select name="exp_level" id="exp_level" class="right" onchange="return set_exp_level()">
-            <option value="Beginner">Beginner</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
-        </select>
-    </p>
+        <h2>Preferences</h2>
+        <p>
+            Preferred Long Run Day: <select name="preferred_long_run_day" id="preferred_long_run_day" class="right" value="Weekday" onchange="return set_preferred_long_run_day()">
+                <option value="Sunday">Sunday</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+            </select><br>
+            Goal Type: <select name="goal_type" id="goal_type" class="right" onchange="return set_goal_type()">
+                <option value="Completion">Completion</option>
+                <option value="Speed">Speed</option>
+            </select><br>
+            Experience Level: <select name="exp_level" id="exp_level" class="right" onchange="return set_exp_level()">
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+            </select>
+        </p>
 
-    <hr>
+        <hr>
 
-    <h2>Plans</h2>
-    <p>
-        Workout plan generation is highly experimental. Consult your doctor and use common sense before following any exercise plan.
-    </p>
-    <p>
-        <button type="button" onclick="return generate_workout_plan()">Generate New Workout Plan</button>
-    </p>
+        <h2>Plans</h2>
+        <p>
+            Workout plan generation is highly experimental. Consult your doctor and use common sense before following any exercise plan.
+        </p>
+        <p>
+            <button type="button" onclick="return generate_workout_plan()">Generate New Workout Plan</button>
+        </p>
 
-    <hr>
+        <hr>
 
-    <h2>Calendar</h2>
-    <p>
-        Planned workouts will be added to the <a href="${root_url}/my_activities"><b>My Activities</b></a> calendar.
-    </p>
-    <p id="calendar_url">
-    </p>
+        <h2>Calendar</h2>
+        <p>
+            Planned workouts will be added to the <a href="${root_url}/my_activities"><b>My Activities</b></a> calendar.
+        </p>
+        <p id="calendar_url">
+        </p>
 
-</div>
+    </div>
+</section>
 
 </body>
 

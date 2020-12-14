@@ -23,6 +23,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 
 <script>
+
 	function request_to_be_friends(target)
 	{
 		var the_url = "${root_url}/api/1.0/request_to_be_friends";
@@ -184,28 +185,31 @@
     }
 
     get_friends_lists();
+
 </script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="user_search_form" style="width: 600px">
-	<h2>Search for a user</h2>
-	<p>User Email or Name: <input type="text" id="searchname"><br></p>
-	<button type="button" onclick="return search()">Search</button>
-</div>
+<section>
+    <div class="user_search_form" style="width: 600px">
+        <h2>Search for a user</h2>
+        <p>User Email or Name: <input type="text" id="searchname"><br></p>
+        <button type="button" onclick="return search()">Search</button>
+    </div>
 
-<div class="friends_list" style="width: 600px">
-	<table id="search_results" >
-	</table>
-</div>
+    <div class="friends_list" style="width: 600px">
+        <table id="search_results" >
+        </table>
+    </div>
 
-<div class="friends_list" style="width: 600px">
-	<h2>My Friends</h2>
-	<table id="Friends">
-	</table>
-</div>
+    <div class="friends_list" style="width: 600px">
+        <h2>My Friends</h2>
+        <table id="Friends">
+        </table>
+    </div>
+</section>
 
 </body>
 

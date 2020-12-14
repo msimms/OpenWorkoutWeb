@@ -23,6 +23,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 
 <script>
+
     function generate_new_api_key()
     {
         var the_url = "${root_url}/api/1.0/generate_api_key";
@@ -45,6 +46,7 @@
 
         var new_row = keys_table.insertRow();
         var cell = new_row.insertCell();
+
         cell.appendChild(document.createTextNode("API Key"));
         cell = new_row.insertCell();
         cell.appendChild(document.createTextNode("Maximum Queries Per Day"));
@@ -65,21 +67,20 @@
     }
 
     get_keys();
+
 </script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="device_list">
-    <div style="width: 800px">
-        <p>
-            <table id="Keys">
-            </table>
-        </p>
+<section class="block">
+    <div>
+        <table class="api_key_list" id="Keys">
+        </table>
     </div>
 	<button type="button" onclick="return generate_new_api_key()">Generate New Key</button>
-</div>
+</section>
 
 </body>
 </html>

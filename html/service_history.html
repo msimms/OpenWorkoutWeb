@@ -225,28 +225,30 @@
 ${nav}
 </section>
 
-<div class="profile" style="width: 600px">
+<section>
+    <div class="block" style="width: 600px">
 
-    <h2 id="GearName"></h2>
-    <h3>Description</h3>
-    <p id="GearDescription"></p>
-    <h3>Distance</h3>
-    <p id="GearDistance"></p>
-    <h3>Date Added</h3>
-    <p id="GearAdded"></p>
-    <h3>Date Retired</h3>
-    <p id="GearRetired"></p>
-    <h3>Service History</h3>
-    <p>
-        <table id="ServiceHistory">
-            <td><b>Date</b></td><td><b>Description</b></td><td></td><tr>
-        </table>
-    </p>
-    <div class="block" id="new_service_record_block" style="width: 560px">
+        <h2 id="GearName"></h2>
+        <h3>Description</h3>
+        <p id="GearDescription"></p>
+        <h3>Distance</h3>
+        <p id="GearDistance"></p>
+        <h3>Date Added</h3>
+        <p id="GearAdded"></p>
+        <h3>Date Retired</h3>
+        <p id="GearRetired"></p>
+        <h3>Service History</h3>
+        <p>
+            <table id="ServiceHistory">
+                <td><b>Date</b></td><td><b>Description</b></td><td></td><tr>
+            </table>
+        </p>
+        <div class="block" id="new_service_record_block" style="width: 560px">
+        </div>
+        <button type="button" onclick="return get_new_service_record_info()">Add Service Record</button>
+
     </div>
-    <button type="button" onclick="return get_new_service_record_info()">Add Service Record</button>
-
-</div>
+</section>
 
 </body>
 

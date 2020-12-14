@@ -29,6 +29,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
 
 <script>
+
     function gear_sort(a, b)
     {
         return a.name.localeCompare(b.name);
@@ -108,33 +109,32 @@
     }
 
     get_gear();
+
 </script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="block" id="block" style="width: 600px">
+<section>
+    <div class="block" style="width: 600px">
 
-    <h2>Bikes</h2>
-    <p>
+        <h2>Bikes</h2>
         <table id="bikes">
             <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
         </table>
-    </p>
-    <button type="button" onclick="return get_new_bike_info('${root_url}')">Add New Bike</button>
+        <button type="button" onclick="return get_new_bike_info('${root_url}')">Add New Bike</button>
 
-	<hr>
+        <hr>
 
-    <h2>Shoes</h2>
-    <p>
+        <h2>Shoes</h2>
         <table id="shoes">
             <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
         </table>
-    </p>
-    <button type="button" onclick="return get_new_shoes_info('${root_url}')">Add New Shoes</button>
+        <button type="button" onclick="return get_new_shoes_info('${root_url}')">Add New Shoes</button>
 
-</div>
+    </div>
+</section>
 
 </body>
 

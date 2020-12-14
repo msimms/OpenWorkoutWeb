@@ -30,6 +30,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
 
 <script>
+
     var countries = [];
     var us_states = [];
     var canadian_provinces = [];
@@ -211,36 +212,39 @@
 
     get_heat_map_data();
     get_personal_records();
+
 </script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="block" id="block" style="width: 600px">
+<section>
+    <div class="block" style="width: 600px">
 
-    <h2>All-Time Bests</h2>
-    <p>
-        <h3>Cycling</h3>
-        <table id="Cycling">
-        </table>
+        <h2>All-Time Bests</h2>
+        <p>
+            <h3>Cycling</h3>
+            <table id="Cycling">
+            </table>
 
-        <h3>Running</h3>
-        <table id="Running">
-        </table>
-    </p>
+            <h3>Running</h3>
+            <table id="Running">
+            </table>
+        </p>
 
-    <h2>Places</h2>
-    <h3>World</h3>
-    <canvas id="worldCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
-    Your browser does not support the canvas element.
-    </canvas>
-    <h3>United States and Canada</h3>
-    <canvas id="usCanadaCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
-    Your browser does not support the canvas element.
-    </canvas>
+        <h2>Places</h2>
+        <h3>World</h3>
+        <canvas id="worldCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
+        Your browser does not support the canvas element.
+        </canvas>
+        <h3>United States and Canada</h3>
+        <canvas id="usCanadaCanvas" width="960" height="480" style="border:0px solid #c3c3c3;">
+        Your browser does not support the canvas element.
+        </canvas>
 
-</div>
+    </div>
+</section>
 
 </body>
 

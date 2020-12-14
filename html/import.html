@@ -72,7 +72,7 @@
 	function show_manual_entry_options()
 	{
 		var activityType = document.getElementById("activity_type").value;
-		var outer_div = document.getElementById("block");
+		var outer_div = document.getElementById("manual_entry_div");
 		var inner_div = document.createElement('div');
 		inner_div.id = "manual_entry_div";
 
@@ -142,6 +142,7 @@
 
 		return false;
 	}
+
 </script>
 
 <section class="nav">
@@ -288,7 +289,7 @@ ${activity_type_list}
 	</form>
 </div>
 	
-<div class="block" id="block">
+<div class="block" id="manual_entry_div">
 </div>
 
 </body>

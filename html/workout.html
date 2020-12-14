@@ -31,6 +31,7 @@
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
+
     function export_workout_to_zwo()
     {
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=zwo", cache: false, success: function(response) {
@@ -66,23 +67,25 @@
 	{
 		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=json", cache: false, success: process_workout_description, dataType: "text" });
 	});
+
 </script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="block" id="block" style="width: 600px">
+<section>
+    <div class="block" style="width: 600px">
 
-<h2 id="type"></h2>
+        <h2 id="type"></h2>
+        <p id="description">
+        </p> 
 
-<p id="description">
-</p> 
+        <button type="button" onclick="return export_workout_to_zwo()">Export to ZWO</button><br>
+        <button type="button" onclick="return export_workout_to_ical()">Export to iCal</button>
 
-<button type="button" onclick="return export_workout_to_zwo()">Export to ZWO</button><br>
-<button type="button" onclick="return export_workout_to_ical()">Export to iCal</button>
-
-</div>
+    </div>
+</section>
 
 </body>
 

@@ -106,6 +106,7 @@ tr {
 }
 
 .device_list tr:first-child { font-weight: bold }
+.api_key_list tr:first-child { font-weight: bold }
 
 .import table {
 	font-family: arial, sans-serif;
@@ -271,6 +272,16 @@ button .fa {
 
 .block textarea {
     border: 0px;
+}
+
+.block section {
+    border: 10px;
+    width: 1000px;
+}
+
+.block div {
+    border: 10px;
+    width: 1000px;
 }
 
 .map_canvas {

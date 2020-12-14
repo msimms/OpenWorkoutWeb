@@ -27,8 +27,8 @@
 <script type="text/javascript" src="${root_url}/jquery-timepicker/jquery.timepicker.js"></script>
 <link rel="stylesheet" type="text/css" href="${root_url}/jquery-timepicker/jquery.timepicker.css" />
 
-
 <script>
+
     function append_to_table(table, task_id, task_type, task_details, task_status)
     {
         var new_row = table.insertRow();
@@ -66,18 +66,21 @@
     }
 
     get_task_statuses();
+
 </script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="block" id="block" style="width: 600px">
-	<h2>Status</h2>
-	<table id="task_statuses">
-    <td><b>ID</b></td><td><b>Type</b></td><td><b>Details</b></td><td><b>Status</b></td><tr>
-	</table>
-</div>
+<section>
+    <div class="block" style="width: 600px">
+        <h2>Status</h2>
+        <table id="task_statuses">
+        <td><b>ID</b></td><td><b>Type</b></td><td><b>Details</b></td><td><b>Status</b></td><tr>
+        </table>
+    </div>
+</section>
 
 </body>
 </html>
