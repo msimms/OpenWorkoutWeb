@@ -29,12 +29,12 @@
 
     function update_gear_defaults(target)
     {
-        var the_url = "${root_url}/api/1.0/update_gear_defaults";
-        var dict = [];
-        var result_text = {};
-        var inner_div = document.getElementById("new_gear_default_div");
-        var activity_type = document.getElementById("activity_type").value;
-        var gear = document.getElementById("gear").value;
+        let the_url = "${root_url}/api/1.0/update_gear_defaults";
+        let dict = [];
+        let result_text = {};
+        let inner_div = document.getElementById("new_gear_default_div");
+        let activity_type = document.getElementById("activity_type").value;
+        let gear = document.getElementById("gear").value;
 
         dict.push({["activity_type"] : activity_type});
         dict.push({["name"] : gear});
@@ -51,15 +51,15 @@
 
     var process_activity_type_list = function(activity_type_list)
     {
-        var activity_type_select = document.getElementById("activity_type");
+        let activity_type_select = document.getElementById("activity_type");
 
         activity_type_list = eval(activity_type_list);
         activity_type_list.sort();
 
-        for (var i = 0; i < activity_type_list.length; i++)
+        for (let i = 0; i < activity_type_list.length; i++)
         {
-            var activity_type = activity_type_list[i];
-            var option = document.createElement("option");
+            let activity_type = activity_type_list[i];
+            let option = document.createElement("option");
 
             option.value = activity_type;
             option.text = activity_type;
@@ -69,15 +69,15 @@
 
     var process_gear_list = function(gear_list)
     {
-        var gear_list_select = document.getElementById("gear");
+        let gear_list_select = document.getElementById("gear");
 
         gear_list = eval(gear_list);
         gear_list.sort();
 
-        for (var i = 0; i < gear_list.length; i++)
+        for (let i = 0; i < gear_list.length; i++)
         {
-            var gear = gear_list[i];
-            var option = document.createElement("option");
+            let gear = gear_list[i];
+            let option = document.createElement("option");
 
             option.value = gear.name;
             option.text = gear.name;
@@ -87,20 +87,20 @@
 
     function list_activity_types()
     {
-        var api_url = "${root_url}/api/1.0/list_activity_types";
+        let api_url = "${root_url}/api/1.0/list_activity_types";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_activity_type_list, dataType: "text" });
     }
 
     function list_gear()
     {
-        var api_url = "${root_url}/api/1.0/list_gear";
+        let api_url = "${root_url}/api/1.0/list_gear";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_gear_list, dataType: "text" });
     }
 
     function add_default_gear_info()
     {
-        var outer_div = document.getElementById("new_gear_default_block");
-        var inner_div = document.createElement('div');
+        let outer_div = document.getElementById("new_gear_default_block");
+        let inner_div = document.createElement('div');
 
         inner_div.id = "new_gear_default_div";
 
@@ -131,7 +131,7 @@
         outer_div.appendChild(inner_div);
 
         // Create a save button.
-        var save_btn = document.createElement('button');
+        let save_btn = document.createElement('button');
         save_btn.appendChild(document.createTextNode('Save'));
         save_btn.title = "Save";
         save_btn.addEventListener('click', function() { update_gear_defaults(this); });
@@ -153,11 +153,11 @@
 
     function update_birthday()
     {
-		var the_url = "${root_url}/api/1.0/update_profile";
-		var birthday = document.getElementById("birthday").value;
-		var dict = [];
-		var result_text = {};
-		var timestamp = Date.parse(birthday) / 1000;
+		let the_url = "${root_url}/api/1.0/update_profile";
+		let birthday = document.getElementById("birthday").value;
+		let dict = [];
+		let result_text = {};
+		let timestamp = Date.parse(birthday) / 1000;
 
 		dict.push({["birthday"] : timestamp});
 		if (send_post_request(the_url, dict, result_text))
@@ -168,10 +168,10 @@
 
 	function update_height()
 	{
-		var the_url = "${root_url}/api/1.0/update_profile";
-		var height = document.getElementById("height").value;
-		var dict = [];
-		var result_text = {};
+		let the_url = "${root_url}/api/1.0/update_profile";
+		let height = document.getElementById("height").value;
+		let dict = [];
+		let result_text = {};
 
 		dict.push({["height"] : height});
 		if (send_post_request(the_url, dict, result_text))
@@ -182,10 +182,10 @@
 
 	function update_weight()
 	{
-		var the_url = "${root_url}/api/1.0/update_profile";
-		var weight = document.getElementById("weight").value;
-		var dict = [];
-		var result_text = {};
+		let the_url = "${root_url}/api/1.0/update_profile";
+		let weight = document.getElementById("weight").value;
+		let dict = [];
+		let result_text = {};
 
 		dict.push({["weight"] : weight});
 		if (send_post_request(the_url, dict, result_text))
@@ -196,10 +196,10 @@
 
 	function update_gender()
 	{
-		var the_url = "${root_url}/api/1.0/update_profile";
-		var gender = document.getElementById("gender").value;
-		var dict = [];
-		var result_text = {};
+		let the_url = "${root_url}/api/1.0/update_profile";
+		let gender = document.getElementById("gender").value;
+		let dict = [];
+		let result_text = {};
 
 		dict.push({["gender"] : gender});
 		if (send_post_request(the_url, dict, result_text))
@@ -210,10 +210,10 @@
 
 	function update_resting_hr()
 	{
-		var the_url = "${root_url}/api/1.0/update_profile";
-		var resting_hr = document.getElementById("resting heart rate").value;
-		var dict = [];
-		var result_text = {};
+		let the_url = "${root_url}/api/1.0/update_profile";
+		let resting_hr = document.getElementById("resting heart rate").value;
+		let dict = [];
+		let result_text = {};
 
 		dict.push({["resting heart rate"] : resting_hr});
 		if (send_post_request(the_url, dict, result_text))
@@ -233,14 +233,14 @@
 
     function append_to_pr_table(table, row_name, row_value)
     {
-        var new_row = table.insertRow();
-        var cell = new_row.insertCell();
-        var text = document.createTextNode(row_name);
+        let new_row = table.insertRow();
+        let cell = new_row.insertCell();
+        let text = document.createTextNode(row_name);
         cell.appendChild(text);
 
         if (row_value.length > 0)
         {
-            var a = document.createElement('a');
+            let a = document.createElement('a');
 
             a.appendChild(document.createTextNode(row_value[0]));
             a.title = row_value;
@@ -252,15 +252,15 @@
 
     var process_personal_records = function(records)
     {
-        var cycling_table = document.getElementById("Cycling");
-        var running_table = document.getElementById("Running");
+        let cycling_table = document.getElementById("Cycling");
+        let running_table = document.getElementById("Running");
 
-        var sorted_cycling_keys = Object.keys(records.Cycling).sort()
-        var sorted_running_keys = Object.keys(records.Running).sort()
+        let sorted_cycling_keys = Object.keys(records.Cycling).sort()
+        let sorted_running_keys = Object.keys(records.Running).sort()
 
         if (sorted_cycling_keys.length > 0)
         {
-            for (var key of sorted_cycling_keys)
+            for (let key of sorted_cycling_keys)
             {
                 append_to_pr_table(cycling_table, key, records.Cycling[key]);
             }
@@ -273,7 +273,7 @@
         if (sorted_running_keys.length > 0)
         {
             run_prs = {}
-            for (var key of sorted_running_keys)
+            for (let key of sorted_running_keys)
             {
                 if (key.includes("Best 5K"))
                     run_prs[key] = records.Running[key][2];
@@ -288,8 +288,8 @@
 
     function append_to_defaults_table(table, default_info)
     {
-        var new_row = table.insertRow();
-        var cell = new_row.insertCell();
+        let new_row = table.insertRow();
+        let cell = new_row.insertCell();
 
         cell.appendChild(document.createTextNode(default_info.activity_type));
         cell = new_row.insertCell();
@@ -298,8 +298,8 @@
 
     function append_to_power_zones_table(table, zone_num, zone_low, zone_high)
     {
-        var new_row = table.insertRow();
-        var cell = new_row.insertCell();
+        let new_row = table.insertRow();
+        let cell = new_row.insertCell();
 
         cell.appendChild(document.createTextNode("Zone " + zone_num));
         cell = new_row.insertCell();
@@ -308,8 +308,8 @@
 
     function append_to_hr_zones_table(table, zone_num, zone_low, zone_high)
     {
-        var new_row = table.insertRow();
-        var cell = new_row.insertCell();
+        let new_row = table.insertRow();
+        let cell = new_row.insertCell();
 
         cell.appendChild(document.createTextNode("Zone " + zone_num));
         cell = new_row.insertCell();
@@ -318,9 +318,9 @@
 
     var process_gear_defaults = function(records)
     {
-        var defaults_table = document.getElementById("Defaults");
+        let defaults_table = document.getElementById("Defaults");
 
-        for (var record of records)
+        for (let record of records)
         {
             append_to_defaults_table(defaults_table, record);
         }
@@ -328,14 +328,14 @@
 
     var process_user_settings = function(records)
     {
-        var units = "metric";
-        var height_units_obj = document.getElementById("height_units");
-        var weight_units_obj = document.getElementById("weight_units");
+        let units = "metric";
+        let height_units_obj = document.getElementById("height_units");
+        let weight_units_obj = document.getElementById("weight_units");
 
         // We need to know the unit system first.
-        for (var record of records)
+        for (let record of records)
         {
-            var key = Object.keys(record)[0];
+            let key = Object.keys(record)[0];
 
             if (key == "preferred units")
             {
@@ -343,11 +343,11 @@
             }
         }
     
-        for (var record of records)
+        for (let record of records)
         {
-            var key = Object.keys(record)[0];
-            var value = record[key];
-            var element = document.getElementById(key);
+            let key = Object.keys(record)[0];
+            let value = record[key];
+            let element = document.getElementById(key);
 
             if (element)
             {
@@ -375,7 +375,7 @@
                 }
                 else if (key == "birthday")
                 {
-                    var n = new Date(value * 1000);
+                    let n = new Date(value * 1000);
                     element.placeholder=n.toLocaleDateString();
                 }
                 else if (key == "gender")
@@ -398,7 +398,7 @@
 
     var process_vo2_max = function(vo2max)
     {
-        var vo2_max_elem = document.getElementById("vo2_max");
+        let vo2_max_elem = document.getElementById("vo2_max");
 
         if (vo2max == 0)
             vo2_max_elem.value = "Not calculated";
@@ -408,14 +408,14 @@
 
     var process_power_zones = function(zones)
     {
-        var zones_elem = document.getElementById("power_zones");
+        let zones_elem = document.getElementById("power_zones");
 
         if (zones.length > 0)
         {
-            var zone_num = 1;
-            var zone_low = 1;
+            let zone_num = 1;
+            let zone_low = 1;
 
-            for (var zone of zones)
+            for (let zone of zones)
             {
                 append_to_power_zones_table(zones_elem, zone_num, zone_low, zone);
                 zone_num++;
@@ -424,20 +424,20 @@
         }
         else
         {
-            var error_str = "Cycling power zones cannot be calculated until the user's FTP (functional threshold power) is set.";
+            let error_str = "Cycling power zones cannot be calculated until the user's FTP (functional threshold power) is set.";
         }
     }
 
     var process_hr_zones = function(zones)
     {
-        var zones_elem = document.getElementById("hr_zones");
+        let zones_elem = document.getElementById("hr_zones");
 
         if (zones.length > 0)
         {
-            var zone_num = 1;
-            var zone_low = 1;
+            let zone_num = 1;
+            let zone_low = 1;
 
-            for (var zone of zones)
+            for (let zone of zones)
             {
                 append_to_hr_zones_table(zones_elem, zone_num, zone_low, zone);
                 zone_num++;
@@ -452,13 +452,13 @@
 
     var process_ftp = function(record)
     {
-        var ftp_elem = document.getElementById("ftp");
+        let ftp_elem = document.getElementById("ftp");
 
         if (record.length > 0)
         {
-            var key = Object.keys(record)[0];
-            var ftp = record[key];
-            var api_url = "${root_url}/api/1.0/list_power_zones?estimated%20ftp=" + ftp;
+            let key = Object.keys(record)[0];
+            let ftp = record[key];
+            let api_url = "${root_url}/api/1.0/list_power_zones?estimated%20ftp=" + ftp;
 
             ftp_elem.value = ftp.toFixed(1) + " watts";
 
@@ -466,14 +466,14 @@
         }
         else
         {
-            var error_str = "Cycling activities with power data that was recorded in the last six months must be uploaded before your FTP can be estimated.";
+            let error_str = "Cycling activities with power data that was recorded in the last six months must be uploaded before your FTP can be estimated.";
             ftp_elem.value = error_str;
         }
     }
 
     var process_bmi = function(bmi)
     {
-        var bmi_elem = document.getElementById("bmi");
+        let bmi_elem = document.getElementById("bmi");
 
         if (bmi == 0)
             bmi_elem.value = "Not calculated";
@@ -483,43 +483,43 @@
 
     function get_personal_records()
     {
-        var api_url = "${root_url}/api/1.0/list_personal_records";
+        let api_url = "${root_url}/api/1.0/list_personal_records";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_personal_records, dataType: "json" });
     }
 
     function get_gear_defaults()
     {
-        var api_url = "${root_url}/api/1.0/list_gear_defaults";
+        let api_url = "${root_url}/api/1.0/list_gear_defaults";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_gear_defaults, dataType: "json" });
     }
 
     function get_user_settings()
     {
-        var api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=preferred%20units,height,weight,birthday,gender,resting%20heart%20rate,estimated%20max%20heart%20rate";
+        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=preferred%20units,height,weight,birthday,gender,resting%20heart%20rate,estimated%20max%20heart%20rate";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
     function get_vo2_max()
     {
-        var api_url = "${root_url}/api/1.0/estimate_vo2_max";
+        let api_url = "${root_url}/api/1.0/estimate_vo2_max";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_vo2_max, dataType: "json" });
     }
 
     function get_ftp()
     {
-        var api_url = "${root_url}/api/1.0/estimate_ftp";
+        let api_url = "${root_url}/api/1.0/estimate_ftp";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_ftp, dataType: "json" });
     }
 
     function get_bmi()
     {
-        var api_url = "${root_url}/api/1.0/estimate_bmi";
+        let api_url = "${root_url}/api/1.0/estimate_bmi";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_bmi, dataType: "json" });
     }
 
     function get_hr_zones(resting_hr)
     {
-        var api_url = "${root_url}/api/1.0/list_hr_zones?resting%20heart%20rate=" + resting_hr;
+        let api_url = "${root_url}/api/1.0/list_hr_zones?resting%20heart%20rate=" + resting_hr;
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_hr_zones, error: process_hr_zones_error, dataType: "json" });
     }
 

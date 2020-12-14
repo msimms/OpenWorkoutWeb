@@ -26,9 +26,9 @@
 
     function append_to_devices_table(table, device_id, last_heard_from)
     {
-        var new_row = table.insertRow();
-        var cell = new_row.insertCell();
-        var a = document.createElement('a');
+        let new_row = table.insertRow();
+        let cell = new_row.insertCell();
+        let a = document.createElement('a');
 
         a.appendChild(document.createTextNode(device_id));
         a.title = device_id;
@@ -38,25 +38,25 @@
         if (last_heard_from > 0)
         {
             cell = new_row.insertCell();
-            var text = document.createTextNode(unix_time_to_local_string(last_heard_from));
+            let text = document.createTextNode(unix_time_to_local_string(last_heard_from));
             cell.appendChild(text);
         }
     }
 
     var process_device_list = function(records)
     {
-		var device_table = document.getElementById("Devices");
+		let device_table = document.getElementById("Devices");
 
         if (records.length > 0)
         {
-            var new_row = device_table.insertRow();
-            var cell = new_row.insertCell();
+            let new_row = device_table.insertRow();
+            let cell = new_row.insertCell();
 
             cell.appendChild(document.createTextNode("Unique Identifier"));
             cell = new_row.insertCell();
             cell.appendChild(document.createTextNode("Last Heard From"));
 
-            for (var record of records)
+            for (let record of records)
             {
                 append_to_devices_table(device_table, record.DeviceId, record.last_heard_from);
             }

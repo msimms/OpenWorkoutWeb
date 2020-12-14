@@ -26,9 +26,9 @@
 
     function generate_new_api_key()
     {
-        var the_url = "${root_url}/api/1.0/generate_api_key";
-        var dict = [];
-        var result_text = {};
+        let the_url = "${root_url}/api/1.0/generate_api_key";
+        let dict = [];
+        let result_text = {};
 
         if (send_post_request(the_url, dict, result_text))
         {
@@ -42,19 +42,20 @@
 
     var process_keys = function(records)
     {
-        var keys_table = document.getElementById("Keys");
+        let keys_table = document.getElementById("Keys");
 
-        var new_row = keys_table.insertRow();
-        var cell = new_row.insertCell();
+        let new_row = keys_table.insertRow();
+        let cell = new_row.insertCell();
 
         cell.appendChild(document.createTextNode("API Key"));
         cell = new_row.insertCell();
         cell.appendChild(document.createTextNode("Maximum Queries Per Day"));
 
-        for (var key_record of records)
+        for (let key_record of records)
         {
-            var new_row = keys_table.insertRow();
-            var cell = new_row.insertCell();
+            let new_row = keys_table.insertRow();
+            let cell = new_row.insertCell();
+
             cell.appendChild(document.createTextNode(key_record.key));
             cell = new_row.insertCell();
             cell.appendChild(document.createTextNode(key_record.rate));

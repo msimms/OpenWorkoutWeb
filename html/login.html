@@ -23,11 +23,11 @@
 
     function submit_login()
     {
-        var the_url = "/api/1.0/login";
-        var username = document.getElementById("username").value;
-        var password = document.getElementById("password").value;
-        var dict = [];
-        var result_text = {};
+        let the_url = "/api/1.0/login";
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+        let dict = [];
+        let result_text = {};
 
         dict.push({["username"] : username});
         dict.push({["password"] : password});

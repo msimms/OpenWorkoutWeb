@@ -33,10 +33,10 @@
 
     function set_preferred_long_run_day()
     {
-        var the_url = "${root_url}/api/1.0/update_settings";
-        var preferred_long_run_day = document.getElementById("preferred_long_run_day").value;
-        var dict = [];
-        var result_text = {};
+        let the_url = "${root_url}/api/1.0/update_settings";
+        let preferred_long_run_day = document.getElementById("preferred_long_run_day").value;
+        let dict = [];
+        let result_text = {};
 
         dict.push({["preferred long run day"] : preferred_long_run_day});
         if (send_post_request(the_url, dict, result_text))
@@ -47,10 +47,10 @@
 
     function set_goal()
     {
-        var the_url = "${root_url}/api/1.0/update_settings";
-        var goal = document.getElementById("goal").value;
-        var dict = [];
-        var result_text = {};
+        let the_url = "${root_url}/api/1.0/update_settings";
+        let goal = document.getElementById("goal").value;
+        let dict = [];
+        let result_text = {};
 
         dict.push({["goal"] : goal});
         if (send_post_request(the_url, dict, result_text))
@@ -61,11 +61,11 @@
 
     function set_goal_date()
     {
-        var the_url = "${root_url}/api/1.0/update_settings";
-        var goal_date_obj = document.getElementById("goal_date");
-        var goal_date = 0;
-        var dict = [];
-        var result_text = {};
+        let the_url = "${root_url}/api/1.0/update_settings";
+        let goal_date_obj = document.getElementById("goal_date");
+        let goal_date = 0;
+        let dict = [];
+        let result_text = {};
 
         if (goal_date_obj.value == "")
         {
@@ -90,10 +90,10 @@
 
     function set_goal_type()
     {
-        var the_url = "${root_url}/api/1.0/update_settings";
-        var goal_type = document.getElementById("goal_type").value;
-        var dict = [];
-        var result_text = {};
+        let the_url = "${root_url}/api/1.0/update_settings";
+        let goal_type = document.getElementById("goal_type").value;
+        let dict = [];
+        let result_text = {};
 
         dict.push({["goal type"] : goal_type});
         if (send_post_request(the_url, dict, result_text))
@@ -104,10 +104,10 @@
 
     function set_exp_level()
     {
-        var the_url = "${root_url}/api/1.0/update_settings";
-        var exp_level = document.getElementById("exp_level").value;
-        var dict = [];
-        var result_text = {};
+        let the_url = "${root_url}/api/1.0/update_settings";
+        let exp_level = document.getElementById("exp_level").value;
+        let dict = [];
+        let result_text = {};
 
         dict.push({["Experience Level"] : exp_level});
         if (send_post_request(the_url, dict, result_text))
@@ -118,9 +118,9 @@
 
     function generate_workout_plan()
     {
-        var the_url = "${root_url}/api/1.0/generate_workout_plan";
-        var dict = [];
-        var result_text = {};
+        let the_url = "${root_url}/api/1.0/generate_workout_plan";
+        let dict = [];
+        let result_text = {};
 
         if (send_post_request(the_url, dict, result_text))
             alert("The workout plan is being generated and will be viewable on the My Activities page when complete.");
@@ -138,8 +138,8 @@
 
     function append_to_paces_table(table, row_name, row_value)
     {
-        var new_row = table.insertRow();
-        var cell = new_row.insertCell();
+        let new_row = table.insertRow();
+        let cell = new_row.insertCell();
         cell.appendChild(document.createTextNode(row_name));
 
         cell = new_row.insertCell();
@@ -148,14 +148,14 @@
 
     var process_run_paces = function(records)
     {
-        var paces_table = document.getElementById("RunPaces");
-        var new_records = Object.keys(records).reduce(function(obj, key){
+        let paces_table = document.getElementById("RunPaces");
+        let new_records = Object.keys(records).reduce(function(obj, key){
             obj[ records[key] ] = key;
             return obj;
         },{});
-        var paces_keys = Object.keys(new_records).sort();
+        let paces_keys = Object.keys(new_records).sort();
 
-        for (var key of paces_keys)
+        for (let key of paces_keys)
         {
             append_to_paces_table(paces_table, new_records[key], key);
         }
@@ -163,20 +163,20 @@
 
     function get_run_paces(run_prs)
     {
-        var api_url = "${root_url}/api/1.0/get_running_paces?" + serialize_to_url_params(run_prs);
+        let api_url = "${root_url}/api/1.0/get_running_paces?" + serialize_to_url_params(run_prs);
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_run_paces, dataType: "json" });
     }
 
     function append_to_pr_table(table, row_name, row_value)
     {
-        var new_row = table.insertRow();
-        var cell = new_row.insertCell();
+        let new_row = table.insertRow();
+        let cell = new_row.insertCell();
 
         cell.appendChild(document.createTextNode(row_name));
 
         if (row_value.length > 0)
         {
-            var a = document.createElement('a');
+            let a = document.createElement('a');
 
             cell = new_row.insertCell();
             a.appendChild(document.createTextNode(row_value[0]));
@@ -188,15 +188,15 @@
 
     var process_personal_records = function(records)
     {
-        var cycling_table = document.getElementById("Cycling");
-        var running_table = document.getElementById("Running");
+        let cycling_table = document.getElementById("Cycling");
+        let running_table = document.getElementById("Running");
 
-        var sorted_cycling_keys = Object.keys(records.Cycling).sort()
-        var sorted_running_keys = Object.keys(records.Running).sort()
+        let sorted_cycling_keys = Object.keys(records.Cycling).sort()
+        let sorted_running_keys = Object.keys(records.Running).sort()
 
         if (sorted_cycling_keys.length > 0)
         {
-            for (var key of sorted_cycling_keys)
+            for (let key of sorted_cycling_keys)
             {
                 append_to_pr_table(cycling_table, key, records.Cycling[key]);
             }
@@ -209,7 +209,7 @@
         if (sorted_running_keys.length > 0)
         {
             run_prs = {}
-            for (var key of sorted_running_keys)
+            for (let key of sorted_running_keys)
             {
                 if (key.includes("Best 5K"))
                     run_prs[key] = records.Running[key][2];
@@ -227,14 +227,14 @@
 
     var process_user_settings = function(records)
     {
-        for (var record of records)
+        for (let record of records)
         {
-            var key = Object.keys(record)[0];
-            var value = record[key];
+            let key = Object.keys(record)[0];
+            let value = record[key];
 
             if (key == "goal")
             {
-                var element = document.getElementById(key);
+                let element = document.getElementById(key);
 
                 if (value == "Fitness")
                     element.selectedIndex = 0;
@@ -255,14 +255,14 @@
             }
             else if (key == "goal_date")
             {
-                var element = document.getElementById(key);
-                var n = new Date(value * 1000);
+                let element = document.getElementById(key);
+                let n = new Date(value * 1000);
 
                 element.placeholder=n.toLocaleDateString();
             }
             else if (key == "goal type")
             {
-                var element = document.getElementById("goal_type");
+                let element = document.getElementById("goal_type");
 
                 if (value == "Completion")
                     element.selectedIndex = 0;
@@ -271,7 +271,7 @@
             }
             else if (key == "preferred long run day")
             {
-                var element = document.getElementById("preferred_long_run_day");
+                let element = document.getElementById("preferred_long_run_day");
 
                 if (value == "sunday")
                     element.selectedIndex = 0;
@@ -290,7 +290,7 @@
             }
             else if (key == "Experience Level")
             {
-                var element = document.getElementById("exp_level");
+                let element = document.getElementById("exp_level");
 
                 if (value == "Beginner")
                     element.selectedIndex = 0;
@@ -304,27 +304,27 @@
 
     var process_calendar_url = function(url_str)
     {
-        var paragraph = "These workouts are also available by via iCal by subscribing to your iCal workouts calendar: " + url_str;
-        var element = document.getElementById("calendar_url");
+        let paragraph = "These workouts are also available by via iCal by subscribing to your iCal workouts calendar: " + url_str;
+        let element = document.getElementById("calendar_url");
         element.innerHTML = paragraph;
     }
 
     function get_personal_records()
     {
-        var six_months = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0);
-        var api_url = "${root_url}/api/1.0/list_personal_records?seconds=" + six_months;
+        let six_months = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0);
+        let api_url = "${root_url}/api/1.0/list_personal_records?seconds=" + six_months;
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_personal_records, dataType: "json" });
     }
 
     function get_user_settings()
     {
-        var api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal,goal_date,goal%20type,preferred%20long%20run%20day,Experience%20Level";
+        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal,goal_date,goal%20type,preferred%20long%20run%20day,Experience%20Level";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
     function get_calendar_url()
     {
-        var api_url = "${root_url}/api/1.0/get_workout_ical_url";
+        let api_url = "${root_url}/api/1.0/get_workout_ical_url";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_calendar_url, dataType: "text" });
     }
 

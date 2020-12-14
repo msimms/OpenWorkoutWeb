@@ -31,17 +31,17 @@
 
 	function list_activities()
 	{
-		var activity_list = [];
-		var the_url = "${root_url}/api/1.0/list_my_activities";
-		var result_text = {};
+		let activity_list = [];
+		let the_url = "${root_url}/api/1.0/list_my_activities";
+		let result_text = {};
 
 		if (send_get_request(the_url, result_text))
 		{
-			var obj = JSON.parse(result_text.value);
+			let obj = JSON.parse(result_text.value);
 
-			for (var i = 0; i < obj.length; i++)
+			for (let i = 0; i < obj.length; i++)
 			{
-				var activity_obj = obj[i];
+				let activity_obj = obj[i];
 
 				activity_obj['start'] = unix_time_to_iso_time(activity_obj['time']);
                 activity_obj['color'] = 'DarkTurquoise';
@@ -58,19 +58,19 @@
 
 	function list_workouts()
 	{
-		var workout_list = [];
-		var the_url = "${root_url}/api/1.0/list_workouts";
-		var result_text = {};
-        var d = new Date();
-        var tz_offset = d.getTimezoneOffset() * 60;
+		let workout_list = [];
+		let the_url = "${root_url}/api/1.0/list_workouts";
+		let result_text = {};
+        let d = new Date();
+        let tz_offset = d.getTimezoneOffset() * 60;
 
 		if (send_get_request(the_url, result_text))
 		{
-			var obj = JSON.parse(result_text.value);
+			let obj = JSON.parse(result_text.value);
 
-			for (var i = 0; i < obj.length; i++)
+			for (let i = 0; i < obj.length; i++)
 			{
-				var workout_obj = obj[i];
+				let workout_obj = obj[i];
 
 				workout_obj['start'] = unix_time_to_iso_time(workout_obj['scheduled time'] + tz_offset);
                 workout_obj['color'] = 'Tomato';
@@ -95,8 +95,8 @@
 
     function get_preferred_first_day_of_week()
     {
-        var the_url = "${root_url}/api/1.0/get_user_setting?requested%20setting=preferred%20first%20day%20of%20week";
-        var result_text = {};
+        let the_url = "${root_url}/api/1.0/get_user_setting?requested%20setting=preferred%20first%20day%20of%20week";
+        let result_text = {};
 
         if (send_get_request(the_url, result_text))
         {

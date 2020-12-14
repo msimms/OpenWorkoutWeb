@@ -37,8 +37,8 @@
 
     function latlon_to_xy(canvas, lat, lon, x_offset, y_offset, x_scale, y_scale)
     {
-        var width = canvas.width;
-        var height = canvas.height;
+        let width = canvas.width;
+        let height = canvas.height;
 
         x = (x_offset + (((lon + 180.0) / 360.0) * width)) * x_scale;
         y = (y_offset + (height - (((lat + 90.0) / 180.0) * height))) * y_scale;
@@ -48,10 +48,10 @@
 
     function draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, x_scale, y_scale)
     {
-        var is_first = true;
+        let is_first = true;
 
         ctx.beginPath();
-        for (var coordinate of coordinate_list)
+        for (let coordinate of coordinate_list)
         {
             [x, y] = latlon_to_xy(canvas, coordinate[1], coordinate[0], x_offset, y_offset, x_scale, y_scale);
 
@@ -71,7 +71,7 @@
 
     function draw_geo_polygon(canvas, ctx, polygon_objects, x_offset, y_offset, x_scale, y_scale)
     {
-        for (var coordinate_list of polygon_objects)
+        for (let coordinate_list of polygon_objects)
         {
             draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, x_scale, y_scale);
         }
@@ -79,9 +79,10 @@
 
     function draw_region(canvas, ctx, region_objects, heat_map, x_offset, y_offset, x_scale, y_scale)
     {
-        for (var region_object of region_objects.features)
+        for (let region_object of region_objects.features)
         {
-            var name = region_object.properties.name;
+            let name = region_object.properties.name;
+
             if (heat_map.indexOf(name) == -1)
                 ctx.fillStyle = '#c3c3c3';
             else
@@ -103,22 +104,24 @@
 
     function draw_world_map(region_objects)
     {
-        var canvas = document.getElementById("worldCanvas");
-        var ctx = canvas.getContext("2d");
+        let canvas = document.getElementById("worldCanvas");
+        let ctx = canvas.getContext("2d");
+
         draw_region(canvas, ctx, region_objects, countries, 20.0, 40.0, 1.0, 1.0);
     }
 
     function draw_us_canada_map(us_region_objects, canada_region_objects)
     {
-        var canvas = document.getElementById("usCanadaCanvas");
-        var ctx = canvas.getContext("2d");
+        let canvas = document.getElementById("usCanadaCanvas");
+        let ctx = canvas.getContext("2d");
+
         draw_region(canvas, ctx, us_region_objects, us_states, -20.0, -50.0, 3.0, 3.4);
         draw_region(canvas, ctx, canada_region_objects, canadian_provinces, -20.0, -50.0, 3.0, 3.4);
     }
 
     function get_map_data()
     {
-        var map_store = {world:null, us:null, canada:null}; 
+        let map_store = {world:null, us:null, canada:null}; 
 
         $.when(
             $.get("${root_url}/data/world.geo.json", function(world) { map_store.world = world; }),
@@ -132,12 +135,12 @@
 
     var process_heat_map = function(heat_map)
     {
-        for (var location_description in heat_map)
+        for (let location_description in heat_map)
         {
-            var location_array = location_description.split(',');
+            let location_array = location_description.split(',');
             if (location_array.length > 0)
             {
-                var country = location_array[location_array.length - 1].trim();
+                let country = location_array[location_array.length - 1].trim();
                 if (countries.indexOf(country) == -1)
                 {
                     countries.push(country);
@@ -146,7 +149,7 @@
                 {
                     if (country == "United States")
                     {
-                        var state = location_array[location_array.length - 2].trim();
+                        let state = location_array[location_array.length - 2].trim();
                         if (us_states.indexOf(state) == -1)
                         {
                             us_states.push(state);
@@ -154,7 +157,7 @@
                     }
                     else if (country == "Canada")
                     {
-                        var province = location_array[location_array.length - 2].trim();
+                        let province = location_array[location_array.length - 2].trim();
                         if (canadian_provinces.indexOf(province) == -1)
                         {
                             canadian_provinces.push(province);
@@ -168,14 +171,14 @@
 
     function append_to_table(table, row_name, row_value)
     {
-        var new_row = table.insertRow();
-        var cell = new_row.insertCell();
-        var text = document.createTextNode(row_name);
+        let new_row = table.insertRow();
+        let cell = new_row.insertCell();
+        let text = document.createTextNode(row_name);
         cell.appendChild(text);
 
         cell = new_row.insertCell();
-        var a = document.createElement('a');
-        var link_text = document.createTextNode(row_value[0]);
+        let a = document.createElement('a');
+        let link_text = document.createTextNode(row_value[0]);
         a.appendChild(link_text);
         a.title = row_value;
         a.href = "${root_url}/activity/" + row_value[1];
@@ -184,17 +187,17 @@
 
     var process_personal_records = function(records)
     {
-		var cycling_table = document.getElementById("Cycling");
-		var running_table = document.getElementById("Running");
+		let cycling_table = document.getElementById("Cycling");
+		let running_table = document.getElementById("Running");
 
-        var sorted_cycling_keys = Object.keys(records.Cycling).sort()
-        var sorted_running_keys = Object.keys(records.Running).sort()
+        let sorted_cycling_keys = Object.keys(records.Cycling).sort()
+        let sorted_running_keys = Object.keys(records.Running).sort()
 
-        for (var key of sorted_cycling_keys)
+        for (let key of sorted_cycling_keys)
         {
             append_to_table(cycling_table, key, records.Cycling[key]);
         }
-        for (var key of sorted_running_keys)
+        for (let key of sorted_running_keys)
         {
             append_to_table(running_table, key, records.Running[key]);
         }

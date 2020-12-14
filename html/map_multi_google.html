@@ -71,15 +71,15 @@ ${routeCoordintes}
 		if (route_path == null)
 			return;
 
-		var obj_list = JSON.parse(response);
+		let obj_list = JSON.parse(response);
 		if (obj_list == null)
 			return;
 		if (obj_list.length == 0)
 			return;
 
-		for (var i = 0; i < obj_list.length; ++i)
+		for (let i = 0; i < obj_list.length; ++i)
 		{
-			var path = route_path.getPath();
+			let path = route_path.getPath();
 			routeCoordinates.push(new google.maps.LatLng(obj_list[i].latitude, obj_list[i].longitude));
 			route_path.setPath(routeCoordinates);
 			route_path.setMap(map);
@@ -103,11 +103,11 @@ ${routeCoordintes}
 
 		if (response.length >= 3)
         {
-            var obj_list = JSON.parse(response);
+            let obj_list = JSON.parse(response);
             if (obj_list == null)
                 return;
 
-            for (var i = 0; i < obj_list.length; ++i)
+            for (let i = 0; i < obj_list.length; ++i)
             {
                 if ((obj_list[i].name != "Name") && (obj_list[i].name != "Avg. Speed"))
                 {

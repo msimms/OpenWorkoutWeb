@@ -26,9 +26,9 @@
 
 	function request_to_be_friends(target)
 	{
-		var the_url = "${root_url}/api/1.0/request_to_be_friends";
-		var dict = [];
-		var result_text = {};
+		let the_url = "${root_url}/api/1.0/request_to_be_friends";
+		let dict = [];
+		let result_text = {};
 
 		dict.push({["target_email"] : target.name});
 		if (send_post_request(the_url, dict, result_text))
@@ -43,9 +43,9 @@
 
     function confirm_friend(useremail)
     {
-		var the_url = "${root_url}/api/1.0/confirm_request_to_be_friends";
-		var dict = [];
-		var result_text = {};
+		let the_url = "${root_url}/api/1.0/confirm_request_to_be_friends";
+		let dict = [];
+		let result_text = {};
 
 		dict.push({["target_email"] : useremail});
 		if (send_post_request(the_url, dict, result_text))
@@ -62,9 +62,9 @@
     {
 		if (confirm('Are you sure you want to do this?'))
 		{
-            var the_url = "${root_url}/api/1.0/unfriend";
-            var dict = [];
-            var result_text = {};
+            let the_url = "${root_url}/api/1.0/unfriend";
+            let dict = [];
+            let result_text = {};
 
             dict.push({["target_email"] : useremail});
             if (send_post_request(the_url, dict, result_text))
@@ -80,24 +80,25 @@
 
 	function search()
 	{
-		var the_url = "${root_url}/api/1.0/list_matched_users";
-		var searchname = document.getElementById("searchname").value;
-		var dict = [];
-		var result_text = {};
+		let the_url = "${root_url}/api/1.0/list_matched_users";
+		let searchname = document.getElementById("searchname").value;
+		let dict = [];
+		let result_text = {};
 
 		dict.push({["searchname"] : searchname});
 		if (send_post_request(the_url, dict, result_text))
 		{
-			var table = document.getElementById('search_results');
-			var obj = JSON.parse(result_text.value);
-			for (var i = 0; i < obj.length; i++)
+			let table = document.getElementById('search_results');
+			let obj = JSON.parse(result_text.value);
+
+			for (let i = 0; i < obj.length; i++)
 			{
-				var tr = document.createElement('tr');   
-				var td1 = document.createElement('td');
-				var td2 = document.createElement('td');
-				var email_text = document.createTextNode(obj[i]);
-				var friend_link = document.createElement('button');
-				var friend_link_text = document.createTextNode('Request Friend');
+				let tr = document.createElement('tr');   
+				let td1 = document.createElement('td');
+				let td2 = document.createElement('td');
+				let email_text = document.createTextNode(obj[i]);
+				let friend_link = document.createElement('button');
+				let friend_link_text = document.createTextNode('Request Friend');
 
 				friend_link.appendChild(friend_link_text);
 				friend_link.title = "Request Friend";
@@ -121,9 +122,9 @@
 
     function append_to_friends_table(table, username, useremail, requesting_user, is_pending_request)
     {
-        var new_row = table.insertRow();
-        var cell = new_row.insertCell();
-        var text = document.createTextNode(username);
+        let new_row = table.insertRow();
+        let cell = new_row.insertCell();
+        let text = document.createTextNode(username);
         cell.appendChild(text);
 
         cell = new_row.insertCell();
@@ -140,8 +141,9 @@
             }
             else
             {
-                var btn = document.createElement('button');
-                var btn_txt = document.createTextNode('Confirm');
+                let btn = document.createElement('button');
+                let btn_txt = document.createTextNode('Confirm');
+
                 btn.appendChild(btn_txt);
                 btn.title = "Confirm";
                 btn.addEventListener('click', function() { confirm_friend(useremail); });
@@ -150,8 +152,9 @@
             }
         }
 
-        var btn = document.createElement('button');
-        var btn_txt = document.createTextNode('Delete');
+        let btn = document.createElement('button');
+        let btn_txt = document.createTextNode('Delete');
+
         btn.appendChild(btn_txt);
         btn.title = "Delete";
         btn.style = "color:red";
@@ -162,9 +165,9 @@
 
     function process_friends_list(records, is_pending_request)
     {
-		var friends_table = document.getElementById("Friends");
+		let friends_table = document.getElementById("Friends");
 
-        for (var friend of records)
+        for (let friend of records)
         {
             append_to_friends_table(friends_table, friend.realname, friend.username, friend.requesting_user, is_pending_request);
         }
@@ -172,8 +175,8 @@
 
     function get_friends_lists()
     {
-        var pending_friends = null;
-        var friends = null;
+        let pending_friends = null;
+        let friends = null;
 
         $.when(
             $.get("${root_url}/api/1.0/list_pending_friends", function(users) { pending_friends = users; }),

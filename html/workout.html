@@ -50,15 +50,15 @@
 	{
 		if (response && response.length >= 3)
         {
-            var obj_list = JSON.parse(response);
+            let obj_list = JSON.parse(response);
             if (obj_list == null)
                 return;
 
             document.getElementById("type").textContent = obj_list.type;
 
-            var description = obj_list.description;
+            let description = obj_list.description;
             description = description.split("\\n").join("<br>");
-    		var elem = document.getElementById("description");
+    		let elem = document.getElementById("description");
             elem.innerHTML = description;
         }
 	};

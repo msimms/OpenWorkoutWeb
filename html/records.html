@@ -32,9 +32,9 @@ ${nav}
 
     function append_to_table(table, record_time, activity_id)
     {
-        var new_row = table.insertRow();
-        var a = document.createElement('a');
-        var link_text = document.createTextNode(activity_id);
+        let new_row = table.insertRow();
+        let a = document.createElement('a');
+        let link_text = document.createTextNode(activity_id);
 
         cell = new_row.insertCell();
         text = document.createTextNode(record_time);
@@ -49,9 +49,9 @@ ${nav}
 
     var process_records = function(records)
     {
-        var table = document.getElementById("records");
+        let table = document.getElementById("records");
 
-        for (var record_index in records)
+        for (let record_index in records)
         {
             append_to_table(table, records[record_index][0], records[record_index][1]);
         }
@@ -59,7 +59,7 @@ ${nav}
 
     function list_records()
     {
-        var api_url = "${root_url}/api/1.0/get_record_progression?activity_type=${activity_type}&record_name=${record_name}";
+        let api_url = "${root_url}/api/1.0/get_record_progression?activity_type=${activity_type}&record_name=${record_name}";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_records, dataType: "json" });
     }
 
