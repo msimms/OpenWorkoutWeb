@@ -270,10 +270,6 @@ button .fa {
 	margin: 5px;
 }
 
-.block textarea {
-    border: 0px;
-}
-
 .block section {
     border: 10px;
     width: 1000px;
@@ -282,6 +278,10 @@ button .fa {
 .block div {
     border: 10px;
     width: 1000px;
+}
+
+.comment textarea {
+    border: 0px;
 }
 
 .map_canvas {

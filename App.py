@@ -304,7 +304,7 @@ class App(object):
             comments_str += decoded_entry[Keys.ACTIVITY_COMMENT_KEY]
             comments_str += "\"</td><tr>\n"
         if logged_in:
-            comments_str += "<td><textarea rows=\"4\" style=\"width:50%;\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>\n"
+            comments_str += "<td><textarea rows=\"4\" class=\"comment\" style=\"width:50%;\" maxlength=\"512\" id=\"comment\"></textarea></td><tr>\n"
             comments_str += "<td><button type=\"button\" onclick=\"return create_comment()\">Post</button></td><tr>\n"
         elif len(comments_str) == 0:
             comments_str = "None"
