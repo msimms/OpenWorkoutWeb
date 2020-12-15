@@ -899,27 +899,6 @@ class Api(object):
         json_result = json.dumps(result, ensure_ascii=False)
         return True, json_result
 
-    def handle_retrieve_activity_photo(self, values):
-        """Returns the specified activity photo."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-        if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.ACTIVITY_PHOTO_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-
-        # Validate the activity ID.
-        activity_id = values[Keys.ACTIVITY_ID_KEY]
-        if not InputChecker.is_uuid(activity_id):
-            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
-
-        # Validate the photo ID.
-        activity_photo_id = values[Keys.ACTIVITY_PHOTO_ID_KEY]
-        if not InputChecker.is_uuid(activity_photo_id):
-            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
-
-        return True, ""
-
     def handle_delete_activity_photo(self, values):
         """Called when an API message to delete a photo and remove it from an activity is received."""
         if self.user_id is None:
@@ -1950,8 +1929,6 @@ class Api(object):
             return self.handle_list_activities(values, False)
         elif request == 'list_activity_photos':
             return self.handle_list_activity_photos(values)
-        elif request == 'retrieve_activity_photo':
-            return self.handle_retrieve_activity_photo(values)
         elif request == 'list_pending_friends':
             return self.list_pending_friends(values)
         elif request == 'list_friends':

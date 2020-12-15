@@ -341,6 +341,20 @@ class DataMgr(Importer.ActivityWriter):
 
         return self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
 
+    def get_user_photos_dir(self, user_id):
+        """Calculates the photos dir assigned to the specified user and creates if it does not exist."""
+
+        # Where are we storing photos?
+        photos_dir = self.config.get_photos_dir()
+        if len(photos_dir) == 0:
+            raise Exception("No photos directory.")
+
+        # Create the directory, if it does not already exist.
+        user_photos_dir = os.path.join(os.path.normpath(os.path.expanduser(photos_dir)), str(user_id))
+        if not os.path.exists(user_photos_dir):
+            os.makedirs(user_photos_dir)
+        return user_photos_dir
+
     def attach_photo_to_activity(self, user_id, uploaded_file_data, activity_id):
         """Imports a photo and associates it with an activity."""
         if self.database is None:
@@ -367,14 +381,7 @@ class DataMgr(Importer.ActivityWriter):
         hash_str = h.hexdigest()
 
         # Where are we storing photos?
-        photos_dir = self.config.get_photos_dir()
-        if len(photos_dir) == 0:
-            raise Exception("No photos directory.")
-
-        # Create the directory, if it does not already exist.
-        user_photos_dir = os.path.join(os.path.normpath(os.path.expanduser(photos_dir)), str(user_id))
-        if not os.path.exists(user_photos_dir):
-            os.makedirs(user_photos_dir)
+        user_photos_dir = self.get_user_photos_dir(user_id)
 
         # Save the file to the user's photos directory.
         try:

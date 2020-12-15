@@ -31,6 +31,7 @@ DATA_DIR = 'data'
 JS_DIR = 'js'
 IMAGES_DIR = 'images'
 MEDIA_DIR = 'media'
+PHOTOS_DIR = 'photos'
 ERROR_LOG = 'error.log'
 
 
@@ -113,6 +114,17 @@ def media(file_name):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + media.__name__)
+    return g_app.render_error()
+
+@g_flask_app.route('/photos/<user_id>/<file_name>')
+def photos(user_id, file_name):
+    """Returns an activity photo."""
+    try:
+        return flask.send_from_directory(PHOTOS_DIR, os.path.join(user_id, file_name))
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + photos.__name__)
     return g_app.render_error()
 
 @g_flask_app.route('/stats')

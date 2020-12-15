@@ -72,8 +72,8 @@ ${nav}
 
     function append_to_summary_list(key, value)
     {
-        var ul = document.getElementById("summary");
-        var li = document.createElement("li");
+        let ul = document.getElementById("summary");
+        let li = document.createElement("li");
         li.appendChild(document.createTextNode(key + " " + value));
         ul.appendChild(li);
     }
@@ -85,14 +85,14 @@ ${nav}
         if (response.length < 3)
             return;
 
-        var obj_list = JSON.parse(response);
+        let obj_list = JSON.parse(response);
         if (obj_list == null)
             return;
         if (obj_list.length == 0)
             return;
 
-        var coordinates = feature.getGeometry().getCoordinates();
-        for (var i = 0; i < obj_list.length; ++i)
+        let coordinates = feature.getGeometry().getCoordinates();
+        for (let i = 0; i < obj_list.length; ++i)
         {
             coordinates.push(new OpenLayers.LonLat(obj_list[i].latitude, obj_list[i].longitude));
         }
@@ -115,11 +115,11 @@ ${nav}
 
         if (response.length >= 3)
         {
-            var obj_list = JSON.parse(response);
+            let obj_list = JSON.parse(response);
             if (obj_list == null)
                 return;
 
-            for (var i = 0; i < obj_list.length; ++i)
+            for (let i = 0; i < obj_list.length; ++i)
             {
                 if ((obj_list[i].name != "Name") && (obj_list[i].name != "Avg. Speed"))
                 {
@@ -139,8 +139,8 @@ ${nav}
             '</div>' +
             '</div>';
 
-        var lon_lat = new OpenLayers.LonLat(last_lon, last_lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
-        var markers = new OpenLayers.Layer.Markers("Markers");
+        let lon_lat = new OpenLayers.LonLat(last_lon, last_lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
+        let markers = new OpenLayers.Layer.Markers("Markers");
         map.addLayer(markers);    
         markers.addMarker(new OpenLayers.Marker(lon_lat));
     };
@@ -178,8 +178,8 @@ ${nav}
         } );
 
         // Data source.... export the activity as GPX.
-        var gpx_format = new OpenLayers.Format.GPX();
-        var vector_source = new OpenLayers.Protocol.HTTP({
+        let gpx_format = new OpenLayers.Format.GPX();
+        let vector_source = new OpenLayers.Protocol.HTTP({
             url: "${root_url}/api/1.0/export_activity?activity_id=${activityId}&export_format=gpx",
             format: gpx_format
         });
@@ -192,28 +192,30 @@ ${nav}
             style: {strokeColor: "red", strokeWidth: 3, strokeOpacity: 0.75},
             projection: proj
         });
-        lgpx.events.register("loadend", lgpx, function() {
-            var features = lgpx.features[0];
-            var route_coordinates = [];
-            var components = features.geometry.components;
+        lgpx.events.register("loadend", lgpx, function()
+        {
+            let features = lgpx.features[0];
+            let route_coordinates = [];
+            let components = features.geometry.components;
 
-            for (var i = 0; i < components.length; ++i) {
-                var lat_lon = OpenLayers.Projection.transform(components[i], 'EPSG:3857', 'EPSG:4326');
+            for (let i = 0; i < components.length; ++i)
+            {
+                let lat_lon = OpenLayers.Projection.transform(components[i], 'EPSG:3857', 'EPSG:4326');
                 route_coordinates.push(lat_lon);
             }
 
             // Analyze the route, compute the total distance, avg. speed, etc.
-            var meters_traveled = total_distance_osm(route_coordinates);
-            var distance_traveled_str = convert_distance_to_unit_system_str("${unit_system}", meters_traveled);
+            let meters_traveled = total_distance_osm(route_coordinates);
+            let distance_traveled_str = convert_distance_to_unit_system_str("${unit_system}", meters_traveled);
             append_to_summary_list("Distance", distance_traveled_str);
             if (${is_foot_based_activity})
             {
-                var pace_str = convert_distance_and_duration_to_pace_str("${unit_system}", meters_traveled, ${duration});
+                let pace_str = convert_distance_and_duration_to_pace_str("${unit_system}", meters_traveled, ${duration});
                 append_to_summary_list("Avg. Pace:", pace_str);
             }
             else
             {
-                var speed_str = convert_distance_and_duration_to_speed_str("${unit_system}", meters_traveled, ${duration});
+                let speed_str = convert_distance_and_duration_to_speed_str("${unit_system}", meters_traveled, ${duration});
                 append_to_summary_list("Avg. Speed:", speed_str);
             }
         });
@@ -224,10 +226,10 @@ ${nav}
 
         // Start position for the map (hardcoded here for simplicity,
         // but maybe you want to get this from the URL params).
-        var lat = last_lat;
-        var lon = last_lon;
-        var zoom = 13;
-        var lon_lat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
+        let lat = last_lat;
+        let lon = last_lon;
+        let zoom = 13;
+        let lon_lat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
         map.setCenter(lon_lat, zoom);
 
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: update_metadata, dataType: "text" });
@@ -259,23 +261,24 @@ ${summary}
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
 <script type="text/javascript">
+
 	function draw_graph(data, title, color)
 	{
-		var margin = {top: 20, right: 20, bottom: 20, left: 50},
+		let margin = {top: 20, right: 20, bottom: 20, left: 50},
 			width = $("#charts").width() - margin.left - margin.right,
 			height = 250 - margin.top - margin.bottom;
 
-		var x = d3.time.scale().range([0, width]);
-		var y = d3.scale.linear().range([height, 0]);
+		let x = d3.time.scale().range([0, width]);
+		let y = d3.scale.linear().range([height, 0]);
 
-		var xAxis = d3.svg.axis().scale(x).orient("bottom");
-		var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
+		let xAxis = d3.svg.axis().scale(x).orient("bottom");
+		let yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
 
-		var valueline = d3.svg.line()
+		let valueline = d3.svg.line()
 			.x(function(d) { return x(d.date); })
 			.y(function(d) { return y(d.value); });
 
-		var svg = d3.select("#charts")
+		let svg = d3.select("#charts")
 			.append("svg:svg")
 				.attr("width", width + margin.left + margin.right)
 				.attr("height", height + margin.top + margin.bottom)
@@ -306,19 +309,19 @@ ${summary}
 
 	function draw_bar_chart(data, title, color)
 	{
-        var xVals = Array.apply(null, Array(data.length - 1)).map(function (x, i) { return i + 1; } );
+        let xVals = Array.apply(null, Array(data.length - 1)).map(function (x, i) { return i + 1; } );
 
-		var margin = {top: 20, right: 20, bottom: 55, left: 50},
+		let margin = {top: 20, right: 20, bottom: 55, left: 50},
 			width = $("#charts").width() - margin.left - margin.right,
 			height = 250 - margin.top - margin.bottom;
 
-        var x = d3.scale.ordinal().domain(xVals).rangeBands([0, width]);
-        var y = d3.scale.linear().domain([0, d3.max(data)]).range([height, 0]);
+        let x = d3.scale.ordinal().domain(xVals).rangeBands([0, width]);
+        let y = d3.scale.linear().domain([0, d3.max(data)]).range([height, 0]);
 
-		var xAxis = d3.svg.axis().scale(x).orient("bottom");
-		var yAxis = d3.svg.axis().scale(y).orient("left").ticks(0);
+		let xAxis = d3.svg.axis().scale(x).orient("bottom");
+		let yAxis = d3.svg.axis().scale(y).orient("left").ticks(0);
 
-		var svg = d3.select("#charts")
+		let svg = d3.select("#charts")
 			.append("svg:svg")
 				.attr("width", width + margin.left + margin.right)
 				.attr("height", height + margin.top + margin.bottom)
@@ -386,16 +389,18 @@ ${splits}
 		$(function() { draw_bar_chart(powerZones, "Power Zone Distribution", "ForestGreen") });
 	if (splits.length > 0)
 		$(function() { draw_bar_chart(splits, "Split Times", "LightSteelBlue") });
+
 </script>
 
 </div>
 
 <script>
+
     function refresh_analysis()
     {
-        var the_url = "${root_url}/api/1.0/refresh_analysis";
-        var dict = [];
-        var result_text = {};
+        let the_url = "${root_url}/api/1.0/refresh_analysis";
+        let dict = [];
+        let result_text = {};
 
         dict.push({["activity_id"] : "${activityId}"});
         if (send_post_request(the_url, dict, result_text))
@@ -406,10 +411,10 @@ ${splits}
 
     function create_comment()
     {
-        var the_url = "${root_url}/api/1.0/create_comment";
-        var comment = document.getElementById("comment").value;
-        var dict = [];
-        var result_text = {};
+        let the_url = "${root_url}/api/1.0/create_comment";
+        let comment = document.getElementById("comment").value;
+        let dict = [];
+        let result_text = {};
 
         dict.push({["activity_id"] : "${activityId}"});
         dict.push({["comment"] : comment});
@@ -421,10 +426,10 @@ ${splits}
 
     function export_activity()
     {
-        var the_url = "${root_url}/api/1.0/export_activity";
-        var format = document.getElementById("format").value;
-        var dict = [];
-        var result_text = {};
+        let the_url = "${root_url}/api/1.0/export_activity";
+        let format = document.getElementById("format").value;
+        let dict = [];
+        let result_text = {};
 
         dict.push({["activity_id"] : "${activityId}"});
         dict.push({["export_format"] : format});
@@ -436,7 +441,7 @@ ${splits}
 
     function edit_activity()
     {
-        var the_url = "${root_url}/edit_activity/${activityId}";
+        let the_url = "${root_url}/edit_activity/${activityId}";
         window.location.replace(the_url);
     }
 
@@ -444,9 +449,9 @@ ${splits}
     {
         if (confirm('Are you sure you want to do this?'))
         {
-            var the_url = "${root_url}/api/1.0/delete_activity";
-            var dict = [];
-            var result_text = {};
+            let the_url = "${root_url}/api/1.0/delete_activity";
+            let dict = [];
+            let result_text = {};
 
             dict.push({["activity_id"] : "${activityId}"});
             if (send_post_request(the_url, dict, result_text))
@@ -456,30 +461,41 @@ ${splits}
         }
     }
 
-    var process_photo = function(photo_data)
+    var process_photos_list = function(photos_list)
     {
-    }
+        let photo_ids = photos_list["photo ids"]
 
-    var process_photos = function(photo_ids)
-    {
-        photo_ids = eval(photo_ids)
-        for (var photo_id in photo_ids)
+        if (photo_ids.length > 0)
         {
-            var api_url = "${root_url}/api/1.0/handle_retrieve_activity_photo?activity_id=${activityId}&photo_id=" + photo_id;
-            $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photo, dataType: "binary" });
+            let photo_table = document.getElementById("photos");
+            let div = document.getElementById('photos_div');
+            div.style = "display: inline-block;";
+
+            for (let i = 0; i < photo_ids.length; ++i)
+            {
+                let photo_url = "${root_url}/photos/${userId}/" + photo_ids[i];
+                let td = document.createElement("td");
+                let img = document.createElement("img");
+                let tr = document.createElement("tr");
+
+                img.setAttribute("src", photo_url);
+                td.appendChild(img);
+                photo_table.appendChild(td);
+                photo_table.appendChild(tr);
+            }
         }
     }
 
     function list_photos()
     {
-        var api_url = "${root_url}/api/1.0/list_activity_photos?activity_id=${activityId}";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photos, dataType: "text" });
+        let api_url = "${root_url}/api/1.0/list_activity_photos?activity_id=${activityId}";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photos_list, dataType: "json" });
     }
 
     var process_tags = function(tags)
     {
         tags = eval(tags)
-        for (var tag in tags)
+        for (let tag in tags)
         {
             if (tags[tag] == "Race")
                 document.getElementById("overlay").style.display = "block";
@@ -488,18 +504,18 @@ ${splits}
 
     function list_tags()
     {
-        var api_url = "${root_url}/api/1.0/list_tags?activity_id=${activityId}";
+        let api_url = "${root_url}/api/1.0/list_tags?activity_id=${activityId}";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_tags, dataType: "text" });
     }
 
     function create_tags(tags)
     {
-        var the_url = "${root_url}/api/1.0/create_tags_on_activity";
-        var dict = [];
-        var result_text = {};
+        let the_url = "${root_url}/api/1.0/create_tags_on_activity";
+        let dict = [];
+        let result_text = {};
 
         dict.push({["activity_id"] : "${activityId}"});
-        for (var tag in tags)
+        for (let tag in tags)
             dict.push({["tag" + tag] : tags[tag]});
         if (!send_post_request(the_url, dict, result_text))
             alert(result_text.value);
@@ -515,52 +531,51 @@ ${splits}
     });
 
     list_photos();
+
 </script>
 
 <hr>
 
 <section class="analysis">
 <h3>Description</h3>
-<p>
 <table>
 ${description}
 </table>
-</p>
 </section>
 
 <section class="analysis">
 <h3>Detailed Analysis</h3>
-<p>
 <table>
 ${details}
 </table>
-</p>
 </section>
 
 <section class="activity_control">
-<p>
 <table>
 ${details_controls}
 </table>
-</p>
 </section>
 
 <section class="activity_control">
 <h3>Tags and Gear</h3>
-<p>
 <select name="tags" id="tags" class="chosen" multiple="true" style="width:50%;" data-placeholder="Specify tags and gear...">
 ${tags}
 </select>
-</p>
+</section>
+
+<section class="activity_control">
+<div class="empty" id="photos_div" style="display: none;">
+<h3>Photos</h3>
+<table id="photos">
+</table>
+</div>
 </section>
 
 <section class="activity_control">
 <h3>Comments</h3>
-<p>
-<table>
+<table id="comments">
 ${comments}
 </table>
-</p>
 </section>
 
 <section class="activity_control">

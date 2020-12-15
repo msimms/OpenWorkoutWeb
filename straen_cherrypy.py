@@ -757,6 +757,11 @@ def main():
             'tools.staticdir.on': True,
             'tools.staticdir.dir': 'media',
         },
+        '/photos':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'photos',
+        },
         '/.well-known':
         {
             'tools.staticdir.on': True,
