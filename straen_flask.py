@@ -623,7 +623,7 @@ def main():
     markdown_logger = logging.getLogger("MARKDOWN")
     markdown_logger.setLevel(logging.ERROR)
 
-    g_flask_app.run(debug=debug_enabled)
+    g_flask_app.run(host=config.get_bindname(), port=config.get_bindport(), debug=debug_enabled)
 
 if __name__ == '__main__':
     main()
