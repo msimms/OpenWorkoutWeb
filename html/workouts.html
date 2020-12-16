@@ -105,13 +105,27 @@
     function set_exp_level()
     {
         let the_url = "${root_url}/api/1.0/update_settings";
-        let exp_level = document.getElementById("exp_level").value;
+        let level = document.getElementById("exp_level").value;
         let dict = [];
         let result_text = {};
 
-        dict.push({["Experience Level"] : exp_level});
+        dict.push({["Experience Level"] : level});
         if (send_post_request(the_url, dict, result_text))
             alert("Experience level updated!");
+        else
+            alert("An error occurred!");
+    }
+
+    function set_structured_training_comfort_level()
+    {
+        let the_url = "${root_url}/api/1.0/update_settings";
+        let level = document.getElementById("structured_training_comfort_level").value;
+        let dict = [];
+        let result_text = {};
+
+        dict.push({["Comfort Level"] : level});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Comfort level updated!");
         else
             alert("An error occurred!");
     }
@@ -399,11 +413,8 @@ ${nav}
                 <option value="Completion">Completion</option>
                 <option value="Speed">Speed</option>
             </select><br>
-            Experience Level: <select name="exp_level" id="exp_level" class="right" onchange="return set_exp_level()">
-                <option value="Beginner">Beginner</option>
-                <option value="Intermediate">Intermediate</option>
-                <option value="Advanced">Advanced</option>
-            </select>
+            Experience Level: <input type="range" min="1" max="10" value="5" class="slider" id="exp_level" onchange="return set_exp_level()"><br>
+            Comfort Level With Structured Training: <input type="range" min="1" max="10" value="5" class="slider" id="structured_training_comfort_level" onchange="return set_structured_training_comfort_level()"><br>
         </p>
 
         <hr>
