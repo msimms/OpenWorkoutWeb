@@ -22,11 +22,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-function set_background_style(background_id)
+function set_background_style(root_url, background_id)
 {
     let section = document.getElementById(background_id);
     let img_index = Math.floor(Math.random() * 7) + 1;
-    let img_str = 'url("../images/main_background' + img_index + '.jpg")';
+    let img_str = 'url("' + root_url + '/images/main_background' + img_index + '.jpg")';
     section.style.backgroundImage = img_str;
 }
 
