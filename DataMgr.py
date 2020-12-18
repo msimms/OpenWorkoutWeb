@@ -354,6 +354,10 @@ class DataMgr(Importer.ActivityWriter):
         user_photos_dir = os.path.join(os.path.normpath(os.path.expanduser(photos_dir)), str(user_id))
         if not os.path.exists(user_photos_dir):
             os.makedirs(user_photos_dir)
+
+        # Sanity check.
+        if not os.path.exists(user_photos_dir):
+            raise Exception("Photos directory not created.")
         return user_photos_dir
 
     def attach_photo_to_activity(self, user_id, uploaded_file_data, activity_id):
