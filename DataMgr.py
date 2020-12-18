@@ -26,6 +26,7 @@
 import base64
 import hashlib
 import os
+import sys
 import threading
 import time
 import uuid
@@ -377,7 +378,11 @@ class DataMgr(Importer.ActivityWriter):
 
         # Hash the photo. This will prevent duplicates as well as give us a unique name.
         h = hashlib.sha512()
-        h.update(str(decoded_file_data).encode('utf-8'))
+        py_version = sys.version_info[0]
+        if py_version < 3:
+            h.update(str(decoded_file_data))
+        else:
+            h.update(str(decoded_file_data).encode('utf-8'))
         hash_str = h.hexdigest()
 
         # Where are we storing photos?
