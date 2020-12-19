@@ -227,6 +227,7 @@ class RunPlanGenerator(object):
         avg_run_distance = inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
         num_runs = inputs[Keys.NUM_RUNS_LAST_FOUR_WEEKS]
         exp_level = inputs[Keys.EXPERIENCE_LEVEL_KEY]
+        comfort_level = inputs[Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY]
 
         # Handle situation in which the user hasn't run in four weeks.
         if not RunPlanGenerator.valid_float(longest_run_in_four_weeks):
@@ -259,7 +260,7 @@ class RunPlanGenerator(object):
             longest_run_in_four_weeks = max_long_run_distance
 
         # Distance ceilings for easy and tempo runs.
-        if exp_level == Keys.EXPERIENCE_LEVEL_BEGINNER.lower():
+        if exp_level <= 5:
             max_easy_run_distance = longest_run_in_four_weeks * 0.60
             max_tempo_run_distance = longest_run_in_four_weeks * 0.40
         else:
@@ -272,9 +273,9 @@ class RunPlanGenerator(object):
             min_run_distance = max_easy_run_distance
 
         # We'll also set the percentage of easy miles/kms based on the experience level.
-        if exp_level == Keys.EXPERIENCE_LEVEL_BEGINNER.lower():
+        if exp_level <= 5:
             min_easy_distance_percentage = 0.90
-        elif exp_level == Keys.EXPERIENCE_LEVEL_INTERMEDIATE.lower():
+        elif exp_level <= 7:
             min_easy_distance_percentage = 0.80
         else:
             min_easy_distance_percentage = 0.75

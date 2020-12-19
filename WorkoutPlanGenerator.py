@@ -186,6 +186,7 @@ class WorkoutPlanGenerator(object):
 
         # Compute an experience level for the user.
         experience_level = self.user_mgr.retrieve_user_setting(user_id, Keys.EXPERIENCE_LEVEL_KEY)
+        comfort_level = self.user_mgr.retrieve_user_setting(user_id, Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY)
 
         # Are we in a taper?
         # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
@@ -212,6 +213,7 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.LONGEST_RUN_WEEK_3_KEY] = longest_run_week_3
         inputs[Keys.AGE_YEARS_KEY] = age_years
         inputs[Keys.EXPERIENCE_LEVEL_KEY] = experience_level
+        inputs[Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
         inputs[Keys.GOAL_KEY] = goal
         inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
@@ -275,6 +277,7 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.LONGEST_RUN_WEEK_3_KEY])
         model_inputs.append(inputs[Keys.AGE_YEARS_KEY])
         model_inputs.append(inputs[Keys.EXPERIENCE_LEVEL_KEY])
+        model_inputs.append(inputs[Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY])
         model_inputs.append(inputs[Keys.GOAL_KEY])
         model_inputs.append(inputs[Keys.GOAL_TYPE_KEY])
         model_inputs.append(inputs[Keys.WEEKS_UNTIL_GOAL_KEY])

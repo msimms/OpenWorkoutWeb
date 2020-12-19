@@ -1447,9 +1447,9 @@ class Api(object):
 
             # Goal date.
             elif decoded_key == Keys.GOAL_DATE_KEY:
-                goal_date = unquote_plus(values[key])
-                if not InputChecker.is_integer(goal_date):
+                if not InputChecker.is_integer(values[key]):
                     raise ApiException.ApiMalformedRequestException("Invalid goal date.")
+                goal_date = int(values[key])
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
 
             # Goal type.
@@ -1461,10 +1461,21 @@ class Api(object):
 
             # Experience level.
             elif decoded_key == Keys.EXPERIENCE_LEVEL_KEY:
-                exp_level = unquote_plus(values[key])
-                if not exp_level in Keys.EXPERIENCE_LEVELS:
-                    raise ApiException.ApiMalformedRequestException("Invalid experience level.")
-                result = self.user_mgr.update_user_setting(self.user_id, Keys.EXPERIENCE_LEVEL_KEY, exp_level)
+                if not InputChecker.is_integer(values[key]):
+                    raise ApiException.ApiMalformedRequestException("Invalid level.")
+                level = int(values[key])
+                if not (level >= 1 and level <= 10):
+                    raise ApiException.ApiMalformedRequestException("Invalid level.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.EXPERIENCE_LEVEL_KEY, level)
+
+            # Comfort level with structured training.
+            elif decoded_key == Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY:
+                if not InputChecker.is_integer(values[key]):
+                    raise ApiException.ApiMalformedRequestException("Invalid level.")
+                level = int(values[key])
+                if not (level >= 1 and level <= 10):
+                    raise ApiException.ApiMalformedRequestException("Invalid level.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, level)
 
             # Unknown
             else:

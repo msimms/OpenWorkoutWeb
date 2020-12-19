@@ -38,7 +38,7 @@
         let dict = [];
         let result_text = {};
 
-        dict.push({["preferred long run day"] : preferred_long_run_day});
+        dict.push({["Preferred Long Run Day"] : preferred_long_run_day});
         if (send_post_request(the_url, dict, result_text))
             alert("Preferred long run day updated!");
         else
@@ -123,7 +123,7 @@
         let dict = [];
         let result_text = {};
 
-        dict.push({["Comfort Level"] : level});
+        dict.push({["Structured Training Comfort Level"] : level});
         if (send_post_request(the_url, dict, result_text))
             alert("Comfort level updated!");
         else
@@ -283,7 +283,7 @@
                 else if (value == "Speed")
                     element.selectedIndex = 1;
             }
-            else if (key == "preferred long run day")
+            else if (key == "Preferred Long Run Day")
             {
                 let element = document.getElementById("preferred_long_run_day");
 
@@ -305,13 +305,12 @@
             else if (key == "Experience Level")
             {
                 let element = document.getElementById("exp_level");
-
-                if (value == "Beginner")
-                    element.selectedIndex = 0;
-                else if (value == "Intermediate")
-                    element.selectedIndex = 1;
-                else if (value == "Advanced")
-                    element.selectedIndex = 2;
+                element.value = value;
+            }
+            else if (key == "Structured Training Comfort Level")
+            {
+                let element = document.getElementById("structured_training_comfort_level");
+                element.value = value;
             }
         }
     }
@@ -332,7 +331,7 @@
 
     function get_user_settings()
     {
-        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal,goal_date,goal%20type,preferred%20long%20run%20day,Experience%20Level";
+        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal,goal_date,goal%20type,preferred%20long%20run%20day,Experience%20Level,Structured%20Training%20Comfort%20Level";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
