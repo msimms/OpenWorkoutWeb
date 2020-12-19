@@ -99,9 +99,7 @@ ${activity_type_options}
     <hr>
 	<h2>Photos</h2>
 	<input type="file" id="photo_picker" class="modern_button" name="photo_list" webkitdirectory multiple><br>
-	<br>
-    <table class="import" id="upload_table">
-    </table>
+	<button type="button" onclick="return upload_selected_files()">Upload</button><br>
 
 	<script>
 		let picker = document.getElementById('photo_picker');
@@ -156,7 +154,6 @@ ${activity_type_options}
 			{
 				selected_photo_list.push(file);
 			};
-            upload_selected_files();
 		});
 	</script>
 </div>
