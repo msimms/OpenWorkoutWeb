@@ -61,7 +61,7 @@ function serialize_to_json(list)
     let str = [];
     for (let i = 0; i < list.length; ++i)
         for (let key in list[i])
-            str.push("\"" + encodeURIComponent(key) + "\": \"" + encodeURIComponent(list[i][key]) + "\"");
+            str.push(JSON.stringify(key) + ": " + JSON.stringify(list[i][key]));
     json_str = "{" + str.join(",") + "}"
     return json_str
 }
@@ -108,7 +108,8 @@ function send_post_request(url, params, result_text)
         }
         result = (xml_http.status == 200);
     }
-    xml_http.send(serialize_to_json(params));
+    json_data = serialize_to_json(params);
+    xml_http.send(json_data);
     return result;
 }
 
