@@ -231,6 +231,11 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 * Bug fixes.
 * Minor UI updates.
 
+### 0.32
+* Bug fixes.
+* Minor UI updates.
+* More work on allow photo uploads.
+
 ## Tech
 This software uses several other source projects to work properly:
 
