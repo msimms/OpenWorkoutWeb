@@ -74,6 +74,7 @@ def import_activity(import_str, internal_task_id):
         print("Writing the data to a local file...")
         with open(local_file_name, 'wb') as local_file:
             print("Base64 decoding...")
+            uploaded_file_data = uploaded_file_data.replace(" ", "+")
             decoded_file_data = base64.b64decode(uploaded_file_data)
 #            print("zlib decompressing...")
 #            decoded_file_data = zlib.decompress(decoded_file_data)
