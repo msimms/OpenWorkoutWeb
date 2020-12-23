@@ -14,6 +14,9 @@ version: v1
 /activity_track:
     description: Returns the activity track as a collection of JSON objects.
     get:
+        queryParameters:
+            activity_id:
+            num_points:
         responses:
             200:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -23,6 +26,19 @@ version: v1
 /activity_metadata:
     description: Returns the activity metadata as a collection of JSON objects.
     get:
+        queryParameters:
+            activity_id:
+        responses:
+            200:
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            500: An internal exception was thrown.
+    post:
+/activity_sensordata:
+    description: Returns the activity sensordata as a collection of JSON objects. Sensor names are specified as a comma-separated list.
+    get:
+        queryParameters:
+            activity_id:
+            sensors:
         responses:
             200:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
