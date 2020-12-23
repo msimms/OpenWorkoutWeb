@@ -267,6 +267,11 @@ ${summary}
 
 	function draw_graph(data, title, color)
 	{
+        if (data.length == 0)
+        {
+            return;
+        }
+
 		let margin = {top: 20, right: 20, bottom: 20, left: 50},
 			width = $("#charts").width() - margin.left - margin.right,
 			height = 250 - margin.top - margin.bottom;
