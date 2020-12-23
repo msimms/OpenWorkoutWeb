@@ -454,20 +454,6 @@ class App(object):
         my_template = Template(filename=self.unmapped_activity_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, description=description_str, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
 
-    def render_speed_graph_for_page(self, activity, unit_system):
-        """Helper function for processing meatadata and formatting it for display."""
-        data_str = ""
-        data = []
-        if Keys.APP_CURRENT_SPEED_KEY in activity:
-            data = activity[Keys.APP_CURRENT_SPEED_KEY]
-        if data is not None and isinstance(data, list):
-            py_version = sys.version_info[0]
-            for datum in data:
-                time, value_num = App.get_time_value_from_list_item(datum, py_version)                    
-                value_num, _, _ = Units.convert_to_speed_for_the_specified_unit_system(unit_system, value_num, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS)
-                data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value_num) + " },\n"
-        return data_str
-
     def render_description_for_page(self, activity):
         """Helper function for processing the activity description and formatting it for display."""
         description = ""
@@ -476,25 +462,6 @@ class App(object):
         if len(description) == 0:
             description = "None"
         return description
-
-    def render_sensor_data_for_page(self, key, activity):
-        """Helper function for processing sensor data and formatting it for display."""
-        data_str = ""
-        data = []
-        multiplier = 1.0
-        py_version = sys.version_info[0]
-        if Keys.ACTIVITY_TYPE_KEY in activity:
-            activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
-            if activity_type in Keys.FOOT_BASED_ACTIVITIES:
-                if key in Keys.CADENCE_KEYS:
-                    multiplier = 2.0
-        if key in activity:
-            data = activity[key]
-        for datum in data:
-            time, value = App.get_time_value_from_list_item(datum, py_version)                    
-            value = value * multiplier
-            data_str += "\t\t\t\t{ date: new Date(" + str(time) + "), value: " + str(value) + " },\n"
-        return data_str
 
     @staticmethod
     def render_intervals_str(intervals):
@@ -620,10 +587,6 @@ class App(object):
 
         # Get all the things.
         description_str = self.render_description_for_page(activity)
-        current_speeds_str = self.render_speed_graph_for_page(activity, unit_system)
-        heart_rates_str = self.render_sensor_data_for_page(Keys.APP_HEART_RATE_KEY, activity)
-        cadences_str = self.render_sensor_data_for_page(Keys.APP_CADENCE_KEY, activity)
-        powers_str = self.render_sensor_data_for_page(Keys.APP_POWER_KEY, activity)
         name = App.render_activity_name(activity)
         activity_type = App.render_activity_type(activity)
         is_foot_based_activity = activity_type in Keys.FOOT_BASED_ACTIVITIES
@@ -740,10 +703,10 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, activityId=activity_id, userId=activity_user_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, activityId=activity_id, userId=activity_user_id, currentSpeeds=current_speeds_str, heartRates=heart_rates_str, cadences=cadences_str, powers=powers_str, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""

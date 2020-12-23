@@ -385,18 +385,6 @@ ${summary}
             .attr("y", function(d) { return y(d); });
     }
 
-	var speeds = [
-${currentSpeeds}
-	];
-	var heartRates = [
-${heartRates}
-	];
-	var cadences = [
-${cadences}
-	];
-	var powers = [
-${powers}
-	];
     var powerZones = [
 ${powerZones}
     ];
@@ -404,18 +392,46 @@ ${powerZones}
 ${splits}
     ];
 
-	if (speeds.length > 0)
-		$(function() { draw_graph(speeds, "Speed", "DodgerBlue") });
-	if (heartRates.length > 0)
-		$(function() { draw_graph(heartRates, "BPM", "FireBrick") });
-	if (cadences.length > 0)
-		$(function() { draw_graph(cadences, "RPM", "ForestGreen") });
-	if (powers.length > 0)
-		$(function() { draw_graph(powers, "Watts", "ForestGreen") });
 	if (powerZones.length > 0)
 		$(function() { draw_bar_chart(powerZones, "Power Zone Distribution", "ForestGreen") });
 	if (splits.length > 0)
 		$(function() { draw_bar_chart(splits, "Split Times", "LightRed") });
+
+    var process_sensordata = function(sensordata)
+    {
+        for (key in sensordata)
+        {
+            let old_data = sensordata[key];
+            let new_data = old_data.map(function(e) { 
+                let new_e = {};
+
+                for (let item in e)
+                {
+                    new_e["date"] = new Date(Number(item));
+                    new_e["value"] = e[item];
+                }
+                
+                return new_e;
+            });
+
+            if (key == "Current Speed")
+                draw_graph(new_data, "Speed", "DodgerBlue");
+            else if (key == "Heart Rate")
+                draw_graph(new_data, "BPM", "FireBrick");
+            else if (key == "Cadence")
+                draw_graph(new_data, "RPM", "ForestGreen");
+            else if (key == "Power")
+                draw_graph(new_data, "Watts", "ForestGreen");
+        }
+    }
+
+    function retrieve_sensor_data()
+    {
+        let api_url = "${root_url}/api/1.0/activity_sensordata?activity_id=${activityId}&sensors=Current%20Speed,Heart%20Rate,Cadence,Power";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
+    }
+
+    retrieve_sensor_data();
 
 </script>
 
