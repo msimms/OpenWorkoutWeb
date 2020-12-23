@@ -522,7 +522,7 @@ class Api(object):
         """Updates the user's email address."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        if 'email' not in values:
+        if Keys.EMAIL_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Email not specified.")
 
         # Get the logged in user.
@@ -531,7 +531,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Decode the parameter.
-        new_username = unquote_plus(values['email'])
+        new_username = unquote_plus(values[Keys.EMAIL_KEY])
 
         # Get the user details.
         user_id, _, user_realname = self.user_mgr.retrieve_user(current_username)

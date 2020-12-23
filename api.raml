@@ -7,6 +7,9 @@ version: v1
 /update_status:
     description: Used by the mobile application to update it's status.
     get:
+        queryParameters:
+            DeviceId:
+            ActivityId:
     post:
         responses:
             200: Empty string
@@ -48,6 +51,8 @@ version: v1
     description:
     get:
     post:
+        queryParameters:
+            activity_id:
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -57,6 +62,9 @@ version: v1
     description: Authenticates a username and password.
     get:
     post:
+        queryParameters:
+            username:
+            password:
         responses:
             200:
             401: Failed authentication. The username and password were invalid, or not provided.
@@ -65,6 +73,11 @@ version: v1
     description: Creates a new account.
     get:
     post:
+        queryParameters:
+            username:
+            realname:
+            password1:
+            password2:
         responses:
             200:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -90,6 +103,8 @@ version: v1
     description: Updates the user's email address.
     get:
     post:
+        queryParameters:
+            email:
         responses:
             200:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -99,6 +114,10 @@ version: v1
     description: Updates the user's password.
     get:
     post:
+        queryParameters:
+            old_password:
+            new_password1:
+            new_password2:
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -108,6 +127,8 @@ version: v1
     description: Removes the current user's gear (all of it).
     get:
     post:
+        queryParameters:
+            password:
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -116,6 +137,8 @@ version: v1
 /delete_users_activities:
     description: Removes the current user's activity data (all of it).
     get:
+        queryParameters:
+            password:
     post:
         responses:
             200: Empty string
@@ -125,6 +148,8 @@ version: v1
 /delete_user:
     description: Removes the current user and all associated data.
     get:
+        queryParameters:
+            password:
     post:
         responses:
             200: Empty string
@@ -162,6 +187,8 @@ version: v1
     description: Removes the specified activity.
     get:
     post:
+        queryParameters:
+            activity_id:
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -650,6 +677,8 @@ version: v1
 /list_hr_zones:
     description: 
     get:
+        queryParameters:
+            estimated max heart rate:
         responses:
             200: The value associated with the requested setting.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
