@@ -509,6 +509,23 @@ ${splits}
         }
     }
 
+    function delete_photo(photo_id)
+    {
+        if (confirm('Are you sure you want to delete the above photo?'))
+        {
+            let the_url = "${root_url}/api/1.0/delete_photo";
+            let dict = [];
+            let result_text = {};
+
+            dict.push({["activity_id"] : "${activityId}"});
+            dict.push({["photo_id"] : photo_id});
+            if (send_post_request(the_url, dict, result_text))
+                window.location.reload();
+            else
+                alert(result_text.value);
+        }
+    }
+
     var process_photos_list = function(photos_list)
     {
         let photo_ids = photos_list["photo ids"]
@@ -522,16 +539,24 @@ ${splits}
             for (let i = 0; i < photo_ids.length; ++i)
             {
                 let photo_url = "${root_url}/photos/${userId}/" + photo_ids[i];
-                let td = document.createElement("td");
+                let imgTd = document.createElement("td");
                 let img = document.createElement("img");
-                let tr = document.createElement("tr");
+                let deleteTd = document.createElement("td");
+                let deleteBtn = document.createElement("button");
 
                 img.setAttribute("src", photo_url);
                 img.setAttribute("width", 1024);
+                imgTd.appendChild(img);
 
-                td.appendChild(img);
-                photo_table.appendChild(td);
-                photo_table.appendChild(tr);
+                deleteBtn.innerHTML = "Delete";
+                deleteBtn.setAttribute("style", "color:red;margin:0px");
+                deleteBtn.setAttribute("onclick", "return delete_photo(\"" + photo_ids[i] + "\")");
+                deleteTd.appendChild(deleteBtn);
+
+                photo_table.appendChild(imgTd);
+                photo_table.appendChild(document.createElement("tr"));
+                photo_table.appendChild(deleteTd);
+                photo_table.appendChild(document.createElement("tr"));
             }
         }
     }
