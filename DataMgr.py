@@ -374,6 +374,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity ID.")
 
         # Decode the uplaoded data.
+        uploaded_file_data = uploaded_file_data.replace(" ", "+") # Some JS base64 encoders replace plus with space, so we need to undo that.
         decoded_file_data = base64.b64decode(uploaded_file_data)
 
         # Check the file size.
