@@ -232,9 +232,9 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 * Minor UI updates.
 
 ### 0.32
-* Bug fixes.
+* Bug fixes and performance optimizations.
 * Minor UI updates.
-* More work on allow photo uploads.
+* Ability to upload photo upload.
 
 ## Tech
 This software uses several other source projects to work properly:
@@ -253,4 +253,4 @@ The app is written in a combination of Python, HTML, and JavaScript.
 Twitter: [@StraenApp](https://twitter.com/StraenApp)
 
 ## License
-Currently proprietary (though there are some source files that are under the MIT license). However I am considering moving the source code to either an MIT or MPL license.
+Currently proprietary (though many of the source files are under the MIT license). However I am considering moving the remainder of the source code to either an MIT or MPL license.
