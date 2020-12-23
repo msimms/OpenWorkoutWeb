@@ -414,6 +414,16 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity ID.")
         return self.database.list_activity_photos(activity_id)
 
+    def delete_activity_photo(self, activity_id, photo_id):
+        """Lists all photos associated with an activity. Response is a list of identifiers."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No activity ID.")
+        if photo_id is None:
+            raise Exception("No photo ID.")
+        return self.database.delete_activity_photo(activity_id, photo_id)
+
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
         if Keys.ACTIVITY_START_TIME_KEY in activity:

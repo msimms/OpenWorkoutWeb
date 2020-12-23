@@ -1871,7 +1871,7 @@ class MongoDatabase(Database.Database):
             # If the activity was found.
             if activity is not None and Keys.ACTIVITY_PHOTOS_KEY in activity:
                 photos = activity[Keys.ACTIVITY_PHOTOS_KEY]
-                data.remove(photo_id)
+                photos.remove(photo_id)
                 activity[Keys.ACTIVITY_PHOTOS_KEY] = photos
                 self.activities_collection.save(activity)
                 return True

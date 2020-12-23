@@ -946,16 +946,19 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         # Validate the photo ID.
-        activity_photo_id = values[Keys.ACTIVITY_PHOTO_ID_KEY]
-        if not InputChecker.is_uuid(activity_photo_id):
-            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+        photo_id = values[Keys.ACTIVITY_PHOTO_ID_KEY]
+        if not InputChecker.is_hex_str(photo_id):
+            raise ApiException.ApiMalformedRequestException("Invalid photo ID.")
 
         # Only the activity's owner should be able to do this.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if not self.activity_belongs_to_logged_in_user(activity):
             raise ApiException.ApiAuthenticationException("Not activity owner.")
 
-        return True, ""
+        # Delete the photo.
+        result = self.data_mgr.delete_activity_photo(activity_id, photo_id)
+
+        return result, ""
 
     def handle_create_tags_on_activity(self, values):
         """Called when an API message to add a tag to an activity is received."""
