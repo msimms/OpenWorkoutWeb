@@ -32,7 +32,7 @@ def create_key(username, rate):
     db = StraenDb.MongoDatabase()
     db.connect()
     user_id, _, _ = db.retrieve_user(username)
-    key = uuid.uuid4()
+    key = str(uuid.uuid4())
     return db.create_api_key(user_id, key, rate)
 
 def list_keys(username):

@@ -74,6 +74,7 @@ def import_activity(import_str, internal_task_id):
         print("Writing the data to a local file...")
         with open(local_file_name, 'wb') as local_file:
             print("Base64 decoding...")
+            uploaded_file_data = uploaded_file_data.replace(" ", "+") # Some JS base64 encoders replace plus with space, so we need to undo that.
             decoded_file_data = base64.b64decode(uploaded_file_data)
 #            print("zlib decompressing...")
 #            decoded_file_data = zlib.decompress(decoded_file_data)
@@ -82,28 +83,35 @@ def import_activity(import_str, internal_task_id):
 
         # Update the status of the analysis in the database.
         print("Updating status...")
-        data_mgr.update_deferred_task(user_id, internal_task_id, Keys.TASK_STATUS_STARTED)
+        data_mgr.update_deferred_task(user_id, internal_task_id, None, Keys.TASK_STATUS_STARTED)
 
-        # Import the file into the database.            
+        # Import the file into the database.
         print("Importing the data to the database...")
         success, _, activity_id = importer.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
 
-        # Save the file to the database.
+        # The import was successful, do more stuff.
         if success:
+
+            # Save the file to the database.
+            print("Saving the file to the database...")
             data_mgr.create_uploaded_file(activity_id, decoded_file_data)
 
-        # Update the status of the analysis in the database.
-        print("Updating status...")
-        data_mgr.update_deferred_task(user_id, internal_task_id, Keys.TASK_STATUS_FINISHED)
+            # Update the status of the analysis in the database.
+            print("Updating status...")
+            data_mgr.update_deferred_task(user_id, internal_task_id, activity_id, Keys.TASK_STATUS_FINISHED)
 
-        # If the import was successful, then schedule the activity for analysis.
-        if success:
+            # Schedule the activity for analysis.
             print("Importing was successful, perform analysis...")
             analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
             activity = data_mgr.retrieve_activity(activity_id)
             analysis_scheduler.add_activity_to_queue(activity, user_id, data_mgr)
+
+        # The import failed.
         else:
+
+            # Update the status of the analysis in the database.
             print("Import was not successful.")
+            data_mgr.update_deferred_task(user_id, internal_task_id, activity_id, Keys.TASK_STATUS_ERROR)
     except:
         log_error("Exception when importing activity data: " + str(import_str))
         log_error(traceback.format_exc())

@@ -31,6 +31,7 @@
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
+
     function export_workout_to_zwo()
     {
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=zwo", cache: false, success: function(response) {
@@ -49,15 +50,15 @@
 	{
 		if (response && response.length >= 3)
         {
-            var obj_list = JSON.parse(response);
+            let obj_list = JSON.parse(response);
             if (obj_list == null)
                 return;
 
             document.getElementById("type").textContent = obj_list.type;
 
-            var description = obj_list.description;
+            let description = obj_list.description;
             description = description.split("\\n").join("<br>");
-    		var elem = document.getElementById("description");
+    		let elem = document.getElementById("description");
             elem.innerHTML = description;
         }
 	};
@@ -66,23 +67,25 @@
 	{
 		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=json", cache: false, success: process_workout_description, dataType: "text" });
 	});
+
 </script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="block" id="block" style="width: 600px">
+<section>
+    <div class="block" style="width: 600px">
 
-<h2 id="type"></h2>
+        <h2 id="type"></h2>
+        <p id="description">
+        </p> 
 
-<p id="description">
-</p> 
+        <button type="button" onclick="return export_workout_to_zwo()">Export to ZWO</button><br>
+        <button type="button" onclick="return export_workout_to_ical()">Export to iCal</button>
 
-<button type="button" onclick="return export_workout_to_zwo()">Export to ZWO</button><br>
-<button type="button" onclick="return export_workout_to_ical()">Export to iCal</button>
-
-</div>
+    </div>
+</section>
 
 </body>
 

@@ -13,6 +13,7 @@ import Workout
 import WorkoutFactory
 
 METERS_PER_HALF_MARATHON = 13.1 * Units.METERS_PER_MILE
+METERS_PER_MARATHON = 26.2 * Units.METERS_PER_MILE
 
 class RunPlanGenerator(object):
     """Class for generating a run plan for the specifiied user."""
@@ -114,22 +115,27 @@ class RunPlanGenerator(object):
         cooldown_duration = 10 * 60
 
         # Build a collection of possible run interval sessions, sorted by target distance. Order is { min reps, max reps, distance in meters }.
-        possible_workouts = [ [ 4, 8, 100 ], [ 4, 8, 200 ], [ 4, 8, 400 ], [ 4, 8, 600 ], [ 2, 8, 800 ], [ 2, 4, 1000 ], [ 2, 4, 1600 ] ]
+        possible_workouts = [ [ 4, 8, 100 ], [ 4, 8, 200 ], [ 4, 8, 400 ], [ 4, 8, 600 ], [ 2, 8, 800 ], [ 2, 6, 1000 ], [ 2, 4, 1600 ] ]
 
         # Build a probability density function for selecting the workout. Longer goals should tend towards longer intervals and so on.
         num_possible_workouts = len(possible_workouts)
         x = np.arange(0, num_possible_workouts, 1)
         center_index = int(num_possible_workouts / 2)
         densities = norm.pdf(x, loc=center_index)
+
+        # Make sure the densities array adds up to one.
         total_densities = sum(densities)
         if total_densities < 1.0:
             densities[center_index] += (1.0 - total_densities)
 
         # If the goal is less than a 10K then favor the shorter interval workouts. If greater than a 1/2 marathon, favor the longer.
         if goal_distance < 10000:
-            mod_densities = np.append(densities[-1], densities[0:len(densities)-1])
-        elif goal_distance > METERS_PER_HALF_MARATHON:
             mod_densities = np.append(densities[1:len(densities)], densities[0])
+        elif goal_distance >= METERS_PER_MARATHON:
+            mod_densities = np.append(densities[-1], densities[0:len(densities)-1])
+            mod_densities = np.append(densities[-1], densities[0:len(densities)-1])
+        elif goal_distance >= METERS_PER_HALF_MARATHON:
+            mod_densities = np.append(densities[-1], densities[0:len(densities)-1])
         else:
             mod_densities = densities
 
@@ -221,6 +227,7 @@ class RunPlanGenerator(object):
         avg_run_distance = inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
         num_runs = inputs[Keys.NUM_RUNS_LAST_FOUR_WEEKS]
         exp_level = inputs[Keys.EXPERIENCE_LEVEL_KEY]
+        comfort_level = inputs[Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY]
 
         # Handle situation in which the user hasn't run in four weeks.
         if not RunPlanGenerator.valid_float(longest_run_in_four_weeks):
@@ -253,7 +260,7 @@ class RunPlanGenerator(object):
             longest_run_in_four_weeks = max_long_run_distance
 
         # Distance ceilings for easy and tempo runs.
-        if exp_level == Keys.EXPERIENCE_LEVEL_BEGINNER.lower():
+        if exp_level <= 5:
             max_easy_run_distance = longest_run_in_four_weeks * 0.60
             max_tempo_run_distance = longest_run_in_four_weeks * 0.40
         else:
@@ -266,9 +273,9 @@ class RunPlanGenerator(object):
             min_run_distance = max_easy_run_distance
 
         # We'll also set the percentage of easy miles/kms based on the experience level.
-        if exp_level == Keys.EXPERIENCE_LEVEL_BEGINNER.lower():
+        if exp_level <= 5:
             min_easy_distance_percentage = 0.90
-        elif exp_level == Keys.EXPERIENCE_LEVEL_INTERMEDIATE.lower():
+        elif exp_level <= 7:
             min_easy_distance_percentage = 0.80
         else:
             min_easy_distance_percentage = 0.75

@@ -23,8 +23,11 @@
 # SOFTWARE.
 """Data store abstraction"""
 
+import base64
 import hashlib
 import os
+import sys
+import threading
 import time
 import uuid
 import BmiCalculator
@@ -44,6 +47,9 @@ SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
 ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
 ONE_WEEK = (7.0 * 24.0 * 60.0 * 60.0)
 FOUR_WEEKS = (28.0 * 24.0 * 60.0 * 60.0)
+
+g_api_key_rate_lock = threading.Lock()
+g_api_key_rates = {}
 
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
@@ -287,7 +293,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No user ID.")
         return self.database.retrieve_deferred_tasks(user_id)
 
-    def update_deferred_task(self, user_id, internal_task_id, status):
+    def update_deferred_task(self, user_id, internal_task_id, activity_id, status):
         """Returns a list of all incomplete tasks."""
         if self.database is None:
             raise Exception("No database.")
@@ -297,7 +303,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No internal task ID.")
         if status is None:
             raise Exception("No status.")
-        return self.database.update_deferred_task(user_id, internal_task_id, status)
+        return self.database.update_deferred_task(user_id, internal_task_id, activity_id, status)
 
     def prune_deferred_tasks_list(self):
         """Removes all completed tasks from the list."""
@@ -336,7 +342,25 @@ class DataMgr(Importer.ActivityWriter):
 
         return self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
 
-    def attach_photo_to_activity(self, user_id, uploaded_file_data, uploaded_file_name, activity_id):
+    def get_user_photos_dir(self, user_id):
+        """Calculates the photos dir assigned to the specified user and creates if it does not exist."""
+
+        # Where are we storing photos?
+        photos_dir = self.config.get_photos_dir()
+        if len(photos_dir) == 0:
+            raise Exception("No photos directory.")
+
+        # Create the directory, if it does not already exist.
+        user_photos_dir = os.path.join(os.path.normpath(os.path.expanduser(photos_dir)), str(user_id))
+        if not os.path.exists(user_photos_dir):
+            os.makedirs(user_photos_dir)
+
+        # Sanity check.
+        if not os.path.exists(user_photos_dir):
+            raise Exception("Photos directory not created.")
+        return user_photos_dir
+
+    def attach_photo_to_activity(self, user_id, uploaded_file_data, activity_id):
         """Imports a photo and associates it with an activity."""
         if self.database is None:
             raise Exception("No database.")
@@ -349,30 +373,32 @@ class DataMgr(Importer.ActivityWriter):
         if activity_id is None:
             raise Exception("No activity ID.")
 
+        # Decode the uplaoded data.
+        uploaded_file_data = uploaded_file_data.replace(" ", "+") # Some JS base64 encoders replace plus with space, so we need to undo that.
+        decoded_file_data = base64.b64decode(uploaded_file_data)
+
         # Check the file size.
-        if len(uploaded_file_data) > self.config.get_photos_max_file_size():
+        if len(decoded_file_data) > self.config.get_photos_max_file_size():
             raise Exception("The file is too large.")
 
         # Hash the photo. This will prevent duplicates as well as give us a unique name.
         h = hashlib.sha512()
-        h.update(uploaded_file_data)
+        py_version = sys.version_info[0]
+        if py_version < 3:
+            h.update(str(decoded_file_data))
+        else:
+            h.update(str(decoded_file_data).encode('utf-8'))
         hash_str = h.hexdigest()
 
         # Where are we storing photos?
-        photos_dir = self.config.get_photos_dir()
-        if len(photos_dir) == 0:
-            raise Exception("No photos directory.")
-
-        # Create the directory, if it does not already exist.
-        user_photos_dir = os.path.join(photos_dir, str(user_id))
-        if not os.path.exists(user_photos_dir):
-            os.makedirs(user_photos_dir)
+        user_photos_dir = self.get_user_photos_dir(user_id)
 
         # Save the file to the user's photos directory.
         try:
             local_file_name = os.path.join(user_photos_dir, hash_str)
-            with open(local_file_name, 'wb') as local_file:
-                local_file.write(uploaded_file_data)
+            if not os.path.isfile(local_file_name):
+                with open(local_file_name, 'wb') as local_file:
+                    local_file.write(decoded_file_data)
         except:
             raise Exception("Could not save the photo.")
 
@@ -388,6 +414,16 @@ class DataMgr(Importer.ActivityWriter):
         if activity_id is None:
             raise Exception("No activity ID.")
         return self.database.list_activity_photos(activity_id)
+
+    def delete_activity_photo(self, activity_id, photo_id):
+        """Lists all photos associated with an activity. Response is a list of identifiers."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No activity ID.")
+        if photo_id is None:
+            raise Exception("No photo ID.")
+        return self.database.delete_activity_photo(activity_id, photo_id)
 
     def update_activity_start_time(self, activity):
         """Caches the activity start time, based on the first reported location."""
@@ -567,9 +603,12 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         # Delete the activity as well as the cache of the PRs performed during that activity.
-        result = self.database.delete_activity(object_id) and self.database.delete_activity_best_for_user(user_id, activity_id)
+        result = self.database.delete_activity(object_id)
 
         if result:
+
+            # Delete the activity bests (there might not be any), so don't bother checking the return code.
+            self.database.delete_activity_best_for_user(user_id, activity_id)
 
             # Delete the uploaded file (if any).
             self.database.delete_uploaded_file(activity_id)
@@ -1138,6 +1177,46 @@ class DataMgr(Importer.ActivityWriter):
         if inputs is None:
             raise Exception("Bad parameter.")
         self.workout_plan_gen_scheduler.add_inputs_to_queue(inputs, self)
+
+    def generate_api_key_for_user(self, user_id):
+        """Generates a new API key for the specified user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        key = str(uuid.uuid4()) # Create the API key
+        rate = 100 # Only allow 100 requests per day
+        return self.database.create_api_key(user_id, key, rate), key
+
+    def delete_api_key(self, user_id, api_key):
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if api_key is None:
+            raise Exception("Bad parameter.")
+        return self.database.delete_api_key(user_id, api_key)
+
+    def check_api_rate(self, api_key, max_rate):
+        """Verifies that the API key is not being overused."""
+        """Returns TRUE if it is fine to process the request, FALSE otherwise."""
+        if self.database is None:
+            raise Exception("No database.")
+        if api_key is None:
+            raise Exception("Bad parameter.")
+
+        result = True
+        g_api_key_rate_lock.acquire()
+        try:
+            current_rate = g_api_key_rates[api_key]
+            result = current_rate <= max_rate
+            g_api_key_rates[api_key] = current_rate + 1
+        except:
+            g_api_key_rates[api_key] = 1
+        finally:
+            g_api_key_rate_lock.release()
+        return result
 
     def merge_gpx_files(self, user_id, uploaded_file1_data, uploaded_file2_data):
         if user_id is None:

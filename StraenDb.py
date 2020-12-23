@@ -226,18 +226,19 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user.
-            query = { Keys.API_KEYS: { Keys.API_KEY: str(api_key), Keys.API_KEY_RATE : int(1000) } }
+            rate = 100
+            query = { Keys.API_KEYS: { Keys.API_KEY: str(api_key), Keys.API_KEY_RATE : rate } }
             result_keys = { Keys.DATABASE_ID_KEY: 1, Keys.HASH_KEY: 1, Keys.REALNAME_KEY: 1 }
             user = self.users_collection.find_one(query, result_keys)
 
             # If the user was found.
             if user is not None:
-                return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], user[Keys.REALNAME_KEY]
-            return None, None, None
+                return str(user[Keys.DATABASE_ID_KEY]), user[Keys.HASH_KEY], user[Keys.REALNAME_KEY], rate
+            return None, None, None, rate
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None, None, None
+        return None, None, None, None
 
     def update_user(self, user_id, username, realname, passhash):
         """Update method for a user."""
@@ -1870,7 +1871,7 @@ class MongoDatabase(Database.Database):
             # If the activity was found.
             if activity is not None and Keys.ACTIVITY_PHOTOS_KEY in activity:
                 photos = activity[Keys.ACTIVITY_PHOTOS_KEY]
-                data.remove(photo_id)
+                photos.remove(photo_id)
                 activity[Keys.ACTIVITY_PHOTOS_KEY] = photos
                 self.activities_collection.save(activity)
                 return True
@@ -2524,7 +2525,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return []
 
-    def update_deferred_task(self, user_id, internal_task_id, status):
+    def update_deferred_task(self, user_id, internal_task_id, activity_id, status):
         """Updated method for deferred task status."""
         if user_id is None:
             self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: user_id")
@@ -2550,6 +2551,7 @@ class MongoDatabase(Database.Database):
                 # Find and update the record.
                 for task in user_tasks[Keys.TASKS_KEY]:
                     if Keys.TASK_INTERNAL_ID_KEY in task and task[Keys.TASK_INTERNAL_ID_KEY] == internal_task_id_str:
+                        task[Keys.TASK_ACTIVITY_ID_KEY] = activity_id
                         task[Keys.TASK_STATUS_KEY] = status
                         break
 

@@ -135,11 +135,12 @@ class WorkoutPlanGenerator(object):
         if cycling_bests is not None and Keys.THRESHOLD_POWER in cycling_bests:
             threshold_power = cycling_bests[Keys.THRESHOLD_POWER][0]
             best_recent_threshold_power = self.data_mgr.retrieve_user_estimated_ftp(user_id)
-            best_recent_threshold_power = best_recent_threshold_power[0]
-            if best_recent_threshold_power is None or threshold_power > best_recent_threshold_power:
-                self.data_mgr.store_user_estimated_ftp(user_id, threshold_power)
-            else:
-                threshold_power = best_recent_threshold_power
+            if best_recent_threshold_power:
+                best_recent_threshold_power = best_recent_threshold_power[0]
+                if best_recent_threshold_power is None or threshold_power > best_recent_threshold_power:
+                    self.data_mgr.store_user_estimated_ftp(user_id, cycling_bests[Keys.THRESHOLD_POWER])
+                else:
+                    threshold_power = best_recent_threshold_power
 
         #
         # Need last four weeks averages and bests.
@@ -185,6 +186,7 @@ class WorkoutPlanGenerator(object):
 
         # Compute an experience level for the user.
         experience_level = self.user_mgr.retrieve_user_setting(user_id, Keys.EXPERIENCE_LEVEL_KEY)
+        comfort_level = self.user_mgr.retrieve_user_setting(user_id, Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY)
 
         # Are we in a taper?
         # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
@@ -211,6 +213,7 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.LONGEST_RUN_WEEK_3_KEY] = longest_run_week_3
         inputs[Keys.AGE_YEARS_KEY] = age_years
         inputs[Keys.EXPERIENCE_LEVEL_KEY] = experience_level
+        inputs[Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
         inputs[Keys.GOAL_KEY] = goal
         inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
@@ -274,6 +277,7 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.LONGEST_RUN_WEEK_3_KEY])
         model_inputs.append(inputs[Keys.AGE_YEARS_KEY])
         model_inputs.append(inputs[Keys.EXPERIENCE_LEVEL_KEY])
+        model_inputs.append(inputs[Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY])
         model_inputs.append(inputs[Keys.GOAL_KEY])
         model_inputs.append(inputs[Keys.GOAL_TYPE_KEY])
         model_inputs.append(inputs[Keys.WEEKS_UNTIL_GOAL_KEY])

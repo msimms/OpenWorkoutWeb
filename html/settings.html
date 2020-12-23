@@ -27,12 +27,12 @@
 
 	function update_settings()
 	{
-		var the_url = "${root_url}/api/1.0/update_settings";
-		var privacy = document.getElementById("privacy_options").value;
-		var units = document.getElementById("units").value;
-		var week_start = document.getElementById("week_start").value;
-		var dict = [];
-		var result_text = {};
+		let the_url = "${root_url}/api/1.0/update_settings";
+		let privacy = document.getElementById("privacy_options").value;
+		let units = document.getElementById("units").value;
+		let week_start = document.getElementById("week_start").value;
+		let dict = [];
+		let result_text = {};
 
 		dict.push({["default privacy"] : privacy});
 		dict.push({["preferred units"] : units});
@@ -45,10 +45,10 @@
 
 	function update_email()
 	{
-		var the_url = "${root_url}/api/1.0/update_email";
-		var new_email = document.getElementById("new_email").value;
-		var dict = [];
-		var result_text = {};
+		let the_url = "${root_url}/api/1.0/update_email";
+		let new_email = document.getElementById("new_email").value;
+		let dict = [];
+		let result_text = {};
 
 		dict.push({["email"] : new_email});
 		if (send_post_request(the_url, dict, result_text))
@@ -59,12 +59,12 @@
 
 	function update_password()
 	{
-		var the_url = "${root_url}/api/1.0/update_password";
-		var current_pword = document.getElementById("current_password").value;
-		var new_pword1 = document.getElementById("new_password1").value;
-		var new_pword2 = document.getElementById("new_password2").value;
-		var dict = [];
-		var result_text = {};
+		let the_url = "${root_url}/api/1.0/update_password";
+		let current_pword = document.getElementById("current_password").value;
+		let new_pword1 = document.getElementById("new_password1").value;
+		let new_pword2 = document.getElementById("new_password2").value;
+		let dict = [];
+		let result_text = {};
 
 		dict.push({["old_password"] : current_pword});
 		dict.push({["new_password1"] : new_pword1});
@@ -84,13 +84,13 @@
 	{
 		if (confirm('Are you sure you want to do this?'))
 		{
-			var the_url = "${root_url}/api/1.0/delete_users_gear";
-			var pword = document.getElementById("password").value;
+			let the_url = "${root_url}/api/1.0/delete_users_gear";
+			let pword = document.getElementById("password").value;
 
             if (pword.length > 0)
             {
-                var dict = [];
-                var result_text = {};
+                let dict = [];
+                let result_text = {};
 
                 dict.push({["password"] : pword});
                 if (send_post_request(the_url, dict, result_text))
@@ -109,13 +109,13 @@
 	{
 		if (confirm('Are you sure you want to do this?'))
 		{
-			var the_url = "${root_url}/api/1.0/delete_users_activities";
-			var pword = document.getElementById("password").value;
+			let the_url = "${root_url}/api/1.0/delete_users_activities";
+			let pword = document.getElementById("password").value;
 
             if (pword.length > 0)
             {
-                var dict = [];
-                var result_text = {};
+                let dict = [];
+                let result_text = {};
 
                 dict.push({["password"] : pword});
                 if (send_post_request(the_url, dict, result_text))
@@ -134,13 +134,13 @@
 	{
 		if (confirm('Are you sure you want to do this?'))
 		{
-			var the_url = "${root_url}/api/1.0/delete_user";
-			var pword = document.getElementById("password").value;
+			let the_url = "${root_url}/api/1.0/delete_user";
+			let pword = document.getElementById("password").value;
 
             if (pword.length > 0)
             {
-                var dict = [];
-                var result_text = {};
+                let dict = [];
+                let result_text = {};
 
                 dict.push({["password"] : pword});
                 if (send_post_request(the_url, dict, result_text))
@@ -157,14 +157,14 @@
 
     var process_user_settings = function(records)
     {
-        for (var record of records)
+        for (let record of records)
         {
-            var key = Object.keys(record)[0];
-            var value = record[key].toLowerCase();
+            let key = Object.keys(record)[0];
+            let value = record[key].toLowerCase();
 
             if (key == "default privacy")
             {
-                var element = document.getElementById("privacy_options");
+                let element = document.getElementById("privacy_options");
 
                 if (value == "public")
                     element.selectedIndex = 0;
@@ -173,7 +173,7 @@
             }
             else if (key == "preferred units")
             {
-                var element = document.getElementById("units");
+                let element = document.getElementById("units");
 
                 if (value == "metric")
                     element.selectedIndex = 0;
@@ -182,7 +182,7 @@
             }
             else if (key == "preferred first day of week")
             {
-                var element = document.getElementById("week_start");
+                let element = document.getElementById("week_start");
 
                 if (value == "sunday")
                     element.selectedIndex = 0;
@@ -204,68 +204,80 @@
 
     function get_user_settings()
     {
-        var api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=default%20privacy,preferred%20units,preferred%20first%20day%20of%20week";
+        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=default%20privacy,preferred%20units,preferred%20first%20day%20of%20week";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
     get_user_settings();
+
 </script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="settings" style="width: 600px">
-	<h2>Settings</h2>
-	<p>
-        <label for="privacy_options">Default Activity Privacy</label>
-        <select id="privacy_options">
-            <option value="Public">Public</option>
-            <option value="Private">Private</option>
-        </select>
-	</p>
-	<p>
-        <label for="units">Preferred Units</label>
-        <select id="units">
-            <option value="Metric">Metric</option>
-            <option value="Standard">Standard</option>
-        </select>
-	</p>
-	<p>
-        <label for="week_start">Week Starts On</label>
-        <select id="week_start">
-            <option value="Sunday">Sunday</option>
-            <option value="Monday">Monday</option>
-            <option value="Tuesday">Tuesday</option>
-            <option value="Wednesday">Wednesday</option>
-            <option value="Thursday">Thursday</option>
-            <option value="Friday">Friday</option>
-            <option value="Saturday">Saturday</option>
-        </select>
-	</p>
-	<button type="button" onclick="return update_settings()">Update</button>
-	<hr>
-	<h2>API Keys</h2>
-	<button type="button" onclick="return manage_api_keys()" style="color:black">Manage API Keys</button><br>
-	<hr>
-	<h2>Email</h2>
-	<p>New Email Address: <input type="text" id="new_email"><br></p>
-    <button type="button" onclick="return update_email()">Update</button>
-    <p><b>Note:</b> Your email address is only used for login authentication.</p>
-	<hr>
-	<h2>Password</h2>
-	<p>Current Password: <input type="password" id="current_password"><br></p>
-	<p>New Password: <input type="password" id="new_password1"><br></p>
-	<p>Confirm Password: <input type="password" id="new_password2"><br></p>
-	<button type="button" onclick="return update_password()">Update</button>
-	<hr>
-	<h2>Delete</h2>
-	<p>Password: <input type="password" id="password"><br></p>
-	<button type="button" onclick="return delete_gear()" style="color:red">Delete My Gear</button><br>
-	<button type="button" onclick="return delete_activities()" style="color:red">Delete My Activities</button><br>
-	<button type="button" onclick="return delete_user()" style="color:red">Delete My Account and All My Data</button><br>
-	<p><b>Note:</b> This cannot be undone.</p>
-</div>
+<section>
+    <div class="settings" style="width: 600px">
+        <!-- Settings -->
+        <h2>Settings</h2>
+        <p>
+            <label for="privacy_options">Default Activity Privacy</label>
+            <select id="privacy_options">
+                <option value="Public">Public</option>
+                <option value="Private">Private</option>
+            </select>
+        </p>
+        <p>
+            <label for="units">Preferred Units</label>
+            <select id="units">
+                <option value="Metric">Metric</option>
+                <option value="Standard">Standard</option>
+            </select>
+        </p>
+        <p>
+            <label for="week_start">Week Starts On</label>
+            <select id="week_start">
+                <option value="Sunday">Sunday</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+            </select>
+        </p>
+        <button type="button" onclick="return update_settings()">Update</button>
+        <hr>
+
+        <!-- API Keys -->
+        <h2>API Keys</h2>
+        <button type="button" onclick="return manage_api_keys()" style="color:black">Manage API Keys</button><br>
+        <hr>
+
+        <!-- Email -->
+        <h2>Email</h2>
+        <p>New Email Address: <input type="text" id="new_email"><br></p>
+        <button type="button" onclick="return update_email()">Update</button>
+        <p><b>Note:</b> Your email address is only used for login authentication.</p>
+        <hr>
+
+        <!-- Password -->
+        <h2>Password</h2>
+        <p>Current Password: <input type="password" id="current_password"><br></p>
+        <p>New Password: <input type="password" id="new_password1"><br></p>
+        <p>Confirm Password: <input type="password" id="new_password2"><br></p>
+        <button type="button" onclick="return update_password()">Update</button>
+        <hr>
+
+        <!-- Delete -->
+        <h2>Delete</h2>
+        <p>Password: <input type="password" id="password"><br></p>
+        <button type="button" onclick="return delete_gear()" style="color:red">Delete My Gear</button><br>
+        <button type="button" onclick="return delete_activities()" style="color:red">Delete My Activities</button><br>
+        <button type="button" onclick="return delete_user()" style="color:red">Delete My Account and All My Data</button><br>
+        <p><b>Note:</b> This cannot be undone.</p>
+    </div>
+</section>
 
 </body>
 </html>

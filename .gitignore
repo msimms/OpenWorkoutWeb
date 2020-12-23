@@ -38,6 +38,9 @@ tempmod/*
 tempfile/
 tempmod*/
 
+# Photos directory
+photos/
+
 # Session management
 sessions*/
 

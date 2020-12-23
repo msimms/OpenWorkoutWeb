@@ -31,6 +31,7 @@ DATA_DIR = 'data'
 JS_DIR = 'js'
 IMAGES_DIR = 'images'
 MEDIA_DIR = 'media'
+PHOTOS_DIR = 'photos'
 ERROR_LOG = 'error.log'
 
 
@@ -113,6 +114,17 @@ def media(file_name):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + media.__name__)
+    return g_app.render_error()
+
+@g_flask_app.route('/photos/<user_id>/<file_name>')
+def photos(user_id, file_name):
+    """Returns an activity photo."""
+    try:
+        return flask.send_from_directory(PHOTOS_DIR, os.path.join(user_id, file_name))
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + photos.__name__)
     return g_app.render_error()
 
 @g_flask_app.route('/stats')
@@ -499,8 +511,21 @@ def api(version, method):
         # Get the logged in user, or lookup the user using the API key.
         user_id = None
         if Keys.API_KEY in params:
-            user_id, _, _ = self.app.user_mgr.retrieve_user_from_api_key(params[Keys.API_KEY])
+
+            # Session key
+            key = params[Keys.API_KEY]
+
+            # Which user is associated with this key?
+            user_id, _, _, max_rate = self.app.user_mgr.retrieve_user_from_api_key(key)
+            if user_id is not None:
+
+                # Make sure the key is not being abused.
+                if not self.app.data_mgr.check_api_rate(key, max_rate):
+                    user_id = None
+                    response = "Excessive API requests."
         else:
+
+            # API key not provided, check the session key.
             username = self.app.user_mgr.get_logged_in_user()
             if username is not None:
                 user_id, _, _ = self.app.user_mgr.retrieve_user(username)
@@ -598,7 +623,7 @@ def main():
     markdown_logger = logging.getLogger("MARKDOWN")
     markdown_logger.setLevel(logging.ERROR)
 
-    g_flask_app.run(debug=debug_enabled)
+    g_flask_app.run(host=config.get_bindname(), port=config.get_bindport(), debug=debug_enabled)
 
 if __name__ == '__main__':
     main()

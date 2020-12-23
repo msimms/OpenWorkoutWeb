@@ -380,6 +380,33 @@ class Api(object):
 
         return True, response
 
+    def handle_retrieve_activity_sensordata(self, values):
+        """Called when an API message to get the activity sensordata. Result is a JSON string."""
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+        if Keys.SENSOR_LIST_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Sensor list not specified.")
+
+        # Get the activity ID from the request.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # Get the activity from the database.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+
+        # Determine if the requesting user can view the activity.
+        if not self.activity_can_be_viewed(activity):
+            return self.error("The requested activity is not viewable to this user.")
+
+        response = {}
+
+        for sensor_name in values[Keys.SENSOR_LIST_KEY].split(','):
+            if sensor_name in activity:
+                response[sensor_name] = activity[sensor_name]
+
+        return True, json.dumps(response)
+
     def handle_update_activity_metadata(self, values):
         """Called when an API message to update the activity metadata."""
         if self.user_id is None:
@@ -423,8 +450,11 @@ class Api(object):
             raise ApiException.ApiAuthenticationException("Invalid email address.")
         password = unquote_plus(values[Keys.PASSWORD_KEY])
 
-        if not self.user_mgr.authenticate_user(email, password):
-            raise ApiException.ApiAuthenticationException("Authentication failed.")
+        try:
+            if not self.user_mgr.authenticate_user(email, password):
+                raise ApiException.ApiAuthenticationException("Authentication failed.")
+        except Exception as e:
+            raise ApiException.ApiAuthenticationException(str(e))
 
         if Keys.DEVICE_KEY in values:
             device_str = unquote_plus(values[Keys.DEVICE_KEY])
@@ -463,7 +493,10 @@ class Api(object):
         else:
             device_str = ""
 
-        if not self.user_mgr.create_user(email, realname, password1, password2, device_str):
+        try:
+            if not self.user_mgr.create_user(email, realname, password1, password2, device_str):
+                raise Exception("User creation failed.")
+        except:
             raise Exception("User creation failed.")
 
         cookie = self.user_mgr.create_new_session(email)
@@ -489,7 +522,7 @@ class Api(object):
         """Updates the user's email address."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        if 'email' not in values:
+        if Keys.EMAIL_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Email not specified.")
 
         # Get the logged in user.
@@ -498,7 +531,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Decode the parameter.
-        new_username = unquote_plus(values['email'])
+        new_username = unquote_plus(values[Keys.EMAIL_KEY])
 
         # Get the user details.
         user_id, _, user_realname = self.user_mgr.retrieve_user(current_username)
@@ -604,7 +637,7 @@ class Api(object):
         if not self.user_mgr.authenticate_user(username, password):
             raise Exception("Authentication failed.")
 
-        # Delete all the user's activities.
+        # Delete all of the user's activities.
         self.data_mgr.delete_user_activities(self.user_id)
 
         # Delete the user.
@@ -699,7 +732,7 @@ class Api(object):
 
         # Did we find it?
         if not deleted:
-            raise Exception("An error occurred. Nothing deleted.")
+            raise Exception("An error occurred. Nothing was deleted.")
 
         return True, ""
 
@@ -868,7 +901,10 @@ class Api(object):
             raise ApiException.ApiAuthenticationException("Not activity owner.")
 
         # Parse the file and store it's contents in the database.
-        result = self.data_mgr.attach_photo_to_activity(username, self.user_id, uploaded_file_data, activity_id)
+        try:
+            result = self.data_mgr.attach_photo_to_activity(self.user_id, uploaded_file_data, activity_id)
+        except Exception as e:
+            raise ApiException.ApiMalformedRequestException(str(e))
 
         return result, ""
 
@@ -885,30 +921,10 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         # List the IDs of each photo attached to this activity.
-        self.data_mgr.list_activity_photos(activity_id)
-
-        return True, ""
-
-    def handle_retrieve_activity_photo(self, values):
-        """Returns the specified activity photo."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-        if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.ACTIVITY_PHOTO_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-
-        # Validate the activity ID.
-        activity_id = values[Keys.ACTIVITY_ID_KEY]
-        if not InputChecker.is_uuid(activity_id):
-            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
-
-        # Validate the photo ID.
-        activity_photo_id = values[Keys.ACTIVITY_PHOTO_ID_KEY]
-        if not InputChecker.is_uuid(activity_photo_id):
-            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
-
-        return True, ""
+        result = {}
+        result["photo ids"] = self.data_mgr.list_activity_photos(activity_id)
+        json_result = json.dumps(result, ensure_ascii=False)
+        return True, json_result
 
     def handle_delete_activity_photo(self, values):
         """Called when an API message to delete a photo and remove it from an activity is received."""
@@ -930,16 +946,19 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         # Validate the photo ID.
-        activity_photo_id = values[Keys.ACTIVITY_PHOTO_ID_KEY]
-        if not InputChecker.is_uuid(activity_photo_id):
-            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+        photo_id = values[Keys.ACTIVITY_PHOTO_ID_KEY]
+        if not InputChecker.is_hex_str(photo_id):
+            raise ApiException.ApiMalformedRequestException("Invalid photo ID.")
 
         # Only the activity's owner should be able to do this.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if not self.activity_belongs_to_logged_in_user(activity):
             raise ApiException.ApiAuthenticationException("Not activity owner.")
 
-        return True, ""
+        # Delete the photo.
+        result = self.data_mgr.delete_activity_photo(activity_id, photo_id)
+
+        return result, ""
 
     def handle_create_tags_on_activity(self, values):
         """Called when an API message to add a tag to an activity is received."""
@@ -1458,9 +1477,9 @@ class Api(object):
 
             # Goal date.
             elif decoded_key == Keys.GOAL_DATE_KEY:
-                goal_date = unquote_plus(values[key])
-                if not InputChecker.is_integer(goal_date):
+                if not InputChecker.is_integer(values[key]):
                     raise ApiException.ApiMalformedRequestException("Invalid goal date.")
+                goal_date = int(values[key])
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
 
             # Goal type.
@@ -1472,10 +1491,21 @@ class Api(object):
 
             # Experience level.
             elif decoded_key == Keys.EXPERIENCE_LEVEL_KEY:
-                exp_level = unquote_plus(values[key])
-                if not exp_level in Keys.EXPERIENCE_LEVELS:
-                    raise ApiException.ApiMalformedRequestException("Invalid experience level.")
-                result = self.user_mgr.update_user_setting(self.user_id, Keys.EXPERIENCE_LEVEL_KEY, exp_level)
+                if not InputChecker.is_integer(values[key]):
+                    raise ApiException.ApiMalformedRequestException("Invalid level.")
+                level = int(values[key])
+                if not (level >= 1 and level <= 10):
+                    raise ApiException.ApiMalformedRequestException("Invalid level.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.EXPERIENCE_LEVEL_KEY, level)
+
+            # Comfort level with structured training.
+            elif decoded_key == Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY:
+                if not InputChecker.is_integer(values[key]):
+                    raise ApiException.ApiMalformedRequestException("Invalid level.")
+                level = int(values[key])
+                if not (level >= 1 and level <= 10):
+                    raise ApiException.ApiMalformedRequestException("Invalid level.")
+                result = self.user_mgr.update_user_setting(self.user_id, Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, level)
 
             # Unknown
             else:
@@ -1601,6 +1631,25 @@ class Api(object):
 
         self.data_mgr.generate_workout_plan_from_inputs(self.user_id)
         return True, ""
+
+    def handle_generate_api_key(self, values):
+        """Generates a new API key for the specified user."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        result, api_key = self.data_mgr.generate_api_key_for_user(self.user_id)
+        return result, api_key
+
+    def handle_delete_api_key(self, values):
+        """Deletes the specified API key."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.API_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("A key was not specified.")
+
+        api_key = values[Keys.API_KEY]
+        result = self.data_mgr.delete_api_key(self.user_id, api_key)
+        return result, api_key
 
     def handle_merge_gpx_files(self, values):
         """Takes two GPX files and attempts to merge them."""
@@ -1911,6 +1960,8 @@ class Api(object):
             return self.handle_retrieve_activity_track(values)
         elif request == 'activity_metadata':
             return self.handle_retrieve_activity_metadata(values)
+        elif request == 'activity_sensordata':
+            return self.handle_retrieve_activity_sensordata(values)
         elif request == 'login_status':
             return self.handle_login_status(values)
         elif request == 'list_devices':
@@ -1921,8 +1972,6 @@ class Api(object):
             return self.handle_list_activities(values, False)
         elif request == 'list_activity_photos':
             return self.handle_list_activity_photos(values)
-        elif request == 'retrieve_activity_photo':
-            return self.handle_retrieve_activity_photo(values)
         elif request == 'list_pending_friends':
             return self.list_pending_friends(values)
         elif request == 'list_friends':
@@ -2063,6 +2112,10 @@ class Api(object):
             return self.handle_generate_workout_plan_for_user(values)
         elif request == 'generate_workout_plan_from_inputs':
             return self.handle_generate_workout_plan_from_inputs(values)
+        elif request == 'generate_api_key':
+            return self.handle_generate_api_key(values)
+        elif request == 'delete_api_key':
+            return self.handle_delete_api_key(values)
         elif request == 'merge_gpx_files':
             return self.handle_merge_gpx_files(values)
         return False, ""

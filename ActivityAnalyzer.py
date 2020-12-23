@@ -53,6 +53,9 @@ class ActivityAnalyzer(object):
             return
 
         try:
+            # Want the variable in scope, but will set it later.
+            activity_id = None
+
             # Determine the activity type.
             if Keys.ACTIVITY_TYPE_KEY in self.activity:
                 activity_type = self.activity[Keys.ACTIVITY_TYPE_KEY]
@@ -70,7 +73,7 @@ class ActivityAnalyzer(object):
                 return
 
             # Update the status of the analysis in the database.
-            self.data_mgr.update_deferred_task(activity_user_id, self.internal_task_id, Keys.TASK_STATUS_STARTED)
+            self.data_mgr.update_deferred_task(activity_user_id, self.internal_task_id, activity_id, Keys.TASK_STATUS_STARTED)
 
             # Make sure the activity start time is set.
             start_time_secs = self.data_mgr.update_activity_start_time(self.activity)
@@ -188,7 +191,7 @@ class ActivityAnalyzer(object):
                 self.log_error("Activity time not provided. Cannot update personal records.")
 
             # Update the status of the analysis in the database.
-            self.data_mgr.update_deferred_task(activity_user_id, self.internal_task_id, Keys.TASK_STATUS_FINISHED)
+            self.data_mgr.update_deferred_task(activity_user_id, self.internal_task_id, activity_id, Keys.TASK_STATUS_FINISHED)
         except:
             self.log_error("Exception when analyzing activity data: " + str(self.summary_data))
             self.log_error(traceback.format_exc())

@@ -568,8 +568,21 @@ class StraenWeb(object):
             # Get the logged in user, or lookup the user using the API key.
             user_id = None
             if Keys.API_KEY in params:
-                user_id, _, _ = self.app.user_mgr.retrieve_user_from_api_key(params[Keys.API_KEY])
+
+                # Session key
+                key = params[Keys.API_KEY]
+
+                # Which user is associated with this key?
+                user_id, _, _, max_rate = self.app.user_mgr.retrieve_user_from_api_key(key)
+                if user_id is not None:
+
+                    # Make sure the key is not being abused.
+                    if not self.app.data_mgr.check_api_rate(key, max_rate):
+                        user_id = None
+                        response = "Excessive API requests."
             else:
+
+                # API key not provided, check the session key.
                 username = self.app.user_mgr.get_logged_in_user()
                 if username is not None:
                     user_id, _, _ = self.app.user_mgr.retrieve_user(username)
@@ -591,13 +604,14 @@ class StraenWeb(object):
                     cherrypy.response.status = 400
             else:
                 cherrypy.response.status = 400
-        except ApiException as e:
-            self.log_error(e.message)
+        except ApiException.ApiException as e:
+            response = e.message
             cherrypy.response.status = e.code
+            self.log_error(str(e))
         except Exception as e:
-            response = str(e.args[0])
-            self.log_error(response)
+            response = "Unhandled error."
             cherrypy.response.status = 500
+            self.log_error(str(e))
         except:
             response = "Unspecified error."
             cherrypy.response.status = 500
@@ -700,6 +714,7 @@ def main():
             'tools.staticdir.root': root_dir,
             'tools.straenweb_auth.on': True,
             'tools.sessions.on': True,
+            'tools.sessions.httponly': True,
             'tools.sessions.name': 'straenweb_auth',
             'tools.sessions.storage_type': 'file',
             'tools.sessions.storage_path': session_dir,
@@ -741,6 +756,11 @@ def main():
         {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': 'media',
+        },
+        '/photos':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'photos',
         },
         '/.well-known':
         {

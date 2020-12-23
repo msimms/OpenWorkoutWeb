@@ -38,13 +38,13 @@
 
     function create_service_record(target)
     {
-        var the_url = "${root_url}/api/1.0/create_service_record";
-        var dict = [];
-        var result_text = {};
-        var inner_div = document.getElementById("new_gear_div");
-        var service_time_obj = new Date(document.getElementById("start_date").value);
-        var service_time = service_time_obj.getTime() / 1000;
-        var description = document.getElementById("Description").value;
+        let the_url = "${root_url}/api/1.0/create_service_record";
+        let dict = [];
+        let result_text = {};
+        let inner_div = document.getElementById("new_gear_div");
+        let service_time_obj = new Date(document.getElementById("start_date").value);
+        let service_time = service_time_obj.getTime() / 1000;
+        let description = document.getElementById("Description").value;
 
         dict.push({["gear_id"] : "${gear_id}"});
         dict.push({["date"] : service_time});
@@ -62,8 +62,8 @@
 
     function get_new_service_record_info()
     {
-        var outer_div = document.getElementById("new_service_record_block");
-        var inner_div = document.createElement('div');
+        let outer_div = document.getElementById("new_service_record_block");
+        let inner_div = document.createElement('div');
         inner_div.id = "new_gear_div";
 
         // Remove existing items, if any.
@@ -73,7 +73,7 @@
         }
 
         // Determine which data fields are needed.
-        var fields = ["Description"];
+        let fields = ["Description"];
 
         // Add a line break.
         outer_div.appendChild(document.createElement("hr"));
@@ -83,8 +83,8 @@
         inner_div.appendChild(document.createTextNode("Date: "));
 
         // Add the date picker.
-        var today = new Date();
-        var start_date = document.createElement('input');
+        let today = new Date();
+        let start_date = document.createElement('input');
         start_date.type = "input";
         start_date.id = "start_date";
         start_date.className = "pickDate";
@@ -105,7 +105,7 @@
         outer_div.appendChild(inner_div);
 
         // Create a save button.
-        var save_btn = document.createElement('button');
+        let save_btn = document.createElement('button');
         save_btn.appendChild(document.createTextNode('Save'));
         save_btn.title = "Save";
         save_btn.addEventListener('click', function() { create_service_record(this); });
@@ -123,9 +123,9 @@
     {
         if (confirm('Are you sure you want to do this?'))
         {
-            var the_url = "${root_url}/api/1.0/delete_service_record";
-            var dict = [];
-            var result_text = {};
+            let the_url = "${root_url}/api/1.0/delete_service_record";
+            let dict = [];
+            let result_text = {};
 
             dict.push({["gear_id"] : "${gear_id}"});
             dict.push({["service_id"] : service_id});
@@ -143,15 +143,15 @@
 
     function append_to_service_history_table(table, service_date, description, service_id)
     {
-        var new_row = table.insertRow();
-        var cell = new_row.insertCell();
+        let new_row = table.insertRow();
+        let cell = new_row.insertCell();
         cell.appendChild(document.createTextNode(unix_time_to_local_date_string(service_date)));
 
         cell = new_row.insertCell();
         cell.appendChild(document.createTextNode(description));
 
-        var btn = document.createElement('button');
-        var btn_txt = document.createTextNode('Delete');
+        let btn = document.createElement('button');
+        let btn_txt = document.createTextNode('Delete');
         btn.appendChild(btn_txt);
         btn.title = "Delete";
         btn.style = "color:red";
@@ -162,36 +162,36 @@
 
     var process_gear_distance = function(records)
     {
-        var gear_distance_elem = document.getElementById("GearDistance");
+        let gear_distance_elem = document.getElementById("GearDistance");
         gear_distance_elem.innerText = records[0][gear_name];
     }
 
     var process_gear = function(records)
     {
-        var history_table = document.getElementById("ServiceHistory");
+        let history_table = document.getElementById("ServiceHistory");
 
-        for (var gear_record of records)
+        for (let gear_record of records)
         {
             if (gear_record.gear_id == "${gear_id}")
             {
                 // Add the title.
-                var gear_name_title = document.getElementById("GearName");
+                let gear_name_title = document.getElementById("GearName");
                 gear_name = gear_record.name
                 gear_name_title.innerText = gear_name;
 
                 // Add the description.
-                var gear_desc_title = document.getElementById("GearDescription");
+                let gear_desc_title = document.getElementById("GearDescription");
                 if (gear_record.description.length > 0)
                     gear_desc_title.innerText = gear_record.description;
                 else
                     gear_desc_title.innerText = "None";
 
                 // Add the added date.
-                var gear_desc_title = document.getElementById("GearAdded");
+                let gear_desc_title = document.getElementById("GearAdded");
                 gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.add_time);
 
                 // Add the retired date.
-                var gear_desc_title = document.getElementById("GearRetired");
+                let gear_desc_title = document.getElementById("GearRetired");
                 if (gear_record.retire_time > 0)
                     gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.retire_time);
                 else
@@ -200,8 +200,8 @@
                 // Add the service records.
                 if (gear_record.hasOwnProperty('service_history'))
                 {
-                    var sorted_service_records = gear_record.service_history.sort(service_sort)
-                    for (var service_record of sorted_service_records)
+                    let sorted_service_records = gear_record.service_history.sort(service_sort)
+                    for (let service_record of sorted_service_records)
                     {
                         append_to_service_history_table(history_table, service_record.date, service_record.description, service_record.service_id);
                     }
@@ -225,28 +225,30 @@
 ${nav}
 </section>
 
-<div class="profile" style="width: 600px">
+<section>
+    <div class="block" style="width: 600px">
 
-    <h2 id="GearName"></h2>
-    <h3>Description</h3>
-    <p id="GearDescription"></p>
-    <h3>Distance</h3>
-    <p id="GearDistance"></p>
-    <h3>Date Added</h3>
-    <p id="GearAdded"></p>
-    <h3>Date Retired</h3>
-    <p id="GearRetired"></p>
-    <h3>Service History</h3>
-    <p>
-        <table id="ServiceHistory">
-            <td><b>Date</b></td><td><b>Description</b></td><td></td><tr>
-        </table>
-    </p>
-    <div class="block" id="new_service_record_block" style="width: 560px">
+        <h2 id="GearName"></h2>
+        <h3>Description</h3>
+        <p id="GearDescription"></p>
+        <h3>Distance</h3>
+        <p id="GearDistance"></p>
+        <h3>Date Added</h3>
+        <p id="GearAdded"></p>
+        <h3>Date Retired</h3>
+        <p id="GearRetired"></p>
+        <h3>Service History</h3>
+        <p>
+            <table id="ServiceHistory">
+                <td><b>Date</b></td><td><b>Description</b></td><td></td><tr>
+            </table>
+        </p>
+        <div class="block" id="new_service_record_block" style="width: 560px">
+        </div>
+        <button type="button" onclick="return get_new_service_record_info()">Add Service Record</button>
+
     </div>
-    <button type="button" onclick="return get_new_service_record_info()">Add Service Record</button>
-
-</div>
+</section>
 
 </body>
 

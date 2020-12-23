@@ -46,7 +46,7 @@
 		{
 			var divChild = inner_div.children[i];
 
-			if (divChild.name == "Repititions")
+			if (divChild.name == "Repetitions")
 			{
 				sets.push(parseInt(divChild.value));
 			}
@@ -72,7 +72,7 @@
 	function show_manual_entry_options()
 	{
 		var activityType = document.getElementById("activity_type").value;
-		var outer_div = document.getElementById("block");
+		var outer_div = document.getElementById("manual_entry_div");
 		var inner_div = document.createElement('div');
 		inner_div.id = "manual_entry_div";
 
@@ -88,7 +88,7 @@
 		{
 			case "Push Up":
 			case "Pull Up":
-				fields = ["Repititions", "Repititions", "Repititions"];
+				fields = ["Repetitions", "Repetitions", "Repetitions"];
 				break;
 		}
 
@@ -142,6 +142,7 @@
 
 		return false;
 	}
+
 </script>
 
 <section class="nav">
@@ -162,7 +163,7 @@ ${nav}
 		let file_list = [];
         let file_tasks = {}; // Associates the task ID returned by the server with the file being uploaded
 
-        function update_file_status(file_name, status_text)
+        function update_file_status(file_name, status_text, activity_id)
         {
             let upload_table = document.getElementById("upload_table");
 
@@ -170,6 +171,15 @@ ${nav}
             {
                 if (row.cells[0].innerText.localeCompare(file_name) == 0)
                 {
+                    if (status_text == "Finished")
+                    {
+                        row.cells[0].innerText = "";
+                        var link = document.createElement("a");
+                        var linkText = document.createTextNode(file_name);
+                        link.setAttribute("href", "${root_url}/activity/" + activity_id);
+                        link.appendChild(linkText);
+                        row.cells[0].appendChild(link);
+                    }
                     row.cells[1].innerText = status_text;
                     break;
                 }
@@ -201,7 +211,7 @@ ${nav}
 
                 if (send_post_request(the_url, dict, result_text))
                 {
-                    update_file_status(file_obj.name, "Uploaded (Queued For Processing)");
+                    update_file_status(file_obj.name, "Uploaded (Queued For Processing)", null);
                     monitor_file_status(file_obj.name, result_text.value);
                 }
                 else
@@ -251,7 +261,11 @@ ${nav}
             {
                 if (record['internal task id'] in file_tasks)
                 {
-                    update_file_status(record["task details"], record["task status"]);
+                    if ("activity id" in record)
+                        activity_id = record["activity id"];
+                    else
+                        activity_id = null;
+                    update_file_status(record["task details"], record["task status"], activity_id);
                 }
             }
         }
@@ -275,7 +289,7 @@ ${activity_type_list}
 	</form>
 </div>
 	
-<div class="block" id="block">
+<div class="block" id="manual_entry_div">
 </div>
 
 </body>

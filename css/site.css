@@ -106,6 +106,7 @@ tr {
 }
 
 .device_list tr:first-child { font-weight: bold }
+.api_key_list tr:first-child { font-weight: bold }
 
 .import table {
 	font-family: arial, sans-serif;
@@ -177,6 +178,10 @@ select {
     border: 0px;
 	font-family: arial, sans-serif;
 	font-size: 120%;
+}
+
+.empty div {
+	margin: 0px;
 }
 
 div {
@@ -265,7 +270,17 @@ button .fa {
 	margin: 5px;
 }
 
-.block textarea {
+.block section {
+    border: 10px;
+    width: 1000px;
+}
+
+.block div {
+    border: 10px;
+    width: 1000px;
+}
+
+.comment textarea {
     border: 0px;
 }
 

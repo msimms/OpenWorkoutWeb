@@ -23,11 +23,12 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 
 <script>
+
     function append_to_devices_table(table, device_id, last_heard_from)
     {
-        var new_row = table.insertRow();
-        var cell = new_row.insertCell();
-        var a = document.createElement('a');
+        let new_row = table.insertRow();
+        let cell = new_row.insertCell();
+        let a = document.createElement('a');
 
         a.appendChild(document.createTextNode(device_id));
         a.title = device_id;
@@ -37,25 +38,25 @@
         if (last_heard_from > 0)
         {
             cell = new_row.insertCell();
-            var text = document.createTextNode(unix_time_to_local_string(last_heard_from));
+            let text = document.createTextNode(unix_time_to_local_string(last_heard_from));
             cell.appendChild(text);
         }
     }
 
     var process_device_list = function(records)
     {
-		var device_table = document.getElementById("Devices");
+		let device_table = document.getElementById("Devices");
 
         if (records.length > 0)
         {
-            var new_row = device_table.insertRow();
-            var cell = new_row.insertCell();
+            let new_row = device_table.insertRow();
+            let cell = new_row.insertCell();
 
             cell.appendChild(document.createTextNode("Unique Identifier"));
             cell = new_row.insertCell();
             cell.appendChild(document.createTextNode("Last Heard From"));
 
-            for (var record of records)
+            for (let record of records)
             {
                 append_to_devices_table(device_table, record.DeviceId, record.last_heard_from);
             }
@@ -68,13 +69,14 @@
     }
 
     get_device_list();
+
 </script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="device_list">
+<section class="block">
 	<p>
         This page lists instances of the mobile app that are associated with this account. To associate an instance of the mobile app with your account, simply log in to your account from the mobile app and enable the Broadcast option. All of this can be found under Settings -> Broadcast as shown in below.
 	</p>
@@ -83,13 +85,11 @@ ${nav}
 	    <img src="${root_url}/images/app_settings_screen.png" width=300></img>
 	</p>
 
-    <div style="width: 800px">
-        <p>
-            <table id="Devices">
-            </table>
-        </p>
+    <div class="device_list" style="width: 800px">
+        <table id="Devices">
+        </table>
     </div>
-</div>
+</section>
 
 </body>
 </html>

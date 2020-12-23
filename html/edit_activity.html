@@ -19,15 +19,17 @@
 <body>
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
 <script>
+
     function update_activity_metadata()
     {
-		var the_url = "${root_url}/api/1.0/update_activity_metadata";
-		var activity_name = document.getElementById("activity_name").value;
-		var activity_type = document.getElementById("activity_type").value;
-		var description = document.getElementById("description").value;
-		var dict = [];
-		var result_text = {};
+		let the_url = "${root_url}/api/1.0/update_activity_metadata";
+		let activity_name = document.getElementById("activity_name").value;
+		let activity_type = document.getElementById("activity_type").value;
+		let description = document.getElementById("description").value;
+		let dict = [];
+		let result_text = {};
 
 		dict.push({["activity_id"] : "${activity_id}"});
 		dict.push({["name"] : activity_name});
@@ -39,39 +41,73 @@
 		else
 			alert("An error occurred!");
     }
+
+    var process_upload_permissions = function(records)
+    {
+        // We need to know the unit system first.
+        for (let record of records)
+        {
+            let key = Object.keys(record)[0];
+
+            if (key == "can upload photos")
+            {
+                if (record[key] == true)
+                {
+    		        let picker = document.getElementById('photos_div');
+                    picker.style = "display: inline-block;";
+                }
+            }
+        }
+    }
+
+    function request_upload_permissions()
+    {
+        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=can%20upload%20photos";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_upload_permissions, dataType: "json" });
+    }
+
+    request_upload_permissions();
 </script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="profile" style="width: 600px">
+<div class="block" style="width: 600px">
+    <!-- Activity Name -->
 	<h2>Activity Name</h2>
 	<input type="text" name="activity_name" id="activity_name" value="${activity_name}" size="80"><br>
+
+    <!-- Activity Type -->
 	<hr>
 	<h2>Activity Type</h2>
 	<select id="activity_type" >
 ${activity_type_options}
 	</select><br>
+
+    <!-- Description -->
 	<hr>
 	<h2>Description</h2>
 	<textarea id="description" rows="10" cols="82">${description}</textarea>
     <br>
-	<button type="button" id="update" onclick="return update_activity_metadata()">Update</button>
+	<button type="button" id="update" onclick="return update_activity_metadata()">Update</button><br>
+</div>
+
+<!-- Photos -->
+<div class="empty" id="photos_div" style="display: none;">
+<div class="block" style="width: 600px">
     <hr>
 	<h2>Photos</h2>
-	<input type="file" id="picker" class="modern_button" name="file_list" webkitdirectory multiple><br>
-	<br>
-    <table class="import" id="upload_table">
-    </table>
+	<input type="file" id="photo_picker" class="modern_button" name="photo_list" webkitdirectory multiple><br>
+	<button type="button" onclick="return upload_selected_files()">Upload Photos</button><br>
 
 	<script>
-		let picker = document.getElementById('picker');
-		let selected_file_list = [];
+		let picker = document.getElementById('photo_picker');
+		let selected_photo_list = [];
 
         function upload_file(file_obj)
         {
-            var reader = new FileReader();
+            let reader = new FileReader();
 
             reader.onerror = function(event)
             {
@@ -79,16 +115,17 @@ ${activity_type_options}
             };
             reader.onload = function(e)
             {
-                var the_url = "${root_url}/api/1.0/upload_activity_photo?${activity_id}";
-                var dict = [];
-                var result_text = {};
-                var encoded_data = btoa(reader.result);
+                let the_url = "${root_url}/api/1.0/upload_activity_photo";
+                let dict = [];
+                let result_text = {};
+                let encoded_data = btoa(reader.result);
 
                 dict.push({["uploaded_file_data"] : encoded_data});
         		dict.push({["activity_id"] : "${activity_id}"});
 
                 if (send_post_request(the_url, dict, result_text))
                 {
+                    window.location.reload();
                 }
                 else
                 {
@@ -100,11 +137,11 @@ ${activity_type_options}
 
 		function upload_selected_files()
 		{
-            if (selected_file_list.length > 0)
+            if (selected_photo_list.length > 0)
             {
-                for (var i = 0; i < selected_file_list.length; i++)
+                for (let i = 0; i < selected_photo_list.length; i++)
                 {
-                    upload_file(selected_file_list[i]);
+                    upload_file(selected_photo_list[i]);
                 }
             }
             else
@@ -116,13 +153,12 @@ ${activity_type_options}
 		picker.addEventListener('change', e => {
 			for (let file of Array.from(e.target.files))
 			{
-				selected_file_list.push(file);
+				selected_photo_list.push(file);
 			};
-            upload_selected_files();
 		});
 	</script>
 </div>
-
+</div>
 
 </body>
 </html>

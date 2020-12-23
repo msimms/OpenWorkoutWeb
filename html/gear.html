@@ -29,6 +29,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
 
 <script>
+
     function gear_sort(a, b)
     {
         return a.name.localeCompare(b.name);
@@ -36,10 +37,10 @@
 
     function append_to_table(table, name, gear_id, description, add_time, retire_time)
     {
-        var new_row = table.insertRow();
-        var cell = new_row.insertCell();
-        var a = document.createElement('a');
-        var link_text = document.createTextNode(name);
+        let new_row = table.insertRow();
+        let cell = new_row.insertCell();
+        let a = document.createElement('a');
+        let link_text = document.createTextNode(name);
 
         a.appendChild(link_text);
         a.title = name;
@@ -64,8 +65,9 @@
         }
         else
         {
-            var btn = document.createElement('button');
-            var btn_txt = document.createTextNode('Retire');
+            let btn = document.createElement('button');
+            let btn_txt = document.createTextNode('Retire');
+
             btn.appendChild(btn_txt);
             btn.title = "Retire";
             btn.style = "color:black";
@@ -73,8 +75,9 @@
             cell.appendChild(btn);
         }
 
-        var btn = document.createElement('button');
-        var btn_txt = document.createTextNode('Delete');
+        let btn = document.createElement('button');
+        let btn_txt = document.createTextNode('Delete');
+
         btn.appendChild(btn_txt);
         btn.title = "Delete";
         btn.style = "color:red";
@@ -85,11 +88,11 @@
 
     var process_gear = function(records)
     {
-        var bikes_table = document.getElementById("bikes");
-        var shoes_table = document.getElementById("shoes");
+        let bikes_table = document.getElementById("bikes");
+        let shoes_table = document.getElementById("shoes");
 
-        var sorted_records = records.sort(gear_sort)
-        for (var record of sorted_records)
+        let sorted_records = records.sort(gear_sort)
+        for (let record of sorted_records)
         {
             if (record.type == "bike")
             {
@@ -108,33 +111,32 @@
     }
 
     get_gear();
+
 </script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="block" id="block" style="width: 600px">
+<section>
+    <div class="block" style="width: 600px">
 
-    <h2>Bikes</h2>
-    <p>
+        <h2>Bikes</h2>
         <table id="bikes">
             <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
         </table>
-    </p>
-    <button type="button" onclick="return get_new_bike_info('${root_url}')">Add New Bike</button>
+        <button type="button" onclick="return get_new_bike_info('${root_url}')">Add New Bike</button>
 
-	<hr>
+        <hr>
 
-    <h2>Shoes</h2>
-    <p>
+        <h2>Shoes</h2>
         <table id="shoes">
             <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
         </table>
-    </p>
-    <button type="button" onclick="return get_new_shoes_info('${root_url}')">Add New Shoes</button>
+        <button type="button" onclick="return get_new_shoes_info('${root_url}')">Add New Shoes</button>
 
-</div>
+    </div>
+</section>
 
 </body>
 
