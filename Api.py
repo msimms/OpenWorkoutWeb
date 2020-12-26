@@ -677,6 +677,22 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
+        # Fetch and validate the activity start and end times (optional).
+        start_time = None
+        end_time = None
+        if Keys.START_TIME in values:
+            start_time = values[Keys.START_TIME]
+            if InputChecker.is_integer(start_time):
+                start_time = int(start_time)
+            else:
+                raise ApiException.ApiMalformedRequestException("Invalid start time.")
+        if Keys.END_TIME in values:
+            end_time = values[Keys.END_TIME]
+            if InputChecker.is_integer(end_time):
+                end_time = int(end_time)
+            else:
+                raise ApiException.ApiMalformedRequestException("Invalid end time.")
+
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
         if username is None:
@@ -688,9 +704,9 @@ class Api(object):
         # Get the activities that belong to the logged in user.
         matched_activities = []
         if include_friends:
-            activities = self.data_mgr.retrieve_all_activities_visible_to_user(self.user_id, user_realname, None, None)
+            activities = self.data_mgr.retrieve_all_activities_visible_to_user(self.user_id, user_realname, start_time, end_time, None)
         else:
-            activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
+            activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, start_time, end_time, None)
 
         # Convert the activities list to an array of JSON objects for return to the client.
         if activities is not None and isinstance(activities, list):
@@ -724,7 +740,7 @@ class Api(object):
 
         # Get the activities that belong to the logged in user.
         deleted = False
-        activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None)
+        activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None, None)
         for activity in activities:
             if Keys.ACTIVITY_ID_KEY in activity and activity[Keys.ACTIVITY_ID_KEY] == activity_id:
                 deleted = self.data_mgr.delete_activity(activity['_id'], self.user_id, activity_id)
@@ -1679,8 +1695,24 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
+        # Fetch and validate the activity start and end times (optional).
+        start_time = None
+        end_time = None
+        if Keys.START_TIME in values:
+            start_time = values[Keys.START_TIME]
+            if InputChecker.is_integer(start_time):
+                start_time = int(start_time)
+            else:
+                raise ApiException.ApiMalformedRequestException("Invalid start time.")
+        if Keys.END_TIME in values:
+            end_time = values[Keys.END_TIME]
+            if InputChecker.is_integer(end_time):
+                end_time = int(end_time)
+            else:
+                raise ApiException.ApiMalformedRequestException("Invalid end time.")
+
         # Get the workouts that belong to the logged in user.
-        workouts = self.data_mgr.retrieve_workouts_for_user(self.user_id)
+        workouts = self.data_mgr.retrieve_workouts_for_user(self.user_id, start_time, end_time)
 
         # Convert the activities list to an array of JSON objects for return to the client.
         matched_workouts = []
@@ -1723,7 +1755,7 @@ class Api(object):
 
         username = self.user_mgr.get_logged_in_user()
         _, _, user_realname = self.user_mgr.retrieve_user(username)
-        user_activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
+        user_activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None, None)
         heat_map = self.data_mgr.compute_location_heat_map(user_activities)
         return True, json.dumps(heat_map)
 
@@ -1851,7 +1883,7 @@ class Api(object):
         _, _, user_realname = self.user_mgr.retrieve_user(username)
 
         # Get the user activity list, sorted by timestamp.
-        user_activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None)
+        user_activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None, None)
 
         activity_type = values[Keys.ACTIVITY_TYPE_KEY]
         if not InputChecker.is_valid_decoded_str(activity_type):

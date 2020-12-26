@@ -150,7 +150,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            post = {Keys.USERNAME_KEY: username, Keys.REALNAME_KEY: realname, Keys.HASH_KEY: passhash, Keys.DEVICES_KEY: [], Keys.FRIENDS_KEY: [], Keys.DEFAULT_PRIVACY_KEY: Keys.ACTIVITY_VISIBILITY_PUBLIC}
+            post = { Keys.USERNAME_KEY: username, Keys.REALNAME_KEY: realname, Keys.HASH_KEY: passhash, Keys.DEVICES_KEY: [], Keys.FRIENDS_KEY: [], Keys.DEFAULT_PRIVACY_KEY: Keys.ACTIVITY_VISIBILITY_PUBLIC }
             self.users_collection.insert(post)
             return True
         except:
@@ -697,7 +697,7 @@ class MongoDatabase(Database.Database):
 
             # If the collection was found.
             if user_records is None:
-                post = {Keys.RECORDS_USER_ID: user_id_str, Keys.PERSONAL_RECORDS_KEY: records}
+                post = { Keys.RECORDS_USER_ID: user_id_str, Keys.PERSONAL_RECORDS_KEY: records }
                 self.records_collection.insert(post)
                 return True
         except:
@@ -757,7 +757,7 @@ class MongoDatabase(Database.Database):
         try:
             # Delete the user's records collection.
             user_id_str = str(user_id)
-            deleted_result = self.records_collection.delete_one({Keys.RECORDS_USER_ID: user_id_str})
+            deleted_result = self.records_collection.delete_one({ Keys.RECORDS_USER_ID: user_id_str })
             if deleted_result is not None:
                 return True
         except:
@@ -888,18 +888,18 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_user_activity_list(self, user_id, start, num_results, exclude_keys):
+    def retrieve_user_activity_list(self, user_id, start_time, end_time, num_results, exclude_keys):
         """Retrieves the list of activities associated with the specified user."""
         if num_results is not None and num_results <= 0:
             return None
 
         try:
-            if start is None and num_results is None:
+            if start_time is None and num_results is None:
                 return list(self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
             elif num_results is None:
-                return list(self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start))
+                return list(self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start_time))
             else:
-                return list(self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start).limit(num_results))
+                return list(self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start_time).limit(num_results))
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -918,7 +918,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def retrieve_device_activity_list(self, device_str, start, num_results):
+    def retrieve_device_activity_list(self, device_str, start_time, num_results):
         """Retrieves the list of activities associated with the specified device."""
         if device_str is None:
             self.log_error(MongoDatabase.retrieve_device_activity_list.__name__ + ": Unexpected empty object: device_str")
@@ -930,12 +930,12 @@ class MongoDatabase(Database.Database):
             # Things we don't need.
             exclude_keys = self.list_excluded_activity_keys()
 
-            if start is None and num_results is None:
+            if (start_time is None or start_time == 0) and num_results is None:
                 return list(self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
             elif num_results is None:
-                return list(self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start))
+                return list(self.activities_collection.find({"$and": [ {Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str}}, {Keys.ACTIVITY_START_TIME_KEY: {'$gt': start_time}} ]}))
             else:
-                return list(self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start).limit(num_results))
+                return list(self.activities_collection.find({"$and": [ {Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str}}, {Keys.ACTIVITY_START_TIME_KEY: {'$gt': start_time}} ]}).limit(num_results))
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1045,7 +1045,7 @@ class MongoDatabase(Database.Database):
                 if Keys.ACTIVITY_LOCATIONS_KEY in activity:
                     location_list = activity[Keys.ACTIVITY_LOCATIONS_KEY]
                 for location in locations:
-                    value = {Keys.LOCATION_TIME_KEY: location[0], Keys.LOCATION_LAT_KEY: location[1], Keys.LOCATION_LON_KEY: location[2], Keys.LOCATION_ALT_KEY: location[3]}
+                    value = { Keys.LOCATION_TIME_KEY: location[0], Keys.LOCATION_LAT_KEY: location[1], Keys.LOCATION_LON_KEY: location[2], Keys.LOCATION_ALT_KEY: location[3] }
                     location_list.append(value)
                 location_list.sort(key=retrieve_time_from_location)
                 activity[Keys.ACTIVITY_LOCATIONS_KEY] = location_list
@@ -1057,7 +1057,7 @@ class MongoDatabase(Database.Database):
                         if sensor_type in activity:
                             value_list = activity[sensor_type]
                         for value in sensor_readings_dict[sensor_type]:
-                            time_value_pair = {str(value[0]): float(value[1])}
+                            time_value_pair = { str(value[0]): float(value[1]) }
                             value_list.append(time_value_pair)
                         value_list.sort(key=retrieve_time_from_time_value_pair)
                         activity[sensor_type] = value_list
@@ -1069,7 +1069,7 @@ class MongoDatabase(Database.Database):
                         if metadata_type in activity:
                             value_list = activity[metadata_type]
                         for value in metadata_list_dict[metadata_type]:
-                            time_value_pair = {str(value[0]): float(value[1])}
+                            time_value_pair = { str(value[0]): float(value[1]) }
                             value_list.append(time_value_pair)
                         value_list.sort(key=retrieve_time_from_time_value_pair)
                         activity[metadata_type] = value_list
@@ -1090,7 +1090,7 @@ class MongoDatabase(Database.Database):
 
         try:
             activity_id_obj = ObjectId(str(object_id))
-            deleted_result = self.activities_collection.delete_one({Keys.DATABASE_ID_KEY: activity_id_obj})
+            deleted_result = self.activities_collection.delete_one({ Keys.DATABASE_ID_KEY: activity_id_obj })
             if deleted_result is not None:
                 return True
         except:
@@ -1175,7 +1175,7 @@ class MongoDatabase(Database.Database):
                 if Keys.ACTIVITY_LOCATIONS_KEY in activity:
                     location_list = activity[Keys.ACTIVITY_LOCATIONS_KEY]
 
-                value = {Keys.LOCATION_TIME_KEY: date_time, Keys.LOCATION_LAT_KEY: latitude, Keys.LOCATION_LON_KEY: longitude, Keys.LOCATION_ALT_KEY: altitude}
+                value = { Keys.LOCATION_TIME_KEY: date_time, Keys.LOCATION_LAT_KEY: latitude, Keys.LOCATION_LON_KEY: longitude, Keys.LOCATION_ALT_KEY: altitude }
                 location_list.append(value)
                 location_list.sort(key=retrieve_time_from_location)
 
@@ -1219,7 +1219,7 @@ class MongoDatabase(Database.Database):
                     location_list = activity[Keys.ACTIVITY_LOCATIONS_KEY]
 
                 for location in locations:
-                    value = {Keys.LOCATION_TIME_KEY: location[0], Keys.LOCATION_LAT_KEY: location[1], Keys.LOCATION_LON_KEY: location[2], Keys.LOCATION_ALT_KEY: location[3]}
+                    value = { Keys.LOCATION_TIME_KEY: location[0], Keys.LOCATION_LAT_KEY: location[1], Keys.LOCATION_LON_KEY: location[2], Keys.LOCATION_ALT_KEY: location[3] }
                     location_list.append(value)
 
                 location_list.sort(key=retrieve_time_from_location)
@@ -1280,7 +1280,7 @@ class MongoDatabase(Database.Database):
                 if sensor_type in activity:
                     value_list = activity[sensor_type]
 
-                time_value_pair = {str(date_time): float(value)}
+                time_value_pair = { str(date_time): float(value) }
                 value_list.append(time_value_pair)
                 value_list.sort(key=retrieve_time_from_time_value_pair)
 
@@ -1318,7 +1318,7 @@ class MongoDatabase(Database.Database):
                     value_list = activity[sensor_type]
 
                 for value in values:
-                    time_value_pair = {str(value[0]): float(value[1])}
+                    time_value_pair = { str(value[0]): float(value[1]) }
                     value_list.append(time_value_pair)
 
                 value_list.sort(key=retrieve_time_from_time_value_pair)
@@ -1460,7 +1460,7 @@ class MongoDatabase(Database.Database):
                     if key in activity:
                         value_list = activity[key]
 
-                    time_value_pair = {str(date_time): value}
+                    time_value_pair = { str(date_time): value }
                     value_list.append(time_value_pair)
                     value_list.sort(key=retrieve_time_from_time_value_pair)
                     activity[key] = value_list
@@ -1497,7 +1497,7 @@ class MongoDatabase(Database.Database):
                 value_list = []
 
                 for value in values:
-                    time_value_pair = {str(value[0]): float(value[1])}
+                    time_value_pair = { str(value[0]): float(value[1]) }
                     value_list.append(time_value_pair)
 
                 value_list.sort(key=retrieve_time_from_time_value_pair)
@@ -1565,7 +1565,7 @@ class MongoDatabase(Database.Database):
                     if accel_list and int(accel_list[-1][Keys.ACCELEROMETER_TIME_KEY]) > accel[0]:
                         self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Received out-of-order time value.")
                     else:
-                        value = {Keys.ACCELEROMETER_TIME_KEY: accel[0], Keys.ACCELEROMETER_AXIS_NAME_X: accel[1], Keys.ACCELEROMETER_AXIS_NAME_Y: accel[2], Keys.ACCELEROMETER_AXIS_NAME_Z: accel[3]}
+                        value = { Keys.ACCELEROMETER_TIME_KEY: accel[0], Keys.ACCELEROMETER_AXIS_NAME_X: accel[1], Keys.ACCELEROMETER_AXIS_NAME_Y: accel[2], Keys.ACCELEROMETER_AXIS_NAME_Z: accel[3] }
                         accel_list.append(value)
 
                 activity[Keys.APP_ACCELEROMETER_KEY] = accel_list
@@ -1960,7 +1960,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def retrieve_workouts_for_user(self, user_id):
+    def retrieve_workouts_for_user(self, user_id, start_time, end_time):
         """Retrieve method for the ical calendar ID for with specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.retrieve_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
@@ -1980,7 +1980,8 @@ class MongoDatabase(Database.Database):
                 for workout in workouts_list:
                     workout_obj = Workout.Workout(user_id)
                     workout_obj.from_dict(workout)
-                    workouts.append(workout_obj)
+                    if start_time is None or start_time == 0 or workout_obj.scheduled_time > start_time:
+                        workouts.append(workout_obj)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
