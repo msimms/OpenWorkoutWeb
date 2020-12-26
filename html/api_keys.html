@@ -24,6 +24,27 @@
 
 <script>
 
+    function delete_api_key(key)
+    {
+        if (confirm('Are you sure you want to do this?'))
+        {
+            let the_url = "${root_url}/api/1.0/delete_api_key";
+            let dict = [];
+            let result_text = {};
+
+            dict.push({["key"] : key});
+
+            if (send_post_request(the_url, dict, result_text))
+            {
+                window.location.replace("${root_url}/api_keys");
+            }
+            else
+            {
+                alert(result_text.value);
+            }
+        }
+    }
+
     function generate_new_api_key()
     {
         let the_url = "${root_url}/api/1.0/generate_api_key";
@@ -55,10 +76,19 @@
         {
             let new_row = keys_table.insertRow();
             let cell = new_row.insertCell();
+            let btn = document.createElement('button');
+            let btn_txt = document.createTextNode('Delete');
 
             cell.appendChild(document.createTextNode(key_record.key));
             cell = new_row.insertCell();
             cell.appendChild(document.createTextNode(key_record.rate));
+
+            btn.appendChild(btn_txt);
+            btn.title = "Delete";
+            btn.style = "color:red";
+            btn.addEventListener('click', function() { delete_api_key(key_record.key); });
+            cell = new_row.insertCell();
+            cell.appendChild(btn);
         }
     }
 
