@@ -580,6 +580,8 @@ class StraenWeb(object):
                     if not self.app.data_mgr.check_api_rate(key, max_rate):
                         user_id = None
                         response = "Excessive API requests."
+                        cherrypy.response.status = 429
+                        self.log_error(response)
             else:
 
                 # API key not provided, check the session key.
