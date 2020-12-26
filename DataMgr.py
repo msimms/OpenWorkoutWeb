@@ -50,6 +50,7 @@ FOUR_WEEKS = (28.0 * 24.0 * 60.0 * 60.0)
 
 g_api_key_rate_lock = threading.Lock()
 g_api_key_rates = {}
+g_last_api_reset = 0 # Timestamp of when g_api_key_rates was last cleared 
 
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
@@ -1201,6 +1202,10 @@ class DataMgr(Importer.ActivityWriter):
     def check_api_rate(self, api_key, max_rate):
         """Verifies that the API key is not being overused."""
         """Returns TRUE if it is fine to process the request, FALSE otherwise."""
+        global g_api_key_rate_lock
+        global g_api_key_rates
+        global g_last_api_reset
+
         if self.database is None:
             raise Exception("No database.")
         if api_key is None:
@@ -1208,6 +1213,15 @@ class DataMgr(Importer.ActivityWriter):
 
         result = True
         g_api_key_rate_lock.acquire()
+
+        # Once a day we should reset the countesr. This algorithm is overly simplistic and
+        # could almost certainly be improved but is good enough for now.
+        now = time.time()
+        if now - g_last_api_reset > 86400:
+            g_api_key_rates = {}
+            g_last_api_reset = now
+
+        # Check and increment the request count.
         try:
             current_rate = g_api_key_rates[api_key]
             result = current_rate <= max_rate
