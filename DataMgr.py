@@ -242,8 +242,8 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No timestamp.")
         if key is None:
             raise Exception("No key.")
-        if values is None:
-            raise Exception("No values.")
+        if value is None:
+            raise Exception("No value.")
         return self.database.create_activity_metadata(activity_id, date_time, key, value, create_list)
 
     def create_activity_metadata_list(self, activity_id, key, values):
