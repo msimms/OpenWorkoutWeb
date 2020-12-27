@@ -238,6 +238,12 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
+        if date_time is None:
+            raise Exception("No timestamp.")
+        if key is None:
+            raise Exception("No key.")
+        if values is None:
+            raise Exception("No values.")
         return self.database.create_activity_metadata(activity_id, date_time, key, value, create_list)
 
     def create_activity_metadata_list(self, activity_id, key, values):
@@ -246,6 +252,10 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
+        if key is None:
+            raise Exception("No key.")
+        if values is None:
+            raise Exception("No values.")
         return self.database.create_activity_metadata_list(activity_id, key, values)
 
     def create_activity_sets_and_reps_data(self, activity_id, sets):

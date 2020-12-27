@@ -251,7 +251,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         # Let the base class perform the analysis first.
         results = SensorAnalyzer.SensorAnalyzer.analyze(self)
 
-        # Do a pace analysis.
+        # Do a speed/pace analysis.
         if len(self.speed_graph) > 1:
 
             # Compute the speed/pace variation. This will tell us how consistent the pace was.
