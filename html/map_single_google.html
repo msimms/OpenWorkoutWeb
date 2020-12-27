@@ -420,7 +420,21 @@ ${splits}
             });
 
             if (key == "Current Speed")
-                draw_graph(new_data, "Speed", "DodgerBlue");
+            {
+                if (${is_foot_based_activity})
+                {
+                    speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
+                    pace_data = convert_speed_graph_to_pace_graph("${unit_system}", new_data);
+
+                    draw_graph(speed_data, "Speed", "DodgerBlue");
+                    draw_graph(pace_data, "Pace", "DodgerBlue");
+                }
+                else
+                {
+                    speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
+                    draw_graph(speed_data, "Speed", "DodgerBlue");
+                }
+            }
             else if (key == "Heart Rate")
                 draw_graph(new_data, "BPM", "FireBrick");
             else if (key == "Cadence")
