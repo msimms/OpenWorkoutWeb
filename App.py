@@ -717,22 +717,20 @@ class App(object):
             self.log_error('Unhandled exception in ' + App.activity.__name__)
         return self.render_error()
 
-    def render_page_for_multiple_mapped_activities(self, email, user_realname, device_strs, user_id, logged_in):
+    def render_page_for_multiple_mapped_activities(self, email, user_realname, device_id_strs, user_id, logged_in):
         """Helper function for rendering the map to track multiple devices."""
 
-        if device_strs is None:
+        if device_id_strs is None:
             my_template = Template(filename=self.error_logged_in_html_file, module_directory=self.tempmod_dir)
             return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, error="No device IDs were specified.")
 
-        route_coordinates = ""
-        center_lat = 0
-        center_lon = 0
-        last_lat = 0
-        last_lon = 0
-        device_index = 0
+        center_lat = 0.0
+        center_lon = 0.0
+        last_lat = 0.0
+        last_lon = 0.0
 
-        for device_str in device_strs:
-            activity_id = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
+        for device_id_str in device_id_strs:
+            activity_id = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_id_str)
             if activity_id is None:
                 continue
 
@@ -740,22 +738,17 @@ class App(object):
             if locations is None:
                 continue
 
-            route_coordinates += "\t\t\tvar routeCoordinates" + str(device_index) + " = \n\t\t\t[\n"
-            for location in locations:
-                route_coordinates += "\t\t\t\tnew_coord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
-                last_loc = location
-            route_coordinates += "\t\t\t];\n"
-            route_coordinates += "\t\t\taddRoute(routeCoordinates" + str(device_index) + ");\n\n"
-
             if len(locations) > 0:
                 first_loc = locations[0]
+                last_loc = locations[-1]
+
                 center_lat = first_loc[Keys.LOCATION_LAT_KEY]
                 center_lon = first_loc[Keys.LOCATION_LON_KEY]
                 last_lat = last_loc[Keys.LOCATION_LAT_KEY]
                 last_lon = last_loc[Keys.LOCATION_LON_KEY]
 
         my_template = Template(filename=self.map_multi_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, googleMapsKey=self.google_maps_key, centerLat=center_lat, centerLon=center_lon, lastLat=last_lat, lastLon=last_lon, routeCoordinates=route_coordinates, userId=str(user_id))
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, googleMapsKey=self.google_maps_key, centerLat=center_lat, centerLon=center_lon, lastLat=last_lat, lastLon=last_lon, userId=str(user_id))
 
     @staticmethod
     def render_user_row(user):
