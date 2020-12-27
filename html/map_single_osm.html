@@ -78,14 +78,8 @@ ${nav}
         ul.appendChild(li);
     }
 
-    var append_to_track = function(response)
+    var append_to_track = function(obj_list)
     {
-        if (response == null)
-            return;
-        if (response.length < 3)
-            return;
-
-        let obj_list = JSON.parse(response);
         if (obj_list == null)
             return;
         if (obj_list.length == 0)
@@ -235,7 +229,7 @@ ${nav}
 
     var check_for_updates = function()
     {
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}", success: append_to_track, dataType: "application/json" });
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}", success: append_to_track, dataType: "json" });
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: update_metadata, dataType: "text" });
     };
 
