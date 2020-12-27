@@ -561,23 +561,16 @@ class App(object):
             return self.render_page_for_errored_activity(activity_id, logged_in, belongs_to_current_user)
 
         route = ""
-        center_lat = 0
-        center_lon = 0
-        last_lat = 0
-        last_lon = 0
-        duration = 0 # Duration of the activity, in milliseconds
+        last_loc = locations[-1]
+        first_loc = locations[0]
+        center_lat = first_loc[Keys.LOCATION_LAT_KEY]
+        center_lon = first_loc[Keys.LOCATION_LON_KEY]
+        last_lat = last_loc[Keys.LOCATION_LAT_KEY]
+        last_lon = last_loc[Keys.LOCATION_LON_KEY]
+        duration = last_loc[Keys.LOCATION_TIME_KEY] - first_loc[Keys.LOCATION_TIME_KEY] # Duration of the activity, in milliseconds
 
         for location in locations:
             route += "\t\t\t\tnew_coord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
-            last_loc = location
-
-        if len(locations) > 0:
-            first_loc = locations[0]
-            center_lat = first_loc[Keys.LOCATION_LAT_KEY]
-            center_lon = first_loc[Keys.LOCATION_LON_KEY]
-            last_lat = last_loc[Keys.LOCATION_LAT_KEY]
-            last_lon = last_loc[Keys.LOCATION_LON_KEY]
-            duration = last_loc[Keys.LOCATION_TIME_KEY] - first_loc[Keys.LOCATION_TIME_KEY]
 
         # User's preferred unit system.
         if logged_in:
