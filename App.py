@@ -560,7 +560,6 @@ class App(object):
         if locations is None or len(locations) == 0:
             return self.render_page_for_errored_activity(activity_id, logged_in, belongs_to_current_user)
 
-        route = ""
         last_loc = locations[-1]
         first_loc = locations[0]
         center_lat = first_loc[Keys.LOCATION_LAT_KEY]
@@ -568,9 +567,6 @@ class App(object):
         last_lat = last_loc[Keys.LOCATION_LAT_KEY]
         last_lon = last_loc[Keys.LOCATION_LON_KEY]
         duration = last_loc[Keys.LOCATION_TIME_KEY] - first_loc[Keys.LOCATION_TIME_KEY] # Duration of the activity, in milliseconds
-
-        for location in locations:
-            route += "\t\t\t\tnew_coord(" + str(location[Keys.LOCATION_LAT_KEY]) + ", " + str(location[Keys.LOCATION_LON_KEY]) + "),\n"
 
         # User's preferred unit system.
         if logged_in:
@@ -696,10 +692,10 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, route=route, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""

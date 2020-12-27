@@ -85,7 +85,6 @@ ${nav}
     var last_lon = ${lastLon}
     var route_coordinates =
     [
-${route}
     ];
 
     function append_to_summary_list(key, value)
@@ -227,7 +226,7 @@ ${route}
     };
 
     google.maps.event.addDomListener(window, 'load', initialize);
-    //check_for_updates();
+    check_for_updates();
 </script>
 
 </div>
@@ -254,7 +253,7 @@ ${summary}
             return;
         }
 
-        let margin = {top: 20, right: 20, bottom: 20, left: 50},
+        let margin = { top: 20, right: 20, bottom: 20, left: 50 },
             width = $("#charts").width() - margin.left - margin.right,
             height = 250 - margin.top - margin.bottom;
 
