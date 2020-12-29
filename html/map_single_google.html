@@ -95,11 +95,6 @@ ${nav}
         ul.appendChild(li);
     }
 
-    function new_coord(x, y)
-    {
-        return new google.maps.LatLng(x, y);
-    }
-
     var append_to_track = function(obj_list)
     {
         if (obj_list == null)
@@ -109,13 +104,28 @@ ${nav}
 
         for (let i = 0; i < obj_list.length; ++i)
         {
-            route_coordinates.push(new_coord(obj_list[i].latitude, obj_list[i].longitude));
+            route_coordinates.push(new google.maps.LatLng(obj_list[i].latitude, obj_list[i].longitude));
         }
         route_path.setPath(route_coordinates);
         route_path.setMap(map);
 
         last_lat = obj_list[obj_list.length - 1].latitude;
         last_lon = obj_list[obj_list.length - 1].longitude;
+
+        // Analyze the route, compute the total distance, avg. speed, etc.
+        let meters_traveled = total_distance_google(route_coordinates);
+        let distance_traveled_str = convert_distance_to_unit_system_str("${unit_system}", meters_traveled);
+        append_to_summary_list("Distance", distance_traveled_str);
+        if (${is_foot_based_activity})
+        {
+            let pace_str = convert_distance_and_duration_to_pace_str("${unit_system}", meters_traveled, ${duration});
+            append_to_summary_list("Avg. Pace:", pace_str);
+        }
+        else
+        {
+            let speed_str = convert_distance_and_duration_to_speed_str("${unit_system}", meters_traveled, ${duration});
+            append_to_summary_list("Avg. Speed:", speed_str);
+        }
 
         // Request metadata for the info box.
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", cache: false, success: update_metadata, dataType: "json" });
@@ -200,23 +210,6 @@ ${nav}
 
         // Draw the route on the map.
         route_path.setMap(map);
-
-        // Analyze the route, compute the total distance, avg. speed, etc.
-        let meters_traveled = total_distance_google(route_coordinates);
-        let distance_traveled_str = convert_distance_to_unit_system_str("${unit_system}", meters_traveled);
-        append_to_summary_list("Distance", distance_traveled_str);
-        if (${is_foot_based_activity})
-        {
-            let pace_str = convert_distance_and_duration_to_pace_str("${unit_system}", meters_traveled, ${duration});
-            append_to_summary_list("Avg. Pace:", pace_str);
-        }
-        else
-        {
-            let speed_str = convert_distance_and_duration_to_speed_str("${unit_system}", meters_traveled, ${duration});
-            append_to_summary_list("Avg. Speed:", speed_str);
-        }
-
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", cache: false, success: update_metadata, dataType: "json" });
     }
 
     var check_for_updates = function()
