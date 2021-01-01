@@ -236,6 +236,9 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 * Minor UI updates.
 * Ability to upload photo upload.
 
+### 0.33
+* Bug fixes and performance optimizations.
+
 ## Tech
 This software uses several other source projects to work properly:
 
