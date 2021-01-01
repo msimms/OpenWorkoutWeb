@@ -19,34 +19,34 @@
 </head>
 
 <style type="text/css">
-	html { height: 100% }
-	body { height: 100%; margin: 0; padding: 0 }
-	div { margin: 0px }
-	#map_canvas { height: 75% }
+    html { height: 100% }
+    body { height: 100%; margin: 0; padding: 0 }
+    div { margin: 0px }
+    #map_canvas { height: 75% }
 
-	div.bar
-	{
-		display: inline-block;
-		width: 20px;
-		height: 75px;	/* Gets overriden by D3-assigned height below */
-		background-color: teal;
-	}
+    div.bar
+    {
+        display: inline-block;
+        width: 20px;
+        height: 75px;	/* Gets overriden by D3-assigned height below */
+        background-color: teal;
+    }
 
-	path
-	{
-		stroke: steelblue;
-		stroke-width: 2;
-		fill: none;
-	}
+    path
+    {
+        stroke: steelblue;
+        stroke-width: 2;
+        fill: none;
+    }
 
-	.axis path,
-	.axis line
-	{
-		fill: none;
-		stroke: #000;
-		stroke-width: 1;
-		shape-rendering: crispEdges;
-	}
+    .axis path,
+    .axis line
+    {
+        fill: none;
+        stroke: #000;
+        stroke-width: 1;
+        shape-rendering: crispEdges;
+    }
 </style>
 
 <body>
@@ -78,14 +78,8 @@ ${nav}
         ul.appendChild(li);
     }
 
-    var append_to_track = function(response)
+    var append_to_track = function(obj_list)
     {
-        if (response == null)
-            return;
-        if (response.length < 3)
-            return;
-
-        let obj_list = JSON.parse(response);
         if (obj_list == null)
             return;
         if (obj_list.length == 0)
@@ -134,13 +128,11 @@ ${nav}
             }
         }
 
-        content_string +=
-            '</p>' +
-            '</div>' +
-            '</div>';
+        content_string += '</p></div></div>';
 
         let lon_lat = new OpenLayers.LonLat(last_lon, last_lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
         let markers = new OpenLayers.Layer.Markers("Markers");
+
         map.addLayer(markers);    
         markers.addMarker(new OpenLayers.Marker(lon_lat));
     };
@@ -237,12 +229,12 @@ ${nav}
 
     var check_for_updates = function()
     {
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}", success: append_to_track, dataType: "application/json" });
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}", success: append_to_track, dataType: "json" });
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: update_metadata, dataType: "text" });
     };
 
     initialize();
-	//setInterval(check_for_updates, 30000);
+    //setInterval(check_for_updates, 30000);
 </script>
 
 </div>
@@ -262,76 +254,76 @@ ${summary}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
-	function draw_graph(data, title, color)
-	{
+    function draw_graph(data, title, color)
+    {
         if (data.length == 0)
         {
             return;
         }
 
-		let margin = {top: 20, right: 20, bottom: 20, left: 50},
-			width = $("#charts").width() - margin.left - margin.right,
-			height = 250 - margin.top - margin.bottom;
+        let margin = {top: 20, right: 20, bottom: 20, left: 50},
+            width = $("#charts").width() - margin.left - margin.right,
+            height = 250 - margin.top - margin.bottom;
 
-		let x = d3.time.scale().range([0, width]);
-		let y = d3.scale.linear().range([height, 0]);
+        let x = d3.time.scale().range([0, width]);
+        let y = d3.scale.linear().range([height, 0]);
 
-		let xAxis = d3.svg.axis().scale(x).orient("bottom");
-		let yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
+        let xAxis = d3.svg.axis().scale(x).orient("bottom");
+        let yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
 
-		let valueline = d3.svg.line()
-			.x(function(d) { return x(d.date); })
-			.y(function(d) { return y(d.value); });
+        let valueline = d3.svg.line()
+            .x(function(d) { return x(d.date); })
+            .y(function(d) { return y(d.value); });
 
-		let svg = d3.select("#charts")
-			.append("svg:svg")
-				.attr("width", width + margin.left + margin.right)
-				.attr("height", height + margin.top + margin.bottom)
-			.append("g")
-				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        let svg = d3.select("#charts")
+            .append("svg:svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-		x.domain(d3.extent(data, function(d) { return d.date; }));
-		y.domain(d3.extent(data, function(d) { return d.value; }));
+        x.domain(d3.extent(data, function(d) { return d.date; }));
+        y.domain(d3.extent(data, function(d) { return d.value; }));
 
-		svg.append("path")
-			.attr("class", "line")
-			.attr("d", valueline(data))
-			.style("stroke", color);
-		svg.append("g")
-			.attr("class", "x axis")
-			.attr("transform", "translate(0," + height + ")")
-			.call(xAxis);
-		svg.append("g")
-			.attr("class", "y axis")
-			.call(yAxis)
-			.append("text")
-			.attr("transform", "rotate(-90)")
-			.attr("y", 6)
-			.attr("dy", ".71em")
-			.style("text-anchor", "end")
-			.text(title);
-	}
+        svg.append("path")
+            .attr("class", "line")
+            .attr("d", valueline(data))
+            .style("stroke", color);
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text(title);
+    }
 
-	function draw_bar_chart(data, title, color)
-	{
+    function draw_bar_chart(data, title, color)
+    {
         let xVals = Array.apply(null, Array(data.length - 1)).map(function (x, i) { return i + 1; } );
 
-		let margin = {top: 20, right: 20, bottom: 55, left: 50},
-			width = $("#charts").width() - margin.left - margin.right,
-			height = 250 - margin.top - margin.bottom;
+        let margin = {top: 20, right: 20, bottom: 55, left: 50},
+            width = $("#charts").width() - margin.left - margin.right,
+            height = 250 - margin.top - margin.bottom;
 
         let x = d3.scale.ordinal().domain(xVals).rangeBands([0, width]);
         let y = d3.scale.linear().domain([0, d3.max(data)]).range([height, 0]);
 
-		let xAxis = d3.svg.axis().scale(x).orient("bottom");
-		let yAxis = d3.svg.axis().scale(y).orient("left").ticks(0);
+        let xAxis = d3.svg.axis().scale(x).orient("bottom");
+        let yAxis = d3.svg.axis().scale(y).orient("left").ticks(0);
 
-		let svg = d3.select("#charts")
-			.append("svg:svg")
-				.attr("width", width + margin.left + margin.right)
-				.attr("height", height + margin.top + margin.bottom)
-			.append("g")
-				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        let svg = d3.select("#charts")
+            .append("svg:svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         svg.append("g")
             .attr("class", "x axis")
@@ -348,7 +340,7 @@ ${summary}
             .append("text")
             .attr("transform", "rotate(-90)")
             .attr("dy", ".71em")
-			.style("text-anchor", "end");
+            .style("text-anchor", "end");
         svg.append("text")
             .attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 20) + ")")
             .style("text-anchor", "middle")
@@ -370,10 +362,10 @@ ${powerZones}
 ${splits}
     ];
 
-	if (powerZones.length > 0)
-		$(function() { draw_bar_chart(powerZones, "Power Zone Distribution", "ForestGreen") });
-	if (splits.length > 0)
-		$(function() { draw_bar_chart(splits, "Split Times", "LightSteelBlue") });
+    if (powerZones.length > 0)
+        $(function() { draw_bar_chart(powerZones, "Power Zone Distribution", "ForestGreen") });
+    if (splits.length > 0)
+        $(function() { draw_bar_chart(splits, "Split Times", "LightSteelBlue") });
 
     var process_sensordata = function(sensordata)
     {
@@ -393,7 +385,21 @@ ${splits}
             });
 
             if (key == "Current Speed")
-                draw_graph(new_data, "Speed", "DodgerBlue");
+            {
+                if (${is_foot_based_activity})
+                {
+                    speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
+                    pace_data = convert_speed_graph_to_pace_graph("${unit_system}", new_data);
+
+                    draw_graph(speed_data, "Speed", "DodgerBlue");
+                    draw_graph(pace_data, "Pace", "DodgerBlue");
+                }
+                else
+                {
+                    speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
+                    draw_graph(speed_data, "Speed", "DodgerBlue");
+                }
+            }
             else if (key == "Heart Rate")
                 draw_graph(new_data, "BPM", "FireBrick");
             else if (key == "Cadence")

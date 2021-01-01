@@ -522,7 +522,9 @@ def api(version, method):
                 # Make sure the key is not being abused.
                 if not self.app.data_mgr.check_api_rate(key, max_rate):
                     user_id = None
+                    code = 429
                     response = "Excessive API requests."
+                    g_app.log_error(response)
         else:
 
             # API key not provided, check the session key.

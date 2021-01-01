@@ -22,6 +22,8 @@ class RunPlanGenerator(object):
         self.user_id = user_id
         self.easy_distance_total_meters = 0.0
         self.hard_distance_total_meters = 0.0
+        self.total_easy_seconds = 0.0 # Total weekly minutes spent running easy
+        self.total_hard_seconds = 0.0 # Total weekly minutes spent running hard
 
     def is_workout_plan_possible(self, inputs):
         """Returns TRUE if we can actually generate a plan with the given contraints."""
@@ -72,6 +74,9 @@ class RunPlanGenerator(object):
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
         self.easy_distance_total_meters += interval_distance_meters
 
+        # Tally up the easy and hard seconds.
+        self.total_easy_seconds += interval_distance_meters * pace
+
         return easy_run_workout
 
     def gen_tempo_run(self, tempo_run_pace, easy_run_pace, max_run_distance):
@@ -86,8 +91,8 @@ class RunPlanGenerator(object):
         if interval_distance_meters < 1000:
             interval_distance_meters = 1000
 
-        warmup_duration = 10 * 60
-        cooldown_duration = 10 * 60
+        warmup_duration = 10 * 60 # Ten minute warmup
+        cooldown_duration = 10 * 60 # Ten minute cooldown
 
         # Create the workout object.
         tempo_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TEMPO_RUN, self.user_id)
@@ -101,6 +106,10 @@ class RunPlanGenerator(object):
         self.easy_distance_total_meters += (cooldown_duration / easy_run_pace)
         self.hard_distance_total_meters += interval_distance_meters
 
+        # Tally up the easy and hard seconds.
+        self.total_easy_seconds += warmup_duration + cooldown_duration
+        self.total_hard_seconds += interval_distance_meters * tempo_run_pace
+
         return tempo_run_workout
 
     def gen_speed_run(self, short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance):
@@ -111,8 +120,8 @@ class RunPlanGenerator(object):
         MAX_REPS_INDEX = 1
         REP_DISTANCE_INDEX = 2
 
-        warmup_duration = 10 * 60
-        cooldown_duration = 10 * 60
+        warmup_duration = 10 * 60 # Ten minute warmup
+        cooldown_duration = 10 * 60 # Ten minute cooldown
 
         # Build a collection of possible run interval sessions, sorted by target distance. Order is { min reps, max reps, distance in meters }.
         possible_workouts = [ [ 4, 8, 100 ], [ 4, 8, 200 ], [ 4, 8, 400 ], [ 4, 8, 600 ], [ 2, 8, 800 ], [ 2, 6, 1000 ], [ 2, 4, 1600 ] ]
@@ -166,10 +175,17 @@ class RunPlanGenerator(object):
         interval_run_workout.add_cooldown(cooldown_duration)
 
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
+        total_rest_meters = ((selected_reps - 1) * rest_interval_distance)
+        total_hard_meters = (selected_reps * interval_distance)
         self.easy_distance_total_meters += (warmup_duration / easy_run_pace)
         self.easy_distance_total_meters += (cooldown_duration / easy_run_pace)
-        self.easy_distance_total_meters += ((selected_reps - 1) * rest_interval_distance)
-        self.hard_distance_total_meters += (selected_reps * interval_distance)
+        self.easy_distance_total_meters += total_rest_meters
+        self.hard_distance_total_meters += total_hard_meters
+
+        # Tally up the easy and hard seconds.
+        self.total_easy_seconds += warmup_duration + cooldown_duration
+        self.total_easy_seconds += total_rest_meters * easy_run_pace
+        self.total_hard_seconds += total_hard_meters * interval_pace
 
         return interval_run_workout
 
@@ -192,17 +208,20 @@ class RunPlanGenerator(object):
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
         self.easy_distance_total_meters += interval_distance_meters
 
+        # Tally up the easy and hard seconds.
+        self.total_easy_seconds += interval_distance_meters * long_run_pace
+
         return long_run_workout
 
     def gen_free_run(self):
         """Utility function for creating a free run workout."""
 
         # Create the workout object.
-        long_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_FREE_RUN, self.user_id)
-        long_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
-        long_run_workout.add_interval(1, 5000, 0, 0, 0)
+        free_run_workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_FREE_RUN, self.user_id)
+        free_run_workout.sport_type = Keys.TYPE_RUNNING_KEY
+        free_run_workout.add_interval(1, 5000, 0, 0, 0)
 
-        return long_run_workout
+        return free_run_workout
 
     def gen_workouts_for_next_week(self, inputs):
         """Generates the workouts for the next week, but doesn't schedule them."""
@@ -289,6 +308,8 @@ class RunPlanGenerator(object):
             # Keep track of the number of easy miles/kms and the number of hard miles/kms we're expecting the user to run so we can balance the two.
             self.easy_distance_total_meters = 0.0
             self.hard_distance_total_meters = 0.0
+            self.total_easy_seconds = 0.0
+            self.total_hard_seconds = 0.0
 
             # Add a long run.
             long_run_workout = self.gen_long_run(long_run_pace, longest_run_in_four_weeks, min_run_distance, max_long_run_distance)

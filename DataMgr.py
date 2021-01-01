@@ -50,6 +50,7 @@ FOUR_WEEKS = (28.0 * 24.0 * 60.0 * 60.0)
 
 g_api_key_rate_lock = threading.Lock()
 g_api_key_rates = {}
+g_last_api_reset = 0 # Timestamp of when g_api_key_rates was last cleared 
 
 def get_activities_sort_key(item):
     # Was the start time provided? If not, look at the first location.
@@ -140,7 +141,7 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
 
-        activities = self.database.retrieve_user_activity_list(user_id, None, None, None)
+        activities = self.database.retrieve_user_activity_list(user_id, None, None, None, None)
         for activity in activities:
 
             if Keys.ACTIVITY_START_TIME_KEY in activity:
@@ -237,6 +238,12 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
+        if date_time is None:
+            raise Exception("No timestamp.")
+        if key is None:
+            raise Exception("No key.")
+        if value is None:
+            raise Exception("No value.")
         return self.database.create_activity_metadata(activity_id, date_time, key, value, create_list)
 
     def create_activity_metadata_list(self, activity_id, key, values):
@@ -245,6 +252,10 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
+        if key is None:
+            raise Exception("No key.")
+        if values is None:
+            raise Exception("No values.")
         return self.database.create_activity_metadata_list(activity_id, key, values)
 
     def create_activity_sets_and_reps_data(self, activity_id, sets):
@@ -466,7 +477,7 @@ class DataMgr(Importer.ActivityWriter):
                 return False
         return True
 
-    def retrieve_user_activity_list(self, user_id, user_realname, start, num_results):
+    def retrieve_user_activity_list(self, user_id, user_realname, start_time, end_time, num_results):
         """Returns a list containing all of the user's activities, up to num_results. num_results can be None for all activiites."""
         if self.database is None:
             raise Exception("No database.")
@@ -480,7 +491,7 @@ class DataMgr(Importer.ActivityWriter):
         devices = list(set(devices)) # De-duplicate
         if devices is not None:
             for device in devices:
-                device_activities = self.database.retrieve_device_activity_list(device, start, None)
+                device_activities = self.database.retrieve_device_activity_list(device, start_time, None)
                 if device_activities is not None:
                     for device_activity in device_activities:
                         device_activity[Keys.REALNAME_KEY] = user_realname
@@ -489,7 +500,7 @@ class DataMgr(Importer.ActivityWriter):
 
         # List activities with no device that are associated with the user.
         exclude_keys = self.database.list_excluded_activity_keys() # Things we don't need.
-        user_activities = self.database.retrieve_user_activity_list(user_id, start, None, exclude_keys)
+        user_activities = self.database.retrieve_user_activity_list(user_id, start_time, end_time, None, exclude_keys)
         if user_activities is not None:
             for user_activity in user_activities:
                 user_activity[Keys.REALNAME_KEY] = user_realname
@@ -522,7 +533,7 @@ class DataMgr(Importer.ActivityWriter):
         # List activities with no device that are associated with the user.
         self.database.retrieve_each_user_activity(context, user_id, cb)
 
-    def retrieve_all_activities_visible_to_user(self, user_id, user_realname, start, num_results):
+    def retrieve_all_activities_visible_to_user(self, user_id, user_realname, start_time, end_time, num_results):
         """Returns a list containing all of the activities visible to the specified user, up to num_results. num_results can be None for all activiites."""
         if self.database is None:
             raise Exception("No database.")
@@ -530,12 +541,12 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         # Start with the user's own activities.
-        activities = self.retrieve_user_activity_list(user_id, user_realname, start, num_results)
+        activities = self.retrieve_user_activity_list(user_id, user_realname, start_time, end_time, num_results)
 
         # Add the activities of users they follow.
         friends = self.database.retrieve_friends(user_id)
         for friend in friends:
-            more_activities = self.retrieve_user_activity_list(friend[Keys.DATABASE_ID_KEY], friend[Keys.REALNAME_KEY], start, num_results)
+            more_activities = self.retrieve_user_activity_list(friend[Keys.DATABASE_ID_KEY], friend[Keys.REALNAME_KEY], start_time, end_time, num_results)
             for another_activity in more_activities:
                 if self.is_activity_public(another_activity):
                     activities.append(another_activity)
@@ -546,13 +557,13 @@ class DataMgr(Importer.ActivityWriter):
 
         return activities
 
-    def retrieve_device_activity_list(self, device_id, start, num_results):
+    def retrieve_device_activity_list(self, device_id, start_time, num_results):
         """Returns a list containing all of the device's activities, up to num_results. num_results can be None for all activiites."""
         if self.database is None:
             raise Exception("No database.")
         if device_id is None or len(device_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_device_activity_list(device_id, start, num_results)
+        return self.database.retrieve_device_activity_list(device_id, start_time, num_results)
 
     def delete_user_gear(self, user_id):
         """Deletes all user gear."""
@@ -991,13 +1002,13 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_workout(user_id, workout_id)
 
-    def retrieve_workouts_for_user(self, user_id):
+    def retrieve_workouts_for_user(self, user_id, start_time, end_time):
         """Retrieve method for all workouts pertaining to the user with the specified ID."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_workouts_for_user(user_id)
+        return self.database.retrieve_workouts_for_user(user_id, start_time, end_time)
 
     def retrieve_workouts_calendar_id_for_user(self, user_id):
         """Retrieve method for the ical calendar ID for with specified ID."""
@@ -1023,7 +1034,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         new_workouts_list = []
-        old_workouts_list = self.database.retrieve_workouts_for_user(user_id)
+        old_workouts_list = self.database.retrieve_workouts_for_user(user_id, start_time, end_time)
         for workout in old_workouts_list:
             if workout.scheduled_time is not None and (workout.scheduled_time < start_time or workout.scheduled_time > end_time):
                 new_workouts_list.append(workout)
@@ -1201,6 +1212,10 @@ class DataMgr(Importer.ActivityWriter):
     def check_api_rate(self, api_key, max_rate):
         """Verifies that the API key is not being overused."""
         """Returns TRUE if it is fine to process the request, FALSE otherwise."""
+        global g_api_key_rate_lock
+        global g_api_key_rates
+        global g_last_api_reset
+
         if self.database is None:
             raise Exception("No database.")
         if api_key is None:
@@ -1208,6 +1223,15 @@ class DataMgr(Importer.ActivityWriter):
 
         result = True
         g_api_key_rate_lock.acquire()
+
+        # Once a day we should reset the countesr. This algorithm is overly simplistic and
+        # could almost certainly be improved but is good enough for now.
+        now = time.time()
+        if now - g_last_api_reset > 86400:
+            g_api_key_rates = {}
+            g_last_api_reset = now
+
+        # Check and increment the request count.
         try:
             current_rate = g_api_key_rates[api_key]
             result = current_rate <= max_rate
@@ -1374,7 +1398,7 @@ class DataMgr(Importer.ActivityWriter):
 
         num_unanalyzed = 0
 
-        all_activities = self.retrieve_user_activity_list(user_id, None, None, None)
+        all_activities = self.retrieve_user_activity_list(user_id, None, None, None, None)
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
 
         for activity in all_activities:

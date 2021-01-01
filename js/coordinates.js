@@ -172,3 +172,68 @@ function convert_distance_and_duration_to_speed_str(unit_system, meters_traveled
     }
     return speed.toFixed(2).toString() + units;
 }
+
+function convert_speed_graph_to_display_units(unit_system, speed_list)
+{
+    let new_speed_list = [];
+
+    // Speed is in meters/second.
+    let is_metric = (unit_system == "metric");
+    for (let data_point in speed_list)
+    {
+        let date = speed_list[data_point].date;
+        let speed = speed_list[data_point].value;
+        let value = 0.0;
+
+        if (is_metric)
+            value = speed * 3.6;
+        else
+            value = speed * 2.23694;
+        new_speed_list.push({date, value});    }
+    return new_speed_list;
+}
+
+function convert_speed_graph_to_pace_graph(unit_system, speed_list)
+{
+    let pace_list = [];
+
+    // Speed is in meters/second.
+    let is_metric = (unit_system == "metric");
+    for (let data_point in speed_list)
+    {
+        let date = speed_list[data_point].date;
+        let speed = speed_list[data_point].value;
+        let value = 0.0;
+
+        if (speed > 0.01)
+        {
+            if (is_metric)
+                value = 16.6666667 / speed;
+            else
+                value = 26.8224 / speed;
+        }
+        else
+            value = 0.0;
+        pace_list.push({date, value});
+    }
+    return pace_list;
+}
+
+function compute_grade_adjusted_pace(elevation_list, pace_list)
+{
+    let gap_list = [];
+    let old_y = nil;
+    let old_x = nil;
+
+    for (let data_point in pace_list)
+    {
+        let date = pace_list[data_point].date;
+        let pace = pace_list[data_point].value;
+        let gradient = 1.0;
+        let cost = (155.4 * (Math.pow(gradient, 5))) - (30.4 * Math.pow(gradient, 4)) - (43.4 * Math.pow(gradient, 3)) - (46.3 * (gradient * gradient)) - (19.5 * gradient) + 3.6;
+        let value = pace + (cost - 3.6) / 3.6;
+
+        gap_list.push({date, value});
+    }
+    return gap_list;
+}

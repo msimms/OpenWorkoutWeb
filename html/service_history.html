@@ -187,11 +187,11 @@
                     gear_desc_title.innerText = "None";
 
                 // Add the added date.
-                let gear_desc_title = document.getElementById("GearAdded");
+                gear_desc_title = document.getElementById("GearAdded");
                 gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.add_time);
 
                 // Add the retired date.
-                let gear_desc_title = document.getElementById("GearRetired");
+                gear_desc_title = document.getElementById("GearRetired");
                 if (gear_record.retire_time > 0)
                     gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.retire_time);
                 else

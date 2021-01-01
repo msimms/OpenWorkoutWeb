@@ -29,10 +29,20 @@
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script type="text/javascript">
 
+    function compute_start_time()
+    {
+        return 0;
+    }
+
+    function compute_end_time()
+    {
+        return Date.now();
+    }
+
 	function list_activities()
 	{
 		let activity_list = [];
-		let the_url = "${root_url}/api/1.0/list_my_activities";
+		let the_url = "${root_url}/api/1.0/list_my_activities?start_time=" + compute_start_time() + "&end_time=" + compute_end_time();
 		let result_text = {};
 
 		if (send_get_request(the_url, result_text))
@@ -59,7 +69,7 @@
 	function list_workouts()
 	{
 		let workout_list = [];
-		let the_url = "${root_url}/api/1.0/list_workouts";
+		let the_url = "${root_url}/api/1.0/list_workouts?start_time=" + compute_start_time() + "&end_time=" + compute_end_time();
 		let result_text = {};
         let d = new Date();
         let tz_offset = d.getTimezoneOffset() * 60;
