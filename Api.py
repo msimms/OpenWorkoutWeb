@@ -121,7 +121,7 @@ class Api(object):
         return location
 
     def parse_json_accel_obj(self, json_obj):
-        """Helper function that parses the JSON object, which contains location data, and updates the database."""
+        """Helper function that parses the JSON object, which contains accelerometer data, and updates the database."""
         accel = []
 
         try:
@@ -136,11 +136,11 @@ class Api(object):
             z = json_obj[Keys.APP_AXIS_NAME_Z]
             accel = [date_time, x, y, z]
         except ValueError as e:
-            self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
+            self.log_error("ValueError in JSON accelerometer data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except KeyError as e:
-            self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
+            self.log_error("KeyError in JSON accelerometer data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except:
-            self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
+            self.log_error("Error parsing JSON accelerometer data. JSON object = " + str(json_obj))
         return accel
 
     def handle_update_status(self, values):
@@ -239,7 +239,7 @@ class Api(object):
             for location in locations[num_points:]:
                 if len(response) > 1:
                     response += ","
-                response += json.dumps({Keys.LOCATION_LAT_KEY: location[Keys.LOCATION_LAT_KEY], Keys.LOCATION_LON_KEY: location[Keys.LOCATION_LON_KEY]})
+                response += json.dumps({Keys.LOCATION_LAT_KEY: location[Keys.LOCATION_LAT_KEY], Keys.LOCATION_LON_KEY: location[Keys.LOCATION_LON_KEY], Keys.LOCATION_ALT_KEY: location[Keys.LOCATION_ALT_KEY]})
 
         response += "]"
 
