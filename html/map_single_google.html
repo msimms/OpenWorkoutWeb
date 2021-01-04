@@ -227,10 +227,14 @@ ${summary}
 
     function draw_graph(data, title, units, color)
     {
-        if (data.length == 0)
+        if (data.length <= 1)
         {
             return;
         }
+
+        // Need to zero out the first and last points or else the fill will look silly.
+        data[0].value = 0.0;
+        data[data.length-1].value = 0.0;
 
         var Tooltip = d3.select("#charts")
             .append("div")
@@ -287,7 +291,9 @@ ${summary}
         svg.append("path")
             .attr("class", "line")
             .attr("d", valueline(data))
-            .style("stroke", color);
+            .style("fill", color)
+            .style("stroke", "LightSlateGray")
+            .style("stroke-width", 1.25);
         svg.append("g")
             .attr("class", "x axis")
             .attr("transform", "translate(0," + height + ")")
@@ -364,7 +370,7 @@ ${splits}
     if (powerZones.length > 0)
         $(function() { draw_bar_chart(powerZones, "Power Zone Distribution", "ForestGreen") });
     if (splits.length > 0)
-        $(function() { draw_bar_chart(splits, "Split Times", "LightRed") });
+        $(function() { draw_bar_chart(splits, "Split Times", "LightSteelBlue") });
 
     var process_sensordata = function(sensordata)
     {
