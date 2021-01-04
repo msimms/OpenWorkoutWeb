@@ -264,28 +264,26 @@ ${summary}
         var Tooltip = d3.select("#charts")
             .append("div")
                 .style("opacity", 0)
-                .style("width", 200)
+                .style("position", "absolute")
+                .style("visibility", "hidden")
                 .style("background-color", "white")
-
+                .style("z-index", 1)
+                .style("cursor", "pointer")
         var mouseover = function() {
             Tooltip
-                .style("opacity", 1)
+                .style("opacity", 0.7)
+                .style("visibility", "visible")
         }
         var mousemove = function() {
             let coordinates = d3.mouse(this);
             let x = coordinates[0];
-            let y = coordinates[1];
 
             Tooltip
                 .html("<b>" + data[x].value.toFixed(2) + " " + units + "</b>")
-                .style("width", "200px")
-                .style("left", "100px")
-                .style("top", "100px")
-                .style("opacity", 1)
+                .style("top", (event.pageY)+"px")
+                .style("left",(event.pageX)+"px")
         }
         var mouseleave = function() {
-            Tooltip
-                .style("opacity", 0)
         }
 
         let margin = {top: 20, right: 20, bottom: 20, left: 50},
@@ -303,15 +301,14 @@ ${summary}
             .y(function(d) { return y(d.value); });
 
         let svg = d3.select("#charts")
-            .append("svg:svg")
+            .append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
+                .on('mouseover', mousemove)
+                .on('mousemove', mouseover)
+                .on('mouseleave', mouseleave)
             .append("g")
                 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-        svg.on('mouseover', mousemove);
-        svg.on('mousemove', mouseover);
-        svg.on('mouseleave', mouseleave);
 
         x.domain(d3.extent(data, function(d) { return d.date; }));
         y.domain(d3.extent(data, function(d) { return d.value; }));
