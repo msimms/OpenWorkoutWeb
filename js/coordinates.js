@@ -205,7 +205,7 @@ function convert_speed_graph_to_pace_graph(unit_system, speed_list)
         let speed = speed_list[data_point].value;
         let value = 0.0;
 
-        if (speed > 0.01)
+        if (speed > 1.0)
         {
             if (is_metric)
                 value = 16.6666667 / speed;
