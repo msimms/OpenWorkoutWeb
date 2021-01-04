@@ -47,6 +47,17 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             500: An internal exception was thrown.
     post:
+/activity_summarydata:
+    description: Returns data computed from the activity. Summmary items are specified as a comma-separated list.
+    get:
+        queryParameters:
+            activity_id:
+            summary_items:
+        responses:
+            200:
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            500: An internal exception was thrown.
+    post:
 /update_activity_metadata:
     description:
     get:

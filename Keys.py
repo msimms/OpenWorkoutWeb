@@ -351,6 +351,7 @@ LOCAL_FILE_NAME = "local file name"
 
 # Only used by the API.
 SENSOR_LIST_KEY = "sensors"
+SUMMARY_ITEMS_LIST_KEY = "summary_items"
 START_TIME = "start_time"
 END_TIME = "end_time"
 

@@ -407,6 +407,36 @@ class Api(object):
 
         return True, json.dumps(response)
 
+    def handle_retrieve_activity_summarydata(self, values):
+        """Called when an API message to get the interval segments computed from the activity is received. Result is a JSON string."""
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+        if Keys.SUMMARY_ITEMS_LIST_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Summary item list not specified.")
+
+        # Get the activity ID from the request.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # Get the activity from the database.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+
+        # Determine if the requesting user can view the activity.
+        if not self.activity_can_be_viewed(activity):
+            return self.error("The requested activity is not viewable to this user.")
+
+        # Get the activity summary from the database.
+        activity_summary = self.data_mgr.retrieve_activity_summary(activity_id)
+
+        response = {}
+
+        for summary_item in values[Keys.SUMMARY_ITEMS_LIST_KEY].split(','):
+            if summary_item in activity_summary:
+                response[summary_item] = activity_summary[summary_item]
+
+        return True, json.dumps(response)
+
     def handle_update_activity_metadata(self, values):
         """Called when an API message to update the activity metadata."""
         if self.user_id is None:
@@ -1994,6 +2024,8 @@ class Api(object):
             return self.handle_retrieve_activity_metadata(values)
         elif request == 'activity_sensordata':
             return self.handle_retrieve_activity_sensordata(values)
+        elif request == 'activity_summarydata':
+            return self.handle_retrieve_activity_summarydata(values)
         elif request == 'login_status':
             return self.handle_login_status(values)
         elif request == 'list_devices':
