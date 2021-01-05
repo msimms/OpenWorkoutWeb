@@ -254,6 +254,9 @@ ${summary}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
+    var start_time = 0;
+    var end_time = 0;
+
     function draw_graph(data, title, units, color)
     {
         if (data.length <= 1)
@@ -290,7 +293,7 @@ ${summary}
         var mouseleave = function() {
         }
 
-        let margin = {top: 20, right: 20, bottom: 20, left: 50},
+        let margin = { top: 20, right: 20, bottom: 20, left: 50 },
             width = $("#charts").width() - margin.left - margin.right,
             height = 250 - margin.top - margin.bottom;
 
@@ -353,7 +356,7 @@ ${summary}
         let yAxis = d3.svg.axis().scale(y).orient("left").ticks(0);
 
         let svg = d3.select("#charts")
-            .append("svg:svg")
+            .append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom)
             .append("g")
@@ -401,6 +404,68 @@ ${splits}
     if (splits.length > 0)
         $(function() { draw_bar_chart(splits, "Split Times", "LightSteelBlue") });
 
+    var process_summarydata = function(summarydata)
+    {
+        for (key in summarydata)
+        {
+            if (key == "intervals")
+            {
+                interval_graph = [];
+                interval_data = summarydata[key];
+                if (interval_data.length > 0)
+                {
+                    if (start_time > 0)
+                    {
+                        graph_node = {};
+                        graph_node["date"] = new Date(start_time);
+                        graph_node["value"] = 0;
+                        interval_graph.push(graph_node);
+                    }
+
+                    for (let i in interval_data)
+                    {
+                        let interval = interval_data[i];
+                        let start_interval_time = Number(interval[0]);
+                        let end_interval_time = Number(interval[1]);
+
+                        graph_node = {};
+                        graph_node["date"] = new Date(start_interval_time-1000);
+                        graph_node["value"] = 0;
+                        interval_graph.push(graph_node);
+                        graph_node = {};
+                        graph_node["date"] = new Date(start_interval_time);
+                        graph_node["value"] = 1;
+                        interval_graph.push(graph_node);
+                        graph_node = {};
+                        graph_node["date"] = new Date(end_interval_time);
+                        graph_node["value"] = 1;
+                        interval_graph.push(graph_node);
+                        graph_node = {};
+                        graph_node["date"] = new Date(end_interval_time+1000);
+                        graph_node["value"] = 0;
+                        interval_graph.push(graph_node);
+                    }
+
+                    if (end_time > 0)
+                    {
+                        graph_node = {};
+                        graph_node["date"] = new Date(end_time);
+                        graph_node["value"] = 0;
+                        interval_graph.push(graph_node);
+                    }
+
+                    draw_graph(interval_graph, "Intervals", "", "Black");
+                }
+            }
+        }
+    }
+
+    function retrieve_summary_data()
+    {
+        let api_url = "${root_url}/api/1.0/activity_summarydata?activity_id=${activityId}&summary_items=intervals";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
+    }
+
     var process_sensordata = function(sensordata)
     {
         for (key in sensordata)
@@ -447,6 +512,12 @@ ${splits}
                     speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
                     draw_graph(speed_data, "Speed", speed_units, "DodgerBlue");
                 }
+
+                if (speed_data.length > 1)
+                {
+                    start_time = speed_data[0].date;
+                    end_time = speed_data[speed_data.length-1].date;
+                }
             }
             else if (key == "Heart Rate")
                 draw_graph(new_data, "BPM", "BPM", "FireBrick");
@@ -455,6 +526,8 @@ ${splits}
             else if (key == "Power")
                 draw_graph(new_data, "Watts", "Watts", "ForestGreen");
         }
+
+        retrieve_summary_data();
     }
 
     function retrieve_sensor_data()
@@ -463,7 +536,12 @@ ${splits}
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
     }
 
-    retrieve_sensor_data();
+    function draw_graphs()
+    {
+        retrieve_sensor_data();
+    }
+
+    draw_graphs();
 
 </script>
 
