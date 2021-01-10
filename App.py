@@ -907,6 +907,7 @@ class App(object):
         if Keys.ACTIVITY_TYPE_KEY in activity:
             selected_activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
         all_activity_types = self.data_mgr.retrieve_activity_types()
+        all_activity_types.sort()
         activity_type_options_str = ""
         for activity_type in all_activity_types:
             activity_type_options_str += "\t\t<option value=\"" + activity_type + "\""
