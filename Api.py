@@ -1789,18 +1789,6 @@ class Api(object):
         heat_map = self.data_mgr.compute_location_heat_map(user_activities)
         return True, json.dumps(heat_map)
 
-    def handle_get_activity_id_from_hash(self, values):
-        """Given the activity ID, return sthe activity hash, or an error if not found. Only looks at the logged in user's activities."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-        if Keys.ACTIVITY_HASH_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Activity hash not specified.")
-
-        activity_hash = values[Keys.ACTIVITY_HASH_KEY]
-        if not InputChecker.is_hex_str(activity_hash):
-            raise ApiException.ApiMalformedRequestException("Invalid activity hash.")
-        pass
-
     def handle_get_activity_hash_from_id(self, values):
         """Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities."""
         if self.user_id is None:
@@ -1808,15 +1796,50 @@ class Api(object):
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
+        # Activity ID from user.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
-        
+
+        # Hash from database.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if Keys.ACTIVITY_HASH_KEY not in summary:
             raise ApiException.ApiMalformedRequestException("Hash not found.")
 
         return True, str(summary_data[Keys.ACTIVITY_HASH_KEY])
+
+    def handle_has_activity(self, values):
+        """Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+        if Keys.ACTIVITY_HASH_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity hash not specified.")
+
+        # Activity ID from user.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # Activity ID from hash.
+        activity_hash = values[Keys.ACTIVITY_HASH_KEY]
+        if not InputChecker.is_hex_str(activity_hash):
+            raise ApiException.ApiMalformedRequestException("Invalid activity hash.")
+
+        # Anything in the database?
+        summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
+        if summary_data is None:
+            return True, json.dumps( { Keys.CODE_KEY: 0 } )
+
+        # Hash from database.
+        if Keys.ACTIVITY_HASH_KEY not in summary:
+            raise ApiException.ApiMalformedRequestException("Hash not found.")
+        hash_from_db = summary_data[Keys.ACTIVITY_HASH_KEY]
+        if hash_from_db != activity_hash:
+            return True, json.dumps( { Keys.CODE_KEY: 1 } )
+
+        return True, json.dumps( { Keys.CODE_KEY: 2 } )
 
     def handle_list_personal_records(self, values):
         """Returns the user's personal records. Result is a JSON string."""
@@ -2060,10 +2083,10 @@ class Api(object):
             return self.handle_get_location_description(values)
         elif request == 'get_location_summary':
             return self.handle_get_location_summary(values)
-        elif request == 'activity_id_from_hash':
-            return self.handle_get_activity_id_from_hash(values)
         elif request == 'activity_hash_from_id':
             return self.handle_get_activity_hash_from_id(values)
+        elif request == 'has_activity':
+            return self.handle_has_activity(values)
         elif request == 'list_personal_records':
             return self.handle_list_personal_records(values)
         elif request == 'get_running_paces':

@@ -569,8 +569,8 @@ version: v1
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
-/activity_id_from_hash:
-    description: Given the activity ID, return sthe activity hash, or an error if not found. Only looks at the logged in user's activities.
+/activity_hash_from_id:
+    description: Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities.
     get:
         responses:
             200:
@@ -578,8 +578,8 @@ version: v1
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
-/activity_hash_from_id:
-    description: Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities.
+/has_activity:
+    description: Given the activity ID has hash, returns whether or not the activity exists in the database for the logged in user.
     get:
         responses:
             200:
