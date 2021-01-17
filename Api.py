@@ -1830,16 +1830,16 @@ class Api(object):
         # Anything in the database?
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None:
-            return True, json.dumps( { Keys.CODE_KEY: 0 } )
+            return True, json.dumps( { Keys.CODE_KEY: 0, Keys.ACTIVITY_ID_KEY: activity_id } )
 
         # Hash from database.
         if Keys.ACTIVITY_HASH_KEY not in summary:
             raise ApiException.ApiMalformedRequestException("Hash not found.")
         hash_from_db = summary_data[Keys.ACTIVITY_HASH_KEY]
         if hash_from_db != activity_hash:
-            return True, json.dumps( { Keys.CODE_KEY: 1 } )
+            return True, json.dumps( { Keys.CODE_KEY: 1, Keys.ACTIVITY_ID_KEY: activity_id } )
 
-        return True, json.dumps( { Keys.CODE_KEY: 2 } )
+        return True, json.dumps( { Keys.CODE_KEY: 2, Keys.ACTIVITY_ID_KEY: activity_id } )
 
     def handle_list_personal_records(self, values):
         """Returns the user's personal records. Result is a JSON string."""
