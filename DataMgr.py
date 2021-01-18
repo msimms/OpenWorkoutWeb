@@ -136,11 +136,17 @@ class DataMgr(Importer.ActivityWriter):
 
         return end_time
 
-    def is_duplicate_activity(self, user_id, start_time):
+    def is_duplicate_activity(self, user_id, start_time, optional_activity_id):
         """Inherited from ActivityWriter. Returns TRUE if the activity appears to be a duplicate of another activity. Returns FALSE otherwise."""
         if self.database is None:
             raise Exception("No database.")
 
+        # If an activity ID was specified then do any documents already exist with this ID?
+        if optional_activity_id is not None:
+            if self.database.retrieve_activity(optional_activity_id) is not None:
+                return True
+
+        # Look through the user's activities for ones that overlap with the given start time.
         activities = self.database.retrieve_user_activity_list(user_id, None, None, None, None)
         for activity in activities:
 

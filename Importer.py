@@ -39,7 +39,7 @@ import Keys
 class ActivityWriter(object):
     """Base class for any class that handles data read from the Importer."""
 
-    def is_duplicate_activity(self, user_id, start_time):
+    def is_duplicate_activity(self, user_id, start_time, optional_activity_id):
         """Inherited from ActivityWriter. Returns TRUE if the activity appears to be a duplicate of another activity. Returns FALSE otherwise."""
         return False
 
@@ -144,7 +144,7 @@ class Importer(object):
             start_time_unix = calendar.timegm(start_time_tuple)
 
             # Make sure this is not a duplicate activity.
-            if self.activity_writer.is_duplicate_activity(user_id, start_time_unix):
+            if self.activity_writer.is_duplicate_activity(user_id, start_time_unix, desired_activity_id):
                 raise Exception("Duplicate activity.")
 
             # Indicate the start of the activity.
@@ -252,7 +252,7 @@ class Importer(object):
             start_time_unix = calendar.timegm(start_time_tuple)
 
         # Make sure this is not a duplicate activity.
-        if self.activity_writer.is_duplicate_activity(user_id, start_time_unix):
+        if self.activity_writer.is_duplicate_activity(user_id, start_time_unix, desired_activity_id):
             raise Exception("Duplicate activity.")
 
         # Since we don't have anything else, use the file name as the name of the activity.
@@ -419,7 +419,7 @@ class Importer(object):
                 events.append(message_data)
 
         # Make sure this is not a duplicate activity.
-        if self.activity_writer.is_duplicate_activity(user_id, start_time_unix):
+        if self.activity_writer.is_duplicate_activity(user_id, start_time_unix, desired_activity_id):
             raise Exception("Duplicate activity.")
 
         # Since we don't have anything else, use the file name as the name of the activity.
