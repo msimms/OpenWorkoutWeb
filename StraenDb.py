@@ -1557,8 +1557,11 @@ class MongoDatabase(Database.Database):
             # If the activity was found.
             if activity is not None:
                 accel_list = []
+
+                # Get the existing list.
                 if Keys.APP_ACCELEROMETER_KEY in activity:
                     accel_list = activity[Keys.APP_ACCELEROMETER_KEY]
+
                 for accel in accels:
 
                     # Make sure time values are monotonically increasing.

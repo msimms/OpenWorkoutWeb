@@ -39,8 +39,8 @@ class ImportScheduler(object):
         logger = logging.getLogger()
         logger.error(log_str)
 
-    def add_file_to_queue(self, username, user_id, uploaded_file_data, uploaded_file_name, data_mgr):
-        """Adds the activity ID to the list of activities to be analyzed."""
+    def add_file_to_queue(self, username, user_id, uploaded_file_data, uploaded_file_name, desired_activity_id, data_mgr):
+        """Adds the activity ID to the list of activities to be analyzed. Activity ID is optional."""
         from bson.json_util import dumps
         from ImportWorker import import_activity
 
@@ -52,6 +52,7 @@ class ImportScheduler(object):
             params['user_id'] = user_id
             params['uploaded_file_data'] = uploaded_file_data
             params['uploaded_file_name'] = uploaded_file_name
+            params['desired_activity_id'] = desired_activity_id
 
             internal_task_id = uuid.uuid4()
             import_task = import_activity.delay(dumps(params), internal_task_id)

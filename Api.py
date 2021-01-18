@@ -807,7 +807,7 @@ class Api(object):
 
         # Add the activity to the database.
         activity_type = unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
-        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time))
+        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time), None)
         self.data_mgr.create_activity_metadata(activity_id, 0, Keys.APP_DISTANCE_KEY, float(values[Keys.APP_DISTANCE_KEY]), False)
         self.data_mgr.create_activity_metadata(activity_id, 0, Keys.APP_DURATION_KEY, float(values[Keys.APP_DURATION_KEY]), False)
 
@@ -856,7 +856,7 @@ class Api(object):
 
         # Add the activity to the database.
         activity_type = unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
-        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time))
+        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time), None)
         self.data_mgr.create_activity_sets_and_reps_data(activity_id, new_sets)
 
         return ""
@@ -905,8 +905,15 @@ class Api(object):
         if len(uploaded_file_data) == 0:
             raise ApiException.ApiMalformedRequestException('Empty file data for ' + uploaded_file_name + '.')
 
+        # Validate the activity ID.
+        desired_activity_id = None
+        if Keys.ACTIVITY_ID_KEY in values:
+            desired_activity_id = values[Keys.ACTIVITY_ID_KEY]
+            if not InputChecker.is_uuid(desired_activity_id):
+                raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
         # Parse the file and store it's contents in the database.
-        task_id = self.data_mgr.import_file(username, self.user_id, uploaded_file_data, uploaded_file_name)
+        task_id = self.data_mgr.import_activity_from_file(username, self.user_id, uploaded_file_data, uploaded_file_name, desired_activity_id)
 
         return True, str(task_id)
 

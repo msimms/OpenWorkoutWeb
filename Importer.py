@@ -43,7 +43,7 @@ class ActivityWriter(object):
         """Inherited from ActivityWriter. Returns TRUE if the activity appears to be a duplicate of another activity. Returns FALSE otherwise."""
         return False
 
-    def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
+    def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time, desired_activity_id):
         """Pure virtual method for starting a location stream - creates the activity ID for the specified user."""
         pass
 
@@ -96,6 +96,7 @@ class Importer(object):
         file_name_parts = file_name.lower().split(' ')
 
         if lower_activity_type == Keys.TYPE_RUNNING_KEY.lower():
+            # Look for words that indicate that the activity may be from a virtual running service, such as Zwift.
             if 'zwift' in file_name_parts:
                 return Keys.TYPE_VIRTUAL_RUNNING_KEY
             return Keys.TYPE_RUNNING_KEY
@@ -104,6 +105,7 @@ class Importer(object):
         elif lower_activity_type == Keys.TYPE_WALKING_KEY.lower():
             return Keys.TYPE_WALKING_KEY
         elif lower_activity_type == Keys.TYPE_CYCLING_KEY.lower() or lower_activity_type == 'biking':
+            # Look for words that indicate that the activity may be from a virtual cycling service, such as Zwift.
             if 'zwift' in file_name_parts:
                 return Keys.TYPE_VIRTUAL_CYCLING_KEY
             if 'rgt' in file_name_parts and 'cyclng' in file_name_parts:
@@ -118,8 +120,9 @@ class Importer(object):
 
         return Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
 
-    def import_gpx_file(self, username, user_id, file_name):
+    def import_gpx_file(self, username, user_id, file_name, desired_activity_id):
         """Imports the specified GPX file."""
+        """Caller can request an activity ID by specifying a value to desired_activity_id."""
 
         # Sanity check.
         if not os.path.isfile(file_name):
@@ -145,7 +148,7 @@ class Importer(object):
                 raise Exception("Duplicate activity.")
 
             # Indicate the start of the activity.
-            device_str, activity_id = self.activity_writer.create_activity(username, user_id, gpx.name, gpx.description, sport_type, start_time_unix)
+            device_str, activity_id = self.activity_writer.create_activity(username, user_id, gpx.name, gpx.description, sport_type, start_time_unix, desired_activity_id)
 
             # We'll store the most recent timecode here.
             end_time_unix = 0
@@ -219,8 +222,9 @@ class Importer(object):
 
         return False, "", ""
 
-    def import_tcx_file(self, username, user_id, file_name, original_file_name):
+    def import_tcx_file(self, username, user_id, file_name, original_file_name, desired_activity_id):
         """Imports the specified TCX file."""
+        """Caller can request an activity ID by specifying a value to desired_activity_id."""
 
         # Sanity check.
         if not os.path.isfile(file_name):
@@ -258,7 +262,7 @@ class Importer(object):
         normalized_activity_type = Importer.normalize_activity_type(activity_type, activity_name)
 
         # Indicate the start of the activity.
-        device_str, activity_id = self.activity_writer.create_activity(username, user_id, activity_name, "", normalized_activity_type, start_time_unix)
+        device_str, activity_id = self.activity_writer.create_activity(username, user_id, activity_name, "", normalized_activity_type, start_time_unix, desired_activity_id)
 
         # We'll store the most recent timecode here.
         end_time_unix = 0
@@ -331,8 +335,9 @@ class Importer(object):
         self.activity_writer.finish_activity(activity_id, end_time_unix)
         return True, device_str, activity_id
 
-    def import_fit_file(self, username, user_id, file_name, original_file_name):
+    def import_fit_file(self, username, user_id, file_name, original_file_name, desired_activity_id):
         """Imports the specified FIT file."""
+        """Caller can request an activity ID by specifying a value to desired_activity_id."""
 
         # Sanity check.
         if not os.path.isfile(file_name):
@@ -424,7 +429,7 @@ class Importer(object):
         normalized_activity_type = Importer.normalize_activity_type(activity_type, activity_name)
 
         # Indicate the start of the activity.
-        device_str, activity_id = self.activity_writer.create_activity(username, user_id, activity_name, "", normalized_activity_type, start_time_unix)
+        device_str, activity_id = self.activity_writer.create_activity(username, user_id, activity_name, "", normalized_activity_type, start_time_unix, desired_activity_id)
 
         # Write all the locations at once.
         self.activity_writer.create_activity_locations(device_str, activity_id, locations)
@@ -440,8 +445,9 @@ class Importer(object):
         self.activity_writer.finish_activity(activity_id, end_time_unix)
         return True, device_str, activity_id
 
-    def import_accelerometer_csv_file(self, username, user_id, file_name):
+    def import_accelerometer_csv_file(self, username, user_id, file_name, desired_activity_id):
         """Imports a CSV file containing accelerometer data."""
+        """Caller can request an activity ID by specifying a value to desired_activity_id."""
 
         # Sanity check.
         if not os.path.isfile(file_name):
@@ -460,6 +466,7 @@ class Importer(object):
         with open(file_name) as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             for row in csv_reader:
+
                 # Skip the header row.
                 if row_count == 0:
                     row_count = row_count + 1
@@ -477,7 +484,7 @@ class Importer(object):
 
                 # Indicate the start of the activity.
                 if row_count == 1:
-                    device_str, activity_id = self.activity_writer.create_activity(username, user_id, "", "", "Lifting", ts)
+                    device_str, activity_id = self.activity_writer.create_activity(username, user_id, "", "", Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY, ts, desired_activity_id)
 
                 self.activity_writer.create_activity_sensor_reading(activity_id, ts, Keys.APP_ACCELEROMETER_KEY, accel_data)
                 row_count = row_count + 1
@@ -486,19 +493,22 @@ class Importer(object):
         self.activity_writer.finish_activity(activity_id, end_time_unix)
         return True, device_str, activity_id
 
-    def import_file(self, username, user_id, local_file_name, original_file_name, file_extension):
-        """Imports the specified file, parsing it based on the provided extension. Result is {success, device_id, activity_id}."""
+    def import_activity_from_file(self, username, user_id, local_file_name, original_file_name, file_extension, desired_activity_id):
+        """Imports the specified file, parsing it based on the provided extension."""
+        """Result is {success, device_id, activity_id}."""
+        """Caller can request an activity ID by specifying a value to desired_activity_id."""
+        result = ( False, "", "" )
         try:
             if file_extension == '.gpx':
-                return self.import_gpx_file(username, user_id, local_file_name)
+                result = self.import_gpx_file(username, user_id, local_file_name, desired_activity_id)
             elif file_extension == '.tcx':
-                return self.import_tcx_file(username, user_id, local_file_name, original_file_name)
+                result = self.import_tcx_file(username, user_id, local_file_name, original_file_name, desired_activity_id)
             elif file_extension == '.fit':
-                return self.import_fit_file(username, user_id, local_file_name, original_file_name)
+                result = self.import_fit_file(username, user_id, local_file_name, original_file_name, desired_activity_id)
             elif file_extension == '.csv':
-                return self.import_accelerometer_csv_file(username, user_id, local_file_name)
+                result = self.import_accelerometer_csv_file(username, user_id, local_file_name, desired_activity_id)
         except:
             traceback.print_exc(file=sys.stdout)
             logger = logging.getLogger()
             logger.error(sys.exc_info()[0])
-        return False, "", ""
+        return result

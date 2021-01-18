@@ -56,6 +56,7 @@ def import_activity(import_str, internal_task_id):
         user_id = import_obj['user_id']
         uploaded_file_data = import_obj['uploaded_file_data']
         uploaded_file_name = import_obj['uploaded_file_name']
+        desired_activity_id = import_obj['desired_activity_id']
         data_mgr = DataMgr.DataMgr(None, "", None, None, None)
         importer = Importer.Importer(data_mgr)
 
@@ -87,7 +88,7 @@ def import_activity(import_str, internal_task_id):
 
         # Import the file into the database.
         print("Importing the data to the database...")
-        success, _, activity_id = importer.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
+        success, _, activity_id = importer.import_activity_from_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext, desired_activity_id)
 
         # The import was successful, do more stuff.
         if success:

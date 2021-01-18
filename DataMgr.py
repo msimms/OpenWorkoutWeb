@@ -159,21 +159,30 @@ class DataMgr(Importer.ActivityWriter):
 
         return False
 
-    def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
+    def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time, desired_activity_id):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
         if self.database is None:
             raise Exception("No database.")
 
+        # Device is unknown.
         device_str = ""
-        activity_id = self.create_activity_id()
+
+        # Create the device ID, or use the provided one.
+        if desired_activity_id is None:
+            activity_id = self.create_activity_id()
+        else:
+            activity_id = desired_activity_id
+
+        # Add the activity to the database.
         if stream_name is None:
             stream_name = ""
-
         if not self.database.create_activity(activity_id, stream_name, start_time, device_str):
             return None, None
         if activity_type is not None and len(activity_type) > 0:
             self.database.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
             self.create_default_tags_on_activity(user_id, activity_type, activity_id)
+
+        # If given a user ID then associate the activity with the user.
         if user_id is not None:
             self.database.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_USER_ID_KEY, user_id, False)
         return device_str, activity_id
@@ -332,8 +341,8 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No file data")
         return self.database.create_uploaded_file(activity_id, file_data)
 
-    def import_file(self, username, user_id, uploaded_file_data, uploaded_file_name):
-        """Imports the contents of a local file into the database."""
+    def import_activity_from_file(self, username, user_id, uploaded_file_data, uploaded_file_name, desired_activity_id):
+        """Imports the contents of a local file into the database. Desired activity ID is optional."""
         if self.import_scheduler is None:
             raise Exception("No importer.")
         if self.config is None:
@@ -351,7 +360,7 @@ class DataMgr(Importer.ActivityWriter):
         if len(uploaded_file_data) > self.config.get_import_max_file_size():
             raise Exception("The file is too large.")
 
-        return self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
+        return self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, desired_activity_id, self)
 
     def get_user_photos_dir(self, user_id):
         """Calculates the photos dir assigned to the specified user and creates if it does not exist."""
