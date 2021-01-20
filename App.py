@@ -1098,6 +1098,11 @@ class App(object):
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_type_list=activity_type_list_str)
 
     @statistics
+    def pace_plans(self):
+        """Renders the pace plans page."""
+        return self.render_simple_page('pace_plans.html')
+
+    @statistics
     def task_status(self):
         """Renders the status page for deferred tasks, such as file imports and activity analysis."""
         return self.render_simple_page('task_status.html')
