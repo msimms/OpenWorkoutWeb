@@ -534,11 +534,29 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-/list_workouts:
-    description: Lists scheduled workouts.
+/list_planned_workouts:
+    description: Lists planned/scheduled workouts.
     get:
         responses:
             200: A JSON-formatted description of all scheduled workouts for the current user.
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
+/list_interval_workouts:
+    description: Lists interval workouts.
+    get:
+        responses:
+            200: A JSON-formatted description of all interval workouts associated with the current user.
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+    post:
+/list_pace_plans:
+    description: Lists pace plans.
+    get:
+        responses:
+            200: A JSON-formatted description of all scheduled pace plans associated with the current user.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.

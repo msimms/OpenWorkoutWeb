@@ -66,10 +66,10 @@
 		return activity_list;
 	}
 
-	function list_workouts()
+	function list_planned_workouts()
 	{
 		let workout_list = [];
-		let the_url = "${root_url}/api/1.0/list_workouts?start_time=" + compute_start_time() + "&end_time=" + compute_end_time();
+		let the_url = "${root_url}/api/1.0/list_planned_workouts?start_time=" + compute_start_time() + "&end_time=" + compute_end_time();
 		let result_text = {};
         let d = new Date();
         let tz_offset = d.getTimezoneOffset() * 60;
@@ -99,7 +99,7 @@
 	function list_calendar_events()
 	{
         activities = list_activities();
-        workouts = list_workouts();
+        workouts = list_planned_workouts();
         return activities.concat(workouts);
     }
 

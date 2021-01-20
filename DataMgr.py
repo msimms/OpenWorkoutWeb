@@ -1009,21 +1009,21 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.create_workout(user_id, workout_obj)
 
-    def retrieve_workout(self, user_id, workout_id):
+    def retrieve_planned_workout(self, user_id, workout_id):
         """Retrieve method for the workout with the specified user and ID."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_workout(user_id, workout_id)
+        return self.database.retrieve_planned_workout(user_id, workout_id)
 
-    def retrieve_workouts_for_user(self, user_id, start_time, end_time):
+    def retrieve_planned_workouts_for_user(self, user_id, start_time, end_time):
         """Retrieve method for all workouts pertaining to the user with the specified ID."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_workouts_for_user(user_id, start_time, end_time)
+        return self.database.retrieve_planned_workouts_for_user(user_id, start_time, end_time)
 
     def retrieve_workouts_calendar_id_for_user(self, user_id):
         """Retrieve method for the ical calendar ID for with specified ID."""
@@ -1049,7 +1049,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         new_workouts_list = []
-        old_workouts_list = self.database.retrieve_workouts_for_user(user_id, start_time, end_time)
+        old_workouts_list = self.database.retrieve_planned_workouts_for_user(user_id, start_time, end_time)
         for workout in old_workouts_list:
             if workout.scheduled_time is not None and (workout.scheduled_time < start_time or workout.scheduled_time > end_time):
                 new_workouts_list.append(workout)
@@ -1070,6 +1070,22 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
         return self.database.retrieve_users_without_scheduled_workouts()
+
+    def retrieve_interval_workouts_for_user(self, user_id):
+        """Retrieve method for all interval workouts associated with the specified user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        pass
+
+    def retrieve_pace_plans_for_user(self, user_id):
+        """Retrieve method for all pace plans associated with the specified user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        pass
 
     def create_gear(self, user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Create method for gear."""

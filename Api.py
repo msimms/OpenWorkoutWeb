@@ -1187,7 +1187,7 @@ class Api(object):
         unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
 
         # Get the workouts that belong to the logged in user.
-        workout = self.data_mgr.retrieve_workout(self.user_id, workout_id)
+        workout = self.data_mgr.retrieve_planned_workout(self.user_id, workout_id)
         result = ""
         if export_format == 'zwo':
             result = workout.export_to_zwo(workout_id)
@@ -1727,7 +1727,7 @@ class Api(object):
         merged_data = self.data_mgr.merge_gpx_files(self.user_id, uploaded_file1_data, uploaded_file2_data)
         return True, merged_data
 
-    def handle_list_workouts(self, values):
+    def handle_list_planned_workouts(self, values):
         """Called when the user wants wants a list of their planned workouts. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -1749,7 +1749,7 @@ class Api(object):
                 raise ApiException.ApiMalformedRequestException("Invalid end time.")
 
         # Get the workouts that belong to the logged in user.
-        workouts = self.data_mgr.retrieve_workouts_for_user(self.user_id, start_time, end_time)
+        workouts = self.data_mgr.retrieve_planned_workouts_for_user(self.user_id, start_time, end_time)
 
         # Convert the activities list to an array of JSON objects for return to the client.
         matched_workouts = []
@@ -1760,6 +1760,24 @@ class Api(object):
                     temp_workout = {Keys.WORKOUT_TYPE_KEY: workout.type, 'url': url, Keys.WORKOUT_SCHEDULED_TIME_KEY: calendar.timegm(workout.scheduled_time.timetuple()), Keys.WORKOUT_ID_KEY: str(workout.workout_id)}
                     matched_workouts.append(temp_workout)
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
+        return True, json_result
+
+    def handle_list_interval_workouts(self, values):
+        """Called when the user wants wants a list of their interval workouts. Result is a JSON string."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        workouts = self.data_mgr.retrieve_interval_workouts_for_user(self.user_id)
+        json_result = json.dumps(workouts)
+        return True, json_result
+
+    def handle_list_pace_plans(self, values):
+        """Called when the user wants wants a list of their pace plans. Result is a JSON string."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        pace_plans = self.data_mgr.retrieve_pace_plans_for_user(self.user_id)
+        json_result = json.dumps(pace_plans)
         return True, json_result
 
     def handle_get_workout_ical_url(self, values):
@@ -2078,8 +2096,12 @@ class Api(object):
             return self.handle_list_gear(values)
         elif request == 'list_gear_defaults':
             return self.handle_list_gear_defaults(values)
-        elif request == 'list_workouts':
-            return self.handle_list_workouts(values)
+        elif request == 'list_planned_workouts':
+            return self.handle_list_planned_workouts(values)
+        elif request == 'list_interval_workouts':
+            return self.handle_list_interval_workouts(values)
+        elif request == 'list_pace_plans':
+            return self.handle_list_pace_plans(values)
         elif request == 'export_activity':
             return self.handle_export_activity(values)
         elif request == 'export_workout':

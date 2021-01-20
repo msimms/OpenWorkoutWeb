@@ -1935,13 +1935,13 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_workout(self, user_id, workout_id):
+    def retrieve_planned_workout(self, user_id, workout_id):
         """Retrieve method for the workout with the specified user and ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_workout.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.retrieve_planned_workout.__name__ + ": Unexpected empty object: user_id")
             return None
         if workout_id is None:
-            self.log_error(MongoDatabase.retrieve_workout.__name__ + ": Unexpected empty object: workout_id")
+            self.log_error(MongoDatabase.retrieve_planned_workout.__name__ + ": Unexpected empty object: workout_id")
             return None
 
         try:
@@ -1963,10 +1963,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def retrieve_workouts_for_user(self, user_id, start_time, end_time):
+    def retrieve_planned_workouts_for_user(self, user_id, start_time, end_time):
         """Retrieve method for the ical calendar ID for with specified ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.retrieve_planned_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
             return None
 
         workouts = []
