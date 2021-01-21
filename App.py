@@ -430,7 +430,7 @@ class App(object):
         exports_title_str = ""
         exports_str = ""
         if logged_in:
-            exports_title_str = "<h3>Export Format</h3>"
+            exports_title_str = "<h3>Export</h3>"
             exports_str = App.render_export_control(False, Keys.APP_ACCELEROMETER_KEY in activity)
 
         # List the edit controls.
@@ -668,7 +668,7 @@ class App(object):
         exports_title_str = ""
         exports_str = ""
         if logged_in:
-            exports_title_str = "<h3>Export Format</h3>"
+            exports_title_str = "<h3>Export</h3>"
             exports_str = App.render_export_control(True, Keys.APP_ACCELEROMETER_KEY in activity)
 
         # List the edit controls.

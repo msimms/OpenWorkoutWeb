@@ -79,24 +79,20 @@ ${nav}
 	<input type="text" name="activity_name" id="activity_name" value="${activity_name}" size="80"><br>
 
     <!-- Activity Type -->
-	<hr>
 	<h2>Activity Type</h2>
 	<select id="activity_type" >
 ${activity_type_options}
 	</select><br>
 
     <!-- Description -->
-	<hr>
 	<h2>Description</h2>
-	<textarea id="description" rows="10" cols="82">${description}</textarea>
-    <br>
+	<textarea id="description" rows="10" cols="82">${description}</textarea><br>
 	<button type="button" id="update" onclick="return update_activity_metadata()">Update</button><br>
 </div>
 
 <!-- Photos -->
 <div class="empty" id="photos_div" style="display: none;">
 <div class="block" style="width: 600px">
-    <hr>
 	<h2>Photos</h2>
 	<input type="file" id="photo_picker" class="modern_button" name="photo_list" webkitdirectory multiple><br>
 	<button type="button" onclick="return upload_selected_files()">Upload Photos</button><br>
