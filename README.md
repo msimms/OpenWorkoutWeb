@@ -243,6 +243,7 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 * Bug fixes and performance optimizations.
 * Minor UI updates.
 * Ability to synchronize with the mobile app (i.e. receive activities that we don't already have).
+* More API work.
 
 ## Tech
 This software uses several other source projects to work properly:
