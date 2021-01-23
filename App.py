@@ -430,7 +430,7 @@ class App(object):
         exports_title_str = ""
         exports_str = ""
         if logged_in:
-            exports_title_str = "<h3>Export Format</h3>"
+            exports_title_str = "<h3>Export</h3>"
             exports_str = App.render_export_control(False, Keys.APP_ACCELEROMETER_KEY in activity)
 
         # List the edit controls.
@@ -668,7 +668,7 @@ class App(object):
         exports_title_str = ""
         exports_str = ""
         if logged_in:
-            exports_title_str = "<h3>Export Format</h3>"
+            exports_title_str = "<h3>Export</h3>"
             exports_str = App.render_export_control(True, Keys.APP_ACCELEROMETER_KEY in activity)
 
         # List the edit controls.
@@ -745,19 +745,6 @@ class App(object):
 
         my_template = Template(filename=self.map_multi_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, googleMapsKey=self.google_maps_key, centerLat=center_lat, centerLon=center_lon, lastLat=last_lat, lastLon=last_lon, userId=str(user_id))
-
-    @staticmethod
-    def render_user_row(user):
-        """Helper function for creating a table row describing a user."""
-        row = "<tr>"
-        row += "<td>"
-        row += user[Keys.USERNAME_KEY]
-        row += "</td>"
-        row += "<td>"
-        row += user[Keys.REALNAME_KEY]
-        row += "</td>"
-        row += "</tr>\n"
-        return row
 
     def render_error(self, error_str=None):
         """Renders the error page."""
@@ -902,18 +889,6 @@ class App(object):
         if Keys.ACTIVITY_NAME_KEY in activity:
             activity_name_str = activity[Keys.ACTIVITY_NAME_KEY]
 
-        # Render the activity types selection.
-        selected_activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
-        if Keys.ACTIVITY_TYPE_KEY in activity:
-            selected_activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
-        all_activity_types = self.data_mgr.retrieve_activity_types()
-        activity_type_options_str = ""
-        for activity_type in all_activity_types:
-            activity_type_options_str += "\t\t<option value=\"" + activity_type + "\""
-            if selected_activity_type == activity_type:
-                activity_type_options_str += " selected"
-            activity_type_options_str += ">" + activity_type + "</option>\n"
-
         # Render the activity description.
         description_str = ""
         if Keys.ACTIVITY_DESCRIPTION_KEY in activity:
@@ -922,7 +897,7 @@ class App(object):
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'edit_activity.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id, activity_name=activity_name_str, activity_type_options=activity_type_options_str, description=description_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id, activity_name=activity_name_str, description=description_str)
 
     @statistics
     def device(self, device_str):
@@ -1095,6 +1070,11 @@ class App(object):
         html_file = os.path.join(self.root_dir, HTML_DIR, 'import.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_type_list=activity_type_list_str)
+
+    @statistics
+    def pace_plans(self):
+        """Renders the pace plans page."""
+        return self.render_simple_page('pace_plans.html')
 
     @statistics
     def task_status(self):

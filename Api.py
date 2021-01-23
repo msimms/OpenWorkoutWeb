@@ -121,7 +121,7 @@ class Api(object):
         return location
 
     def parse_json_accel_obj(self, json_obj):
-        """Helper function that parses the JSON object, which contains location data, and updates the database."""
+        """Helper function that parses the JSON object, which contains accelerometer data, and updates the database."""
         accel = []
 
         try:
@@ -136,11 +136,11 @@ class Api(object):
             z = json_obj[Keys.APP_AXIS_NAME_Z]
             accel = [date_time, x, y, z]
         except ValueError as e:
-            self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
+            self.log_error("ValueError in JSON accelerometer data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except KeyError as e:
-            self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
+            self.log_error("KeyError in JSON accelerometer data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except:
-            self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
+            self.log_error("Error parsing JSON accelerometer data. JSON object = " + str(json_obj))
         return accel
 
     def handle_update_status(self, values):
@@ -239,7 +239,7 @@ class Api(object):
             for location in locations[num_points:]:
                 if len(response) > 1:
                     response += ","
-                response += json.dumps({Keys.LOCATION_LAT_KEY: location[Keys.LOCATION_LAT_KEY], Keys.LOCATION_LON_KEY: location[Keys.LOCATION_LON_KEY]})
+                response += json.dumps({Keys.LOCATION_LAT_KEY: location[Keys.LOCATION_LAT_KEY], Keys.LOCATION_LON_KEY: location[Keys.LOCATION_LON_KEY], Keys.LOCATION_ALT_KEY: location[Keys.LOCATION_ALT_KEY]})
 
         response += "]"
 
@@ -404,6 +404,36 @@ class Api(object):
         for sensor_name in values[Keys.SENSOR_LIST_KEY].split(','):
             if sensor_name in activity:
                 response[sensor_name] = activity[sensor_name]
+
+        return True, json.dumps(response)
+
+    def handle_retrieve_activity_summarydata(self, values):
+        """Called when an API message to get the interval segments computed from the activity is received. Result is a JSON string."""
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+        if Keys.SUMMARY_ITEMS_LIST_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Summary item list not specified.")
+
+        # Get the activity ID from the request.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # Get the activity from the database.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+
+        # Determine if the requesting user can view the activity.
+        if not self.activity_can_be_viewed(activity):
+            return self.error("The requested activity is not viewable to this user.")
+
+        # Get the activity summary from the database.
+        activity_summary = self.data_mgr.retrieve_activity_summary(activity_id)
+
+        response = {}
+
+        for summary_item in values[Keys.SUMMARY_ITEMS_LIST_KEY].split(','):
+            if summary_item in activity_summary:
+                response[summary_item] = activity_summary[summary_item]
 
         return True, json.dumps(response)
 
@@ -777,7 +807,7 @@ class Api(object):
 
         # Add the activity to the database.
         activity_type = unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
-        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time))
+        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time), None)
         self.data_mgr.create_activity_metadata(activity_id, 0, Keys.APP_DISTANCE_KEY, float(values[Keys.APP_DISTANCE_KEY]), False)
         self.data_mgr.create_activity_metadata(activity_id, 0, Keys.APP_DURATION_KEY, float(values[Keys.APP_DURATION_KEY]), False)
 
@@ -826,7 +856,7 @@ class Api(object):
 
         # Add the activity to the database.
         activity_type = unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
-        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time))
+        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time), None)
         self.data_mgr.create_activity_sets_and_reps_data(activity_id, new_sets)
 
         return ""
@@ -875,8 +905,15 @@ class Api(object):
         if len(uploaded_file_data) == 0:
             raise ApiException.ApiMalformedRequestException('Empty file data for ' + uploaded_file_name + '.')
 
+        # Validate the activity ID.
+        desired_activity_id = None
+        if Keys.ACTIVITY_ID_KEY in values:
+            desired_activity_id = values[Keys.ACTIVITY_ID_KEY]
+            if not InputChecker.is_uuid(desired_activity_id):
+                raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
         # Parse the file and store it's contents in the database.
-        task_id = self.data_mgr.import_file(username, self.user_id, uploaded_file_data, uploaded_file_name)
+        task_id = self.data_mgr.import_activity_from_file(username, self.user_id, uploaded_file_data, uploaded_file_name, desired_activity_id)
 
         return True, str(task_id)
 
@@ -1150,7 +1187,7 @@ class Api(object):
         unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
 
         # Get the workouts that belong to the logged in user.
-        workout = self.data_mgr.retrieve_workout(self.user_id, workout_id)
+        workout = self.data_mgr.retrieve_planned_workout(self.user_id, workout_id)
         result = ""
         if export_format == 'zwo':
             result = workout.export_to_zwo(workout_id)
@@ -1690,7 +1727,7 @@ class Api(object):
         merged_data = self.data_mgr.merge_gpx_files(self.user_id, uploaded_file1_data, uploaded_file2_data)
         return True, merged_data
 
-    def handle_list_workouts(self, values):
+    def handle_list_planned_workouts(self, values):
         """Called when the user wants wants a list of their planned workouts. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -1712,7 +1749,7 @@ class Api(object):
                 raise ApiException.ApiMalformedRequestException("Invalid end time.")
 
         # Get the workouts that belong to the logged in user.
-        workouts = self.data_mgr.retrieve_workouts_for_user(self.user_id, start_time, end_time)
+        workouts = self.data_mgr.retrieve_planned_workouts_for_user(self.user_id, start_time, end_time)
 
         # Convert the activities list to an array of JSON objects for return to the client.
         matched_workouts = []
@@ -1723,6 +1760,24 @@ class Api(object):
                     temp_workout = {Keys.WORKOUT_TYPE_KEY: workout.type, 'url': url, Keys.WORKOUT_SCHEDULED_TIME_KEY: calendar.timegm(workout.scheduled_time.timetuple()), Keys.WORKOUT_ID_KEY: str(workout.workout_id)}
                     matched_workouts.append(temp_workout)
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
+        return True, json_result
+
+    def handle_list_interval_workouts(self, values):
+        """Called when the user wants wants a list of their interval workouts. Result is a JSON string."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        workouts = self.data_mgr.retrieve_interval_workouts_for_user(self.user_id)
+        json_result = json.dumps(workouts)
+        return True, json_result
+
+    def handle_list_pace_plans(self, values):
+        """Called when the user wants wants a list of their pace plans. Result is a JSON string."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        pace_plans = self.data_mgr.retrieve_pace_plans_for_user(self.user_id)
+        json_result = json.dumps(pace_plans)
         return True, json_result
 
     def handle_get_workout_ical_url(self, values):
@@ -1759,18 +1814,6 @@ class Api(object):
         heat_map = self.data_mgr.compute_location_heat_map(user_activities)
         return True, json.dumps(heat_map)
 
-    def handle_get_activity_id_from_hash(self, values):
-        """Given the activity ID, return sthe activity hash, or an error if not found. Only looks at the logged in user's activities."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-        if Keys.ACTIVITY_HASH_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Activity hash not specified.")
-
-        activity_hash = values[Keys.ACTIVITY_HASH_KEY]
-        if not InputChecker.is_hex_str(activity_hash):
-            raise ApiException.ApiMalformedRequestException("Invalid activity hash.")
-        pass
-
     def handle_get_activity_hash_from_id(self, values):
         """Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities."""
         if self.user_id is None:
@@ -1778,15 +1821,50 @@ class Api(object):
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
+        # Activity ID from user.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
-        
+
+        # Hash from database.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if Keys.ACTIVITY_HASH_KEY not in summary:
             raise ApiException.ApiMalformedRequestException("Hash not found.")
 
         return True, str(summary_data[Keys.ACTIVITY_HASH_KEY])
+
+    def handle_has_activity(self, values):
+        """Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+        if Keys.ACTIVITY_HASH_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity hash not specified.")
+
+        # Activity ID from user.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # Activity ID from hash.
+        activity_hash = values[Keys.ACTIVITY_HASH_KEY]
+        if not InputChecker.is_hex_str(activity_hash):
+            raise ApiException.ApiMalformedRequestException("Invalid activity hash.")
+
+        # Anything in the database?
+        summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
+        if summary_data is None:
+            return True, json.dumps( { Keys.CODE_KEY: 0, Keys.ACTIVITY_ID_KEY: activity_id } )
+
+        # Hash from database.
+        if Keys.ACTIVITY_HASH_KEY not in summary:
+            raise ApiException.ApiMalformedRequestException("Hash not found.")
+        hash_from_db = summary_data[Keys.ACTIVITY_HASH_KEY]
+        if hash_from_db != activity_hash:
+            return True, json.dumps( { Keys.CODE_KEY: 1, Keys.ACTIVITY_ID_KEY: activity_id } )
+
+        return True, json.dumps( { Keys.CODE_KEY: 2, Keys.ACTIVITY_ID_KEY: activity_id } )
 
     def handle_list_personal_records(self, values):
         """Returns the user's personal records. Result is a JSON string."""
@@ -1994,6 +2072,8 @@ class Api(object):
             return self.handle_retrieve_activity_metadata(values)
         elif request == 'activity_sensordata':
             return self.handle_retrieve_activity_sensordata(values)
+        elif request == 'activity_summarydata':
+            return self.handle_retrieve_activity_summarydata(values)
         elif request == 'login_status':
             return self.handle_login_status(values)
         elif request == 'list_devices':
@@ -2016,8 +2096,12 @@ class Api(object):
             return self.handle_list_gear(values)
         elif request == 'list_gear_defaults':
             return self.handle_list_gear_defaults(values)
-        elif request == 'list_workouts':
-            return self.handle_list_workouts(values)
+        elif request == 'list_planned_workouts':
+            return self.handle_list_planned_workouts(values)
+        elif request == 'list_interval_workouts':
+            return self.handle_list_interval_workouts(values)
+        elif request == 'list_pace_plans':
+            return self.handle_list_pace_plans(values)
         elif request == 'export_activity':
             return self.handle_export_activity(values)
         elif request == 'export_workout':
@@ -2028,10 +2112,10 @@ class Api(object):
             return self.handle_get_location_description(values)
         elif request == 'get_location_summary':
             return self.handle_get_location_summary(values)
-        elif request == 'activity_id_from_hash':
-            return self.handle_get_activity_id_from_hash(values)
         elif request == 'activity_hash_from_id':
             return self.handle_get_activity_hash_from_id(values)
+        elif request == 'has_activity':
+            return self.handle_has_activity(values)
         elif request == 'list_personal_records':
             return self.handle_list_personal_records(values)
         elif request == 'get_running_paces':

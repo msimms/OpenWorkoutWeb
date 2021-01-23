@@ -58,11 +58,17 @@ class TestActivityWriter(Importer.ActivityWriter):
         self.location_analyzer = None
         self.sensor_analyzers = []
 
-    def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
+    def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time, desired_activity_id):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
 
-        self.location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type) # Need a fresh analyzer object for each activity
-        self.current_activity_id = str(uuid.uuid4())
+        # Need a fresh analyzer object for each activity.
+        self.location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
+
+        # Set all the activity attributes.
+        if desired_activity_id is None:
+            self.current_activity_id = str(uuid.uuid4())
+        else:
+            self.current_activity_id = desired_activity_id
         self.current_activity_type = activity_type
         self.current_activity_start_time = start_time
 
@@ -263,7 +269,7 @@ def run_unit_tests():
                 print(title_str)
                 print("=" * len(title_str))
                 start_time = time.time()
-                success, device_id, activity_id = importer.import_file("test user", "", full_path, current_file, temp_file_ext)
+                success, device_id, activity_id = importer.import_activity_from_file("test user", "", full_path, current_file, temp_file_ext)
                 if success:
                     elapsed_time = time.time() - start_time
                     total_time = total_time + elapsed_time

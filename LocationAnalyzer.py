@@ -267,7 +267,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 if len(smoothed_graph) > 1:
         
                     # Find peaks in the speed graph. We're looking for intervals.
-                    peak_list = peaks.find_peaks_in_numeric_array(smoothed_graph, 0.5)
+                    peak_list = peaks.find_peaks_in_numeric_array(smoothed_graph, 0.3)
 
                     # Examine the lines between the peaks. Extract pertinant data, such as avg speed/pace and set it aside.
                     # This data is used later when generating the report.

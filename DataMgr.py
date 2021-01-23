@@ -136,11 +136,17 @@ class DataMgr(Importer.ActivityWriter):
 
         return end_time
 
-    def is_duplicate_activity(self, user_id, start_time):
+    def is_duplicate_activity(self, user_id, start_time, optional_activity_id):
         """Inherited from ActivityWriter. Returns TRUE if the activity appears to be a duplicate of another activity. Returns FALSE otherwise."""
         if self.database is None:
             raise Exception("No database.")
 
+        # If an activity ID was specified then do any documents already exist with this ID?
+        if optional_activity_id is not None:
+            if self.database.retrieve_activity(optional_activity_id) is not None:
+                return True
+
+        # Look through the user's activities for ones that overlap with the given start time.
         activities = self.database.retrieve_user_activity_list(user_id, None, None, None, None)
         for activity in activities:
 
@@ -159,21 +165,30 @@ class DataMgr(Importer.ActivityWriter):
 
         return False
 
-    def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time):
+    def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time, desired_activity_id):
         """Inherited from ActivityWriter. Called when we start reading an activity file."""
         if self.database is None:
             raise Exception("No database.")
 
+        # Device is unknown.
         device_str = ""
-        activity_id = self.create_activity_id()
+
+        # Create the device ID, or use the provided one.
+        if desired_activity_id is None:
+            activity_id = self.create_activity_id()
+        else:
+            activity_id = desired_activity_id
+
+        # Add the activity to the database.
         if stream_name is None:
             stream_name = ""
-
         if not self.database.create_activity(activity_id, stream_name, start_time, device_str):
             return None, None
         if activity_type is not None and len(activity_type) > 0:
             self.database.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
             self.create_default_tags_on_activity(user_id, activity_type, activity_id)
+
+        # If given a user ID then associate the activity with the user.
         if user_id is not None:
             self.database.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_USER_ID_KEY, user_id, False)
         return device_str, activity_id
@@ -332,8 +347,8 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No file data")
         return self.database.create_uploaded_file(activity_id, file_data)
 
-    def import_file(self, username, user_id, uploaded_file_data, uploaded_file_name):
-        """Imports the contents of a local file into the database."""
+    def import_activity_from_file(self, username, user_id, uploaded_file_data, uploaded_file_name, desired_activity_id):
+        """Imports the contents of a local file into the database. Desired activity ID is optional."""
         if self.import_scheduler is None:
             raise Exception("No importer.")
         if self.config is None:
@@ -351,7 +366,7 @@ class DataMgr(Importer.ActivityWriter):
         if len(uploaded_file_data) > self.config.get_import_max_file_size():
             raise Exception("The file is too large.")
 
-        return self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, self)
+        return self.import_scheduler.add_file_to_queue(username, user_id, uploaded_file_data, uploaded_file_name, desired_activity_id, self)
 
     def get_user_photos_dir(self, user_id):
         """Calculates the photos dir assigned to the specified user and creates if it does not exist."""
@@ -994,21 +1009,21 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.create_workout(user_id, workout_obj)
 
-    def retrieve_workout(self, user_id, workout_id):
+    def retrieve_planned_workout(self, user_id, workout_id):
         """Retrieve method for the workout with the specified user and ID."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_workout(user_id, workout_id)
+        return self.database.retrieve_planned_workout(user_id, workout_id)
 
-    def retrieve_workouts_for_user(self, user_id, start_time, end_time):
+    def retrieve_planned_workouts_for_user(self, user_id, start_time, end_time):
         """Retrieve method for all workouts pertaining to the user with the specified ID."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_workouts_for_user(user_id, start_time, end_time)
+        return self.database.retrieve_planned_workouts_for_user(user_id, start_time, end_time)
 
     def retrieve_workouts_calendar_id_for_user(self, user_id):
         """Retrieve method for the ical calendar ID for with specified ID."""
@@ -1034,7 +1049,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         new_workouts_list = []
-        old_workouts_list = self.database.retrieve_workouts_for_user(user_id, start_time, end_time)
+        old_workouts_list = self.database.retrieve_planned_workouts_for_user(user_id, start_time, end_time)
         for workout in old_workouts_list:
             if workout.scheduled_time is not None and (workout.scheduled_time < start_time or workout.scheduled_time > end_time):
                 new_workouts_list.append(workout)
@@ -1055,6 +1070,22 @@ class DataMgr(Importer.ActivityWriter):
         if self.database is None:
             raise Exception("No database.")
         return self.database.retrieve_users_without_scheduled_workouts()
+
+    def retrieve_interval_workouts_for_user(self, user_id):
+        """Retrieve method for all interval workouts associated with the specified user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        pass
+
+    def retrieve_pace_plans_for_user(self, user_id):
+        """Retrieve method for all pace plans associated with the specified user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        pass
 
     def create_gear(self, user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Create method for gear."""

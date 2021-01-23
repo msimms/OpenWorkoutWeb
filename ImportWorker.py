@@ -56,6 +56,7 @@ def import_activity(import_str, internal_task_id):
         user_id = import_obj['user_id']
         uploaded_file_data = import_obj['uploaded_file_data']
         uploaded_file_name = import_obj['uploaded_file_name']
+        desired_activity_id = import_obj['desired_activity_id']
         data_mgr = DataMgr.DataMgr(None, "", None, None, None)
         importer = Importer.Importer(data_mgr)
 
@@ -70,9 +71,12 @@ def import_activity(import_str, internal_task_id):
         local_file_name = os.path.join(upload_path, str(uuid.uuid4()))
         local_file_name = local_file_name + uploaded_file_ext
 
-        # Write the file.
+        # Decode and write the file.
         print("Writing the data to a local file...")
         with open(local_file_name, 'wb') as local_file:
+
+            # Data to import is expected to be Base 64 encoded. This is because, at this point, we don't distinguish between
+            # text and binary files.
             print("Base64 decoding...")
             uploaded_file_data = uploaded_file_data.replace(" ", "+") # Some JS base64 encoders replace plus with space, so we need to undo that.
             decoded_file_data = base64.b64decode(uploaded_file_data)
@@ -87,7 +91,7 @@ def import_activity(import_str, internal_task_id):
 
         # Import the file into the database.
         print("Importing the data to the database...")
-        success, _, activity_id = importer.import_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext)
+        success, _, activity_id = importer.import_activity_from_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext, desired_activity_id)
 
         # The import was successful, do more stuff.
         if success:

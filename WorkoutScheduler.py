@@ -42,7 +42,7 @@ class WorkoutScheduler(object):
 
         smoothed_scores = signals.smooth(daily_stress_scores, 2)
         avg_smoothed_scores = sum(smoothed_scores) / len(smoothed_scores)
-        stdev_smoothed_scores = statistics.stddev(daily_stress_scores, avg_smoothed_scores)
+        stdev_smoothed_scores = statistics.stddev(smoothed_scores, avg_smoothed_scores)
         return stdev_smoothed_scores
 
     def list_schedulable_days(self, week):

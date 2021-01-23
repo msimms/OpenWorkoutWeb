@@ -60,13 +60,38 @@
         }
     }
 
+    var process_activity_type_list = function(activity_type_list)
+    {
+        let activity_type_select = document.getElementById("activity_type");
+
+        activity_type_list = eval(activity_type_list);
+        activity_type_list.sort();
+
+        for (let i = 0; i < activity_type_list.length; i++)
+        {
+            let activity_type = activity_type_list[i];
+            let option = document.createElement("option");
+
+            option.value = activity_type;
+            option.text = activity_type;
+            activity_type_select.appendChild(option);
+        }
+    }
+
     function request_upload_permissions()
     {
         let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=can%20upload%20photos";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_upload_permissions, dataType: "json" });
     }
 
+    function list_activity_types()
+    {
+        let api_url = "${root_url}/api/1.0/list_activity_types";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_activity_type_list, dataType: "text" });
+    }
+
     request_upload_permissions();
+    list_activity_types();
 </script>
 
 <section class="nav">
@@ -79,24 +104,19 @@ ${nav}
 	<input type="text" name="activity_name" id="activity_name" value="${activity_name}" size="80"><br>
 
     <!-- Activity Type -->
-	<hr>
 	<h2>Activity Type</h2>
 	<select id="activity_type" >
-${activity_type_options}
 	</select><br>
 
     <!-- Description -->
-	<hr>
 	<h2>Description</h2>
-	<textarea id="description" rows="10" cols="82">${description}</textarea>
-    <br>
+	<textarea id="description" rows="10" cols="82">${description}</textarea><br>
 	<button type="button" id="update" onclick="return update_activity_metadata()">Update</button><br>
 </div>
 
 <!-- Photos -->
 <div class="empty" id="photos_div" style="display: none;">
 <div class="block" style="width: 600px">
-    <hr>
 	<h2>Photos</h2>
 	<input type="file" id="photo_picker" class="modern_button" name="photo_list" webkitdirectory multiple><br>
 	<button type="button" onclick="return upload_selected_files()">Upload Photos</button><br>
