@@ -746,19 +746,6 @@ class App(object):
         my_template = Template(filename=self.map_multi_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, googleMapsKey=self.google_maps_key, centerLat=center_lat, centerLon=center_lon, lastLat=last_lat, lastLon=last_lon, userId=str(user_id))
 
-    @staticmethod
-    def render_user_row(user):
-        """Helper function for creating a table row describing a user."""
-        row = "<tr>"
-        row += "<td>"
-        row += user[Keys.USERNAME_KEY]
-        row += "</td>"
-        row += "<td>"
-        row += user[Keys.REALNAME_KEY]
-        row += "</td>"
-        row += "</tr>\n"
-        return row
-
     def render_error(self, error_str=None):
         """Renders the error page."""
         try:
