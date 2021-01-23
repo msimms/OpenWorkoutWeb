@@ -60,13 +60,38 @@
         }
     }
 
+    var process_activity_type_list = function(activity_type_list)
+    {
+        let activity_type_select = document.getElementById("activity_type");
+
+        activity_type_list = eval(activity_type_list);
+        activity_type_list.sort();
+
+        for (let i = 0; i < activity_type_list.length; i++)
+        {
+            let activity_type = activity_type_list[i];
+            let option = document.createElement("option");
+
+            option.value = activity_type;
+            option.text = activity_type;
+            activity_type_select.appendChild(option);
+        }
+    }
+
     function request_upload_permissions()
     {
         let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=can%20upload%20photos";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_upload_permissions, dataType: "json" });
     }
 
+    function list_activity_types()
+    {
+        let api_url = "${root_url}/api/1.0/list_activity_types";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_activity_type_list, dataType: "text" });
+    }
+
     request_upload_permissions();
+    list_activity_types();
 </script>
 
 <section class="nav">
@@ -81,7 +106,6 @@ ${nav}
     <!-- Activity Type -->
 	<h2>Activity Type</h2>
 	<select id="activity_type" >
-${activity_type_options}
 	</select><br>
 
     <!-- Description -->
