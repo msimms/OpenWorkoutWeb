@@ -352,32 +352,6 @@ ${nav}
 <section>
     <div class="block" style="width: 600px">
 
-        <h2>Six Month Bests</h2>
-        <p>
-            Workouts are calculated using paces computed from the last six months of activity.
-        </p>
-        <p>
-            <h3>Cycling</h3>
-            <table id="Cycling">
-            </table>
-
-            <h3>Running</h3>
-            <table id="Running">
-            </table>
-        </p>
-
-        <hr>
-
-        <h2>Training Paces For Running</h2>
-        <p>
-            Run workouts will reference these paces, calculated from the last six months of activity.
-        </p>
-        <p>
-            <table id="RunPaces">
-            </table>
-        </p>
-
-        <hr>
         <h2>Goal</h2>
         <p>
             <select name="goal" id="goal" class="right" onchange="return set_goal()">
@@ -389,7 +363,8 @@ ${nav}
                 <option value="Marathon">Marathon</option>
                 <option value="50K Run">50K Run</option>
                 <option value="50 Mile Run">50 Mile Run</option>
-            </select> on 
+            </select><br>
+            on <br>
             <input type="text" name="goal_date" id="goal_date" onchange="return set_goal_date()">
         </p>
 
@@ -397,7 +372,8 @@ ${nav}
 
         <h2>Preferences</h2>
         <p>
-            Preferred Long Run Day: <select name="preferred_long_run_day" id="preferred_long_run_day" class="right" value="Weekday" onchange="return set_preferred_long_run_day()">
+            Which day of the week is most suitable for doing long runs?<br>
+            <select name="preferred_long_run_day" id="preferred_long_run_day" class="right" value="Weekday" onchange="return set_preferred_long_run_day()">
                 <option value="Sunday">Sunday</option>
                 <option value="Monday">Monday</option>
                 <option value="Tuesday">Tuesday</option>
@@ -406,12 +382,24 @@ ${nav}
                 <option value="Friday">Friday</option>
                 <option value="Saturday">Saturday</option>
             </select><br>
-            Goal Type: <select name="goal_type" id="goal_type" class="right" onchange="return set_goal_type()">
+            Are you interested in speed/pace or just finishing?<br>
+            <select name="goal_type" id="goal_type" class="right" onchange="return set_goal_type()">
                 <option value="Completion">Completion</option>
                 <option value="Speed">Speed</option>
             </select><br>
             Experience Level: <br><input type="range" min="1" max="10" value="5" class="slider" id="exp_level" onchange="return set_exp_level()"><br>
             Comfort Level With Structured Training: <br><input type="range" min="1" max="10" value="5" class="slider" id="structured_training_comfort_level" onchange="return set_structured_training_comfort_level()"><br>
+        </p>
+
+        <hr>
+
+        <h2>Training Paces For Running</h2>
+        <p>
+            Run workouts will reference these paces, calculated from the last six months of activity.
+        </p>
+        <p>
+            <table id="RunPaces">
+            </table>
         </p>
 
         <hr>
@@ -433,6 +421,21 @@ ${nav}
         <p id="calendar_url">
         </p>
 
+        <hr>
+
+        <h2>Six Month Bests</h2>
+        <p>
+            Workouts are calculated using paces computed from the last six months of activity.
+        </p>
+        <p>
+            <h3>Cycling</h3>
+            <table id="Cycling">
+            </table>
+
+            <h3>Running</h3>
+            <table id="Running">
+            </table>
+        </p>
     </div>
 </section>
 
