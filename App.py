@@ -889,6 +889,11 @@ class App(object):
         if Keys.ACTIVITY_NAME_KEY in activity:
             activity_name_str = activity[Keys.ACTIVITY_NAME_KEY]
 
+        # Render the activity type.
+        activity_type_str = ""
+        if Keys.ACTIVITY_TYPE_KEY in activity:
+            activity_type_str = activity[Keys.ACTIVITY_TYPE_KEY]
+
         # Render the activity description.
         description_str = ""
         if Keys.ACTIVITY_DESCRIPTION_KEY in activity:
@@ -897,7 +902,7 @@ class App(object):
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'edit_activity.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id, activity_name=activity_name_str, description=description_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id, activity_name=activity_name_str, activity_type=activity_type_str, description=description_str)
 
     @statistics
     def device(self, device_str):

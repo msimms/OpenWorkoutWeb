@@ -74,6 +74,11 @@
 
             option.value = activity_type;
             option.text = activity_type;
+
+            if (activity_type == "${activity_type}")
+            {
+                option.selected = true;
+            }
             activity_type_select.appendChild(option);
         }
     }
