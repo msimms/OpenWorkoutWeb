@@ -25,6 +25,7 @@
 
 import cherrypy
 import datetime
+import inspect
 import json
 import logging
 import mako
@@ -56,6 +57,12 @@ from dateutil.tz import tzlocal
 from mako.lookup import TemplateLookup
 from mako.template import Template
 
+# Locate and load the Distance calculations module.
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+distancedir = os.path.join(currentdir, 'LibMath', 'python', 'distance')
+sys.path.insert(0, distancedir)
+import distance
+
 
 PRODUCT_NAME = 'Straen'
 
@@ -63,6 +70,7 @@ LOGIN_URL = '/login'
 DEFAULT_LOGGED_IN_URL = '/all_activities'
 TASK_STATUS_URL = '/task_status'
 HTML_DIR = 'html'
+MEDIA_DIR = 'media'
 
 
 g_stats_lock = threading.Lock()
@@ -124,6 +132,8 @@ class App(object):
 
         self.google_maps_key = google_maps_key
         self.debug = debug
+        self.watopia_map_file = os.path.join(root_dir, MEDIA_DIR, 'watopia.png')
+        self.watopia_html_file = os.path.join(root_dir, HTML_DIR, 'watopia.html')
         self.unmapped_activity_html_file = os.path.join(root_dir, HTML_DIR, 'unmapped_activity.html')
         self.map_single_osm_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_osm.html')
         self.map_single_google_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
@@ -540,6 +550,14 @@ class App(object):
             result += str(item)
         return result
 
+    @staticmethod
+    def is_activity_in_watopia(activity_type, lat, lon):
+        """Zwift's Watopia is mapped over the Solomon Islands."""
+        if activity_type == Keys.TYPE_VIRTUAL_CYCLING_KEY or activity_type == Keys.TYPE_VIRTUAL_RUNNING_KEY:
+            distance_to_watopia_meters = distance.haversine_distance_ignore_altitude(lat, lon, -11.6364607214928, 166.972435712814)
+            return (distance_to_watopia_meters < 50000)
+        return False
+
     def render_page_for_errored_activity(self, activity_id, logged_in, belongs_to_current_user):
         """Helper function for rendering an error page when attempting to view an activity with bad data."""
         delete_str = ""
@@ -689,8 +707,14 @@ class App(object):
         else:
             page_title = "Activity"
 
+        # Was this a virtual activity in Zwift's Watopia?
+        is_in_watopia = App.is_activity_in_watopia(activity_type, center_lat, center_lon)
+
         # If a google maps key was provided then use google maps, otherwise use open street map.
-        if self.google_maps_key:
+        if is_in_watopia and os.path.isfile(self.watopia_map_file) > 0:
+            my_template = Template(filename=self.watopia_html_file, module_directory=self.tempmod_dir)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
+        elif self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
             return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
         else:
