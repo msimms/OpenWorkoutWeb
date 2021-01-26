@@ -1847,7 +1847,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        # Activity ID from hash.
+        # Activity hash from user.
         activity_hash = values[Keys.ACTIVITY_HASH_KEY]
         if not InputChecker.is_hex_str(activity_hash):
             raise ApiException.ApiMalformedRequestException("Invalid activity hash.")
