@@ -300,6 +300,9 @@ SERVICE_RECORD_ID_KEY = "service_id"
 SERVICE_RECORD_DATE_KEY = "date"
 SERVICE_RECORD_DESCRIPTION_KEY = "description"
 
+# Keys used to manage pace plans.
+PACE_PLANS_KEY = "pace_plans"
+
 # Activity types.
 TYPE_UNSPECIFIED_ACTIVITY_KEY = "Unknown"
 TYPE_RUNNING_KEY = "Running"
