@@ -2505,13 +2505,25 @@ class MongoDatabase(Database.Database):
     # Pace plan management methods
     #
 
-    def create_pace_plan(self, user_id, pace_plan):
+    def create_pace_plan(self, user_id, pace_plan_id, pace_plan_name, target_pace_min_km, target_distance_kms, splits):
         """Create method for a pace plan associated with the specified user."""
         if user_id is None:
             self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: user_id")
             return False
-        if pace_plan is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: pace_plan")
+        if pace_plan_id is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: pace_plan_id")
+            return False
+        if pace_plan_name is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: pace_plan_name")
+            return False
+        if target_pace_min_km is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_pace_min_km")
+            return False
+        if target_distance_kms is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_distance_kms")
+            return False
+        if splits is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: splits")
             return False
 
         try:
@@ -2527,7 +2539,11 @@ class MongoDatabase(Database.Database):
                 if Keys.PACE_PLANS_KEY in user:
                     pace_plan_list = user[Keys.PACE_PLANS_KEY]
                 new_pace_plan = {}
-                # TODO
+                new_pace_plan[Keys.PACE_PLAN_ID_KEY] = str(pace_plan_id)
+                new_pace_plan[Keys.PACE_PLAN_NAME_KEY] = pace_plan_name
+                new_pace_plan[Keys.PACE_PLAN_TARGET_PACE_KEY] = float(target_pace_min_km)
+                new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance_kms)
+                new_pace_plan[Keys.PACE_PLAN_SPLITS_KEY] = float(splits)
                 pace_plan_list.append(new_pace_plan)
                 user[Keys.PACE_PLANS_KEY] = pace_plan_list
                 self.users_collection.save(user)
@@ -2561,10 +2577,65 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return []
 
-    def update_pace_plan(self, user_id, pace_plan_id, pace_plan):
+    def update_pace_plan(self, user_id, pace_plan_id, pace_plan_name, target_pace_min_km, target_distance_kms, splits):
         """Update method for a pace plan associated with the specified user."""
         if user_id is None:
             self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if pace_plan_id is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: pace_plan_id")
+            return False
+        if pace_plan_name is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: pace_plan_name")
+            return False
+        if target_pace_min_km is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_pace_min_km")
+            return False
+        if target_distance_kms is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_pace_min_km")
+            return False
+        if splits is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: splits")
+            return False
+
+        try:
+            # Find the user's document.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+
+            # If the user's document was found.
+            if user is not None:
+
+                # Update the pace plans list.
+                pace_plan_list = []
+                if Keys.PACE_PLANS_KEY in user:
+                    pace_plan_list = user[Keys.PACE_PLANS_KEY]
+                    pace_plan_index = 0
+                    for pace_plan in pace_plan_list:
+                        if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(pace_plan_id):
+                            if pace_plan_name is not None:
+                                pace_plan[Keys.PACE_PLAN_NAME_KEY] = pace_plan_name
+                            if target_pace_min_km is not None:
+                                pace_plan[Keys.PACE_PLAN_TARGET_PACE_KEY] = float(target_pace_min_km)
+                            if target_distance_kms is not None:
+                                pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance_kms)
+                            if splits is not None:
+                                pace_plan[Keys.PACE_PLAN_SPLITS_KEY] = float(splits)
+                            pace_plan_list.pop(pace_plan_index)
+                            pace_plan_list.append(pace_plan)
+                            user[Keys.PACE_PLANS_KEY] = pace_plan_list
+                            self.users_collection.save(user)
+                            return True
+                        pace_plan_index = pace_plan_index + 1
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def delete_pace_plan(self, user_id, pace_plan_id):
+        """Delete method for a pace plan associated with the specified user."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_pace_plan.__name__ + ": Unexpected empty object: user_id")
             return False
         if pace_plan_id is None:
             self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: pace_plan_id")
@@ -2585,44 +2656,11 @@ class MongoDatabase(Database.Database):
                     pace_plan_index = 0
                     for pace_plan in pace_plan_list:
                         if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(pace_plan_id):
-                            # TODO
                             pace_plan_list.pop(pace_plan_index)
-                            pace_plan_list.append(pace_plan)
                             user[Keys.PACE_PLANS_KEY] = pace_plan_list
                             self.users_collection.save(user)
                             return True
                         pace_plan_index = pace_plan_index + 1
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return False
-
-    def delete_pace_plan(self, user_id, pace_plan):
-        """Delete method for a pace plan associated with the specified user."""
-        if user_id is None:
-            self.log_error(MongoDatabase.delete_pace_plan.__name__ + ": Unexpected empty object: user_id")
-            return False
-
-        try:
-            # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
-
-            # If the user's document was found.
-            if user is not None:
-
-                # Update the pace plans list.
-                pace_plan_list = []
-                if Keys.PACE_PLANS_KEY in user:
-                    pace_plan_list = user[Keys.PACE_PLANS_KEY]
-                    pace_plan_index = 0
-                    for pace_plan in pace_plan_list:
-                        if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(pace_plan_id):
-                            pace_plan_list.pop(gear_index)
-                            user[Keys.PACE_PLANS_KEY] = pace_plan_list
-                            self.users_collection.save(user)
-                            return True
-                        gear_index = gear_index + 1
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

@@ -302,6 +302,11 @@ SERVICE_RECORD_DESCRIPTION_KEY = "description"
 
 # Keys used to manage pace plans.
 PACE_PLANS_KEY = "pace_plans"
+PACE_PLAN_ID_KEY = "pace_plan_id"
+PACE_PLAN_NAME_KEY = "name"
+PACE_PLAN_TARGET_PACE_KEY = "target pace"
+PACE_PLAN_TARGET_DISTANCE_KEY = "target pace"
+PACE_PLAN_SPLITS_KEY = "splits"
 
 # Activity types.
 TYPE_UNSPECIFIED_ACTIVITY_KEY = "Unknown"
