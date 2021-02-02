@@ -1079,6 +1079,26 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         pass
 
+    def create_pace_plan(self, user_id, plan_id, plan_name, plan_target_pace, plan_target_distance, plan_target_pace_units, plan_target_distance_units):
+        """Create method for a pace plan."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if plan_id is None:
+            raise Exception("Bad parameter.")
+        if plan_name is None:
+            raise Exception("Bad parameter.")
+        if plan_target_pace is None:
+            raise Exception("Bad parameter.")
+        if plan_target_distance is None:
+            raise Exception("Bad parameter.")
+        if plan_target_pace_units is None:
+            raise Exception("Bad parameter.")
+        if plan_target_distance_units is None:
+            raise Exception("Bad parameter.")
+        pass
+
     def retrieve_pace_plans_for_user(self, user_id):
         """Retrieve method for all pace plans associated with the specified user."""
         if self.database is None:

@@ -305,7 +305,9 @@ PACE_PLANS_KEY = "pace_plans"
 PACE_PLAN_ID_KEY = "pace_plan_id"
 PACE_PLAN_NAME_KEY = "name"
 PACE_PLAN_TARGET_PACE_KEY = "target pace"
-PACE_PLAN_TARGET_DISTANCE_KEY = "target pace"
+PACE_PLAN_TARGET_DISTANCE_KEY = "target distance"
+PACE_PLAN_TARGET_PACE_UNITS_KEY = "target pace units"
+PACE_PLAN_TARGET_DISTANCE_UNITS_KEY = "target distance units"
 PACE_PLAN_SPLITS_KEY = "splits"
 
 # Activity types.

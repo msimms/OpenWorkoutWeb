@@ -1771,6 +1771,45 @@ class Api(object):
         json_result = json.dumps(workouts)
         return True, json_result
 
+    def handle_create_pace_plan(self, values):
+        """Called when the user is uploading a pace plan, typically from the mobile app."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.PACE_PLAN_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_NAME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_TARGET_PACE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_TARGET_DISTANCE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_TARGET_PACE_UNITS_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        plan_id = unquote_plus(values[Keys.PACE_PLAN_ID_KEY])
+        if not InputChecker.is_valid_decoded_str(plan_id):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        plan_name = unquote_plus(values[Keys.PACE_PLAN_NAME_KEY])
+        if not InputChecker.is_valid_decoded_str(plan_id):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        plan_target_pace = unquote_plus(values[Keys.PACE_PLAN_TARGET_PACE_KEY])
+        if not InputChecker.is_valid_decoded_str(plan_id):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        plan_target_distance = unquote_plus(values[Keys.PACE_PLAN_TARGET_DISTANCE_KEY])
+        if not InputChecker.is_valid_decoded_str(plan_id):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        plan_target_pace_units = unquote_plus(values[Keys.PACE_PLAN_TARGET_PACE_UNITS_KEY])
+        if not InputChecker.is_valid_decoded_str(plan_id):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        plan_target_distance_units = unquote_plus(values[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY])
+        if not InputChecker.is_valid_decoded_str(plan_id):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        result = self.data_mgr.create_pace_plan(self.user_id, plan_id, plan_name, plan_target_pace, plan_target_distance, plan_target_pace_units, plan_target_distance_units)
+        return result, ""
+
     def handle_list_pace_plans(self, values):
         """Called when the user wants wants a list of their pace plans. Result is a JSON string."""
         if self.user_id is None:
@@ -2214,6 +2253,8 @@ class Api(object):
             return self.handle_create_service_record(values)
         elif request == 'delete_service_record':
             return self.handle_delete_service_record(values)
+        elif request == 'create_pace_plan':
+            return self.handle_create_pace_plan(values)        
         elif request == 'update_settings':
             return self.handle_update_settings(values)
         elif request == 'update_profile':
