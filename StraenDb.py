@@ -2505,7 +2505,7 @@ class MongoDatabase(Database.Database):
     # Pace plan management methods
     #
 
-    def create_pace_plan(self, user_id, pace_plan_id, pace_plan_name, target_pace_min_km, target_distance_kms, splits):
+    def create_pace_plan(self, user_id, pace_plan_id, pace_plan_name, target_pace_min_km, target_distance_kms, starget_pace_units, target_distance_units, splits):
         """Create method for a pace plan associated with the specified user."""
         if user_id is None:
             self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: user_id")
@@ -2521,6 +2521,12 @@ class MongoDatabase(Database.Database):
             return False
         if target_distance_kms is None:
             self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_distance_kms")
+            return False
+        if starget_pace_units is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: starget_pace_units")
+            return False
+        if target_distance_units is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_distance_units")
             return False
         if splits is None:
             self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: splits")
@@ -2543,6 +2549,8 @@ class MongoDatabase(Database.Database):
                 new_pace_plan[Keys.PACE_PLAN_NAME_KEY] = pace_plan_name
                 new_pace_plan[Keys.PACE_PLAN_TARGET_PACE_KEY] = float(target_pace_min_km)
                 new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance_kms)
+                new_pace_plan[Keys.PACE_PLAN_TARGET_PACE_UNITS_KEY] = int(starget_pace_units)
+                new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY] = int(target_distance_units)
                 new_pace_plan[Keys.PACE_PLAN_SPLITS_KEY] = float(splits)
                 pace_plan_list.append(new_pace_plan)
                 user[Keys.PACE_PLANS_KEY] = pace_plan_list
@@ -2577,7 +2585,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return []
 
-    def update_pace_plan(self, user_id, pace_plan_id, pace_plan_name, target_pace_min_km, target_distance_kms, splits):
+    def update_pace_plan(self, user_id, pace_plan_id, pace_plan_name, target_pace_min_km, target_distance_kms, starget_pace_units, target_distance_units, splits):
         """Update method for a pace plan associated with the specified user."""
         if user_id is None:
             self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: user_id")
@@ -2593,6 +2601,12 @@ class MongoDatabase(Database.Database):
             return False
         if target_distance_kms is None:
             self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_pace_min_km")
+            return False
+        if starget_pace_units is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: starget_pace_units")
+            return False
+        if target_distance_units is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_distance_units")
             return False
         if splits is None:
             self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: splits")
@@ -2613,14 +2627,12 @@ class MongoDatabase(Database.Database):
                     pace_plan_index = 0
                     for pace_plan in pace_plan_list:
                         if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(pace_plan_id):
-                            if pace_plan_name is not None:
-                                pace_plan[Keys.PACE_PLAN_NAME_KEY] = pace_plan_name
-                            if target_pace_min_km is not None:
-                                pace_plan[Keys.PACE_PLAN_TARGET_PACE_KEY] = float(target_pace_min_km)
-                            if target_distance_kms is not None:
-                                pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance_kms)
-                            if splits is not None:
-                                pace_plan[Keys.PACE_PLAN_SPLITS_KEY] = float(splits)
+                            pace_plan[Keys.PACE_PLAN_NAME_KEY] = pace_plan_name
+                            pace_plan[Keys.PACE_PLAN_TARGET_PACE_KEY] = float(target_pace_min_km)
+                            pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance_kms)
+                            pace_plan[Keys.PACE_PLAN_TARGET_PACE_UNITS_KEY] = int(starget_pace_units)
+                            pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY] = int(target_distance_units)
+                            pace_plan[Keys.PACE_PLAN_SPLITS_KEY] = float(splits)
                             pace_plan_list.pop(pace_plan_index)
                             pace_plan_list.append(pace_plan)
                             user[Keys.PACE_PLANS_KEY] = pace_plan_list
