@@ -227,7 +227,7 @@ class App(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, page_stats=page_stats_str, total_activities=total_activities_str, total_users=total_users_str)
 
-    def render_simple_page(self, template_file_name):
+    def render_simple_page(self, template_file_name, **kwargs):
         """Renders a basic page from the specified template. This exists because a lot of pages only need this to be rendered."""
 
         # Get the logged in user.
@@ -244,7 +244,7 @@ class App(object):
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, template_file_name)
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, **kwargs)
         
     def create_navbar(self, logged_in):
         """Helper function for building the navigation bar."""
@@ -975,22 +975,8 @@ class App(object):
     @statistics
     def record_progression(self, activity_type, record_name):
         """Renders the list of records, in order of progression, for the specified user and record type."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'records.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_type=activity_type, record_name=record_name)
+        kwargs = {"activity_type" : activity_type, "record_name" : record_name} 
+        return self.render_simple_page('records.html', **kwargs)
 
     @statistics
     def workouts(self):
@@ -1007,21 +993,9 @@ class App(object):
         if not InputChecker.is_uuid(workout_id):
             return self.render_error()
 
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'workout.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, workout_id=workout_id)
+        kwargs = {"workout_id" : workout_id} 
+        return self.render_simple_page('workout.html', **kwargs)
 
     @statistics
     def stats(self):
@@ -1043,21 +1017,9 @@ class App(object):
         if not InputChecker.is_uuid(gear_id):
             return self.render_error()
 
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'service_history.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, gear_id=gear_id)
+        kwargs = {"gear_id" : gear_id} 
+        return self.render_simple_page('service_history.html', **kwargs)
 
     @statistics
     def friends(self):
@@ -1078,17 +1040,6 @@ class App(object):
     def import_activity(self):
         """Renders the import page."""
 
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
         # Build the list options for manual entry.
         activity_type_list = self.data_mgr.retrieve_activity_types()
         activity_type_list_str = "\t\t\t<option value=\"-\">-</option>\n"
@@ -1096,9 +1047,8 @@ class App(object):
             activity_type_list_str += "\t\t\t<option value=\"" + activity_type + "\">" + activity_type + "</option>\n"
 
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'import.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_type_list=activity_type_list_str)
+        kwargs = {"activity_type_list" : activity_type_list_str} 
+        return self.render_simple_page('service_history.html', **kwargs)
 
     @statistics
     def pace_plans(self):
