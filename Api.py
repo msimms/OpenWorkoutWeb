@@ -1328,7 +1328,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         # Retired date is optional.
-        if Keys.GEAR_RETIRE_TIME_KEY in values and len(values[Keys.GEAR_RETIRE_TIME_KEY]) > 0:
+        if Keys.GEAR_RETIRE_TIME_KEY in values and values[Keys.GEAR_RETIRE_TIME_KEY] is not None and len(values[Keys.GEAR_RETIRE_TIME_KEY]) > 0:
             gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
             if gear_retire_time == 'NaN':
                 gear_retire_time = 0

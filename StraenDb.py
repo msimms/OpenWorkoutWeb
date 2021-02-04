@@ -2254,10 +2254,17 @@ class MongoDatabase(Database.Database):
             # If the user's document was found.
             if user is not None:
 
-                # Update the gear list.
+                # Find the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
+
+                # Make sure we don't already have an item with this ID.
+                for gear in gear_list:
+                    if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
+                        return False
+
+                # Update the gear list.
                 new_gear = {}
                 new_gear[Keys.GEAR_ID_KEY] = str(gear_id)
                 new_gear[Keys.GEAR_TYPE_KEY] = gear_type
@@ -2543,10 +2550,17 @@ class MongoDatabase(Database.Database):
             # If the user's document was found.
             if user is not None:
 
-                # Update the pace plans list.
+                # Fidn the pace plans list.
                 pace_plan_list = []
                 if Keys.PACE_PLANS_KEY in user:
                     pace_plan_list = user[Keys.PACE_PLANS_KEY]
+
+                # Make sure we don't already have a pace plan with this ID.
+                for pace_plan in pace_plan_list:
+                    if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(plan_id):
+                        return False
+
+                # Update the pace plans list.
                 new_pace_plan = {}
                 new_pace_plan[Keys.PACE_PLAN_ID_KEY] = str(plan_id)
                 new_pace_plan[Keys.PACE_PLAN_NAME_KEY] = plan_name

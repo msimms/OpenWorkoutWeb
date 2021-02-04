@@ -122,7 +122,7 @@ function retire_gear(root_url, gear_id)
 
 function get_new_gear_info(root_url, gear_type)
 {
-    let outer_div = document.getElementById("block");
+    let outer_div = document.getElementById("new_gear");
     let inner_div = document.createElement('div');
     inner_div.id = "new_gear_div";
 
