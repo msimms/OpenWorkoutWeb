@@ -52,9 +52,14 @@
 
         dict.push({["goal"] : goal});
         if (send_post_request(the_url, dict, result_text))
+        {
             alert("Goal updated!");
+            generate_workout_plan();
+        }
         else
+        {
             alert("An error occurred!");
+        }
     }
 
     function set_goal_date()
@@ -81,9 +86,14 @@
 
         dict.push({["goal_date"] : goal_date});
         if (send_post_request(the_url, dict, result_text))
+        {
             alert("Goal date updated!");
+            generate_workout_plan();
+        }
         else
+        {
             alert("An error occurred!");
+        }
     }
 
     function set_goal_type()
@@ -95,9 +105,14 @@
 
         dict.push({["goal type"] : goal_type});
         if (send_post_request(the_url, dict, result_text))
+        {
             alert("Goal type updated!");
+            generate_workout_plan();
+        }
         else
+        {
             alert("An error occurred!");
+        }
     }
 
     function set_exp_level()
@@ -400,16 +415,6 @@ ${nav}
         <p>
             <table id="RunPaces">
             </table>
-        </p>
-
-        <hr>
-
-        <h2>Plans</h2>
-        <p>
-            Workout plan generation is highly experimental. Consult your doctor and use common sense before following any exercise plan.
-        </p>
-        <p>
-            <button type="button" onclick="return generate_workout_plan()">Generate New Workout Plan</button>
         </p>
 
         <hr>
