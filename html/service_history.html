@@ -27,6 +27,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
 <script>
+
     var gear_name = ""
 
     function service_sort(a, b)
@@ -216,7 +217,9 @@
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_gear", cache: false, success: process_gear, dataType: "json" });
     }
 
+    // Things we need when the page is loaded.
     get_gear();
+
 </script>
 
 <section class="nav">

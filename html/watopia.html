@@ -127,6 +127,7 @@ ${nav}
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=" + route_len, cache: false, success: append_to_track, dataType: "json" });
     };
 
+    // Things we need when the page is loaded.
     check_for_updates();
 
 </script>

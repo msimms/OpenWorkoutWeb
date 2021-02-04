@@ -30,6 +30,7 @@
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
 
+    // Request a ZWO file.
     function export_workout_to_zwo()
     {
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=zwo", cache: false, success: function(response) {
@@ -37,6 +38,7 @@
         }, dataType: "text" });
     }
 
+    // Request an iCal file.
     function export_workout_to_ical()
     {
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=ics", cache: false, success: function(response) {
@@ -61,10 +63,14 @@
         }
 	};
 
-	$(document).ready(function()
-	{
+    // Request the URL that allows iCal to subscribe to the workouts calendar.
+    function get_workout_description()
+    {
 		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=json", cache: false, success: process_workout_description, dataType: "text" });
-	});
+	};
+
+    // Things we need when the page is loaded.
+    get_workout_description();
 
 </script>
 
