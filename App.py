@@ -254,6 +254,7 @@ class App(object):
                 "\t\t<li><a href=\"" + self.root_url + "/my_activities/\">My Activities</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/all_activities/\">All Activities</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/workouts/\">Workouts</a></li>\n" \
+                "\t\t<li><a href=\"" + self.root_url + "/pace_plans/\">Pace Plans</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/statistics/\">Statistics</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/gear/\">Gear</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/device_list/\">Devices</a></li>\n" \
