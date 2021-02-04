@@ -309,6 +309,7 @@ PACE_PLAN_TARGET_DISTANCE_KEY = "target distance"
 PACE_PLAN_TARGET_PACE_UNITS_KEY = "target pace units"
 PACE_PLAN_TARGET_DISTANCE_UNITS_KEY = "target distance units"
 PACE_PLAN_SPLITS_KEY = "splits"
+PACE_PLAN_LAST_UPDATED_TIME_KEY = "last updated"
 
 # Activity types.
 TYPE_UNSPECIFIED_ACTIVITY_KEY = "Unknown"

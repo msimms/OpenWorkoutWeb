@@ -27,6 +27,19 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script>
 
+    var process_pace_plans = function(records)
+    {
+        let table = document.getElementById("pace_plans");
+
+        if (records.length == 0)
+        {
+        }
+
+        for (let record_index in records)
+        {
+        }
+    }
+
     function list_pace_plans()
     {
         let api_url = "${root_url}/api/1.0/list_pace_plans";
@@ -42,6 +55,13 @@ ${nav}
 </section>
 
 <section class="block">
+
+    <h2>Pace Plans</h2>
+    <p>
+        <table id="pace_plans">
+        </table>
+    </p>
+
 </section>
 
 </body>

@@ -1787,27 +1787,37 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_SPLITS_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_LAST_UPDATED_TIME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         plan_id = unquote_plus(values[Keys.PACE_PLAN_ID_KEY])
         if not InputChecker.is_uuid(plan_id):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         plan_name = unquote_plus(values[Keys.PACE_PLAN_NAME_KEY])
-        if not InputChecker.is_valid_decoded_str(plan_id):
+        if not InputChecker.is_valid_decoded_str(plan_name):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        plan_target_pace = unquote_plus(values[Keys.PACE_PLAN_TARGET_PACE_KEY])
-        if not InputChecker.is_valid_decoded_str(plan_id):
+        target_pace = unquote_plus(values[Keys.PACE_PLAN_TARGET_PACE_KEY])
+        if not InputChecker.is_float(target_pace):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        plan_target_distance = unquote_plus(values[Keys.PACE_PLAN_TARGET_DISTANCE_KEY])
-        if not InputChecker.is_valid_decoded_str(plan_id):
+        target_distance = unquote_plus(values[Keys.PACE_PLAN_TARGET_DISTANCE_KEY])
+        if not InputChecker.is_float(target_distance):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        plan_target_pace_units = unquote_plus(values[Keys.PACE_PLAN_TARGET_PACE_UNITS_KEY])
-        if not InputChecker.is_valid_decoded_str(plan_id):
+        target_pace_units = unquote_plus(values[Keys.PACE_PLAN_TARGET_PACE_UNITS_KEY])
+        if not InputChecker.is_float(target_pace_units):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        plan_target_distance_units = unquote_plus(values[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY])
-        if not InputChecker.is_valid_decoded_str(plan_id):
+        target_distance_units = unquote_plus(values[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY])
+        if not InputChecker.is_float(target_distance_units):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        splits = unquote_plus(values[Keys.PACE_PLAN_SPLITS_KEY])
+        if not InputChecker.is_float(splits):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        last_updated_time = unquote_plus(values[Keys.PACE_PLAN_LAST_UPDATED_KEY])
+        if not InputChecker.is_integer(last_updated_time):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        result = self.data_mgr.create_pace_plan(self.user_id, plan_id, plan_name, plan_target_pace, plan_target_distance, plan_target_pace_units, plan_target_distance_units)
+        result = self.data_mgr.create_pace_plan(self.user_id, plan_id, plan_name, target_pace, target_distance, target_pace_units, target_distance_units, splits, last_updated_time)
         return result, ""
 
     def delete_pace_plan(self, values):
