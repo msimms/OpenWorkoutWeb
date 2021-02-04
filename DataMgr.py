@@ -1127,6 +1127,16 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.update_pace_plan(user_id, plan_id, plan_name, plan_target_pace, plan_target_distance, plan_target_pace_units, plan_target_distance_units)
 
+    def delete_pace_plan(self, user_id, plan_id):
+        """Delete method for a user's pace plan."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if plan_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.delete_pace_plan(user_id, plan_id)
+
     def create_gear(self, user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Create method for gear."""
         if self.database is None:
