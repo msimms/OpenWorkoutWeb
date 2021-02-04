@@ -857,6 +857,10 @@ class App(object):
     def activity(self, activity_id):
         """Renders the details page for an activity."""
 
+        # Sanity check the activity ID.
+        if not InputChecker.is_uuid(activity_id):
+            return self.render_error("Invalid activity ID")
+
         # Get the logged in user (if any).
         logged_in_user_id = None
         logged_in_username = self.user_mgr.get_logged_in_user()
@@ -886,6 +890,10 @@ class App(object):
     @statistics
     def edit_activity(self, activity_id):
         """Renders the edit page for an activity."""
+
+        # Sanity check the activity ID.
+        if not InputChecker.is_uuid(activity_id):
+            return self.render_error("Invalid activity ID")
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -1049,7 +1057,7 @@ class App(object):
 
         # Render from template.
         kwargs = {"activity_type_list" : activity_type_list_str} 
-        return self.render_simple_page('service_history.html', **kwargs)
+        return self.render_simple_page('import.html', **kwargs)
 
     @statistics
     def pace_plans(self):
