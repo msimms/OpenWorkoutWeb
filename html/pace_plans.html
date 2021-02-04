@@ -29,14 +29,18 @@
 
     var process_pace_plans = function(records)
     {
-        let table = document.getElementById("pace_plans");
-
         if (records.length == 0)
         {
+            let para = document.getElementById("description");
+            para.innerHTML = "You have no pace plans.";
         }
-
-        for (let record_index in records)
+        else
         {
+            let table = document.getElementById("pace_plans");
+
+            for (let record_index in records)
+            {
+            }
         }
     }
 
@@ -46,6 +50,7 @@
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_pace_plans, dataType: "json" });
     }
 
+    // Things we need when the page is loaded.
     list_pace_plans();
 
 </script>
@@ -60,6 +65,8 @@ ${nav}
     <p>
         <table id="pace_plans">
         </table>
+        <p id="description">
+        </p> 
     </p>
 
 </section>
