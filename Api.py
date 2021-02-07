@@ -1783,13 +1783,13 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.PACE_PLAN_TARGET_DISTANCE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.PACE_PLAN_TARGET_PACE_UNITS_KEY not in values:
+        if Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY not in values:
+        if Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.PACE_PLAN_SPLITS_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.PACE_PLAN_LAST_UPDATED_TIME_KEY not in values:
+        if Keys.PACE_PLAN_LAST_UPDATED_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         plan_id = unquote_plus(values[Keys.PACE_PLAN_ID_KEY])
@@ -1804,10 +1804,10 @@ class Api(object):
         target_distance = unquote_plus(values[Keys.PACE_PLAN_TARGET_DISTANCE_KEY])
         if not InputChecker.is_float(target_distance):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        target_pace_units = unquote_plus(values[Keys.PACE_PLAN_TARGET_PACE_UNITS_KEY])
+        target_pace_units = unquote_plus(values[Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY])
         if not InputChecker.is_float(target_pace_units):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        target_distance_units = unquote_plus(values[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY])
+        target_distance_units = unquote_plus(values[Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY])
         if not InputChecker.is_float(target_distance_units):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         splits = unquote_plus(values[Keys.PACE_PLAN_SPLITS_KEY])

@@ -302,14 +302,14 @@ SERVICE_RECORD_DESCRIPTION_KEY = "description"
 
 # Keys used to manage pace plans.
 PACE_PLANS_KEY = "pace_plans"
-PACE_PLAN_ID_KEY = "pace_plan_id"
+PACE_PLAN_ID_KEY = "id" # Unique identifier
 PACE_PLAN_NAME_KEY = "name"
-PACE_PLAN_TARGET_PACE_KEY = "target pace"
-PACE_PLAN_TARGET_DISTANCE_KEY = "target distance"
-PACE_PLAN_TARGET_PACE_UNITS_KEY = "target pace units"
-PACE_PLAN_TARGET_DISTANCE_UNITS_KEY = "target distance units"
-PACE_PLAN_SPLITS_KEY = "splits"
-PACE_PLAN_LAST_UPDATED_TIME_KEY = "last updated"
+PACE_PLAN_TARGET_PACE_KEY = "target pace" # Target pace (in km/mile)
+PACE_PLAN_TARGET_DISTANCE_KEY = "target distance" # Target distance (in kms)
+PACE_PLAN_DISPLAY_UNITS_PACE_KEY = "display units pace" # Units in which the user prefers to view the pace
+PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY = "display units distance" # Units in which the user prefers to view the distance
+PACE_PLAN_SPLITS_KEY = "splits" # Desired splits, in +/- seconds (i.e., zero is even splits)
+PACE_PLAN_LAST_UPDATED_KEY = "last updated" # Last updated timestamp
 
 # Activity types.
 TYPE_UNSPECIFIED_ACTIVITY_KEY = "Unknown"
