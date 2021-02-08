@@ -27,6 +27,78 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script>
 
+    // Button handler for when the user requests pace plan deletion.
+    function delete_pace_plan(id)
+    {
+        if (confirm('Are you sure you want to do this?'))
+        {
+            let the_url = "${root_url}/api/1.0/delete_pace_plan";
+            let dict = [];
+            let result_text = {};
+
+            dict.push({["id"] : id});
+
+            if (send_post_request(the_url, dict, result_text))
+            {
+                window.location.replace("${root_url}/pace_plans");
+            }
+            else
+            {
+                alert(result_text.value);
+            }
+        }
+    }
+
+    // Handler for when the server returns the user's pace plan list.
+    function append_to_pace_plans_table(table, id, name, target_pace, target_distance, display_units_pace, display_units_distance, splits, last_updated)
+    {
+        let new_row = table.insertRow();
+        let cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(name));
+
+        let new_target_pace_str = "";
+        if (display_units_pace == 1)
+        {
+            target_pace = target_pace * 1.60934
+            new_target_pace_str = target_pace.toFixed(2).toString() + " minutes/mile";
+        }
+        else
+        {
+            new_target_pace_str = target_pace.toFixed(2).toString() + " minutes/km";
+        }
+
+        let new_target_distance_str = "";
+        if (display_units_distance == 1)
+        {
+            target_distance = target_distance * 0.621371192;
+            new_target_distance_str = target_distance.toFixed(2).toString() + " mile(s)";
+        }
+        else
+        {
+            new_target_distance_str = target_distance.toFixed(2).toString() + " km(s)";
+        }
+
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(new_target_pace_str));
+
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(new_target_distance_str));
+
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(unix_time_to_local_date_string(last_updated)));
+
+        // Add a delete button.
+        let btn = document.createElement('button');
+        let btn_txt = document.createTextNode('Delete');
+        btn.appendChild(btn_txt);
+        btn.title = "Delete";
+        btn.style = "color:red";
+        btn.addEventListener('click', function() { delete_pace_plan(id); });
+        cell = new_row.insertCell();
+        cell.appendChild(btn);
+    }
+
+    // Process a list of pace plans returned from the server.
     var process_pace_plans = function(records)
     {
         if (records.length == 0)
@@ -38,12 +110,14 @@
         {
             let table = document.getElementById("pace_plans");
 
-            for (let record_index in records)
+            for (let record of records)
             {
+                append_to_pace_plans_table(table, record.id, record.name, record["target pace"], record["target distance"], record["display units pace"], record["display units distance"], record.splits, record["last updated"]);
             }
         }
     }
 
+    // Request the pace plans.
     function list_pace_plans()
     {
         let api_url = "${root_url}/api/1.0/list_pace_plans";

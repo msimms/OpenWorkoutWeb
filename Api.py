@@ -1820,7 +1820,7 @@ class Api(object):
         result = self.data_mgr.create_pace_plan(self.user_id, plan_id, plan_name, target_pace, target_distance, target_pace_units, target_distance_units, splits, last_updated_time)
         return result, ""
 
-    def delete_pace_plan(self, values):
+    def handle_delete_pace_plan(self, values):
         """Called when the user wants to delete a pace plan."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
