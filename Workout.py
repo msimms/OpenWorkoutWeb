@@ -55,7 +55,7 @@ class Workout(object):
         self.warmup = {} # The warmup interval
         self.cooldown = {} # The cooldown interval
         self.intervals = [] # The workout intervals
-        self.estimated_training_stress = None # Estimated training stress, the highter, the more stresful
+        self.estimated_strain_score = None # Estimated strain, the highter, the greater the load on the body
         self.workout_id = uuid.uuid4() # Unique identifier for the workout
 
     def __getitem__(self, key):
@@ -75,7 +75,7 @@ class Workout(object):
             dt = time.mktime(self.scheduled_time.timetuple())
             return datetime.datetime(dt.year, dt.month, dt.day)
         if key == Keys.WORKOUT_ESTIMATED_STRESS_KEY:
-            return self.estimated_training_stress
+            return self.estimated_strain_score
         return None
 
     def to_dict(self):
@@ -89,8 +89,8 @@ class Workout(object):
         output[Keys.WORKOUT_INTERVALS_KEY] = self.intervals
         if self.scheduled_time is not None:
             output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = time.mktime(self.scheduled_time.timetuple())
-        if self.estimated_training_stress is not None:
-            output[Keys.WORKOUT_ESTIMATED_STRESS_KEY] = self.estimated_training_stress
+        if self.estimated_strain_score is not None:
+            output[Keys.WORKOUT_ESTIMATED_STRESS_KEY] = self.estimated_strain_score
         return output
 
     def from_dict(self, input):
@@ -110,7 +110,7 @@ class Workout(object):
         if Keys.WORKOUT_SCHEDULED_TIME_KEY in input and input[Keys.WORKOUT_SCHEDULED_TIME_KEY] is not None:
             self.scheduled_time = datetime.datetime.fromtimestamp(input[Keys.WORKOUT_SCHEDULED_TIME_KEY]).date()
         if Keys.WORKOUT_ESTIMATED_STRESS_KEY in input:
-            self.estimated_training_stress = input[Keys.WORKOUT_ESTIMATED_STRESS_KEY]
+            self.estimated_strain_score = input[Keys.WORKOUT_ESTIMATED_STRESS_KEY]
 
     def add_warmup(self, seconds):
         """Defines the workout warmup."""
@@ -278,13 +278,13 @@ class Workout(object):
         elif self.type == Keys.WORKOUT_TYPE_SPEED_INTERVAL_RIDE:
             result += "Purpose: Speed interval sessions get you used to riding at faster paces.\n"
         elif self.type == Keys.WORKOUT_TYPE_TEMPO_RIDE:
-            result += "Purpose: Tempo rides build a combination of speed and endurance. They should be performed at an intensity you can hold for roughly one hour.\n"
+            result += "Purpose: Tempo rides build a combination of speed and endurance. They should be performed at a pace you can hold for roughly one hour.\n"
         elif self.type == Keys.WORKOUT_TYPE_EASY_RIDE:
             result += "Purpose: Easy rides build aerobic capacity while keeping the wear and tear on the body to a minimum.\n"
 
-        if self.estimated_training_stress is not None:
-            stress_str = "{:.1f}".format(self.estimated_training_stress)
-            result += "Estimated Training Stress: "
+        if self.estimated_strain_score is not None:
+            stress_str = "{:.1f}".format(self.estimated_strain_score)
+            result += "Estimated Strain Score: "
             result += stress_str
             result += "\n"
 
@@ -307,8 +307,8 @@ class Workout(object):
         interval_duration_secs = interval_meters / (interval_pace_meters_per_minute / 60.0)
         return interval_duration_secs
 
-    def calculate_estimated_training_stress(self, threshold_pace_meters_per_minute):
-        """Computes the estimated training stress for this workout."""
+    def calculate_estimated_strain_score(self, threshold_pace_meters_per_minute):
+        """Computes the estimated strain for this workout."""
         """May be overridden by child classes, depending on the type of workout."""
         workout_duration_secs = 0.0
         avg_workout_pace_meters_per_sec = 0.0
@@ -336,4 +336,4 @@ class Workout(object):
             avg_workout_pace_meters_per_sec = avg_workout_pace_meters_per_sec / workout_duration_secs
 
         calc = TrainingStressCalculator.TrainingStressCalculator()
-        self.estimated_training_stress = calc.estimate_training_stress(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_minute * 60.0)
+        self.estimated_strain_score = calc.estimate_strain_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_minute * 60.0)

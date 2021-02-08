@@ -148,7 +148,7 @@ class ActivityAnalyzer(object):
 
                 # Was a stress score calculated (i.e., did the activity have power data from which stress could be computed)?
                 # If not, estimate a stress score.
-                print("Computing training stress...")
+                print("Computing the strain score...")
                 end_time_secs = end_time_ms / 1000
 
                 # If activity duration and distance have been calculated.
@@ -166,8 +166,8 @@ class ActivityAnalyzer(object):
                         if Keys.FUNCTIONAL_THRESHOLD_PACE in run_paces:
                             threshold_pace_meters_per_hour = run_paces[Keys.FUNCTIONAL_THRESHOLD_PACE] * 60.0
                             calc = TrainingStressCalculator.TrainingStressCalculator()
-                            stress = calc.estimate_training_stress(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour)
-                            self.summary_data[Keys.TRAINING_STRESS] = stress
+                            stress = calc.estimate_strain_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour)
+                            self.summary_data[Keys.STRAIN_SCORE] = stress
 
                     # Cycling activity
                     elif activity_type in Keys.CYCLING_ACTIVITIES:
