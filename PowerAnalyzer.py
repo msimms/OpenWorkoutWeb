@@ -9,7 +9,7 @@ import DataMgr
 import FtpCalculator
 import Keys
 import SensorAnalyzer
-import TrainingStressCalculator
+import StrainCalculator
 import Units
 
 class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
@@ -118,7 +118,7 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
 
                         # Compute the strain score.
                         t = (self.end_time - self.start_time) / 1000.0
-                        calc = TrainingStressCalculator.TrainingStressCalculator()
+                        calc = StrainCalculator.StrainCalculator()
                         strain_score = calc.calculate_strain_score_from_power(t, np, ftp[0])
                         results[Keys.STRAIN_SCORE] = strain_score
 

@@ -33,7 +33,7 @@ import time
 import uuid
 import IcsWriter
 import Keys
-import TrainingStressCalculator
+import StrainCalculator
 import Units
 import UserMgr
 import ZwoWriter
@@ -335,5 +335,5 @@ class Workout(object):
         if workout_duration_secs > 0.0:
             avg_workout_pace_meters_per_sec = avg_workout_pace_meters_per_sec / workout_duration_secs
 
-        calc = TrainingStressCalculator.TrainingStressCalculator()
+        calc = StrainCalculator.StrainCalculator()
         self.estimated_strain_score = calc.estimate_strain_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_minute * 60.0)

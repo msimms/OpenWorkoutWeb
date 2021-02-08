@@ -23,11 +23,11 @@
 # SOFTWARE.
 """Encapsulates equations for calculating or estimating the strain the workout places on the body."""
 
-class TrainingStressCalculator(object):
+class StrainCalculator(object):
     """Encapsulates equations for calculating or estimating the strain the workout places on the body."""
 
     def __init__(self):
-        super(TrainingStressCalculator, self).__init__()
+        super(StrainCalculator, self).__init__()
 
     @staticmethod
     def estimate_strain_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour):
