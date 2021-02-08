@@ -83,18 +83,21 @@
         }
     }
 
+    // Get the list of things the user is allowed to do. Needed to determine if we should render the Upload Photos option.
     function request_upload_permissions()
     {
         let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=can%20upload%20photos";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_upload_permissions, dataType: "json" });
     }
 
+    // Get the list of all possible activity types. Needed to populate the activity type combo box.
     function list_activity_types()
     {
         let api_url = "${root_url}/api/1.0/list_activity_types";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_activity_type_list, dataType: "text" });
     }
 
+    // Things we need when the page is loaded.
     request_upload_permissions();
     list_activity_types();
 </script>

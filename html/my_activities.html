@@ -28,11 +28,13 @@
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script type="text/javascript">
 
+    // Request activities starting on this date, in UNIX time.
     function compute_start_time()
     {
         return 0;
     }
 
+    // Do not request activities that start after this date, in UNIX time.
     function compute_end_time()
     {
         return Date.now();
@@ -102,6 +104,7 @@
         return activities.concat(workouts);
     }
 
+    // What's the user's preference for the first day of the week? Need to know this before rendering the calendar.
     function get_preferred_first_day_of_week()
     {
         let the_url = "${root_url}/api/1.0/get_user_setting?requested%20setting=preferred%20first%20day%20of%20week";

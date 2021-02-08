@@ -23,6 +23,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script>
 
+    // Button handler for when the user requests to delete an API key.
     function delete_api_key(key)
     {
         if (confirm('Are you sure you want to do this?'))
@@ -44,6 +45,7 @@
         }
     }
 
+    // Button handler for when the user requests a new API key.
     function generate_new_api_key()
     {
         let the_url = "${root_url}/api/1.0/generate_api_key";
@@ -60,10 +62,10 @@
         }
     }
 
+    // Handler for when we receive the list of API keys from the server.
     var process_keys = function(records)
     {
         let keys_table = document.getElementById("Keys");
-
         let new_row = keys_table.insertRow();
         let cell = new_row.insertCell();
 
@@ -82,6 +84,7 @@
             cell = new_row.insertCell();
             cell.appendChild(document.createTextNode(key_record.rate));
 
+            // Add a delete button.
             btn.appendChild(btn_txt);
             btn.title = "Delete";
             btn.style = "color:red";
@@ -91,6 +94,7 @@
         }
     }
 
+    // Request the user's API keys.
     function get_keys()
     {
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_api_keys", cache: false, success: process_keys, dataType: "json" });

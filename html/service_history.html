@@ -149,6 +149,7 @@
         cell = new_row.insertCell();
         cell.appendChild(document.createTextNode(description));
 
+        // Add a delete button.
         let btn = document.createElement('button');
         let btn_txt = document.createTextNode('Delete');
         btn.appendChild(btn_txt);
@@ -165,6 +166,7 @@
         gear_distance_elem.innerText = records[0][gear_name];
     }
 
+    // Handler for when the server returns the user's gear list.
     var process_gear = function(records)
     {
         let history_table = document.getElementById("ServiceHistory");
@@ -212,6 +214,7 @@
         }
     }
 
+    // List all the gear associated with the current user.
     function get_gear()
     {
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_gear", cache: false, success: process_gear, dataType: "json" });
