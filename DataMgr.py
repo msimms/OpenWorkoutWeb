@@ -1105,7 +1105,8 @@ class DataMgr(Importer.ActivityWriter):
         pace_plans = self.database.retrieve_pace_plans(user_id)
         for plan in pace_plans:
             if plan[Keys.PACE_PLAN_ID_KEY] == planId:
-                return self.database.update_pace_plan(user_id, plan_id, plan_name, target_pace, target_distance, display_units_pace, display_units_distance, splits, last_updated_time)
+                if Keys.PACE_PLAN_LAST_UPDATED_KEY in plan and int(plan[Keys.PACE_PLAN_LAST_UPDATED_KEY]) < int(last_updated_time):
+                    return self.database.update_pace_plan(user_id, plan_id, plan_name, target_pace, target_distance, display_units_pace, display_units_distance, splits, last_updated_time)
         return self.database.create_pace_plan(user_id, plan_id, plan_name, target_pace, target_distance, display_units_pace, display_units_distance, splits, last_updated_time)
 
     def retrieve_pace_plans_for_user(self, user_id):

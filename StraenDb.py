@@ -2566,8 +2566,8 @@ class MongoDatabase(Database.Database):
                 new_pace_plan[Keys.PACE_PLAN_NAME_KEY] = plan_name
                 new_pace_plan[Keys.PACE_PLAN_TARGET_PACE_KEY] = float(target_pace_min_km)
                 new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance_kms)
-                new_pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY] = int(display_units_pace)
-                new_pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY] = int(display_units_distance)
+                new_pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY] = int(float(display_units_pace))
+                new_pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY] = int(float(display_units_distance))
                 new_pace_plan[Keys.PACE_PLAN_SPLITS_KEY] = int(float(splits))
                 new_pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
                 pace_plan_list.append(new_pace_plan)
@@ -2651,8 +2651,8 @@ class MongoDatabase(Database.Database):
                             pace_plan[Keys.PACE_PLAN_NAME_KEY] = plan_name
                             pace_plan[Keys.PACE_PLAN_TARGET_PACE_KEY] = float(target_pace_min_km)
                             pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance_kms)
-                            pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY] = int(display_units_pace)
-                            pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY] = int(display_units_distance)
+                            pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY] = int(float(display_units_pace))
+                            pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY] = int(float(display_units_distance))
                             pace_plan[Keys.PACE_PLAN_SPLITS_KEY] = int(float(splits))
                             pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
                             pace_plan_list.pop(pace_plan_index)
