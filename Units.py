@@ -358,8 +358,6 @@ def convert_to_string_in_specified_unit_system(unit_system, in_value, in_distanc
         out_value = "{:.2f} ".format(in_value)
     elif label == Keys.VARIABILITY_INDEX:
         out_value = "{:.2f} ".format(in_value)
-    elif label == Keys.INTENSITY_FACTOR:
-        out_value = "{:.2f} ".format(in_value)
     else:
         out_value = str(in_value)
     return out_value
