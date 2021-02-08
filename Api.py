@@ -1328,7 +1328,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         # Retired date is optional.
-        if Keys.GEAR_RETIRE_TIME_KEY in values and len(values[Keys.GEAR_RETIRE_TIME_KEY]) > 0:
+        if Keys.GEAR_RETIRE_TIME_KEY in values and values[Keys.GEAR_RETIRE_TIME_KEY] is not None and len(values[Keys.GEAR_RETIRE_TIME_KEY]) > 0:
             gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
             if gear_retire_time == 'NaN':
                 gear_retire_time = 0
@@ -1771,6 +1771,69 @@ class Api(object):
         json_result = json.dumps(workouts)
         return True, json_result
 
+    def handle_create_pace_plan(self, values):
+        """Called when the user is uploading a pace plan, typically from the mobile app."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.PACE_PLAN_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_NAME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_TARGET_PACE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_TARGET_DISTANCE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_SPLITS_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.PACE_PLAN_LAST_UPDATED_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        plan_id = unquote_plus(values[Keys.PACE_PLAN_ID_KEY])
+        if not InputChecker.is_uuid(plan_id):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        plan_name = unquote_plus(values[Keys.PACE_PLAN_NAME_KEY])
+        if not InputChecker.is_valid_decoded_str(plan_name):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        target_pace = unquote_plus(values[Keys.PACE_PLAN_TARGET_PACE_KEY])
+        if not InputChecker.is_float(target_pace):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        target_distance = unquote_plus(values[Keys.PACE_PLAN_TARGET_DISTANCE_KEY])
+        if not InputChecker.is_float(target_distance):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        target_pace_units = unquote_plus(values[Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY])
+        if not InputChecker.is_float(target_pace_units):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        target_distance_units = unquote_plus(values[Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY])
+        if not InputChecker.is_float(target_distance_units):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        splits = unquote_plus(values[Keys.PACE_PLAN_SPLITS_KEY])
+        if not InputChecker.is_float(splits):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        last_updated_time = unquote_plus(values[Keys.PACE_PLAN_LAST_UPDATED_KEY])
+        if not InputChecker.is_integer(last_updated_time):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        result = self.data_mgr.create_pace_plan(self.user_id, plan_id, plan_name, target_pace, target_distance, target_pace_units, target_distance_units, splits, last_updated_time)
+        return result, ""
+
+    def handle_delete_pace_plan(self, values):
+        """Called when the user wants to delete a pace plan."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.PACE_PLAN_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        plan_id = unquote_plus(values[Keys.PACE_PLAN_ID_KEY])
+        if not InputChecker.is_uuid(plan_id):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        result = self.data_mgr.delete_pace_plan(self.user_id, plan_id)
+        return result, ""
+
     def handle_list_pace_plans(self, values):
         """Called when the user wants wants a list of their pace plans. Result is a JSON string."""
         if self.user_id is None:
@@ -1847,7 +1910,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        # Activity ID from hash.
+        # Activity hash from user.
         activity_hash = values[Keys.ACTIVITY_HASH_KEY]
         if not InputChecker.is_hex_str(activity_hash):
             raise ApiException.ApiMalformedRequestException("Invalid activity hash.")
@@ -2214,6 +2277,10 @@ class Api(object):
             return self.handle_create_service_record(values)
         elif request == 'delete_service_record':
             return self.handle_delete_service_record(values)
+        elif request == 'create_pace_plan':
+            return self.handle_create_pace_plan(values)        
+        elif request == 'delete_pace_plan':
+            return self.handle_delete_pace_plan(values)        
         elif request == 'update_settings':
             return self.handle_update_settings(values)
         elif request == 'update_profile':

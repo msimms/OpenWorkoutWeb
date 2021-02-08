@@ -164,11 +164,19 @@
 
     function process_friends_list(records, is_pending_request)
     {
-		let friends_table = document.getElementById("Friends");
-
-        for (let friend of records)
+        if (records.length == 0)
         {
-            append_to_friends_table(friends_table, friend.realname, friend.username, friend.requesting_user, is_pending_request);
+            let para = document.getElementById("description");
+            para.innerHTML = "You have no friends.";
+        }
+        else
+        {
+            let friends_table = document.getElementById("Friends");
+
+            for (let friend of records)
+            {
+                append_to_friends_table(friends_table, friend.realname, friend.username, friend.requesting_user, is_pending_request);
+            }
         }
     }
 
@@ -186,6 +194,7 @@
         });
     }
 
+    // Things we need when the page is loaded.
     get_friends_lists();
 
 </script>
@@ -194,7 +203,7 @@
 ${nav}
 </section>
 
-<section>
+<section class="block">
     <div class="user_search_form" style="width: 600px">
         <h2>Search for a user</h2>
         <p>User Email or Name: <input type="text" id="searchname"><br></p>
@@ -210,6 +219,8 @@ ${nav}
         <h2>My Friends</h2>
         <table id="Friends">
         </table>
+        <p id="description">
+        </p> 
     </div>
 </section>
 

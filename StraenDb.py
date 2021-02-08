@@ -128,6 +128,10 @@ class MongoDatabase(Database.Database):
         exclude_keys[Keys.PREFERRED_UNITS_KEY] = False
         return exclude_keys
 
+    #
+    # User management methods
+    #
+
     def create_user(self, username, realname, passhash):
         """Create method for a user."""
         if username is None:
@@ -320,6 +324,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return user_list
 
+    #
+    # Device management methods
+    #
+
     def create_user_device(self, user_id, device_str):
         """Create method for a device."""
         if user_id is None:
@@ -394,6 +402,10 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
+
+    #
+    # Friend management methods
+    #
 
     def create_pending_friend_request(self, user_id, target_id):
         """Appends a user to the friends list of the user with the specified id."""
@@ -606,6 +618,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    #
+    # User settings methods
+    #
+
     def update_user_setting(self, user_id, key, value):
         """Create/update method for user preferences."""
         if user_id is None:
@@ -680,6 +696,10 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return None
+
+    #
+    # Personal record management methods
+    #
 
     def create_user_personal_records(self, user_id, records):
         """Create method for a user's personal record."""
@@ -764,6 +784,10 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
+
+    #
+    # Activity bests management methods
+    #
 
     def create_activity_bests(self, user_id, activity_id, activity_type, activity_time, bests):
         """Create method for a user's personal records for a given activity."""
@@ -887,6 +911,10 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
+
+    #
+    # Activity management methods
+    #
 
     def retrieve_user_activity_list(self, user_id, start_time, end_time, num_results, exclude_keys):
         """Retrieves the list of activities associated with the specified user."""
@@ -1642,6 +1670,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    #
+    # Tag management methods
+    #
+
     def create_tag(self, activity_id, tag):
         """Adds a tag to the specified activity."""
         if activity_id is None:
@@ -1753,6 +1785,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    #
+    # Activity comment management methods
+    #
+
     def create_activity_comment(self, activity_id, commenter_id, comment):
         """Create method for a comment on an activity."""
         if activity_id is None:
@@ -1802,6 +1838,10 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return None
+
+    #
+    # Activity photo management methods
+    #
 
     def create_activity_photo(self, user_id, activity_id, photo_hash):
         """Create method for an activity photo."""
@@ -1882,6 +1922,10 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
+
+    #
+    # Planned workout management methods
+    #
 
     def create_workout(self, user_id, workout_obj):
         """Create method for a workout."""
@@ -2109,6 +2153,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return user_ids
 
+    #
+    # Gear default management methods
+    #
+
     def retrieve_gear_defaults(self, user_id):
         """Retrieve method for the gear with the specified ID."""
         if user_id is None:
@@ -2179,6 +2227,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    #
+    # Gear management methods
+    #
+
     def create_gear(self, user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
         """Create method for gear."""
         if user_id is None:
@@ -2202,10 +2254,17 @@ class MongoDatabase(Database.Database):
             # If the user's document was found.
             if user is not None:
 
-                # Update the gear list.
+                # Find the gear list.
                 gear_list = []
                 if Keys.GEAR_KEY in user:
                     gear_list = user[Keys.GEAR_KEY]
+
+                # Make sure we don't already have an item with this ID.
+                for gear in gear_list:
+                    if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
+                        return False
+
+                # Update the gear list.
                 new_gear = {}
                 new_gear[Keys.GEAR_ID_KEY] = str(gear_id)
                 new_gear[Keys.GEAR_TYPE_KEY] = gear_type
@@ -2449,6 +2508,202 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    #
+    # Pace plan management methods
+    #
+
+    def create_pace_plan(self, user_id, plan_id, plan_name, target_pace_min_km, target_distance_kms, display_units_pace, display_units_distance, splits, last_updated_time):
+        """Create method for a pace plan associated with the specified user."""
+        if user_id is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if plan_id is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: plan_id")
+            return False
+        if plan_name is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: plan_name")
+            return False
+        if target_pace_min_km is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_pace_min_km")
+            return False
+        if target_distance_kms is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_distance_kms")
+            return False
+        if display_units_pace is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: display_units_pace")
+            return False
+        if display_units_distance is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: display_units_distance")
+            return False
+        if splits is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: splits")
+            return False
+        if last_updated_time is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: last_updated_time")
+            return False
+
+        try:
+            # Find the user's document.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+
+            # If the user's document was found.
+            if user is not None:
+
+                # Fidn the pace plans list.
+                pace_plan_list = []
+                if Keys.PACE_PLANS_KEY in user:
+                    pace_plan_list = user[Keys.PACE_PLANS_KEY]
+
+                # Make sure we don't already have a pace plan with this ID.
+                for pace_plan in pace_plan_list:
+                    if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(plan_id):
+                        return False
+
+                # Update the pace plans list.
+                new_pace_plan = {}
+                new_pace_plan[Keys.PACE_PLAN_ID_KEY] = str(plan_id)
+                new_pace_plan[Keys.PACE_PLAN_NAME_KEY] = plan_name
+                new_pace_plan[Keys.PACE_PLAN_TARGET_PACE_KEY] = float(target_pace_min_km)
+                new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance_kms)
+                new_pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY] = int(float(display_units_pace))
+                new_pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY] = int(float(display_units_distance))
+                new_pace_plan[Keys.PACE_PLAN_SPLITS_KEY] = int(float(splits))
+                new_pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
+                pace_plan_list.append(new_pace_plan)
+                user[Keys.PACE_PLANS_KEY] = pace_plan_list
+                self.users_collection.save(user)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_pace_plans(self, user_id):
+        """Retrieve method for pace plans associated with the specified user."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_pace_plan.__name__ + ": Unexpected empty object: user_id")
+            return False
+
+        try:
+            # Find the user's document.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+
+            # If the user's document was found.
+            if user is not None:
+
+                # Read the pace plans list.
+                pace_plan_list = []
+                if Keys.PACE_PLANS_KEY in user:
+                    pace_plan_list = user[Keys.PACE_PLANS_KEY]
+                return pace_plan_list
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return []
+
+    def update_pace_plan(self, user_id, plan_id, plan_name, target_pace_min_km, target_distance_kms, display_units_pace, display_units_distance, splits, last_updated_time):
+        """Update method for a pace plan associated with the specified user."""
+        if user_id is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if plan_id is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: plan_id")
+            return False
+        if plan_name is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: plan_name")
+            return False
+        if target_pace_min_km is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_pace_min_km")
+            return False
+        if target_distance_kms is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_pace_min_km")
+            return False
+        if display_units_pace is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: display_units_pace")
+            return False
+        if display_units_distance is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: display_units_distance")
+            return False
+        if splits is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: splits")
+            return False
+        if last_updated_time is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: last_updated_time")
+            return False
+
+        try:
+            # Find the user's document.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+
+            # If the user's document was found.
+            if user is not None:
+
+                # Update the pace plans list.
+                pace_plan_list = []
+                if Keys.PACE_PLANS_KEY in user:
+                    pace_plan_list = user[Keys.PACE_PLANS_KEY]
+                    pace_plan_index = 0
+                    for pace_plan in pace_plan_list:
+                        if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(plan_id):
+                            pace_plan[Keys.PACE_PLAN_NAME_KEY] = plan_name
+                            pace_plan[Keys.PACE_PLAN_TARGET_PACE_KEY] = float(target_pace_min_km)
+                            pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance_kms)
+                            pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY] = int(float(display_units_pace))
+                            pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY] = int(float(display_units_distance))
+                            pace_plan[Keys.PACE_PLAN_SPLITS_KEY] = int(float(splits))
+                            pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
+                            pace_plan_list.pop(pace_plan_index)
+                            pace_plan_list.append(pace_plan)
+                            user[Keys.PACE_PLANS_KEY] = pace_plan_list
+                            self.users_collection.save(user)
+                            return True
+                        pace_plan_index = pace_plan_index + 1
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def delete_pace_plan(self, user_id, pace_plan_id):
+        """Delete method for a pace plan associated with the specified user."""
+        if user_id is None:
+            self.log_error(MongoDatabase.delete_pace_plan.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if pace_plan_id is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: pace_plan_id")
+            return False
+
+        try:
+            # Find the user's document.
+            user_id_obj = ObjectId(str(user_id))
+            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+
+            # If the user's document was found.
+            if user is not None:
+
+                # Update the pace plans list.
+                pace_plan_list = []
+                if Keys.PACE_PLANS_KEY in user:
+                    pace_plan_list = user[Keys.PACE_PLANS_KEY]
+                    pace_plan_index = 0
+                    for pace_plan in pace_plan_list:
+                        if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(pace_plan_id):
+                            pace_plan_list.pop(pace_plan_index)
+                            user[Keys.PACE_PLANS_KEY] = pace_plan_list
+                            self.users_collection.save(user)
+                            return True
+                        pace_plan_index = pace_plan_index + 1
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    #
+    # Deferred task management methods
+    #
+
     def create_deferred_task(self, user_id, task_type, celery_task_id, internal_task_id, details, status):
         """Create method for tracking a deferred task, such as a file import or activity analysis."""
         if user_id is None:
@@ -2626,6 +2881,10 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
+
+    #
+    # API key management methods
+    #
 
     def create_api_key(self, user_id, key, rate):
         """Create method for an API key."""

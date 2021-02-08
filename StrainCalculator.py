@@ -21,24 +21,21 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Encapsulates equations for calculating workout intensity."""
+"""Encapsulates equations for calculating or estimating the strain the workout places on the body."""
 
-class TrainingStressCalculator(object):
-    """Encapsulates equations for calculating workout intensity."""
+class StrainCalculator(object):
+    """Encapsulates equations for calculating or estimating the strain the workout places on the body."""
 
     def __init__(self):
-        super(TrainingStressCalculator, self).__init__()
+        super(StrainCalculator, self).__init__()
 
     @staticmethod
-    def estimate_training_stress(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour):
-        stress = ((workout_duration_secs * avg_workout_pace_meters_per_sec) / threshold_pace_meters_per_hour) * 100.0
-        return stress
+    def estimate_strain_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour):
+        strain_score = ((workout_duration_secs * avg_workout_pace_meters_per_sec) / threshold_pace_meters_per_hour) * 100.0
+        return strain_score
 
     @staticmethod
-    def calculate_training_stress_from_power(workout_duration_secs, np, ftp):
-        # Compute the intensity factor (IF = NP / FTP).
-        intfac = np / ftp
-
-        # Compute the training stress score (TSS = (t * NP * IF) / (FTP * 36)).
-        tss = (workout_duration_secs * np * intfac) / (ftp * 36)
-        return intfac, tss
+    def calculate_strain_score_from_power(workout_duration_secs, np, ftp):
+        # Compute the strain score: (t * NP * IF) / (FTP * 36).
+        strain_score = (workout_duration_secs * (np / ftp) * intfac) / (ftp * 36)
+        return strain_score

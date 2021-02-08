@@ -136,7 +136,7 @@ class Summarizer(object):
             return lhs < rhs
         elif key in Keys.SPEED_KEYS or key in Keys.POWER_KEYS or key in Keys.DISTANCE_KEYS: # Higher is better
             return lhs > rhs
-        elif key == Keys.TRAINING_STRESS:
+        elif key == Keys.STRAIN_SCORE:
             return lhs > rhs
         return False
 
@@ -144,8 +144,6 @@ class Summarizer(object):
         """Submits one item of an activity's metadata for summary analysis."""
 
         # Ignore these ones.
-        if summary_data_key.find(Keys.CLUSTER) > 0:
-            return
         if summary_data_key in Keys.UNSUMMARIZABLE_KEYS:
             return
 
@@ -204,13 +202,13 @@ class Summarizer(object):
             else:
                 summary_record_set[Keys.TOTAL_ACTIVITIES] = 1
 
-        # Update training stress sum.
-        if summary_data_key == Keys.TRAINING_STRESS:
+        # Update the strain score summary.
+        if summary_data_key == Keys.STRAIN_SCORE:
 
-            if Keys.TOTAL_TRAINING_STRESS in summary_record_set:
-                summary_record_set[Keys.TOTAL_TRAINING_STRESS] = summary_record_set[Keys.TOTAL_TRAINING_STRESS] + summary_data_value
+            if Keys.TOTAL_STRAIN_SCORE in summary_record_set:
+                summary_record_set[Keys.TOTAL_STRAIN_SCORE] = summary_record_set[Keys.TOTAL_STRAIN_SCORE] + summary_data_value
             else:
-                summary_record_set[Keys.TOTAL_TRAINING_STRESS] = summary_data_value
+                summary_record_set[Keys.TOTAL_STRAIN_SCORE] = summary_data_value
 
         # Update the record set.
         self.set_summary_dictionary(activity_type, summary_record_set)

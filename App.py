@@ -25,6 +25,7 @@
 
 import cherrypy
 import datetime
+import inspect
 import json
 import logging
 import mako
@@ -56,6 +57,12 @@ from dateutil.tz import tzlocal
 from mako.lookup import TemplateLookup
 from mako.template import Template
 
+# Locate and load the Distance calculations module.
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+distancedir = os.path.join(currentdir, 'LibMath', 'python', 'distance')
+sys.path.insert(0, distancedir)
+import distance
+
 
 PRODUCT_NAME = 'Straen'
 
@@ -63,6 +70,7 @@ LOGIN_URL = '/login'
 DEFAULT_LOGGED_IN_URL = '/all_activities'
 TASK_STATUS_URL = '/task_status'
 HTML_DIR = 'html'
+MEDIA_DIR = 'media'
 
 
 g_stats_lock = threading.Lock()
@@ -124,6 +132,8 @@ class App(object):
 
         self.google_maps_key = google_maps_key
         self.debug = debug
+        self.watopia_map_file = os.path.join(root_dir, MEDIA_DIR, 'watopia.png')
+        self.watopia_html_file = os.path.join(root_dir, HTML_DIR, 'watopia.html')
         self.unmapped_activity_html_file = os.path.join(root_dir, HTML_DIR, 'unmapped_activity.html')
         self.map_single_osm_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_osm.html')
         self.map_single_google_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
@@ -217,7 +227,7 @@ class App(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, page_stats=page_stats_str, total_activities=total_activities_str, total_users=total_users_str)
 
-    def render_simple_page(self, template_file_name):
+    def render_simple_page(self, template_file_name, **kwargs):
         """Renders a basic page from the specified template. This exists because a lot of pages only need this to be rendered."""
 
         # Get the logged in user.
@@ -234,7 +244,7 @@ class App(object):
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, template_file_name)
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, **kwargs)
         
     def create_navbar(self, logged_in):
         """Helper function for building the navigation bar."""
@@ -244,6 +254,7 @@ class App(object):
                 "\t\t<li><a href=\"" + self.root_url + "/my_activities/\">My Activities</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/all_activities/\">All Activities</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/workouts/\">Workouts</a></li>\n" \
+                "\t\t<li><a href=\"" + self.root_url + "/pace_plans/\">Pace Plans</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/statistics/\">Statistics</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/gear/\">Gear</a></li>\n" \
                 "\t\t<li><a href=\"" + self.root_url + "/device_list/\">Devices</a></li>\n" \
@@ -540,6 +551,14 @@ class App(object):
             result += str(item)
         return result
 
+    @staticmethod
+    def is_activity_in_watopia(activity_type, lat, lon):
+        """Zwift's Watopia is mapped over the Solomon Islands."""
+        if activity_type == Keys.TYPE_VIRTUAL_CYCLING_KEY or activity_type == Keys.TYPE_VIRTUAL_RUNNING_KEY:
+            distance_to_watopia_meters = distance.haversine_distance_ignore_altitude(lat, lon, -11.6364607214928, 166.972435712814)
+            return (distance_to_watopia_meters < 50000)
+        return False
+
     def render_page_for_errored_activity(self, activity_id, logged_in, belongs_to_current_user):
         """Helper function for rendering an error page when attempting to view an activity with bad data."""
         delete_str = ""
@@ -689,8 +708,14 @@ class App(object):
         else:
             page_title = "Activity"
 
+        # Was this a virtual activity in Zwift's Watopia?
+        is_in_watopia = App.is_activity_in_watopia(activity_type, center_lat, center_lon)
+
         # If a google maps key was provided then use google maps, otherwise use open street map.
-        if self.google_maps_key:
+        if is_in_watopia and os.path.isfile(self.watopia_map_file) > 0:
+            my_template = Template(filename=self.watopia_html_file, module_directory=self.tempmod_dir)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
+        elif self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
             return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
         else:
@@ -832,6 +857,10 @@ class App(object):
     def activity(self, activity_id):
         """Renders the details page for an activity."""
 
+        # Sanity check the activity ID.
+        if not InputChecker.is_uuid(activity_id):
+            return self.render_error("Invalid activity ID")
+
         # Get the logged in user (if any).
         logged_in_user_id = None
         logged_in_username = self.user_mgr.get_logged_in_user()
@@ -862,6 +891,10 @@ class App(object):
     def edit_activity(self, activity_id):
         """Renders the edit page for an activity."""
 
+        # Sanity check the activity ID.
+        if not InputChecker.is_uuid(activity_id):
+            return self.render_error("Invalid activity ID")
+
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
         if username is None:
@@ -889,6 +922,11 @@ class App(object):
         if Keys.ACTIVITY_NAME_KEY in activity:
             activity_name_str = activity[Keys.ACTIVITY_NAME_KEY]
 
+        # Render the activity type.
+        activity_type_str = ""
+        if Keys.ACTIVITY_TYPE_KEY in activity:
+            activity_type_str = activity[Keys.ACTIVITY_TYPE_KEY]
+
         # Render the activity description.
         description_str = ""
         if Keys.ACTIVITY_DESCRIPTION_KEY in activity:
@@ -897,7 +935,7 @@ class App(object):
         # Render from template.
         html_file = os.path.join(self.root_dir, HTML_DIR, 'edit_activity.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id, activity_name=activity_name_str, description=description_str)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id, activity_name=activity_name_str, activity_type=activity_type_str, description=description_str)
 
     @statistics
     def device(self, device_str):
@@ -946,22 +984,8 @@ class App(object):
     @statistics
     def record_progression(self, activity_type, record_name):
         """Renders the list of records, in order of progression, for the specified user and record type."""
-
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
-        # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'records.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_type=activity_type, record_name=record_name)
+        kwargs = {"activity_type" : activity_type, "record_name" : record_name} 
+        return self.render_simple_page('records.html', **kwargs)
 
     @statistics
     def workouts(self):
@@ -978,21 +1002,9 @@ class App(object):
         if not InputChecker.is_uuid(workout_id):
             return self.render_error()
 
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'workout.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, workout_id=workout_id)
+        kwargs = {"workout_id" : workout_id} 
+        return self.render_simple_page('workout.html', **kwargs)
 
     @statistics
     def stats(self):
@@ -1014,21 +1026,9 @@ class App(object):
         if not InputChecker.is_uuid(gear_id):
             return self.render_error()
 
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'service_history.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, gear_id=gear_id)
+        kwargs = {"gear_id" : gear_id} 
+        return self.render_simple_page('service_history.html', **kwargs)
 
     @statistics
     def friends(self):
@@ -1049,17 +1049,6 @@ class App(object):
     def import_activity(self):
         """Renders the import page."""
 
-        # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
-        if username is None:
-            raise RedirectException(LOGIN_URL)
-
-        # Get the details of the logged in user.
-        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
-        if user_id is None:
-            self.log_error('Unknown user ID')
-            raise RedirectException(LOGIN_URL)
-
         # Build the list options for manual entry.
         activity_type_list = self.data_mgr.retrieve_activity_types()
         activity_type_list_str = "\t\t\t<option value=\"-\">-</option>\n"
@@ -1067,9 +1056,8 @@ class App(object):
             activity_type_list_str += "\t\t\t<option value=\"" + activity_type + "\">" + activity_type + "</option>\n"
 
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'import.html')
-        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_type_list=activity_type_list_str)
+        kwargs = {"activity_type_list" : activity_type_list_str} 
+        return self.render_simple_page('import.html', **kwargs)
 
     @statistics
     def pace_plans(self):

@@ -74,7 +74,7 @@ EXPERIENCE_LEVEL_KEY = "Experience Level" # Athlete's experience level with runn
 STRUCTURED_TRAINING_COMFORT_LEVEL_KEY = "Structured Training Comfort Level" # Athlete's comfort level (i.e. experience) with doing intervals, long runs, etc. (scale 1-10)
 WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
 IN_TAPER_KEY = "Is In Taper"
-NUM_WEEKS_BUILDING_KEY = "Num Weeks Building" # The number of consecutive weeks with increasing training stress
+NUM_WEEKS_BUILDING_KEY = "Num Weeks Building" # The number of consecutive weeks with increasing strain
 AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
 AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
 NUM_RUNS_LAST_FOUR_WEEKS = "Number of Runs (Last 4 Weeks)"
@@ -85,22 +85,22 @@ PREFERRED_LONG_RUN_DAY_KEY = "Preferred Long Run Day" # Day of the week on which
 REQUESTED_SETTING_KEY = "requested setting"
 REQUESTED_SETTINGS_KEY = "requested settings" # For requesting a list of settings (more efficient than requesting settings one by one)
 DEFAULT_PRIVACY_KEY = "default privacy"
-PREFERRED_UNITS_KEY = "preferred units"
+PREFERRED_UNITS_KEY = "preferred units" # The unit system preferred by the user, can be either UNITS_METRIC_KEY or UNITS_STANDARD_KEY
 UNITS_METRIC_KEY = "metric"
 UNITS_STANDARD_KEY = "standard"
-PREFERRED_FIRST_DAY_OF_WEEK_KEY = "preferred first day of week"
+PREFERRED_FIRST_DAY_OF_WEEK_KEY = "preferred first day of week" # Which day of the week does the user consider to be the first day of the week.
 BIRTHDAY_KEY = "birthday"
 DEFAULT_BIRTHDAY_KEY = "315532800"
 HEIGHT_KEY = "height"
 DEFAULT_HEIGHT_KEY = "1.8"
 WEIGHT_KEY = "weight" # User's weight (kilograms)
 DEFAULT_WEIGHT_KEY = "70"
-GENDER_KEY = "gender"
+GENDER_KEY = "gender" # The gender to use when computing calorie burn
 GENDER_MALE_KEY = "male"
 GENDER_FEMALE_KEY = "female"
-RESTING_HEART_RATE_KEY = "resting heart rate"
-ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate"
-ESTIMATED_FTP_KEY = "estimated ftp"
+RESTING_HEART_RATE_KEY = "resting heart rate" # Resting heart rate, in bpm
+ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate" # Maximum heart rate, in bpm
+ESTIMATED_FTP_KEY = "estimated ftp" # Estimated FTP, in watts
 CAN_UPLOAD_PHOTOS_KEY = "can upload photos"
 USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, PREFERRED_UNITS_KEY, PREFERRED_FIRST_DAY_OF_WEEK_KEY, BIRTHDAY_KEY, HEIGHT_KEY, WEIGHT_KEY, GENDER_KEY, RESTING_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_FTP_KEY, GOAL_KEY, GOAL_DATE_KEY, GOAL_TYPE_KEY, EXPERIENCE_LEVEL_KEY, PREFERRED_LONG_RUN_DAY_KEY, STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, CAN_UPLOAD_PHOTOS_KEY ]
 
@@ -128,17 +128,17 @@ WORKOUT_ESTIMATED_STRESS_KEY = "estimated stress score"
 # Workout types
 WORKOUT_TYPE_REST = "Rest"
 WORKOUT_TYPE_EVENT = "Event"
-WORKOUT_TYPE_SPEED_RUN = "Speed Session"
-WORKOUT_TYPE_TEMPO_RUN = "Tempo Run"
-WORKOUT_TYPE_EASY_RUN = "Easy Run"
-WORKOUT_TYPE_LONG_RUN = "Long Run"
+WORKOUT_TYPE_SPEED_RUN = "Speed Session" # A run with speed intervals
+WORKOUT_TYPE_TEMPO_RUN = "Tempo Run" # A run at tempo pace
+WORKOUT_TYPE_EASY_RUN = "Easy Run" # A run at an easy pace
+WORKOUT_TYPE_LONG_RUN = "Long Run" # Long run
 WORKOUT_TYPE_FREE_RUN = "Free Run" # A run at no specific pace
 WORKOUT_TYPE_HILL_REPEATS = "Hill Repeats" # 4-10 repeats, depending on skill level, done at 5K pace
-WORKOUT_TYPE_FARTLEK_RUN = "Fartlek Session"
+WORKOUT_TYPE_FARTLEK_RUN = "Fartlek Session" # A run in which the user can vary the pace at will
 WORKOUT_TYPE_MIDDLE_DISTANCE_RUN = "Middle Distance Run" # 2 hour run for advanced distance runners
-WORKOUT_TYPE_SPEED_INTERVAL_RIDE = "Speed Interval Ride"
-WORKOUT_TYPE_TEMPO_RIDE = "Tempo Ride"
-WORKOUT_TYPE_EASY_RIDE = "Easy Ride"
+WORKOUT_TYPE_SPEED_INTERVAL_RIDE = "Speed Interval Ride" # A bike ride with speed intervals
+WORKOUT_TYPE_TEMPO_RIDE = "Tempo Ride" # A bike ride at tempo pace/power
+WORKOUT_TYPE_EASY_RIDE = "Easy Ride" # A bike ride at an easy pace/power
 WORKOUT_TYPE_OPEN_WATER_SWIM = "Open Water Swim"
 WORKOUT_TYPE_POOL_WATER_SWIM = "Pool Swim"
 
@@ -251,15 +251,13 @@ STEPS_PER_MINUTE = "Steps Per Minute" # Cadence for foot based activity
 AVG_STEPS_PER_MINUTE = "Average Steps Per Minute" # Average cadence for foot based activity
 NORMALIZED_POWER = "Normalized Power"
 THRESHOLD_POWER = "Threshold Power"
-INTENSITY_FACTOR = "Intensity Factor"
-TRAINING_STRESS = "TSS" # Training Stress Score
-ESTIMATED_TRAINING_STRESS = "Estimated Training Stress" # Estimated training stress, for activities that don't have power data
+STRAIN_SCORE = "Strain" # Strain score, represents the amount of strain the activity places on the body
+ESTIMATED_STRAIN_SCORE = "Estimated Training Stress" # Estimated strain score, for activities that don't have power data
 VARIABILITY_INDEX = "Variability Index"
-CLUSTER = "Cluster"
 TOTAL_DISTANCE = "Total Distance" # Distance for an activity
 LONGEST_DISTANCE = "Longest Distance" # Longest distance, when summarizing activities
 TOTAL_ACTIVITIES = "Total Activities" # Number of activities logged over the specified time
-TOTAL_TRAINING_STRESS = "Total Training Stress" # Sum of the training stress for each activity within the specified time
+TOTAL_STRAIN_SCORE = "Total Strain" # Sum of the strain scores for each activity within the specified time
 MILE_SPLITS = "Mile Splits" # List of mile splits
 KM_SPLITS = "KM Splits" # List of kilometer splits
 
@@ -286,19 +284,30 @@ GEAR_KEY = "gear"
 GEAR_DEFAULTS_KEY = "gear_defaults"
 GEAR_ID_KEY = "gear_id"
 GEAR_TYPE_KEY = "type"
+GEAR_TYPE_BIKE = "bike"
+GEAR_TYPE_SHOES = "shoes"
 GEAR_NAME_KEY = "name"
 GEAR_DESCRIPTION_KEY = "description"
 GEAR_ADD_TIME_KEY = "add_time"
 GEAR_RETIRE_TIME_KEY = "retire_time"
 GEAR_INITIAL_DISTANCE_KEY = "initial_distance"
-GEAR_TYPE_BIKE = "bike"
-GEAR_TYPE_SHOES = "shoes"
 GEAR_SERVICE_HISTORY = "service_history"
 
 # Service record keys.
 SERVICE_RECORD_ID_KEY = "service_id"
 SERVICE_RECORD_DATE_KEY = "date"
 SERVICE_RECORD_DESCRIPTION_KEY = "description"
+
+# Keys used to manage pace plans.
+PACE_PLANS_KEY = "pace_plans"
+PACE_PLAN_ID_KEY = "id" # Unique identifier
+PACE_PLAN_NAME_KEY = "name"
+PACE_PLAN_TARGET_PACE_KEY = "target pace" # Target pace (in km/mile)
+PACE_PLAN_TARGET_DISTANCE_KEY = "target distance" # Target distance (in kms)
+PACE_PLAN_DISPLAY_UNITS_PACE_KEY = "display units pace" # Units in which the user prefers to view the pace
+PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY = "display units distance" # Units in which the user prefers to view the distance
+PACE_PLAN_SPLITS_KEY = "splits" # Desired splits, in +/- seconds (i.e., zero is even splits)
+PACE_PLAN_LAST_UPDATED_KEY = "last updated" # Last updated timestamp
 
 # Activity types.
 TYPE_UNSPECIFIED_ACTIVITY_KEY = "Unknown"
@@ -365,7 +374,7 @@ HEART_RATE_KEYS = [ AVG_HEART_RATE, MAX_HEART_RATE ]
 CADENCE_KEYS = [ APP_CADENCE_KEY, AVG_CADENCE, MAX_CADENCE ]
 RUNNING_CADENCE_KEYS = [ STEPS_PER_MINUTE, AVG_STEPS_PER_MINUTE ]
 GOALS = [ GOAL_FITNESS_KEY, GOAL_5K_RUN_KEY, GOAL_10K_RUN_KEY, GOAL_15K_RUN_KEY, GOAL_HALF_MARATHON_RUN_KEY, GOAL_MARATHON_RUN_KEY, GOAL_50K_RUN_KEY, GOAL_50_MILE_RUN_KEY ]
-TRAINING_STRESS_SCORES = [ TRAINING_STRESS, ESTIMATED_TRAINING_STRESS ]
+STRAIN_SCORES = [ STRAIN_SCORE, ESTIMATED_STRAIN_SCORE ]
 
 UNSUMMARIZABLE_KEYS = [ APP_SPEED_VARIANCE_KEY, APP_DISTANCES_KEY, APP_LOCATIONS_KEY, ACTIVITY_START_TIME_KEY, ACTIVITY_TYPE_KEY, ACTIVITY_HASH_KEY, ACTIVITY_LOCATION_DESCRIPTION_KEY, ACTIVITY_INTERVALS_KEY, MILE_SPLITS, KM_SPLITS ]
 

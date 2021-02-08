@@ -54,3 +54,5 @@ celerybeat-schedule.*
 # Auto generated test files
 test/input.json
 
+# Zwift maps
+watopia.png

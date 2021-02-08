@@ -246,6 +246,11 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 * Ability to synchronize with the mobile app (i.e. receive activities that we don't already have).
 * More API work.
 
+### 0.35
+* Bug fixes and performance optimizations.
+* Added pace plan synchronization with the mobile app.
+* More API work.
+
 ## Tech
 This software uses several other source projects to work properly:
 

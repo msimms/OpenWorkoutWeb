@@ -52,9 +52,14 @@
 
         dict.push({["goal"] : goal});
         if (send_post_request(the_url, dict, result_text))
+        {
             alert("Goal updated!");
+            generate_workout_plan();
+        }
         else
+        {
             alert("An error occurred!");
+        }
     }
 
     function set_goal_date()
@@ -81,9 +86,14 @@
 
         dict.push({["goal_date"] : goal_date});
         if (send_post_request(the_url, dict, result_text))
+        {
             alert("Goal date updated!");
+            generate_workout_plan();
+        }
         else
+        {
             alert("An error occurred!");
+        }
     }
 
     function set_goal_type()
@@ -95,9 +105,14 @@
 
         dict.push({["goal type"] : goal_type});
         if (send_post_request(the_url, dict, result_text))
+        {
             alert("Goal type updated!");
+            generate_workout_plan();
+        }
         else
+        {
             alert("An error occurred!");
+        }
     }
 
     function set_exp_level()
@@ -128,6 +143,7 @@
             alert("An error occurred!");
     }
 
+    // Ask the server to start workout plan generation.
     function generate_workout_plan()
     {
         let the_url = "${root_url}/api/1.0/generate_workout_plan";
@@ -158,6 +174,7 @@
         cell.appendChild(document.createTextNode(row_value));
     }
 
+    // Results handler for when the server returns the user's trun training paces .
     var process_run_paces = function(records)
     {
         let paces_table = document.getElementById("RunPaces");
@@ -168,11 +185,12 @@
         let paces_keys = Object.keys(new_records).sort();
 
         for (let key of paces_keys)
-        {
+        {AS 
             append_to_paces_table(paces_table, new_records[key], key);
         }
     }
 
+    // Request the user's run training paces from the server.
     function get_run_paces(run_prs)
     {
         let api_url = "${root_url}/api/1.0/get_running_paces?" + serialize_to_url_params(run_prs);
@@ -198,6 +216,7 @@
         }
     }
 
+    // Results handler for when the server returns the user's personal records.
     var process_personal_records = function(records)
     {
         let cycling_table = document.getElementById("Cycling");
@@ -237,6 +256,7 @@
         }
     }
 
+    // Results handler for when the server returns the user's settings.
     var process_user_settings = function(records)
     {
         for (let record of records)
@@ -313,6 +333,7 @@
         }
     }
 
+    // Results handler for when the server returns the user's iCal URL.
     var process_calendar_url = function(url_str)
     {
         let paragraph = "These workouts are also available by via iCal by subscribing to your iCal workouts calendar: " + url_str;
@@ -320,6 +341,7 @@
         element.innerHTML = paragraph;
     }
 
+    // Request personal records from the server.
     function get_personal_records()
     {
         let six_months = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0);
@@ -327,18 +349,21 @@
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_personal_records, dataType: "json" });
     }
 
+    // Request user settings from the server.
     function get_user_settings()
     {
         let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal,goal_date,goal%20type,preferred%20long%20run%20day,Experience%20Level,Structured%20Training%20Comfort%20Level";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
+    // Request the URL that allows iCal to subscribe to the workouts calendar.
     function get_calendar_url()
     {
         let api_url = "${root_url}/api/1.0/get_workout_ical_url";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_calendar_url, dataType: "text" });
     }
 
+    // Things we need when the page is loaded.
     get_personal_records();
     get_user_settings();
     get_calendar_url();
@@ -349,7 +374,7 @@
 ${nav}
 </section>
 
-<section>
+<section class="block">
     <div class="block" style="width: 600px">
 
         <h2>Goal</h2>
@@ -400,16 +425,6 @@ ${nav}
         <p>
             <table id="RunPaces">
             </table>
-        </p>
-
-        <hr>
-
-        <h2>Plans</h2>
-        <p>
-            Workout plan generation is highly experimental. Consult your doctor and use common sense before following any exercise plan.
-        </p>
-        <p>
-            <button type="button" onclick="return generate_workout_plan()">Generate New Workout Plan</button>
         </p>
 
         <hr>

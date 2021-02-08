@@ -63,6 +63,7 @@
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_task_statuses", cache: false, success: process_task_statuses, dataType: "json" });
     }
 
+    // Things we need when the page is loaded.
     get_task_statuses();
 
 </script>
@@ -71,7 +72,7 @@
 ${nav}
 </section>
 
-<section>
+<section class="block">
     <div class="block" style="width: 600px">
         <h2>Status</h2>
         <table id="task_statuses">
