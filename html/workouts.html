@@ -29,6 +29,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
 <script>
 
+    // Handler for when the user changes their preferred long run day of the week.
     function set_preferred_long_run_day()
     {
         let the_url = "${root_url}/api/1.0/update_settings";
@@ -43,6 +44,7 @@
             alert("An error occurred!");
     }
 
+    // Handler for when the user changes their goal.
     function set_goal()
     {
         let the_url = "${root_url}/api/1.0/update_settings";
@@ -62,6 +64,7 @@
         }
     }
 
+    // Handler for when the user changes their goal date.
     function set_goal_date()
     {
         let the_url = "${root_url}/api/1.0/update_settings";
@@ -96,6 +99,7 @@
         }
     }
 
+    // Handler for when the user changes their goal type.
     function set_goal_type()
     {
         let the_url = "${root_url}/api/1.0/update_settings";
@@ -115,6 +119,7 @@
         }
     }
 
+    // Handler for when the user changes their experience level.
     function set_exp_level()
     {
         let the_url = "${root_url}/api/1.0/update_settings";
@@ -129,6 +134,7 @@
             alert("An error occurred!");
     }
 
+    // Handler for when the user changes their comfort level with structured training.
     function set_structured_training_comfort_level()
     {
         let the_url = "${root_url}/api/1.0/update_settings";
@@ -375,7 +381,7 @@ ${nav}
 </section>
 
 <section class="block">
-    <div class="block" style="width: 600px">
+    <div>
 
         <h2>Goal</h2>
         <p>
