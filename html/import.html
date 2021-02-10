@@ -159,6 +159,7 @@ ${nav}
 		let file_list = [];
         let file_tasks = {}; // Associates the task ID returned by the server with the file being uploaded
 
+        /// @function update_file_status
         function update_file_status(file_name, status_text, activity_id)
         {
             let upload_table = document.getElementById("upload_table");
@@ -183,11 +184,13 @@ ${nav}
             }
         }
 
+        /// @function monitor_file_status
         function monitor_file_status(file_name, task_id)
         {
             file_tasks[task_id] = file_name;
         }
 
+        /// @function upload_file
         function upload_file(file_obj)
         {
             var reader = new FileReader();
@@ -219,6 +222,7 @@ ${nav}
             reader.readAsBinaryString(file_obj);
         }
 
+        /// @function upload_selected_files
 		function upload_selected_files()
 		{
             if (file_list.length > 0)

@@ -30,6 +30,7 @@
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
 
+    /// @function export_workout_to_zwo
     // Request a ZWO file.
     function export_workout_to_zwo()
     {
@@ -38,6 +39,7 @@
         }, dataType: "text" });
     }
 
+    /// @function export_workout_to_ical
     // Request an iCal file.
     function export_workout_to_ical()
     {
@@ -63,6 +65,7 @@
         }
 	};
 
+    /// @function get_workout_description
     // Request the URL that allows iCal to subscribe to the workouts calendar.
     function get_workout_description()
     {

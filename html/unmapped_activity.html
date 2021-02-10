@@ -128,6 +128,7 @@ ${zAxis}
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script>
 
+    /// @function refresh_analysis
     function refresh_analysis()
     {
         var the_url = "${root_url}/api/1.0/refresh_analysis";
@@ -141,6 +142,7 @@ ${zAxis}
             alert(result_text.value);
     }
 
+    /// @function create_comment
     function create_comment()
     {
         var the_url = "${root_url}/api/1.0/create_comment";
@@ -156,6 +158,7 @@ ${zAxis}
             alert(result_text.value);
     }
 
+    /// @function export_activity
     function export_activity()
     {
         var the_url = "${root_url}/api/1.0/export_activity";
@@ -171,12 +174,14 @@ ${zAxis}
             alert(result_text.value);
     }
 
+    /// @function edit_activity
     function edit_activity()
     {
         var the_url = "${root_url}/edit_activity/${activityId}";
         window.location.replace(the_url);
     }
 
+    /// @function delete_activity
     function delete_activity()
     {
         if (confirm('Are you sure you want to do this?'))
@@ -193,6 +198,7 @@ ${zAxis}
         }
     }
 
+    /// @function create_tags
     function create_tags(tags)
     {
         var the_url = "${root_url}/api/1.0/create_tags_on_activity";

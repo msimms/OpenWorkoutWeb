@@ -27,6 +27,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script>
 
+    /// @function delete_pace_plan
     // Button handler for when the user requests pace plan deletion.
     function delete_pace_plan(id)
     {
@@ -49,6 +50,7 @@
         }
     }
 
+    /// @function append_to_pace_plans_table
     // Handler for when the server returns the user's pace plan list.
     function append_to_pace_plans_table(table, id, name, target_pace, target_distance, display_units_pace, display_units_distance, splits, last_updated)
     {
@@ -117,6 +119,7 @@
         }
     }
 
+    /// @function list_pace_plans
     // Request the pace plans.
     function list_pace_plans()
     {

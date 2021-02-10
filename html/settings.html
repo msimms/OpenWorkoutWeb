@@ -23,6 +23,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script>
 
+    /// @function update_settings
     // Button handler for when the user wants to update their preference settings.
 	function update_settings()
 	{
@@ -42,6 +43,7 @@
 			alert("An error occurred!");
 	}
 
+    /// @function update_email
     // Button handler for when the user wants to update their email.
 	function update_email()
 	{
@@ -57,6 +59,7 @@
 			alert("An error occurred!");
 	}
 
+    /// @function update_password
     // Button handler for when the user wants to update their password.
 	function update_password()
 	{
@@ -76,12 +79,14 @@
 			alert("An error occurred!");
 	}
 
+    /// @function manage_api_keys
     // Button handler for when the user wants to navigate to the API management page.
     function manage_api_keys()
     {
         window.location.replace("${root_url}/api_keys");
     }
 
+    /// @function delete_gear
     // Button handler for when the user wants to delete their gear.
 	function delete_gear()
 	{
@@ -108,6 +113,7 @@
 		}
 	}
 
+    /// @function delete_activities
     // Button handler for when the user wants to delete their activities.
 	function delete_activities()
 	{
@@ -134,6 +140,7 @@
 		}
 	}
 
+    /// @function delete_user
     // Button handler for when the user wants to delete their account.
 	function delete_user()
 	{
@@ -208,6 +215,7 @@
         }
     }
 
+    /// @function get_user_settings
     // Request the user's settings.
     function get_user_settings()
     {

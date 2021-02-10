@@ -64,11 +64,13 @@
 ${route}
     ];
 
+    /// @function new_coord
     function new_coord(x, y)
     {
         return new google.maps.LatLng(x, y);
     }
 
+    /// @function add_route
     function add_route(route)
     {
         var route_path = new google.maps.Polyline
@@ -83,6 +85,7 @@ ${route}
         route_path.setMap(map);
     }
 
+    /// @function initialize
     function initialize()
     {
         var mapOptions =

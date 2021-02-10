@@ -33,6 +33,7 @@
     var us_states = [];
     var canadian_provinces = [];
 
+    /// @function latlon_to_xy
     function latlon_to_xy(canvas, lat, lon, x_offset, y_offset, x_scale, y_scale)
     {
         let width = canvas.width;
@@ -44,6 +45,7 @@
         return [x, y];
     }
 
+    /// @function draw_coordinate_list
     function draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, x_scale, y_scale)
     {
         let is_first = true;
@@ -67,6 +69,7 @@
         ctx.fill();
     }
 
+    /// @function draw_geo_polygon
     function draw_geo_polygon(canvas, ctx, polygon_objects, x_offset, y_offset, x_scale, y_scale)
     {
         for (let coordinate_list of polygon_objects)
@@ -75,6 +78,7 @@
         }
     }
 
+    /// @function draw_region
     function draw_region(canvas, ctx, region_objects, heat_map, x_offset, y_offset, x_scale, y_scale)
     {
         for (let region_object of region_objects.features)
@@ -100,6 +104,7 @@
         }
     }
 
+    /// @function draw_world_map
     function draw_world_map(region_objects)
     {
         let canvas = document.getElementById("worldCanvas");
@@ -108,6 +113,7 @@
         draw_region(canvas, ctx, region_objects, countries, 20.0, 40.0, 1.0, 1.0);
     }
 
+    /// @function draw_us_canada_map
     function draw_us_canada_map(us_region_objects, canada_region_objects)
     {
         let canvas = document.getElementById("usCanadaCanvas");
@@ -117,6 +123,7 @@
         draw_region(canvas, ctx, canada_region_objects, canadian_provinces, -20.0, -50.0, 3.0, 3.4);
     }
 
+    /// @function get_map_data
     function get_map_data()
     {
         let map_store = {world:null, us:null, canada:null}; 
@@ -167,6 +174,7 @@
         get_map_data();
     }
 
+    /// @function append_to_table
     function append_to_table(table, row_name, row_value)
     {
         let new_row = table.insertRow();
@@ -201,11 +209,13 @@
         }
     }
 
+    /// @function get_heat_map_data
     function get_heat_map_data()
     {
 		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_location_summary", cache: false, success: process_heat_map, dataType: "json" });
     }
 
+    /// @function get_personal_records
     function get_personal_records()
     {
 		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_personal_records", cache: false, success: process_personal_records, dataType: "json" });

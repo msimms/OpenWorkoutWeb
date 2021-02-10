@@ -25,6 +25,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script>
 
+    /// @function update_gear_defaults
     function update_gear_defaults(target)
     {
         let the_url = "${root_url}/api/1.0/update_gear_defaults";
@@ -83,18 +84,21 @@
         }
     }
 
+    /// @function list_activity_types
     function list_activity_types()
     {
         let api_url = "${root_url}/api/1.0/list_activity_types";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_activity_type_list, dataType: "text" });
     }
 
+    /// @function list_gear
     function list_gear()
     {
         let api_url = "${root_url}/api/1.0/list_gear";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_gear_list, dataType: "text" });
     }
 
+    /// @function add_default_gear_info
     function add_default_gear_info()
     {
         let outer_div = document.getElementById("new_gear_default_block");
@@ -149,6 +153,7 @@
         return false;
     }
 
+    /// @function update_birthday
     // Button handler for when the user updates their birthday.
     function update_birthday()
     {
@@ -165,6 +170,7 @@
 			alert("An error occurred!");
     }
 
+    /// @function update_height
     // Button handler for when the user updates their height.
 	function update_height()
 	{
@@ -180,6 +186,7 @@
 			alert("An error occurred!");
 	}
 
+    /// @function update_weight
     // Button handler for when the user updates their weight.
 	function update_weight()
 	{
@@ -195,6 +202,7 @@
 			alert("An error occurred!");
 	}
 
+    /// @function update_gender
     // Button handler for when the user updates their gender.
 	function update_gender()
 	{
@@ -210,6 +218,7 @@
 			alert("An error occurred!");
 	}
 
+    /// @function update_resting_hr
     // Button handler for when the user updates their resting heart rate.
 	function update_resting_hr()
 	{
