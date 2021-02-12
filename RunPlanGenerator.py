@@ -104,8 +104,8 @@ class RunPlanGenerator(object):
         workout.add_cooldown(cooldown_duration)
 
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        total_rest_meters = ((num_intervals - 1) * interval_distance)
-        total_hard_meters = (num_intervals * interval_distance)
+        total_rest_meters = ((num_intervals - 1) * interval_distance_meters)
+        total_hard_meters = (num_intervals * interval_distance_meters)
         self.easy_distance_total_meters += (warmup_duration / easy_run_pace)
         self.easy_distance_total_meters += (cooldown_duration / easy_run_pace)
         self.easy_distance_total_meters += (total_rest_meters)
