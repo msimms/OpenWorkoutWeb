@@ -134,8 +134,12 @@ class Workout(object):
         interval[Keys.INTERVAL_WORKOUT_REPEAT_KEY] = int(repeat)
         interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY] = float(distance)
         interval[Keys.INTERVAL_WORKOUT_PACE_KEY] = float(pace)
-        interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = float(recovery_distance)
-        interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = float(recovery_pace)
+        if repeat > 1:
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = float(recovery_distance)
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = float(recovery_pace)
+        else:
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = 0.0
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = 0.0
         self.intervals.append(interval)
 
     def export_to_zwo(self, name):
@@ -263,8 +267,10 @@ class Workout(object):
         # Add an string that describes how this workout fits into the big picture.
         if self.type == Keys.WORKOUT_TYPE_SPEED_RUN:
             result += "Purpose: Speed sessions get you used to running at faster paces.\n"
-        elif self.type == Keys.WORKOUT_TYPE_TEMPO_RUN:
+        elif self.type == Keys.WORKOUT_TYPE_THRESHOLD_RUN:
             result += "Purpose: Tempo runs build a combination of speed and endurance. They should be performed at a pace you can hold for roughly one hour.\n"
+        elif self.type == Keys.WORKOUT_TYPE_TEMPO_RUN:
+            result += "Purpose: Tempo runs build a combination of speed and endurance. They should be performed at a pace slightly slower than your pace for a 5K race.\n"
         elif self.type == Keys.WORKOUT_TYPE_EASY_RUN:
             result += "Purpose: Easy runs build aerobic capacity while keeping the wear and tear on the body to a minimum.\n"
         elif self.type == Keys.WORKOUT_TYPE_LONG_RUN:
