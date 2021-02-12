@@ -123,7 +123,7 @@ WORKOUT_INTERVALS_KEY = "intervals"
 WORKOUT_COOLDOWN_KEY = "cooldown"
 WORKOUT_SCHEDULED_TIME_KEY = "scheduled time"
 WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY = "last scheduled workout time"
-WORKOUT_ESTIMATED_STRESS_KEY = "estimated stress score"
+WORKOUT_ESTIMATED_STRAIN_KEY = "estimated strain score"
 
 # Workout types
 WORKOUT_TYPE_REST = "Rest"

@@ -74,7 +74,7 @@ class Workout(object):
         if key == Keys.WORKOUT_SCHEDULED_TIME_KEY and self.scheduled_time is not None:
             dt = time.mktime(self.scheduled_time.timetuple())
             return datetime.datetime(dt.year, dt.month, dt.day)
-        if key == Keys.WORKOUT_ESTIMATED_STRESS_KEY:
+        if key == Keys.WORKOUT_ESTIMATED_STRAIN_KEY:
             return self.estimated_strain_score
         return None
 
@@ -90,7 +90,7 @@ class Workout(object):
         if self.scheduled_time is not None:
             output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = time.mktime(self.scheduled_time.timetuple())
         if self.estimated_strain_score is not None:
-            output[Keys.WORKOUT_ESTIMATED_STRESS_KEY] = self.estimated_strain_score
+            output[Keys.WORKOUT_ESTIMATED_STRAIN_KEY] = self.estimated_strain_score
         return output
 
     def from_dict(self, input):
@@ -109,8 +109,8 @@ class Workout(object):
             self.intervals = input[Keys.WORKOUT_INTERVALS_KEY]
         if Keys.WORKOUT_SCHEDULED_TIME_KEY in input and input[Keys.WORKOUT_SCHEDULED_TIME_KEY] is not None:
             self.scheduled_time = datetime.datetime.fromtimestamp(input[Keys.WORKOUT_SCHEDULED_TIME_KEY]).date()
-        if Keys.WORKOUT_ESTIMATED_STRESS_KEY in input:
-            self.estimated_strain_score = input[Keys.WORKOUT_ESTIMATED_STRESS_KEY]
+        if Keys.WORKOUT_ESTIMATED_STRAIN_KEY in input:
+            self.estimated_strain_score = input[Keys.WORKOUT_ESTIMATED_STRAIN_KEY]
 
     def add_warmup(self, seconds):
         """Defines the workout warmup."""
