@@ -81,7 +81,7 @@ class Workout(object):
     def to_dict(self):
         """Converts the object representation to a dictionary, only converting what is actually useful, as opposed to __dict__."""
         output = {}
-        output[Keys.WORKOUT_ID_KEY] = self.workout_id
+        output[Keys.WORKOUT_ID_KEY] = str(self.workout_id)
         output[Keys.WORKOUT_TYPE_KEY] = self.type
         output[Keys.WORKOUT_SPORT_TYPE_KEY] = self.sport_type
         output[Keys.WORKOUT_WARMUP_KEY] = self.warmup
