@@ -140,6 +140,7 @@ WORKOUT_TYPE_MIDDLE_DISTANCE_RUN = "Middle Distance Run" # 2 hour run for advanc
 WORKOUT_TYPE_SPEED_INTERVAL_RIDE = "Speed Interval Ride" # A bike ride with speed intervals
 WORKOUT_TYPE_TEMPO_RIDE = "Tempo Ride" # A bike ride at tempo pace/power
 WORKOUT_TYPE_EASY_RIDE = "Easy Ride" # A bike ride at an easy pace/power
+WORKOUT_TYPE_SWEET_SPOT_RIDE = "Sweet Spot Ride"
 WORKOUT_TYPE_OPEN_WATER_SWIM = "Open Water Swim"
 WORKOUT_TYPE_POOL_WATER_SWIM = "Pool Swim"
 
