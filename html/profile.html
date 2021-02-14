@@ -420,7 +420,7 @@
         let vo2_max_elem = document.getElementById("vo2_max");
 
         if (vo2max == 0)
-            vo2_max_elem.value = "Not calculated";
+            vo2_max_elem.value = "Not calculated.";
         else
             vo2_max_elem.value = vo2max.toFixed(1);
     }
@@ -476,6 +476,7 @@
     var process_ftp = function(record)
     {
         let ftp_elem = document.getElementById("ftp");
+        let ftp_error_elem = document.getElementById("ftp_error");
 
         if (record && record.length > 0)
         {
@@ -484,13 +485,15 @@
             let api_url = "${root_url}/api/1.0/list_power_zones?estimated%20ftp=" + ftp;
 
             ftp_elem.value = ftp.toFixed(1) + " watts";
+            ftp_error_elem.hidden = true;
 
             $.ajax({ type: 'GET', url: api_url, cache: false, success: process_power_zones, dataType: "json" });
         }
         else
         {
             let error_str = "Cycling activities with power data that was recorded in the last six months must be uploaded before your FTP can be estimated.";
-            ftp_elem.value = error_str;
+            ftp_error_elem.innerHTML = error_str;
+            ftp_elem.hidden = true;
         }
     }
 
@@ -612,11 +615,14 @@ ${nav}
         <h2>VO2 Max</h2>
         <input style="border:0" type="text" id="vo2_max" readonly></input>
         <hr>
+
+        <!-- FTP -->
         <h2>Estimated Functional Threshold Power (FTP)</h2>
         <p>
             Functional Threshold Power is the amount of power that you can exert over one hour at maximum effort. It is estimated from recent activity.
         </p>
         <input style="border:0" type="text" id="ftp" readonly></input>
+        <p id="ftp_error"></p>
         <hr>
 
         <!-- Heart Rate Zones -->
