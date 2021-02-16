@@ -36,6 +36,10 @@ class StrainCalculator(object):
 
     @staticmethod
     def calculate_strain_score_from_power(workout_duration_secs, np, ftp):
+        # Sanity check.
+        if ftp is None or ftp < 0.1:
+            return 0.0
+
         # Compute the strain score: (t * NP * IF) / (FTP * 36).
         strain_score = (workout_duration_secs * (np / ftp) * (np / ftp)) / (ftp * 36)
         return strain_score
