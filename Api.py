@@ -1755,10 +1755,9 @@ class Api(object):
         matched_workouts = []
         if workouts is not None and isinstance(workouts, list):
             for workout in workouts:
-                if workout.scheduled_time is not None and workout.workout_id is not None and workout.type is not None:
-                    url = self.root_url + "/workout/" + str(workout.workout_id)
-                    temp_workout = {Keys.WORKOUT_TYPE_KEY: workout.type, 'url': url, Keys.WORKOUT_SCHEDULED_TIME_KEY: calendar.timegm(workout.scheduled_time.timetuple()), Keys.WORKOUT_ID_KEY: str(workout.workout_id)}
-                    matched_workouts.append(temp_workout)
+                workout_dict = workout.to_dict()
+                workout_dict['url'] = self.root_url + "/workout/" + str(workout.workout_id)
+                matched_workouts.append(workout_dict)
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
 
@@ -2104,15 +2103,18 @@ class Api(object):
     def handle_list_hr_zones(self, values):
         """Returns heart rate zones corresponding to the specified resting heart rate value."""
         if Keys.ESTIMATED_MAX_HEART_RATE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("FTP not specified.")
+            raise ApiException.ApiMalformedRequestException("Maximum heart rate not specified.")
 
         max_hr = values[Keys.ESTIMATED_MAX_HEART_RATE_KEY]
         if not InputChecker.is_float(max_hr):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if not max_hr < 1.0:
+
+        # Convert to float and sanity check.
+        max_hr = float(max_hr)
+        if max_hr < 1.0:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        zones = self.data_mgr.retrieve_heart_rate_zones(float(max_hr))
+        zones = self.data_mgr.retrieve_heart_rate_zones(max_hr)
         return True, json.dumps(zones)
 
     def handle_list_api_keys(self):

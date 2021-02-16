@@ -23,6 +23,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script>
 
+    /// @function request_to_be_friends
 	function request_to_be_friends(target)
 	{
 		let the_url = "${root_url}/api/1.0/request_to_be_friends";
@@ -40,6 +41,7 @@
 		}
 	}
 
+    /// @function confirm_friend
     function confirm_friend(useremail)
     {
 		let the_url = "${root_url}/api/1.0/confirm_request_to_be_friends";
@@ -57,6 +59,7 @@
 		}
     }
 
+    /// @function unfriend
     function unfriend(useremail)
     {
 		if (confirm('Are you sure you want to do this?'))
@@ -77,6 +80,7 @@
         }
     }
 
+    /// @function search
 	function search()
 	{
 		let the_url = "${root_url}/api/1.0/list_matched_users";
@@ -119,6 +123,7 @@
 		}
 	}
 
+    /// @function append_to_friends_table
     function append_to_friends_table(table, username, useremail, requesting_user, is_pending_request)
     {
         let new_row = table.insertRow();
@@ -162,6 +167,7 @@
         cell.appendChild(btn);
     }
 
+    /// @function process_friends_list
     function process_friends_list(records, is_pending_request)
     {
         if (records.length == 0)
@@ -180,6 +186,7 @@
         }
     }
 
+    /// @function get_friends_lists
     function get_friends_lists()
     {
         let pending_friends = null;

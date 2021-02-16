@@ -276,12 +276,15 @@ button .fa {
 
 .block section {
     border: 10px;
-    width: 1000px;
 }
 
 .block div {
     border: 10px;
-    width: 1000px;
+}
+
+.block table {
+    width: 600px;
+    margin: auto 0;
 }
 
 .comment textarea {

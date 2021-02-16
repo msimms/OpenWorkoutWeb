@@ -28,18 +28,21 @@
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script type="text/javascript">
 
+    /// @function compute_start_time
     // Request activities starting on this date, in UNIX time.
     function compute_start_time()
     {
         return 0;
     }
 
+    /// @function compute_end_time
     // Do not request activities that start after this date, in UNIX time.
     function compute_end_time()
     {
         return Date.now();
     }
 
+    /// @function list_activities
 	function list_activities()
 	{
 		let activity_list = [];
@@ -67,6 +70,7 @@
 		return activity_list;
 	}
 
+    /// @function list_planned_workouts
 	function list_planned_workouts()
 	{
 		let workout_list = [];
@@ -97,6 +101,7 @@
 		return workout_list;
 	}
 
+    /// @function list_calendar_events
 	function list_calendar_events()
 	{
         activities = list_activities();
@@ -104,6 +109,7 @@
         return activities.concat(workouts);
     }
 
+    /// @function get_preferred_first_day_of_week
     // What's the user's preference for the first day of the week? Need to know this before rendering the calendar.
     function get_preferred_first_day_of_week()
     {

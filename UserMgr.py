@@ -24,8 +24,8 @@
 """Manages user accounts"""
 
 import bcrypt
-import time
 import sys
+import time
 import Keys
 import SessionMgr
 import StraenDb
@@ -297,6 +297,23 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         return self.database.update_user_setting(user_id, key, value)
 
+    def estimate_max_heart_rate(self, user_id):
+        """Looks through the list of maximum heart rate values in the database"""
+        """and returns the highest value from the last year."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        # Read the stored max heart rates out of the database.
+        stored_max_hrs = self.database.retrieve_user_setting(user_id, Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY)
+
+        # Only consider heart rate values from the last year.
+        ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
+        one_year_ago = int(time.time()) - ONE_YEAR
+        recent_hrs = [v for k,v in stored_max_hrs.items() if int(k) >= ONE_YEAR]
+        return max(recent_hrs)
+
     def default_user_setting(self, key):
         """Returns the default value for the specified setting."""
         if key is None or len(key) == 0:
@@ -319,6 +336,10 @@ class UserMgr(object):
         if key == Keys.RESTING_HEART_RATE_KEY:
             return 0
         if key == Keys.ESTIMATED_MAX_HEART_RATE_KEY:
+            return 0
+        if key == Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY:
+            return {}
+        if key == Keys.USER_SPECIFIED_MAX_HEART_RATE_KEY:
             return 0
         if key == Keys.ESTIMATED_FTP_KEY:
             return 0
@@ -343,6 +364,11 @@ class UserMgr(object):
         if key is None or len(key) == 0:
             raise Exception("Bad parameter.")
 
+        # Are we looking for the estimated max heart rate because that is computed rather than stored?
+        if key == Keys.ESTIMATED_MAX_HEART_RATE_KEY:
+            max_hr = self.estimate_max_heart_rate(user_id)
+            return max_hr
+
         # What's in the database?
         result = self.database.retrieve_user_setting(user_id, key)
 
@@ -355,7 +381,10 @@ class UserMgr(object):
             return result
 
         # Return all strings as lowercase, just to keep things simple.
-        return result.lower()
+        if type(result) != list and type(result) != dict:
+            result = result.lower()
+
+        return result
 
     def retrieve_user_settings(self, user_id, keys):
         """Retrieve method for user preferences."""
@@ -368,6 +397,11 @@ class UserMgr(object):
 
         # What's in the database?
         results = self.database.retrieve_user_settings(user_id, keys)
+
+        # Are we looking for the estimated max heart rate because that is computed rather than stored?
+        if Keys.ESTIMATED_MAX_HEART_RATE_KEY in keys:
+            max_hr = self.estimate_max_heart_rate(user_id)
+            results.append({Keys.ESTIMATED_MAX_HEART_RATE_KEY: max_hr})
 
         # Add defaults for anything no in the database.
         for key in keys:

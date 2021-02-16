@@ -275,7 +275,7 @@ class App(object):
             activity_tags = activity[Keys.ACTIVITY_TAGS_KEY]
 
         if activity_user_id is not None and Keys.ACTIVITY_TYPE_KEY in activity:
-            default_tags = self.data_mgr.list_tags_for_activity_type_and_user(activity_user_id, activity[Keys.ACTIVITY_TYPE_KEY])
+            default_tags = self.data_mgr.list_available_tags_for_activity_type_and_user(activity_user_id, activity[Keys.ACTIVITY_TYPE_KEY])
         else:
             default_tags = self.data_mgr.list_default_tags()
 

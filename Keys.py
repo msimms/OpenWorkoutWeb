@@ -88,7 +88,7 @@ DEFAULT_PRIVACY_KEY = "default privacy"
 PREFERRED_UNITS_KEY = "preferred units" # The unit system preferred by the user, can be either UNITS_METRIC_KEY or UNITS_STANDARD_KEY
 UNITS_METRIC_KEY = "metric"
 UNITS_STANDARD_KEY = "standard"
-PREFERRED_FIRST_DAY_OF_WEEK_KEY = "preferred first day of week" # Which day of the week does the user consider to be the first day of the week.
+PREFERRED_FIRST_DAY_OF_WEEK_KEY = "preferred first day of week" # Which day of the week does the user consider to be the first day of the week?
 BIRTHDAY_KEY = "birthday"
 DEFAULT_BIRTHDAY_KEY = "315532800"
 HEIGHT_KEY = "height"
@@ -99,10 +99,12 @@ GENDER_KEY = "gender" # The gender to use when computing calorie burn
 GENDER_MALE_KEY = "male"
 GENDER_FEMALE_KEY = "female"
 RESTING_HEART_RATE_KEY = "resting heart rate" # Resting heart rate, in bpm
-ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate" # Maximum heart rate, in bpm
+ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate" # Maximum heart rate, in bpm, computed from activities
+ESTIMATED_MAX_HEART_RATE_LIST_KEY = "estimated max heart rate list" # List of all maximum heart rates, in bpm, computed from activities
+USER_SPECIFIED_MAX_HEART_RATE_KEY = "user specified max heart rate" # Maximum heart rate, in bpm, given by the user
 ESTIMATED_FTP_KEY = "estimated ftp" # Estimated FTP, in watts
 CAN_UPLOAD_PHOTOS_KEY = "can upload photos"
-USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, PREFERRED_UNITS_KEY, PREFERRED_FIRST_DAY_OF_WEEK_KEY, BIRTHDAY_KEY, HEIGHT_KEY, WEIGHT_KEY, GENDER_KEY, RESTING_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_FTP_KEY, GOAL_KEY, GOAL_DATE_KEY, GOAL_TYPE_KEY, EXPERIENCE_LEVEL_KEY, PREFERRED_LONG_RUN_DAY_KEY, STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, CAN_UPLOAD_PHOTOS_KEY ]
+USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, PREFERRED_UNITS_KEY, PREFERRED_FIRST_DAY_OF_WEEK_KEY, BIRTHDAY_KEY, HEIGHT_KEY, WEIGHT_KEY, GENDER_KEY, RESTING_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, USER_SPECIFIED_MAX_HEART_RATE_KEY, ESTIMATED_FTP_KEY, GOAL_KEY, GOAL_DATE_KEY, GOAL_TYPE_KEY, EXPERIENCE_LEVEL_KEY, PREFERRED_LONG_RUN_DAY_KEY, STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, CAN_UPLOAD_PHOTOS_KEY ]
 
 # Personal records
 RECORDS_USER_ID = "user_id"
@@ -123,12 +125,13 @@ WORKOUT_INTERVALS_KEY = "intervals"
 WORKOUT_COOLDOWN_KEY = "cooldown"
 WORKOUT_SCHEDULED_TIME_KEY = "scheduled time"
 WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY = "last scheduled workout time"
-WORKOUT_ESTIMATED_STRESS_KEY = "estimated stress score"
+WORKOUT_ESTIMATED_STRAIN_KEY = "estimated strain score"
 
 # Workout types
 WORKOUT_TYPE_REST = "Rest"
 WORKOUT_TYPE_EVENT = "Event"
 WORKOUT_TYPE_SPEED_RUN = "Speed Session" # A run with speed intervals
+WORKOUT_TYPE_THRESHOLD_RUN = "Threshold Run" # A run at threshold pace
 WORKOUT_TYPE_TEMPO_RUN = "Tempo Run" # A run at tempo pace
 WORKOUT_TYPE_EASY_RUN = "Easy Run" # A run at an easy pace
 WORKOUT_TYPE_LONG_RUN = "Long Run" # Long run
@@ -139,6 +142,7 @@ WORKOUT_TYPE_MIDDLE_DISTANCE_RUN = "Middle Distance Run" # 2 hour run for advanc
 WORKOUT_TYPE_SPEED_INTERVAL_RIDE = "Speed Interval Ride" # A bike ride with speed intervals
 WORKOUT_TYPE_TEMPO_RIDE = "Tempo Ride" # A bike ride at tempo pace/power
 WORKOUT_TYPE_EASY_RIDE = "Easy Ride" # A bike ride at an easy pace/power
+WORKOUT_TYPE_SWEET_SPOT_RIDE = "Sweet Spot Ride"
 WORKOUT_TYPE_OPEN_WATER_SWIM = "Open Water Swim"
 WORKOUT_TYPE_POOL_WATER_SWIM = "Pool Swim"
 
@@ -275,9 +279,9 @@ DEVICE_LAST_HEARD_FROM = "last_heard_from"
 LONG_RUN_PACE = "Long Run Pace"
 EASY_RUN_PACE = "Easy Run Pace"
 TEMPO_RUN_PACE = "Tempo Run Pace"
+FUNCTIONAL_THRESHOLD_PACE = "Functional Threshold Pace" # Pace that could be held for one hour, max effort
 SPEED_RUN_PACE = "Speed Session Pace" # Pace for medium distance interfals
 SHORT_INTERVAL_RUN_PACE = "Short Interval Run Pace" # Pace for shorter track intervals
-FUNCTIONAL_THRESHOLD_PACE = "Functional Threshold Pace" # Pace that could be held for one hour, max effort
 
 # Keys used to manage gear.
 GEAR_KEY = "gear"
@@ -368,7 +372,7 @@ CODE_KEY = "code"
 TIME_KEYS = [ BEST_1K, BEST_MILE, BEST_5K, BEST_10K, BEST_15K, BEST_HALF_MARATHON, BEST_MARATHON, BEST_METRIC_CENTURY, BEST_CENTURY ]
 DISTANCE_KEYS = [ TOTAL_DISTANCE, LONGEST_DISTANCE ]
 SPEED_KEYS = [ APP_CURRENT_SPEED_KEY, APP_AVG_SPEED_KEY, APP_MOVING_SPEED_KEY, APP_SPEED_VARIANCE_KEY, BEST_SPEED ]
-PACE_KEYS = [ APP_CURRENT_PACE_KEY, BEST_PACE, AVG_PACE, LONG_RUN_PACE, EASY_RUN_PACE, TEMPO_RUN_PACE, SPEED_RUN_PACE, SHORT_INTERVAL_RUN_PACE, FUNCTIONAL_THRESHOLD_PACE, INTERVAL_WORKOUT_PACE_KEY ]
+PACE_KEYS = [ APP_CURRENT_PACE_KEY, BEST_PACE, AVG_PACE, LONG_RUN_PACE, EASY_RUN_PACE, TEMPO_RUN_PACE, FUNCTIONAL_THRESHOLD_PACE, SPEED_RUN_PACE, SHORT_INTERVAL_RUN_PACE, FUNCTIONAL_THRESHOLD_PACE, INTERVAL_WORKOUT_PACE_KEY ]
 POWER_KEYS = [ AVG_POWER, MAX_POWER, BEST_5_SEC_POWER, BEST_12_MIN_POWER, BEST_20_MIN_POWER, BEST_1_HOUR_POWER, NORMALIZED_POWER, THRESHOLD_POWER ]
 HEART_RATE_KEYS = [ AVG_HEART_RATE, MAX_HEART_RATE ]
 CADENCE_KEYS = [ APP_CADENCE_KEY, AVG_CADENCE, MAX_CADENCE ]

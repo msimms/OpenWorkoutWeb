@@ -30,11 +30,13 @@
 
     var gear_name = ""
 
+    /// @function service_sort
     function service_sort(a, b)
     {
         return a.time < b.time ? -1 : 1;
     }
 
+    /// @function create_service_record
     function create_service_record(target)
     {
         let the_url = "${root_url}/api/1.0/create_service_record";
@@ -59,6 +61,7 @@
         }
     }
 
+    /// @function get_new_service_record_info
     function get_new_service_record_info()
     {
         let outer_div = document.getElementById("new_service_record_block");
@@ -118,6 +121,7 @@
         return false;
     }
 
+    /// @function delete_service_record
     function delete_service_record(service_id)
     {
         if (confirm('Are you sure you want to do this?'))
@@ -140,6 +144,7 @@
         }
     }
 
+    /// @function append_to_service_history_table
     function append_to_service_history_table(table, service_date, description, service_id)
     {
         let new_row = table.insertRow();
@@ -214,6 +219,7 @@
         }
     }
 
+    /// @function get_gear
     // List all the gear associated with the current user.
     function get_gear()
     {

@@ -37,6 +37,8 @@ class TrainingPaceCalculator(object):
 
     def calc_from_vo2max(self, vo2max):
         """Give the athlete's VO2Max, returns the suggested long run, easy run, tempo run, and speed run paces."""
+
+        # Training paces are computed as a percentage of VO2Max.
         long_run_pace = vo2max * 0.6
         easy_pace = vo2max * 0.7
         tempo_pace = vo2max * 0.88

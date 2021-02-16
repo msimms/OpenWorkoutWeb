@@ -29,6 +29,8 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
 <script>
 
+    /// @function set_preferred_long_run_day
+    // Handler for when the user changes their preferred long run day of the week.
     function set_preferred_long_run_day()
     {
         let the_url = "${root_url}/api/1.0/update_settings";
@@ -43,6 +45,8 @@
             alert("An error occurred!");
     }
 
+    /// @function set_goal
+    // Handler for when the user changes their goal.
     function set_goal()
     {
         let the_url = "${root_url}/api/1.0/update_settings";
@@ -62,6 +66,8 @@
         }
     }
 
+    /// @function set_goal_date
+    // Handler for when the user changes their goal date.
     function set_goal_date()
     {
         let the_url = "${root_url}/api/1.0/update_settings";
@@ -96,6 +102,8 @@
         }
     }
 
+    /// @function set_goal_type
+    // Handler for when the user changes their goal type.
     function set_goal_type()
     {
         let the_url = "${root_url}/api/1.0/update_settings";
@@ -115,6 +123,8 @@
         }
     }
 
+    /// @function set_exp_level
+    // Handler for when the user changes their experience level.
     function set_exp_level()
     {
         let the_url = "${root_url}/api/1.0/update_settings";
@@ -129,6 +139,8 @@
             alert("An error occurred!");
     }
 
+    /// @function set_structured_training_comfort_level
+    // Handler for when the user changes their comfort level with structured training.
     function set_structured_training_comfort_level()
     {
         let the_url = "${root_url}/api/1.0/update_settings";
@@ -143,6 +155,7 @@
             alert("An error occurred!");
     }
 
+    /// @function generate_workout_plan
     // Ask the server to start workout plan generation.
     function generate_workout_plan()
     {
@@ -164,6 +177,7 @@
         });
     });
 
+    /// @function append_to_paces_table
     function append_to_paces_table(table, row_name, row_value)
     {
         let new_row = table.insertRow();
@@ -185,11 +199,12 @@
         let paces_keys = Object.keys(new_records).sort();
 
         for (let key of paces_keys)
-        {AS 
+        {
             append_to_paces_table(paces_table, new_records[key], key);
         }
     }
 
+    /// @function get_run_paces
     // Request the user's run training paces from the server.
     function get_run_paces(run_prs)
     {
@@ -197,6 +212,7 @@
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_run_paces, dataType: "json" });
     }
 
+    /// @function append_to_pr_table
     function append_to_pr_table(table, row_name, row_value)
     {
         let new_row = table.insertRow();
@@ -341,6 +357,7 @@
         element.innerHTML = paragraph;
     }
 
+    /// @function get_personal_records
     // Request personal records from the server.
     function get_personal_records()
     {
@@ -349,6 +366,7 @@
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_personal_records, dataType: "json" });
     }
 
+    /// @function get_user_settings
     // Request user settings from the server.
     function get_user_settings()
     {
@@ -356,6 +374,7 @@
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
+    /// @function get_calendar_url
     // Request the URL that allows iCal to subscribe to the workouts calendar.
     function get_calendar_url()
     {
@@ -375,7 +394,7 @@ ${nav}
 </section>
 
 <section class="block">
-    <div class="block" style="width: 600px">
+    <div>
 
         <h2>Goal</h2>
         <p>
@@ -388,8 +407,8 @@ ${nav}
                 <option value="Marathon">Marathon</option>
                 <option value="50K Run">50K Run</option>
                 <option value="50 Mile Run">50 Mile Run</option>
-            </select><br>
-            on <br>
+            </select>
+            on 
             <input type="text" name="goal_date" id="goal_date" onchange="return set_goal_date()">
         </p>
 

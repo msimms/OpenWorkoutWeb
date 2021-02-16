@@ -22,6 +22,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
 <script>
 
+    /// @function update_activity_metadata
     function update_activity_metadata()
     {
 		let the_url = "${root_url}/api/1.0/update_activity_metadata";
@@ -83,6 +84,7 @@
         }
     }
 
+    /// @function request_upload_permissions
     // Get the list of things the user is allowed to do. Needed to determine if we should render the Upload Photos option.
     function request_upload_permissions()
     {
@@ -90,6 +92,7 @@
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_upload_permissions, dataType: "json" });
     }
 
+    /// @function list_activity_types
     // Get the list of all possible activity types. Needed to populate the activity type combo box.
     function list_activity_types()
     {
@@ -106,7 +109,7 @@
 ${nav}
 </section>
 
-<div class="block" style="width: 600px">
+<div class="block">
     <!-- Activity Name -->
 	<h2>Activity Name</h2>
 	<input type="text" name="activity_name" id="activity_name" value="${activity_name}" size="80"><br>
@@ -124,7 +127,7 @@ ${nav}
 
 <!-- Photos -->
 <div class="empty" id="photos_div" style="display: none;">
-<div class="block" style="width: 600px">
+<div class="block">
 	<h2>Photos</h2>
 	<input type="file" id="photo_picker" class="modern_button" name="photo_list" webkitdirectory multiple><br>
 	<button type="button" onclick="return upload_selected_files()">Upload Photos</button><br>
@@ -188,7 +191,7 @@ ${nav}
 </div>
 </div>
 
-<div class="block" style="width: 600px">
+<div class="block">
     <hr>
 	<button type="button" onclick="window.location.replace('${root_url}/activity/${activity_id}')">Back</button><br>
 </div>

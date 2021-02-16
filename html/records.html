@@ -25,6 +25,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script>
 
+    /// @function append_to_table
     function append_to_table(table, record_time, activity_id)
     {
         let new_row = table.insertRow();
@@ -52,6 +53,7 @@
         }
     }
 
+    /// @function list_records
     function list_records()
     {
         let api_url = "${root_url}/api/1.0/get_record_progression?activity_type=${activity_type}&record_name=${record_name}";

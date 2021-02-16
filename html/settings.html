@@ -23,6 +23,8 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script>
 
+    /// @function update_settings
+    // Button handler for when the user wants to update their preference settings.
 	function update_settings()
 	{
 		let the_url = "${root_url}/api/1.0/update_settings";
@@ -41,6 +43,8 @@
 			alert("An error occurred!");
 	}
 
+    /// @function update_email
+    // Button handler for when the user wants to update their email.
 	function update_email()
 	{
 		let the_url = "${root_url}/api/1.0/update_email";
@@ -55,6 +59,8 @@
 			alert("An error occurred!");
 	}
 
+    /// @function update_password
+    // Button handler for when the user wants to update their password.
 	function update_password()
 	{
 		let the_url = "${root_url}/api/1.0/update_password";
@@ -73,11 +79,15 @@
 			alert("An error occurred!");
 	}
 
+    /// @function manage_api_keys
+    // Button handler for when the user wants to navigate to the API management page.
     function manage_api_keys()
     {
         window.location.replace("${root_url}/api_keys");
     }
 
+    /// @function delete_gear
+    // Button handler for when the user wants to delete their gear.
 	function delete_gear()
 	{
 		if (confirm('Are you sure you want to do this?'))
@@ -103,6 +113,8 @@
 		}
 	}
 
+    /// @function delete_activities
+    // Button handler for when the user wants to delete their activities.
 	function delete_activities()
 	{
 		if (confirm('Are you sure you want to do this?'))
@@ -128,6 +140,8 @@
 		}
 	}
 
+    /// @function delete_user
+    // Button handler for when the user wants to delete their account.
 	function delete_user()
 	{
 		if (confirm('Are you sure you want to do this?'))
@@ -153,6 +167,7 @@
 		}
 	}
 
+    // Handler for when the server returns the user's settings.
     var process_user_settings = function(records)
     {
         for (let record of records)
@@ -200,6 +215,8 @@
         }
     }
 
+    /// @function get_user_settings
+    // Request the user's settings.
     function get_user_settings()
     {
         let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=default%20privacy,preferred%20units,preferred%20first%20day%20of%20week";
@@ -216,7 +233,7 @@ ${nav}
 </section>
 
 <section class="block">
-    <div class="settings" style="width: 600px">
+    <div>
         <!-- Settings -->
         <h2>Settings</h2>
         <p>

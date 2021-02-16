@@ -765,7 +765,7 @@ class DataMgr(Importer.ActivityWriter):
         tags.append('Group Activity')
         return tags
 
-    def list_tags_for_activity_type_and_user(self, user_id, activity_type):
+    def list_available_tags_for_activity_type_and_user(self, user_id, activity_type):
         """Returns a list of tags that are valid for a particular activity type and user."""
         tags = self.list_default_tags()
         gear_list = self.retrieve_gear(user_id)
@@ -776,7 +776,8 @@ class DataMgr(Importer.ActivityWriter):
         for gear in gear_list:
             if Keys.GEAR_TYPE_KEY in gear and Keys.GEAR_NAME_KEY in gear:
                 if (show_shoes and gear[Keys.GEAR_TYPE_KEY] == Keys.GEAR_TYPE_SHOES) or (show_bikes and gear[Keys.GEAR_TYPE_KEY] == Keys.GEAR_TYPE_BIKE):
-                    tags.append(gear[Keys.GEAR_NAME_KEY])
+                    if gear[Keys.GEAR_RETIRE_TIME_KEY] == 0:
+                        tags.append(gear[Keys.GEAR_NAME_KEY])
         return tags
 
     def create_activity_tag(self, activity_id, tag):

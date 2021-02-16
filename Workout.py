@@ -74,14 +74,14 @@ class Workout(object):
         if key == Keys.WORKOUT_SCHEDULED_TIME_KEY and self.scheduled_time is not None:
             dt = time.mktime(self.scheduled_time.timetuple())
             return datetime.datetime(dt.year, dt.month, dt.day)
-        if key == Keys.WORKOUT_ESTIMATED_STRESS_KEY:
+        if key == Keys.WORKOUT_ESTIMATED_STRAIN_KEY:
             return self.estimated_strain_score
         return None
 
     def to_dict(self):
         """Converts the object representation to a dictionary, only converting what is actually useful, as opposed to __dict__."""
         output = {}
-        output[Keys.WORKOUT_ID_KEY] = self.workout_id
+        output[Keys.WORKOUT_ID_KEY] = str(self.workout_id)
         output[Keys.WORKOUT_TYPE_KEY] = self.type
         output[Keys.WORKOUT_SPORT_TYPE_KEY] = self.sport_type
         output[Keys.WORKOUT_WARMUP_KEY] = self.warmup
@@ -90,7 +90,7 @@ class Workout(object):
         if self.scheduled_time is not None:
             output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = time.mktime(self.scheduled_time.timetuple())
         if self.estimated_strain_score is not None:
-            output[Keys.WORKOUT_ESTIMATED_STRESS_KEY] = self.estimated_strain_score
+            output[Keys.WORKOUT_ESTIMATED_STRAIN_KEY] = self.estimated_strain_score
         return output
 
     def from_dict(self, input):
@@ -109,8 +109,8 @@ class Workout(object):
             self.intervals = input[Keys.WORKOUT_INTERVALS_KEY]
         if Keys.WORKOUT_SCHEDULED_TIME_KEY in input and input[Keys.WORKOUT_SCHEDULED_TIME_KEY] is not None:
             self.scheduled_time = datetime.datetime.fromtimestamp(input[Keys.WORKOUT_SCHEDULED_TIME_KEY]).date()
-        if Keys.WORKOUT_ESTIMATED_STRESS_KEY in input:
-            self.estimated_strain_score = input[Keys.WORKOUT_ESTIMATED_STRESS_KEY]
+        if Keys.WORKOUT_ESTIMATED_STRAIN_KEY in input:
+            self.estimated_strain_score = input[Keys.WORKOUT_ESTIMATED_STRAIN_KEY]
 
     def add_warmup(self, seconds):
         """Defines the workout warmup."""
@@ -134,8 +134,12 @@ class Workout(object):
         interval[Keys.INTERVAL_WORKOUT_REPEAT_KEY] = int(repeat)
         interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY] = float(distance)
         interval[Keys.INTERVAL_WORKOUT_PACE_KEY] = float(pace)
-        interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = float(recovery_distance)
-        interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = float(recovery_pace)
+        if repeat > 1:
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = float(recovery_distance)
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = float(recovery_pace)
+        else:
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = 0.0
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = 0.0
         self.intervals.append(interval)
 
     def export_to_zwo(self, name):
@@ -263,8 +267,10 @@ class Workout(object):
         # Add an string that describes how this workout fits into the big picture.
         if self.type == Keys.WORKOUT_TYPE_SPEED_RUN:
             result += "Purpose: Speed sessions get you used to running at faster paces.\n"
-        elif self.type == Keys.WORKOUT_TYPE_TEMPO_RUN:
+        elif self.type == Keys.WORKOUT_TYPE_THRESHOLD_RUN:
             result += "Purpose: Tempo runs build a combination of speed and endurance. They should be performed at a pace you can hold for roughly one hour.\n"
+        elif self.type == Keys.WORKOUT_TYPE_TEMPO_RUN:
+            result += "Purpose: Tempo runs build a combination of speed and endurance. They should be performed at a pace slightly slower than your pace for a 5K race.\n"
         elif self.type == Keys.WORKOUT_TYPE_EASY_RUN:
             result += "Purpose: Easy runs build aerobic capacity while keeping the wear and tear on the body to a minimum.\n"
         elif self.type == Keys.WORKOUT_TYPE_LONG_RUN:
@@ -281,6 +287,12 @@ class Workout(object):
             result += "Purpose: Tempo rides build a combination of speed and endurance. They should be performed at a pace you can hold for roughly one hour.\n"
         elif self.type == Keys.WORKOUT_TYPE_EASY_RIDE:
             result += "Purpose: Easy rides build aerobic capacity while keeping the wear and tear on the body to a minimum.\n"
+        elif self.type == Keys.WORKOUT_TYPE_SWEET_SPOT_RIDE:
+            result += "Purpose: .\n"
+        elif self.type == Keys.WORKOUT_TYPE_OPEN_WATER_SWIM:
+            result += "Purpose: Open water swims get you used to race day conditions.\n"
+        elif self.type == Keys.WORKOUT_TYPE_POOL_WATER_SWIM:
+            result += "Purpose: .\n"
 
         if self.estimated_strain_score is not None:
             stress_str = "{:.1f}".format(self.estimated_strain_score)
