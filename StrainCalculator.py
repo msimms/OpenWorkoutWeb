@@ -41,5 +41,5 @@ class StrainCalculator(object):
             return 0.0
 
         # Compute the strain score: (t * NP * IF) / (FTP * 36).
-        strain_score = (workout_duration_secs * (np / ftp) * (np / ftp)) / (ftp * 36)
+        strain_score = (workout_duration_secs * np * (np / ftp)) / (ftp * 36)
         return strain_score
