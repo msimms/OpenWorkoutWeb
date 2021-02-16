@@ -28,6 +28,7 @@ class ActivityAnalyzer(object):
         self.speed_graph = None
         root_dir = os.path.dirname(os.path.abspath(__file__))
         self.data_mgr = DataMgr.DataMgr(None, "file://" + root_dir, None, None, None)
+        self.user_mgr = UserMgr.UserMgr(None)
         self.last_yield = time.time()
         super(ActivityAnalyzer, self).__init__()
 
@@ -110,8 +111,20 @@ class ActivityAnalyzer(object):
                 if sensor_type in self.activity:
                     print("Analyzing " + sensor_type + " data...")
                     try:
+                        # Do the analysis.
                         sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type], activity_type, activity_user_id, self.data_mgr)
+
+                        # Save the results to the database.
                         self.summary_data.update(sensor_analyzer.analyze())
+
+                        # Did we find the maximum heart rate. If so, add it to the list of calculated maximums.
+                        # This list will be used to compute the user's estimated maximum heart rate.
+                        if sensor_type == Keys.APP_HEART_RATE_KEY:
+
+                            existing_max_hrs = self.user_mgr.retrieve_user_setting(activity_user_id, Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY)
+                            existing_max_hrs[str(sensor_analyzer.max_time)] = sensor_analyzer.max
+                            self.user_mgr.update_user_setting(activity_user_id, Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY, existing_max_hrs)
+                            
                     except:
                         self.log_error("Exception when analyzing activity " + sensor_type + " data.")
                         self.log_error(traceback.format_exc())

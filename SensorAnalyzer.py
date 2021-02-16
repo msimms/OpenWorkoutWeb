@@ -15,6 +15,7 @@ class SensorAnalyzer(object):
         self.units = units
         self.start_time = None
         self.end_time = None
+        self.max_time = 0 # Timestamp of the maximum sensor value
         self.max = 0.0 # Maximum sensor value
         self.avg = 0.0 # Average sensor value
         self.sum = 0.0 # Used in computing the average
@@ -29,9 +30,10 @@ class SensorAnalyzer(object):
             return self.bests[record_name]
         return None
 
-    def update_maximum_value(self, reading):
+    def update_maximum_value(self, date_time, reading):
         """Computes the maximum value for the workout. Called by 'append_sensor_value'."""
         if reading > self.max:
+            self.max_time = date_time
             self.max = reading
 
     def update_average_value(self, reading):
@@ -49,7 +51,7 @@ class SensorAnalyzer(object):
         self.num_readings = self.num_readings + 1
         self.readings.append([date_time, value])
         self.value_readings.append(value)
-        self.update_maximum_value(value)
+        self.update_maximum_value(date_time, value)
         self.update_average_value(value)
 
     def analyze(self):

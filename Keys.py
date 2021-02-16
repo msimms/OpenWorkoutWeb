@@ -88,7 +88,7 @@ DEFAULT_PRIVACY_KEY = "default privacy"
 PREFERRED_UNITS_KEY = "preferred units" # The unit system preferred by the user, can be either UNITS_METRIC_KEY or UNITS_STANDARD_KEY
 UNITS_METRIC_KEY = "metric"
 UNITS_STANDARD_KEY = "standard"
-PREFERRED_FIRST_DAY_OF_WEEK_KEY = "preferred first day of week" # Which day of the week does the user consider to be the first day of the week.
+PREFERRED_FIRST_DAY_OF_WEEK_KEY = "preferred first day of week" # Which day of the week does the user consider to be the first day of the week?
 BIRTHDAY_KEY = "birthday"
 DEFAULT_BIRTHDAY_KEY = "315532800"
 HEIGHT_KEY = "height"
@@ -99,10 +99,12 @@ GENDER_KEY = "gender" # The gender to use when computing calorie burn
 GENDER_MALE_KEY = "male"
 GENDER_FEMALE_KEY = "female"
 RESTING_HEART_RATE_KEY = "resting heart rate" # Resting heart rate, in bpm
-ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate" # Maximum heart rate, in bpm
+ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate" # Maximum heart rate, in bpm, computed from activities
+ESTIMATED_MAX_HEART_RATE_LIST_KEY = "estimated max heart rate list" # List of all maximum heart rates, in bpm, computed from activities
+USER_SPECIFIED_MAX_HEART_RATE_KEY = "user specified max heart rate" # Maximum heart rate, in bpm, given by the user
 ESTIMATED_FTP_KEY = "estimated ftp" # Estimated FTP, in watts
 CAN_UPLOAD_PHOTOS_KEY = "can upload photos"
-USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, PREFERRED_UNITS_KEY, PREFERRED_FIRST_DAY_OF_WEEK_KEY, BIRTHDAY_KEY, HEIGHT_KEY, WEIGHT_KEY, GENDER_KEY, RESTING_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_FTP_KEY, GOAL_KEY, GOAL_DATE_KEY, GOAL_TYPE_KEY, EXPERIENCE_LEVEL_KEY, PREFERRED_LONG_RUN_DAY_KEY, STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, CAN_UPLOAD_PHOTOS_KEY ]
+USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, PREFERRED_UNITS_KEY, PREFERRED_FIRST_DAY_OF_WEEK_KEY, BIRTHDAY_KEY, HEIGHT_KEY, WEIGHT_KEY, GENDER_KEY, RESTING_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, USER_SPECIFIED_MAX_HEART_RATE_KEY, ESTIMATED_FTP_KEY, GOAL_KEY, GOAL_DATE_KEY, GOAL_TYPE_KEY, EXPERIENCE_LEVEL_KEY, PREFERRED_LONG_RUN_DAY_KEY, STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, CAN_UPLOAD_PHOTOS_KEY ]
 
 # Personal records
 RECORDS_USER_ID = "user_id"
