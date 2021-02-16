@@ -130,11 +130,8 @@ class WorkoutPlanGenerator(object):
         else:
             running_paces = {}
 
-        # Estimate an FTP from the last six months of cycling data.
-        threshold_power = 0.0
-        if cycling_bests is not None and Keys.THRESHOLD_POWER in cycling_bests:
-            threshold_power = cycling_bests[Keys.THRESHOLD_POWER][0]
-            best_recent_threshold_power = self.user_mgr.estimate_ftp(self.user_id)
+        # Get the user's current estimated cycling FTP.
+        threshold_power = self.user_mgr.estimate_ftp(self.user_id)
 
         #
         # Need last four weeks averages and bests.
