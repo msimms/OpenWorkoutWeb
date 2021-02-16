@@ -307,6 +307,8 @@ class UserMgr(object):
 
         # Read the stored max heart rates out of the database.
         stored_max_hrs = self.database.retrieve_user_setting(user_id, Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY)
+        if stored_max_hrs is None:
+            return 0.0
 
         # Only consider heart rate values from the last year.
         ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
@@ -324,6 +326,8 @@ class UserMgr(object):
 
         # Read the stored 20 minute power bests out of the database.
         stored_20_min_power_bests = self.database.retrieve_user_setting(user_id, Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY)
+        if stored_20_min_power_bests is None:
+            return 0.0
 
         # Only consider values from the last year.
         ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
