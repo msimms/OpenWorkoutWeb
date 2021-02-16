@@ -151,9 +151,10 @@ ${nav}
 	<h2>Import File(s)</h2>
 
     <p>Accepted file types are .gpx, .tcx, and .fit formatted files.</p>
-	<input type="file" id="picker" name="file_list" class="modern_button" webkitdirectory multiple><br>
+	<input type="file" id="picker" name="file_list" class="modern_button" accept=".gpx,.tcx,.fit,.csv" webkitdirectory multiple><br>
     <table class="import" id="upload_table" style="display: none;"></table>
-	<button type="button" onclick="return upload_selected_files()">Upload</button><br>
+    <table class="import" id="parsed_csv_table" style="display: none;"></table>
+	<button type="button" onclick="return upload_selected_files()">Upload File(s)</button><br>
 
 	<script>
 		let picker = document.getElementById('picker');
@@ -191,10 +192,42 @@ ${nav}
             file_tasks[task_id] = file_name;
         }
 
+        /// @function parse_csv_file
+        function parse_csv_file(file_obj)
+        {
+            var reader = new FileReader();
+
+            reader.onerror = function(event)
+            {
+                reader.abort();
+            };
+            reader.onload = function(e)
+            {
+                let line_data = reader.result.split("\n");
+                let csv_table = document.getElementById("parsed_csv_table");
+
+                csv_table.style = "display: inline-block;";
+
+                line_data.forEach(res => {
+                    let column_data = res.split(",");
+                    let new_row = csv_table.insertRow();
+
+                    column_data.forEach(column => {
+                        let cell = new_row.insertCell();
+                        let text = document.createTextNode(column);
+
+                        cell.appendChild(text);
+                    });
+                });
+            }
+            reader.readAsBinaryString(file_obj);
+        }
+    
         /// @function upload_file
         function upload_file(file_obj)
         {
             var reader = new FileReader();
+            reader.readAsBinaryString(file_obj);
 
             reader.onerror = function(event)
             {
@@ -230,7 +263,14 @@ ${nav}
             {
                 for (var i = 0; i < file_list.length; i++)
                 {
-                    upload_file(file_list[i]);
+                    let file_obj = file_list[i];
+                    let file_name = file_obj.name;
+                    let file_ext = file_name.substr(file_name.lastIndexOf('.') + 1);
+
+                    if (file_ext == "csv")
+                        parse_csv_file(file_obj);
+                    else
+                        upload_file(file_obj);
                 }
             }
             else
