@@ -36,7 +36,7 @@ class FtpCalculator(object):
         self.cutoff_time = time.time() - ((365.25 / 2.0) * 24.0 * 60.0 * 60.0) # last six months
         super(FtpCalculator, self).__init__()
 
-    def estimate(self):
+    def estimate_ftp(self):
         """To be called after adding data with 'add_activity_data', estimates the user's FTP."""
         """Source: https://www.youtube.com/watch?v=kmxhVO5H-f8"""
         max_20min_adjusted = 0.0

@@ -2075,7 +2075,7 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        ftp = self.data_mgr.retrieve_user_estimated_ftp(self.user_id)
+        ftp = self.user_mgr.estimate_ftp(self.user_id)
         return True, json.dumps(ftp)
 
     def handle_estimate_bmi(self):
@@ -2090,10 +2090,10 @@ class Api(object):
 
     def handle_list_power_zones(self, values):
         """Returns power zones corresponding to the specified FTP value."""
-        if Keys.ESTIMATED_FTP_KEY not in values:
+        if Keys.ESTIMATED_CYCLING_FTP_KEY not in values:
             raise ApiException.ApiMalformedRequestException("FTP not specified.")
 
-        ftp = values[Keys.ESTIMATED_FTP_KEY]
+        ftp = values[Keys.ESTIMATED_CYCLING_FTP_KEY]
         if not InputChecker.is_float(ftp):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 

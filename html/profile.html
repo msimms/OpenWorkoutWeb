@@ -473,15 +473,13 @@
     }
 
     // Handler for when the server returns the user's FTP.
-    var process_ftp = function(record)
+    var process_ftp = function(ftp)
     {
         let ftp_elem = document.getElementById("ftp");
         let ftp_error_elem = document.getElementById("ftp_error");
 
-        if (record && record.length > 0)
+        if (ftp)
         {
-            let key = Object.keys(record)[0];
-            let ftp = record[key];
             let api_url = "${root_url}/api/1.0/list_power_zones?estimated%20ftp=" + ftp;
 
             ftp_elem.value = ftp.toFixed(1) + " watts";
@@ -492,6 +490,7 @@
         else
         {
             let error_str = "Cycling activities with power data that was recorded in the last six months must be uploaded before your FTP can be estimated.";
+
             ftp_error_elem.innerHTML = error_str;
             ftp_elem.hidden = true;
         }
@@ -621,15 +620,6 @@ ${nav}
         <input style="border:0" type="text" id="vo2_max" readonly></input>
         <hr>
 
-        <!-- FTP -->
-        <h2>Estimated Functional Threshold Power (FTP)</h2>
-        <p>
-            Functional Threshold Power is the amount of power that you can exert over one hour at maximum effort. It is estimated from recent activity.
-        </p>
-        <input style="border:0" type="text" id="ftp" readonly></input>
-        <p id="ftp_error"></p>
-        <hr>
-
         <!-- Heart Rate Zones -->
         <h2>Heart Rate Zones</h2>
         <p>
@@ -637,6 +627,15 @@ ${nav}
         </p>
         <table id="hr_zones">
         </table>
+        <hr>
+
+        <!-- FTP -->
+        <h2>Estimated Functional Threshold Power (FTP)</h2>
+        <p>
+            Functional Threshold Power is the amount of power that you can exert over one hour at maximum effort. It is estimated from recent activity.
+        </p>
+        <input style="border:0" type="text" id="ftp" readonly></input>
+        <p id="ftp_error"></p>
         <hr>
 
         <!-- Power Training Zones -->

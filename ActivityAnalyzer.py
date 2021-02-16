@@ -110,6 +110,7 @@ class ActivityAnalyzer(object):
             for sensor_type in sensor_types_to_analyze:
                 if sensor_type in self.activity:
                     print("Analyzing " + sensor_type + " data...")
+
                     try:
                         # Do the analysis.
                         sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type], activity_type, activity_user_id, self.data_mgr)
@@ -124,7 +125,15 @@ class ActivityAnalyzer(object):
                             existing_max_hrs = self.user_mgr.retrieve_user_setting(activity_user_id, Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY)
                             existing_max_hrs[str(sensor_analyzer.max_time)] = sensor_analyzer.max
                             self.user_mgr.update_user_setting(activity_user_id, Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY, existing_max_hrs)
-                            
+
+                        # Did we find the power meter for a cycling activity. If so, find the best 20 minute power.
+                        # This list will be used to compute the user's estimated FTP.
+                        if sensor_type == Keys.APP_POWER_KEY and activity_type in Keys.CYCLING_ACTIVITIES and Keys.BEST_20_MIN_POWER in self.summary_data:
+
+                            existing_20_minute_power_bests = self.user_mgr.retrieve_user_setting(activity_user_id, Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY)
+                            existing_20_minute_power_bests[str(sensor_analyzer.max_time)] = self.summary_data[Keys.BEST_20_MIN_POWER]
+                            self.user_mgr.update_user_setting(activity_user_id, Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, existing_20_minute_power_bests)
+
                     except:
                         self.log_error("Exception when analyzing activity " + sensor_type + " data.")
                         self.log_error(traceback.format_exc())
