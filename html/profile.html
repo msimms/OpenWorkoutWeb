@@ -548,9 +548,9 @@
     }
 
     // Request the user's heart rate zones.
-    function get_hr_zones(resting_hr)
+    function get_hr_zones(max_hr)
     {
-        let api_url = "${root_url}/api/1.0/list_hr_zones?resting%20heart%20rate=" + resting_hr;
+        let api_url = "${root_url}/api/1.0/list_hr_zones?estimated%20max%20heart%20rate=" + max_hr;
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_hr_zones, error: process_hr_zones_error, dataType: "json" });
     }
 
@@ -605,7 +605,7 @@ ${nav}
 
         <!-- Estimated Maximum Heart Rate -->
         <h2>Estimated Maximum Heart Rate</h2>
-            <input type="text" id="estimated max heart rate" value="Not set"> bpm<br>
+            <input type="text" id="estimated max heart rate" value="Not calculated"> bpm<br>
         <hr>
 
         <!-- BMI -->
