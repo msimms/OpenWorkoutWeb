@@ -250,6 +250,11 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 * Added pace plan synchronization with the mobile app.
 * More API work.
 
+### 0.36
+* Bug fixes and performance optimizations.
+* Fixed planned workout synchronization with the mobile app.
+* Fixed heart rate zone generation.
+
 ## Tech
 This software uses several other source projects to work properly:
 
