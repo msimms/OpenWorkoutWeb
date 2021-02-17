@@ -26,6 +26,7 @@
 import bcrypt
 import sys
 import time
+import FtpCalculator
 import Keys
 import SessionMgr
 import StraenDb
@@ -333,7 +334,8 @@ class UserMgr(object):
         ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
         one_year_ago = int(time.time()) - ONE_YEAR
         recent_bests = [v for k,v in stored_20_min_power_bests.items() if int(k) >= ONE_YEAR]
-        return max(recent_bests) * 0.95 # 95% of 20 minute power
+        calc = FtpCalculator.FtpCalculator()
+        return calc.estimate_ftp_from_20_min_power(max(recent_bests))
 
     def default_user_setting(self, key):
         """Returns the default value for the specified setting."""
