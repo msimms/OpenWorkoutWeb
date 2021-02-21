@@ -131,7 +131,7 @@ class WorkoutPlanGenerator(object):
             running_paces = {}
 
         # Get the user's current estimated cycling FTP.
-        threshold_power = self.user_mgr.estimate_ftp(self.user_id)
+        threshold_power = self.user_mgr.estimate_ftp(user_id)
 
         #
         # Need last four weeks averages and bests.
