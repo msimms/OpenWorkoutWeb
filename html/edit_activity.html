@@ -25,22 +25,22 @@
     /// @function update_activity_metadata
     function update_activity_metadata()
     {
-		let the_url = "${root_url}/api/1.0/update_activity_metadata";
-		let activity_name = document.getElementById("activity_name").value;
-		let activity_type = document.getElementById("activity_type").value;
-		let description = document.getElementById("description").value;
-		let dict = [];
-		let result_text = {};
+        let the_url = "${root_url}/api/1.0/update_activity_metadata";
+        let activity_name = document.getElementById("activity_name").value;
+        let activity_type = document.getElementById("activity_type").value;
+        let description = document.getElementById("description").value;
+        let dict = [];
+        let result_text = {};
 
-		dict.push({["activity_id"] : "${activity_id}"});
-		dict.push({["name"] : activity_name});
-		dict.push({["activity_type"] : activity_type});
-		dict.push({["description"] : description});
+        dict.push({["activity_id"] : "${activity_id}"});
+        dict.push({["name"] : activity_name});
+        dict.push({["activity_type"] : activity_type});
+        dict.push({["description"] : description});
 
-		if (send_post_request(the_url, dict, result_text))
+        if (send_post_request(the_url, dict, result_text))
             window.location.replace("${root_url}/activity/${activity_id}");
-		else
-			alert("An error occurred!");
+        else
+            alert("An error occurred!");
     }
 
     var process_upload_permissions = function(records)
@@ -54,7 +54,7 @@
             {
                 if (record[key] == true)
                 {
-    		        let picker = document.getElementById('photos_div');
+                    let picker = document.getElementById('photos_div');
                     picker.style = "display: inline-block;";
                 }
             }
@@ -111,89 +111,89 @@ ${nav}
 
 <div class="block">
     <!-- Activity Name -->
-	<h2>Activity Name</h2>
-	<input type="text" name="activity_name" id="activity_name" value="${activity_name}" size="80"><br>
+    <h2>Activity Name</h2>
+    <input type="text" name="activity_name" id="activity_name" value="${activity_name}" size="80"><br>
 
     <!-- Activity Type -->
-	<h2>Activity Type</h2>
-	<select id="activity_type" >
-	</select><br>
+    <h2>Activity Type</h2>
+    <select id="activity_type" >
+    </select><br>
 
     <!-- Description -->
-	<h2>Description</h2>
-	<textarea id="description" rows="10" cols="82">${description}</textarea><br>
-	<button type="button" id="update" onclick="return update_activity_metadata()">Update</button><br>
+    <h2>Description</h2>
+    <textarea id="description" rows="10" cols="82">${description}</textarea><br>
+    <button type="button" id="update" onclick="return update_activity_metadata()">Update</button><br>
 </div>
 
 <!-- Photos -->
 <div class="empty" id="photos_div" style="display: none;">
-<div class="block">
-	<h2>Photos</h2>
-	<input type="file" id="photo_picker" class="modern_button" name="photo_list" webkitdirectory multiple><br>
-	<button type="button" onclick="return upload_selected_files()">Upload Photos</button><br>
+    <div class="block">
+        <h2>Photos</h2>
+        <input type="file" id="photo_picker" class="modern_button" name="photo_list" webkitdirectory multiple><br>
+        <button type="button" onclick="return upload_selected_files()">Upload Photos</button><br>
 
-	<script>
-		let picker = document.getElementById('photo_picker');
-		let selected_photo_list = [];
+        <script>
+            let picker = document.getElementById('photo_picker');
+            let selected_photo_list = [];
 
-        function upload_file(file_obj)
-        {
-            let reader = new FileReader();
-
-            reader.onerror = function(event)
+            function upload_file(file_obj)
             {
-                reader.abort();
-            };
-            reader.onload = function(e)
-            {
-                let the_url = "${root_url}/api/1.0/upload_activity_photo";
-                let dict = [];
-                let result_text = {};
-                let encoded_data = btoa(reader.result);
+                let reader = new FileReader();
 
-                dict.push({["uploaded_file_data"] : encoded_data});
-        		dict.push({["activity_id"] : "${activity_id}"});
-
-                if (send_post_request(the_url, dict, result_text))
+                reader.onerror = function(event)
                 {
-                    window.location.reload();
+                    reader.abort();
+                };
+                reader.onload = function(e)
+                {
+                    let the_url = "${root_url}/api/1.0/upload_activity_photo";
+                    let dict = [];
+                    let result_text = {};
+                    let encoded_data = btoa(reader.result);
+
+                    dict.push({["uploaded_file_data"] : encoded_data});
+                    dict.push({["activity_id"] : "${activity_id}"});
+
+                    if (send_post_request(the_url, dict, result_text))
+                    {
+                        window.location.reload();
+                    }
+                    else
+                    {
+                        alert(result_text.value);
+                    }
+                }
+                reader.readAsBinaryString(file_obj);
+            }
+
+            function upload_selected_files()
+            {
+                if (selected_photo_list.length > 0)
+                {
+                    for (let i = 0; i < selected_photo_list.length; i++)
+                    {
+                        upload_file(selected_photo_list[i]);
+                    }
                 }
                 else
                 {
-                    alert(result_text.value);
+                    alert("No files have been specified.");
                 }
             }
-            reader.readAsBinaryString(file_obj);
-        }
 
-		function upload_selected_files()
-		{
-            if (selected_photo_list.length > 0)
-            {
-                for (let i = 0; i < selected_photo_list.length; i++)
+            picker.addEventListener('change', e => {
+                for (let file of Array.from(e.target.files))
                 {
-                    upload_file(selected_photo_list[i]);
-                }
-            }
-            else
-            {
-                alert("No files have been specified.");
-            }
-		}
-
-		picker.addEventListener('change', e => {
-			for (let file of Array.from(e.target.files))
-			{
-				selected_photo_list.push(file);
-			};
-		});
-	</script>
-</div>
+                    selected_photo_list.push(file);
+                };
+            });
+        </script>
+    </div>
 </div>
 
 <div class="block">
     <hr>
-	<button type="button" onclick="window.location.replace('${root_url}/activity/${activity_id}')">Back</button><br>
+    <button type="button" onclick="window.location.replace('${root_url}/activity/${activity_id}')">Back</button><br>
 </div>
 
 </body>

@@ -27,119 +27,119 @@
 <script type="text/javascript" src="${root_url}/jquery-timepicker/jquery.timepicker.js"></script>
 <script>
 
-	function save(target)
-	{
-		var the_url = "${root_url}/api/1.0/add_activity";
-		var dict = [];
-		var sets = [];
-		var result_text = {};
-		var inner_div = document.getElementById("manual_entry_div");
-		var startDate = document.getElementById("startDate").value;
-		var startTime = document.getElementById("startTime").value;
-		var activityStartObj = new Date(startDate + " " + startTime);
-		var activityStart = activityStartObj.getTime() / 1000;
-		var activityType = document.getElementById("activity_type").value;
+    function save(target)
+    {
+        var the_url = "${root_url}/api/1.0/add_activity";
+        var dict = [];
+        var sets = [];
+        var result_text = {};
+        var inner_div = document.getElementById("manual_entry_div");
+        var startDate = document.getElementById("startDate").value;
+        var startTime = document.getElementById("startTime").value;
+        var activityStartObj = new Date(startDate + " " + startTime);
+        var activityStart = activityStartObj.getTime() / 1000;
+        var activityType = document.getElementById("activity_type").value;
 
-		for (var i = 0; i < inner_div.children.length; i++)
-		{
-			var divChild = inner_div.children[i];
+        for (var i = 0; i < inner_div.children.length; i++)
+        {
+            var divChild = inner_div.children[i];
 
-			if (divChild.name == "Repetitions")
-			{
-				sets.push(parseInt(divChild.value));
-			}
-			else if ((divChild.name == "Duration") || (divChild.name == "Distance"))
-			{
-				dict.push({[divChild.name] : parseFloat(divChild.value)});
-			}
-		}
-		dict.push({["Sets"] : JSON.stringify(sets)});
-		dict.push({["time"] : activityStart});
-		dict.push({["activity_type"] : activityType});
+            if (divChild.name == "Repetitions")
+            {
+                sets.push(parseInt(divChild.value));
+            }
+            else if ((divChild.name == "Duration") || (divChild.name == "Distance"))
+            {
+                dict.push({[divChild.name] : parseFloat(divChild.value)});
+            }
+        }
+        dict.push({["Sets"] : JSON.stringify(sets)});
+        dict.push({["time"] : activityStart});
+        dict.push({["activity_type"] : activityType});
 
-		if (send_post_request(the_url, dict, result_text))
-		{
-			window.location.replace("${root_url}/task_status");
-		}
-		else
-		{
-			alert(result_text.value);
-		}
-	}
+        if (send_post_request(the_url, dict, result_text))
+        {
+            window.location.replace("${root_url}/task_status");
+        }
+        else
+        {
+            alert(result_text.value);
+        }
+    }
 
-	function show_manual_entry_options()
-	{
-		var activityType = document.getElementById("activity_type").value;
-		var outer_div = document.getElementById("manual_entry_div");
-		var inner_div = document.createElement('div');
-		inner_div.id = "manual_entry_div";
+    function show_manual_entry_options()
+    {
+        var activityType = document.getElementById("activity_type").value;
+        var outer_div = document.getElementById("manual_entry_div");
+        var inner_div = document.createElement('div');
+        inner_div.id = "manual_entry_div";
 
-		// Remove existing items, if any.
-		while (outer_div.firstChild)
-		{
-			outer_div.removeChild(outer_div.firstChild);
-		}
+        // Remove existing items, if any.
+        while (outer_div.firstChild)
+        {
+            outer_div.removeChild(outer_div.firstChild);
+        }
 
-		// Determine which data fields are needed.
-		var fields = ["Duration", "Distance"];
-		switch (activityType)
-		{
-			case "Push Up":
-			case "Pull Up":
-				fields = ["Repetitions", "Repetitions", "Repetitions"];
-				break;
-		}
+        // Determine which data fields are needed.
+        var fields = ["Duration", "Distance"];
+        switch (activityType)
+        {
+            case "Push Up":
+            case "Pull Up":
+                fields = ["Repetitions", "Repetitions", "Repetitions"];
+                break;
+        }
 
-		// Add a label for the date picker.
-		var dateLabel = document.createTextNode("Date: ");
-		inner_div.appendChild(dateLabel);
+        // Add a label for the date picker.
+        var dateLabel = document.createTextNode("Date: ");
+        inner_div.appendChild(dateLabel);
 
-		// Add the date picker.
-		var today = new Date();
-		var startDate = document.createElement('input');
-		startDate.type = "input";
-		startDate.id = "startDate";
-		startDate.className = "pickDate";
-		$(startDate).datepicker({showButtonPanel: true, defaultDate: today});
-		$(startDate).datepicker('setDate', today);
-		inner_div.appendChild(startDate);
+        // Add the date picker.
+        var today = new Date();
+        var startDate = document.createElement('input');
+        startDate.type = "input";
+        startDate.id = "startDate";
+        startDate.className = "pickDate";
+        $(startDate).datepicker({showButtonPanel: true, defaultDate: today});
+        $(startDate).datepicker('setDate', today);
+        inner_div.appendChild(startDate);
 
-		// Add a label for the start time picker.
-		var dateLabel = document.createTextNode("Start Time: ");
-		inner_div.appendChild(dateLabel);
+        // Add a label for the start time picker.
+        var dateLabel = document.createTextNode("Start Time: ");
+        inner_div.appendChild(dateLabel);
 
-		// Add the start time picker.
-		var startTime = document.createElement('input');
-		startTime.type = "input";
-		startTime.id = "startTime";
-		startTime.className = "pickTime"; 
-		$(startTime).timepicker({ 'timeFormat': 'h:i A' });
-		inner_div.appendChild(startTime);
+        // Add the start time picker.
+        var startTime = document.createElement('input');
+        startTime.type = "input";
+        startTime.id = "startTime";
+        startTime.className = "pickTime"; 
+        $(startTime).timepicker({ 'timeFormat': 'h:i A' });
+        inner_div.appendChild(startTime);
 
-		// Add a line break.
-		var br = document.createElement("br");
-		inner_div.appendChild(br);
+        // Add a line break.
+        var br = document.createElement("br");
+        inner_div.appendChild(br);
 
-		// Add the data fields.
-		for (i = 0, len = fields.length; i < len; i++)
-		{
-			add_number_entry_node(inner_div, fields[i]);
-		}
+        // Add the data fields.
+        for (i = 0, len = fields.length; i < len; i++)
+        {
+            add_number_entry_node(inner_div, fields[i]);
+        }
 
-		// Add to the div.
-		outer_div.appendChild(inner_div);
+        // Add to the div.
+        outer_div.appendChild(inner_div);
 
-		// Create a save button.
-		var save_btn = document.createElement('button');
-		save_btn.appendChild(document.createTextNode('Save'));
-		save_btn.title = "Save";
-		save_btn.addEventListener('click', function() { save(this); });
+        // Create a save button.
+        var save_btn = document.createElement('button');
+        save_btn.appendChild(document.createTextNode('Save'));
+        save_btn.title = "Save";
+        save_btn.addEventListener('click', function() { save(this); });
 
-		// Add the save button to the screen.
-		outer_div.appendChild(save_btn);
+        // Add the save button to the screen.
+        outer_div.appendChild(save_btn);
 
-		return false;
-	}
+        return false;
+    }
 
 </script>
 
@@ -148,17 +148,17 @@ ${nav}
 </section>
 
 <div class="import" style="width: 600px">
-	<h2>Import File(s)</h2>
+    <h2>Import File(s)</h2>
 
     <p>Accepted file types are .gpx, .tcx, and .fit formatted files.</p>
-	<input type="file" id="picker" name="file_list" class="modern_button" accept=".gpx,.tcx,.fit,.csv" webkitdirectory multiple><br>
+    <input type="file" id="picker" name="file_list" class="modern_button" accept=".gpx,.tcx,.fit,.csv" webkitdirectory multiple><br>
     <table class="import" id="upload_table" style="display: none;"></table>
     <table class="import" id="parsed_csv_table" style="display: none;"></table>
-	<button type="button" onclick="return upload_selected_files()">Upload File(s)</button><br>
+    <button type="button" onclick="return upload_selected_files()">Upload File(s)</button><br>
 
-	<script>
-		let picker = document.getElementById('picker');
-		let file_list = [];
+    <script>
+        let picker = document.getElementById('picker');
+        let file_list = [];
         let file_tasks = {}; // Associates the task ID returned by the server with the file being uploaded
 
         /// @function update_file_status
@@ -257,8 +257,8 @@ ${nav}
         }
 
         /// @function upload_selected_files
-		function upload_selected_files()
-		{
+        function upload_selected_files()
+        {
             if (file_list.length > 0)
             {
                 for (var i = 0; i < file_list.length; i++)
@@ -277,13 +277,13 @@ ${nav}
             {
                 alert("No files have been specified.");
             }
-		}
+        }
 
-		picker.addEventListener('change', e => {
+        picker.addEventListener('change', e => {
             let upload_table = document.getElementById("upload_table");
 
-			for (let file of Array.from(e.target.files))
-			{
+            for (let file of Array.from(e.target.files))
+            {
                 let new_row = upload_table.insertRow();
                 let cell = new_row.insertCell();
                 let text = document.createTextNode(file.name);
@@ -293,9 +293,9 @@ ${nav}
                 text = document.createTextNode("Waiting");
                 cell.appendChild(text);
 
-				file_list.push(file);
-			};
-		});
+                file_list.push(file);
+            };
+        });
 
         var process_task_statuses = function(records)
         {
@@ -318,17 +318,17 @@ ${nav}
         }
 
         setInterval(check_for_updates, 5000);
-	</script>
+    </script>
 
-	<h2>Manual Entry</h2>
+    <h2>Manual Entry</h2>
 
-	<form onChange="return show_manual_entry_options()" method="post" enctype="multipart/form-data">
-		<select id="activity_type" name="activity_type">
+    <form onChange="return show_manual_entry_options()" method="post" enctype="multipart/form-data">
+        <select id="activity_type" name="activity_type">
 ${activity_type_list}
-		</select>
-	</form>
+        </select>
+    </form>
 </div>
-	
+    
 <div class="block" id="manual_entry_div">
 </div>
 

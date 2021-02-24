@@ -157,91 +157,91 @@
     // Button handler for when the user updates their birthday.
     function update_birthday()
     {
-		let the_url = "${root_url}/api/1.0/update_profile";
-		let birthday = document.getElementById("birthday").value;
-		let dict = [];
-		let result_text = {};
-		let timestamp = Date.parse(birthday) / 1000;
+        let the_url = "${root_url}/api/1.0/update_profile";
+        let birthday = document.getElementById("birthday").value;
+        let dict = [];
+        let result_text = {};
+        let timestamp = Date.parse(birthday) / 1000;
 
-		dict.push({["birthday"] : timestamp});
-		if (send_post_request(the_url, dict, result_text))
-			alert("Birthday updated!");
-		else
-			alert("An error occurred!");
+        dict.push({["birthday"] : timestamp});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Birthday updated!");
+        else
+            alert("An error occurred!");
     }
 
     /// @function update_height
     // Button handler for when the user updates their height.
-	function update_height()
-	{
-		let the_url = "${root_url}/api/1.0/update_profile";
-		let height = document.getElementById("height").value;
-		let dict = [];
-		let result_text = {};
+    function update_height()
+    {
+        let the_url = "${root_url}/api/1.0/update_profile";
+        let height = document.getElementById("height").value;
+        let dict = [];
+        let result_text = {};
 
-		dict.push({["height"] : height});
-		if (send_post_request(the_url, dict, result_text))
-			alert("Height updated!");
-		else
-			alert("An error occurred!");
-	}
+        dict.push({["height"] : height});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Height updated!");
+        else
+            alert("An error occurred!");
+    }
 
     /// @function update_weight
     // Button handler for when the user updates their weight.
-	function update_weight()
-	{
-		let the_url = "${root_url}/api/1.0/update_profile";
-		let weight = document.getElementById("weight").value;
-		let dict = [];
-		let result_text = {};
+    function update_weight()
+    {
+        let the_url = "${root_url}/api/1.0/update_profile";
+        let weight = document.getElementById("weight").value;
+        let dict = [];
+        let result_text = {};
 
-		dict.push({["weight"] : weight});
-		if (send_post_request(the_url, dict, result_text))
-			alert("Weight updated!");
-		else
-			alert("An error occurred!");
-	}
+        dict.push({["weight"] : weight});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Weight updated!");
+        else
+            alert("An error occurred!");
+    }
 
     /// @function update_gender
     // Button handler for when the user updates their gender.
-	function update_gender()
-	{
-		let the_url = "${root_url}/api/1.0/update_profile";
-		let gender = document.getElementById("gender").value;
-		let dict = [];
-		let result_text = {};
+    function update_gender()
+    {
+        let the_url = "${root_url}/api/1.0/update_profile";
+        let gender = document.getElementById("gender").value;
+        let dict = [];
+        let result_text = {};
 
-		dict.push({["gender"] : gender});
-		if (send_post_request(the_url, dict, result_text))
-			alert("Gender updated!");
-		else
-			alert("An error occurred!");
-	}
+        dict.push({["gender"] : gender});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Gender updated!");
+        else
+            alert("An error occurred!");
+    }
 
     /// @function update_resting_hr
     // Button handler for when the user updates their resting heart rate.
-	function update_resting_hr()
-	{
-		let the_url = "${root_url}/api/1.0/update_profile";
-		let resting_hr = document.getElementById("resting heart rate").value;
-		let dict = [];
-		let result_text = {};
+    function update_resting_hr()
+    {
+        let the_url = "${root_url}/api/1.0/update_profile";
+        let resting_hr = document.getElementById("resting heart rate").value;
+        let dict = [];
+        let result_text = {};
 
-		dict.push({["resting heart rate"] : resting_hr});
-		if (send_post_request(the_url, dict, result_text))
-			alert("Resting heart rate updated!");
-		else
-			alert("An error occurred!");
-	}
+        dict.push({["resting heart rate"] : resting_hr});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Resting heart rate updated!");
+        else
+            alert("An error occurred!");
+    }
 
-	$(function()
-	{
-		$('#birthday').datepicker({
+    $(function()
+    {
+        $('#birthday').datepicker({
             yearRange: '1910:2010',
             changeYear: true,
             changeMonth: true
         });
-	});
+    });
 
     function append_to_pr_table(table, row_name, row_value)
     {

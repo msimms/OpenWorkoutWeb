@@ -25,59 +25,59 @@
 
     /// @function update_settings
     // Button handler for when the user wants to update their preference settings.
-	function update_settings()
-	{
-		let the_url = "${root_url}/api/1.0/update_settings";
-		let privacy = document.getElementById("privacy_options").value;
-		let units = document.getElementById("units").value;
-		let week_start = document.getElementById("week_start").value;
-		let dict = [];
-		let result_text = {};
+    function update_settings()
+    {
+        let the_url = "${root_url}/api/1.0/update_settings";
+        let privacy = document.getElementById("privacy_options").value;
+        let units = document.getElementById("units").value;
+        let week_start = document.getElementById("week_start").value;
+        let dict = [];
+        let result_text = {};
 
-		dict.push({["default privacy"] : privacy});
-		dict.push({["preferred units"] : units});
-		dict.push({["preferred first day of week"] : week_start});
-		if (send_post_request(the_url, dict, result_text))
-			alert("Settings updated!");
-		else
-			alert("An error occurred!");
-	}
+        dict.push({["default privacy"] : privacy});
+        dict.push({["preferred units"] : units});
+        dict.push({["preferred first day of week"] : week_start});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Settings updated!");
+        else
+            alert("An error occurred!");
+    }
 
     /// @function update_email
     // Button handler for when the user wants to update their email.
-	function update_email()
-	{
-		let the_url = "${root_url}/api/1.0/update_email";
-		let new_email = document.getElementById("new_email").value;
-		let dict = [];
-		let result_text = {};
+    function update_email()
+    {
+        let the_url = "${root_url}/api/1.0/update_email";
+        let new_email = document.getElementById("new_email").value;
+        let dict = [];
+        let result_text = {};
 
-		dict.push({["email"] : new_email});
-		if (send_post_request(the_url, dict, result_text))
-			alert("Email updated!");
-		else
-			alert("An error occurred!");
-	}
+        dict.push({["email"] : new_email});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Email updated!");
+        else
+            alert("An error occurred!");
+    }
 
     /// @function update_password
     // Button handler for when the user wants to update their password.
-	function update_password()
-	{
-		let the_url = "${root_url}/api/1.0/update_password";
-		let current_pword = document.getElementById("current_password").value;
-		let new_pword1 = document.getElementById("new_password1").value;
-		let new_pword2 = document.getElementById("new_password2").value;
-		let dict = [];
-		let result_text = {};
+    function update_password()
+    {
+        let the_url = "${root_url}/api/1.0/update_password";
+        let current_pword = document.getElementById("current_password").value;
+        let new_pword1 = document.getElementById("new_password1").value;
+        let new_pword2 = document.getElementById("new_password2").value;
+        let dict = [];
+        let result_text = {};
 
-		dict.push({["old_password"] : current_pword});
-		dict.push({["new_password1"] : new_pword1});
-		dict.push({["new_password2"] : new_pword2});
-		if (send_post_request(the_url, dict, result_text))
-			alert("Password updated!");
-		else
-			alert("An error occurred!");
-	}
+        dict.push({["old_password"] : current_pword});
+        dict.push({["new_password1"] : new_pword1});
+        dict.push({["new_password2"] : new_pword2});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Password updated!");
+        else
+            alert("An error occurred!");
+    }
 
     /// @function manage_api_keys
     // Button handler for when the user wants to navigate to the API management page.
@@ -88,12 +88,12 @@
 
     /// @function delete_gear
     // Button handler for when the user wants to delete their gear.
-	function delete_gear()
-	{
-		if (confirm('Are you sure you want to do this?'))
-		{
-			let the_url = "${root_url}/api/1.0/delete_users_gear";
-			let pword = document.getElementById("password").value;
+    function delete_gear()
+    {
+        if (confirm('Are you sure you want to do this?'))
+        {
+            let the_url = "${root_url}/api/1.0/delete_users_gear";
+            let pword = document.getElementById("password").value;
 
             if (pword.length > 0)
             {
@@ -110,17 +110,17 @@
             {
                 alert("Please enter your password.");
             }
-		}
-	}
+        }
+    }
 
     /// @function delete_activities
     // Button handler for when the user wants to delete their activities.
-	function delete_activities()
-	{
-		if (confirm('Are you sure you want to do this?'))
-		{
-			let the_url = "${root_url}/api/1.0/delete_users_activities";
-			let pword = document.getElementById("password").value;
+    function delete_activities()
+    {
+        if (confirm('Are you sure you want to do this?'))
+        {
+            let the_url = "${root_url}/api/1.0/delete_users_activities";
+            let pword = document.getElementById("password").value;
 
             if (pword.length > 0)
             {
@@ -137,17 +137,17 @@
             {
                 alert("Please enter your password.");
             }
-		}
-	}
+        }
+    }
 
     /// @function delete_user
     // Button handler for when the user wants to delete their account.
-	function delete_user()
-	{
-		if (confirm('Are you sure you want to do this?'))
-		{
-			let the_url = "${root_url}/api/1.0/delete_user";
-			let pword = document.getElementById("password").value;
+    function delete_user()
+    {
+        if (confirm('Are you sure you want to do this?'))
+        {
+            let the_url = "${root_url}/api/1.0/delete_user";
+            let pword = document.getElementById("password").value;
 
             if (pword.length > 0)
             {
@@ -164,8 +164,8 @@
             {
                 alert("Please enter your password.");
             }
-		}
-	}
+        }
+    }
 
     // Handler for when the server returns the user's settings.
     var process_user_settings = function(records)

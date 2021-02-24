@@ -1,196 +1,196 @@
 h1 {
-	color: #000000;
-	text-transform: uppercase;
-	text-align: left;
-	font-size: 250%;
-	margin: 0px;
-	padding: 0px;
+    color: #000000;
+    text-transform: uppercase;
+    text-align: left;
+    font-size: 250%;
+    margin: 0px;
+    padding: 0px;
 }
 
 h2 {
-	color: #000000;
-	background: #FFFFFF;
+    color: #000000;
+    background: #FFFFFF;
 }
 
 .nav ul {
-	list-style-type: none;
-	overflow: hidden;
-	background-color: #333;
-	margin: 0px;
-	padding: 0px;
+    list-style-type: none;
+    overflow: hidden;
+    background-color: #333;
+    margin: 0px;
+    padding: 0px;
 }
 
 .nav li {
-	float: left;
+    float: left;
 }
 
 .nav li a {
-	display: inline-block;
-	color: white;
-	text-align: center;
-	margin: 0px;
-	padding: 14px 16px;
-	text-decoration: none;
+    display: inline-block;
+    color: white;
+    text-align: center;
+    margin: 0px;
+    padding: 14px 16px;
+    text-decoration: none;
 }
 
 .nav li a:hover {
-	background-color: #111;
+    background-color: #111;
 }
 
 .summary ul {
-	list-style-type: none;
-	overflow: hidden;
-	background-color: #333;
-	margin: 0px;
-	padding: 0px;
+    list-style-type: none;
+    overflow: hidden;
+    background-color: #333;
+    margin: 0px;
+    padding: 0px;
 }
 
 .summary li {
-	float: left;
-	color: white;
-	margin: 0px;
-	padding: 10px 16px;
-	text-decoration: none;
+    float: left;
+    color: white;
+    margin: 0px;
+    padding: 10px 16px;
+    text-decoration: none;
 }
 
 section {
-	color: #000000;
-	background: #FFFFFF;
-	vertical-align: top;
-	margin: 0px;
-	padding: 0px;
+    color: #000000;
+    background: #FFFFFF;
+    vertical-align: top;
+    margin: 0px;
+    padding: 0px;
 }
 
 .active {
-	opacity: 1.0;
+    opacity: 1.0;
 }
 
 .left {
-	display: inline-block;
-	background-color: #777713;
-	width: 250px;
+    display: inline-block;
+    background-color: #777713;
+    width: 250px;
 }
 
 .right {
-	display: inline-block;
-	background-color: #FFFFFF;
-	width: 1000px;
+    display: inline-block;
+    background-color: #FFFFFF;
+    width: 1000px;
 }
 
 .left img {
-	margin: 20px;
-	width: 200px;
-	border: 3px;
-	border-style: solid;
-	border-color: #000000;
+    margin: 20px;
+    width: 200px;
+    border: 3px;
+    border-style: solid;
+    border-color: #000000;
 }
 
 table {
-	font-family: arial, sans-serif;
-	background: linear-gradient(to left, #FFFFFF , #DDDDDD);
-	margin-left: auto;
-	margin-right: auto;
-	width: 100%;
+    font-family: arial, sans-serif;
+    background: linear-gradient(to left, #FFFFFF , #DDDDDD);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
 }
 
 td {
-	border: 1px solid #FFFFFF;
-	padding: 2px;
-	border-radius: 2px;
-	text-shadow: 1px 1px #FFFFFF;
-	text-align: center;
+    border: 1px solid #FFFFFF;
+    padding: 2px;
+    border-radius: 2px;
+    text-shadow: 1px 1px #FFFFFF;
+    text-align: center;
 }
 
 tr {
-	opacity: 0.7;
+    opacity: 0.7;
 }
 
 .device_list tr:first-child { font-weight: bold }
 .api_key_list tr:first-child { font-weight: bold }
 
 .import table {
-	font-family: arial, sans-serif;
-	background: linear-gradient(to left, #FFFFFF , #DDDDDD);
+    font-family: arial, sans-serif;
+    background: linear-gradient(to left, #FFFFFF , #DDDDDD);
     margin-top: 16px;
-	margin-left: auto;
-	margin-right: auto;
-	width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
 }
 
 .import td {
-	padding: 2px 25px 2px 25px;
-	text-align: center;
+    padding: 2px 25px 2px 25px;
+    text-align: center;
 }
 
 .analysis table {
-	font-family: arial, sans-serif;
-	background: linear-gradient(to left, #FFFFFF , #FFFFFF);
-	margin-left: auto;
-	margin-right: auto;
-	width: 100%;
+    font-family: arial, sans-serif;
+    background: linear-gradient(to left, #FFFFFF , #FFFFFF);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
 }
 
 .activity_control table {
-	font-family: arial, sans-serif;
-	background: linear-gradient(to left, #FFFFFF , #FFFFFF);
-	margin-left: auto;
-	margin-right: auto;
-	width: 100%;
+    font-family: arial, sans-serif;
+    background: linear-gradient(to left, #FFFFFF , #FFFFFF);
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
 }
 
 .activity_control td {
-	border: 1px solid #FFFFFF;
-	padding: 2px;
-	border-radius: 2px;
-	text-align: left;
+    border: 1px solid #FFFFFF;
+    padding: 2px;
+    border-radius: 2px;
+    text-align: left;
 }
 
 .activity_control tr {
-	opacity: 0.7;
+    opacity: 0.7;
 }
 
 tr:hover {
-	opacity: 1.0;
+    opacity: 1.0;
 }
 
 .user_search_form {
-	width: 200px;
-	margin: 50px auto;
-	padding: 25px;
+    width: 200px;
+    margin: 50px auto;
+    padding: 25px;
 }
 
 .user_search_form ul {
-	margin: 0px;
-	padding: 0px;
+    margin: 0px;
+    padding: 0px;
 }
 
 .user_search_form li {
-	display: inline;
-	padding-bottom: .25cm;
+    display: inline;
+    padding-bottom: .25cm;
 }
 
 .user_search_form input {
-	width: 400px;
+    width: 400px;
 }
 
 .activities_list {
-	padding: 25px 25px 25px 25px;
+    padding: 25px 25px 25px 25px;
 }
 
 select {
-	width: 250px;
-	margin: 5px 5px 5px 5px;
+    width: 250px;
+    margin: 5px 5px 5px 5px;
     border: 0px;
-	font-family: arial, sans-serif;
-	font-size: 120%;
+    font-family: arial, sans-serif;
+    font-size: 120%;
 }
 
 .empty div {
-	margin: 0px;
+    margin: 0px;
 }
 
 div {
-	margin: 10px;
+    margin: 10px;
 }
 
 button {
@@ -266,12 +266,12 @@ button .fa {
 }
 
 .block input {
-	width: 400px;
+    width: 400px;
 }
 
 .block select {
-	width: 250px;
-	margin: 5px;
+    width: 250px;
+    margin: 5px;
 }
 
 .block section {
@@ -316,5 +316,5 @@ button .fa {
     font-size: 32px;
     color: red;
     z-index: 3;
-	background: url('../images/race.png');
+    background: url('../images/race.png');
 }
