@@ -166,7 +166,10 @@ class Importer(object):
 
                         # Read the timestamp. Discard any garbage by splitting after the (possible) plus sign.
                         dt_str = str(point.time).split('+')[0] + " UTC"
-                        dt_obj = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S %Z")
+                        if dt_str.find('.') > 1:
+                            dt_obj = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S.%f %Z")
+                        else:
+                            dt_obj = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S %Z")
                         dt_tuple = dt_obj.timetuple()
                         dt_unix = calendar.timegm(dt_tuple) * 1000
 
