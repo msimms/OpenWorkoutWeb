@@ -103,8 +103,11 @@
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_api_keys", cache: false, success: process_keys, dataType: "json" });
     }
 
-    // Things we need when the page is loaded.
-    get_keys();
+    $(document).ready(function()
+    {
+        // Things we need when the page is loaded.
+        get_keys();
+    });
 
 </script>
 

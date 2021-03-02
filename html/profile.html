@@ -553,13 +553,16 @@
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_hr_zones, error: process_hr_zones_error, dataType: "json" });
     }
 
-    // Things we need when the page is loaded.
-    get_personal_records();
-    get_gear_defaults();
-    get_user_settings();
-    get_vo2_max();
-    get_ftp();
-    get_bmi();
+    $(document).ready(function()
+    {
+        // Things we need when the page is loaded.
+        get_personal_records();
+        get_gear_defaults();
+        get_user_settings();
+        get_vo2_max();
+        get_ftp();
+        get_bmi();
+    });
 
 </script>
 
