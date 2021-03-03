@@ -76,7 +76,6 @@ function send_get_request(url, result_text)
 
     xml_http.open("GET", url, false);
     xml_http.setRequestHeader('Content-Type', content_type);
-
     xml_http.onreadystatechange = function()
     {
         if (xml_http.readyState == XMLHttpRequest.DONE)
@@ -89,6 +88,24 @@ function send_get_request(url, result_text)
     return result;
 }
 
+/// @function Sends an HTTP GET request and waits for the response.
+function send_get_request_async(url, callback)
+{
+    let xml_http = new XMLHttpRequest();
+    let content_type = "application/json; charset=utf-8";
+
+    xml_http.open("GET", url, true);
+    xml_http.setRequestHeader('Content-Type', content_type);
+    xml_http.onreadystatechange = function()
+    {
+        if (xml_http.readyState == XMLHttpRequest.DONE)
+        {
+            callback(xml_http.status, xml_http.responseText);
+        }
+    }
+    xml_http.send();
+}
+
 /// @function Sends an HTTP POST request and waits for the response.
 function send_post_request(url, params, result_text)
 {
@@ -99,7 +116,6 @@ function send_post_request(url, params, result_text)
 
     xml_http.open("POST", url, false);
     xml_http.setRequestHeader('Content-Type', content_type);
-
     xml_http.onreadystatechange = function()
     {
         if (xml_http.readyState == XMLHttpRequest.DONE)

@@ -11,6 +11,7 @@ import Keys
 import SensorAnalyzer
 import StrainCalculator
 import Units
+import UserMgr
 
 class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on power data."""
@@ -18,6 +19,7 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     def __init__(self, activity_type, activity_user_id, data_mgr):
         SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_POWER_KEY, Units.get_power_units_str(), activity_type)
         self.data_mgr = data_mgr
+        self.user_mgr = UserMgr.UserMgr(None)
         self.np_buf = []
         self.current_30_sec_buf = []
         self.current_30_sec_buf_start_time = 0
@@ -113,13 +115,13 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 if self.activity_user_id and self.data_mgr:
 
                     # Get the user's FTP.
-                    ftp = self.data_mgr.retrieve_user_estimated_ftp(self.activity_user_id)
+                    ftp = self.user_mgr.estimate_ftp(self.activity_user_id)
                     if ftp is not None:
 
                         # Compute the strain score.
                         t = (self.end_time - self.start_time) / 1000.0
                         calc = StrainCalculator.StrainCalculator()
-                        strain_score = calc.calculate_strain_score_from_power(t, np, ftp[0])
+                        strain_score = calc.calculate_strain_score_from_power(t, np, ftp)
                         results[Keys.STRAIN_SCORE] = strain_score
 
             #
@@ -128,7 +130,7 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
 
             ftp_calc = FtpCalculator.FtpCalculator()
             ftp_calc.add_activity_data(self.activity_type, self.start_time, self.bests)
-            estimated_ftp = ftp_calc.estimate()
+            estimated_ftp = ftp_calc.estimate_ftp()
             if estimated_ftp:
                 results[Keys.THRESHOLD_POWER] = estimated_ftp
 

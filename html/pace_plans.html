@@ -127,8 +127,11 @@
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_pace_plans, dataType: "json" });
     }
 
-    // Things we need when the page is loaded.
-    list_pace_plans();
+    $(document).ready(function()
+    {
+        // Things we need when the page is loaded.
+        list_pace_plans();
+    });
 
 </script>
 

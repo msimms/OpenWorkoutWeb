@@ -108,9 +108,9 @@ function draw_graph(data, title, units, color)
 
 function draw_bar_chart(data, title, color)
 {
-    let xVals = Array.apply(null, Array(data.length - 1)).map(function (x, i) { return i + 1; } );
+    let xVals = Array.apply(null, Array(data.length)).map(function (x, i) { return i + 1; } );
 
-    let margin = {top: 20, right: 20, bottom: 55, left: 50},
+    let margin = { top: 20, right: 20, bottom: 55, left: 50 },
         width = $("#charts").width() - margin.left - margin.right,
         height = 250 - margin.top - margin.bottom;
 
@@ -153,6 +153,6 @@ function draw_bar_chart(data, title, color)
         .style("fill", color)
         .attr("width", x.rangeBand())
         .attr("height", function(d) { return height - y(d); })
-        .attr("x", function(d, i) { return x(i); })
+        .attr("x", function(d, i) { return x(i+1); })
         .attr("y", function(d) { return y(d); });
 }

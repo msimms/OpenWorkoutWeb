@@ -164,9 +164,12 @@ class Importer(object):
                 for segment in track.segments:
                     for point in segment.points:
 
-                        # Read the timestamp.
-                        dt_str = str(point.time) + " UTC"
-                        dt_obj = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S %Z")
+                        # Read the timestamp. Discard any garbage by splitting after the (possible) plus sign.
+                        dt_str = str(point.time).split('+')[0] + " UTC"
+                        if dt_str.find('.') > 1:
+                            dt_obj = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S.%f %Z")
+                        else:
+                            dt_obj = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S %Z")
                         dt_tuple = dt_obj.timetuple()
                         dt_unix = calendar.timegm(dt_tuple) * 1000
 

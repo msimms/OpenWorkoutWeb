@@ -26,6 +26,7 @@
 import bcrypt
 import sys
 import time
+import FtpCalculator
 import Keys
 import SessionMgr
 import StraenDb
@@ -307,12 +308,34 @@ class UserMgr(object):
 
         # Read the stored max heart rates out of the database.
         stored_max_hrs = self.database.retrieve_user_setting(user_id, Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY)
+        if stored_max_hrs is None:
+            return None
 
         # Only consider heart rate values from the last year.
         ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
         one_year_ago = int(time.time()) - ONE_YEAR
         recent_hrs = [v for k,v in stored_max_hrs.items() if int(k) >= ONE_YEAR]
         return max(recent_hrs)
+
+    def estimate_ftp(self, user_id):
+        """Looks through the list of 20 minute power bests in the database"""
+        """and returns an FTP estimation using the highest value from the last year."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        # Read the stored 20 minute power bests out of the database.
+        stored_20_min_power_bests = self.database.retrieve_user_setting(user_id, Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY)
+        if stored_20_min_power_bests is None:
+            return None
+
+        # Only consider values from the last year.
+        ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
+        one_year_ago = int(time.time()) - ONE_YEAR
+        recent_bests = [v for k,v in stored_20_min_power_bests.items() if int(k) >= ONE_YEAR]
+        calc = FtpCalculator.FtpCalculator()
+        return calc.estimate_ftp_from_20_min_power(max(recent_bests))
 
     def default_user_setting(self, key):
         """Returns the default value for the specified setting."""
@@ -341,7 +364,9 @@ class UserMgr(object):
             return {}
         if key == Keys.USER_SPECIFIED_MAX_HEART_RATE_KEY:
             return 0
-        if key == Keys.ESTIMATED_FTP_KEY:
+        if key == Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY:
+            return {}
+        if key == Keys.ESTIMATED_CYCLING_FTP_KEY:
             return 0
         if key == Keys.GOAL_DATE_KEY:
             return int(time.time())
@@ -364,10 +389,15 @@ class UserMgr(object):
         if key is None or len(key) == 0:
             raise Exception("Bad parameter.")
 
-        # Are we looking for the estimated max heart rate because that is computed rather than stored?
+        # Are we looking for the estimated max heart rate, because that is computed rather than stored?
         if key == Keys.ESTIMATED_MAX_HEART_RATE_KEY:
             max_hr = self.estimate_max_heart_rate(user_id)
             return max_hr
+
+        # Are we looking for the estimated FTP value, because that is computed rather than stored?
+        if key == Keys.ESTIMATED_CYCLING_FTP_KEY:
+            ftp = self.estimate_ftp(user_id)
+            return ftp
 
         # What's in the database?
         result = self.database.retrieve_user_setting(user_id, key)
@@ -398,10 +428,17 @@ class UserMgr(object):
         # What's in the database?
         results = self.database.retrieve_user_settings(user_id, keys)
 
-        # Are we looking for the estimated max heart rate because that is computed rather than stored?
+        # Are we looking for the estimated max heart rate, because that is computed rather than stored?
         if Keys.ESTIMATED_MAX_HEART_RATE_KEY in keys:
             max_hr = self.estimate_max_heart_rate(user_id)
-            results.append({Keys.ESTIMATED_MAX_HEART_RATE_KEY: max_hr})
+            if max_hr is not None:
+                results.append({ Keys.ESTIMATED_MAX_HEART_RATE_KEY: max_hr })
+
+        # Are we looking for the estimated FTP value, because that is computed rather than stored?
+        if Keys.ESTIMATED_CYCLING_FTP_KEY in keys:
+            ftp = self.estimate_ftp(user_id)
+            if ftp is not None:
+                results.append({ Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY: ftp })
 
         # Add defaults for anything no in the database.
         for key in keys:

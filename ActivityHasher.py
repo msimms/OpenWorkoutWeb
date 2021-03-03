@@ -4,7 +4,6 @@
 import hashlib
 import sys
 import Keys
-import SensorAnalyzerFactory
 
 class ActivityHasher(object):
     """Computes the hash of an activity. Used to determine uniqueness."""
@@ -45,37 +44,6 @@ class ActivityHasher(object):
                 h.update(latitude)
                 h.update(longitude)
                 h.update(altitude)
-
-        # Hash the sensor data. The order in which we hash sensor data needs to match the order in the mobile app.
-        print("Hashing sensor data...")
-        sensor_types_to_analyze = [Keys.APP_ACCELEROMETER_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]
-        for sensor_type in sensor_types_to_analyze:
-            if sensor_type in self.activity:
-                print("Hashing " + sensor_type + " data...")
-
-                # Accelerometer data is stored differently....
-                if sensor_type == Keys.APP_ACCELEROMETER_KEY:
-                    for datum in self.activity[sensor_type]:
-                        time = str(datum[Keys.ACCELEROMETER_TIME_KEY]).encode('utf-8')
-                        x = self.float_to_str(datum[Keys.ACCELEROMETER_AXIS_NAME_X])
-                        y = self.float_to_str(datum[Keys.ACCELEROMETER_AXIS_NAME_Y])
-                        z = self.float_to_str(datum[Keys.ACCELEROMETER_AXIS_NAME_Z])
-
-                        h.update(time)
-                        h.update(x)
-                        h.update(y)
-                        h.update(z)
-                else:
-                    for datum in self.activity[sensor_type]:
-                        if sys.version_info[0] < 3:
-                            time = self.str_num_to_str(datum.keys()[0])
-                            value = self.str_num_to_str(datum.values()[0])
-                        else:
-                            time = self.str_num_to_str(list(datum.keys())[0]).encode('utf-8')
-                            value = self.str_num_to_str(list(datum.values())[0]).encode('utf-8')
-
-                        h.update(time)
-                        h.update(value)
 
         # Finalize the hash digest.
         hash_str = h.hexdigest()

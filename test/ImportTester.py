@@ -224,7 +224,7 @@ def print_records(store, activity_type):
     if activity_type == Keys.TYPE_CYCLING_KEY:
 
         # Print the estimated FTP.
-        estimated_ftp = store.summarizer.ftp_calc.estimate()
+        estimated_ftp = store.summarizer.ftp_calc.estimate_ftp()
         print("Estimated FTP: {:.2f} watts".format(estimated_ftp))
 
         # Print the training zones.

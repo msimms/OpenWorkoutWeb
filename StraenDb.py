@@ -904,7 +904,7 @@ class MongoDatabase(Database.Database):
         try:
             user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
             if user_records is not None:
-                user_records.pop(activity_id)
+                user_records.pop(activity_id, None)
                 self.records_collection.save(user_records)
                 return True
         except:

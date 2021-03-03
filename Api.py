@@ -1915,18 +1915,21 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity hash.")
 
         # Anything in the database?
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if activity is None:
+            return True, json.dumps( { Keys.CODE_KEY: 0, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity does not exist
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None:
-            return True, json.dumps( { Keys.CODE_KEY: 0, Keys.ACTIVITY_ID_KEY: activity_id } )
+            return True, json.dumps( { Keys.CODE_KEY: 1, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash not computed
 
         # Hash from database.
-        if Keys.ACTIVITY_HASH_KEY not in summary:
-            raise ApiException.ApiMalformedRequestException("Hash not found.")
+        if Keys.ACTIVITY_HASH_KEY not in summary_data:
+            return True, json.dumps( { Keys.CODE_KEY: 1, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash not computed
         hash_from_db = summary_data[Keys.ACTIVITY_HASH_KEY]
         if hash_from_db != activity_hash:
-            return True, json.dumps( { Keys.CODE_KEY: 1, Keys.ACTIVITY_ID_KEY: activity_id } )
+            return True, json.dumps( { Keys.CODE_KEY: 2, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, has does not match
 
-        return True, json.dumps( { Keys.CODE_KEY: 2, Keys.ACTIVITY_ID_KEY: activity_id } )
+        return True, json.dumps( { Keys.CODE_KEY: 3, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, has matches
 
     def handle_list_personal_records(self, values):
         """Returns the user's personal records. Result is a JSON string."""
@@ -2075,7 +2078,7 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        ftp = self.data_mgr.retrieve_user_estimated_ftp(self.user_id)
+        ftp = self.user_mgr.estimate_ftp(self.user_id)
         return True, json.dumps(ftp)
 
     def handle_estimate_bmi(self):
@@ -2090,10 +2093,10 @@ class Api(object):
 
     def handle_list_power_zones(self, values):
         """Returns power zones corresponding to the specified FTP value."""
-        if Keys.ESTIMATED_FTP_KEY not in values:
+        if Keys.ESTIMATED_CYCLING_FTP_KEY not in values:
             raise ApiException.ApiMalformedRequestException("FTP not specified.")
 
-        ftp = values[Keys.ESTIMATED_FTP_KEY]
+        ftp = values[Keys.ESTIMATED_CYCLING_FTP_KEY]
         if not InputChecker.is_float(ftp):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 

@@ -193,8 +193,8 @@
 
     var process_personal_records = function(records)
     {
-		let cycling_table = document.getElementById("Cycling");
-		let running_table = document.getElementById("Running");
+        let cycling_table = document.getElementById("Cycling");
+        let running_table = document.getElementById("Running");
 
         let sorted_cycling_keys = Object.keys(records.Cycling).sort()
         let sorted_running_keys = Object.keys(records.Running).sort()
@@ -212,18 +212,21 @@
     /// @function get_heat_map_data
     function get_heat_map_data()
     {
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_location_summary", cache: false, success: process_heat_map, dataType: "json" });
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_location_summary", cache: false, success: process_heat_map, dataType: "json" });
     }
 
     /// @function get_personal_records
     function get_personal_records()
     {
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_personal_records", cache: false, success: process_personal_records, dataType: "json" });
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_personal_records", cache: false, success: process_personal_records, dataType: "json" });
     }
 
-    // Things we need when the page is loaded.
-    get_heat_map_data();
-    get_personal_records();
+    $(document).ready(function()
+    {
+        // Things we need when the page is loaded.
+        get_heat_map_data();
+        get_personal_records();
+    });
 
 </script>
 
