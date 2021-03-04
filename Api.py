@@ -1741,11 +1741,9 @@ class Api(object):
         start_time = None
         end_time = None
         if Keys.START_DATE_KEY in values:
-            start_time = values[Keys.START_DATE_KEY]
-            start_time = int(datetime.datetime.strptime(start_time, '%Y-%m-%d').strftime("%s"))
+            start_time = int(datetime.datetime.strptime(values[Keys.START_DATE_KEY], '%Y-%m-%d').strftime("%s"))
         if Keys.END_DATE_KEY in values:
-            end_time = values[Keys.END_DATE_KEY]
-            end_time = int(datetime.datetime.strptime(end_time, '%Y-%m-%d').strftime("%s"))
+            end_time = int(datetime.datetime.strptime(values[Keys.END_DATE_KEY], '%Y-%m-%d').strftime("%s"))
         if Keys.START_TIME_KEY in values:
             start_time = values[Keys.START_TIME_KEY]
             if InputChecker.is_integer(start_time):

@@ -2027,7 +2027,8 @@ class MongoDatabase(Database.Database):
                 for workout in workouts_list:
                     workout_obj = Workout.Workout(user_id)
                     workout_obj.from_dict(workout)
-                    if start_time is None or start_time == 0 or workout_obj.scheduled_time > start_time:
+                    scheduled_time = time.mktime(workout_obj.scheduled_time.timetuple())
+                    if start_time is None or start_time == 0 or scheduled_time > start_time:
                         workouts.append(workout_obj)
         except:
             self.log_error(traceback.format_exc())
