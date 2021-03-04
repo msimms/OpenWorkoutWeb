@@ -255,6 +255,9 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 * Fixed planned workout synchronization with the mobile app.
 * Fixed heart rate zone generation.
 
+### 0.37
+* Bug fixes and performance optimizations.
+
 ## Tech
 This software uses several other source projects to work properly:
 
