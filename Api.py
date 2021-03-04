@@ -24,6 +24,7 @@
 """API request handlers"""
 
 import calendar
+import datetime
 import json
 import logging
 import os
@@ -710,14 +711,18 @@ class Api(object):
         # Fetch and validate the activity start and end times (optional).
         start_time = None
         end_time = None
-        if Keys.START_TIME in values:
-            start_time = values[Keys.START_TIME]
+        if Keys.START_DATE_KEY in values:
+            start_time = int(datetime.datetime.strptime(values[Keys.START_DATE_KEY], '%Y-%m-%d').strftime("%s"))
+        if Keys.END_DATE_KEY in values:
+            end_time = int(datetime.datetime.strptime(values[Keys.END_DATE_KEY], '%Y-%m-%d').strftime("%s"))
+        if Keys.START_TIME_KEY in values:
+            start_time = values[Keys.START_TIME_KEY]
             if InputChecker.is_integer(start_time):
                 start_time = int(start_time)
             else:
                 raise ApiException.ApiMalformedRequestException("Invalid start time.")
-        if Keys.END_TIME in values:
-            end_time = values[Keys.END_TIME]
+        if Keys.END_TIME_KEY in values:
+            end_time = values[Keys.END_TIME_KEY]
             if InputChecker.is_integer(end_time):
                 end_time = int(end_time)
             else:
@@ -1735,14 +1740,20 @@ class Api(object):
         # Fetch and validate the activity start and end times (optional).
         start_time = None
         end_time = None
-        if Keys.START_TIME in values:
-            start_time = values[Keys.START_TIME]
+        if Keys.START_DATE_KEY in values:
+            start_time = values[Keys.START_DATE_KEY]
+            start_time = int(datetime.datetime.strptime(start_time, '%Y-%m-%d').strftime("%s"))
+        if Keys.END_DATE_KEY in values:
+            end_time = values[Keys.END_DATE_KEY]
+            end_time = int(datetime.datetime.strptime(end_time, '%Y-%m-%d').strftime("%s"))
+        if Keys.START_TIME_KEY in values:
+            start_time = values[Keys.START_TIME_KEY]
             if InputChecker.is_integer(start_time):
                 start_time = int(start_time)
             else:
                 raise ApiException.ApiMalformedRequestException("Invalid start time.")
-        if Keys.END_TIME in values:
-            end_time = values[Keys.END_TIME]
+        if Keys.END_TIME_KEY in values:
+            end_time = values[Keys.END_TIME_KEY]
             if InputChecker.is_integer(end_time):
                 end_time = int(end_time)
             else:

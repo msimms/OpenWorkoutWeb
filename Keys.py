@@ -367,8 +367,10 @@ LOCAL_FILE_NAME = "local file name"
 # Only used by the API.
 SENSOR_LIST_KEY = "sensors"
 SUMMARY_ITEMS_LIST_KEY = "summary_items"
-START_TIME = "start_time"
-END_TIME = "end_time"
+START_TIME_KEY = "start_time"
+END_TIME_KEY = "end_time"
+START_DATE_KEY = "start"
+END_DATE_KEY = "end"
 CODE_KEY = "code"
 
 TIME_KEYS = [ BEST_1K, BEST_MILE, BEST_5K, BEST_10K, BEST_15K, BEST_HALF_MARATHON, BEST_MARATHON, BEST_METRIC_CENTURY, BEST_CENTURY ]
