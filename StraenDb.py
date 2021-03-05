@@ -102,20 +102,6 @@ class MongoDatabase(Database.Database):
             self.log_error(MongoDatabase.total_activities_count.__name__ + ": Exception")
         return 0
 
-    def list_excluded_activity_keys(self):
-        """This is the list of stuff we don't need to return when we're building an activity list. Helps with efficiency."""
-        exclude_keys = {}
-        exclude_keys[Keys.APP_CADENCE_KEY] = False
-        exclude_keys[Keys.APP_CURRENT_SPEED_KEY] = False
-        exclude_keys[Keys.APP_AVG_SPEED_KEY] = False
-        exclude_keys[Keys.APP_MOVING_SPEED_KEY] = False
-        exclude_keys[Keys.APP_HEART_RATE_KEY] = False
-        exclude_keys[Keys.APP_AVG_HEART_RATE_KEY] = False
-        exclude_keys[Keys.APP_CURRENT_PACE_KEY] = False
-        exclude_keys[Keys.APP_POWER_KEY] = False
-        exclude_keys[Keys.ACTIVITY_LOCATIONS_KEY] = False
-        return exclude_keys
-
     def list_excluded_user_keys(self):
         """This is the list of stuff we don't need to return when we're building a friends list. Helps with efficiency and privacy by not exposing more than we need."""
         exclude_keys = {}
@@ -916,22 +902,20 @@ class MongoDatabase(Database.Database):
     # Activity management methods
     #
 
-    def retrieve_user_activity_list(self, user_id, start_time, end_time, num_results, exclude_keys):
+    def retrieve_user_activity_list(self, user_id, start_time, end_time):
         """Retrieves the list of activities associated with the specified user."""
-        if num_results is not None and num_results <= 0:
-            return None
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_user_activity_list.__name__ + ": Unexpected empty object: user_id")
+            return []
 
         try:
-            if start_time is None and num_results is None:
-                return list(self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
-            elif num_results is None:
-                return list(self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start_time))
-            else:
-                return list(self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).skip(start_time).limit(num_results))
+            if start_time is None or end_time is None:
+                return list(self.activities_collection.find({"$and": [ {Keys.ACTIVITY_USER_ID_KEY: {'$eq': user_id}} ]}))
+            return list(self.activities_collection.find({"$and": [ {Keys.ACTIVITY_USER_ID_KEY: {'$eq': user_id}}, {Keys.ACTIVITY_START_TIME_KEY: {'$gt': start_time}}, {Keys.ACTIVITY_START_TIME_KEY: {'$lt': end_time}} ]}))
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return []
 
     def retrieve_each_user_activity(self, context, user_id, callback_func):
         """Retrieves each user activity and calls the callback function for each one."""
@@ -946,28 +930,20 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def retrieve_device_activity_list(self, device_str, start_time, num_results):
+    def retrieve_device_activity_list(self, device_str, start_time, end_time):
         """Retrieves the list of activities associated with the specified device."""
         if device_str is None:
             self.log_error(MongoDatabase.retrieve_device_activity_list.__name__ + ": Unexpected empty object: device_str")
-            return None
-        if num_results is not None and num_results <= 0:
-            return None
+            return []
 
         try:
-            # Things we don't need.
-            exclude_keys = self.list_excluded_activity_keys()
-
-            if (start_time is None or start_time == 0) and num_results is None:
-                return list(self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1))
-            elif num_results is None:
-                return list(self.activities_collection.find({"$and": [ {Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str}}, {Keys.ACTIVITY_START_TIME_KEY: {'$gt': start_time}} ]}))
-            else:
-                return list(self.activities_collection.find({"$and": [ {Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str}}, {Keys.ACTIVITY_START_TIME_KEY: {'$gt': start_time}} ]}).limit(num_results))
+            if start_time is None or end_time is None:
+                return list(self.activities_collection.find({"$and": [ {Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str}} ]}))
+            return list(self.activities_collection.find({"$and": [ {Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str}}, {Keys.ACTIVITY_START_TIME_KEY: {'$gt': start_time}}, {Keys.ACTIVITY_START_TIME_KEY: {'$lt': end_time}} ]}))
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return []
 
     def retrieve_each_device_activity(self, context, user_id, device_str, callback_func):
         """Retrieves each device activity and calls the callback function for each one."""
@@ -2027,8 +2003,8 @@ class MongoDatabase(Database.Database):
                 for workout in workouts_list:
                     workout_obj = Workout.Workout(user_id)
                     workout_obj.from_dict(workout)
-                    scheduled_time = time.mktime(workout_obj.scheduled_time.timetuple())
-                    if start_time is None or start_time == 0 or scheduled_time > start_time:
+                    scheduled_time = int(time.mktime(workout_obj.scheduled_time.timetuple()))
+                    if (start_time is None or start_time == 0 or scheduled_time > start_time) and (end_time is None or end_time == 0 or scheduled_time <= end_time):
                         workouts.append(workout_obj)
         except:
             self.log_error(traceback.format_exc())
