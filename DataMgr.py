@@ -147,7 +147,7 @@ class DataMgr(Importer.ActivityWriter):
                 return True
 
         # Look through the user's activities for ones that overlap with the given start time.
-        activities = self.database.retrieve_user_activity_list(user_id, None, None, None, None)
+        activities = self.database.retrieve_user_activity_list(user_id, None, None)
         for activity in activities:
 
             if Keys.ACTIVITY_START_TIME_KEY in activity:
