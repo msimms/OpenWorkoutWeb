@@ -608,19 +608,17 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity(activity_id)
 
-    def delete_activity(self, object_id, user_id, activity_id):
+    def delete_activity(self, user_id, activity_id):
         """Delete the activity with the specified object ID."""
         if self.database is None:
             raise Exception("No database.")
-        if object_id is None:
-            raise Exception("Bad parameter.")
         if user_id is None:
             raise Exception("Bad parameter.")
         if activity_id is None:
             raise Exception("Bad parameter.")
 
         # Delete the activity as well as the cache of the PRs performed during that activity.
-        result = self.database.delete_activity(object_id)
+        result = self.database.delete_activity(activity_id)
 
         if result:
 

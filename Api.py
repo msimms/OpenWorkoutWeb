@@ -773,13 +773,13 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        # Get the activities that belong to the logged in user.
-        deleted = False
-        activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None, None)
-        for activity in activities:
-            if Keys.ACTIVITY_ID_KEY in activity and activity[Keys.ACTIVITY_ID_KEY] == activity_id:
-                deleted = self.data_mgr.delete_activity(activity['_id'], self.user_id, activity_id)
-                break
+        # Only the activity's owner should be able to do this.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
+
+        # Delete the activity.
+        deleted = self.data_mgr.delete_activity(self.user_id, activity_id)
 
         # Did we find it?
         if not deleted:

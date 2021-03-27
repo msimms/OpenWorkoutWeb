@@ -1086,15 +1086,15 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def delete_activity(self, object_id):
-        """Delete method for an activity, specified by the database object ID."""
-        if object_id is None:
-            self.log_error(MongoDatabase.delete_activity.__name__ + ": Unexpected empty object: object_id")
+    def delete_activity(self, activity_id):
+        """Delete method for an activity, specified by the activity ID."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.delete_activity.__name__ + ": Unexpected empty object: activity_id")
             return False
 
         try:
             activity_id_obj = ObjectId(str(object_id))
-            deleted_result = self.activities_collection.delete_one({ Keys.DATABASE_ID_KEY: activity_id_obj })
+            deleted_result = self.activities_collection.delete_one({ Keys.ACTIVITY_ID_KEY: activity_id })
             if deleted_result is not None:
                 return True
         except:

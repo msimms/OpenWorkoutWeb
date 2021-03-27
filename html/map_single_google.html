@@ -446,10 +446,9 @@ ${splits}
             let result_text = {};
 
             dict.push({["activity_id"] : "${activityId}"});
-            if (send_post_request(the_url, dict, result_text))
+            send_post_request_async(the_url, dict, function(s, m) {
                 window.location.replace("${root_url}");
-            else
-                alert(result_text.value);
+            });
         }
     }
 
