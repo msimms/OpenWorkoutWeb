@@ -1093,7 +1093,6 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            activity_id_obj = ObjectId(str(object_id))
             deleted_result = self.activities_collection.delete_one({ Keys.ACTIVITY_ID_KEY: activity_id })
             if deleted_result is not None:
                 return True
