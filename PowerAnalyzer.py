@@ -35,7 +35,7 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
         """Adds another reading to the analyzer."""
         SensorAnalyzer.SensorAnalyzer.append_sensor_value(self, date_time, value)
 
-        sum_of_readings = 0
+        sum_of_readings = 0.0
         num_readings = 0
         duration = self.end_time - self.start_time
 
@@ -54,6 +54,7 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
             sum_of_readings = sum_of_readings + reading[1]
             num_readings = num_readings + 1
             curr_time_diff = (self.end_time - reading_time) / 1000
+
             if curr_time_diff == 5:
                 average_power = sum_of_readings / num_readings
                 self.do_power_record_check(Keys.BEST_5_SEC_POWER, average_power)
