@@ -189,7 +189,8 @@ function convert_speed_graph_to_display_units(unit_system, speed_list)
             value = speed * 3.6;
         else
             value = speed * 2.23694;
-        new_speed_list.push({date, value});    }
+        new_speed_list.push({date, value});
+    }
     return new_speed_list;
 }
 

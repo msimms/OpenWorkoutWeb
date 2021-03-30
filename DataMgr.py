@@ -147,7 +147,7 @@ class DataMgr(Importer.ActivityWriter):
                 return True
 
         # Look through the user's activities for ones that overlap with the given start time.
-        activities = self.database.retrieve_user_activity_list(user_id, None, None, None, None)
+        activities = self.database.retrieve_user_activity_list(user_id, None, None)
         for activity in activities:
 
             if Keys.ACTIVITY_START_TIME_KEY in activity:
@@ -506,7 +506,7 @@ class DataMgr(Importer.ActivityWriter):
         devices = list(set(devices)) # De-duplicate
         if devices is not None:
             for device in devices:
-                device_activities = self.database.retrieve_device_activity_list(device, start_time, None)
+                device_activities = self.database.retrieve_device_activity_list(device, start_time, end_time)
                 if device_activities is not None:
                     for device_activity in device_activities:
                         device_activity[Keys.REALNAME_KEY] = user_realname
@@ -514,8 +514,7 @@ class DataMgr(Importer.ActivityWriter):
                     activities.extend(device_activities)
 
         # List activities with no device that are associated with the user.
-        exclude_keys = self.database.list_excluded_activity_keys() # Things we don't need.
-        user_activities = self.database.retrieve_user_activity_list(user_id, start_time, end_time, None, exclude_keys)
+        user_activities = self.database.retrieve_user_activity_list(user_id, start_time, end_time)
         if user_activities is not None:
             for user_activity in user_activities:
                 user_activity[Keys.REALNAME_KEY] = user_realname
@@ -572,14 +571,6 @@ class DataMgr(Importer.ActivityWriter):
 
         return activities
 
-    def retrieve_device_activity_list(self, device_id, start_time, num_results):
-        """Returns a list containing all of the device's activities, up to num_results. num_results can be None for all activiites."""
-        if self.database is None:
-            raise Exception("No database.")
-        if device_id is None or len(device_id) == 0:
-            raise Exception("Bad parameter.")
-        return self.database.retrieve_device_activity_list(device_id, start_time, num_results)
-
     def delete_user_gear(self, user_id):
         """Deletes all user gear."""
         if self.database is None:
@@ -617,19 +608,17 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity(activity_id)
 
-    def delete_activity(self, object_id, user_id, activity_id):
+    def delete_activity(self, user_id, activity_id):
         """Delete the activity with the specified object ID."""
         if self.database is None:
             raise Exception("No database.")
-        if object_id is None:
-            raise Exception("Bad parameter.")
         if user_id is None:
             raise Exception("Bad parameter.")
         if activity_id is None:
             raise Exception("Bad parameter.")
 
         # Delete the activity as well as the cache of the PRs performed during that activity.
-        result = self.database.delete_activity(object_id)
+        result = self.database.delete_activity(activity_id)
 
         if result:
 
@@ -1032,7 +1021,11 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         new_workouts_list = []
-        old_workouts_list = self.database.retrieve_planned_workouts_for_user(user_id, start_time, end_time)
+        unix_start_time = int(time.mktime(start_time.timetuple()))
+        unix_end_time = int(time.mktime(end_time.timetuple()))
+
+        old_workouts_list = self.database.retrieve_planned_workouts_for_user(user_id, unix_start_time, unix_end_time)
+
         for workout in old_workouts_list:
             if workout.scheduled_time is not None and (workout.scheduled_time < start_time or workout.scheduled_time > end_time):
                 new_workouts_list.append(workout)

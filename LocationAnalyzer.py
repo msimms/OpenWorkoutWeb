@@ -95,16 +95,16 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         self.current_speed = 0.0
 
         # Loop through the list, in reverse order, updating the current speed, and all "bests".
-        for time_distance_pair in reversed(self.distance_buf):
+        for time_distance_node in reversed(self.distance_buf):
 
             # Convert time from ms to seconds - seconds from this point to the end of the activity.
-            current_time = time_distance_pair[0]
+            current_time = time_distance_node[0]
             total_seconds = (self.last_time - current_time) / 1000.0
             if total_seconds <= 0:
                 continue
 
             # Distance travelled from this point to the end of the activity.
-            current_distance = time_distance_pair[2]
+            current_distance = time_distance_node[1]
             total_meters = self.total_distance - current_distance
 
             # Current speed is the average of the last ten seconds.
@@ -188,7 +188,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
 
             # Update totals and averages.
             self.total_distance = self.total_distance + meters_traveled
-            self.distance_buf.append([date_time, meters_traveled, self.total_distance])
+            self.distance_buf.append([date_time, self.total_distance])
             self.total_vertical = self.total_vertical + abs(altitude - self.last_alt)
             self.update_average_speed(date_time)
 
@@ -217,7 +217,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
     def examine_interval_peak(self, start_index, end_index):
         """Examines a line of near-constant pace/speed."""
         if start_index >= end_index:
-            return
+            return None
 
         # How long (in seconds) was this block?
         start_time = self.speed_times[start_index]
@@ -239,7 +239,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                     break
             line_length_meters = 0.0
             if start_distance_rec is not None and end_distance_rec is not None:
-                line_length_meters = end_distance_rec[2] - start_distance_rec[2]
+                line_length_meters = end_distance_rec[1] - start_distance_rec[1]
             line_avg_speed = statistics.mean(speeds)
             self.speed_blocks.append(line_avg_speed)
 
@@ -271,15 +271,16 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
 
                     # Examine the lines between the peaks. Extract pertinant data, such as avg speed/pace and set it aside.
                     # This data is used later when generating the report.
-                    all_intervals = []
+                    filtered_interval_list = []
                     for peak in peak_list:
                         interval = self.examine_interval_peak(peak.left_trough.x, peak.right_trough.x)
-                        all_intervals.append(interval)
+                        if interval is not None:
+                            filtered_interval_list.append(interval)
 
                     # Do a k-means analysis on the computed speed/pace blocks so we can get rid of any outliers.
                     significant_intervals = []
                     num_speed_blocks = len(self.speed_blocks)
-                    if num_speed_blocks > 1:
+                    if num_speed_blocks >= 2:
 
                         # Make the data two dimensional because this is needed for the k means algorithm.
                         x1 = np.array(self.speed_blocks)
@@ -298,11 +299,15 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                         distortions = []
                         for k in range(1, max_k):
                             kmeans_model = KMeans(n_clusters=k).fit(X)
-                            distortions.append(sum(np.min(cdist(X, kmeans_model.cluster_centers_, 'euclidean'), axis = 1)) / X.shape[0])
+                            distances = cdist(X, kmeans_model.cluster_centers_, 'euclidean')
+                            distances_sum = sum(np.min(distances, axis = 1))
+                            distortion = distances_sum / X.shape[0]
+                            distortions.append(distortion)
 
                             # Use the elbow method to find the best value for k.
-                            if len(distortions) > 1:
+                            if len(distortions) >= 2 and k >= 2:
                                 slope = (distortions[k-1] + distortions[k-2]) / 2
+
                                 if best_k == 0 or slope > steepest_slope:
                                     best_k = k
                                     best_labels = kmeans_model.labels_
@@ -312,7 +317,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                         interval_index = 0
                         for label in best_labels:
                             if label >= 1:
-                                significant_intervals.append(all_intervals[interval_index])
+                                significant_intervals.append(filtered_interval_list[interval_index])
                             interval_index = interval_index + 1
 
                     results[Keys.ACTIVITY_INTERVALS_KEY] = significant_intervals

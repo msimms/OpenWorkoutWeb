@@ -24,6 +24,7 @@
 """API request handlers"""
 
 import calendar
+import datetime
 import json
 import logging
 import os
@@ -710,14 +711,18 @@ class Api(object):
         # Fetch and validate the activity start and end times (optional).
         start_time = None
         end_time = None
-        if Keys.START_TIME in values:
-            start_time = values[Keys.START_TIME]
+        if Keys.START_DATE_KEY in values:
+            start_time = int(datetime.datetime.strptime(values[Keys.START_DATE_KEY], '%Y-%m-%d').strftime("%s"))
+        if Keys.END_DATE_KEY in values:
+            end_time = int(datetime.datetime.strptime(values[Keys.END_DATE_KEY], '%Y-%m-%d').strftime("%s"))
+        if Keys.START_TIME_KEY in values:
+            start_time = values[Keys.START_TIME_KEY]
             if InputChecker.is_integer(start_time):
                 start_time = int(start_time)
             else:
                 raise ApiException.ApiMalformedRequestException("Invalid start time.")
-        if Keys.END_TIME in values:
-            end_time = values[Keys.END_TIME]
+        if Keys.END_TIME_KEY in values:
+            end_time = values[Keys.END_TIME_KEY]
             if InputChecker.is_integer(end_time):
                 end_time = int(end_time)
             else:
@@ -768,13 +773,13 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        # Get the activities that belong to the logged in user.
-        deleted = False
-        activities = self.data_mgr.retrieve_user_activity_list(self.user_id, "", None, None, None)
-        for activity in activities:
-            if Keys.ACTIVITY_ID_KEY in activity and activity[Keys.ACTIVITY_ID_KEY] == activity_id:
-                deleted = self.data_mgr.delete_activity(activity['_id'], self.user_id, activity_id)
-                break
+        # Only the activity's owner should be able to do this.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
+
+        # Delete the activity.
+        deleted = self.data_mgr.delete_activity(self.user_id, activity_id)
 
         # Did we find it?
         if not deleted:
@@ -1735,14 +1740,18 @@ class Api(object):
         # Fetch and validate the activity start and end times (optional).
         start_time = None
         end_time = None
-        if Keys.START_TIME in values:
-            start_time = values[Keys.START_TIME]
+        if Keys.START_DATE_KEY in values:
+            start_time = int(datetime.datetime.strptime(values[Keys.START_DATE_KEY], '%Y-%m-%d').strftime("%s"))
+        if Keys.END_DATE_KEY in values:
+            end_time = int(datetime.datetime.strptime(values[Keys.END_DATE_KEY], '%Y-%m-%d').strftime("%s"))
+        if Keys.START_TIME_KEY in values:
+            start_time = values[Keys.START_TIME_KEY]
             if InputChecker.is_integer(start_time):
                 start_time = int(start_time)
             else:
                 raise ApiException.ApiMalformedRequestException("Invalid start time.")
-        if Keys.END_TIME in values:
-            end_time = values[Keys.END_TIME]
+        if Keys.END_TIME_KEY in values:
+            end_time = values[Keys.END_TIME_KEY]
             if InputChecker.is_integer(end_time):
                 end_time = int(end_time)
             else:
