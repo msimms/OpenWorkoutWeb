@@ -90,7 +90,7 @@ function draw_graph(data, title, units, color)
         .attr("d", valueline(data))
         .style("fill", color)
         .style("stroke", "LightSlateGray")
-        .style("stroke-width", 1.25);
+        .style("stroke-width", 0.25);
     svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height + ")")
