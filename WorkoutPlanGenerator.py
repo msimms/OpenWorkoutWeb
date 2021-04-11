@@ -112,7 +112,7 @@ class WorkoutPlanGenerator(object):
         goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
 
         # Analyze any unanalyzed activities.
-        self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.FOUR_WEEKS)
+        self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.SIX_MONTHS)
 
         # This will trigger the callback for each of the user's activities.
         self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb)

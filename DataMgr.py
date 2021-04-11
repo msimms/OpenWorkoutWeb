@@ -1464,14 +1464,15 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         # We're only interested in activities from this time forward.
+        now = time.time()
         if timeframe is None:
             cutoff_time = None
         else:
-            cutoff_time = time.time() - timeframe
+            cutoff_time = now - timeframe
 
         num_unanalyzed = 0
 
-        all_activities = self.retrieve_user_activity_list(user_id, None, None, None, None)
+        all_activities = self.retrieve_user_activity_list(user_id, None, cutoff_time, now, None)
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
 
         for activity in all_activities:
