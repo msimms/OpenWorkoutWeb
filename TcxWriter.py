@@ -58,20 +58,21 @@ class TcxWriter(XmlWriter.XmlWriter):
         self.create(file_name)
 
         attributes = {}
-        attributes["xmlns"] = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
-        attributes["xmlns:xsd"] = "http://www.w3.org/2001/XMLSchema"
-        attributes["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"
-        attributes["xmlns:tc2"] = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
-        attributes["targetNamespace"] = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
-        attributes["elementFormDefault"] = "qualified"        
+        attributes["xsi:schemaLocation"] = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd"
+        attributes["xmlns:ns5"] = "http://www.garmin.com/xmlschemas/ActivityGoals/v1"
+        attributes["xmlns:ns3"] = "http://www.garmin.com/xmlschemas/ActivityExtension/v2"
+        attributes["xmlns:ns2"] = "http://www.garmin.com/xmlschemas/UserProfile/v2"
+        attributes["xmlns"]     = "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
+        attributes["xmlns:xsi"] = "http://www.w3.org/2001/XMLSchema-instance"        
+        attributes["xmlns:ns4"] = "http://www.garmin.com/xmlschemas/ProfileExtension/v1"        
         self.open_tag_with_attributes("TrainingCenterDatabase", attributes, True)
         self.open_tag(TCX_TAG_NAME_ACTIVITIES)
 
     def close(self):
         self.close_all_tags()
 
-    def write_id(self, start_time):
-        buf = datetime.datetime.utcfromtimestamp(start_time).strftime('%Y-%m-%dT%H:%M:%SZ')
+    def store_id(self, start_time):
+        buf = self.format_time_ms(start_time)
         self.write_tag_and_value(TCX_TAG_NAME_ID, buf)
 
     def start_activity(self, description):
@@ -88,10 +89,10 @@ class TcxWriter(XmlWriter.XmlWriter):
         attributes["StartTime"] = self.format_time_ms(time_ms)
         self.open_tag_with_attributes(TCX_TAG_NAME_LAP, attributes, False)
 
-    def store_lap_seconds(self, time_ms):
+    def store_lap_seconds(self, lap_seconds):
         if self.current_tag() is not TCX_TAG_NAME_LAP:
             raise Exception("TCX tag error when writing lap seconds.")
-        self.write_tag_and_value(TCX_TAG_NAME_TOTAL_TIME_SECONDS, time_ms / 1000)
+        self.write_tag_and_value(TCX_TAG_NAME_TOTAL_TIME_SECONDS, lap_seconds)
 
     def store_lap_distance(self, distance_meters):
         if self.current_tag() is not TCX_TAG_NAME_LAP:
@@ -189,6 +190,6 @@ class TcxWriter(XmlWriter.XmlWriter):
         sec  = t / 1000
         ms = t % 1000
 
-        buf1 = datetime.datetime.utcfromtimestamp(sec).strftime('%Y-%m-%d %H:%M:%S')
-        buf2 = buf1 + ".%04d" % ms
+        buf1 = datetime.datetime.utcfromtimestamp(sec).strftime('%Y-%m-%dT%H:%M:%S')
+        buf2 = buf1 + ".%04dZ" % ms
         return buf2
