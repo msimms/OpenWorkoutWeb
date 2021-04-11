@@ -112,6 +112,11 @@ RECORDS_USER_ID = "user_id"
 RECORD_NAME_KEY = "record_name"
 PERSONAL_RECORDS_KEY = "records"
 
+# Workout training intensity distribution
+TRAINING_INTENSITY_DIST_POLARIZED = "polarized"
+TRAINING_INTENSITY_DIST_PYRAMIDAL = "pyramidal"
+TRAINING_INTENSITY_DIST_THRESHOLD = "threshold"
+
 # Workout plans
 WORKOUT_PLAN_USER_ID_KEY = "user_id"
 WORKOUT_PLAN_CALENDAR_ID_KEY = "calendar id"
