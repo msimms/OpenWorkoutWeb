@@ -22,8 +22,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-function draw_graph(data, title, units, color)
+/// @function draw_graph
+function draw_graph(start_time_ms, end_time_ms, data, title, units, color)
 {
+    if (data.length <= 1)
+    {
+        return;
+    }
+
+    // To make all the graphs line up, make sure they have the same start and end time
+    if (start_time_ms > 0)
+    {
+        graph_node = {};
+        graph_node["date"] = new Date(start_time_ms);
+        graph_node["value"] = 0;
+        data.unshift(graph_node);
+    }
+    if (end_time_ms > start_time_ms)
+    {
+        graph_node = {};
+        graph_node["date"] = new Date(end_time_ms);
+        graph_node["value"] = 0;
+        data.push(graph_node);
+    }
+
     if (data.length <= 1)
     {
         return;
@@ -106,6 +128,7 @@ function draw_graph(data, title, units, color)
         .text(title);
 }
 
+/// @function draw_bar_chart
 function draw_bar_chart(data, title, color)
 {
     let xVals = Array.apply(null, Array(data.length)).map(function (x, i) { return i + 1; } );
@@ -155,4 +178,39 @@ function draw_bar_chart(data, title, color)
         .attr("height", function(d) { return height - y(d); })
         .attr("x", function(d, i) { return x(i+1); })
         .attr("y", function(d) { return y(d); });
+}
+
+/// @function draw_intervals_graph
+function draw_intervals_graph(start_time_ms, end_time_ms, interval_data)
+{
+    interval_graph = [];
+
+    if (interval_data.length > 0)
+    {
+        for (let i in interval_data)
+        {
+            let interval = interval_data[i];
+            let start_interval_time = interval[0];
+            let end_interval_time = interval[1];
+
+            graph_node = {};
+            graph_node["date"] = new Date(start_interval_time - 1000);
+            graph_node["value"] = 0;
+            interval_graph.push(graph_node);
+            graph_node = {};
+            graph_node["date"] = new Date(start_interval_time);
+            graph_node["value"] = 1;
+            interval_graph.push(graph_node);
+            graph_node = {};
+            graph_node["date"] = new Date(end_interval_time);
+            graph_node["value"] = 1;
+            interval_graph.push(graph_node);
+            graph_node = {};
+            graph_node["date"] = new Date(end_interval_time + 1000);
+            graph_node["value"] = 0;
+            interval_graph.push(graph_node);
+        }
+
+        draw_graph(start_time_ms, end_time_ms, interval_graph, "Intervals", "", "Black");
+    }
 }

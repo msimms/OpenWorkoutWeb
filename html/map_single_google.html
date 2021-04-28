@@ -228,8 +228,8 @@ ${summary}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
-    var start_time = 0;
-    var end_time = 0;
+    var start_time_ms = 0;
+    var end_time_ms = 0;
 
     var powerZones = [
 ${powerZones}
@@ -249,52 +249,7 @@ ${splits}
         {
             if (key == "intervals")
             {
-                interval_graph = [];
-                interval_data = summarydata[key];
-                if (interval_data.length > 0)
-                {
-                    if (start_time > 0)
-                    {
-                        graph_node = {};
-                        graph_node["date"] = new Date(start_time);
-                        graph_node["value"] = 0;
-                        interval_graph.push(graph_node);
-                    }
-
-                    for (let i in interval_data)
-                    {
-                        let interval = interval_data[i];
-                        let start_interval_time = Number(interval[0]);
-                        let end_interval_time = Number(interval[1]);
-
-                        graph_node = {};
-                        graph_node["date"] = new Date(start_interval_time-1000);
-                        graph_node["value"] = 0;
-                        interval_graph.push(graph_node);
-                        graph_node = {};
-                        graph_node["date"] = new Date(start_interval_time);
-                        graph_node["value"] = 1;
-                        interval_graph.push(graph_node);
-                        graph_node = {};
-                        graph_node["date"] = new Date(end_interval_time);
-                        graph_node["value"] = 1;
-                        interval_graph.push(graph_node);
-                        graph_node = {};
-                        graph_node["date"] = new Date(end_interval_time+1000);
-                        graph_node["value"] = 0;
-                        interval_graph.push(graph_node);
-                    }
-
-                    if (end_time > 0)
-                    {
-                        graph_node = {};
-                        graph_node["date"] = new Date(end_time);
-                        graph_node["value"] = 0;
-                        interval_graph.push(graph_node);
-                    }
-
-                    draw_graph(interval_graph, "Intervals", "", "Black");
-                }
+                draw_intervals_graph(start_time_ms, end_time_ms, summarydata[key]);
             }
         }
     }
@@ -321,6 +276,12 @@ ${splits}
                 return new_e;
             });
 
+            if (new_data.length > 1 && start_time_ms == 0)
+            {
+                start_time_ms = new_data[0].date;
+                end_time_ms = new_data[new_data.length-1].date;
+            }
+
             if (key == "Current Speed")
             {
                 let is_metric = ("${unit_system}" == "metric");
@@ -343,27 +304,21 @@ ${splits}
                     speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
                     pace_data = convert_speed_graph_to_pace_graph("${unit_system}", new_data);
 
-                    draw_graph(speed_data, "Speed", speed_units, "DodgerBlue");
-                    draw_graph(pace_data, "Pace", pace_units, "DodgerBlue");
+                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
+                    draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, "DodgerBlue");
                 }
                 else
                 {
                     speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
-                    draw_graph(speed_data, "Speed", speed_units, "DodgerBlue");
-                }
-
-                if (speed_data.length > 1)
-                {
-                    start_time = speed_data[0].date;
-                    end_time = speed_data[speed_data.length-1].date;
+                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
                 }
             }
             else if (key == "Heart Rate")
-                draw_graph(new_data, "BPM", "BPM", "FireBrick");
+                draw_graph(start_time_ms, end_time_ms, new_data, "BPM", "BPM", "FireBrick");
             else if (key == "Cadence")
-                draw_graph(new_data, "RPM", "RPM", "ForestGreen");
+                draw_graph(start_time_ms, end_time_ms, new_data, "RPM", "RPM", "ForestGreen");
             else if (key == "Power")
-                draw_graph(new_data, "Watts", "Watts", "ForestGreen");
+                draw_graph(start_time_ms, end_time_ms, new_data, "Watts", "Watts", "ForestGreen");
         }
 
         retrieve_summary_data();
