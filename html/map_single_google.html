@@ -32,13 +32,6 @@
         background-color: teal;
     }
 
-    path
-    {
-        stroke: steelblue;
-        stroke-width: 2;
-        fill: none;
-    }
-
     .axis path,
     .axis line
     {
@@ -225,7 +218,7 @@ ${summary}
 
 <div id="charts"/>
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
     var start_time_ms = 0;
@@ -254,6 +247,7 @@ ${splits}
         }
     }
 
+    /// @function retrieve_summary_data
     function retrieve_summary_data()
     {
         let api_url = "${root_url}/api/1.0/activity_summarydata?activity_id=${activityId}&summary_items=intervals";
@@ -324,12 +318,14 @@ ${splits}
         retrieve_summary_data();
     }
 
+    /// @function retrieve_sensor_data
     function retrieve_sensor_data()
     {
         let api_url = "${root_url}/api/1.0/activity_sensordata?activity_id=${activityId}&sensors=Current%20Speed,Heart%20Rate,Cadence,Power";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
     }
 
+    /// @function draw_graphs
     function draw_graphs()
     {
         retrieve_sensor_data();
@@ -343,6 +339,7 @@ ${splits}
 
 <script>
 
+    /// @function refresh_analysis
     function refresh_analysis()
     {
         let the_url = "${root_url}/api/1.0/refresh_analysis";
@@ -356,6 +353,7 @@ ${splits}
             alert(result_text.value);
     }
 
+    /// @function create_comment
     function create_comment()
     {
         let the_url = "${root_url}/api/1.0/create_comment";
@@ -371,6 +369,7 @@ ${splits}
             alert(result_text.value);
     }
 
+    /// @function export_activity
     function export_activity()
     {
         let the_url = "${root_url}/api/1.0/export_activity";
@@ -386,12 +385,14 @@ ${splits}
             alert(result_text.value);
     }
 
+    /// @function edit_activity
     function edit_activity()
     {
         let the_url = "${root_url}/edit_activity/${activityId}";
         window.location.replace(the_url);
     }
 
+    /// @function delete_activity
     function delete_activity()
     {
         if (confirm('Are you sure you want to do this?'))
@@ -407,6 +408,7 @@ ${splits}
         }
     }
 
+    /// @function delete_photo
     function delete_photo(photo_id)
     {
         if (confirm('Are you sure you want to delete the above photo?'))
@@ -459,6 +461,7 @@ ${splits}
         }
     }
 
+    /// @function list_photos
     function list_photos()
     {
         let api_url = "${root_url}/api/1.0/list_activity_photos?activity_id=${activityId}";
@@ -475,12 +478,14 @@ ${splits}
         }
     }
 
+    /// @function list_tags
     function list_tags()
     {
         let api_url = "${root_url}/api/1.0/list_tags?activity_id=${activityId}";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_tags, dataType: "text" });
     }
 
+    /// @function create_tags
     function create_tags(tags)
     {
         let the_url = "${root_url}/api/1.0/create_tags_on_activity";
