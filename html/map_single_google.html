@@ -224,17 +224,18 @@ ${summary}
     var start_time_ms = 0;
     var end_time_ms = 0;
 
-    var powerZones = [
+    let power_zones = [
 ${powerZones}
     ];
-    var splits = [
+    let splits = [
 ${splits}
     ];
+    let new_splits = splits.map(function(item) { return item / 1000.0 });
 
-    if (powerZones.length > 0)
-        $(function() { draw_bar_chart(powerZones, "Power Zone Distribution", "ForestGreen") });
-    if (splits.length > 0)
-        $(function() { draw_bar_chart(splits, "Split Times", "LightSteelBlue") });
+    if (power_zones.length > 0)
+        $(function() { draw_bar_chart(power_zones, "Power Zone Distribution", "ForestGreen") });
+    if (new_splits.length > 0)
+        $(function() { draw_bar_chart(new_splits, "Split Times", "LightSteelBlue") });
 
     var process_summarydata = function(summarydata)
     {

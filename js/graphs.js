@@ -32,14 +32,12 @@ function pad(num, size)
 
 /// @function convert_seconds_to_hours_mins_secs
 /// Converts seconds to HH:MM:SS format.
-function convert_seconds_to_hours_mins_secs(milliseconds_in)
+function convert_seconds_to_hours_mins_secs(seconds_in)
 {
-    seconds_in = milliseconds_in / 1000;
-    seconds = seconds_in % 60;
     minutes = Math.trunc(seconds_in / 60);
     hours = Math.trunc(minutes / 60);
     minutes = Math.trunc(minutes % 60);
-    out_str = pad(hours.toFixed(0), 2) + ":" + pad(minutes.toFixed(0), 2) + ":" + pad(seconds.toFixed(0), 2);
+    out_str = pad(hours.toFixed(0), 2) + ":" + pad(minutes.toFixed(0), 2) + ":" + pad(seconds_in.toFixed(0), 2);
     return out_str;
 }
 
@@ -113,7 +111,7 @@ function draw_simple_graph(data, title, color)
         .attr("x", 0 - (height / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")
-        .text(title);  
+        .text(title);
 
     // Add a clipPath: everything out of this area won't be drawn.
     let clip = svg.append("defs").append("svg:clipPath")
@@ -407,7 +405,7 @@ function draw_bar_chart(data, title, color)
     let x = d3.scaleBand().domain(d3.range(1, data.length + 1)).range([0, width])
     let y = d3.scaleLinear().domain([0, d3.max(data)]).range([height, 0])
 
-    let xAxis = d3.axisBottom(x);
+    let xAxis = d3.axisBottom(x).ticks(data.length);
     let yAxis = d3.axisLeft(y).ticks(2);
 
     let svg = d3.select("#charts")
@@ -442,4 +440,39 @@ function draw_bar_chart(data, title, color)
         .attr("height", function(d) { return height - y(d); })
         .attr("x", function(d, i) { return x(i+1); })
         .attr("y", function(d) { return y(d); });
+}
+
+/// @function draw_intervals_graph
+function draw_intervals_graph(start_time_ms, end_time_ms, interval_data)
+{
+    interval_graph = [];
+
+    if (interval_data.length > 0)
+    {
+        for (let i in interval_data)
+        {
+            let interval = interval_data[i];
+            let start_interval_time = interval[0];
+            let end_interval_time = interval[1];
+
+            graph_node = {};
+            graph_node["date"] = new Date(start_interval_time - 1000);
+            graph_node["value"] = 0;
+            interval_graph.push(graph_node);
+            graph_node = {};
+            graph_node["date"] = new Date(start_interval_time);
+            graph_node["value"] = 1;
+            interval_graph.push(graph_node);
+            graph_node = {};
+            graph_node["date"] = new Date(end_interval_time);
+            graph_node["value"] = 1;
+            interval_graph.push(graph_node);
+            graph_node = {};
+            graph_node["date"] = new Date(end_interval_time + 1000);
+            graph_node["value"] = 0;
+            interval_graph.push(graph_node);
+        }
+
+        draw_graph(start_time_ms, end_time_ms, interval_graph, "Intervals", "", "Gray");
+    }
 }
