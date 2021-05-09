@@ -27,7 +27,7 @@ class IntensityCalculator(object):
     """Encapsulates equations for calculating or estimating the intensity of the workout."""
 
     def __init__(self):
-        super(StrainCalculator, self).__init__()
+        super(IntensityCalculator, self).__init__()
 
     @staticmethod
     def estimate_intensity_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour):
