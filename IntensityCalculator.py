@@ -23,7 +23,7 @@
 # SOFTWARE.
 """Encapsulates equations for calculating or estimating the intensity of the workout."""
 
-class StrainCalculator(object):
+class IntensityCalculator(object):
     """Encapsulates equations for calculating or estimating the intensity of the workout."""
 
     def __init__(self):
