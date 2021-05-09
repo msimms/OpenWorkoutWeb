@@ -32,8 +32,8 @@ import sys
 import time
 import uuid
 import IcsWriter
+import IntensityCalculator
 import Keys
-import StrainCalculator
 import Units
 import UserMgr
 import ZwoWriter
@@ -347,5 +347,5 @@ class Workout(object):
         if workout_duration_secs > 0.0:
             avg_workout_pace_meters_per_sec = avg_workout_pace_meters_per_sec / workout_duration_secs
 
-        calc = StrainCalculator.StrainCalculator()
+        calc = IntensityCalculator.IntensityCalculator()
         self.estimated_intensity_score = calc.estimate_intensity_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_minute * 60.0)

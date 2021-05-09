@@ -12,10 +12,10 @@ import time
 import traceback
 import ActivityHasher
 import DataMgr
+import IntensityCalculator
 import Keys
 import LocationAnalyzer
 import SensorAnalyzerFactory
-import StrainCalculator
 import UserMgr
 
 class ActivityAnalyzer(object):
@@ -191,7 +191,7 @@ class ActivityAnalyzer(object):
                         # We need to know the user's threshold pace to compute the intensity score.
                         if Keys.FUNCTIONAL_THRESHOLD_PACE in run_paces:
                             threshold_pace_meters_per_hour = run_paces[Keys.FUNCTIONAL_THRESHOLD_PACE] * 60.0
-                            calc = StrainCalculator.StrainCalculator()
+                            calc = IntensityCalculator.IntensityCalculator()
                             stress = calc.estimate_intensity_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour)
                             self.summary_data[Keys.INTENSITY_SCORE] = stress
 
