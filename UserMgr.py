@@ -26,10 +26,10 @@
 import bcrypt
 import sys
 import time
+import AppDatabase
 import FtpCalculator
 import Keys
 import SessionMgr
-import StraenDb
 
 
 MIN_PASSWORD_LEN  = 8
@@ -39,7 +39,7 @@ class UserMgr(object):
 
     def __init__(self, session_mgr):
         self.session_mgr = session_mgr
-        self.database = StraenDb.MongoDatabase()
+        self.database = AppDatabase.MongoDatabase()
         self.database.connect()
         super(UserMgr, self).__init__()
 

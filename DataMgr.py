@@ -30,13 +30,13 @@ import sys
 import threading
 import time
 import uuid
+import AppDatabase
 import BmiCalculator
 import FtpCalculator
 import HeartRateCalculator
 import Importer
 import Keys
 import MapSearch
-import StraenDb
 import Summarizer
 import TrainingPaceCalculator
 import VO2MaxCalculator
@@ -67,7 +67,7 @@ class DataMgr(Importer.ActivityWriter):
         self.analysis_scheduler = analysis_scheduler
         self.import_scheduler = import_scheduler
         self.workout_plan_gen_scheduler = workout_plan_gen_scheduler
-        self.database = StraenDb.MongoDatabase()
+        self.database = AppDatabase.MongoDatabase()
         self.database.connect()
         self.map_search = None
         self.celery_worker = celery.Celery('straen_worker')
