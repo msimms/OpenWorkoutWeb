@@ -119,11 +119,11 @@ class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
                     ftp = self.user_mgr.estimate_ftp(self.activity_user_id)
                     if ftp is not None:
 
-                        # Compute the strain score.
+                        # Compute the intensity score.
                         t = (self.end_time - self.start_time) / 1000.0
                         calc = StrainCalculator.StrainCalculator()
-                        strain_score = calc.calculate_strain_score_from_power(t, np, ftp)
-                        results[Keys.STRAIN_SCORE] = strain_score
+                        intensity_score = calc.calculate_intensity_score_from_power(t, np, ftp)
+                        results[Keys.INTENSITY_SCORE] = intensity_score
 
             #
             # Compute the threshold power from this workout. Maybe we have a new estimated FTP?

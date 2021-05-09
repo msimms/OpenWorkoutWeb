@@ -74,7 +74,7 @@ EXPERIENCE_LEVEL_KEY = "Experience Level" # Athlete's experience level with runn
 STRUCTURED_TRAINING_COMFORT_LEVEL_KEY = "Structured Training Comfort Level" # Athlete's comfort level (i.e. experience) with doing intervals, long runs, etc. (scale 1-10)
 WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
 IN_TAPER_KEY = "Is In Taper"
-NUM_WEEKS_BUILDING_KEY = "Num Weeks Building" # The number of consecutive weeks with increasing strain
+NUM_WEEKS_BUILDING_KEY = "Num Weeks Building" # The number of consecutive weeks with increasing intensity
 AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
 AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
 NUM_RUNS_LAST_FOUR_WEEKS = "Number of Runs (Last 4 Weeks)"
@@ -131,7 +131,7 @@ WORKOUT_INTERVALS_KEY = "intervals"
 WORKOUT_COOLDOWN_KEY = "cooldown"
 WORKOUT_SCHEDULED_TIME_KEY = "scheduled time"
 WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY = "last scheduled workout time"
-WORKOUT_ESTIMATED_STRAIN_KEY = "estimated strain score"
+WORKOUT_ESTIMATED_INTENSITY_KEY = "estimated intensity score"
 
 # Workout types
 WORKOUT_TYPE_REST = "Rest"
@@ -261,13 +261,13 @@ STEPS_PER_MINUTE = "Steps Per Minute" # Cadence for foot based activity
 AVG_STEPS_PER_MINUTE = "Average Steps Per Minute" # Average cadence for foot based activity
 NORMALIZED_POWER = "Normalized Power"
 THRESHOLD_POWER = "Threshold Power"
-STRAIN_SCORE = "Strain" # Strain score, represents the amount of strain the activity places on the body
-ESTIMATED_STRAIN_SCORE = "Estimated Training Stress" # Estimated strain score, for activities that don't have power data
 VARIABILITY_INDEX = "Variability Index"
-TOTAL_DISTANCE = "Total Distance" # Distance for an activity
 LONGEST_DISTANCE = "Longest Distance" # Longest distance, when summarizing activities
+TOTAL_DISTANCE = "Total Distance" # Distance for an activity
 TOTAL_ACTIVITIES = "Total Activities" # Number of activities logged over the specified time
-TOTAL_STRAIN_SCORE = "Total Strain" # Sum of the strain scores for each activity within the specified time
+INTENSITY_SCORE = "Intensity Score" # Intensity score, represents the intensity of the workout
+ESTIMATED_INTENSITY_SCORE = "Estimated Intensity Score" # Estimated intensity score, for activities that don't have power data
+TOTAL_INTENSITY_SCORE = "Total Intensity Score" # Sum of the intensity scores for each activity within the specified time
 MILE_SPLITS = "Mile Splits" # List of mile splits
 KM_SPLITS = "KM Splits" # List of kilometer splits
 
@@ -387,7 +387,7 @@ HEART_RATE_KEYS = [ AVG_HEART_RATE, MAX_HEART_RATE ]
 CADENCE_KEYS = [ APP_CADENCE_KEY, AVG_CADENCE, MAX_CADENCE ]
 RUNNING_CADENCE_KEYS = [ STEPS_PER_MINUTE, AVG_STEPS_PER_MINUTE ]
 GOALS = [ GOAL_FITNESS_KEY, GOAL_5K_RUN_KEY, GOAL_10K_RUN_KEY, GOAL_15K_RUN_KEY, GOAL_HALF_MARATHON_RUN_KEY, GOAL_MARATHON_RUN_KEY, GOAL_50K_RUN_KEY, GOAL_50_MILE_RUN_KEY ]
-STRAIN_SCORES = [ STRAIN_SCORE, ESTIMATED_STRAIN_SCORE ]
+INTENSITY_SCORES = [ INTENSITY_SCORE, ESTIMATED_INTENSITY_SCORE, TOTAL_INTENSITY_SCORE ]
 
 UNSUMMARIZABLE_KEYS = [ APP_SPEED_VARIANCE_KEY, APP_DISTANCES_KEY, APP_LOCATIONS_KEY, ACTIVITY_START_TIME_KEY, ACTIVITY_TYPE_KEY, ACTIVITY_HASH_KEY, ACTIVITY_LOCATION_DESCRIPTION_KEY, ACTIVITY_INTERVALS_KEY, MILE_SPLITS, KM_SPLITS ]
 

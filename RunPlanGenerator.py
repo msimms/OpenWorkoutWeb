@@ -400,6 +400,6 @@ class RunPlanGenerator(object):
 
         # Calculate the total stress for each workout.
         for workout in workouts:
-            workout.calculate_estimated_strain_score(functional_threshold_pace)
+            workout.calculate_estimated_intensity_score(functional_threshold_pace)
 
         return workouts
