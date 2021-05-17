@@ -167,15 +167,15 @@ ${nav}
             let upload_table = document.getElementById("upload_table");
             upload_table.style = "display: inline-block;";
 
-            for (var i = 0, row; row = upload_table.rows[i]; i++)
+            for (let i = 0, row; row = upload_table.rows[i]; i++)
             {
                 if (row.cells[0].innerText.localeCompare(file_name) == 0)
                 {
                     if (status_text == "Finished")
                     {
                         row.cells[0].innerText = "";
-                        var link = document.createElement("a");
-                        var linkText = document.createTextNode(file_name);
+                        let link = document.createElement("a");
+                        let linkText = document.createTextNode(file_name);
                         link.setAttribute("href", "${root_url}/activity/" + activity_id);
                         link.appendChild(linkText);
                         row.cells[0].appendChild(link);
@@ -195,7 +195,7 @@ ${nav}
         /// @function parse_csv_file
         function parse_csv_file(file_obj)
         {
-            var reader = new FileReader();
+            let reader = new FileReader();
 
             reader.onerror = function(event)
             {
@@ -226,8 +226,7 @@ ${nav}
         /// @function upload_file
         function upload_file(file_obj)
         {
-            var reader = new FileReader();
-            reader.readAsBinaryString(file_obj);
+            let reader = new FileReader();
 
             reader.onerror = function(event)
             {
@@ -235,10 +234,10 @@ ${nav}
             };
             reader.onload = function(e)
             {
-                var the_url = "${root_url}/api/1.0/upload_activity_file";
-                var dict = [];
-                var result_text = {};
-                var encoded_data = btoa(reader.result);
+                let the_url = "${root_url}/api/1.0/upload_activity_file";
+                let dict = [];
+                let result_text = {};
+                let encoded_data = btoa(reader.result);
 
                 dict.push({["uploaded_file_name"] : file_obj.name});
                 dict.push({["uploaded_file_data"] : encoded_data});
@@ -261,7 +260,7 @@ ${nav}
         {
             if (file_list.length > 0)
             {
-                for (var i = 0; i < file_list.length; i++)
+                for (let i = 0; i < file_list.length; i++)
                 {
                     let file_obj = file_list[i];
                     let file_name = file_obj.name;
@@ -299,7 +298,7 @@ ${nav}
 
         var process_task_statuses = function(records)
         {
-            for (var record of records)
+            for (let record of records)
             {
                 if (record['internal task id'] in file_tasks)
                 {
