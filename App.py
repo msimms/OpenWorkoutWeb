@@ -337,7 +337,8 @@ class App(object):
     @staticmethod
     def render_edit_controls():
         """Helper function for building the edit string that appears on the activity details screens."""
-        edit_str = "<td><button type=\"button\" onclick=\"return edit_activity()\" style=\"color:black\">Edit</button></td><tr>\n"
+        edit_str  = "<td><button type=\"button\" onclick=\"return edit_activity()\" style=\"color:black\">Edit</button></td><tr>\n"
+        edit_str += "<td><button type=\"button\" onclick=\"return add_photos()\" style=\"color:black\">Add Photos</button></td><tr>\n"
         return edit_str
 
     @staticmethod
@@ -936,6 +937,30 @@ class App(object):
         html_file = os.path.join(self.root_dir, HTML_DIR, 'edit_activity.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id, activity_name=activity_name_str, activity_type=activity_type_str, description=description_str)
+
+    @statistics
+    def add_photos(self, activity_id):
+        """Renders the edit page for an activity."""
+
+        # Sanity check the activity ID.
+        if not InputChecker.is_uuid(activity_id):
+            return self.render_error("Invalid activity ID")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, HTML_DIR, 'add_photos.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id)
 
     @statistics
     def device(self, device_str):
