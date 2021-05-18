@@ -192,6 +192,16 @@ ${nav}
             file_tasks[task_id] = file_name;
         }
 
+        /// @function add_select_option
+        function add_select_option(select, option_text)
+        {
+            let option = document.createElement("option");
+
+            option.value = option_text;
+            option.text = option_text;
+            select.appendChild(option);
+        }
+
         /// @function parse_csv_file
         function parse_csv_file(file_obj)
         {
@@ -205,12 +215,30 @@ ${nav}
             {
                 let line_data = reader.result.split("\n");
                 let csv_table = document.getElementById("parsed_csv_table");
+                let title_row = csv_table.insertRow();
+                let is_first_row = true;
 
                 csv_table.style = "display: inline-block;";
 
                 line_data.forEach(res => {
                     let column_data = res.split(",");
                     let new_row = csv_table.insertRow();
+
+                    if (is_first_row) {
+                        column_data.forEach(column => {
+                            let cell = title_row.insertCell();
+                            let select = document.createElement("select");
+
+                            add_select_option(select, "---");
+                            add_select_option(select, "Date");
+                            for (let i = 1; i <= column_data.length; ++i)
+                            {
+                                add_select_option(select, "Set " + i.toString());
+                            }
+                            cell.appendChild(select);
+                        });
+                        is_first_row = false;
+                    }
 
                     column_data.forEach(column => {
                         let cell = new_row.insertCell();
