@@ -110,6 +110,7 @@ ${route}
 
     google.maps.event.addDomListener(window, 'load', initialize);
 
+    /// @function append_to_track
     var append_to_track = function(obj_list)
     {
         if (obj_list == null)
@@ -129,6 +130,7 @@ ${route}
         last_lon = obj_list[obj_list.length - 1].longitude;
     };
 
+    /// @function update_metadata
     var update_metadata = function(obj_list)
     {
         if (obj_list == null)
@@ -185,6 +187,7 @@ ${route}
         info_window.open(map, marker);
     };
 
+    /// @function check_for_updates
     var check_for_updates = function()
     {
         $.ajax({ type: 'POST', url: "${root_url}/updatefollowing/${userId}/${routeLen}", success: append_to_track, dataType: "application/json" });

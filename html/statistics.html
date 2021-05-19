@@ -26,8 +26,8 @@
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
-<script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
+<script type="text/javascript">
 
     var countries = [];
     var us_states = [];
@@ -138,6 +138,7 @@
         });
     }
 
+    /// @function process_heat_map
     var process_heat_map = function(heat_map)
     {
         for (let location_description in heat_map)
@@ -191,6 +192,7 @@
         cell.appendChild(a);
     }
 
+    /// @function process_personal_records
     var process_personal_records = function(records)
     {
         let cycling_table = document.getElementById("Cycling");

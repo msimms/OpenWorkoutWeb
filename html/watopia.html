@@ -164,6 +164,7 @@ ${splits}
     if (new_splits.length > 0)
         $(function() { draw_bar_chart(new_splits, "Split Times", "LightSteelBlue") });
 
+    /// @function process_summarydata
     var process_summarydata = function(summarydata)
     {
         for (key in summarydata)
@@ -182,6 +183,7 @@ ${splits}
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
     }
 
+    /// @function process_sensordata
     var process_sensordata = function(sensordata)
     {
         for (key in sensordata)
@@ -355,6 +357,7 @@ ${splits}
         }
     }
 
+    /// @function process_photos_list
     var process_photos_list = function(photos_list)
     {
         let photo_ids = photos_list["photo ids"]
@@ -397,6 +400,7 @@ ${splits}
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photos_list, dataType: "json" });
     }
 
+    /// @function process_tags
     var process_tags = function(tags)
     {
         tags = eval(tags)

@@ -27,7 +27,7 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
-<script>
+<script type="text/javascript">
 
     /// @function set_preferred_long_run_day
     // Handler for when the user changes their preferred long run day of the week.
@@ -232,6 +232,7 @@
         }
     }
 
+    /// @function process_personal_records
     // Results handler for when the server returns the user's personal records.
     var process_personal_records = function(records)
     {
@@ -272,6 +273,7 @@
         }
     }
 
+    /// @function process_user_settings
     // Results handler for when the server returns the user's settings.
     var process_user_settings = function(records)
     {
@@ -349,6 +351,7 @@
         }
     }
 
+    /// @function process_calendar_url
     // Results handler for when the server returns the user's iCal URL.
     var process_calendar_url = function(url_str)
     {

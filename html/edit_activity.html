@@ -20,7 +20,8 @@
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
-<script>
+<script type="text/javascript">
+
     /// @function update_activity_metadata
     function update_activity_metadata()
     {
@@ -42,6 +43,7 @@
             alert("An error occurred!");
     }
 
+    /// @function process_activity_type_list
     var process_activity_type_list = function(activity_type_list)
     {
         let activity_type_select = document.getElementById("activity_type");
@@ -78,6 +80,7 @@
         // Things we need when the page is loaded.
         list_activity_types();
     });
+    
 </script>
 
 <section class="nav">

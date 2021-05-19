@@ -255,6 +255,7 @@ ${splits}
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
     }
 
+    /// @function process_sensordata
     var process_sensordata = function(sensordata)
     {
         for (key in sensordata)

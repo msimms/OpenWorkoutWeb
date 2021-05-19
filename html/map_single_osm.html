@@ -72,6 +72,7 @@ ${nav}
         ul.appendChild(li);
     }
 
+    /// @function append_to_track
     var append_to_track = function(obj_list)
     {
         if (obj_list == null)
@@ -89,6 +90,7 @@ ${nav}
         last_lon = obj_list[obj_list.length - 1].longitude;
     };
 
+    /// @function update_metadata
     var update_metadata = function(response)
     {
         if (response == null)
@@ -131,6 +133,7 @@ ${nav}
         markers.addMarker(new OpenLayers.Marker(lon_lat));
     };
 
+    /// @function route_loaded
     var route_loaded = function(response, options)
     {
         if (options.callback)
