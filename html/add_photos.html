@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+<title>${product} - ${name}</title>
+
+<link rel="stylesheet" href="${root_url}/css/normalize.css">
+<link rel="stylesheet" href="${root_url}/css/site.css">
+
+<meta charset="UTF-8">
+<meta name="description" content="Lists all devices claimed by the logged in user">
+<meta name="keywords" content="device list">
+
+</head>
+
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+
+<body>
+
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
+
+<section class="nav">
+${nav}
+</section>
+
+<div class="block">
+
+    <!-- Photos -->
+    <h2>Photos</h2>
+    <input type="file" id="photo_picker" class="modern_button" accept=".png,.jpg,.jpeg,.gif" name="photo_list" webkitdirectory multiple><br>
+    <button type="button" onclick="return upload_selected_files()">Upload Photos</button><br>
+
+    <script type="text/javascript">
+        let picker = document.getElementById('photo_picker');
+        let selected_photo_list = [];
+
+        /// @function upload_file
+        // Sends the chosen photos to the cloud.
+        function upload_file(file_obj)
+        {
+            let reader = new FileReader();
+
+            reader.onerror = function(event)
+            {
+                reader.abort();
+            };
+            reader.onload = function(e)
+            {
+                let the_url = "${root_url}/api/1.0/upload_activity_photo";
+                let dict = [];
+                let result_text = {};
+                let encoded_data = btoa(reader.result);
+
+                dict.push({["uploaded_file_data"] : encoded_data});
+                dict.push({["activity_id"] : "${activity_id}"});
+
+                if (send_post_request(the_url, dict, result_text))
+                {
+                    window.location.reload();
+                }
+                else
+                {
+                    alert(result_text.value);
+                }
+            }
+            reader.readAsBinaryString(file_obj);
+        }
+
+        /// @function upload_selected_files
+        function upload_selected_files()
+        {
+            if (selected_photo_list.length > 0)
+            {
+                for (let i = 0; i < selected_photo_list.length; i++)
+                {
+                    upload_file(selected_photo_list[i]);
+                }
+            }
+            else
+            {
+                alert("No files have been specified.");
+            }
+        }
+
+        picker.addEventListener('change', e => {
+            for (let file of Array.from(e.target.files))
+            {
+                selected_photo_list.push(file);
+            };
+        });
+
+    </script>
+
+</div>
+
+<div class="block">
+    <!-- Back Button -->
+    <hr>
+    <button type="button" onclick="window.location.replace('${root_url}/activity/${activity_id}')">Back</button><br>
+</div>
+
+</body>
+</html>

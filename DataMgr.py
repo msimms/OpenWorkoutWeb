@@ -30,13 +30,13 @@ import sys
 import threading
 import time
 import uuid
+import AppDatabase
 import BmiCalculator
 import FtpCalculator
 import HeartRateCalculator
 import Importer
 import Keys
 import MapSearch
-import StraenDb
 import Summarizer
 import TrainingPaceCalculator
 import VO2MaxCalculator
@@ -67,7 +67,7 @@ class DataMgr(Importer.ActivityWriter):
         self.analysis_scheduler = analysis_scheduler
         self.import_scheduler = import_scheduler
         self.workout_plan_gen_scheduler = workout_plan_gen_scheduler
-        self.database = StraenDb.MongoDatabase()
+        self.database = AppDatabase.MongoDatabase()
         self.database.connect()
         self.map_search = None
         self.celery_worker = celery.Celery('straen_worker')
@@ -1464,14 +1464,15 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         # We're only interested in activities from this time forward.
+        now = time.time()
         if timeframe is None:
             cutoff_time = None
         else:
-            cutoff_time = time.time() - timeframe
+            cutoff_time = now - timeframe
 
         num_unanalyzed = 0
 
-        all_activities = self.retrieve_user_activity_list(user_id, None, None, None, None)
+        all_activities = self.retrieve_user_activity_list(user_id, None, cutoff_time, now, None)
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
 
         for activity in all_activities:

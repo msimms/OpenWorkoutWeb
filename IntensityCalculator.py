@@ -21,25 +21,25 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Encapsulates equations for calculating or estimating the strain the workout places on the body."""
+"""Encapsulates equations for calculating or estimating the intensity of the workout."""
 
-class StrainCalculator(object):
-    """Encapsulates equations for calculating or estimating the strain the workout places on the body."""
+class IntensityCalculator(object):
+    """Encapsulates equations for calculating or estimating the intensity of the workout."""
 
     def __init__(self):
-        super(StrainCalculator, self).__init__()
+        super(IntensityCalculator, self).__init__()
 
     @staticmethod
-    def estimate_strain_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour):
-        strain_score = ((workout_duration_secs * avg_workout_pace_meters_per_sec) / threshold_pace_meters_per_hour) * 100.0
-        return strain_score
+    def estimate_intensity_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour):
+        intensity_score = ((workout_duration_secs * avg_workout_pace_meters_per_sec) / threshold_pace_meters_per_hour) * 100.0
+        return intensity_score
 
     @staticmethod
-    def calculate_strain_score_from_power(workout_duration_secs, np, ftp):
+    def calculate_intensity_score_from_power(workout_duration_secs, np, ftp):
         # Sanity check.
         if ftp is None or ftp < 0.1:
             return 0.0
 
-        # Compute the strain score: (t * NP * IF) / (FTP * 36).
-        strain_score = (workout_duration_secs * np * (np / ftp)) / (ftp * 36)
-        return strain_score
+        # Compute the intensity score: (t * NP * IF) / (FTP * 36).
+        intensity_score = (workout_duration_secs * np * (np / ftp)) / (ftp * 36)
+        return intensity_score

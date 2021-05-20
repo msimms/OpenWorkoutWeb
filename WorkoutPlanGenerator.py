@@ -93,9 +93,6 @@ class WorkoutPlanGenerator(object):
         longest_run_week_2 = None
         longest_run_week_3 = None
 
-        # Analyze any unanalyzed activities.
-        self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.FOUR_WEEKS)
-
         # Fetch the detail of the user's goal.
         goal, goal_date = self.data_mgr.retrieve_user_goal(user_id)
         if goal is None:
@@ -113,6 +110,9 @@ class WorkoutPlanGenerator(object):
 
         # Is the user interested in just completion, or do they care about performance (i.e. pace/speed)?
         goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
+
+        # Analyze any unanalyzed activities.
+        self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.SIX_MONTHS)
 
         # This will trigger the callback for each of the user's activities.
         self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb)
@@ -226,10 +226,11 @@ class WorkoutPlanGenerator(object):
         """Generates workouts for the specified user to perform in the next week."""
 
         workouts = []
+        training_intensity_distribution = Keys.TRAINING_INTENSITY_DIST_POLARIZED
 
         swim_planner = SwimPlanGenerator.SwimPlanGenerator(user_id)
         bike_planner = BikePlanGenerator.BikePlanGenerator(user_id)
-        run_planner = RunPlanGenerator.RunPlanGenerator(user_id)
+        run_planner = RunPlanGenerator.RunPlanGenerator(user_id, training_intensity_distribution)
 
         # Generate the swim workouts.
         if not swim_planner.is_workout_plan_possible(inputs):

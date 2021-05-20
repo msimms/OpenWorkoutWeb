@@ -15,15 +15,21 @@ import WorkoutFactory
 METERS_PER_HALF_MARATHON = 13.1 * Units.METERS_PER_MILE
 METERS_PER_MARATHON = 26.2 * Units.METERS_PER_MILE
 
+# Max zone 1, zone 2, zone 3 intensity distributions for each training philosophy
+TID_THRESHOLD = [55, 55, 20]
+TID_POLARIZED = [85, 10, 25]
+TID_PYRAMIDAL = [75, 25, 10]
+
 class RunPlanGenerator(object):
     """Class for generating a run plan for the specifiied user."""
 
-    def __init__(self, user_id):
+    def __init__(self, user_id, training_intensity_distribution):
         self.user_id = user_id
         self.easy_distance_total_meters = 0.0
         self.hard_distance_total_meters = 0.0
-        self.total_easy_seconds = 0.0 # Total weekly minutes spent running easy
-        self.total_hard_seconds = 0.0 # Total weekly minutes spent running hard
+        self.total_easy_seconds = 0.0 # Total weekly seconds spent running easy
+        self.total_hard_seconds = 0.0 # Total weekly seconds spent running hard
+        self.training_intensity_distribution = training_intensity_distribution
 
     def is_workout_plan_possible(self, inputs):
         """Returns TRUE if we can actually generate a plan with the given contraints."""
@@ -394,6 +400,6 @@ class RunPlanGenerator(object):
 
         # Calculate the total stress for each workout.
         for workout in workouts:
-            workout.calculate_estimated_strain_score(functional_threshold_pace)
+            workout.calculate_estimated_intensity_score(functional_threshold_pace)
 
         return workouts

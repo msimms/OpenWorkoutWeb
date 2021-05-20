@@ -32,8 +32,8 @@ import sys
 import time
 import uuid
 import IcsWriter
+import IntensityCalculator
 import Keys
-import StrainCalculator
 import Units
 import UserMgr
 import ZwoWriter
@@ -55,7 +55,7 @@ class Workout(object):
         self.warmup = {} # The warmup interval
         self.cooldown = {} # The cooldown interval
         self.intervals = [] # The workout intervals
-        self.estimated_strain_score = None # Estimated strain, the highter, the greater the load on the body
+        self.estimated_intensity_score = None # Estimated intensity, the highter, the greater the load on the body
         self.workout_id = uuid.uuid4() # Unique identifier for the workout
 
     def __getitem__(self, key):
@@ -74,8 +74,8 @@ class Workout(object):
         if key == Keys.WORKOUT_SCHEDULED_TIME_KEY and self.scheduled_time is not None:
             dt = time.mktime(self.scheduled_time.timetuple())
             return datetime.datetime(dt.year, dt.month, dt.day)
-        if key == Keys.WORKOUT_ESTIMATED_STRAIN_KEY:
-            return self.estimated_strain_score
+        if key == Keys.WORKOUT_ESTIMATED_INTENSITY_KEY:
+            return self.estimated_intensity_score
         return None
 
     def to_dict(self):
@@ -89,8 +89,8 @@ class Workout(object):
         output[Keys.WORKOUT_INTERVALS_KEY] = self.intervals
         if self.scheduled_time is not None:
             output[Keys.WORKOUT_SCHEDULED_TIME_KEY] = time.mktime(self.scheduled_time.timetuple())
-        if self.estimated_strain_score is not None:
-            output[Keys.WORKOUT_ESTIMATED_STRAIN_KEY] = self.estimated_strain_score
+        if self.estimated_intensity_score is not None:
+            output[Keys.WORKOUT_ESTIMATED_INTENSITY_KEY] = self.estimated_intensity_score
         return output
 
     def from_dict(self, input):
@@ -109,8 +109,8 @@ class Workout(object):
             self.intervals = input[Keys.WORKOUT_INTERVALS_KEY]
         if Keys.WORKOUT_SCHEDULED_TIME_KEY in input and input[Keys.WORKOUT_SCHEDULED_TIME_KEY] is not None:
             self.scheduled_time = datetime.datetime.fromtimestamp(input[Keys.WORKOUT_SCHEDULED_TIME_KEY]).date()
-        if Keys.WORKOUT_ESTIMATED_STRAIN_KEY in input:
-            self.estimated_strain_score = input[Keys.WORKOUT_ESTIMATED_STRAIN_KEY]
+        if Keys.WORKOUT_ESTIMATED_INTENSITY_KEY in input:
+            self.estimated_intensity_score = input[Keys.WORKOUT_ESTIMATED_INTENSITY_KEY]
 
     def add_warmup(self, seconds):
         """Defines the workout warmup."""
@@ -294,9 +294,9 @@ class Workout(object):
         elif self.type == Keys.WORKOUT_TYPE_POOL_WATER_SWIM:
             result += "Purpose: .\n"
 
-        if self.estimated_strain_score is not None:
-            stress_str = "{:.1f}".format(self.estimated_strain_score)
-            result += "Estimated Strain Score: "
+        if self.estimated_intensity_score is not None:
+            stress_str = "{:.1f}".format(self.estimated_intensity_score)
+            result += "Estimated Intensity Score: "
             result += stress_str
             result += "\n"
 
@@ -319,8 +319,8 @@ class Workout(object):
         interval_duration_secs = interval_meters / (interval_pace_meters_per_minute / 60.0)
         return interval_duration_secs
 
-    def calculate_estimated_strain_score(self, threshold_pace_meters_per_minute):
-        """Computes the estimated strain for this workout."""
+    def calculate_estimated_intensity_score(self, threshold_pace_meters_per_minute):
+        """Computes the estimated intensity for this workout."""
         """May be overridden by child classes, depending on the type of workout."""
         workout_duration_secs = 0.0
         avg_workout_pace_meters_per_sec = 0.0
@@ -347,5 +347,5 @@ class Workout(object):
         if workout_duration_secs > 0.0:
             avg_workout_pace_meters_per_sec = avg_workout_pace_meters_per_sec / workout_duration_secs
 
-        calc = StrainCalculator.StrainCalculator()
-        self.estimated_strain_score = calc.estimate_strain_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_minute * 60.0)
+        calc = IntensityCalculator.IntensityCalculator()
+        self.estimated_intensity_score = calc.estimate_intensity_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_minute * 60.0)

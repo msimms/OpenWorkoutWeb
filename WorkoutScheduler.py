@@ -36,8 +36,8 @@ class WorkoutScheduler(object):
         index = 0
         for day in week:
             if day is not None:
-                if day.estimated_strain_score is not None:
-                    daily_stress_scores[index] = day.estimated_strain_score
+                if day.estimated_intensity_score is not None:
+                    daily_stress_scores[index] = day.estimated_intensity_score
             index = index + 1
 
         smoothed_scores = signals.smooth(daily_stress_scores, 2)

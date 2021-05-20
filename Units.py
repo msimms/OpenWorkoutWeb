@@ -354,7 +354,7 @@ def convert_to_string_in_specified_unit_system(unit_system, in_value, in_distanc
         out_value = "{:.2f} ".format(in_value) + get_running_cadence_units_str()
     elif label in Keys.POWER_KEYS:
         out_value = "{:.2f} ".format(in_value) + get_power_units_str()
-    elif label in Keys.STRAIN_SCORES:
+    elif label in Keys.INTENSITY_SCORES:
         out_value = "{:.2f} ".format(in_value)
     elif label == Keys.VARIABILITY_INDEX:
         out_value = "{:.2f} ".format(in_value)

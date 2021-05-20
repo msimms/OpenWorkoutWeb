@@ -32,13 +32,6 @@
         background-color: teal;
     }
 
-    path
-    {
-        stroke: steelblue;
-        stroke-width: 2;
-        fill: none;
-    }
-
     .axis path,
     .axis line
     {
@@ -84,6 +77,8 @@ ${nav}
     [
     ];
 
+    /// @function lat_lon_to_xy
+    /// Converts latitude and longitude to the x,y coordinates needed for the Watopia map.
     function lat_lon_to_xy(width, height, lat, lon)
     {
         let x = (width / 2) - ((center_lon - lon) * 2560.0);
@@ -150,76 +145,33 @@ ${summary}
 
 <div id="charts"/>
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
-    var start_time = 0;
-    var end_time = 0;
+    var start_time_ms = 0;
+    var end_time_ms = 0;
 
-    var powerZones = [
+    let power_zones = [
 ${powerZones}
     ];
-    var splits = [
+    let splits = [
 ${splits}
     ];
+    let new_splits = splits.map(function(item) { return item / 1000.0 });
 
-    if (powerZones.length > 0)
-        $(function() { draw_bar_chart(powerZones, "Power Zone Distribution", "ForestGreen") });
-    if (splits.length > 0)
-        $(function() { draw_bar_chart(splits, "Split Times", "LightSteelBlue") });
+    if (power_zones.length > 0)
+        $(function() { draw_bar_chart(power_zones, "Power Zone Distribution", "ForestGreen") });
+    if (new_splits.length > 0)
+        $(function() { draw_bar_chart(new_splits, "Split Times", "LightSteelBlue") });
 
+    /// @function process_summarydata
     var process_summarydata = function(summarydata)
     {
         for (key in summarydata)
         {
             if (key == "intervals")
             {
-                interval_graph = [];
-                interval_data = summarydata[key];
-                if (interval_data.length > 0)
-                {
-                    if (start_time > 0)
-                    {
-                        graph_node = {};
-                        graph_node["date"] = new Date(start_time);
-                        graph_node["value"] = 0;
-                        interval_graph.push(graph_node);
-                    }
-
-                    for (let i in interval_data)
-                    {
-                        let interval = interval_data[i];
-                        let start_interval_time = Number(interval[0]);
-                        let end_interval_time = Number(interval[1]);
-
-                        graph_node = {};
-                        graph_node["date"] = new Date(start_interval_time-1000);
-                        graph_node["value"] = 0;
-                        interval_graph.push(graph_node);
-                        graph_node = {};
-                        graph_node["date"] = new Date(start_interval_time);
-                        graph_node["value"] = 1;
-                        interval_graph.push(graph_node);
-                        graph_node = {};
-                        graph_node["date"] = new Date(end_interval_time);
-                        graph_node["value"] = 1;
-                        interval_graph.push(graph_node);
-                        graph_node = {};
-                        graph_node["date"] = new Date(end_interval_time+1000);
-                        graph_node["value"] = 0;
-                        interval_graph.push(graph_node);
-                    }
-
-                    if (end_time > 0)
-                    {
-                        graph_node = {};
-                        graph_node["date"] = new Date(end_time);
-                        graph_node["value"] = 0;
-                        interval_graph.push(graph_node);
-                    }
-
-                    draw_graph(interval_graph, "Intervals", "", "Black");
-                }
+                draw_intervals_graph(start_time_ms, end_time_ms, summarydata[key]);
             }
         }
     }
@@ -231,6 +183,7 @@ ${splits}
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
     }
 
+    /// @function process_sensordata
     var process_sensordata = function(sensordata)
     {
         for (key in sensordata)
@@ -246,6 +199,12 @@ ${splits}
                 }
                 return new_e;
             });
+
+            if (new_data.length > 1 && start_time_ms == 0)
+            {
+                start_time_ms = new_data[0].date;
+                end_time_ms = new_data[new_data.length-1].date;
+            }
 
             if (key == "Current Speed")
             {
@@ -269,27 +228,21 @@ ${splits}
                     speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
                     pace_data = convert_speed_graph_to_pace_graph("${unit_system}", new_data);
 
-                    draw_graph(speed_data, "Speed", speed_units, "DodgerBlue");
-                    draw_graph(pace_data, "Pace", pace_units, "DodgerBlue");
+                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
+                    draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, "DodgerBlue");
                 }
                 else
                 {
                     speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
-                    draw_graph(speed_data, "Speed", speed_units, "DodgerBlue");
-                }
-
-                if (speed_data.length > 1)
-                {
-                    start_time = speed_data[0].date;
-                    end_time = speed_data[speed_data.length-1].date;
+                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
                 }
             }
             else if (key == "Heart Rate")
-                draw_graph(new_data, "BPM", "BPM", "FireBrick");
+                draw_graph(start_time_ms, end_time_ms, new_data, "BPM", "BPM", "FireBrick");
             else if (key == "Cadence")
-                draw_graph(new_data, "RPM", "RPM", "ForestGreen");
+                draw_graph(start_time_ms, end_time_ms, new_data, "RPM", "RPM", "ForestGreen");
             else if (key == "Power")
-                draw_graph(new_data, "Watts", "Watts", "ForestGreen");
+                draw_graph(start_time_ms, end_time_ms, new_data, "Watts", "Watts", "ForestGreen");
         }
 
         retrieve_summary_data();
@@ -316,6 +269,7 @@ ${splits}
 
 <script>
 
+    /// @function refresh_analysis
     function refresh_analysis()
     {
         let the_url = "${root_url}/api/1.0/refresh_analysis";
@@ -329,6 +283,7 @@ ${splits}
             alert(result_text.value);
     }
 
+    /// @function create_comment
     function create_comment()
     {
         let the_url = "${root_url}/api/1.0/create_comment";
@@ -344,6 +299,7 @@ ${splits}
             alert(result_text.value);
     }
 
+    /// @function export_activity
     function export_activity()
     {
         let the_url = "${root_url}/api/1.0/export_activity";
@@ -359,12 +315,14 @@ ${splits}
             alert(result_text.value);
     }
 
+    /// @function edit_activity
     function edit_activity()
     {
         let the_url = "${root_url}/edit_activity/${activityId}";
         window.location.replace(the_url);
     }
 
+    /// @function delete_activity
     function delete_activity()
     {
         if (confirm('Are you sure you want to do this?'))
@@ -381,6 +339,7 @@ ${splits}
         }
     }
 
+    /// @function delete_photo
     function delete_photo(photo_id)
     {
         if (confirm('Are you sure you want to delete the above photo?'))
@@ -398,6 +357,7 @@ ${splits}
         }
     }
 
+    /// @function process_photos_list
     var process_photos_list = function(photos_list)
     {
         let photo_ids = photos_list["photo ids"]
@@ -433,12 +393,14 @@ ${splits}
         }
     }
 
+    /// @function list_photos
     function list_photos()
     {
         let api_url = "${root_url}/api/1.0/list_activity_photos?activity_id=${activityId}";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photos_list, dataType: "json" });
     }
 
+    /// @function process_tags
     var process_tags = function(tags)
     {
         tags = eval(tags)
@@ -449,12 +411,14 @@ ${splits}
         }
     }
 
+    /// @function list_tags
     function list_tags()
     {
         let api_url = "${root_url}/api/1.0/list_tags?activity_id=${activityId}";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_tags, dataType: "text" });
     }
 
+    /// @function create_tags
     function create_tags(tags)
     {
         let the_url = "${root_url}/api/1.0/create_tags_on_activity";

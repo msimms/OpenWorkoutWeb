@@ -20,7 +20,7 @@
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
-<script>
+<script type="text/javascript">
 
     /// @function update_activity_metadata
     function update_activity_metadata()
@@ -43,24 +43,7 @@
             alert("An error occurred!");
     }
 
-    var process_upload_permissions = function(records)
-    {
-        // We need to know the unit system first.
-        for (let record of records)
-        {
-            let key = Object.keys(record)[0];
-
-            if (key == "can upload photos")
-            {
-                if (record[key] == true)
-                {
-                    let picker = document.getElementById('photos_div');
-                    picker.style = "display: inline-block;";
-                }
-            }
-        }
-    }
-
+    /// @function process_activity_type_list
     var process_activity_type_list = function(activity_type_list)
     {
         let activity_type_select = document.getElementById("activity_type");
@@ -84,14 +67,6 @@
         }
     }
 
-    /// @function request_upload_permissions
-    // Get the list of things the user is allowed to do. Needed to determine if we should render the Upload Photos option.
-    function request_upload_permissions()
-    {
-        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=can%20upload%20photos";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_upload_permissions, dataType: "json" });
-    }
-
     /// @function list_activity_types
     // Get the list of all possible activity types. Needed to populate the activity type combo box.
     function list_activity_types()
@@ -103,10 +78,9 @@
     $(document).ready(function()
     {
         // Things we need when the page is loaded.
-        request_upload_permissions();
         list_activity_types();
     });
-
+    
 </script>
 
 <section class="nav">
@@ -129,73 +103,8 @@ ${nav}
     <button type="button" id="update" onclick="return update_activity_metadata()">Update</button><br>
 </div>
 
-<!-- Photos -->
-<div class="empty" id="photos_div" style="display: none;">
-    <div class="block">
-        <h2>Photos</h2>
-        <input type="file" id="photo_picker" class="modern_button" accept=".png,.jpg,.jpeg,.gif" name="photo_list" webkitdirectory multiple><br>
-        <button type="button" onclick="return upload_selected_files()">Upload Photos</button><br>
-
-        <script>
-            let picker = document.getElementById('photo_picker');
-            let selected_photo_list = [];
-
-            function upload_file(file_obj)
-            {
-                let reader = new FileReader();
-
-                reader.onerror = function(event)
-                {
-                    reader.abort();
-                };
-                reader.onload = function(e)
-                {
-                    let the_url = "${root_url}/api/1.0/upload_activity_photo";
-                    let dict = [];
-                    let result_text = {};
-                    let encoded_data = btoa(reader.result);
-
-                    dict.push({["uploaded_file_data"] : encoded_data});
-                    dict.push({["activity_id"] : "${activity_id}"});
-
-                    if (send_post_request(the_url, dict, result_text))
-                    {
-                        window.location.reload();
-                    }
-                    else
-                    {
-                        alert(result_text.value);
-                    }
-                }
-                reader.readAsBinaryString(file_obj);
-            }
-
-            function upload_selected_files()
-            {
-                if (selected_photo_list.length > 0)
-                {
-                    for (let i = 0; i < selected_photo_list.length; i++)
-                    {
-                        upload_file(selected_photo_list[i]);
-                    }
-                }
-                else
-                {
-                    alert("No files have been specified.");
-                }
-            }
-
-            picker.addEventListener('change', e => {
-                for (let file of Array.from(e.target.files))
-                {
-                    selected_photo_list.push(file);
-                };
-            });
-        </script>
-    </div>
-</div>
-
 <div class="block">
+    <!-- Back Button -->
     <hr>
     <button type="button" onclick="window.location.replace('${root_url}/activity/${activity_id}')">Back</button><br>
 </div>

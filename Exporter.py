@@ -214,29 +214,42 @@ class Exporter(object):
             raise Exception("No locations for this activity.")
 
         cadence_iter = iter(cadence_readings)
+        hr_iter = iter(hr_readings)
         temp_iter = iter(temp_readings)
         power_iter = iter(power_readings)
-        hr_iter = iter(hr_readings)
 
         nearest_cadence = None
+        nearest_hr = None
         nearest_temp = None
         nearest_power = None
-        nearest_hr = None
 
         writer = TcxWriter.TcxWriter()
         writer.create_tcx(file_name)
         writer.start_activity(activity[Keys.ACTIVITY_TYPE_KEY])
 
+        # Lap time
         lap_start_time_ms = locations[0][Keys.LOCATION_TIME_KEY]
-        lap_end_time_ms = 0
+        lap_end_time_ms = locations[-1][Keys.LOCATION_TIME_KEY]
+        lap_time_sec = (lap_end_time_ms - lap_start_time_ms) / 1000
 
-        writer.write_id(lap_start_time_ms / 1000)
+        # Lap distance
+        lap_distance_meters = 0
+        if Keys.ACTIVITY_SUMMARY_KEY in activity:
+            summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
+            if summary_data:
+                lap_distance_meters = summary_data[Keys.LONGEST_DISTANCE]
+
+        # The lap ID is just the start time for the lap.
+        writer.store_id(lap_start_time_ms / 1000)
 
         prev_location = None
         done = False
         while not done:
 
             writer.start_lap(lap_start_time_ms)
+            writer.store_lap_seconds(lap_time_sec)
+            writer.store_lap_distance(lap_distance_meters)
+            writer.store_lap_calories(0)
             writer.start_track()
 
             while not done:

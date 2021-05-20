@@ -12,10 +12,10 @@ import time
 import traceback
 import ActivityHasher
 import DataMgr
+import IntensityCalculator
 import Keys
 import LocationAnalyzer
 import SensorAnalyzerFactory
-import StrainCalculator
 import UserMgr
 
 class ActivityAnalyzer(object):
@@ -170,7 +170,7 @@ class ActivityAnalyzer(object):
 
                 # Was a stress score calculated (i.e., did the activity have power data from which stress could be computed)?
                 # If not, estimate a stress score.
-                print("Computing the strain score...")
+                print("Computing the intensity score...")
                 end_time_secs = end_time_ms / 1000
 
                 # If activity duration and distance have been calculated.
@@ -188,12 +188,12 @@ class ActivityAnalyzer(object):
                         _, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(activity_user_id, DataMgr.SIX_MONTHS)
                         run_paces = self.data_mgr.compute_run_training_paces(activity_user_id, running_bests)
 
-                        # We need to know the user's threshold pace to compute the strain score.
+                        # We need to know the user's threshold pace to compute the intensity score.
                         if Keys.FUNCTIONAL_THRESHOLD_PACE in run_paces:
                             threshold_pace_meters_per_hour = run_paces[Keys.FUNCTIONAL_THRESHOLD_PACE] * 60.0
-                            calc = StrainCalculator.StrainCalculator()
-                            stress = calc.estimate_strain_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour)
-                            self.summary_data[Keys.STRAIN_SCORE] = stress
+                            calc = IntensityCalculator.IntensityCalculator()
+                            stress = calc.estimate_intensity_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour)
+                            self.summary_data[Keys.INTENSITY_SCORE] = stress
 
                     # Cycling activity
                     elif activity_type in Keys.CYCLING_ACTIVITIES:

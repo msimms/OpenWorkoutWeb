@@ -191,6 +191,17 @@ def edit_activity(activity_id):
         g_app.log_error('Unhandled exception in ' + edit_activity.__name__)
     return g_app.render_error()
 
+@g_flask_app.route('/add_photos/<activity_id>')
+def add_photos(activity_id):
+    """Renders the add photos page for an activity."""
+    try:
+        return g_app.add_photos(activity_id)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + add_photos.__name__)
+    return g_app.render_error()
+
 @g_flask_app.route('/device/<device_str>')
 def device(device_str):
     """Renders the map page for a single device."""

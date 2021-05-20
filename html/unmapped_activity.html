@@ -31,13 +31,6 @@
 		background-color: teal;
 	}
 
-	path
-	{
-		stroke: steelblue;
-		stroke-width: 2;
-		fill: none;
-	}
-
 	.axis path,
 	.axis line
 	{
@@ -56,77 +49,33 @@ ${nav}
 
 <div id="charts"/>
 
+<script type="text/javascript" src="${root_url}/js/graphs.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.js" integrity="sha256-tA8y0XqiwnpwmOIl3SGAcFl2RvxHjA8qp0+1uCGmRmg=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script type="text/javascript">
-	function drawChart(data, title, color)
-	{
-		var margin = {top: 20, right: 20, bottom: 20, left: 50},
-			width = $("#charts").width() - margin.left - margin.right,
-			height = 200 - margin.top - margin.bottom;
-
-		var x = d3.time.scale().range([0, width]);
-		var y = d3.scale.linear().range([height, 0]);
-
-		var xAxis = d3.svg.axis().scale(x).orient("bottom");
-		var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5);
-
-		var valueline = d3.svg.line()
-			.x(function(d) { return x(d.date); })
-			.y(function(d) { return y(d.value); });
-
-		var svg = d3.select("#charts")
-			.append("svg:svg")
-				.attr("width", width + margin.left + margin.right)
-				.attr("height", height + margin.top + margin.bottom)
-			.append("g")
-				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-		x.domain(d3.extent(data, function(d) { return d.date; }));
-		y.domain(d3.extent(data, function(d) { return d.value; }));
-
-		svg.append("path")
-			.attr("class", "line")
-			.attr("d", valueline(data))
-			.style("stroke", color);
-		svg.append("g")
-			.attr("class", "x axis")
-			.attr("transform", "translate(0," + height + ")")
-			.call(xAxis);
-		svg.append("g")
-			.attr("class", "y axis")
-			.call(yAxis)
-			.append("text")
-			.attr("transform", "rotate(-90)")
-			.attr("y", 6)
-			.attr("dy", ".71em")
-			.style("text-anchor", "end")
-			.text(title);
-	}
-
-	var xAxis = [
+	let xAxis = [
 ${xAxis}
 	];
-	var yAxis = [
+	let yAxis = [
 ${yAxis}
 	];
-	var zAxis = [
+	let zAxis = [
 ${zAxis}
 	];
 
 	if (xAxis.length > 0)
-		$(function() { drawChart(xAxis, "x", "DodgerBlue") });
+		draw_simple_graph(xAxis, "x", "DodgerBlue");
 	if (yAxis.length > 0)
-		$(function() { drawChart(yAxis, "y", "FireBrick") });
+		draw_simple_graph(yAxis, "y", "FireBrick");
 	if (zAxis.length > 0)
-		$(function() { drawChart(zAxis, "z", "ForestGreen") });
+		draw_simple_graph(zAxis, "z", "ForestGreen");
 </script>
 
 </div>
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script>
+<script type="text/javascript">
 
     /// @function refresh_analysis
     function refresh_analysis()

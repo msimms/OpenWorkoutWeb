@@ -23,7 +23,7 @@
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script>
+<script type="text/javascript">
 
     /// @function update_gear_defaults
     function update_gear_defaults(target)
@@ -48,6 +48,7 @@
         }
     }
 
+    /// @function process_activity_type_list
     var process_activity_type_list = function(activity_type_list)
     {
         let activity_type_select = document.getElementById("activity_type");
@@ -66,6 +67,7 @@
         }
     }
 
+    /// @function process_gear_list
     var process_gear_list = function(gear_list)
     {
         let gear_list_select = document.getElementById("gear");
@@ -243,6 +245,7 @@
         });
     });
 
+    /// @function append_to_pr_table
     function append_to_pr_table(table, row_name, row_value)
     {
         let new_row = table.insertRow();
@@ -263,6 +266,7 @@
         }
     }
 
+    /// @function process_personal_records
     var process_personal_records = function(records)
     {
         let cycling_table = document.getElementById("Cycling");
@@ -299,6 +303,7 @@
         }
     }
 
+    /// @function append_to_defaults_table
     function append_to_defaults_table(table, default_info)
     {
         let new_row = table.insertRow();
@@ -309,6 +314,7 @@
         cell.appendChild(document.createTextNode(default_info.name));
     }
 
+    /// @function append_to_power_zones_table
     function append_to_power_zones_table(table, zone_num, zone_low, zone_high)
     {
         let new_row = table.insertRow();
@@ -319,6 +325,7 @@
         cell.appendChild(document.createTextNode(zone_low.toFixed(0) + " watts to " + zone_high.toFixed(0) + " watts"));
     }
 
+    /// @function append_to_hr_zones_table
     function append_to_hr_zones_table(table, zone_num, zone_low, zone_high)
     {
         let new_row = table.insertRow();
@@ -329,6 +336,7 @@
         cell.appendChild(document.createTextNode(zone_low.toFixed(0) + " bpm to " + zone_high.toFixed(0) + " bpm"));
     }
 
+    /// @function process_gear_defaults
     var process_gear_defaults = function(records)
     {
         let defaults_table = document.getElementById("Defaults");
@@ -339,6 +347,7 @@
         }
     }
 
+    /// @function process_user_settings
     var process_user_settings = function(records)
     {
         let units = "metric";
@@ -507,18 +516,21 @@
             bmi_elem.value = bmi.toFixed(1);
     }
 
+    /// @function get_personal_records
     function get_personal_records()
     {
         let api_url = "${root_url}/api/1.0/list_personal_records";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_personal_records, dataType: "json" });
     }
 
+    /// @function get_gear_defaults
     function get_gear_defaults()
     {
         let api_url = "${root_url}/api/1.0/list_gear_defaults";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_gear_defaults, dataType: "json" });
     }
 
+    /// @function get_user_settings
     function get_user_settings()
     {
         let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=preferred%20units,height,weight,birthday,gender,resting%20heart%20rate,estimated%20max%20heart%20rate";

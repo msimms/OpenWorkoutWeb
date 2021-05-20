@@ -214,6 +214,17 @@ class StraenWeb(object):
         return self.error()
 
     @cherrypy.expose
+    def add_photos(self, activity_id, *args, **kw):
+        """Renders the add photos page for an activity."""
+        try:
+            return self.app.add_photos(activity_id)
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + StraenWeb.add_photos.__name__)
+        return self.error()
+
+    @cherrypy.expose
     def device(self, device_str, *args, **kw):
         """Renders the map page for a single device."""
         try:
