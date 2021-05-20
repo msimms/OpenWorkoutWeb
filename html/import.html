@@ -25,24 +25,26 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js" integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="${root_url}/jquery-timepicker/jquery.timepicker.js"></script>
-<script>
+<script type="text/javascript">
 
+    /// @function save
+    /// Called when the user saves a manual entry.
     function save(target)
     {
-        var the_url = "${root_url}/api/1.0/add_activity";
-        var dict = [];
-        var sets = [];
-        var result_text = {};
-        var inner_div = document.getElementById("manual_entry_div");
-        var startDate = document.getElementById("startDate").value;
-        var startTime = document.getElementById("startTime").value;
-        var activityStartObj = new Date(startDate + " " + startTime);
-        var activityStart = activityStartObj.getTime() / 1000;
-        var activityType = document.getElementById("activity_type").value;
+        let the_url = "${root_url}/api/1.0/add_activity";
+        let dict = [];
+        let sets = [];
+        let result_text = {};
+        let inner_div = document.getElementById("manual_entry_div");
+        let start_date = document.getElementById("start_date").value;
+        let start_time = document.getElementById("start_time").value;
+        let activity_start_obj = new Date(start_date + " " + start_time);
+        let activity_start = activity_start_obj.getTime() / 1000;
+        let activity_type = document.getElementById("activity_type").value;
 
-        for (var i = 0; i < inner_div.children.length; i++)
+        for (let i = 0; i < inner_div.children.length; i++)
         {
-            var divChild = inner_div.children[i];
+            let divChild = inner_div.children[i];
 
             if (divChild.name == "Repetitions")
             {
@@ -54,24 +56,23 @@
             }
         }
         dict.push({["Sets"] : JSON.stringify(sets)});
-        dict.push({["time"] : activityStart});
-        dict.push({["activity_type"] : activityType});
+        dict.push({["time"] : activity_start});
+        dict.push({["activity_type"] : activity_type});
 
-        if (send_post_request(the_url, dict, result_text))
-        {
-            window.location.replace("${root_url}/task_status");
-        }
-        else
+        if (!send_post_request(the_url, dict, result_text))
         {
             alert(result_text.value);
         }
     }
 
+    /// @function show_manual_entry_options
+    /// Displays the controls for manually adding an activity.
     function show_manual_entry_options()
     {
-        var activityType = document.getElementById("activity_type").value;
-        var outer_div = document.getElementById("manual_entry_div");
-        var inner_div = document.createElement('div');
+        let activity_type = document.getElementById("activity_type").value;
+        let outer_div = document.getElementById("manual_entry_div");
+        let inner_div = document.createElement('div');
+
         inner_div.id = "manual_entry_div";
 
         // Remove existing items, if any.
@@ -81,8 +82,8 @@
         }
 
         // Determine which data fields are needed.
-        var fields = ["Duration", "Distance"];
-        switch (activityType)
+        let fields = ["Duration", "Distance"];
+        switch (activity_type)
         {
             case "Push Up":
             case "Pull Up":
@@ -91,33 +92,33 @@
         }
 
         // Add a label for the date picker.
-        var dateLabel = document.createTextNode("Date: ");
-        inner_div.appendChild(dateLabel);
+        let date_label = document.createTextNode("Date: ");
+        inner_div.appendChild(date_label);
 
         // Add the date picker.
-        var today = new Date();
-        var startDate = document.createElement('input');
-        startDate.type = "input";
-        startDate.id = "startDate";
-        startDate.className = "pickDate";
-        $(startDate).datepicker({showButtonPanel: true, defaultDate: today});
-        $(startDate).datepicker('setDate', today);
-        inner_div.appendChild(startDate);
+        let today = new Date();
+        let start_date = document.createElement('input');
+        start_date.type = "input";
+        start_date.id = "start_date";
+        start_date.className = "pickDate";
+        $(start_date).datepicker({showButtonPanel: true, defaultDate: today});
+        $(start_date).datepicker('setDate', today);
+        inner_div.appendChild(start_date);
 
         // Add a label for the start time picker.
-        var dateLabel = document.createTextNode("Start Time: ");
-        inner_div.appendChild(dateLabel);
+        let time_label = document.createTextNode("Start Time: ");
+        inner_div.appendChild(time_label);
 
         // Add the start time picker.
-        var startTime = document.createElement('input');
-        startTime.type = "input";
-        startTime.id = "startTime";
-        startTime.className = "pickTime"; 
-        $(startTime).timepicker({ 'timeFormat': 'h:i A' });
-        inner_div.appendChild(startTime);
+        let start_time = document.createElement('input');
+        start_time.type = "input";
+        start_time.id = "start_time";
+        start_time.className = "pickTime"; 
+        $(start_time).timepicker({ 'timeFormat': 'h:i A' });
+        inner_div.appendChild(start_time);
 
         // Add a line break.
-        var br = document.createElement("br");
+        let br = document.createElement("br");
         inner_div.appendChild(br);
 
         // Add the data fields.
@@ -130,7 +131,7 @@
         outer_div.appendChild(inner_div);
 
         // Create a save button.
-        var save_btn = document.createElement('button');
+        let save_btn = document.createElement('button');
         save_btn.appendChild(document.createTextNode('Save'));
         save_btn.title = "Save";
         save_btn.addEventListener('click', function() { save(this); });
@@ -152,11 +153,17 @@ ${nav}
 
     <p>Accepted file types are .gpx, .tcx, and .fit formatted files.</p>
     <input type="file" id="picker" name="file_list" class="modern_button" accept=".gpx,.tcx,.fit,.csv" webkitdirectory multiple><br>
-    <table class="import" id="upload_table" style="display: none;"></table>
+    <button type="button" id="upload_button" onclick="return upload_selected_files()">Upload File(s)</button><br>
+    <button type="button" id="confirm_selections" onclick="return confirm_selections()" style="display: none;">Confirm Selections</button><br>
+    <table class="import" id="upload_table" style="display: none;"></table><br>
+    <select id="activity_type_select" style="display: none;">
+    </select><br>
     <table class="import" id="parsed_csv_table" style="display: none;"></table>
-    <button type="button" onclick="return upload_selected_files()">Upload File(s)</button><br>
 
-    <script>
+    <script type="text/javascript">
+        let DATE_TITLE = "Date";
+        let SET_TITLE = "Set ";
+
         let picker = document.getElementById('picker');
         let file_list = [];
         let file_tasks = {}; // Associates the task ID returned by the server with the file being uploaded
@@ -165,6 +172,7 @@ ${nav}
         function update_file_status(file_name, status_text, activity_id)
         {
             let upload_table = document.getElementById("upload_table");
+
             upload_table.style = "display: inline-block;";
 
             for (let i = 0, row; row = upload_table.rows[i]; i++)
@@ -173,11 +181,13 @@ ${nav}
                 {
                     if (status_text == "Finished")
                     {
-                        row.cells[0].innerText = "";
                         let link = document.createElement("a");
-                        let linkText = document.createTextNode(file_name);
+                        let link_text = document.createTextNode(file_name);
+
                         link.setAttribute("href", "${root_url}/activity/" + activity_id);
-                        link.appendChild(linkText);
+                        link.appendChild(link_text);
+
+                        row.cells[0].innerText = "";
                         row.cells[0].appendChild(link);
                     }
                     row.cells[1].innerText = status_text;
@@ -202,6 +212,34 @@ ${nav}
             select.appendChild(option);
         }
 
+        /// @function process_activity_type_list
+        var process_activity_type_list = function(activity_type_list)
+        {
+            let activity_type_select = document.getElementById("activity_type_select");
+
+            activity_type_list = eval(activity_type_list);
+            activity_type_list.sort();
+
+            for (let i = 0; i < activity_type_list.length; i++)
+            {
+                let activity_type = activity_type_list[i];
+                let option = document.createElement("option");
+
+                option.value = activity_type;
+                option.text = activity_type;
+
+                activity_type_select.appendChild(option);
+            }
+        }
+
+        /// @function list_activity_types
+        // Get the list of all possible activity types. Needed to populate the activity type combo box.
+        function list_activity_types()
+        {
+            let api_url = "${root_url}/api/1.0/list_activity_types";
+            $.ajax({ type: 'GET', url: api_url, cache: false, success: process_activity_type_list, dataType: "text" });
+        }
+
         /// @function parse_csv_file
         function parse_csv_file(file_obj)
         {
@@ -215,25 +253,35 @@ ${nav}
             {
                 let line_data = reader.result.split("\n");
                 let csv_table = document.getElementById("parsed_csv_table");
+                let upload_button = document.getElementById("upload_button");
+                let confirm_button = document.getElementById("confirm_selections");
+                let activity_type_select = document.getElementById("activity_type_select");
                 let title_row = csv_table.insertRow();
                 let is_first_row = true;
 
+                upload_button.style = "display: none;";
+                confirm_button.style = "display: inline-block;";
                 csv_table.style = "display: inline-block;";
+                activity_type_select.style = "display: inline-block;";
 
                 line_data.forEach(res => {
                     let column_data = res.split(",");
                     let new_row = csv_table.insertRow();
+                    let row_index = 0;
 
                     if (is_first_row) {
                         column_data.forEach(column => {
                             let cell = title_row.insertCell();
                             let select = document.createElement("select");
 
+                            select.id = row_index.toString();
+                            ++row_index;
+
                             add_select_option(select, "---");
-                            add_select_option(select, "Date");
+                            add_select_option(select, DATE_TITLE);
                             for (let i = 1; i <= column_data.length; ++i)
                             {
-                                add_select_option(select, "Set " + i.toString());
+                                add_select_option(select, SET_TITLE + i.toString());
                             }
                             cell.appendChild(select);
                         });
@@ -252,6 +300,7 @@ ${nav}
         }
     
         /// @function upload_file
+        // Sends a file to the cloud.
         function upload_file(file_obj)
         {
             let reader = new FileReader();
@@ -295,14 +344,75 @@ ${nav}
                     let file_ext = file_name.substr(file_name.lastIndexOf('.') + 1);
 
                     if (file_ext == "csv")
+                    {
+                        list_activity_types();
                         parse_csv_file(file_obj);
+                    }
                     else
+                    {
                         upload_file(file_obj);
+                    }
                 }
             }
             else
             {
                 alert("No files have been specified.");
+            }
+        }
+
+        /// @function confirm_selections
+        // Called after the user has selected the data to import from a CSV file.
+        function confirm_selections()
+        {
+            let csv_table = document.getElementById("parsed_csv_table");
+            let titles = [];
+
+            for (let row_index = 0, row; row = csv_table.rows[row_index]; ++row_index)
+            {
+                let activity_start = 0;
+                let sets = []; // The values are the reps for each set.
+
+                for (let col_index = 0, col; col = row.cells[col_index]; ++col_index)
+                {
+                    if (row_index == 0)
+                    {
+                        let select = document.getElementById(col_index.toString());
+                        titles.push(select.value);
+                    }
+                    else
+                    {
+                        if (titles[col_index] == DATE_TITLE)
+                        {
+                            let activity_start_obj = new Date(col.innerText);
+                            activity_start = activity_start_obj.getTime() / 1000;
+                        }
+                        else
+                        {
+                            let str_offset = titles[col_index].search(SET_TITLE);
+                            if (str_offset == 0)
+                            {
+                                let set_num = titles[col_index].substring(str_offset + 4);
+                                let rep_count = parseInt(col.innerText);
+                                sets[set_num - 1] = rep_count;
+                            }
+                        }
+                    }
+                }  
+
+                // If we found data then add it.
+                if (activity_start > 0)
+                {
+                    let the_url = "${root_url}/api/1.0/add_activity";
+                    let dict = [];
+                    let result_text = {};
+                    let activity_type = document.getElementById("activity_type_select").value;
+
+                    dict.push({["Sets"] : JSON.stringify(sets)});
+                    dict.push({["time"] : activity_start});
+                    dict.push({["activity_type"] : activity_type});
+
+                    send_post_request(the_url, dict, result_text);
+                }
             }
         }
 
@@ -324,6 +434,7 @@ ${nav}
             };
         });
 
+        /// @function process_task_statuses
         var process_task_statuses = function(records)
         {
             for (let record of records)
@@ -339,6 +450,8 @@ ${nav}
             }
         }
 
+        /// @function check_for_updates
+        // Pings the cloud service to know the status of files that have been uploaded.
         var check_for_updates = function()
         {
             $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_task_statuses", cache: false, success: process_task_statuses, dataType: "json" });
