@@ -189,7 +189,9 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             # Update totals and averages.
             self.total_distance = self.total_distance + meters_traveled
             self.distance_buf.append([date_time, self.total_distance])
-            self.total_vertical = self.total_vertical + abs(altitude - self.last_alt)
+            vertical = altitude - self.last_alt
+            if vertical > 0.0:
+                self.total_vertical = self.total_vertical + vertical
             self.update_average_speed(date_time)
 
             # Update the split calculations.
