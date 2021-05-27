@@ -81,7 +81,7 @@ ${nav}
     /// Converts latitude and longitude to the x,y coordinates needed for the Watopia map.
     function lat_lon_to_xy(width, height, lat, lon)
     {
-        let x = (width / 2) - ((center_lon - lon) * 2560.0);
+        let x = (width / 2) - ((center_lon - lon) * 2520.0);
         let y = (height / 2) - ((lat - center_lat) * 1850.0);
         return [x, y];
     };
@@ -97,7 +97,7 @@ ${nav}
         var ctx = can.getContext('2d');
 
         ctx.beginPath();
-        ctx.lineWidth = 0.5;
+        ctx.lineWidth = 0.95;
         ctx.strokeStyle = 'red';
 
         if (obj_list.length > 0)
