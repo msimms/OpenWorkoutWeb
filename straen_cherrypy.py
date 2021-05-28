@@ -122,12 +122,12 @@ def require(*conditions):
     return decorate
 
 
-class StraenWeb(object):
+class CherryPyFrontEnd(object):
     """Class containing the URL handlers."""
 
     def __init__(self, app):
         self.app = app
-        super(StraenWeb, self).__init__()
+        super(CherryPyFrontEnd, self).__init__()
 
     def terminate(self):
         """Destructor"""
@@ -177,7 +177,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.live.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.live.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -188,7 +188,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.live_user.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.live_user.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -199,7 +199,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.activity.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.activity.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -210,7 +210,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.edit_activity.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.edit_activity.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -221,7 +221,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.add_photos.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.add_photos.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -232,7 +232,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.device.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.device.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -248,7 +248,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.my_activities.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.my_activities.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -264,7 +264,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.all_activities.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.all_activities.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -280,7 +280,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.record_progression.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.record_progression.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -296,7 +296,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.workouts.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.workouts.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -312,7 +312,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.workout.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.workout.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -328,7 +328,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.statistics.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.statistics.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -344,7 +344,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.gear.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.gear.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -360,7 +360,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.service_history.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.service_history.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -376,7 +376,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.friends.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.friends.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -392,7 +392,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.device_list.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.device_list.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -408,7 +408,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.manual_entry.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.manual_entry.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -424,7 +424,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.import_activity.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.import_activity.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -440,7 +440,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.pace_plans.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.pace_plans.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -456,7 +456,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.task_status.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.task_status.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -472,7 +472,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.profile.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.profile.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -488,7 +488,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.settings.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.settings.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -561,7 +561,7 @@ class StraenWeb(object):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-            self.log_error('Unhandled exception in ' + StraenWeb.ical.__name__)
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.ical.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -718,7 +718,7 @@ def main():
     workout_plan_gen = WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler()
     data_mgr = DataMgr.DataMgr(config, root_url, analysis_scheduler, import_scheduler, workout_plan_gen)
     backend = App.App(user_mgr, data_mgr, root_dir, root_url, googlemaps_key, profiling_enabled, debug_enabled)
-    g_app = StraenWeb(backend)
+    g_app = CherryPyFrontEnd(backend)
 
     # Configure the error logger.
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
