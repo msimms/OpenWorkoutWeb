@@ -910,8 +910,8 @@ class MongoDatabase(Database.Database):
 
         try:
             if start_time is None or end_time is None:
-                return list(self.activities_collection.find({"$and": [ {Keys.ACTIVITY_USER_ID_KEY: {'$eq': user_id}} ]}))
-            return list(self.activities_collection.find({"$and": [ {Keys.ACTIVITY_USER_ID_KEY: {'$eq': user_id}}, {Keys.ACTIVITY_START_TIME_KEY: {'$gt': start_time}}, {Keys.ACTIVITY_START_TIME_KEY: {'$lt': end_time}} ]}))
+                return list(self.activities_collection.find({ "$and": [ { Keys.ACTIVITY_USER_ID_KEY: { '$eq': user_id } } ]}))
+            return list(self.activities_collection.find({ "$and": [ { Keys.ACTIVITY_USER_ID_KEY: { '$eq': user_id }}, { Keys.ACTIVITY_START_TIME_KEY: { '$gt': start_time } }, { Keys.ACTIVITY_START_TIME_KEY: { '$lt': end_time } } ]}))
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -930,16 +930,20 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def retrieve_device_activity_list(self, device_str, start_time, end_time):
-        """Retrieves the list of activities associated with the specified device."""
-        if device_str is None:
-            self.log_error(MongoDatabase.retrieve_device_activity_list.__name__ + ": Unexpected empty object: device_str")
+    def retrieve_devices_activity_list(self, devices, start_time, end_time):
+        """Retrieves the list of activities associated with the specified devices."""
+        if devices is None:
+            self.log_error(MongoDatabase.retrieve_devices_activity_list.__name__ + ": Unexpected empty object: devices")
             return []
+
+        device_list = []
+        for device_str in devices:
+            device_list.append( { Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str} } )
 
         try:
             if start_time is None or end_time is None:
-                return list(self.activities_collection.find({"$and": [ {Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str}} ]}))
-            return list(self.activities_collection.find({"$and": [ {Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str}}, {Keys.ACTIVITY_START_TIME_KEY: {'$gt': start_time}}, {Keys.ACTIVITY_START_TIME_KEY: {'$lt': end_time}} ]}))
+                return list(self.activities_collection.find({ "$or": device_list }))
+            return list(self.activities_collection.find({ "$and": [ { "$or": device_list }, { Keys.ACTIVITY_START_TIME_KEY: { '$gt': start_time } }, { Keys.ACTIVITY_START_TIME_KEY: { '$lt': end_time } } ] }))
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
