@@ -240,7 +240,7 @@ class Api(object):
             for location in locations[num_points:]:
                 if len(response) > 1:
                     response += ","
-                response += json.dumps({Keys.LOCATION_LAT_KEY: location[Keys.LOCATION_LAT_KEY], Keys.LOCATION_LON_KEY: location[Keys.LOCATION_LON_KEY], Keys.LOCATION_ALT_KEY: location[Keys.LOCATION_ALT_KEY]})
+                response += json.dumps({Keys.LOCATION_LAT_KEY: location[Keys.LOCATION_LAT_KEY], Keys.LOCATION_LON_KEY: location[Keys.LOCATION_LON_KEY], Keys.LOCATION_ALT_KEY: location[Keys.LOCATION_ALT_KEY], Keys.LOCATION_TIME_KEY: location[Keys.LOCATION_TIME_KEY]})
 
         response += "]"
 

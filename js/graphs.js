@@ -194,7 +194,7 @@ function draw_simple_graph(data, title, color)
 }
 
 /// @function draw_graph
-function draw_graph(start_time_ms, end_time_ms, data, title, units, color, show_ticks)
+function draw_graph(start_time_ms, end_time_ms, data, title, units, color)
 {
     if (data.length <= 1)
     {
