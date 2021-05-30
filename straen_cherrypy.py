@@ -501,7 +501,7 @@ class CherryPyFrontEnd(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
-            return self.error()
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.login.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -510,7 +510,7 @@ class CherryPyFrontEnd(object):
         try:
             return self.app.create_login()
         except:
-            return self.error()
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.create_login.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -523,7 +523,7 @@ class CherryPyFrontEnd(object):
         except cherrypy.HTTPRedirect as e:
             raise e
         except:
-            return self.error()
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.logout.__name__)
         return self.error()
 
     @cherrypy.expose
@@ -645,6 +645,10 @@ class CherryPyFrontEnd(object):
             response = "Unspecified error."
             cherrypy.response.status = 500
         return response
+
+    @cherrypy.expose
+    def google_maps(self):
+        raise cherrypy.HTTPRedirect("https://maps.googleapis.com/maps/api/js?key=" + self.app.google_maps_key)
 
     @cherrypy.expose
     def index(self):

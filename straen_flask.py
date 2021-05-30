@@ -445,7 +445,7 @@ def login():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
-        return g_app.render_error()
+        g_app.log_error('Unhandled exception in ' + login.__name__)
     return g_app.render_error()
 
 @g_flask_app.route('/create_login')
@@ -454,7 +454,7 @@ def create_login():
     try:
         return g_app.create_login()
     except:
-        return g_app.render_error()
+        g_app.log_error('Unhandled exception in ' + g_flask_app.__name__)
     return g_app.render_error()
 
 @g_flask_app.route('/logout')
@@ -467,7 +467,6 @@ def logout():
     except SessionException.SessionTerminatedException as e:
         response = flask.redirect(e.url, code=302)
         response.set_cookie(Keys.SESSION_KEY, '', expires=0)
-        response.delete_cookie(username)
         return response
     except:
         return g_app.render_error()
@@ -584,6 +583,10 @@ def api(version, method):
     except:
         code = 500
     return response, code
+
+@g_flask_app.route('/google_maps')
+def google_maps(self):
+    return flask.redirect("https://maps.googleapis.com/maps/api/js?key=" + g_app.google_maps_key, code=302)
 
 @g_flask_app.route('/')
 def index():
