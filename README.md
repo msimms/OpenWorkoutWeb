@@ -268,6 +268,9 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 ### 0.39
 * Bug fixes and performance optimizations.
 
+### 0.40
+* Bug fixes and performance optimizations.
+
 ## Tech
 This software uses several other source projects to work properly:
 
