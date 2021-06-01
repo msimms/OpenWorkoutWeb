@@ -58,16 +58,25 @@ ${nav}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="${root_url}/js/OpenStreetMap.js"></script>
 <script type="text/javascript">
-    var content_string
-    var map
-    var lgpx
-    var last_lat = ${lastLat}
-    var last_lon = ${lastLon}
 
+    let loc_start_time_ms = 0;
+    let loc_end_time_ms = 0;
+
+    let content_string = null;
+    let map = null;
+    let lgpx = null;
+
+    let last_lat = ${lastLat};
+    let last_lon = ${lastLon};
+
+    let elevation_graph = [];
+
+    /// @function append_to_summary_list
     function append_to_summary_list(key, value)
     {
         let ul = document.getElementById("summary");
         let li = document.createElement("li");
+
         li.appendChild(document.createTextNode(key + " " + value));
         ul.appendChild(li);
     }
@@ -84,6 +93,7 @@ ${nav}
         for (let i = 0; i < obj_list.length; ++i)
         {
             coordinates.push(new OpenLayers.LonLat(obj_list[i].latitude, obj_list[i].longitude));
+            elevation_graph.push(obj_list[i].altitude);
         }
 
         last_lat = obj_list[obj_list.length - 1].latitude;
@@ -191,6 +201,7 @@ ${nav}
             {
                 let lat_lon = OpenLayers.Projection.transform(components[i], 'EPSG:3857', 'EPSG:4326');
                 route_coordinates.push(lat_lon);
+
             }
 
             // Analyze the route, compute the total distance, avg. speed, etc.
@@ -207,6 +218,9 @@ ${nav}
                 let speed_str = convert_distance_and_duration_to_speed_str("${unit_system}", meters_traveled, ${duration});
                 append_to_summary_list("Avg. Speed:", speed_str);
             }
+
+            // Draw the elevation graph.
+            draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", "PeachPuff");
         });
         map.addLayer(lgpx);
 
@@ -251,8 +265,8 @@ ${summary}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
-    var start_time_ms = 0;
-    var end_time_ms = 0;
+    let start_time_ms = 0;
+    let end_time_ms = 0;
 
     let power_zones = [
 ${powerZones}
@@ -278,10 +292,45 @@ ${splits}
         }
     }
 
+    /// @function retrieve_summary_data
     function retrieve_summary_data()
     {
         let api_url = "${root_url}/api/1.0/activity_summarydata?activity_id=${activityId}&summary_items=intervals";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
+    }
+
+
+    /// @function draw_speed_graph
+    function draw_speed_graph(start_time_ms, end_time_ms, data)
+    {
+        let unit_system = "${unit_system}";
+        let speed_units = ""
+        let pace_units = ""
+
+        if (unit_system == "metric")
+        {
+            speed_units = "kph";
+            pace_units = "mins/km";
+        }
+        else
+        {
+            speed_units = "mph";
+            pace_units = "mins/mile";
+        }
+
+        if (${is_foot_based_activity})
+        {
+            speed_data = convert_speed_graph_to_display_units(unit_system, data);
+            pace_data = convert_speed_graph_to_pace_graph(unit_system, data);
+
+            draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
+            draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, "DodgerBlue");
+        }
+        else
+        {
+            speed_data = convert_speed_graph_to_display_units(unit_system, data);
+            draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
+        }
     }
 
     var process_sensordata = function(sensordata)
@@ -307,36 +356,7 @@ ${splits}
             }
 
             if (key == "Current Speed")
-            {
-                let is_metric = ("${unit_system}" == "metric");
-                let speed_units = ""
-                let pace_units = ""
-
-                if (is_metric)
-                {
-                    speed_units = "kph";
-                    pace_units = "mins/km";
-                }
-                else
-                {
-                    speed_units = "mph";
-                    pace_units = "mins/mile";
-                }
-
-                if (${is_foot_based_activity})
-                {
-                    speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
-                    pace_data = convert_speed_graph_to_pace_graph("${unit_system}", new_data);
-
-                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
-                    draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, "DodgerBlue");
-                }
-                else
-                {
-                    speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
-                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
-                }
-            }
+                draw_speed_graph(start_time_ms, end_time_ms, new_data);
             else if (key == "Heart Rate")
                 draw_graph(start_time_ms, end_time_ms, new_data, "BPM", "BPM", "FireBrick");
             else if (key == "Cadence")
@@ -348,12 +368,14 @@ ${splits}
         retrieve_summary_data();
     }
 
+    /// @function retrieve_sensor_data
     function retrieve_sensor_data()
     {
         let api_url = "${root_url}/api/1.0/activity_sensordata?activity_id=${activityId}&sensors=Current%20Speed,Heart%20Rate,Cadence,Power";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
     }
 
+    /// @function draw_graphs
     function draw_graphs()
     {
         retrieve_sensor_data();
@@ -470,6 +492,7 @@ ${splits}
         {
             let photo_table = document.getElementById("photos");
             let div = document.getElementById('photos_div');
+
             div.style = "display: inline-block;";
 
             for (let i = 0; i < photo_ids.length; ++i)
