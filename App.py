@@ -71,7 +71,9 @@ DEFAULT_LOGGED_IN_URL = '/all_activities'
 TASK_STATUS_URL = '/task_status'
 HTML_DIR = 'html'
 MEDIA_DIR = 'media'
-
+ZWIFT_WATOPIA_MAP_FILE_NAME = 'watopia.png'
+ZWIFT_CRIT_CITY_MAP_FILE_NAME = 'crit_city.png'
+ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME = 'makuri_islands.png'
 
 g_stats_lock = threading.Lock()
 g_stats_count = {}
@@ -132,9 +134,9 @@ class App(object):
 
         self.google_maps_key = google_maps_key
         self.debug = debug
-        self.watopia_map_file = os.path.join(root_dir, MEDIA_DIR, 'watopia.png')
-        self.crit_city_map_file = os.path.join(root_dir, MEDIA_DIR, 'crit_city.png')
-        self.makuri_islands_map_file = os.path.join(root_dir, MEDIA_DIR, 'makuri_islands.png')
+        self.zwift_watopia_map_file = os.path.join(root_dir, MEDIA_DIR, ZWIFT_WATOPIA_MAP_FILE_NAME)
+        self.zwift_crit_city_map_file = os.path.join(root_dir, MEDIA_DIR, ZWIFT_CRIT_CITY_MAP_FILE_NAME)
+        self.zwift_makuri_islands_map_file = os.path.join(root_dir, MEDIA_DIR, ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME)
         self.zwift_html_file = os.path.join(root_dir, HTML_DIR, 'zwift.html')
         self.unmapped_activity_html_file = os.path.join(root_dir, HTML_DIR, 'unmapped_activity.html')
         self.map_single_osm_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_osm.html')
@@ -555,11 +557,27 @@ class App(object):
         return result
 
     @staticmethod
-    def is_activity_in_watopia(activity_type, lat, lon):
+    def is_activity_in_zwift_watopia(activity_type, lat, lon):
         """Zwift's Watopia is mapped over the Solomon Islands."""
         if activity_type == Keys.TYPE_VIRTUAL_CYCLING_KEY or activity_type == Keys.TYPE_VIRTUAL_RUNNING_KEY:
             distance_to_watopia_meters = distance.haversine_distance_ignore_altitude(lat, lon, -11.6364607214928, 166.972435712814)
-            return (distance_to_watopia_meters < 50000)
+            return (distance_to_watopia_meters < 25000)
+        return False
+
+    @staticmethod
+    def is_activity_in_zwift_crit_city(activity_type, lat, lon):
+        """Zwift's Crit City is mapped over the Solomon Islands."""
+        if activity_type == Keys.TYPE_VIRTUAL_CYCLING_KEY or activity_type == Keys.TYPE_VIRTUAL_RUNNING_KEY:
+            distance_to_watopia_meters = distance.haversine_distance_ignore_altitude(lat, lon, -10.383856371045113, 165.80203771591187)
+            return (distance_to_watopia_meters < 10000)
+        return False
+
+    @staticmethod
+    def is_activity_in_zwift_makuri_islands(activity_type, lat, lon):
+        """Zwift's Makuri Islands is mapped over the Santa Cruz Islands in the Solomon Islands chain."""
+        if activity_type == Keys.TYPE_VIRTUAL_CYCLING_KEY or activity_type == Keys.TYPE_VIRTUAL_RUNNING_KEY:
+            distance_to_watopia_meters = distance.haversine_distance_ignore_altitude(lat, lon, -10.74387788772583, 165.8565080165863)
+            return (distance_to_watopia_meters < 25000)
         return False
 
     def render_page_for_errored_activity(self, activity_id, logged_in, belongs_to_current_user):
@@ -712,12 +730,20 @@ class App(object):
             page_title = "Activity"
 
         # Was this a virtual activity in Zwift's Watopia?
-        is_in_watopia = App.is_activity_in_watopia(activity_type, center_lat, center_lon)
+        is_in_watopia = App.is_activity_in_zwift_watopia(activity_type, center_lat, center_lon)
+        is_in_crit_city = App.is_activity_in_zwift_crit_city(activity_type, center_lat, center_lon)
+        is_in_makuri_islands = App.is_activity_in_zwift_makuri_islands(activity_type, center_lat, center_lon)
 
         # If a google maps key was provided then use google maps, otherwise use open street map.
-        if is_in_watopia and os.path.isfile(self.watopia_map_file) > 0:
+        if is_in_watopia and os.path.isfile(self.zwift_watopia_map_file) > 0:
             my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_WATOPIA_MAP_FILE_NAME)
+        elif is_in_crit_city and os.path.isfile(self.zwift_crit_city_map_file) > 0:
+            my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_CRIT_CITY_MAP_FILE_NAME)
+        elif is_in_makuri_islands and os.path.isfile(self.zwift_makuri_islands_map_file) > 0:
+            my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME)
         elif self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
             return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, googleMapsKey=self.google_maps_key, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)

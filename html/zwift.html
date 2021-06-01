@@ -43,7 +43,7 @@
 
     canvas
     {
-        background-image: url("${root_url}/media/watopia.png");
+        background-image: url("${root_url}/media/${map_file_name}");
         background-position: center;
         background-size: 100% 100%;
         height: 100%;
@@ -77,9 +77,9 @@ ${nav}
     [
     ];
 
-    /// @function lat_lon_to_xy
+    /// @function lat_lon_to_watopia_xy
     /// Converts latitude and longitude to the x,y coordinates needed for the Watopia map.
-    function lat_lon_to_xy(width, height, lat, lon)
+    function lat_lon_to_watopia_xy(width, height, lat, lon)
     {
         let x = (width / 2) - ((center_lon - lon) * 2520.0);
         let y = (height / 2) - ((lat - center_lat) * 1850.0);
@@ -93,8 +93,8 @@ ${nav}
         if (obj_list.length == 0)
             return;
 
-        var can = document.getElementById('canvas');
-        var ctx = can.getContext('2d');
+        let can = document.getElementById('canvas');
+        let ctx = can.getContext('2d');
 
         ctx.beginPath();
         ctx.lineWidth = 0.95;
@@ -102,12 +102,14 @@ ${nav}
 
         if (obj_list.length > 0)
         {
-            let xy_coords = lat_lon_to_xy(can.width, can.height, obj_list[0].latitude, obj_list[0].longitude);
+            let xy_coords = lat_lon_to_watopia_xy(can.width, can.height, obj_list[0].latitude, obj_list[0].longitude);
+
             ctx.moveTo(xy_coords[0], xy_coords[1]);
         }
         for (let i = 0; i < obj_list.length; ++i)
         {
-            let xy_coords = lat_lon_to_xy(can.width, can.height, obj_list[i].latitude, obj_list[i].longitude);
+            let xy_coords = lat_lon_to_watopia_xy(can.width, can.height, obj_list[i].latitude, obj_list[i].longitude);
+
             ctx.lineTo(xy_coords[0], xy_coords[1]);
             ctx.stroke();
             route_coordinates.push(xy_coords);
@@ -148,8 +150,8 @@ ${summary}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
-    var start_time_ms = 0;
-    var end_time_ms = 0;
+    let start_time_ms = 0;
+    let end_time_ms = 0;
 
     let power_zones = [
 ${powerZones}
