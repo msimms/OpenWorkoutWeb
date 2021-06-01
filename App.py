@@ -133,7 +133,9 @@ class App(object):
         self.google_maps_key = google_maps_key
         self.debug = debug
         self.watopia_map_file = os.path.join(root_dir, MEDIA_DIR, 'watopia.png')
-        self.watopia_html_file = os.path.join(root_dir, HTML_DIR, 'watopia.html')
+        self.crit_city_map_file = os.path.join(root_dir, MEDIA_DIR, 'crit_city.png')
+        self.makuri_islands_map_file = os.path.join(root_dir, MEDIA_DIR, 'makuri_islands.png')
+        self.zwift_html_file = os.path.join(root_dir, HTML_DIR, 'zwift.html')
         self.unmapped_activity_html_file = os.path.join(root_dir, HTML_DIR, 'unmapped_activity.html')
         self.map_single_osm_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_osm.html')
         self.map_single_google_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
@@ -714,7 +716,7 @@ class App(object):
 
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if is_in_watopia and os.path.isfile(self.watopia_map_file) > 0:
-            my_template = Template(filename=self.watopia_html_file, module_directory=self.tempmod_dir)
+            my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
             return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, centerLat=center_lat, lastLat=last_lat, lastLon=last_lon, centerLon=center_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
         elif self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
