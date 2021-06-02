@@ -36,8 +36,8 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_DISTANCE_KEY, Units.get_speed_units_str(Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS), activity_type)
 
         self.activity_type = activity_type
-        self.start_time = None
-        self.last_time = None
+        self.start_time_ms = None
+        self.last_time_ms = None
         self.last_lat = None
         self.last_lon = None
         self.last_alt = None
@@ -67,9 +67,9 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         else:
             self.speed_window_size = 11
 
-    def update_average_speed(self, date_time):
+    def update_average_speed(self, date_time_ms):
         """Computes the average speed of the workout. Called by 'append_location'."""
-        elapsed_milliseconds = date_time - self.start_time
+        elapsed_milliseconds = date_time_ms - self.start_time_ms
         if elapsed_milliseconds > 0:
             self.avg_speed = self.total_distance / (elapsed_milliseconds / 1000.0)
 
@@ -98,8 +98,8 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         for time_distance_node in reversed(self.distance_buf):
 
             # Convert time from ms to seconds - seconds from this point to the end of the activity.
-            current_time = time_distance_node[0]
-            total_seconds = (self.last_time - current_time) / 1000.0
+            current_time_ms = time_distance_node[0]
+            total_seconds = (self.last_time_ms - current_time_ms) / 1000.0
             if total_seconds <= 0:
                 continue
 
@@ -116,11 +116,11 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                     self.bests[Keys.BEST_SPEED] = self.current_speed
                 if self.total_distance < 1000:
                     break
-                if current_time > self.last_speed_buf_update_time:
-                    self.speed_times.append(current_time)
+                if current_time_ms > self.last_speed_buf_update_time:
+                    self.speed_times.append(current_time_ms)
                     self.speed_graph.append(self.current_speed)
                     self.speed_heat_map.append(self.current_speed)
-                    self.last_speed_buf_update_time = current_time
+                    self.last_speed_buf_update_time = current_time_ms
 
             # Is this a new kilometer record for this activity?
             if total_meters < 1000:
@@ -173,35 +173,35 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                     continue
                 self.do_record_check(Keys.BEST_CENTURY, total_seconds, total_meters, Units.METERS_PER_MILE * 100.0)
 
-    def append_location(self, date_time, latitude, longitude, altitude):
+    def append_location(self, date_time_ms, latitude, longitude, altitude):
         """Adds another location to the analyzer. Locations should be sent in order."""
 
         # Not much we can do with the first location other than note the start time.
-        if self.start_time is None:
-            self.start_time = date_time
+        if self.start_time_ms is None:
+            self.start_time_ms = date_time_ms
 
         # Update the total distance calculation.
-        elif self.last_time is not None:
+        elif self.last_time_ms is not None:
 
             # How far since the last point?
             meters_traveled = distance.haversine_distance(latitude, longitude, altitude, self.last_lat, self.last_lon, self.last_alt)
 
             # Update totals and averages.
             self.total_distance = self.total_distance + meters_traveled
-            self.distance_buf.append([date_time, self.total_distance])
+            self.distance_buf.append([date_time_ms, self.total_distance])
             vertical = altitude - self.last_alt
             if vertical > 0.0:
                 self.total_vertical = self.total_vertical + vertical
-            self.update_average_speed(date_time)
+            self.update_average_speed(date_time_ms)
 
             # Update the split calculations.
-            self.do_split_check(date_time - self.start_time, 1000, self.km_splits)
-            self.do_split_check(date_time - self.start_time, Units.METERS_PER_MILE, self.mile_splits)
+            self.do_split_check(date_time_ms - self.start_time_ms, 1000, self.km_splits)
+            self.do_split_check(date_time_ms - self.start_time_ms, Units.METERS_PER_MILE, self.mile_splits)
 
         # Update the heat map.
         self.location_heat_map.append(latitude, longitude)
 
-        self.last_time = date_time
+        self.last_time_ms = date_time_ms
         self.last_lat = latitude
         self.last_lon = longitude
         self.last_alt = altitude
