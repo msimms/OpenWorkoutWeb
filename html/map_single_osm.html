@@ -320,15 +320,16 @@ ${splits}
 
         if (${is_foot_based_activity})
         {
-            speed_data = convert_speed_graph_to_display_units(unit_system, data);
-            pace_data = convert_speed_graph_to_pace_graph(unit_system, data);
+            let speed_data = convert_speed_graph_to_display_units(unit_system, data);
+            let pace_data = convert_speed_graph_to_pace_graph(unit_system, data);
 
             draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
             draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, "DodgerBlue");
         }
         else
         {
-            speed_data = convert_speed_graph_to_display_units(unit_system, data);
+            let speed_data = convert_speed_graph_to_display_units(unit_system, data);
+
             draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
         }
     }

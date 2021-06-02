@@ -48,10 +48,11 @@
 </style>
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script type="text/javascript" src="${root_url}/js/graphs.js"></script>
 <script type="text/javascript" src="${root_url}/js/coordinates.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}"></script>
+<script type="text/javascript" src="${root_url}/google_maps"></script>
 <script type="text/javascript">
     var content_string
     var map
@@ -90,7 +91,7 @@ ${route}
     {
         var mapOptions =
         {
-            center: new google.maps.LatLng(${centerLat}, ${centerLon}),
+            center: new google.maps.LatLng(${lastLat}, ${lastLon}),
             zoom: 12
         };
 

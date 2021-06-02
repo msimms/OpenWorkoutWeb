@@ -70,19 +70,41 @@ ${nav}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
 <script type="text/javascript">
-    const center_lat = -11.663;
-    const center_lon = 166.945;
-
-    var route_coordinates =
-    [
-    ];
+    let route_coordinates = [];
 
     /// @function lat_lon_to_watopia_xy
     /// Converts latitude and longitude to the x,y coordinates needed for the Watopia map.
     function lat_lon_to_watopia_xy(width, height, lat, lon)
     {
+        const center_lat = -11.663;
+        const center_lon = 166.945;
+
         let x = (width / 2) - ((center_lon - lon) * 2520.0);
         let y = (height / 2) - ((lat - center_lat) * 1850.0);
+        return [x, y];
+    };
+
+    /// @function lat_lon_to_crit_city_xy
+    /// Converts latitude and longitude to the x,y coordinates needed for the Watopia map.
+    function lat_lon_to_crit_city_xy(width, height, lat, lon)
+    {
+        const center_lat = -10.383;
+        const center_lon = 165.802;
+
+        let x = (width / 2) - ((center_lon - lon) * 2000.0);
+        let y = (height / 2) - ((lat - center_lat) * 2000.0);
+        return [x, y];
+    };
+
+    /// @function lat_lon_to_makuri_islands_xy
+    /// Converts latitude and longitude to the x,y coordinates needed for the Watopia map.
+    function lat_lon_to_makuri_islands_xy(width, height, lat, lon)
+    {
+        const center_lat = -10.743;
+        const center_lon = 165.856;
+
+        let x = (width / 2) - ((center_lon - lon) * 2000.0);
+        let y = (height / 2) - ((lat - center_lat) * 2000.0);
         return [x, y];
     };
 
@@ -95,6 +117,16 @@ ${nav}
 
         let can = document.getElementById('canvas');
         let ctx = can.getContext('2d');
+        let func = lat_lon_to_watopia_xy;
+
+        if ("${map_file_name}" == "crit_city.png")
+        {
+            func = lat_lon_to_crit_city_xy
+        }
+        if ("${map_file_name}" == "makuri_islands.png")
+        {
+            func = lat_lon_to_makuri_islands_xy
+        }
 
         ctx.beginPath();
         ctx.lineWidth = 0.95;
@@ -102,13 +134,13 @@ ${nav}
 
         if (obj_list.length > 0)
         {
-            let xy_coords = lat_lon_to_watopia_xy(can.width, can.height, obj_list[0].latitude, obj_list[0].longitude);
+            let xy_coords = func(can.width, can.height, obj_list[0].latitude, obj_list[0].longitude);
 
             ctx.moveTo(xy_coords[0], xy_coords[1]);
         }
         for (let i = 0; i < obj_list.length; ++i)
         {
-            let xy_coords = lat_lon_to_watopia_xy(can.width, can.height, obj_list[i].latitude, obj_list[i].longitude);
+            let xy_coords = func(can.width, can.height, obj_list[i].latitude, obj_list[i].longitude);
 
             ctx.lineTo(xy_coords[0], xy_coords[1]);
             ctx.stroke();
@@ -227,15 +259,16 @@ ${splits}
 
                 if (${is_foot_based_activity})
                 {
-                    speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
-                    pace_data = convert_speed_graph_to_pace_graph("${unit_system}", new_data);
+                    let speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
+                    let pace_data = convert_speed_graph_to_pace_graph("${unit_system}", new_data);
 
                     draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
                     draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, "DodgerBlue");
                 }
                 else
                 {
-                    speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
+                    let speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
+
                     draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
                 }
             }
