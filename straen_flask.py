@@ -243,7 +243,7 @@ def all_activities():
 
 @g_flask_app.route('/record_progression/<activity_type>/<record_name>')
 @login_requred
-def record_progression(self, activity_type, record_name):
+def record_progression(activity_type, record_name):
     """Renders the list of records, in order of progression, for the specified user and record type."""
     try:
         return g_app.record_progression(activity_type, record_name)
@@ -253,7 +253,7 @@ def record_progression(self, activity_type, record_name):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + record_progression.__name__)
-    return self.error()
+    return g_app.error()
 
 @g_flask_app.route('/workouts')
 @login_requred
@@ -445,7 +445,7 @@ def login():
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:
-        return g_app.render_error()
+        g_app.log_error('Unhandled exception in ' + login.__name__)
     return g_app.render_error()
 
 @g_flask_app.route('/create_login')
@@ -454,7 +454,7 @@ def create_login():
     try:
         return g_app.create_login()
     except:
-        return g_app.render_error()
+        g_app.log_error('Unhandled exception in ' + g_flask_app.__name__)
     return g_app.render_error()
 
 @g_flask_app.route('/logout')
@@ -467,7 +467,6 @@ def logout():
     except SessionException.SessionTerminatedException as e:
         response = flask.redirect(e.url, code=302)
         response.set_cookie(Keys.SESSION_KEY, '', expires=0)
-        response.delete_cookie(username)
         return response
     except:
         return g_app.render_error()
@@ -508,13 +507,13 @@ def ical(calendar_id):
     return result
 
 @g_flask_app.route('/api_keys')
-def api_keys(self):
+def api_keys():
     """Renders the api key management page."""
     result = ""
     try:
-        result = self.app.api_keys()
+        result = g_app.api_keys()
     except:
-        result = self.error()
+        result = g_app.error()
     return result
 
 @g_flask_app.route('/api/<version>/<method>', methods = ['GET','POST'])
@@ -541,11 +540,11 @@ def api(version, method):
             key = params[Keys.API_KEY]
 
             # Which user is associated with this key?
-            user_id, _, _, max_rate = self.app.user_mgr.retrieve_user_from_api_key(key)
+            user_id, _, _, max_rate = g_app.user_mgr.retrieve_user_from_api_key(key)
             if user_id is not None:
 
                 # Make sure the key is not being abused.
-                if not self.app.data_mgr.check_api_rate(key, max_rate):
+                if not g_app.data_mgr.check_api_rate(key, max_rate):
                     user_id = None
                     code = 429
                     response = "Excessive API requests."
@@ -553,9 +552,9 @@ def api(version, method):
         else:
 
             # API key not provided, check the session key.
-            username = self.app.user_mgr.get_logged_in_user()
+            username = g_app.user_mgr.get_logged_in_user()
             if username is not None:
-                user_id, _, _ = self.app.user_mgr.retrieve_user(username)
+                user_id, _, _ = g_app.user_mgr.retrieve_user(username)
 
         # Process the API request.
         if version == '1.0':
@@ -584,6 +583,10 @@ def api(version, method):
     except:
         code = 500
     return response, code
+
+@g_flask_app.route('/google_maps')
+def google_maps():
+    return flask.redirect("https://maps.googleapis.com/maps/api/js?key=" + g_app.google_maps_key, code=302)
 
 @g_flask_app.route('/')
 def index():

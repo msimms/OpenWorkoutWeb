@@ -266,6 +266,12 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 * Bug fixes and performance optimizations, including a lot of graph fixes.
 * Initial cut of csv import functionality.
 
+### 0.39
+* Bug fixes and performance optimizations.
+
+### 0.40
+* Bug fixes and performance optimizations.
+
 ## Tech
 This software uses several other source projects to work properly:
 

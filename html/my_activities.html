@@ -96,30 +96,6 @@
             then((results) => draw_calendar());
     }
 
-    /// @function on_prev_year
-    function on_prev_year()
-    {
-        $('#calendar').fullCalendar('prevYear');
-    }
-
-    /// @function on_prev_month
-    function on_prev_month()
-    {
-        $('#calendar').fullCalendar('prev');
-    }
-
-    /// @function on_next_month
-    function on_next_month()
-    {
-        $('#calendar').fullCalendar('next');
-    }
-
-    /// @function on_next_year
-    function on_next_year()
-    {
-        $('#calendar').fullCalendar('nextYear');
-    }
-
     /// @function draw_calendar
     function draw_calendar()
     {
@@ -145,11 +121,6 @@
             ],
             eventDataTransform: process_activity_obj
         });
-
-        $('#prevYear').on('click', on_prev_year);
-        $('#prev').on('click', on_prev_month);
-        $('#next').on('click', on_next_month);
-        $('#nextYear').on('click', on_next_year);
     }
 
     $(document).ready(function()

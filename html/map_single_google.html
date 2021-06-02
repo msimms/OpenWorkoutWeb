@@ -55,23 +55,29 @@ ${nav}
 <script type="text/javascript" src="${root_url}/js/coordinates.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=${googleMapsKey}"></script>
+<script type="text/javascript" src="${root_url}/google_maps"></script>
 <script type="text/javascript">
-    var route_path
-    var map
-    var marker = null
-    var info_window = null
-    var last_lat = ${lastLat}
-    var last_lon = ${lastLon}
-    var route_coordinates =
-    [
-    ];
+
+    let loc_start_time_ms = 0;
+    let loc_end_time_ms = 0;
+
+    let route_path = null;
+    let map = null;
+    let marker = null;
+    let info_window = null;
+
+    let last_lat = ${lastLat};
+    let last_lon = ${lastLon};
+
+    let route_coordinates = [];
+    let elevation_graph = [];
 
     /// @function append_to_summary_list
     function append_to_summary_list(key, value)
     {
         let ul = document.getElementById("summary");
         let li = document.createElement("li");
+
         li.appendChild(document.createTextNode(key + " " + value));
         ul.appendChild(li);
     }
@@ -86,6 +92,12 @@ ${nav}
         for (let i = 0; i < obj_list.length; ++i)
         {
             route_coordinates.push(new google.maps.LatLng(obj_list[i].latitude, obj_list[i].longitude));
+            elevation_graph.push({"date": new Date(obj_list[i].time), "value": obj_list[i].altitude});
+            if (loc_start_time_ms == 0)
+            {
+                loc_start_time_ms = obj_list[i].time;
+            }
+            loc_end_time_ms = obj_list[i].time;
         }
         route_path.setPath(route_coordinates);
         route_path.setMap(map);
@@ -94,22 +106,27 @@ ${nav}
         last_lon = obj_list[obj_list.length - 1].longitude;
 
         // Analyze the route, compute the total distance, avg. speed, etc.
+        let unit_system = "${unit_system}";
+        let duration = ${duration};
         let meters_traveled = total_distance_google(route_coordinates);
-        let distance_traveled_str = convert_distance_to_unit_system_str("${unit_system}", meters_traveled);
+        let distance_traveled_str = convert_distance_to_unit_system_str(unit_system, meters_traveled);
         append_to_summary_list("Distance", distance_traveled_str);
         if (${is_foot_based_activity})
         {
-            let pace_str = convert_distance_and_duration_to_pace_str("${unit_system}", meters_traveled, ${duration});
+            let pace_str = convert_distance_and_duration_to_pace_str(unit_system, meters_traveled, duration);
             append_to_summary_list("Avg. Pace:", pace_str);
         }
         else
         {
-            let speed_str = convert_distance_and_duration_to_speed_str("${unit_system}", meters_traveled, ${duration});
+            let speed_str = convert_distance_and_duration_to_speed_str(unit_system, meters_traveled, duration);
             append_to_summary_list("Avg. Speed:", speed_str);
         }
 
         // Request metadata for the info box.
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", cache: false, success: update_metadata, dataType: "json" });
+
+        // Draw the elevation graph.
+        draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", "PeachPuff");
     };
 
     var update_metadata = function(obj_list)
@@ -176,7 +193,7 @@ ${nav}
     {
         var mapOptions =
         {
-            center: new google.maps.LatLng(${centerLat}, ${centerLon}),
+            center: new google.maps.LatLng(last_lat, last_lon),
             zoom: 12
         };
 
@@ -221,8 +238,8 @@ ${summary}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
-    var start_time_ms = 0;
-    var end_time_ms = 0;
+    let start_time_ms = 0;
+    let end_time_ms = 0;
 
     let power_zones = [
 ${powerZones}
@@ -255,6 +272,40 @@ ${splits}
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
     }
 
+    /// @function draw_speed_graph
+    function draw_speed_graph(start_time_ms, end_time_ms, data)
+    {
+        let unit_system = "${unit_system}";
+        let speed_units = ""
+        let pace_units = ""
+
+        if (unit_system == "metric")
+        {
+            speed_units = "kph";
+            pace_units = "mins/km";
+        }
+        else
+        {
+            speed_units = "mph";
+            pace_units = "mins/mile";
+        }
+
+        if (${is_foot_based_activity})
+        {
+            let speed_data = convert_speed_graph_to_display_units(unit_system, data);
+            let pace_data = convert_speed_graph_to_pace_graph(unit_system, data);
+
+            draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
+            draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, "DodgerBlue");
+        }
+        else
+        {
+            let speed_data = convert_speed_graph_to_display_units(unit_system, data);
+
+            draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
+        }
+    }
+
     /// @function process_sensordata
     var process_sensordata = function(sensordata)
     {
@@ -279,36 +330,7 @@ ${splits}
             }
 
             if (key == "Current Speed")
-            {
-                let is_metric = ("${unit_system}" == "metric");
-                let speed_units = ""
-                let pace_units = ""
-
-                if (is_metric)
-                {
-                    speed_units = "kph";
-                    pace_units = "mins/km";
-                }
-                else
-                {
-                    speed_units = "mph";
-                    pace_units = "mins/mile";
-                }
-
-                if (${is_foot_based_activity})
-                {
-                    speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
-                    pace_data = convert_speed_graph_to_pace_graph("${unit_system}", new_data);
-
-                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
-                    draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, "DodgerBlue");
-                }
-                else
-                {
-                    speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
-                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
-                }
-            }
+                draw_speed_graph(start_time_ms, end_time_ms, new_data);
             else if (key == "Heart Rate")
                 draw_graph(start_time_ms, end_time_ms, new_data, "BPM", "BPM", "FireBrick");
             else if (key == "Cadence")
@@ -443,6 +465,7 @@ ${splits}
         {
             let photo_table = document.getElementById("photos");
             let div = document.getElementById('photos_div');
+
             div.style = "display: inline-block;";
 
             for (let i = 0; i < photo_ids.length; ++i)
