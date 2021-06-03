@@ -64,7 +64,7 @@ sys.path.insert(0, distancedir)
 import distance
 
 
-PRODUCT_NAME = 'Straen'
+PRODUCT_NAME = 'OpenWorkout'
 
 LOGIN_URL = '/login'
 DEFAULT_LOGGED_IN_URL = '/all_activities'
