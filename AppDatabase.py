@@ -58,7 +58,7 @@ class Device(object):
 
 
 class MongoDatabase(Database.Database):
-    """Mongo DB implementation of the Straen database."""
+    """Mongo DB implementation of the application database."""
     conn = None
     database = None
     users_collection = None

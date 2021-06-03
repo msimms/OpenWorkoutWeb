@@ -1,9 +1,9 @@
-[![API Docs](https://img.shields.io/badge/api-raml-green.svg)](https://raw.githubusercontent.com/msimms/StraenWeb/master/api.raml)
+[![API Docs](https://img.shields.io/badge/api-raml-green.svg)](https://raw.githubusercontent.com/msimms/OpenWorkoutWeb/master/api.raml)
 [![API Docs](https://img.shields.io/badge/api-html-green.svg)](https://mikesimms.net/straen/api/api.html)
-![](https://travis-ci.com/msimms/StraenWeb.svg?branch=master)
+![](https://travis-ci.com/msimms/OpenWorkoutWeb.svg?branch=master)
 
-# StraenWeb
-Workout tracking website and optional companion to the Straen mobile app. This is very much a work-in-progress and is being done as a spare-time project, so set your expectations appropriately.
+# OpenWorkoutWeb
+Workout tracking website and optional companion to the Open Workout mobile app. This is very much a work-in-progress and is being done as a spare-time project, so set your expectations appropriately.
 
 ## Rationale
 Why develop a workout tracker when there are so many closed-source options available?
@@ -15,11 +15,8 @@ Why develop a workout tracker when there are so many closed-source options avail
 * I want to do some experiments with automatically generating workout plans. This will serve as the platform for this idea.
 * Education. For the experience in performing full-stack software development: dealing with website deployment and scalability, and security issues.
 
-## Origin of the Name
-Straen is the Welsh word for stress and exercise is a (positive) form of stress. Also, it was the only thing I could think of where I could register a decent domain name.
-
 ## Major Features
-* Enables the live tracking feature of the Straen mobile app.
+* Enables the live tracking feature of the Open Workout mobile app.
 * Supports strength (lifting) activities as well as distance (aerobic) activities.
 
 ## Major Todos
@@ -29,17 +26,17 @@ Straen is the Welsh word for stress and exercise is a (positive) form of stress.
 * Replace Google Maps with Open Street Map.
 * More analytics.
 
-[Full bug and feature tracking](https://github.com/msimms/StraenWeb/issues).
+[Full bug and feature tracking](https://github.com/msimms/OpenWorkoutWeb/issues).
 
 ## Installation
 To clone the source code:
 ```
-git clone https://github.com/msimms/StraenWeb
+git clone https://github.com/msimms/OpenWorkoutWeb
 ```
 
 To install the dependencies:
 ```
-cd StraenWeb
+cd OpenWorkoutWeb
 python setup.py
 ```
 
@@ -49,12 +46,12 @@ It is also designed to work with both python2 and python3.
 
 To run the web service under the cherrypy framework:
 ```
-python straen_cherrypy.py --config ~/Code/Scripts/DevOps/zaius/straen.config
+python straen_cherrypy.py --config openworkout.config
 ```
 
 To run the web service under the flask framework:
 ```
-python start_flask.py --config ~/Code/Scripts/DevOps/zaius/straen.config
+python start_flask.py --config openworkout.config
 ```
 
 *If a Google Maps key is not provided, OpenStreetMap will be used instead.*
@@ -63,7 +60,7 @@ python start_flask.py --config ~/Code/Scripts/DevOps/zaius/straen.config
 
 The software architecture makes it possible to use this system with different front-end technologies. Also, computationally expensive analysis tasks are kept separate from the main application, communicating via RabbitMQ.
 
-![Architecture Diagram](https://github.com/msimms/StraenWeb/blob/master/docs/Architecture.png?raw=true)
+![Architecture Diagram](https://github.com/msimms/OpenWorkoutWeb/blob/master/docs/Architecture.png?raw=true)
 
 ## Workout Plans
 
@@ -71,7 +68,7 @@ This feature is very much under development and will go through several iteratio
 
 ## User Guide
 
-For instructional material, consult the [Wiki](https://github.com/msimms/StraenWeb/wiki)
+For instructional material, consult the [Wiki](https://github.com/msimms/OpenWorkoutWeb/wiki)
 
 ## Version History
 
@@ -150,7 +147,7 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 * Bug fixes.
 
 ### 0.15
-* Added gear tracking. [Feature Page](https://github.com/msimms/StraenWeb/issues/4)
+* Added gear tracking. [Feature Page](https://github.com/msimms/OpenWorkoutWeb/issues/4)
 * Added location descriptions (i.e., Florida, United States).
 * Importing data now also starts the analysis process.
 * Bug fixes.
@@ -171,19 +168,19 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 * Added planned workouts to the My Activities calendar.
 
 ### 0.19
-* Added a map that shows the countries, US states, and Canadian provinces in which activities were recorded. [Feature Page](https://github.com/msimms/StraenWeb/issues/18)
+* Added a map that shows the countries, US states, and Canadian provinces in which activities were recorded. [Feature Page](https://github.com/msimms/OpenWorkoutWeb/issues/18)
 * Bug fixes and performance improvements.
 
 ### 0.20
 * Moved more functionality to the API.
 * Display US and Canada together for state/province statistics as it just looks better.
 * Reworked the follower/following system, so that everyone is just 'friends'.
-* Track mile and kilometer split times. [Feature Page](https://github.com/msimms/StraenWeb/issues/19)
+* Track mile and kilometer split times. [Feature Page](https://github.com/msimms/OpenWorkoutWeb/issues/19)
 * Bug fixes.
 
 ### 0.21
 * Moved more functionality to the API.
-* Moved distance and pace calculations to the front end (at least when using Google Maps). [Feature Page](https://github.com/msimms/StraenWeb/issues/20)
+* Moved distance and pace calculations to the front end (at least when using Google Maps). [Feature Page](https://github.com/msimms/OpenWorkoutWeb/issues/20)
 * Bug fixes.
 
 ### 0.22
@@ -195,16 +192,16 @@ For instructional material, consult the [Wiki](https://github.com/msimms/StraenW
 ### 0.24
 * Bug fixes and performance optimizations.
 * More work on run workout plan generation.
-* Added gear defaults. [Feature Page](https://github.com/msimms/StraenWeb/issues/17)
-* Display mile and kilometer split times. [Feature Page](https://github.com/msimms/StraenWeb/issues/19)
+* Added gear defaults. [Feature Page](https://github.com/msimms/OpenWorkoutWeb/issues/17)
+* Display mile and kilometer split times. [Feature Page](https://github.com/msimms/OpenWorkoutWeb/issues/19)
 
 ### 0.25
-* Ability to import FIT files. [Feature Page](https://github.com/msimms/StraenWeb/issues/22)
-* Ability to export workouts in ZWO fomrat. [Feature Page](https://github.com/msimms/StraenWeb/issues/1)
+* Ability to import FIT files. [Feature Page](https://github.com/msimms/OpenWorkoutWeb/issues/22)
+* Ability to export workouts in ZWO fomrat. [Feature Page](https://github.com/msimms/OpenWorkoutWeb/issues/1)
 * More work on run workout plan generation.
 
 ### 0.26
-* Replaced command line options with a configuration file. [Feature Page](https://github.com/msimms/StraenWeb/issues/24)
+* Replaced command line options with a configuration file. [Feature Page](https://github.com/msimms/OpenWorkoutWeb/issues/24)
 * More work on run workout plan generation.
 
 ### 0.27

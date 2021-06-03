@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y sudo
 EXPOSE 8080
 
 # Copy the application into the image.
-RUN mkdir -p /StraenWeb
-WORKDIR /StraenWeb
+RUN mkdir -p /OpenWorkoutWeb
+WORKDIR /OpenWorkoutWeb
 COPY . .
 
 # Install all of the python packages that we need.
