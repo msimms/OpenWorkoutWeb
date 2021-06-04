@@ -60,7 +60,7 @@ python start_flask.py --config openworkout.config
 
 The software architecture makes it possible to use this system with different front-end technologies. Also, computationally expensive analysis tasks are kept separate from the main application, communicating via RabbitMQ.
 
-![Architecture Diagram](https://github.com/msimms/OpenWorkoutWeb/blob/master/docs/Architecture.png?raw=true)
+![Architecture Diagram](https://github.com/msimms/OpenWorkoutWeb/blob/master/docs/architecture/Architecture.png?raw=true)
 
 ## Workout Plans
 
