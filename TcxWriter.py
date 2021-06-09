@@ -71,8 +71,8 @@ class TcxWriter(XmlWriter.XmlWriter):
     def close(self):
         self.close_all_tags()
 
-    def store_id(self, start_time):
-        buf = self.format_time_ms(start_time)
+    def store_id(self, start_time_ms):
+        buf = self.format_time_ms(start_time_ms)
         self.write_tag_and_value(TCX_TAG_NAME_ID, buf)
 
     def start_activity(self, description):
@@ -183,13 +183,10 @@ class TcxWriter(XmlWriter.XmlWriter):
         self.write_tag_and_value(TCX_TAG_NAME_LONGITUDE, lon)
         self.close_tag()
 
-    def format_time_sec(self, t):
-        return datetime.datetime.utcfromtimestamp(t).strftime('%Y-%m-%dT%H:%M:%SZ')
-
     def format_time_ms(self, t):
         sec  = t / 1000
         ms = t % 1000
 
         buf1 = datetime.datetime.utcfromtimestamp(sec).strftime('%Y-%m-%dT%H:%M:%S')
-        buf2 = buf1 + ".%04dZ" % ms
+        buf2 = buf1 + ".%03dZ" % ms
         return buf2
