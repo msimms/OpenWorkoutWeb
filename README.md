@@ -46,7 +46,7 @@ It is also designed to work with both python2 and python3.
 
 To run the web service under the cherrypy framework:
 ```
-python straen_cherrypy.py --config openworkout.config
+python start_cherrypy.py --config openworkout.config
 ```
 
 To run the web service under the flask framework:
@@ -283,7 +283,7 @@ This software uses several other source projects to work properly:
 The app is written in a combination of Python, HTML, and JavaScript.
 
 ## Social
-Twitter: [@StraenApp](https://twitter.com/StraenApp)
+Twitter: [@OpenWorkoutApp](https://twitter.com/OpenWorkoutApp)
 
 ## License
 Currently proprietary (though many of the source files are under the MIT license). However I am considering moving the remainder of the source code to either an MIT or MPL license.
