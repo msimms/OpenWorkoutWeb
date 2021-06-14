@@ -46,7 +46,7 @@ It is also designed to work with both python2 and python3.
 
 To run the web service under the cherrypy framework:
 ```
-python straen_cherrypy.py --config openworkout.config
+python start_cherrypy.py --config openworkout.config
 ```
 
 To run the web service under the flask framework:
