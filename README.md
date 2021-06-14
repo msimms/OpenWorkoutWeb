@@ -283,7 +283,7 @@ This software uses several other source projects to work properly:
 The app is written in a combination of Python, HTML, and JavaScript.
 
 ## Social
-Twitter: [@StraenApp](https://twitter.com/StraenApp)
+Twitter: [@OpenWorkoutApp](https://twitter.com/OpenWorkoutApp)
 
 ## License
 Currently proprietary (though many of the source files are under the MIT license). However I am considering moving the remainder of the source code to either an MIT or MPL license.
