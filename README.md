@@ -1,5 +1,5 @@
 [![API Docs](https://img.shields.io/badge/api-raml-green.svg)](https://raw.githubusercontent.com/msimms/OpenWorkoutWeb/master/api.raml)
-[![API Docs](https://img.shields.io/badge/api-html-green.svg)](https://mikesimms.net/straen/api/api.html)
+[![API Docs](https://img.shields.io/badge/api-html-green.svg)](https://raw.githubusercontent.com/msimms/OpenWorkoutWeb/master/api.html)
 ![](https://travis-ci.com/msimms/OpenWorkoutWeb.svg?branch=master)
 
 # OpenWorkoutWeb
