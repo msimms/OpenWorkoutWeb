@@ -432,6 +432,9 @@ function draw_bar_chart(data, title, color)
         .attr("transform", "rotate(-90)")
         .attr("dy", ".71em")
         .style("text-anchor", "end");
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
     svg.selectAll("bar")
         .data(data)
         .enter().append("rect")
