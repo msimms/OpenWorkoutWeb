@@ -696,7 +696,7 @@ def main():
         if debug_enabled:
             host = "127.0.0.1"
         else:
-            host = "straen-app.com"
+            host = "openworkout.cloud"
         print("Hostname not provided, will use " + host)
 
     root_dir = os.path.dirname(os.path.abspath(__file__))
