@@ -56,7 +56,6 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         self.current_speed = None # Current speed (in meters/second)
 
         self.location_heat_map = LocationHeatMap.LocationHeatMap()
-        self.speed_heat_map = SpeedHeatMap.SpeedHeatMap()
 
         self.last_speed_buf_update_time = 0
 
@@ -100,7 +99,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             # Convert time from ms to seconds - seconds from this point to the end of the activity.
             current_time_ms = time_distance_node[0]
             total_seconds = (self.last_time_ms - current_time_ms) / 1000.0
-            if total_seconds <= 0:
+            if total_seconds <= 0.0:
                 continue
 
             # Distance travelled from this point to the end of the activity.
@@ -108,18 +107,15 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             total_meters = self.total_distance - current_distance
 
             # Current speed is the average of the last ten seconds.
-            if int(total_seconds) == self.speed_window_size or self.current_speed is None:
+            if int(total_seconds) == self.speed_window_size:
 
                 self.current_speed = total_meters / total_seconds
 
                 if Keys.BEST_SPEED not in self.bests or self.current_speed > self.bests[Keys.BEST_SPEED]:
                     self.bests[Keys.BEST_SPEED] = self.current_speed
-                if self.total_distance < 1000:
-                    break
                 if current_time_ms > self.last_speed_buf_update_time:
                     self.speed_times.append(current_time_ms)
                     self.speed_graph.append(self.current_speed)
-                    self.speed_heat_map.append(self.current_speed)
                     self.last_speed_buf_update_time = current_time_ms
 
             # Is this a new kilometer record for this activity?
