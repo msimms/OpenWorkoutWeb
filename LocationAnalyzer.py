@@ -42,7 +42,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         self.last_lon = None
         self.last_alt = None
 
-        self.distance_buf = [] # Holds the distance calculations; used for the current speed calcuations. Each item is an array of the form [date_time, meters_traveled, total_distance]
+        self.distance_buf = [] # Holds the distance calculations; used for the current speed calcuations. Each item is an array of the form [date_time_ms, total_distance]
         self.speed_times = [] # Holds the times associated with self.speed_graph
         self.speed_graph = [] # Holds the current speed calculations 
         self.speed_blocks = [] # List of speed/pace blocks, i.e. statistically significant times spent at a given pace
