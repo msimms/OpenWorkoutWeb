@@ -56,11 +56,7 @@ ${nav}
                 dict.push({["uploaded_file_data"] : encoded_data});
                 dict.push({["activity_id"] : "${activity_id}"});
 
-                if (send_post_request(the_url, dict, result_text))
-                {
-                    window.location.reload();
-                }
-                else
+                if (!send_post_request(the_url, dict, result_text))
                 {
                     alert(result_text.value);
                 }
@@ -77,6 +73,7 @@ ${nav}
                 {
                     upload_file(selected_photo_list[i]);
                 }
+                window.location.replace("${root_url}/activity/${activity_id}");
             }
             else
             {
