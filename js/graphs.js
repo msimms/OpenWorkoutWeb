@@ -95,7 +95,7 @@ function draw_simple_graph(data, title, color)
     let x = d3.scaleTime()
         .domain(d3.extent(data, function(d) { return d.date; }))
         .range([ 0, width ]);
-    let xAxis = svg.append("g")
+    let x_axis = svg.append("g")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x));
 
@@ -103,7 +103,7 @@ function draw_simple_graph(data, title, color)
     let y = d3.scaleLinear()
         .domain(d3.extent(data, function(d) { return d.value; }))
         .range([ height, 0 ]);
-    let yAxis = svg.append("g")
+    let y_axis = svg.append("g")
         .call(d3.axisLeft(y));
     svg.append("text")
         .attr("transform", "rotate(-90)")
@@ -147,9 +147,9 @@ function draw_simple_graph(data, title, color)
         .attr("class", "brush")
         .call(brush);
 
-    // A function that set idleTimeOut to null.
-    var idleTimeout
-    function idled() { idleTimeout = null; }
+    // A function that set idle_timeout to null.
+    var idle_timeout
+    function idled() { idle_timeout = null; }
 
     // A function that update the chart for given boundaries.
     function updateChart() {
@@ -160,8 +160,8 @@ function draw_simple_graph(data, title, color)
         // If no selection, back to initial coordinate. Otherwise, update X axis domain.
         if (!extent)
         {
-            if (!idleTimeout)
-                return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
+            if (!idle_timeout)
+                return idle_timeout = setTimeout(idled, 350); // This allows to wait a little bit
             x.domain([4,8])
         }
         else
@@ -171,7 +171,7 @@ function draw_simple_graph(data, title, color)
         }
 
         // Update axis and line position
-        xAxis.transition().duration(1000).call(d3.axisBottom(x))
+        x_axis.transition().duration(1000).call(d3.axisBottom(x))
         line.select('.line')
             .transition()
             .duration(1000)
@@ -183,7 +183,7 @@ function draw_simple_graph(data, title, color)
     // If user double click, reinitialize the chart
     svg.on("dblclick",function() {
         x.domain(d3.extent(data, function(d) { return d.date; }))
-        xAxis.transition().call(d3.axisBottom(x))
+        x_axis.transition().call(d3.axisBottom(x))
         line.select('.line')
             .transition()
             .attr("d", d3.line()
@@ -200,6 +200,10 @@ function draw_graph(start_time_ms, end_time_ms, data, title, units, color)
     {
         return;
     }
+
+    // Calculate the y axis extents.
+    let min_y = d3.min(data, function(d) { return d.value; }) * 0.9;
+    let max_y = d3.max(data, function(d) { return d.value; });
 
     // To make all the graphs line up, make sure they have the same start and end time.
     if (start_time_ms > 0)
@@ -267,19 +271,19 @@ function draw_graph(start_time_ms, end_time_ms, data, title, units, color)
     let x = d3.scaleTime()
         .domain(d3.extent(data, function(d) { return d.date; }))
         .range([ 0, width ]);
-    let xAxis = svg.append("g")
+    let x_axis = svg.append("g")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x));
 
     // Add Y axis.
     let y = d3.scaleLinear()
-        .domain([0, d3.max(data, function(d) { return +d.value; })])
+        .domain([min_y, max_y])
         .range([ height, 0 ]);
-    let yAxis = svg.append("g")
+    let y_axis = svg.append("g")
         .call(d3.axisLeft(y));
     svg.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("y", 0-margin.left)
+        .attr("y", 0 - (margin.left))
         .attr("x", 0 - (height / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")
@@ -319,9 +323,9 @@ function draw_graph(start_time_ms, end_time_ms, data, title, units, color)
         .attr("class", "brush")
         .call(brush);
 
-    // A function that set idleTimeOut to null
-    var idleTimeout
-    function idled() { idleTimeout = null; }
+    // A function that set idle_timeout to null
+    var idle_timeout
+    function idled() { idle_timeout = null; }
 
     // A function that update the chart for given boundaries
     function updateChart() {
@@ -332,8 +336,8 @@ function draw_graph(start_time_ms, end_time_ms, data, title, units, color)
         // If no selection, back to initial coordinate. Otherwise, update X axis domain
         if (!extent)
         {
-            if (!idleTimeout)
-                return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
+            if (!idle_timeout)
+                return idle_timeout = setTimeout(idled, 350); // This allows to wait a little bit
             x.domain([4,8])
         }
         else
@@ -343,7 +347,7 @@ function draw_graph(start_time_ms, end_time_ms, data, title, units, color)
         }
 
         // Update axis and line position
-        xAxis.transition().duration(1000).call(d3.axisBottom(x))
+        x_axis.transition().duration(1000).call(d3.axisBottom(x))
         line.select('.line')
             .transition()
             .duration(1000)
@@ -355,7 +359,7 @@ function draw_graph(start_time_ms, end_time_ms, data, title, units, color)
     // If user double click, reinitialize the chart
     svg.on("dblclick",function() {
         x.domain(d3.extent(data, function(d) { return d.date; }))
-        xAxis.transition().call(d3.axisBottom(x))
+        x_axis.transition().call(d3.axisBottom(x))
         line.select('.line')
             .transition()
             .attr("d", d3.line()
@@ -405,8 +409,8 @@ function draw_bar_chart(data, title, color)
     let x = d3.scaleBand().domain(d3.range(1, data.length + 1)).range([0, width])
     let y = d3.scaleLinear().domain([0, d3.max(data)]).range([height, 0])
 
-    let xAxis = d3.axisBottom(x).ticks(data.length);
-    let yAxis = d3.axisLeft(y).ticks(2);
+    let x_axis = d3.axisBottom(x).ticks(data.length);
+    let y_axis = d3.axisLeft(y).ticks(2);
 
     let svg = d3.select("#charts")
         .append("svg")
@@ -427,7 +431,7 @@ function draw_bar_chart(data, title, color)
         .text(title);  
     svg.append("g")
         .attr("class", "y axis")
-        .call(yAxis)
+        .call(y_axis)
         .append("text")
         .attr("transform", "rotate(-90)")
         .attr("dy", ".71em")
