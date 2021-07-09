@@ -41,6 +41,24 @@ function convert_seconds_to_hours_mins_secs(seconds_in)
     return out_str;
 }
 
+/// @function get_graph_color
+function get_graph_color(key)
+{
+    if (key == "Speed" || key == "Current Speed")
+        return "DodgerBlue";
+    if (key == "Pace")
+        return "DodgerBlue";
+    if (key == "Navy")
+        return "Navy";
+    if (key == "Cadence")
+        return "Tan";
+    if (key == "Heart Rate")
+        return "FireBrick";
+    if (key == "Altitude")
+        return "ForestGreen";
+    return "Gray";
+}
+
 /// @function draw_simple_graph
 function draw_simple_graph(data, title, color)
 {
