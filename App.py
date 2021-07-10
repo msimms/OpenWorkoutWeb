@@ -368,21 +368,6 @@ class App(object):
         # Is the user logged in?
         logged_in = logged_in_username is not None
 
-        # Read the accelerometer data (if any).
-        accels = []
-        if Keys.APP_ACCELEROMETER_KEY in activity:
-            accels = activity[Keys.APP_ACCELEROMETER_KEY]
-
-        # Format the accelerometer data.
-        x_axis = ""
-        y_axis = ""
-        z_axis = ""
-        for accel in accels:
-            time_str = str(accel[Keys.ACCELEROMETER_TIME_KEY])
-            x_axis += "\t\t\t\t{ date: new Date(" + time_str + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_X]) + " },\n"
-            y_axis += "\t\t\t\t{ date: new Date(" + time_str + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Y]) + " },\n"
-            z_axis += "\t\t\t\t{ date: new Date(" + time_str + "), value: " + str(accel[Keys.ACCELEROMETER_AXIS_NAME_Z]) + " },\n"
-
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None or len(summary_data) == 0:
@@ -468,7 +453,7 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.unmapped_activity_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, description=description_str, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, xAxis=x_axis, yAxis=y_axis, zAxis=z_axis, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, description=description_str, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
 
     def render_description_for_page(self, activity):
         """Helper function for processing the activity description and formatting it for display."""
@@ -753,10 +738,20 @@ class App(object):
         """Helper function for rendering the page corresonding to a specific activity."""
 
         try:
+        
+            # Does the activity contain any location data?
             if Keys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[Keys.ACTIVITY_LOCATIONS_KEY]) > 0:
                 return self.render_page_for_mapped_activity(email, user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
+
+            # Does the activity contain accelerometer data, as with lifting activities recorded from the companion app?
             elif Keys.APP_ACCELEROMETER_KEY in activity or Keys.APP_SETS_KEY in activity:
                 return self.render_page_for_unmapped_activity(email, user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
+
+            # Does the activity contain any sensor data at all, if so then we can still render something?
+            elif any(x in activity for x in Keys.SENSOR_KEYS):
+                return self.render_page_for_unmapped_activity(email, user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
+
+            # No idea what to do with this.
             else:
                 return self.render_page_for_errored_activity(activity[Keys.ACTIVITY_ID_KEY], logged_in_user_id is not None, belongs_to_current_user)
         except:

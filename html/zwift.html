@@ -262,22 +262,22 @@ ${splits}
                     let speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
                     let pace_data = convert_speed_graph_to_pace_graph("${unit_system}", new_data);
 
-                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
-                    draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, "DodgerBlue");
+                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, get_graph_color(key));
+                    draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, get_graph_color(key));
                 }
                 else
                 {
                     let speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
 
-                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, "DodgerBlue");
+                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, get_graph_color(key));
                 }
             }
             else if (key == "Heart Rate")
-                draw_graph(start_time_ms, end_time_ms, new_data, "BPM", "BPM", "FireBrick");
+                draw_graph(start_time_ms, end_time_ms, new_data, key, "BPM", get_graph_color(key));
             else if (key == "Cadence")
-                draw_graph(start_time_ms, end_time_ms, new_data, "RPM", "RPM", "ForestGreen");
+                draw_graph(start_time_ms, end_time_ms, new_data, key, "RPM", get_graph_color(key));
             else if (key == "Power")
-                draw_graph(start_time_ms, end_time_ms, new_data, "Watts", "Watts", "ForestGreen");
+                draw_graph(start_time_ms, end_time_ms, new_data, key, "Watts", get_graph_color(key));
         }
 
         retrieve_summary_data();

@@ -53,8 +53,16 @@ function get_graph_color(key)
     if (key == "Cadence")
         return "Tan";
     if (key == "Heart Rate")
-        return "FireBrick";
+        return "Crimson";
     if (key == "Altitude")
+        return "ForestGreen";
+    if (key == "Temperature")
+        return "FireBrick";
+    if (key == "x")
+        return "DodgerBlue";
+    if (key == "y")
+        return "FireBrick";
+    if (key == "z")
         return "ForestGreen";
     return "Gray";
 }

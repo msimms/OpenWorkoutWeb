@@ -441,7 +441,7 @@ class Importer(object):
         self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
         self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
         self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
-        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_TEMPERATURE_KEY, temperatures)
+        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_TEMP_KEY, temperatures)
         self.activity_writer.create_activity_events(activity_id, events)
 
         # Let it be known that we are finished with this activity.
@@ -456,11 +456,6 @@ class Importer(object):
         if not os.path.isfile(file_name):
             raise Exception("File does not exist.")
 
-        columns = []
-        ts_list = []
-        x_list = []
-        y_list = []
-        z_list = []
         end_time_unix = 0
         row_count = 0
         device_str = ""

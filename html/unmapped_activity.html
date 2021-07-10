@@ -50,26 +50,68 @@ ${nav}
 <div id="charts"/>
 
 <script type="text/javascript" src="${root_url}/js/graphs.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.slim.js" integrity="sha256-tA8y0XqiwnpwmOIl3SGAcFl2RvxHjA8qp0+1uCGmRmg=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script type="text/javascript">
-	let xAxis = [
-${xAxis}
-	];
-	let yAxis = [
-${yAxis}
-	];
-	let zAxis = [
-${zAxis}
-	];
 
-	if (xAxis.length > 0)
-		draw_simple_graph(xAxis, "x", "DodgerBlue");
-	if (yAxis.length > 0)
-		draw_simple_graph(yAxis, "y", "FireBrick");
-	if (zAxis.length > 0)
-		draw_simple_graph(zAxis, "z", "ForestGreen");
+    var process_sensordata = function(sensordata)
+    {
+        for (key in sensordata)
+        {
+            if (key == "accelerometer")
+            {
+                let accel_data = sensordata[key];
+
+                let x_data = [];
+                let y_data = [];
+                let z_data = [];
+
+                accel_data.forEach((item, index) => {
+                    let time = item["time"];
+
+                    x_data.push({ date: new Date(time), value:item["x"] });
+                    y_data.push({ date: new Date(time), value:item["y"] });
+                    z_data.push({ date: new Date(time), value:item["z"] });
+                });
+
+                draw_simple_graph(x_data, "x", get_graph_color("x"));
+                draw_simple_graph(y_data, "y", get_graph_color("y"));
+                draw_simple_graph(z_data, "z", get_graph_color("z"));
+            }
+            else
+            {
+                let old_data = sensordata[key];
+                let new_data = old_data.map(function(e) { 
+                    let new_e = {};
+
+                    for (let item in e)
+                    {
+                        new_e["date"] = new Date(Number(item));
+                        new_e["value"] = e[item];
+                    }
+                    return new_e;
+                });
+
+                draw_simple_graph(new_data, key, get_graph_color(key));
+            }
+        }
+    }
+
+    /// @function retrieve_sensor_data
+    function retrieve_sensor_data()
+    {
+        let api_url = "${root_url}/api/1.0/activity_sensordata?activity_id=${activityId}&sensors=accelerometer,Temperature";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
+    }
+
+    /// @function draw_graphs
+    function draw_graphs()
+    {
+        retrieve_sensor_data();
+    }
+
+    draw_graphs();
 </script>
 
 </div>
