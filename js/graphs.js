@@ -64,6 +64,8 @@ function get_graph_color(key)
         return "FireBrick";
     if (key == "z")
         return "ForestGreen";
+    if (key == "Lap Time")
+        return "LightSteelBlue";
     return "Gray";
 }
 
@@ -398,7 +400,7 @@ function draw_graph(start_time_ms, end_time_ms, data, title, units, color)
 /// @function draw_bar_chart
 function draw_bar_chart(data, title, color)
 {
-    if (data.length == 0)
+    if (data.length <= 1)
     {
         return;
     }
