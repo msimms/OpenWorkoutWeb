@@ -62,7 +62,6 @@ ${nav}
             if (key == "accelerometer")
             {
                 let accel_data = sensordata[key];
-
                 let x_data = [];
                 let y_data = [];
                 let z_data = [];
@@ -78,6 +77,31 @@ ${nav}
                 draw_simple_graph(x_data, "x", get_graph_color("x"));
                 draw_simple_graph(y_data, "y", get_graph_color("y"));
                 draw_simple_graph(z_data, "z", get_graph_color("z"));
+            }
+            else if (key == "Events")
+            {
+                let events = sensordata[key];
+                let total_strokes = [];
+                let total_timer_time = [];
+
+                events.forEach((item, index) => {
+                    let time = item["timestamp"] * 1000;
+
+                    if ("event" in item && item["event"] == "length")
+                    {
+                        if ("total_strokes" in item && item["total_strokes"] != null)
+                        {
+                            total_strokes.push(item["total_strokes"]);
+                        }
+                        if ("total_timer_time" in item && item["total_timer_time"] != null)
+                        {
+                            total_timer_time.push({ date: new Date(time), value:item["total_timer_time"] });
+                        }
+                    }
+                });
+
+                draw_bar_chart(total_strokes, "Total Strokes", "LightSteelBlue");
+                draw_simple_graph(total_timer_time, "Lap Time", "LightSteelBlue");
             }
             else
             {
@@ -101,7 +125,7 @@ ${nav}
     /// @function retrieve_sensor_data
     function retrieve_sensor_data()
     {
-        let api_url = "${root_url}/api/1.0/activity_sensordata?activity_id=${activityId}&sensors=accelerometer,Temperature";
+        let api_url = "${root_url}/api/1.0/activity_sensordata?activity_id=${activityId}&sensors=accelerometer,Temperature,Events";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
     }
 

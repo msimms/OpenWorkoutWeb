@@ -398,7 +398,10 @@ function draw_graph(start_time_ms, end_time_ms, data, title, units, color)
 /// @function draw_bar_chart
 function draw_bar_chart(data, title, color)
 {
-    let xVals = Array.apply(null, Array(data.length)).map(function (x, i) { return i + 1; } );
+    if (data.length == 0)
+    {
+        return;
+    }
 
     let tooltip = d3.select("#charts")
         .append("div")
@@ -435,7 +438,6 @@ function draw_bar_chart(data, title, color)
     let x = d3.scaleBand().domain(d3.range(1, data.length + 1)).range([0, width])
     let y = d3.scaleLinear().domain([0, d3.max(data)]).range([height, 0])
 
-    let x_axis = d3.axisBottom(x).ticks(data.length);
     let y_axis = d3.axisLeft(y).ticks(2);
 
     let svg = d3.select("#charts")
