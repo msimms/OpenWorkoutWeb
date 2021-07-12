@@ -269,6 +269,12 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 ### 0.40
 * Bug fixes and performance optimizations.
 
+### 0.41
+* Project renamed.
+* Bug fixes and performance optimizations.
+* Temperature data is now shown.
+* Pool swimming workouts can now be imported.
+
 ## Tech
 This software uses several other source projects to work properly:
 
