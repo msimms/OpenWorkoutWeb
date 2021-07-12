@@ -404,7 +404,26 @@ class Api(object):
 
         for sensor_name in values[Keys.SENSOR_LIST_KEY].split(','):
             if sensor_name in activity:
-                response[sensor_name] = activity[sensor_name]
+
+                # Need to fix up the datetime item for each event.
+                if sensor_name == 'Events':
+                    events = activity[sensor_name]
+                    for event in events:
+                        if 'timestamp' in event:
+                            dt_tuple = event['timestamp'].timetuple()
+                            dt_unix = calendar.timegm(dt_tuple)
+                            event['timestamp'] = dt_unix
+                        if 'start_time' in event:
+                            dt_tuple = event['start_time'].timetuple()
+                            dt_unix = calendar.timegm(dt_tuple)
+                            event['start_time'] = dt_unix
+                        if 'local_timestamp' in event:
+                            dt_tuple = event['local_timestamp'].timetuple()
+                            dt_unix = calendar.timegm(dt_tuple)
+                            event['local_timestamp'] = dt_unix
+                    response[sensor_name] = events
+                else:
+                    response[sensor_name] = activity[sensor_name]
 
         return True, json.dumps(response)
 
