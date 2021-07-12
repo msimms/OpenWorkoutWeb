@@ -87,12 +87,13 @@ class Importer(object):
         self.activity_writer = activity_writer
 
     @staticmethod
-    def normalize_activity_type(activity_type, file_name):
+    def normalize_activity_type(activity_type, sub_activity_type, file_name):
         """Takes the various activity names that appear in GPX and TCX files and normalizes to the ones used in this app."""
         if activity_type is None:
             return Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
 
         lower_activity_type = activity_type.lower()
+        lower_sub_activity_type = sub_activity_type.lower()
         file_name_parts = file_name.lower().split(' ')
 
         if lower_activity_type == Keys.TYPE_RUNNING_KEY.lower():
@@ -112,6 +113,12 @@ class Importer(object):
                 return Keys.TYPE_VIRTUAL_CYCLING_KEY
             return Keys.TYPE_CYCLING_KEY
         elif lower_activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY.lower():
+            return Keys.TYPE_OPEN_WATER_SWIMMING_KEY
+        elif lower_activity_type == Keys.TYPE_POOL_SWIMMING_KEY.lower():
+            return Keys.TYPE_POOL_SWIMMING_KEY
+        elif lower_activity_type == 'swimming' and sub_activity_type is not None:
+            if lower_sub_activity_type == 'lap_swimming':
+                return Keys.TYPE_POOL_SWIMMING_KEY
             return Keys.TYPE_OPEN_WATER_SWIMMING_KEY
 
         # Didn't match any known activity types, so take a guess from the name.
@@ -137,7 +144,7 @@ class Importer(object):
             # Figure out the sport type.
             sport_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
             if len(gpx.tracks) > 0:
-                sport_type = Importer.normalize_activity_type(gpx.tracks[0].type, file_name)
+                sport_type = Importer.normalize_activity_type(gpx.tracks[0].type, None, file_name)
 
             # Find the start timestamp.
             start_time_tuple = gpx.time.timetuple()
@@ -262,7 +269,7 @@ class Importer(object):
         activity_name = os.path.splitext(os.path.basename(original_file_name))[0]
 
         # Figure out the type of the activity.
-        normalized_activity_type = Importer.normalize_activity_type(activity_type, activity_name)
+        normalized_activity_type = Importer.normalize_activity_type(activity_type, None, activity_name)
 
         # Indicate the start of the activity.
         device_str, activity_id = self.activity_writer.create_activity(username, user_id, activity_name, "", normalized_activity_type, start_time_unix, desired_activity_id)
@@ -347,6 +354,7 @@ class Importer(object):
             raise Exception("File does not exist.")
 
         activity_type = ''
+        sub_activity_type = ''
 
         start_time_unix = 0
         end_time_unix = 0
@@ -372,6 +380,8 @@ class Importer(object):
 
             if 'sport' in message_data:
                 activity_type = message_data['sport']
+            if 'sub_sport' in message_data:
+                sub_activity_type = message_data['sub_sport']
             if 'timestamp' not in message_data:
                 continue
 
@@ -429,7 +439,7 @@ class Importer(object):
         activity_name = os.path.splitext(os.path.basename(original_file_name))[0]
 
         # Figure out the type of the activity.
-        normalized_activity_type = Importer.normalize_activity_type(activity_type, activity_name)
+        normalized_activity_type = Importer.normalize_activity_type(activity_type, sub_activity_type, activity_name)
 
         # Indicate the start of the activity.
         device_str, activity_id = self.activity_writer.create_activity(username, user_id, activity_name, "", normalized_activity_type, start_time_unix, desired_activity_id)
