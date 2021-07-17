@@ -56,6 +56,7 @@
     {
         let new_row = table.insertRow();
         let cell = new_row.insertCell();
+
         cell.appendChild(document.createTextNode(name));
 
         let new_target_pace_str = "";
@@ -106,6 +107,7 @@
         if (records.length == 0)
         {
             let para = document.getElementById("description");
+
             para.innerHTML = "You have no pace plans.";
         }
         else

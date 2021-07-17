@@ -1194,7 +1194,16 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_gear_defaults(user_id)
+
+        # Retrieve the current gear defaults from the database.
+        defaults = self.database.retrieve_gear_defaults(user_id)
+
+        # Make sure all activity types are represented.
+        all_activity_types = self.retrieve_activity_types()
+        for activity_type in all_activity_types:
+            if activity_type not in defaults:
+                defaults.append({"activity": activity_type, "gear": ""})
+        return defaults
 
     def update_gear_defaults(self, user_id, activity_type, gear_name):
         """Retrieve method for the gear that is, by default, associated with each activity type. Result is a JSON string."""

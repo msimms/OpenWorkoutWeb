@@ -34,8 +34,14 @@
         return a.name.localeCompare(b.name);
     }
 
-    /// @function append_to_table
-    function append_to_table(table, name, gear_id, description, add_time, retire_time)
+    /// @function gear_defaults_sort
+    function gear_defaults_sort(a, b)
+    {
+        return a.activity.localeCompare(b.activity);
+    }
+
+    /// @function append_to_gear_table
+    function append_to_gear_table(table, name, gear_id, description, add_time, retire_time)
     {
         let new_row = table.insertRow();
         let cell = new_row.insertCell();
@@ -65,7 +71,7 @@
         }
         else
         {
-            let btn = document.createElement('button');
+            let btn = document.createElement("button");
             let btn_txt = document.createTextNode('Retire');
 
             btn.appendChild(btn_txt);
@@ -75,7 +81,7 @@
             cell.appendChild(btn);
         }
 
-        let btn = document.createElement('button');
+        let btn = document.createElement("button");
         let btn_txt = document.createTextNode('Delete');
 
         btn.appendChild(btn_txt);
@@ -84,6 +90,47 @@
         btn.addEventListener('click', function() { delete_gear("${root_url}", gear_id); });
         cell = new_row.insertCell();
         cell.appendChild(btn);
+
+        table.style = "display: block;";
+    }
+
+    /// @function append_to_defaults_table
+    function append_to_defaults_table(activity_type, selected_gear_name, all_gear_names)
+    {
+        let defaults_table = document.getElementById("defaults");
+        let new_row = defaults_table.insertRow();
+        let cell = new_row.insertCell();
+        let activity_text = document.createTextNode(activity_type);
+
+        cell.appendChild(activity_text);
+        cell = new_row.insertCell();
+
+        let select = document.createElement("select");
+
+        cell.appendChild(select);
+
+        let none_option = document.createElement("option");
+
+        none_option.value = "--";
+        none_option.text = "--";
+        select.appendChild(none_option);
+
+        for (gear_name in all_gear_names)
+        {
+            let option = document.createElement("option");
+
+            option.value = gear_name;
+            option.text = gear_name;
+
+            if (gear_name == selected_gear_name)
+            {
+                option.selected = true;
+                none_option.selected = false;
+            }
+            select.appendChild(option);
+        }
+
+        defaults_table.style = "display: block;";
     }
 
     /// @function process_gear
@@ -97,12 +144,22 @@
         {
             if (record.type == "bike")
             {
-                append_to_table(bikes_table, record.name, record.gear_id, record.description, record.add_time, record.retire_time);
+                append_to_gear_table(bikes_table, record.name, record.gear_id, record.description, record.add_time, record.retire_time);
             }
             else if (record.type == "shoes")
             {
-                append_to_table(shoes_table, record.name, record.gear_id, record.description, record.add_time, record.retire_time);
+                append_to_gear_table(shoes_table, record.name, record.gear_id, record.description, record.add_time, record.retire_time);
             }
+        }
+    }
+
+    /// @function process_gear_defaults
+    var process_gear_defaults = function(records)
+    {
+        let sorted_records = records.sort(gear_defaults_sort)
+        for (let record of sorted_records)
+        {
+            append_to_defaults_table(record["activity"], record["gear"], []);
         }
     }
 
@@ -112,10 +169,17 @@
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_gear", cache: false, success: process_gear, dataType: "json" });
     }
 
+    /// @function get_gear_defaults
+    function get_gear_defaults()
+    {
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_gear_defaults", cache: false, success: process_gear_defaults, dataType: "json" });
+    }
+
     $(document).ready(function()
     {
         // Things we need when the page is loaded.
         get_gear();
+        get_gear_defaults();
     });
 
 </script>
@@ -130,7 +194,7 @@ ${nav}
 
     <div id="existing_gear">
         <h2>Bikes</h2>
-        <table id="bikes">
+        <table id="bikes" style="display: none;">
             <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
         </table>
         <button type="button" onclick="return get_new_bike_info('${root_url}')">Add New Bike</button>
@@ -138,11 +202,17 @@ ${nav}
         <hr>
 
         <h2>Shoes</h2>
-        <table id="shoes">
+        <table id="shoes" style="display: none;">
             <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
         </table>
         <button type="button" onclick="return get_new_shoes_info('${root_url}')">Add New Shoes</button>
 
+        <hr>
+
+        <h2>Defaults</h2>
+        <table id="defaults" style="display: none;">
+            <td><b>Sport</b></td><td><b>Default Gear</b></td><tr>
+        </table>
     </div>
 </section>
 
