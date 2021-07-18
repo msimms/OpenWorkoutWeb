@@ -35,7 +35,6 @@ import threading
 import time
 import timeit
 import traceback
-import urllib
 import cProfile
 import pstats
 
@@ -46,14 +45,11 @@ except ImportError:
 
 import Keys
 import Api
-import DataMgr
 import IcalServer
 import InputChecker
 import Units
-import UserMgr
 
 from dateutil.tz import tzlocal
-from mako.lookup import TemplateLookup
 from mako.template import Template
 
 # Locate and load the Distance calculations module.
