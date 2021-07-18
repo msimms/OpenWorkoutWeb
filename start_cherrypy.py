@@ -65,13 +65,15 @@ def secureheaders():
     headers['Content-Security-Policy'] = "default-src='self'"
 
 
-def check_auth(*args, **kwargs):
+def do_auth_check(*args, **kwargs):
     global g_app
 
     # A tool that looks in config for 'auth.require'. If found and it is not None, a login
     # is required and the entry is evaluated as a list of conditions that the user must fulfill
     conditions = cherrypy.request.config.get('auth.require', None)
     if conditions is not None:
+
+        # Split the URL.
         requested_url = cherrypy.request.request_line.split()[1]
         requested_url_parts = requested_url.split('/')
         requested_url_parts = filter(lambda part: part != '', requested_url_parts)
@@ -99,6 +101,7 @@ def check_auth(*args, **kwargs):
                     if g_app.data_mgr.is_activity_id_public(activity_id):
                         return
 
+        # Check conditions for the logged in user.
         username = g_app.app.user_mgr.get_logged_in_user()
         if username:
             cherrypy.request.login = username
@@ -739,7 +742,7 @@ def main():
     if not os.path.exists(session_dir):
         os.makedirs(session_dir)
 
-    cherrypy.tools.web_auth = cherrypy.Tool('before_handler', check_auth)
+    cherrypy.tools.web_auth = cherrypy.Tool('before_handler', do_auth_check)
 
     conf = {
         '/':
