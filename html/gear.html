@@ -40,7 +40,7 @@
     /// @function gear_defaults_sort
     function gear_defaults_sort(a, b)
     {
-        return a.activity.localeCompare(b.activity);
+        return a.activity_type.localeCompare(b.activity_type);
     }
 
     /// @function append_to_gear_table
@@ -164,7 +164,7 @@
         let sorted_records = records.sort(gear_defaults_sort)
         for (let record of sorted_records)
         {
-            append_to_defaults_table(record["activity"], record["gear"]);
+            append_to_defaults_table(record["activity_type"], record["name"]);
         }
     }
 

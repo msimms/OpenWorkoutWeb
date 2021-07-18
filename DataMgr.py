@@ -1200,9 +1200,10 @@ class DataMgr(Importer.ActivityWriter):
 
         # Make sure all activity types are represented.
         all_activity_types = self.retrieve_activity_types()
+        activities_with_defined_defaults = [item[Keys.ACTIVITY_TYPE_KEY] for item in defaults]
         for activity_type in all_activity_types:
-            if activity_type not in defaults:
-                defaults.append({"activity": activity_type, "gear": ""})
+            if activity_type not in activities_with_defined_defaults:
+                defaults.append({Keys.ACTIVITY_TYPE_KEY: activity_type, "gear": ""})
         return defaults
 
     def update_gear_defaults(self, user_id, activity_type, gear_name):
