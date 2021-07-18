@@ -129,3 +129,18 @@ function retire_gear(root_url, gear_id)
         }
     }
 }
+
+function set_gear_default(root_url, activity_type, gear_name)
+{
+    let the_url = root_url + "/api/1.0/update_gear_defaults";
+    let dict = [];
+    let result_text = {};
+
+    dict.push({["activity_type"] : activity_type});
+    dict.push({["name"] : gear_name});
+
+    if (!send_post_request(the_url, dict, result_text))
+    {
+        alert(result_text.value);
+    }
+}

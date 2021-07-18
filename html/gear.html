@@ -29,6 +29,7 @@
 <script type="text/javascript">
 
     let new_gear_type = "shoes";
+    let all_gear_records = [];
 
     /// @function gear_sort
     function gear_sort(a, b)
@@ -97,40 +98,39 @@
     }
 
     /// @function append_to_defaults_table
-    function append_to_defaults_table(activity_type, selected_gear_name, all_gear_names)
+    function append_to_defaults_table(activity_type, selected_gear_name)
     {
         let defaults_table = document.getElementById("defaults");
         let new_row = defaults_table.insertRow();
         let cell = new_row.insertCell();
         let activity_text = document.createTextNode(activity_type);
+        let select = document.createElement("select");
+        let none_option = document.createElement("option");
 
         cell.appendChild(activity_text);
         cell = new_row.insertCell();
-
-        let select = document.createElement("select");
-
         cell.appendChild(select);
-
-        let none_option = document.createElement("option");
 
         none_option.value = "--";
         none_option.text = "--";
         select.appendChild(none_option);
+        select.onchange = function() {
+            set_gear_default("${root_url}", activity_type, this.value);
+        };
 
-        for (gear_name in all_gear_names)
-        {
+        all_gear_records.forEach( gear_record => {
             let option = document.createElement("option");
 
-            option.value = gear_name;
-            option.text = gear_name;
+            option.value = gear_record.name;
+            option.text = gear_record.name;
 
-            if (gear_name == selected_gear_name)
+            if (gear_record.name == selected_gear_name)
             {
                 option.selected = true;
                 none_option.selected = false;
             }
             select.appendChild(option);
-        }
+        });
 
         defaults_table.style = "display: block;";
     }
@@ -141,8 +141,8 @@
         let bikes_table = document.getElementById("bikes");
         let shoes_table = document.getElementById("shoes");
 
-        let sorted_records = records.sort(gear_sort)
-        for (let record of sorted_records)
+        all_gear_records = records.sort(gear_sort)
+        for (let record of all_gear_records)
         {
             if (record.type == "bike")
             {
@@ -153,6 +153,9 @@
                 append_to_gear_table(shoes_table, record.name, record.gear_id, record.description, record.add_time, record.retire_time);
             }
         }
+
+        // Now that we have all the gear, we can request the defaults.
+        get_gear_defaults();
     }
 
     /// @function process_gear_defaults
@@ -161,7 +164,7 @@
         let sorted_records = records.sort(gear_defaults_sort)
         for (let record of sorted_records)
         {
-            append_to_defaults_table(record["activity"], record["gear"], []);
+            append_to_defaults_table(record["activity"], record["gear"]);
         }
     }
 
@@ -206,7 +209,6 @@
     {
         // Things we need when the page is loaded.
         get_gear();
-        get_gear_defaults();
     });
 
 </script>
