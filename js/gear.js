@@ -22,21 +22,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-function create_gear(root_url, gearType)
+function create_gear(root_url, gear_type)
 {
     let the_url = root_url + "/api/1.0/create_gear";
     let dict = [];
     let result_text = {};
-    let add_time_obj = new Date(document.getElementById("startDate").value);
-    let add_time = add_time_obj.getTime() / 1000;
-    let retired_time_obj = new Date(document.getElementById("retiredDate").value);
-    let retiredTime = retired_time_obj.getTime() / 1000;
-    let name = document.getElementById("Name").value;
-    let description = document.getElementById("Description").value;
+    let add_time_obj = document.getElementById("date_added");
+    let add_time = Date.parse(add_time_obj.value);
+    let retired_time_obj = document.getElementById("date_retired");
+    let retired_time = Date.parse(retired_time_obj.value);
+    let name = document.getElementById("name").value;
+    let description = document.getElementById("description").value;
 
-    dict.push({["type"] : gearType});
+    if (!isNaN(add_time))
+        add_time = add_time / 1000;
+    if (!isNaN(retired_time))
+        retired_time = retired_time / 1000;
+
+    dict.push({["type"] : gear_type});
     dict.push({["add_time"] : add_time});
-    dict.push({["retire_time"] : retiredTime});
+    dict.push({["retire_time"] : retired_time});
     dict.push({["name"] : name});
     dict.push({["description"] : description});
 
@@ -50,21 +55,26 @@ function create_gear(root_url, gearType)
     }
 }
 
-function update_gear(root_url, gearType)
+function update_gear(root_url, gear_type)
 {
     let the_url = root_url + "/api/1.0/update_gear";
     let dict = [];
     let result_text = {};
-    let add_time_obj = new Date(document.getElementById("startDate").value);
-    let add_time = add_time_obj.getTime() / 1000;
-    let retired_time_obj = new Date(document.getElementById("retiredDate").value);
-    let retiredTime = retired_time_obj.getTime() / 1000;
-    let name = document.getElementById("Name").value;
-    let description = document.getElementById("Description").value;
+    let add_time_obj = document.getElementById("date_added");
+    let add_time = Date.parse(add_time_obj.value);
+    let retired_time_obj = document.getElementById("date_retired");
+    let retired_time = Date.parse(retired_time_obj.value);
+    let name = document.getElementById("name").value;
+    let description = document.getElementById("description").value;
 
-    dict.push({["type"] : gearType});
+    if (!isNaN(add_time))
+        add_time = add_time / 1000;
+    if (!isNaN(retired_time))
+        retired_time = retired_time / 1000;
+
+    dict.push({["type"] : gear_type});
     dict.push({["add_time"] : add_time});
-    dict.push({["retire_time"] : retiredTime});
+    dict.push({["retire_time"] : retired_time});
     dict.push({["name"] : name});
     dict.push({["description"] : description});
 
@@ -118,83 +128,4 @@ function retire_gear(root_url, gear_id)
             alert(result_text.value);
         }
     }
-}
-
-function get_new_gear_info(root_url, gear_type)
-{
-    let outer_div = document.getElementById("new_gear");
-    let inner_div = document.createElement('div');
-    inner_div.id = "new_gear_div";
-
-    // Remove existing items, if any.
-    while (outer_div.firstChild)
-    {
-        outer_div.removeChild(outer_div.firstChild);
-    }
-
-    // Determine which data fields are needed.
-    let fields = ["Name", "Description"];
-
-    // Add a label for the date picker.
-    let date_label = document.createTextNode("Date Added: ");
-    inner_div.appendChild(date_label);
-
-    // Add the date picker.
-    let today = new Date();
-    let start_date = document.createElement('input');
-    start_date.type = "input";
-    start_date.id = "startDate";
-    start_date.className = "pickDate";
-    $(start_date).datepicker({showButtonPanel: true, defaultDate: today});
-    $(start_date).datepicker('setDate', today);
-    inner_div.appendChild(start_date);
-
-    // Add a line break.
-    let br = document.createElement("br");
-    inner_div.appendChild(br);
-
-    // Add a label for the date retired picker.
-    let dateLabel = document.createTextNode("Date Retired: ");
-    inner_div.appendChild(dateLabel);
-
-    // Add the date retired picker.
-    let retired_date = document.createElement('input');
-    retired_date.type = "input";
-    retired_date.id = "retiredDate";
-    retired_date.className = "pickDate";
-    $(retired_date).datepicker({showButtonPanel: true});
-    inner_div.appendChild(retired_date);
-
-    // Add a line break.
-    br = document.createElement("br");
-    inner_div.appendChild(br);
-
-    // Add the data fields.
-    for (i = 0, len = fields.length; i < len; i++)
-    {
-        add_text_entry_node(inner_div, fields[i]);
-    }
-
-    // Add to the div.
-    outer_div.appendChild(inner_div);
-
-    // Create a save button.
-    let save_btn = document.createElement('button');
-    let save_btn_text = document.createTextNode('Save');
-    save_btn.appendChild(save_btn_text);
-    save_btn.title = "Save";
-    save_btn.addEventListener('click', function() { create_gear(root_url, gear_type); });
-
-    // Add the save button to the screen.
-    outer_div.appendChild(save_btn);
-}
-
-function get_new_bike_info(root_url)
-{
-    get_new_gear_info(root_url, "bike");
-}
-
-function get_new_shoes_info(root_url)
-{
-    get_new_gear_info(root_url, "shoes");
 }

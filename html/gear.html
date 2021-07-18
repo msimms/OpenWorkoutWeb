@@ -28,6 +28,8 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
+    let new_gear_type = "shoes";
+
     /// @function gear_sort
     function gear_sort(a, b)
     {
@@ -175,6 +177,31 @@
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_gear_defaults", cache: false, success: process_gear_defaults, dataType: "json" });
     }
 
+    /// @function get_new_gear_info
+    function get_new_gear_info(gear_type)
+    {
+        let outer_div = document.getElementById("new_gear");
+        let date_added = document.getElementById("date_added");
+        let n = new Date();
+
+        date_added.placeholder = n.toLocaleDateString();
+        date_added.value = n.toLocaleDateString();
+        new_gear_type = gear_type;
+        outer_div.style = "display: block;";
+    }
+
+    /// @function get_new_bike_info
+    function get_new_bike_info()
+    {
+        get_new_gear_info("bike");
+    }
+
+    /// @function get_new_shoes_info
+    function get_new_shoes_info()
+    {
+        get_new_gear_info("shoes");
+    }
+
     $(document).ready(function()
     {
         // Things we need when the page is loaded.
@@ -189,7 +216,14 @@ ${nav}
 </section>
 
 <section class="block">
-    <div id="new_gear">
+    <div id="new_gear" style="display: none;">
+        <h2>New Gear</h2>
+        <p>Name: <input type="text" name="name" id="name"><br></p>
+        <p>Description: <input type="text" name="description" id="description"><br></p>
+        <p>Date Added: <input type="text" name="date_added" id="date_added"><br></p>
+        <p>Date Retired: <input type="text" name="date_retired" id="date_retired"><br></p>
+        <button type="modern_button" onclick="return create_gear('${root_url}', new_gear_type)">Save</button>
+        <hr>
     </div>
 
     <div id="existing_gear">
@@ -197,7 +231,7 @@ ${nav}
         <table id="bikes" style="display: none;">
             <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
         </table>
-        <button type="button" onclick="return get_new_bike_info('${root_url}')">Add New Bike</button>
+        <button type="button" onclick="return get_new_bike_info()">Add New Bike</button>
 
         <hr>
 
@@ -205,7 +239,7 @@ ${nav}
         <table id="shoes" style="display: none;">
             <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
         </table>
-        <button type="button" onclick="return get_new_shoes_info('${root_url}')">Add New Shoes</button>
+        <button type="button" onclick="return get_new_shoes_info()">Add New Shoes</button>
 
         <hr>
 
@@ -215,6 +249,14 @@ ${nav}
         </table>
     </div>
 </section>
+
+<script>
+    $(function()
+    {
+        $('#date_added').datepicker({ changeYear: true, changeMonth: true });
+        $('#date_retired').datepicker({ changeYear: true, changeMonth: true });
+    });
+</script>
 
 </body>
 
