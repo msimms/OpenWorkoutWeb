@@ -23,7 +23,6 @@
 # SOFTWARE.
 """Main application, contains all web page handlers"""
 
-import cherrypy
 import datetime
 import inspect
 import json
@@ -989,11 +988,9 @@ class App(object):
             logged_in_user_id, _, _ = self.user_mgr.retrieve_user(logged_in_username)
 
         # Get the activity ID being requested. If one is not provided then get the latest activity for the device
-        activity_id = cherrypy.request.params.get("activity_id")
+        activity_id = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
         if activity_id is None:
-            activity_id = self.data_mgr.retrieve_most_recent_activity_id_for_device(device_str)
-            if activity_id is None:
-                return self.render_error()
+            return self.render_error()
 
         # Determine who owns the device.
         device_user = self.user_mgr.retrieve_user_from_device(device_str)
