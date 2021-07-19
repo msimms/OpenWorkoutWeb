@@ -188,7 +188,7 @@ class Api(object):
             if accels:
                 self.data_mgr.create_activity_accelerometer_reading(device_str, activity_id, accels)
 
-        # Udpate the activity type.
+        # Update the activity type.
         if len(activity_type) > 0:
             self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
 

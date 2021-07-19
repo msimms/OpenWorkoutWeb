@@ -260,7 +260,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
             # Don't look for peaks unless the variance was high. Cutoff selected via experimentation.
             if speed_variance > 0.25:
 
-                # Smooth the speed graph to take out some of the GPS jitter.
+                # Smooth the speed graph to take out some of the location data jitter.
                 smoothed_graph = signals.smooth(self.speed_graph, 4)
                 if len(smoothed_graph) > 1:
         
