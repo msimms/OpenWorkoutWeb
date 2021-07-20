@@ -365,8 +365,12 @@ class MongoDatabase(Database.Database):
 
     def retrieve_user_from_device(self, device_str):
         """Finds the user associated with the device."""
+        if device_str is None:
+            self.log_error(MongoDatabase.retrieve_user_from_device.__name__ + ": Unexpected empty object: device_str")
+            return None
         if len(device_str) == 0:
-            return False, "Device string not provided."
+            self.log_error(MongoDatabase.retrieve_user_from_device.__name__ + ": Device string not provided")
+            return None
 
         try:
             return self.users_collection.find_one({ Keys.DEVICES_KEY: device_str })
@@ -783,6 +787,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: activity_id")
             return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Invalid object: activity_id")
+            return False
         if activity_type is None:
             self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: activity_type")
             return False
@@ -986,6 +993,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity.__name__ + ": Unexpected empty object: activity_id")
             return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity.__name__ + ": Invalid object: activity_id")
+            return False
         if activty_name is None:
             self.log_error(MongoDatabase.create_activity.__name__ + ": Unexpected empty object: activty_name")
             return False
@@ -1014,6 +1024,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.retrieve_activity.__name__ + ": Unexpected empty object: activity_id")
             return None
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.retrieve_activity.__name__ + ": Invalid object: activity_id")
+            return None
 
         try:
             # Find the activity.
@@ -1030,6 +1043,9 @@ class MongoDatabase(Database.Database):
             return False
         if activity_id is None:
             self.log_error(MongoDatabase.update_activity.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.update_activity.__name__ + ": Invalid object: activity_id")
             return False
         if not locations:
             self.log_error(MongoDatabase.update_activity.__name__ + ": Unexpected empty object: locations")
@@ -1095,6 +1111,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.delete_activity.__name__ + ": Unexpected empty object: activity_id")
             return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.delete_activity.__name__ + ": Invalid object: activity_id")
+            return False
 
         try:
             deleted_result = self.activities_collection.delete_one({ Keys.ACTIVITY_ID_KEY: activity_id })
@@ -1109,6 +1128,9 @@ class MongoDatabase(Database.Database):
         """Returns the visibility setting for the specified activity."""
         if activity_id is None:
             self.log_error(MongoDatabase.retrieve_activity_visibility.__name__ + ": Unexpected empty object: activity_id")
+            return None
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.retrieve_activity_visibility.__name__ + ": Invalid object: activity_id")
             return None
 
         try:
@@ -1128,6 +1150,9 @@ class MongoDatabase(Database.Database):
         """Changes the visibility setting for the specified activity."""
         if activity_id is None:
             self.log_error(MongoDatabase.update_activity_visibility.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.update_activity_visibility.__name__ + ": Invalid object: activity_id")
             return False
         if visibility is None:
             self.log_error(MongoDatabase.update_activity_visibility.__name__ + ": Unexpected empty object: visibility")
@@ -1154,6 +1179,9 @@ class MongoDatabase(Database.Database):
             return False
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Invalid object: activity_id")
             return False
         if latitude is None:
             self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: latitude")
@@ -1203,6 +1231,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_locations.__name__ + ": Unexpected empty object: activity_id")
             return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_locations.__name__ + ": Invalid object: activity_id")
+            return False
         if not locations:
             self.log_error(MongoDatabase.create_activity_locations.__name__ + ": Unexpected empty object: locations")
             return False
@@ -1245,6 +1276,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.retrieve_activity_locations.__name__ + ": Unexpected empty object: activity_id")
             return None
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.retrieve_activity_locations.__name__ + ": Invalid object: activity_id")
+            return None
 
         try:
             # Find the activity.
@@ -1264,6 +1298,9 @@ class MongoDatabase(Database.Database):
         """Create method for a piece of sensor data, such as a heart rate or power meter reading."""
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Invalid object: activity_id")
             return False
         if date_time is None:
             self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: date_time")
@@ -1304,6 +1341,9 @@ class MongoDatabase(Database.Database):
         """Create method for several pieces of sensor data, such as a heart rate or power meter reading."""
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Invalid object: activity_id")
             return False
         if sensor_type is None:
             self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: sensor_type")
@@ -1347,6 +1387,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.retrieve_activity_sensor_readings.__name__ + ": Unexpected empty object: activity_id")
             return None
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.retrieve_activity_sensor_readings.__name__ + ": Invalid object: activity_id")
+            return None
 
         try:
             # Find the activity.
@@ -1366,6 +1409,9 @@ class MongoDatabase(Database.Database):
         """Inherited from ActivityWriter. 'events' is an array of dictionaries in which each dictionary describes an event."""
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_event.__name__ + ": Unexpected empty object: activity_id")
+            return None
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_event.__name__ + ": Invalid object: activity_id")
             return None
         if event is None:
             self.log_error(MongoDatabase.create_activity_event.__name__ + ": Unexpected empty object: event")
@@ -1400,6 +1446,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_events.__name__ + ": Unexpected empty object: activity_id")
             return None
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_events.__name__ + ": Invalid object: activity_id")
+            return None
         if events is None:
             self.log_error(MongoDatabase.create_activity_events.__name__ + ": Unexpected empty object: events")
             return None
@@ -1432,6 +1481,9 @@ class MongoDatabase(Database.Database):
         """Create method for a piece of metaadata. When dealing with a list, will append values."""
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Invalid object: activity_id")
             return False
         if date_time is None:
             self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: date_time")
@@ -1473,7 +1525,7 @@ class MongoDatabase(Database.Database):
                     activity[key] = value_list
                     self.activities_collection.save(activity)
 
-                # The metadata is a scalar, just make sure it hasn't changed before updating it.
+                # The metadata is a scalar, just make sure to only update it if it has actually changed.
                 elif key not in activity or activity[key] != value:
                     activity[key] = value
                     self.activities_collection.save(activity)
@@ -1487,6 +1539,9 @@ class MongoDatabase(Database.Database):
         """Create method for a list of metaadata values. Will overwrite existing data."""
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_metadata_list.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_metadata_list.__name__ + ": Invalid object: activity_id")
             return False
         if key is None:
             self.log_error(MongoDatabase.create_activity_metadata_list.__name__ + ": Unexpected empty object: key")
@@ -1521,6 +1576,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_sets_and_reps_data.__name__ + ": Unexpected empty object: activity_id")
             return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_sets_and_reps_data.__name__ + ": Invalid object: activity_id")
+            return False
         if sets is None:
             self.log_error(MongoDatabase.create_activity_sets_and_reps_data.__name__ + ": Unexpected empty object: sets")
             return False
@@ -1546,6 +1604,9 @@ class MongoDatabase(Database.Database):
             return False
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Invalid object: activity_id")
             return False
         if not accels:
             self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Unexpected empty object: accels")
@@ -1591,6 +1652,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_summary.__name__ + ": Unexpected empty object: activity_id")
             return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_summary.__name__ + ": Invalid object: activity_id")
+            return False
         if summary_data is None:
             self.log_error(MongoDatabase.create_activity_summary.__name__ + ": Unexpected empty object: summary_data")
             return False
@@ -1614,6 +1678,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.retrieve_activity_summary.__name__ + ": Unexpected empty object: activity_id")
             return None
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.retrieve_activity_summary.__name__ + ": Invalid object: activity_id")
+            return None
 
         try:
             # Find the activity.
@@ -1631,6 +1698,9 @@ class MongoDatabase(Database.Database):
         """Delete method for activity summary data. Summary data is data computed from the raw data."""
         if activity_id is None:
             self.log_error(MongoDatabase.delete_activity_summary.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.delete_activity_summary.__name__ + ": Invalid object: activity_id")
             return False
 
         try:
@@ -1657,6 +1727,9 @@ class MongoDatabase(Database.Database):
         """Adds a tag to the specified activity."""
         if activity_id is None:
             self.log_error(MongoDatabase.create_tag.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_tag.__name__ + ": Invalid object: activity_id")
             return False
         if tag is None:
             self.log_error(MongoDatabase.create_tag.__name__ + ": Unexpected empty object: tag")
@@ -1703,6 +1776,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.create_tags_on_activity_by_id.__name__ + ": Unexpected empty object: activity_id")
             return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_tags_on_activity_by_id.__name__ + ": Invalid object: activity_id")
+            return False
         if tags is None:
             self.log_error(MongoDatabase.create_tags_on_activity_by_id.__name__ + ": Unexpected empty object: tags")
             return False
@@ -1726,6 +1802,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.retrieve_tags.__name__ + ": Unexpected empty object: activity_id")
             return []
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.retrieve_tags.__name__ + ": Invalid object: activity_id")
+            return []
 
         try:
             # Find the activity.
@@ -1743,6 +1822,9 @@ class MongoDatabase(Database.Database):
         """Deletes the specified tag from the activity with the given ID."""
         if activity_id is None:
             self.log_error(MongoDatabase.create_tag.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_tag.__name__ + ": Invalid object: activity_id")
             return False
         if tag is None:
             self.log_error(MongoDatabase.create_tag.__name__ + ": Unexpected empty object: tag")
@@ -1772,6 +1854,9 @@ class MongoDatabase(Database.Database):
         """Create method for a comment on an activity."""
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Invalid object: activity_id")
             return False
         if commenter_id is None:
             self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Unexpected empty object: commenter_id")
@@ -1805,6 +1890,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.retrieve_activity_comments.__name__ + ": Unexpected empty object: activity_id")
             return None
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.retrieve_activity_comments.__name__ + ": Invalid object: activity_id")
+            return False
 
         try:
             # Find the activity.
@@ -1829,6 +1917,9 @@ class MongoDatabase(Database.Database):
             return False
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Invalid object: activity_id")
             return False
         if photo_hash is None:
             self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Unexpected empty object: photo_hash")
@@ -1864,6 +1955,9 @@ class MongoDatabase(Database.Database):
         if activity_id is None:
             self.log_error(MongoDatabase.list_activity_photos.__name__ + ": Unexpected empty object: activity_id")
             return []
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.list_activity_photos.__name__ + ": Invalid object: activity_id")
+            return []
 
         try:
             # Find the activity.
@@ -1881,6 +1975,9 @@ class MongoDatabase(Database.Database):
         """Deletes the specified tag from the activity with the given ID."""
         if activity_id is None:
             self.log_error(MongoDatabase.delete_activity_photo.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.delete_activity_photo.__name__ + ": Invalid object: activity_id")
             return False
         if photo_id is None:
             self.log_error(MongoDatabase.delete_activity_photo.__name__ + ": Unexpected empty object: photo_id")
