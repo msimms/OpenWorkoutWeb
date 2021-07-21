@@ -221,37 +221,52 @@ function draw_simple_graph(data, title, color)
     });
 }
 
+
 /// @function draw_graph
-function draw_graph(start_time_ms, end_time_ms, data, title, units, color)
+// if existing_graph is provided, a new line will be appended to that graph.
+function draw_graph(graph_start_time_ms, graph_end_time_ms, data, title, units, color)
 {
     if (data.length <= 1)
     {
         return;
     }
 
-    // Calculate the y axis extents.
+    let first_point = data[0];
+    let last_point = data[data.length - 1];
+    let last_ts = last_point["date"].getTime();
+
+    // If the y axis extents were not provided then calculate them now.
     let min_y = d3.min(data, function(d) { return d.value; }) * 0.9;
     let max_y = d3.max(data, function(d) { return d.value; });
 
+    // Need the graphs to start at zero or the fill will look stupid.
+    graph_node = {};
+    graph_node["date"] = new Date(first_point["date"] - 1);
+    graph_node["value"] = 0.0;
+    data.unshift(graph_node);
+
     // To make all the graphs line up, make sure they have the same start and end time.
-    if (start_time_ms > 0)
+    if (graph_start_time_ms > 0)
     {
         graph_node = {};
-        graph_node["date"] = new Date(start_time_ms);
-        graph_node["value"] = 0;
+        graph_node["date"] = new Date(graph_start_time_ms);
+        graph_node["value"] = 0.0;
         data.unshift(graph_node);
     }
-    if (end_time_ms > start_time_ms)
+
+    // Need the graphs to start at zero or the fill will look stupid.
+    graph_node = {};
+    graph_node["date"] = new Date(last_ts + 1);
+    graph_node["value"] = 0.0;
+    data.push(graph_node);
+
+    if (graph_end_time_ms >= last_ts)
     {
         graph_node = {};
-        graph_node["date"] = new Date(end_time_ms);
-        graph_node["value"] = 0;
+        graph_node["date"] = new Date(graph_end_time_ms);
+        graph_node["value"] = 0.0;
         data.push(graph_node);
     }
-    
-    // Need to zero out the first and last points or else the fill will look silly.
-    data[0].value = 0.0;
-    data[data.length - 1].value = 0.0;
 
     let tooltip = d3.select("#charts")
         .append("div")
@@ -285,6 +300,16 @@ function draw_graph(start_time_ms, end_time_ms, data, title, units, color)
         width = $("#charts").width() - margin.left - margin.right,
         height = 250 - margin.top - margin.bottom;
 
+    // Create the x axis scale function, which is in date format.
+    let x_scale = d3.scaleTime()
+        .domain(d3.extent(data, function(d) { return d.date; }))
+        .range([ 0, width ]);
+
+    // Create the y axis.
+    let y_scale = d3.scaleLinear()
+        .domain([ min_y, max_y ])
+        .range([ height, 0 ]);
+
     let svg = d3.select("#charts")
         .append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -295,106 +320,120 @@ function draw_graph(start_time_ms, end_time_ms, data, title, units, color)
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    // Add X axis --> it is a date format.
-    let x = d3.scaleTime()
-        .domain(d3.extent(data, function(d) { return d.date; }))
-        .range([ 0, width ]);
+    // Create and add the grid lines.
+    let x_axis_grid = d3.axisBottom(x_scale)
+        .tickSize(-height)
+        .tickSizeOuter(0)
+        .tickFormat('')
+        .ticks(10);
+    let y_axis_grid = d3.axisLeft(y_scale)
+        .tickSize(-width)
+        .tickSizeOuter(0)
+        .tickFormat('')
+        .ticks(10);
+    svg.append('g')
+        .attr('class', 'x axis-grid')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(x_axis_grid);
+    svg.append('g')
+        .attr('class', 'y axis-grid')
+        .call(y_axis_grid);
+
+    // Add the x axis.
     let x_axis = svg.append("g")
         .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x));
+        .call(d3.axisBottom(x_scale));
 
-    // Add Y axis.
-    let y = d3.scaleLinear()
-        .domain([min_y, max_y])
-        .range([ height, 0 ]);
-    let y_axis = svg.append("g")
-        .call(d3.axisLeft(y));
+    // If the user double clicks, re-initialize the chart.
+    svg.on("dblclick", function() {
+        x_scale.domain(d3.extent(data, function(d) { return d.date; }))
+        x_axis.transition().call(d3.axisBottom(x_scale))
+        line.select('.line')
+            .transition()
+            .attr("d", d3.line()
+                .x(function(d) { return x_scale(d.date) })
+                .y(function(d) { return y_scale(d.value) }));
+    });
+
+    // Add the title.
     svg.append("text")
         .attr("transform", "rotate(-90)")
         .attr("y", 0 - (margin.left))
         .attr("x", 0 - (height / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")
-        .text(title);  
+        .text(title);
 
     // Add a clipPath: everything out of this area won't be drawn.
     let clip = svg.append("defs").append("svg:clipPath")
         .attr("id", "clip")
         .append("svg:rect")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("x", 0)
-        .attr("y", 0);
+            .attr("width", width)
+            .attr("height", height)
+            .attr("x", 0)
+            .attr("y", 0);
 
-    // Add brushing.
-    let brush = d3.brushX()                   // Add the brush feature using the d3.brush function
-        .extent( [ [0,0], [width, height] ] ) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
-        .on("end", updateChart)               // Each time the brush selection changes, trigger the 'updateChart' function
+    // A function that set idle_time_out to null.
+    var idle_time_out = null;
+    function idled() { idle_time_out = null; }
 
+    // A function that update the chart for given boundaries.
+    function update_chart()
+    {
+        // What are the selected boundaries?
+        let extent = d3.event.selection;
+
+        // If no selection, back to initial coordinate. Otherwise, update x axis domain.
+        if (extent)
+        {
+            x_scale.domain([ x_scale.invert(extent[0]), x_scale.invert(extent[1]) ]);
+            line.select(".brush").call(brush.move, null); // This removes the grey brush area as soon as the selection has been done.
+        }
+        else
+        {
+            if (!idle_time_out)
+                return idle_time_out = setTimeout(idled, 350); // This allows to wait a little bit.
+            x_scale.domain([4,8])
+        }
+
+        // Update the axis and line position.
+        x_axis.transition().duration(1000).call(d3.axisBottom(x_scale));
+        line.select('.line')
+            .transition()
+            .duration(1000)
+            .attr("d", d3.line()
+                .x(function(d) { return x_scale(d.date) })
+                .y(function(d) { return y_scale(d.value) }));
+    }
+
+    // Add the y axis.
+    let y_axis = svg.append("g")
+        .call(d3.axisLeft(y_scale));
+
+    // Create the line.
     let line = svg.append('g')
         .attr("clip-path", "url(#clip)");
 
-    // Add the line
+    // Add the line.
     line.append("path")
         .datum(data)
         .attr("class", "line")  // I add the class line to be able to modify this line later on.
         .attr("fill", color)
         .attr("stroke", color)
-        .attr("stroke-width", 1.5)
+        .attr("stroke-width", 0.25)
         .attr("d", d3.line()
-            .x(function(d) { return x(d.date) })
-            .y(function(d) { return y(d.value) })
-        )
+            .x(function(d) { return x_scale(d.date) })
+            .y(function(d) { return y_scale(d.value) }));
 
-    // Add the brushing
+    // Add the brushing.
+    let brush = d3.brushX()                        // Add the brush feature using the d3.brush function.
+        .extent( [ [ 0, 0 ], [ width, height ] ] ) // Initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area.
+        .on("end", update_chart)                   // Each time the brush selection changes, trigger the 'update_chart' function.
     line.append("g")
         .attr("class", "brush")
         .call(brush);
 
-    // A function that set idle_timeout to null
-    var idle_timeout
-    function idled() { idle_timeout = null; }
-
-    // A function that update the chart for given boundaries
-    function updateChart() {
-
-        // What are the selected boundaries?
-        extent = d3.event.selection
-
-        // If no selection, back to initial coordinate. Otherwise, update X axis domain
-        if (!extent)
-        {
-            if (!idle_timeout)
-                return idle_timeout = setTimeout(idled, 350); // This allows to wait a little bit
-            x.domain([4,8])
-        }
-        else
-        {
-            x.domain([ x.invert(extent[0]), x.invert(extent[1]) ]);
-            line.select(".brush").call(brush.move, null); // This removes the grey brush area as soon as the selection has been done
-        }
-
-        // Update axis and line position
-        x_axis.transition().duration(1000).call(d3.axisBottom(x))
-        line.select('.line')
-            .transition()
-            .duration(1000)
-            .attr("d", d3.line()
-                .x(function(d) { return x(d.date) })
-                .y(function(d) { return y(d.value) }))
-    }
-
-    // If user double click, reinitialize the chart
-    svg.on("dblclick",function() {
-        x.domain(d3.extent(data, function(d) { return d.date; }))
-        x_axis.transition().call(d3.axisBottom(x))
-        line.select('.line')
-            .transition()
-            .attr("d", d3.line()
-            .x(function(d) { return x(d.date) })
-            .y(function(d) { return y(d.value) })
-        )
-    });
+    return svg;
 }
 
 /// @function draw_bar_chart
