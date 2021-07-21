@@ -189,16 +189,25 @@ class Api(object):
                 self.data_mgr.create_activity_accelerometer_reading(device_str, activity_id, accels)
 
         # Update the activity type.
+        activity_type_updated = False
         if len(activity_type) > 0:
-            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
 
-        # Update the user device association.
+            # If the activity type was updated then set the default gear (will be done later after user id validation).
+            activity_type_updated = self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
+
+        # Valid user?
         if len(username) > 0:
             temp_user_id, _, _ = self.user_mgr.retrieve_user(username)
             if temp_user_id == self.user_id:
+
+                # Update the user device association.
                 user_devices = self.user_mgr.retrieve_user_devices(self.user_id)
                 if user_devices is not None and device_str not in user_devices:
                     self.user_mgr.create_user_device_for_user_id(self.user_id, device_str)
+
+                # Set the default gear.
+                if activity_type_updated:
+                    self.data_mgr.create_default_tags_on_activity(self.user_id, activity_type, activity_id)
 
         # Analysis is now obsolete, so delete it.
         self.data_mgr.delete_activity_summary(activity_id)
@@ -831,7 +840,9 @@ class Api(object):
 
         # Add the activity to the database.
         activity_type = unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
-        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time), None)
+        _, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time), None)
+
+        # Add the activity data to the database.
         self.data_mgr.create_activity_metadata(activity_id, 0, Keys.APP_DISTANCE_KEY, float(values[Keys.APP_DISTANCE_KEY]), False)
         self.data_mgr.create_activity_metadata(activity_id, 0, Keys.APP_DURATION_KEY, float(values[Keys.APP_DURATION_KEY]), False)
 

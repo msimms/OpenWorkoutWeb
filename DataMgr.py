@@ -804,7 +804,7 @@ class DataMgr(Importer.ActivityWriter):
 
         defaults = self.retrieve_gear_defaults(user_id)
         for default in defaults:
-            if default[Keys.ACTIVITY_TYPE_KEY] == activity_type:
+            if Keys.ACTIVITY_TYPE_KEY in default and default[Keys.ACTIVITY_TYPE_KEY] == activity_type:
                 tags = []
                 tags.append(default[Keys.GEAR_NAME_KEY])
                 return self.database.create_tags_on_activity_by_id(activity_id, tags)

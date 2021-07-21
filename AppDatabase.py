@@ -1524,12 +1524,13 @@ class MongoDatabase(Database.Database):
                     value_list.sort(key=retrieve_time_from_time_value_pair)
                     activity[key] = value_list
                     self.activities_collection.save(activity)
+                    return True
 
                 # The metadata is a scalar, just make sure to only update it if it has actually changed.
                 elif key not in activity or activity[key] != value:
                     activity[key] = value
                     self.activities_collection.save(activity)
-                return True
+                    return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
