@@ -27,10 +27,8 @@ import calendar
 import datetime
 import json
 import logging
-import os
 import sys
 import time
-import uuid
 import ApiException
 import Exporter
 import InputChecker
