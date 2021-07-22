@@ -35,7 +35,6 @@ import IcsWriter
 import IntensityCalculator
 import Keys
 import Units
-import UserMgr
 import ZwoWriter
 
 # Locate and load the ZwoTags module.

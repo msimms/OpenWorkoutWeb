@@ -23,9 +23,6 @@
 # SOFTWARE.
 """Estimates the user's maximum heart rate and heart rate zones based on activity summary data."""
 
-import inspect
-import os
-import sys
 import time
 import Keys
 

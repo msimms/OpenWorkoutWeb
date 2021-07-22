@@ -1,10 +1,6 @@
 # Copyright 2018 Michael J Simms
 """Performs calculations on basic sensor information (heart rate, power, etc.)."""
 
-from sklearn.cluster import KMeans
-import numpy
-import Keys
-
 class SensorAnalyzer(object):
     """Class for performing calculations on basic sensor information (heart rate, power, etc.)."""
 

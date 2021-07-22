@@ -2,7 +2,6 @@
 """Computes estimated finishing times for running races, based on VO2 estimation."""
 
 import math
-import Keys
 
 class RunningRacePredictor(object):
     """Computes estimated finishing times for running races, based on VO2 estimation."""

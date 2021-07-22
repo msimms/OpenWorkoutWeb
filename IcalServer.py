@@ -23,7 +23,6 @@
 # SOFTWARE.
 """Handles ical calendar requests."""
 
-import DataMgr
 import IcsWriter
 import Keys
 

@@ -23,9 +23,6 @@
 # SOFTWARE.
 """Estimates body mass index."""
 
-import time
-import Keys
-
 class BmiCalculator(object):
     """Estimates body mass index"""
 

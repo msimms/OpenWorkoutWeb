@@ -23,7 +23,6 @@
 # SOFTWARE.
 """Instantiates objects that can describe workouts."""
 
-import sys
 import Keys
 import Event
 import Rest

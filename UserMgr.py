@@ -29,7 +29,6 @@ import time
 import AppDatabase
 import FtpCalculator
 import Keys
-import SessionMgr
 
 
 MIN_PASSWORD_LEN  = 8

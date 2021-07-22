@@ -27,7 +27,6 @@ import datetime
 import inspect
 import json
 import logging
-import mako
 import markdown
 import os
 import sys

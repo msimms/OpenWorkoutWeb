@@ -2,7 +2,6 @@
 """Computes the hash of an activity. Used to determine uniqueness."""
 
 import hashlib
-import sys
 import Keys
 
 class ActivityHasher(object):

@@ -3,7 +3,6 @@
 
 from __future__ import absolute_import
 from CeleryWorker import celery_worker
-import celery
 import json
 import logging
 import os
