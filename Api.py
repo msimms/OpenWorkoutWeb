@@ -838,6 +838,8 @@ class Api(object):
 
         # Add the activity to the database.
         activity_type = unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
+        if not InputChecker.is_valid_decoded_str(activity_type):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         _, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time), None)
 
         # Add the activity data to the database.
@@ -887,8 +889,12 @@ class Api(object):
         if not InputChecker.is_integer(start_time):
             raise ApiException.ApiMalformedRequestException("Invalid start time.")
 
-        # Add the activity to the database.
+        # Validate the activity type.
         activity_type = unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
+        if not InputChecker.is_valid_decoded_str(activity_type):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Add the activity to the database.
         _, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time), None)
         self.data_mgr.create_activity_sets_and_reps_data(activity_id, new_sets)
 
