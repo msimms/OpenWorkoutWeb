@@ -11,7 +11,6 @@ import signal
 import sys
 import traceback
 
-import Api
 import ApiException
 import App
 import Config

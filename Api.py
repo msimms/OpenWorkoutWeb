@@ -889,7 +889,7 @@ class Api(object):
 
         # Add the activity to the database.
         activity_type = unquote_plus(values[Keys.ACTIVITY_TYPE_KEY])
-        device_str, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time), None)
+        _, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time), None)
         self.data_mgr.create_activity_sets_and_reps_data(activity_id, new_sets)
 
         return ""
