@@ -56,16 +56,6 @@ function serialize_to_url_params(dict)
     return str.join("&");
 }
 
-function serialize_to_json(list)
-{
-    let str = [];
-    for (let i = 0; i < list.length; ++i)
-        for (let key in list[i])
-            str.push(JSON.stringify(key) + ": " + JSON.stringify(list[i][key]));
-    json_str = "{" + str.join(",") + "}"
-    return json_str
-}
-
 /// @function Sends an HTTP GET request and waits for the response.
 function send_get_request(url, result_text)
 {
@@ -124,11 +114,10 @@ function send_post_request(url, params, result_text)
         }
         result = (xml_http.status == 200);
     }
-    json_data = serialize_to_json(params);
+    json_data = JSON.stringify(params);
     xml_http.send(json_data);
     return result;
 }
-
 
 /// @function Sends an HTTP POST request and waits for the response.
 function send_post_request_async(url, params, callback)
@@ -145,7 +134,7 @@ function send_post_request_async(url, params, callback)
             callback(xml_http.status, xml_http.responseText);
         }
     }
-    json_data = serialize_to_json(params);
+    json_data = JSON.stringify(params);
     xml_http.send(json_data);
 }
 
