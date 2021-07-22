@@ -378,9 +378,9 @@ class Importer(object):
             for field in fields:
                 message_data[field.name] = field.value
 
-            if 'sport' in message_data:
+            if 'sport' in message_data and isinstance(message_data['sport'], str):
                 activity_type = message_data['sport']
-            if 'sub_sport' in message_data:
+            if 'sub_sport' in message_data and isinstance(message_data['sub_sport'], str):
                 sub_activity_type = message_data['sub_sport']
             if 'timestamp' not in message_data:
                 continue
