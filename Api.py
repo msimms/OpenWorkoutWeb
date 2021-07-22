@@ -1523,79 +1523,79 @@ class Api(object):
         result = True
 
         # Update the user's setting.
-        for key in values:
-            decoded_key = unquote_plus(key)
+        for item in values:
+            key = unquote_plus(item.keys()[0])
 
             # Default privacy/visibility.
-            if decoded_key == Keys.DEFAULT_PRIVACY_KEY:
-                default_privacy = unquote_plus(values[key]).lower()
+            if key == Keys.DEFAULT_PRIVACY_KEY:
+                default_privacy = unquote_plus(item[key]).lower()
                 if not (default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE):
                     raise ApiException.ApiMalformedRequestException("Invalid visibility value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY_KEY, default_privacy)
             
             # Metric or imperial?
-            elif decoded_key == Keys.PREFERRED_UNITS_KEY:
-                preferred_units = unquote_plus(values[key]).lower()
+            elif key == Keys.PREFERRED_UNITS_KEY:
+                preferred_units = unquote_plus(item[key]).lower()
                 if not (preferred_units == Keys.UNITS_METRIC_KEY or preferred_units == Keys.UNITS_STANDARD_KEY):
                     raise ApiException.ApiMalformedRequestException("Invalid units value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY, preferred_units)
 
             # Preferred first day of week.
-            elif decoded_key == Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY:
-                preferred_first_day_of_week = unquote_plus(values[key])
+            elif key == Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY:
+                preferred_first_day_of_week = unquote_plus(item[key])
                 if not preferred_first_day_of_week in Keys.DAYS_OF_WEEK:
                     raise ApiException.ApiMalformedRequestException("Invalid day value.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY, preferred_first_day_of_week)
 
             # Preferred long run day of the week.
-            elif decoded_key == Keys.PREFERRED_LONG_RUN_DAY_KEY:
-                preferred_long_run_day = unquote_plus(values[key]).lower()
+            elif key == Keys.PREFERRED_LONG_RUN_DAY_KEY:
+                preferred_long_run_day = unquote_plus(item[key]).lower()
                 if not InputChecker.is_day_of_week(preferred_long_run_day):
                     raise ApiException.ApiMalformedRequestException("Invalid long run day.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day)
 
             # Goal.
-            elif decoded_key == Keys.GOAL_KEY:
-                goal = unquote_plus(values[key])
+            elif key == Keys.GOAL_KEY:
+                goal = unquote_plus(item[key])
                 if not (goal in Keys.GOALS):
                     raise ApiException.ApiMalformedRequestException("Invalid goal.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
 
             # Goal date.
-            elif decoded_key == Keys.GOAL_DATE_KEY:
-                if not InputChecker.is_integer(values[key]):
+            elif key == Keys.GOAL_DATE_KEY:
+                if not InputChecker.is_integer(item[key]):
                     raise ApiException.ApiMalformedRequestException("Invalid goal date.")
-                goal_date = int(values[key])
+                goal_date = int(item[key])
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
 
             # Goal type.
-            elif decoded_key == Keys.GOAL_TYPE_KEY:
-                goal_type = unquote_plus(values[key])
+            elif key == Keys.GOAL_TYPE_KEY:
+                goal_type = unquote_plus(item[key])
                 if not (goal_type == Keys.GOAL_TYPE_COMPLETION or goal_type == Keys.GOAL_TYPE_SPEED):
                     raise ApiException.ApiMalformedRequestException("Invalid goal type.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_TYPE_KEY, goal_type)
 
             # Experience level.
-            elif decoded_key == Keys.EXPERIENCE_LEVEL_KEY:
-                if not InputChecker.is_integer(values[key]):
+            elif key == Keys.EXPERIENCE_LEVEL_KEY:
+                if not InputChecker.is_integer(item[key]):
                     raise ApiException.ApiMalformedRequestException("Invalid level.")
-                level = int(values[key])
+                level = int(item[key])
                 if not (level >= 1 and level <= 10):
                     raise ApiException.ApiMalformedRequestException("Invalid level.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.EXPERIENCE_LEVEL_KEY, level)
 
             # Comfort level with structured training.
-            elif decoded_key == Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY:
-                if not InputChecker.is_integer(values[key]):
+            elif key == Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY:
+                if not InputChecker.is_integer(item[key]):
                     raise ApiException.ApiMalformedRequestException("Invalid level.")
-                level = int(values[key])
+                level = int(item[key])
                 if not (level >= 1 and level <= 10):
                     raise ApiException.ApiMalformedRequestException("Invalid level.")
                 result = self.user_mgr.update_user_setting(self.user_id, Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, level)
 
             # Unknown
             else:
-                raise ApiException.ApiMalformedRequestException("Invalid user setting: " + decoded_key)
+                raise ApiException.ApiMalformedRequestException("Invalid user setting: " + key)
 
         return result, ""
 
