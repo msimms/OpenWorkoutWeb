@@ -76,7 +76,10 @@ class ActivityAnalyzer(object):
             self.data_mgr.update_deferred_task(activity_user_id, self.internal_task_id, activity_id, Keys.TASK_STATUS_STARTED)
 
             # Make sure the activity start time is set.
+            print("Computing the start time...")
             start_time_secs = self.data_mgr.update_activity_start_time(self.activity)
+
+            # We'll use this to ompute the end time.
             end_time_ms = 0
 
             # Hash the activity.
@@ -149,29 +152,32 @@ class ActivityAnalyzer(object):
                 # Create a current speed graph - if one has not already been created.
                 if Keys.APP_CURRENT_SPEED_KEY not in self.activity and location_analyzer is not None:
 
-                    print("Creating speed graph...")
+                    print("Creating the speed graph...")
                     self.speed_graph = location_analyzer.create_speed_graph()
 
                     print("Storing the speed graph...")
                     if not self.data_mgr.create_activity_metadata_list(activity_id, Keys.APP_CURRENT_SPEED_KEY, self.speed_graph):
                         self.log_error("Error returned when saving activity speed graph.")
 
-                    print("Storing distance calculations...")
+                    print("Storing the distance calculations...")
                     if not self.data_mgr.create_activity_metadata_list(activity_id, Keys.APP_DISTANCES_KEY, location_analyzer.distance_buf):
                         self.log_error("Error returned when saving activity speed graph.")                    
                 self.should_yield()
 
                 # Where was this activity performed?
-                print("Computing location description...")
+                print("Computing the location description...")
                 location_description = self.data_mgr.get_location_description(activity_id)
                 self.summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY] = location_description
                 self.should_yield()
 
                 # Was a stress score calculated (i.e., did the activity have power data from which stress could be computed)?
                 # If not, estimate a stress score.
-                print("Computing the intensity score...")
+                print("Update the end time...")
                 end_time_secs = end_time_ms / 1000
+                if end_time_ms > 0:
+                    self.data_mgr.update_activity_end_time(self.activity, end_time_secs)
 
+                print("Computing the intensity score...")
                 # If activity duration and distance have been calculated.
                 if start_time_secs > 0 and end_time_secs > 0 and end_time_secs > start_time_secs and len(location_analyzer.distance_buf) > 0:
 
