@@ -956,6 +956,8 @@ class Api(object):
 
     def handle_upload_activity_photo(self, values):
         """Called when an API message to upload a photo to an activity is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
         if Keys.UPLOADED_FILE_DATA_KEY not in values:
             raise ApiException.ApiMalformedRequestException("File data not specified.")
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -998,8 +1000,6 @@ class Api(object):
 
     def handle_list_activity_photos(self, values):
         """Lists all photos associated with an activity."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
