@@ -120,6 +120,12 @@ class DataMgr(Importer.ActivityWriter):
 
         return end_time_ms
 
+    def update_activity_end_time(self, activity, end_time_sec):
+        """Utility function for updating the activitiy's end time in the database."""
+        if self.database is None:
+            raise Exception("No database.")
+        self.database.create_activity_metadata(activity[Keys.ACTIVITY_ID_KEY], int(end_time_sec * 1000), Keys.ACTIVITY_END_TIME_KEY, int(end_time_sec), False)
+
     def compute_and_store_activity_end_time(self, activity):
         """Examines the activity and computes the time at which the activity ended, storing it so we don't have to do this again."""
         if self.database is None:
@@ -130,16 +136,15 @@ class DataMgr(Importer.ActivityWriter):
         # Compute from the activity's raw data.
         end_time_ms = self.compute_activity_end_time(activity)
         if end_time_ms is not None:
-            end_time_sec = int(end_time_ms / 1000)
+            end_time_sec = end_time_ms / 1000
 
         # If we couldn't find anything with a time then just duplicate the start time, assuming it's a manually entered workout or something.
         if end_time_sec is None:
-            end_time_sec = int(activity[Keys.ACTIVITY_START_TIME_KEY])
+            end_time_sec = activity[Keys.ACTIVITY_START_TIME_KEY]
 
         # Store the end time, so we don't have to go through this again.
         if end_time_sec is not None:
-            activity_id = activity[Keys.ACTIVITY_ID_KEY]
-            self.database.create_activity_metadata(activity_id, end_time_sec * 1000, Keys.ACTIVITY_END_TIME_KEY, end_time_sec, False)
+            self.update_activity_end_time(activity, end_time_sec)
 
         return end_time_sec
 
