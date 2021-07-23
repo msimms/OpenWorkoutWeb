@@ -2343,6 +2343,7 @@ class Api(object):
             return self.handle_api_1_0_get_request(request, values)
         elif verb == 'POST':
             # Flatten the array of dictionaries into a single dictionary.
-            values = {k: v for d in values for k, v in d.items()}
+            if isinstance(values, list):
+                values = {k: v for d in values for k, v in d.items()}
             return self.handle_api_1_0_post_request(request, values)
         return False, ""
