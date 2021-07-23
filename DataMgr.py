@@ -159,7 +159,7 @@ class DataMgr(Importer.ActivityWriter):
                 return True
 
         # Look through the user's activities for ones that overlap with the given start time.
-        activities = self.database.retrieve_user_activity_list(user_id, None, None)
+        activities = self.database.retrieve_user_activity_list(user_id, None, None, True)
         for activity in activities:
 
             if Keys.ACTIVITY_START_TIME_KEY in activity:
@@ -524,7 +524,7 @@ class DataMgr(Importer.ActivityWriter):
             activities.extend(device_activities)
 
         # List activities with no device that are associated with the user.
-        user_activities = self.database.retrieve_user_activity_list(user_id, start_time, end_time)
+        user_activities = self.database.retrieve_user_activity_list(user_id, start_time, end_time, False)
         if user_activities is not None:
             for user_activity in user_activities:
                 user_activity[Keys.REALNAME_KEY] = user_realname
@@ -1373,6 +1373,7 @@ class DataMgr(Importer.ActivityWriter):
 
         heat_map = {}
 
+        # Retrieve the summary data for each activity and update the heat map.
         for activity in activities:
             if Keys.ACTIVITY_ID_KEY in activity and activity[Keys.ACTIVITY_ID_KEY]:
                 summary_data = self.retrieve_activity_summary(activity[Keys.ACTIVITY_ID_KEY])

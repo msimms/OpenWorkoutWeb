@@ -921,16 +921,22 @@ class MongoDatabase(Database.Database):
     #
 
     @Perf.statistics
-    def retrieve_user_activity_list(self, user_id, start_time, end_time):
+    def retrieve_user_activity_list(self, user_id, start_time, end_time, return_all_data):
         """Retrieves the list of activities associated with the specified user."""
         if user_id is None:
             self.log_error(MongoDatabase.retrieve_user_activity_list.__name__ + ": Unexpected empty object: user_id")
             return []
 
         try:
+            # Things we don't need.
+            if return_all_data:
+                exclude_keys = {}
+            else:
+                exclude_keys = self.list_excluded_activity_keys_for_summarization()
+
             if start_time is None or end_time is None:
-                return list(self.activities_collection.find({ "$and": [ { Keys.ACTIVITY_USER_ID_KEY: { '$eq': user_id } } ]}))
-            return list(self.activities_collection.find({ "$and": [ { Keys.ACTIVITY_USER_ID_KEY: { '$eq': user_id }}, { Keys.ACTIVITY_START_TIME_KEY: { '$gt': start_time } }, { Keys.ACTIVITY_START_TIME_KEY: { '$lt': end_time } } ]}))
+                return list(self.activities_collection.find({ "$and": [ { Keys.ACTIVITY_USER_ID_KEY: { '$eq': user_id } } ]}, exclude_keys))
+            return list(self.activities_collection.find({ "$and": [ { Keys.ACTIVITY_USER_ID_KEY: { '$eq': user_id }}, { Keys.ACTIVITY_START_TIME_KEY: { '$gt': start_time } }, { Keys.ACTIVITY_START_TIME_KEY: { '$lt': end_time } } ]}, exclude_keys))
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
