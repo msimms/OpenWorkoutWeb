@@ -400,6 +400,8 @@ class Api(object):
 
         # Get the activity from the database.
         activity = self.data_mgr.retrieve_activity(activity_id)
+        if activity is None:
+            raise ApiException.ApiMalformedRequestException("Invalid activity object.")
 
         # Determine if the requesting user can view the activity.
         if not self.activity_can_be_viewed(activity):
