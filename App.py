@@ -140,6 +140,22 @@ class App(object):
         self.error_activity_html_file = os.path.join(root_dir, HTML_DIR, 'error_activity.html')
         self.ical_server = IcalServer.IcalServer(user_mgr, data_mgr, self.root_url)
 
+        self.logged_in_navbar = "<nav>\n\t<ul>\n" \
+            "\t\t<li><a href=\"" + self.root_url + "/my_activities/\">My Activities</a></li>\n" \
+            "\t\t<li><a href=\"" + self.root_url + "/all_activities/\">All Activities</a></li>\n" \
+            "\t\t<li><a href=\"" + self.root_url + "/workouts/\">Workouts</a></li>\n" \
+            "\t\t<li><a href=\"" + self.root_url + "/pace_plans/\">Pace Plans</a></li>\n" \
+            "\t\t<li><a href=\"" + self.root_url + "/statistics/\">Statistics</a></li>\n" \
+            "\t\t<li><a href=\"" + self.root_url + "/gear/\">Gear</a></li>\n" \
+            "\t\t<li><a href=\"" + self.root_url + "/device_list/\">Devices</a></li>\n" \
+            "\t\t<li><a href=\"" + self.root_url + "/friends/\">Friends</a></li>\n" \
+            "\t\t<li><a href=\"" + self.root_url + "/import_activity/\">Import</a></li>\n" \
+            "\t\t<li><a href=\"" + self.root_url + "/profile/\">Profile</a></li>\n" \
+            "\t\t<li><a href=\"" + self.root_url + "/settings/\">Settings</a></li>\n" \
+            "\t\t<li><a href=\"" + self.root_url + "/logout/\">Log Out</a></li>\n"
+        self.logged_out_navbar = "<nav>\n\t<ul>\n" \
+            "\t\t<li><a href=\"" + self.root_url + "/login/\">Log In</a></li>\n"
+
         self.tempfile_dir = os.path.join(root_dir, 'tempfile')
         if not os.path.exists(self.tempfile_dir):
             os.makedirs(self.tempfile_dir)
@@ -175,6 +191,12 @@ class App(object):
         """Writes an error message to the log file."""
         logger = logging.getLogger()
         logger.error(log_str)
+
+    def create_navbar(self, logged_in):
+        """Helper function for building the navigation bar."""
+        if logged_in:
+            return self.logged_in_navbar
+        return self.logged_out_navbar
 
     def stats(self):
         """Renders the list of a user's devices."""
@@ -243,28 +265,6 @@ class App(object):
         html_file = os.path.join(self.root_dir, HTML_DIR, template_file_name)
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, **kwargs)
-        
-    def create_navbar(self, logged_in):
-        """Helper function for building the navigation bar."""
-        navbar_str = "<nav>\n\t<ul>\n"
-        if logged_in:
-            navbar_str += \
-                "\t\t<li><a href=\"" + self.root_url + "/my_activities/\">My Activities</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/all_activities/\">All Activities</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/workouts/\">Workouts</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/pace_plans/\">Pace Plans</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/statistics/\">Statistics</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/gear/\">Gear</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/device_list/\">Devices</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/friends/\">Friends</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/import_activity/\">Import</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/profile/\">Profile</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/settings/\">Settings</a></li>\n" \
-                "\t\t<li><a href=\"" + self.root_url + "/logout/\">Log Out</a></li>\n"
-        else:
-            navbar_str += "\t\t<li><a href=\"" + self.root_url + "/login/\">Log In</a></li>\n"
-        navbar_str += "\t</ul>\n</nav>"
-        return navbar_str
 
     def render_tags(self, activity, activity_user_id, belongs_to_current_user):
         """Helper function for building the tags string."""
