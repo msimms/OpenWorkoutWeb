@@ -507,6 +507,7 @@ def ical(calendar_id):
     return result
 
 @g_flask_app.route('/api_keys')
+@login_requred
 def api_keys():
     """Renders the api key management page."""
     result = ""
