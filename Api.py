@@ -1913,7 +1913,7 @@ class Api(object):
 
         # Hash from database.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
-        if Keys.ACTIVITY_HASH_KEY not in summary:
+        if Keys.ACTIVITY_HASH_KEY not in summary_data:
             raise ApiException.ApiMalformedRequestException("Hash not found.")
 
         return True, str(summary_data[Keys.ACTIVITY_HASH_KEY])
