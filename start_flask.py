@@ -128,10 +128,11 @@ def photos(user_id, file_name):
     return g_app.render_error()
 
 @g_flask_app.route('/stats')
+@login_requred
 def stats():
     """Renders the internal statistics page."""
     try:
-        return g_app.stats()
+        return g_app.performance_stats()
     except:
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
@@ -288,7 +289,7 @@ def workout(workout_id):
 def statistics():
     """Renders the statistics view."""
     try:
-        return g_app.stats()
+        return g_app.user_stats()
     except App.RedirectException as e:
         return flask.redirect(e.url, code=302)
     except:

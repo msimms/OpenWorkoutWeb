@@ -200,8 +200,8 @@ class App(object):
             return self.logged_in_navbar
         return self.logged_out_navbar
 
-    def stats(self):
-        """Renders the list of a user's devices."""
+    def performance_stats(self):
+        """Renders the application's performance statistics."""
         global g_stats_lock
         global g_stats_count
         global g_stats_time
@@ -1024,8 +1024,8 @@ class App(object):
         return self.render_simple_page('workout.html', **kwargs)
 
     @statistics
-    def stats(self):
-        """Renders the statistics view."""
+    def user_stats(self):
+        """Renders the user's statistics view."""
         return self.render_simple_page('statistics.html')
 
     @statistics

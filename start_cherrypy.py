@@ -144,10 +144,11 @@ class CherryPyFrontEnd(object):
         logger.error(log_str)
 
     @cherrypy.expose
+    @require()
     def stats(self):
         """Renders the internal statistics page."""
         try:
-            return self.app.stats()
+            return self.app.performance_stats()
         except:
             pass
         return self.app.render_error("")
@@ -322,7 +323,7 @@ class CherryPyFrontEnd(object):
     def statistics(self, *args, **kw):
         """Renders the statistics view."""
         try:
-            return self.app.stats()
+            return self.app.user_stats()
         except App.RedirectException as e:
             raise cherrypy.HTTPRedirect(e.url)
         except cherrypy.HTTPRedirect as e:
