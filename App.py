@@ -152,9 +152,11 @@ class App(object):
             "\t\t<li><a href=\"" + self.root_url + "/import_activity/\">Import</a></li>\n" \
             "\t\t<li><a href=\"" + self.root_url + "/profile/\">Profile</a></li>\n" \
             "\t\t<li><a href=\"" + self.root_url + "/settings/\">Settings</a></li>\n" \
-            "\t\t<li><a href=\"" + self.root_url + "/logout/\">Log Out</a></li>\n"
+            "\t\t<li><a href=\"" + self.root_url + "/logout/\">Log Out</a></li>\n" \
+            "\t</ul>\n"
         self.logged_out_navbar = "<nav>\n\t<ul>\n" \
-            "\t\t<li><a href=\"" + self.root_url + "/login/\">Log In</a></li>\n"
+            "\t\t<li><a href=\"" + self.root_url + "/login/\">Log In</a></li>\n" \
+            "\t</ul>\n"
 
         self.tempfile_dir = os.path.join(root_dir, 'tempfile')
         if not os.path.exists(self.tempfile_dir):
@@ -905,7 +907,7 @@ class App(object):
             return self.render_error("The requested activity does not exist.")
 
         # Determine who owns the device, and hence the activity.
-        activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
+        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
         belongs_to_current_user = str(activity_user_id) == str(user_id)
         if not belongs_to_current_user:
             return self.render_error("The logged in user does not own the requested activity.")
