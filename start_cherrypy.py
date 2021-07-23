@@ -567,6 +567,7 @@ class CherryPyFrontEnd(object):
         return self.error()
 
     @cherrypy.expose
+    @require()
     def api_keys(self):
         """Renders the api key management page."""
         result = ""
