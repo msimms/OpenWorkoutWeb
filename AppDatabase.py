@@ -35,6 +35,7 @@ import time
 import Database
 import InputChecker
 import Keys
+import Perf
 import Workout
 
 
@@ -112,6 +113,16 @@ class MongoDatabase(Database.Database):
         exclude_keys[Keys.PR_KEY] = False
         exclude_keys[Keys.DEFAULT_PRIVACY_KEY] = False
         exclude_keys[Keys.PREFERRED_UNITS_KEY] = False
+        return exclude_keys
+
+    def list_excluded_activity_keys_for_summarization(self):
+        """This is the list of stuff we don't need to return when we're summarizing activities."""
+        exclude_keys = {}
+        exclude_keys[Keys.APP_LOCATIONS_KEY] = False
+        exclude_keys[Keys.APP_ACCELEROMETER_KEY] = False
+        exclude_keys[Keys.APP_CURRENT_SPEED_KEY] = False
+        exclude_keys[Keys.APP_HEART_RATE_KEY] = False
+        exclude_keys[Keys.APP_POWER_KEY] = False
         return exclude_keys
 
     #
@@ -909,6 +920,7 @@ class MongoDatabase(Database.Database):
     # Activity management methods
     #
 
+    @Perf.statistics
     def retrieve_user_activity_list(self, user_id, start_time, end_time):
         """Retrieves the list of activities associated with the specified user."""
         if user_id is None:
@@ -924,6 +936,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return []
 
+    @Perf.statistics
     def retrieve_each_user_activity(self, context, user_id, callback_func):
         """Retrieves each user activity and calls the callback function for each one."""
         try:
@@ -937,25 +950,30 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    @Perf.statistics
     def retrieve_devices_activity_list(self, devices, start_time, end_time):
         """Retrieves the list of activities associated with the specified devices."""
         if devices is None:
             self.log_error(MongoDatabase.retrieve_devices_activity_list.__name__ + ": Unexpected empty object: devices")
             return []
 
-        device_list = []
-        for device_str in devices:
-            device_list.append( { Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str} } )
-
         try:
+            # Things we don't need.
+            exclude_keys = self.list_excluded_activity_keys_for_summarization()
+
+            device_list = []
+            for device_str in devices:
+                device_list.append( { Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str} } )
+
             if start_time is None or end_time is None:
-                return list(self.activities_collection.find({ "$or": device_list }))
-            return list(self.activities_collection.find({ "$and": [ { "$or": device_list }, { Keys.ACTIVITY_START_TIME_KEY: { '$gt': start_time } }, { Keys.ACTIVITY_START_TIME_KEY: { '$lt': end_time } } ] }))
+                return list(self.activities_collection.find({ "$or": device_list }, exclude_keys))
+            return list(self.activities_collection.find({ "$and": [ { "$or": device_list }, { Keys.ACTIVITY_START_TIME_KEY: { '$gt': start_time } }, { Keys.ACTIVITY_START_TIME_KEY: { '$lt': end_time } } ] }, exclude_keys))
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return []
 
+    @Perf.statistics
     def retrieve_each_device_activity(self, context, user_id, device_str, callback_func):
         """Retrieves each device activity and calls the callback function for each one."""
         try:
@@ -972,6 +990,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    @Perf.statistics
     def retrieve_most_recent_activity_for_device(self, device_str):
         """Retrieves the ID for the most recent activity to be associated with the specified device."""
         if device_str is None:
@@ -1961,8 +1980,11 @@ class MongoDatabase(Database.Database):
             return []
 
         try:
+            # Things we don't need.
+            exclude_keys = self.list_excluded_activity_keys_for_summarization()
+
             # Find the activity.
-            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id }, exclude_keys)
 
             # If the activity was found and contains comments.
             if activity is not None and Keys.ACTIVITY_PHOTOS_KEY in activity:

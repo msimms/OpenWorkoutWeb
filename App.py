@@ -46,6 +46,7 @@ import Keys
 import Api
 import IcalServer
 import InputChecker
+import Perf
 import Units
 
 from dateutil.tz import tzlocal
@@ -68,39 +69,6 @@ MEDIA_DIR = 'media'
 ZWIFT_WATOPIA_MAP_FILE_NAME = 'watopia.png'
 ZWIFT_CRIT_CITY_MAP_FILE_NAME = 'crit_city.png'
 ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME = 'makuri_islands.png'
-
-g_stats_lock = threading.Lock()
-g_stats_count = {}
-g_stats_time = {}
-
-
-def statistics(function):
-    """Function decorator for usage and timing statistics."""
-
-    def wrapper(*args, **kwargs):
-        global g_stats_lock
-        global g_stats_count
-        global g_stats_time
-
-        start = timeit.default_timer()
-        result = function(*args, **kwargs)
-        end = timeit.default_timer()
-        execution_time = end - start
-
-        g_stats_lock.acquire()
-        try:
-            g_stats_count[function.__name__] = g_stats_count[function.__name__] + 1
-            g_stats_time[function.__name__] = g_stats_time[function.__name__] + execution_time
-        except:
-            g_stats_count[function.__name__] = 1
-            g_stats_time[function.__name__] = execution_time
-        finally:
-            g_stats_lock.release()
-
-        return result
-
-    return wrapper
-
 
 class RedirectException(Exception):
     """This is thrown when the app needs to redirect to another page."""
@@ -202,9 +170,6 @@ class App(object):
 
     def performance_stats(self):
         """Renders the application's performance statistics."""
-        global g_stats_lock
-        global g_stats_count
-        global g_stats_time
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -217,23 +182,25 @@ class App(object):
             self.log_error('Unknown user ID')
             raise RedirectException(LOGIN_URL)
 
+        # Make a copy of the data so we don't have to hold the lock.
+        Perf.g_stats_lock.acquire()
+        temp_stats_count = Perf.g_stats_count
+        temp_stats_time = Perf.g_stats_time
+        Perf.g_stats_lock.release()
+
         # Build a list of table rows from the device information.
         page_stats_str = "<td><b>Page</b></td><td><b>Num Accesses</b></td><td><b>Avg Time (secs)</b></td><tr>\n"
-        g_stats_lock.acquire()
-        try:
-            for key, count_value in g_stats_count.iteritems():
-                page_stats_str += "\t\t<tr><td>"
-                page_stats_str += str(key)
-                page_stats_str += "</td><td>"
-                page_stats_str += str(count_value)
-                page_stats_str += "</td><td>"
-                if key in g_stats_time and count_value > 0:
-                    total_time = g_stats_time[key]
-                    avg_time = total_time / count_value
-                    page_stats_str += str(avg_time)
-                page_stats_str += "</td></tr>\n"
-        finally:
-            g_stats_lock.release()
+        for key, count_value in temp_stats_count.iteritems():
+            page_stats_str += "\t\t<tr><td>"
+            page_stats_str += str(key)
+            page_stats_str += "</td><td>"
+            page_stats_str += str(count_value)
+            page_stats_str += "</td><td>"
+            if key in temp_stats_time and count_value > 0:
+                total_time = temp_stats_time[key]
+                avg_time = total_time / count_value
+                page_stats_str += str(avg_time)
+            page_stats_str += "</td></tr>\n"
 
         # The number of users and activities.
         total_users_str = ""
@@ -788,7 +755,7 @@ class App(object):
             pass
         return ""
 
-    @statistics
+    @Perf.statistics
     def live_activity(self, activity, activity_user):
         """Renders the map page for the specified (in progress) activity."""
 
@@ -816,7 +783,7 @@ class App(object):
         # Render from template.
         return self.render_page_for_activity(activity, activity_user[Keys.USERNAME_KEY], activity_user[Keys.REALNAME_KEY], activity_user_id, logged_in_user_id, belongs_to_current_user, True)
 
-    @statistics
+    @Perf.statistics
     def live_device(self, device_str):
         """Renders the map page for the current activity from a single device."""
 
@@ -831,7 +798,7 @@ class App(object):
         # Render the page.
         return self.live_activity(activity, device_user)
 
-    @statistics
+    @Perf.statistics
     def live_user(self, user_str):
         """Renders the map page for the current activity for a given user."""
 
@@ -848,7 +815,7 @@ class App(object):
         # Render the page.
         return self.live_activity(activity, user)
 
-    @statistics
+    @Perf.statistics
     def activity(self, activity_id):
         """Renders the details page for an activity."""
 
@@ -882,7 +849,7 @@ class App(object):
         # Render from template.
         return self.render_page_for_activity(activity, activity_username, activity_user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, False)
 
-    @statistics
+    @Perf.statistics
     def edit_activity(self, activity_id):
         """Renders the edit page for an activity."""
 
@@ -932,7 +899,7 @@ class App(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id, activity_name=activity_name_str, activity_type=activity_type_str, description=description_str)
 
-    @statistics
+    @Perf.statistics
     def add_photos(self, activity_id):
         """Renders the edit page for an activity."""
 
@@ -956,7 +923,7 @@ class App(object):
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id)
 
-    @statistics
+    @Perf.statistics
     def device(self, device_str):
         """Renders the map page for a single device."""
 
@@ -988,28 +955,28 @@ class App(object):
         # Render from template.
         return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_user_id, logged_in_user_id, belongs_to_current_user, False)
 
-    @statistics
+    @Perf.statistics
     def my_activities(self):
         """Renders the list of the specified user's activities."""
         return self.render_simple_page('my_activities.html')
 
-    @statistics
+    @Perf.statistics
     def all_activities(self):
         """Renders the list of all activities the specified user is allowed to view."""
         return self.render_simple_page('all_activities.html')
 
-    @statistics
+    @Perf.statistics
     def record_progression(self, activity_type, record_name):
         """Renders the list of records, in order of progression, for the specified user and record type."""
         kwargs = {"activity_type" : activity_type, "record_name" : record_name} 
         return self.render_simple_page('records.html', **kwargs)
 
-    @statistics
+    @Perf.statistics
     def workouts(self):
         """Renders the workouts view."""
         return self.render_simple_page('workouts.html')
 
-    @statistics
+    @Perf.statistics
     def workout(self, workout_id):
         """Renders the view for an individual workout."""
 
@@ -1023,17 +990,17 @@ class App(object):
         kwargs = {"workout_id" : workout_id} 
         return self.render_simple_page('workout.html', **kwargs)
 
-    @statistics
+    @Perf.statistics
     def user_stats(self):
         """Renders the user's statistics view."""
         return self.render_simple_page('statistics.html')
 
-    @statistics
+    @Perf.statistics
     def gear(self):
         """Renders the list of all gear belonging to the logged in user."""
         return self.render_simple_page('gear.html')
 
-    @statistics
+    @Perf.statistics
     def service_history(self, gear_id):
         """Renders the service history for a particular piece of gear."""
 
@@ -1047,22 +1014,22 @@ class App(object):
         kwargs = {"gear_id" : gear_id} 
         return self.render_simple_page('service_history.html', **kwargs)
 
-    @statistics
+    @Perf.statistics
     def friends(self):
         """Renders the list of users who are friends with the logged in user."""
         return self.render_simple_page('friends.html')
 
-    @statistics
+    @Perf.statistics
     def device_list(self):
         """Renders the list of a user's devices."""
         return self.render_simple_page('device_list.html')
 
-    @statistics
+    @Perf.statistics
     def manual_entry(self, activity_type):
         """Called when the user selects an activity type, indicatig they want to make a manual data entry."""
         print(activity_type)
 
-    @statistics
+    @Perf.statistics
     def import_activity(self):
         """Renders the import page."""
 
@@ -1076,27 +1043,27 @@ class App(object):
         kwargs = {"activity_type_list" : activity_type_list_str} 
         return self.render_simple_page('import.html', **kwargs)
 
-    @statistics
+    @Perf.statistics
     def pace_plans(self):
         """Renders the pace plans page."""
         return self.render_simple_page('pace_plans.html')
 
-    @statistics
+    @Perf.statistics
     def task_status(self):
         """Renders the status page for deferred tasks, such as file imports and activity analysis."""
         return self.render_simple_page('task_status.html')
 
-    @statistics
+    @Perf.statistics
     def profile(self):
         """Renders the user's profile page."""
         return self.render_simple_page('profile.html')
 
-    @statistics
+    @Perf.statistics
     def settings(self):
         """Renders the user's settings page."""
         return self.render_simple_page('settings.html')
 
-    @statistics
+    @Perf.statistics
     def ical(self, calendar_id):
         """Returns the ical calendar with the specified ID."""
         if calendar_id is None:
@@ -1107,14 +1074,14 @@ class App(object):
         handled, response = self.ical_server.handle_request(calendar_id)
         return handled, response
 
-    @statistics
+    @Perf.statistics
     def api(self, user_id, verb, method, params):
         """Handles an API request."""
         api = Api.Api(self.user_mgr, self.data_mgr, user_id, self.root_url)
         handled, response = api.handle_api_1_0_request(verb, method, params)
         return handled, response
 
-    @statistics
+    @Perf.statistics
     def login(self):
         """Renders the login page."""
 
@@ -1134,14 +1101,14 @@ class App(object):
         my_template = Template(filename=login_html_file, module_directory=self.tempmod_dir)
         return my_template.render(product=PRODUCT_NAME, root_url=self.root_url, readme=html)
 
-    @statistics
+    @Perf.statistics
     def create_login(self):
         """Renders the create login page."""
         create_login_html_file = os.path.join(self.root_dir, HTML_DIR, 'create_login.html')
         my_template = Template(filename=create_login_html_file, module_directory=self.tempmod_dir)
         return my_template.render(product=PRODUCT_NAME, root_url=self.root_url)
 
-    @statistics
+    @Perf.statistics
     def logout(self):
         """Ends the logged in session."""
 
@@ -1156,17 +1123,17 @@ class App(object):
         # Send the user back to the login screen.
         raise RedirectException(LOGIN_URL)
 
-    @statistics
+    @Perf.statistics
     def about(self):
         """Renders the about page."""
         return self.render_simple_page('about.html')
 
-    @statistics
+    @Perf.statistics
     def status(self):
         """Renders the status page. Used as a simple way to tell if the site is up."""
         return "Up"
 
-    @statistics
+    @Perf.statistics
     def api_keys(self):
         """Renders the api key management page."""
         return self.render_simple_page('api_keys.html')
