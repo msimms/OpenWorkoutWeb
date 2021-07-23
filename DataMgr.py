@@ -102,41 +102,48 @@ class DataMgr(Importer.ActivityWriter):
 
     def compute_activity_end_time(self, activity):
         """Examines the activity and computes the time at which the activity ended."""
-        end_time = None
+        end_time_ms = None
 
         # Look through activity attributes that have a "time".
         search_keys = []
         search_keys.append(Keys.APP_LOCATIONS_KEY)
         search_keys.append(Keys.APP_ACCELEROMETER_KEY)
         for search_key in search_keys:
-            if search_key in activity and isinstance(activity[search_key], list) and len(activity[search_key]) > 0:
-                last_entry = (activity[search_key])[-1]
-                if "time" in last_entry:
-                    possible_end_time = last_entry["time"]
-                    if end_time is None or possible_end_time > end_time:
-                        end_time = possible_end_time
 
-        return end_time
+            # Read the last item out of the list since they should be in chronological order.
+            if search_key in activity and isinstance(activity[search_key], list) and len(activity[search_key]) > 0:
+                last_list_entry = (activity[search_key])[-1]
+                if "time" in last_list_entry:
+                    possible_end_time_ms = last_list_entry["time"]
+                    if end_time_ms is None or possible_end_time_ms > end_time_ms:
+                        end_time_ms = possible_end_time_ms
+
+        return end_time_ms
 
     def compute_and_store_activity_end_time(self, activity):
         """Examines the activity and computes the time at which the activity ended, storing it so we don't have to do this again."""
         if self.database is None:
             raise Exception("No database.")
 
-        end_time = self.compute_activity_end_time(activity)
+        end_time_sec = None
+
+        # Compute from the activity's raw data.
+        end_time_ms = self.compute_activity_end_time(activity)
+        if end_time_ms is not None:
+            end_time_sec = int(end_time_ms / 1000)
 
         # If we couldn't find anything with a time then just duplicate the start time, assuming it's a manually entered workout or something.
-        if end_time is None:
-            end_time = activity[Keys.ACTIVITY_START_TIME_KEY]
+        if end_time_sec is None:
+            end_time_sec = int(activity[Keys.ACTIVITY_START_TIME_KEY])
 
         # Store the end time, so we don't have to go through this again.
-        if end_time is not None:
+        if end_time_sec is not None:
             activity_id = activity[Keys.ACTIVITY_ID_KEY]
-            self.database.create_activity_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
+            self.database.create_activity_metadata(activity_id, end_time_sec * 1000, Keys.ACTIVITY_END_TIME_KEY, end_time_sec, False)
 
-        return end_time
+        return end_time_sec
 
-    def is_duplicate_activity(self, user_id, start_time, optional_activity_id):
+    def is_duplicate_activity(self, user_id, start_time_sec, optional_activity_id):
         """Inherited from ActivityWriter. Returns TRUE if the activity appears to be a duplicate of another activity. Returns FALSE otherwise."""
         if self.database is None:
             raise Exception("No database.")
@@ -153,14 +160,14 @@ class DataMgr(Importer.ActivityWriter):
             if Keys.ACTIVITY_START_TIME_KEY in activity:
 
                 # Get the activity start and end times.
-                activity_start_time = activity[Keys.ACTIVITY_START_TIME_KEY]
+                activity_start_time_sec = activity[Keys.ACTIVITY_START_TIME_KEY]
                 if Keys.ACTIVITY_END_TIME_KEY not in activity:
-                    activity_end_time = self.compute_and_store_activity_end_time(activity)
+                    activity_end_time_sec = self.compute_and_store_activity_end_time(activity)
                 else:
-                    activity_end_time = activity[Keys.ACTIVITY_END_TIME_KEY]
+                    activity_end_time_sec = activity[Keys.ACTIVITY_END_TIME_KEY]
 
                 # We're looking for activities that start within the bounds of another activity.
-                if start_time >= activity_start_time and start_time < activity_end_time:
+                if start_time_sec >= activity_start_time_sec and start_time_sec < activity_end_time_sec:
                     return True
 
         return False
@@ -289,13 +296,13 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity ID.")
         return self.database.create_activity_accelerometer_reading(device_str, activity_id, accels)
 
-    def finish_activity(self, activity_id, end_time):
+    def finish_activity(self, activity_id, end_time_ms):
         """Inherited from ActivityWriter. Called for post-processing."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
-        return self.database.create_activity_metadata(activity_id, end_time, Keys.ACTIVITY_END_TIME_KEY, end_time / 1000, False)
+        return self.database.create_activity_metadata(activity_id, end_time_ms, Keys.ACTIVITY_END_TIME_KEY, int(end_time_ms / 1000), False)
 
     def create_deferred_task(self, user_id, task_type, celery_task_id, internal_task_id, details):
         """Called by the importer to store data associated with an ongoing import task."""
