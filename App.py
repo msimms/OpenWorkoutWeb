@@ -504,16 +504,6 @@ class App(object):
         return activity_type
 
     @staticmethod
-    def render_array(array):
-        """Helper function for converting an array (list) to a comma-separated string."""
-        result = ""
-        for item in array:
-            if len(result) > 0:
-                result += ", "
-            result += str(item)
-        return result
-
-    @staticmethod
     def render_difference_array(array):
         """Helper function for converting an array (list) to a comma-separated string."""
         result = ""
@@ -595,19 +585,11 @@ class App(object):
         description_str = self.render_description_for_page(activity)
         name = App.render_activity_name(activity)
         activity_type = App.render_activity_type(activity)
+        ftp = self.user_mgr.estimate_ftp(activity_user_id)
         is_foot_based_activity = activity_type in Keys.FOOT_BASED_ACTIVITIES
         is_foot_based_activity_str = "false"
         if is_foot_based_activity:
             is_foot_based_activity_str = "true"
-
-        # Compute the power zones.
-        power_zones_str = ""
-        ftp = self.user_mgr.estimate_ftp(activity_user_id)
-        if ftp is not None and Keys.APP_POWER_KEY in activity:
-            powers = activity[Keys.APP_POWER_KEY]
-            if len(powers) > 0:
-                power_zone_distribution = self.data_mgr.compute_power_zone_distribution(ftp, powers)
-                power_zones_str = "\t\t" + App.render_array(power_zone_distribution)
 
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
@@ -714,19 +696,19 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if is_in_watopia and os.path.isfile(self.zwift_watopia_map_file) > 0:
             my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_WATOPIA_MAP_FILE_NAME)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_WATOPIA_MAP_FILE_NAME)
         elif is_in_crit_city and os.path.isfile(self.zwift_crit_city_map_file) > 0:
             my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_CRIT_CITY_MAP_FILE_NAME)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_CRIT_CITY_MAP_FILE_NAME)
         elif is_in_makuri_islands and os.path.isfile(self.zwift_makuri_islands_map_file) > 0:
             my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME)
         elif self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, lastLat=last_lat, lastLon=last_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, lastLat=last_lat, lastLon=last_lon, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, lastLat=last_lat, lastLon=last_lon, activityId=activity_id, userId=activity_user_id, powerZones=power_zones_str, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, lastLat=last_lat, lastLon=last_lon, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
 
     def render_page_for_activity(self, activity, email, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""

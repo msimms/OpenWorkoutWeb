@@ -59,6 +59,7 @@ ${nav}
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script type="text/javascript" src="${root_url}/js/graphs.js"></script>
 <script type="text/javascript" src="${root_url}/js/coordinates.js"></script>
+<script type="text/javascript" src="${root_url}/js/power.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
@@ -274,16 +275,11 @@ ${summary}
     let start_time_ms = 0;
     let end_time_ms = 0;
 
-    let power_zones = [
-${powerZones}
-    ];
     let splits = [
 ${splits}
     ];
     let new_splits = splits.map(function(item) { return item / 1000.0 });
 
-    if (power_zones.length > 0)
-        $(function() { draw_bar_chart(power_zones, "Power Zone Distribution", "ForestGreen") });
     if (new_splits.length > 0)
         $(function() { draw_bar_chart(new_splits, "Split Times (seconds)", "LightSteelBlue") });
 
@@ -363,15 +359,28 @@ ${splits}
             }
 
             if (key == "Current Speed")
+            {
                 draw_speed_graph(start_time_ms, end_time_ms, new_data);
+            }
             else if (key == "Heart Rate")
+            {
                 draw_graph(start_time_ms, end_time_ms, new_data, key, "BPM", get_graph_color(key));
+            }
             else if (key == "Cadence")
+            {
                 draw_graph(start_time_ms, end_time_ms, new_data, key, "RPM", get_graph_color(key));
+            }
             else if (key == "Power")
+            {
+                let power_zones = compute_power_zone_distribution(${ftp}, new_data);
+
+                draw_bar_chart(power_zones, "Power Zone Distribution", "ForestGreen");
                 draw_graph(start_time_ms, end_time_ms, new_data, key, "Watts", get_graph_color(key));
+            }
             else if (key == "Temperature")
+            {
                 draw_graph(start_time_ms, end_time_ms, new_data, key, "Temperature", get_graph_color(key));
+            }
         }
 
         retrieve_summary_data();
