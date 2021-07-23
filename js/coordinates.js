@@ -22,13 +22,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+/// @function degrees_to_radians
 function degrees_to_radians(degrees)
 {
     let pi = Math.PI;
     return degrees * (pi/180);
 }
 
-/// @function Calculates the distance between two points on the earth's surface.
+/// @function haversine_distance
+/// Calculates the distance between two points on the earth's surface.
 function haversine_distance(loc1_lat, loc1_lon, loc1_alt, loc2_lat, loc2_lon, loc2_alt)
 {
     // Returns the Haversine distance between two points on the Earth's surface.
@@ -50,7 +52,8 @@ function haversine_distance(loc1_lat, loc1_lon, loc1_alt, loc2_lat, loc2_lon, lo
     return rad * R;
 }
 
-/// @function Calculates the distance between two points on the earth's surface, ignores altitude.
+/// @function haversine_distance_ignore_altitude
+/// Calculates the distance between two points on the earth's surface, ignores altitude.
 function haversine_distance_ignore_altitude(loc1_lat, loc1_lon, loc2_lat, loc2_lon)
 {
     // Returns the Haversine distance between two points on the Earth's surface."""
@@ -71,7 +74,8 @@ function haversine_distance_ignore_altitude(loc1_lat, loc1_lon, loc2_lat, loc2_l
     return rad * R;
 }
 
-/// @function Distance calculation for a coordinate array that was built for use with the Google Maps API.
+/// @function total_distance_google
+/// Distance calculation for a coordinate array that was built for use with the Google Maps API.
 function total_distance_google(coordinates)
 {
     let last_coordinate = null;
@@ -89,7 +93,8 @@ function total_distance_google(coordinates)
     return total_distance_meters;
 }
 
-/// @function Distance calculation for a coordinate array that was built for use with the Open Street Map API.
+/// @function total_distance_osm
+/// Distance calculation for a coordinate array that was built for use with the Open Street Map API.
 function total_distance_osm(coordinates)
 {
     let last_coordinate = null;
@@ -107,6 +112,7 @@ function total_distance_osm(coordinates)
     return total_distance_meters;
 }
 
+/// @functionconvert_distance_to_unit_system_str
 /// Converts meters to whatever the preferred units are and formats it as a string.
 function convert_distance_to_unit_system_str(unit_system, meters_traveled)
 {
@@ -119,6 +125,7 @@ function convert_distance_to_unit_system_str(unit_system, meters_traveled)
     return miles.toFixed(2).toString() + " miles";
 }
 
+/// @function convert_distance_and_duration_to_pace_str
 function convert_distance_and_duration_to_pace_str(unit_system, meters_traveled, duration_ms)
 {
     if (meters_traveled == 0)
@@ -148,6 +155,7 @@ function convert_distance_and_duration_to_pace_str(unit_system, meters_traveled,
     return mins.toString() + ":" + secs_str + units;
 }
 
+/// @function convert_distance_and_duration_to_speed_str
 function convert_distance_and_duration_to_speed_str(unit_system, meters_traveled, duration_ms)
 {
     if (meters_traveled == 0)
@@ -173,6 +181,7 @@ function convert_distance_and_duration_to_speed_str(unit_system, meters_traveled
     return speed.toFixed(2).toString() + units;
 }
 
+/// @function convert_speed_graph_to_display_units
 function convert_speed_graph_to_display_units(unit_system, speed_list)
 {
     let new_speed_list = [];
@@ -194,6 +203,7 @@ function convert_speed_graph_to_display_units(unit_system, speed_list)
     return new_speed_list;
 }
 
+/// @function convert_speed_graph_to_pace_graph
 function convert_speed_graph_to_pace_graph(unit_system, speed_list)
 {
     let pace_list = [];
@@ -220,11 +230,10 @@ function convert_speed_graph_to_pace_graph(unit_system, speed_list)
     return pace_list;
 }
 
+/// @function compute_grade_adjusted_pace
 function compute_grade_adjusted_pace(elevation_list, pace_list)
 {
     let gap_list = [];
-    let old_y = nil;
-    let old_x = nil;
 
     for (let data_point in pace_list)
     {

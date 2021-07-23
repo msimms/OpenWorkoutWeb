@@ -22,6 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+/// @function set_background_style
 function set_background_style(root_url, background_id)
 {
     let section = document.getElementById(background_id);
@@ -30,24 +31,28 @@ function set_background_style(root_url, background_id)
     section.style.backgroundImage = img_str;
 }
 
+/// @function unix_time_to_local_string
 function unix_time_to_local_string(unix_time)
 {
     let date = new Date(unix_time * 1000);
     return date.toLocaleString();
 }
 
+/// @function unix_time_to_local_date_string
 function unix_time_to_local_date_string(unix_time)
 {
     let date = new Date(unix_time * 1000);
     return date.toLocaleDateString();
 }
 
+/// @function unix_time_to_iso_time
 function unix_time_to_iso_time(unix_time)
 {
     let date = new Date(unix_time * 1000);
     return date.toISOString();
 }
 
+/// @function serialize_to_url_params
 function serialize_to_url_params(dict)
 {
     let str = [];
@@ -138,6 +143,7 @@ function send_post_request_async(url, params, callback)
     xml_http.send(json_data);
 }
 
+/// @function create_local_file
 function create_local_file(data, filename, type)
 {
     let file = new Blob([data], {type: type});
@@ -161,6 +167,7 @@ function create_local_file(data, filename, type)
     }
 }
 
+/// @function add_number_entry_node
 function add_number_entry_node(div, name)
 {
     let label = document.createTextNode(name + ": ");
@@ -177,6 +184,7 @@ function add_number_entry_node(div, name)
     div.appendChild(br);
 }
 
+/// @function add_text_entry_node
 function add_text_entry_node(div, name)
 {
     let label = document.createTextNode(name + ": ");

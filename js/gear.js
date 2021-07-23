@@ -22,6 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+/// @function create_gear
 function create_gear(root_url, gear_type)
 {
     let the_url = root_url + "/api/1.0/create_gear";
@@ -55,6 +56,7 @@ function create_gear(root_url, gear_type)
     }
 }
 
+/// @function update_gear
 function update_gear(root_url, gear_type)
 {
     let the_url = root_url + "/api/1.0/update_gear";
@@ -88,6 +90,7 @@ function update_gear(root_url, gear_type)
     }
 }
 
+/// @function delete_gear
 function delete_gear(root_url, gear_id)
 {
     if (confirm('Are you sure you want to do this?'))
@@ -109,6 +112,7 @@ function delete_gear(root_url, gear_id)
     }
 }
 
+/// @function retire_gear
 function retire_gear(root_url, gear_id)
 {
     if (confirm('Are you sure you want to do this?'))
@@ -130,6 +134,7 @@ function retire_gear(root_url, gear_id)
     }
 }
 
+/// @function set_gear_default
 function set_gear_default(root_url, activity_type, gear_name)
 {
     let the_url = root_url + "/api/1.0/update_gear_defaults";
