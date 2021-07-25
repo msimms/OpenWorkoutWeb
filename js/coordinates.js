@@ -231,19 +231,17 @@ function convert_speed_graph_to_pace_graph(unit_system, speed_list)
 }
 
 /// @function compute_grade_adjusted_pace
-function compute_grade_adjusted_pace(elevation_list, pace_list)
+function compute_grade_adjusted_pace(gradient_list, time_pace_data)
 {
-    let gap_list = [];
-
-    for (let data_point in pace_list)
-    {
-        let date = pace_list[data_point].date;
-        let pace = pace_list[data_point].value;
-        let gradient = 1.0;
+    let gap_list = time_pace_data.map(function(x, i) {
+        let gradient = gradient_list[i];
         let cost = (155.4 * (Math.pow(gradient, 5))) - (30.4 * Math.pow(gradient, 4)) - (43.4 * Math.pow(gradient, 3)) - (46.3 * (gradient * gradient)) - (19.5 * gradient) + 3.6;
-        let value = pace + (cost - 3.6) / 3.6;
+        let value = x.value + (cost - 3.6) / 3.6;
 
-        gap_list.push({date, value});
-    }
+        if (value < 0.0)
+            value = 0.0;
+
+        return {"date": new Date(x.date), "value": value};
+    });
     return gap_list;
 }

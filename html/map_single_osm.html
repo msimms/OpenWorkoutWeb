@@ -77,6 +77,7 @@ ${nav}
     let last_lon = ${lastLon};
 
     let elevation_graph = [];
+    let gradient_curve = [];
 
     /// @function append_to_summary_list
     function append_to_summary_list(key, value)
@@ -96,11 +97,40 @@ ${nav}
         if (obj_list.length == 0)
             return;
 
+        let last_lat = 0.0;
+        let last_lon = 0.0;
+        let prev_alt = 0.0;
+        let prev_gradient = 0.0;
         let coordinates = feature.getGeometry().getCoordinates();
+
         for (let i = 0; i < obj_list.length; ++i)
         {
-            coordinates.push(new OpenLayers.LonLat(obj_list[i].latitude, obj_list[i].longitude));
+            let latitude = obj_list[i].latitude;
+            let longitude = obj_list[i].longitude;
+            let altitude = obj_list[i].altitude;
+
+            coordinates.push(new OpenLayers.LonLat(latitude, longitude));
             elevation_graph.push(obj_list[i].altitude);
+
+            if (i > 0)
+            {
+                let meters_traveled = haversine_distance(latitude, longitude, altitude, last_lat, last_lon, prev_alt);
+
+                if (meters_traveled < 0.01)
+                {
+                    gradient_curve.push(prev_gradient);
+                }
+                else
+                {
+                    let gradient = (altitude - prev_alt) / meters_traveled;
+                    gradient_curve.push(gradient);
+                    prev_gradient = gradient;
+                }
+            }
+
+            last_lat = latitude;
+            last_lon = longitude;
+            prev_alt = altitude;
         }
 
         last_lat = obj_list[obj_list.length - 1].latitude;
@@ -324,9 +354,11 @@ ${splits}
         {
             let speed_data = convert_speed_graph_to_display_units(unit_system, data);
             let pace_data = convert_speed_graph_to_pace_graph(unit_system, data);
+            let gap_data = compute_grade_adjusted_pace(gradient_curve, pace_data);
 
             draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, get_graph_color(key));
             draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, get_graph_color(key));
+            draw_graph(loc_start_time_ms, loc_end_time_ms, gap_data, "Grade Adjusted Pace", pace_units, get_graph_color(key));
         }
         else
         {
