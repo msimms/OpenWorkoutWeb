@@ -182,7 +182,7 @@ class GpxMerge(ActivityMerge.ActivityMerge):
             f.write(writer.buffer())
             f.close()
         
-    def merge_gpx_files(self, file_name1, file_name2, outfile_name):
+    def merge_activities(self, file_name1, file_name2, outfile_name):
         """Main entry point for this class."""
 
         # Sanity check.
@@ -219,7 +219,7 @@ def main():
         sys.exit(1)
 
     merge_tool = GpxMerge()
-    merge_tool.merge_gpx_files(args.file1, args.file2, args.outfile)
+    merge_tool.merge_activities(args.file1, args.file2, args.outfile)
 
 if __name__ == "__main__":
     main()

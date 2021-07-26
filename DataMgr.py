@@ -1335,7 +1335,7 @@ class DataMgr(Importer.ActivityWriter):
             g_api_key_rate_lock.release()
         return result
 
-    def merge_gpx_files(self, user_id, uploaded_file1_data, uploaded_file2_data):
+    def merge_activities(self, user_id, uploaded_file1_data, uploaded_file2_data):
         if user_id is None:
             raise Exception("Bad parameter.")
         if uploaded_file1_data is None:

@@ -1724,8 +1724,8 @@ class Api(object):
         result = self.data_mgr.delete_api_key(self.user_id, api_key)
         return result, api_key
 
-    def handle_merge_gpx_files(self, values):
-        """Takes two GPX files and attempts to merge them."""
+    def handle_merge_activities(self, values):
+        """Takes two files and attempts to merge them."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.UPLOADED_FILE1_DATA_KEY not in values:
@@ -1744,7 +1744,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException('Empty file data.')
 
         # Parse the file and store it's contents in the database.
-        merged_data = self.data_mgr.merge_gpx_files(self.user_id, uploaded_file1_data, uploaded_file2_data)
+        merged_data = self.data_mgr.merge_activities(self.user_id, uploaded_file1_data, uploaded_file2_data)
         return True, merged_data
 
     def handle_list_planned_workouts(self, values):
@@ -2329,8 +2329,8 @@ class Api(object):
             return self.handle_generate_api_key(values)
         elif request == 'delete_api_key':
             return self.handle_delete_api_key(values)
-        elif request == 'merge_gpx_files':
-            return self.handle_merge_gpx_files(values)
+        elif request == 'merge_activities':
+            return self.handle_merge_activities(values)
         return False, ""
 
     def handle_api_1_0_request(self, verb, request, values):
