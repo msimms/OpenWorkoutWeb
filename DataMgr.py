@@ -37,6 +37,7 @@ import HeartRateCalculator
 import Importer
 import Keys
 import MapSearch
+import MergeTool
 import Summarizer
 import TrainingPaceCalculator
 import VO2MaxCalculator
@@ -1343,7 +1344,7 @@ class DataMgr(Importer.ActivityWriter):
         if uploaded_file2_data is None:
             raise Exception("Bad parameter.")
 
-        merge_tool = GpxMerge.GpxMerge()
+        merge_tool = MergeTool.MergeTool()
 
     def get_location_description(self, activity_id):
         """Returns the political location that corresponds to an activity."""

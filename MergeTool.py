@@ -33,7 +33,7 @@ import sys
 import ActivityMerge
 import GpxWriter
 
-class GpxMerge(ActivityMerge.ActivityMerge):
+class MergeTool(ActivityMerge.ActivityMerge):
     """Class for merging two GPX files."""
 
     # These will keep track of where we are in each file.
@@ -218,7 +218,7 @@ def main():
         parser.error(e)
         sys.exit(1)
 
-    merge_tool = GpxMerge()
+    merge_tool = MergeTool()
     merge_tool.merge_activities(args.file1, args.file2, args.outfile)
 
 if __name__ == "__main__":
