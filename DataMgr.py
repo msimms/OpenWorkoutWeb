@@ -1092,7 +1092,7 @@ class DataMgr(Importer.ActivityWriter):
         for plan in pace_plans:
 
             # Does the plan already exist? If so, just update it, if necessary.
-            if plan[Keys.PACE_PLAN_ID_KEY] == planId:
+            if plan[Keys.PACE_PLAN_ID_KEY] == plan_id:
                 if Keys.PACE_PLAN_LAST_UPDATED_KEY in plan and int(plan[Keys.PACE_PLAN_LAST_UPDATED_KEY]) < int(last_updated_time):
                     return self.database.update_pace_plan(user_id, plan_id, plan_name, target_pace, target_distance, display_units_pace, display_units_distance, splits, last_updated_time)
         return self.database.create_pace_plan(user_id, plan_id, plan_name, target_pace, target_distance, display_units_pace, display_units_distance, splits, last_updated_time)
@@ -1113,7 +1113,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if plan_id is None:
             raise Exception("Bad parameter.")
-        if name is None:
+        if plan_name is None:
             raise Exception("Bad parameter.")
         if target_pace is None:
             raise Exception("Bad parameter.")
