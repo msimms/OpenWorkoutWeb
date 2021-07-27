@@ -313,7 +313,7 @@ class UserMgr(object):
         # Only consider heart rate values from the last year.
         ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
         one_year_ago = int(time.time()) - ONE_YEAR
-        recent_hrs = [v for k,v in stored_max_hrs.items() if int(k) >= ONE_YEAR]
+        recent_hrs = [v for k,v in stored_max_hrs.items() if int(k) >= one_year_ago]
         return max(recent_hrs)
 
     def estimate_ftp(self, user_id):
@@ -332,7 +332,7 @@ class UserMgr(object):
         # Only consider values from the last year.
         ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
         one_year_ago = int(time.time()) - ONE_YEAR
-        recent_bests = [v for k,v in stored_20_min_power_bests.items() if int(k) >= ONE_YEAR]
+        recent_bests = [v for k,v in stored_20_min_power_bests.items() if int(k) >= one_year_ago]
         calc = FtpCalculator.FtpCalculator()
         return calc.estimate_ftp_from_20_min_power(max(recent_bests))
 
