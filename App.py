@@ -554,7 +554,10 @@ class App(object):
         description_str = self.render_description_for_page(activity)
         name = App.render_activity_name(activity)
         activity_type = App.render_activity_type(activity)
-        ftp = self.user_mgr.estimate_ftp(activity_user_id)
+        if activity_user_id is not None:
+            ftp = self.user_mgr.estimate_ftp(activity_user_id)
+        else:
+            ftp = 0.0
         is_foot_based_activity = activity_type in Keys.FOOT_BASED_ACTIVITIES
         is_foot_based_activity_str = "false"
         if is_foot_based_activity:
