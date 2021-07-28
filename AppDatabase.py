@@ -967,9 +967,11 @@ class MongoDatabase(Database.Database):
             # Things we don't need.
             exclude_keys = self.list_excluded_activity_keys_for_summarization()
 
+            # Build part of the exptression while sanity checking the input.
             device_list = []
             for device_str in devices:
-                device_list.append( { Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str} } )
+                if InputChecker.is_uuid(device_str):
+                    device_list.append( { Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str} } )
 
             if start_time is None or end_time is None:
                 return list(self.activities_collection.find({ "$or": device_list }, exclude_keys))
