@@ -115,7 +115,7 @@ class MongoDatabase(Database.Database):
         exclude_keys[Keys.PREFERRED_UNITS_KEY] = False
         return exclude_keys
 
-    def list_excluded_activity_keys_for_summarization(self):
+    def list_excluded_activity_keys_activity_lists(self):
         """This is the list of stuff we don't need to return when we're summarizing activities."""
         exclude_keys = {}
         exclude_keys[Keys.APP_LOCATIONS_KEY] = False
@@ -124,6 +124,7 @@ class MongoDatabase(Database.Database):
         exclude_keys[Keys.APP_HEART_RATE_KEY] = False
         exclude_keys[Keys.APP_CADENCE_KEY] = False
         exclude_keys[Keys.APP_POWER_KEY] = False
+        exclude_keys[Keys.ACTIVITY_SUMMARY_KEY] = False
         return exclude_keys
 
     #
@@ -933,7 +934,7 @@ class MongoDatabase(Database.Database):
             if return_all_data:
                 exclude_keys = {}
             else:
-                exclude_keys = self.list_excluded_activity_keys_for_summarization()
+                exclude_keys = self.list_excluded_activity_keys_activity_lists()
 
             if start_time is None or end_time is None:
                 return list(self.activities_collection.find({ "$and": [ { Keys.ACTIVITY_USER_ID_KEY: { '$eq': user_id } } ]}, exclude_keys))
@@ -966,7 +967,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Things we don't need.
-            exclude_keys = self.list_excluded_activity_keys_for_summarization()
+            exclude_keys = self.list_excluded_activity_keys_activity_lists()
 
             # Build part of the exptression while sanity checking the input.
             device_list = []
@@ -1990,7 +1991,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Things we don't need.
-            exclude_keys = self.list_excluded_activity_keys_for_summarization()
+            exclude_keys = self.list_excluded_activity_keys_activity_lists()
 
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id }, exclude_keys)
