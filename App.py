@@ -325,7 +325,7 @@ class App(object):
             value = float(list(item.values())[0])
         return time, value
 
-    def render_page_for_unmapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_username, belongs_to_current_user, is_live):
+    def render_page_for_unmapped_activity(self, user_realname, activity_id, activity, activity_user_id, logged_in_username, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific un-mapped activity."""
 
         # Is the user logged in?
@@ -416,7 +416,7 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.unmapped_activity_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, description=description_str, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, description=description_str, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
 
     def render_description_for_page(self, activity):
         """Helper function for processing the activity description and formatting it for display."""
@@ -527,7 +527,7 @@ class App(object):
         my_template = Template(filename=self.error_activity_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.", activityId=activity_id, delete=delete_str)
 
-    def render_page_for_mapped_activity(self, email, user_realname, activity_id, activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
+    def render_page_for_mapped_activity(self, user_realname, activity_id, activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the map corresonding to a specific activity."""
 
         # Is the user logged in?
@@ -668,36 +668,36 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if is_in_watopia and os.path.isfile(self.zwift_watopia_map_file) > 0:
             my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_WATOPIA_MAP_FILE_NAME)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_WATOPIA_MAP_FILE_NAME)
         elif is_in_crit_city and os.path.isfile(self.zwift_crit_city_map_file) > 0:
             my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_CRIT_CITY_MAP_FILE_NAME)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_CRIT_CITY_MAP_FILE_NAME)
         elif is_in_makuri_islands and os.path.isfile(self.zwift_makuri_islands_map_file) > 0:
             my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME)
         elif self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, lastLat=last_lat, lastLon=last_lon, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, lastLat=last_lat, lastLon=last_lon, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, email=email, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, lastLat=last_lat, lastLon=last_lon, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, lastLat=last_lat, lastLon=last_lon, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
 
-    def render_page_for_activity(self, activity, email, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
+    def render_page_for_activity(self, activity, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
 
         try:
         
             # Does the activity contain any location data?
             if Keys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[Keys.ACTIVITY_LOCATIONS_KEY]) > 0:
-                return self.render_page_for_mapped_activity(email, user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
+                return self.render_page_for_mapped_activity(user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
 
             # Does the activity contain accelerometer data, as with lifting activities recorded from the companion app?
             elif Keys.APP_ACCELEROMETER_KEY in activity or Keys.APP_SETS_KEY in activity:
-                return self.render_page_for_unmapped_activity(email, user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
+                return self.render_page_for_unmapped_activity(user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
 
             # Does the activity contain any sensor data at all, if so then we can still render something?
             elif any(x in activity for x in Keys.SENSOR_KEYS):
-                return self.render_page_for_unmapped_activity(email, user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
+                return self.render_page_for_unmapped_activity(user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
 
             # No idea what to do with this.
             else:
@@ -784,7 +784,7 @@ class App(object):
             return self.render_error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, activity_user[Keys.USERNAME_KEY], activity_user[Keys.REALNAME_KEY], activity_user_id, logged_in_user_id, belongs_to_current_user, True)
+        return self.render_page_for_activity(activity, activity_user[Keys.REALNAME_KEY], activity_user_id, logged_in_user_id, belongs_to_current_user, True)
 
     @Perf.statistics
     def live_device(self, device_str):
@@ -840,8 +840,6 @@ class App(object):
         # Determine who owns the device, and hence the activity.
         activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
         belongs_to_current_user = str(activity_user_id) == str(logged_in_user_id)
-        if activity_username is None:
-            activity_username = ""
         if activity_user_realname is None:
             activity_user_realname = ""
 
@@ -850,7 +848,7 @@ class App(object):
             return self.render_error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, activity_username, activity_user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, False)
+        return self.render_page_for_activity(activity, activity_user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, False)
 
     @Perf.statistics
     def edit_activity(self, activity_id):
@@ -956,7 +954,7 @@ class App(object):
             return self.render_error("The requested activity is not public.")
 
         # Render from template.
-        return self.render_page_for_activity(activity, device_user[Keys.USERNAME_KEY], device_user[Keys.REALNAME_KEY], activity_user_id, logged_in_user_id, belongs_to_current_user, False)
+        return self.render_page_for_activity(activity, device_user[Keys.REALNAME_KEY], activity_user_id, logged_in_user_id, belongs_to_current_user, False)
 
     @Perf.statistics
     def my_activities(self):
