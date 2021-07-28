@@ -58,16 +58,18 @@ class Api(object):
 
     def activity_belongs_to_logged_in_user(self, activity):
         """Returns True if the specified activity belongs to the logged in user."""
+        if self.user_id is None:
+            return False
         activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
         belongs_to_current_user = str(activity_user_id) == str(self.user_id)
         return belongs_to_current_user
 
     def activity_can_be_viewed(self, activity):
         """Determine if the requesting user can view the activity."""
+        if self.user_id is None:
+            return self.data_mgr.is_activity_public(activity)
         activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
-        belongs_to_current_user = False
-        if self.user_id is not None:
-            belongs_to_current_user = str(activity_user_id) == str(self.user_id)
+        belongs_to_current_user = belongs_to_current_user = str(activity_user_id) == str(self.user_id)
         return self.data_mgr.is_activity_public(activity) or belongs_to_current_user
 
     def parse_json_loc_obj(self, json_obj, sensor_readings_dict, metadata_list_dict):
