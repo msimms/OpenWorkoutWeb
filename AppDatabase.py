@@ -122,6 +122,7 @@ class MongoDatabase(Database.Database):
         exclude_keys[Keys.APP_ACCELEROMETER_KEY] = False
         exclude_keys[Keys.APP_CURRENT_SPEED_KEY] = False
         exclude_keys[Keys.APP_HEART_RATE_KEY] = False
+        exclude_keys[Keys.APP_CADENCE_KEY] = False
         exclude_keys[Keys.APP_POWER_KEY] = False
         return exclude_keys
 
