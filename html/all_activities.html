@@ -78,7 +78,7 @@
     {
         let promises = [];
 
-        first_day_promise = get_preferred_first_day_of_week();
+        let first_day_promise = get_preferred_first_day_of_week();
         promises.push(first_day_promise);
 
         Promise.allSettled(promises).

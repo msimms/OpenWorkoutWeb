@@ -40,40 +40,71 @@ ${nav}
         // Sends the chosen photos to the cloud.
         function upload_file(file_obj)
         {
-            let reader = new FileReader();
-
-            reader.onerror = function(event)
+            return new Promise(function(resolve, reject)
             {
-                reader.abort();
-            };
-            reader.onload = function(e)
-            {
-                let the_url = "${root_url}/api/1.0/upload_activity_photo";
-                let dict = [];
-                let result_text = {};
-                let encoded_data = btoa(reader.result);
+                let reader = new FileReader();
 
-                dict.push({["uploaded_file_data"] : encoded_data});
-                dict.push({["activity_id"] : "${activity_id}"});
-
-                if (!send_post_request(the_url, dict, result_text))
+                reader.onerror = function(e)
                 {
-                    alert(result_text.value);
+                    switch(e.target.error.code) 
+                    {
+                        case e.target.error.NOT_FOUND_ERR:
+                            alert("File Not Found!");
+                            break;
+                        case e.target.error.NOT_READABLE_ERR:
+                            alert("File is not readable");
+                            break;
+                        case e.target.error.ABORT_ERR:
+                            break;
+                        default:
+                            alert("An error occurred reading this file.");
+                    };
+                    reader.abort();
+                    reject();
+                };
+                reader.onabort = function(e) 
+                {
+                    alert('File read cancelled');
+                    reject();
+                };
+                reader.onload = function(e)
+                {
+                    let the_url = "${root_url}/api/1.0/upload_activity_photo";
+                    let dict = [];
+                    let result_text = {};
+                    let encoded_data = btoa(reader.result);
+
+                    dict.push({["uploaded_file_data"] : encoded_data});
+                    dict.push({["activity_id"] : "${activity_id}"});
+
+                    if (send_post_request(the_url, dict, result_text))
+                    {
+                        resolve();
+                    }
+                    else
+                    {
+                        alert(result_text.value);
+                        reject();
+                    }
                 }
-            }
-            reader.readAsBinaryString(file_obj);
+                reader.readAsBinaryString(file_obj);
+            });
         }
 
         /// @function upload_selected_files
         function upload_selected_files()
         {
+            let promises = [];
+
             if (selected_photo_list.length > 0)
             {
                 for (let i = 0; i < selected_photo_list.length; i++)
                 {
-                    upload_file(selected_photo_list[i]);
+                    let promise = upload_file(selected_photo_list[i]);
+                    promises.push(promise);
                 }
-                window.location.replace("${root_url}/activity/${activity_id}");
+                Promise.allSettled(promises).
+                    then((results) => window.location.replace("${root_url}/activity/${activity_id}"));
             }
             else
             {
