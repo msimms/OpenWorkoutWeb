@@ -93,18 +93,24 @@ class Importer(object):
             return Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
 
         lower_activity_type = activity_type.lower()
-        lower_sub_activity_type = sub_activity_type.lower()
         file_name_parts = file_name.lower().split(' ')
 
+        # Running
         if lower_activity_type == Keys.TYPE_RUNNING_KEY.lower():
             # Look for words that indicate that the activity may be from a virtual running service, such as Zwift.
             if 'zwift' in file_name_parts:
                 return Keys.TYPE_VIRTUAL_RUNNING_KEY
             return Keys.TYPE_RUNNING_KEY
+
+        # Hiking
         elif lower_activity_type == Keys.TYPE_HIKING_KEY.lower():
             return Keys.TYPE_HIKING_KEY
+
+        # Walking
         elif lower_activity_type == Keys.TYPE_WALKING_KEY.lower():
             return Keys.TYPE_WALKING_KEY
+
+        # Virtual Cycling
         elif lower_activity_type == Keys.TYPE_CYCLING_KEY.lower() or lower_activity_type == 'biking':
             # Look for words that indicate that the activity may be from a virtual cycling service, such as Zwift.
             if 'zwift' in file_name_parts:
@@ -112,14 +118,22 @@ class Importer(object):
             if 'rgt' in file_name_parts and 'cyclng' in file_name_parts:
                 return Keys.TYPE_VIRTUAL_CYCLING_KEY
             return Keys.TYPE_CYCLING_KEY
+
+        # Swimming
         elif lower_activity_type == Keys.TYPE_OPEN_WATER_SWIMMING_KEY.lower():
             return Keys.TYPE_OPEN_WATER_SWIMMING_KEY
         elif lower_activity_type == Keys.TYPE_POOL_SWIMMING_KEY.lower():
             return Keys.TYPE_POOL_SWIMMING_KEY
-        elif lower_activity_type == 'swimming' and sub_activity_type is not None:
-            if lower_sub_activity_type == 'lap_swimming':
+        elif lower_activity_type == 'swimming':
+            if sub_activity_type is not None and sub_activity_type.lower() == 'lap_swimming':
                 return Keys.TYPE_POOL_SWIMMING_KEY
             return Keys.TYPE_OPEN_WATER_SWIMMING_KEY
+
+        # Multisport
+        elif lower_activity_type == Keys.TYPE_TRIATHLON_KEY:
+            return Keys.TYPE_TRIATHLON_KEY
+        elif lower_activity_type == Keys.TYPE_DUATHLON_KEY:
+            return Keys.TYPE_DUATHLON_KEY
 
         # Didn't match any known activity types, so take a guess from the name.
         if 'walk' in file_name_parts or 'walking' in file_name_parts:
