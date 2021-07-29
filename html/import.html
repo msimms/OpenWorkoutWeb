@@ -303,33 +303,57 @@ ${nav}
         // Sends a file to the cloud.
         function upload_file(file_obj)
         {
-            let reader = new FileReader();
-
-            reader.onerror = function(event)
+            return new Promise(function(resolve, reject)
             {
-                reader.abort();
-            };
-            reader.onload = function(e)
-            {
-                let the_url = "${root_url}/api/1.0/upload_activity_file";
-                let dict = [];
-                let result_text = {};
-                let encoded_data = btoa(reader.result);
+                let reader = new FileReader();
 
-                dict.push({["uploaded_file_name"] : file_obj.name});
-                dict.push({["uploaded_file_data"] : encoded_data});
+                reader.onerror = function(e)
+                {
+                    switch(e.target.error.code) 
+                    {
+                        case e.target.error.NOT_FOUND_ERR:
+                            alert("File Not Found!");
+                            break;
+                        case e.target.error.NOT_READABLE_ERR:
+                            alert("File is not readable");
+                            break;
+                        case e.target.error.ABORT_ERR:
+                            break;
+                        default:
+                            alert("An error occurred reading this file.");
+                    };
+                    reader.abort();
+                    reject();
+                };
+                reader.onabort = function(e) 
+                {
+                    alert('File read cancelled');
+                    reject();
+                };
+                reader.onload = function(e)
+                {
+                    let the_url = "${root_url}/api/1.0/upload_activity_file";
+                    let dict = [];
+                    let result_text = {};
+                    let encoded_data = btoa(reader.result);
 
-                if (send_post_request(the_url, dict, result_text))
-                {
-                    update_file_status(file_obj.name, "Uploaded (Queued For Processing)", null);
-                    monitor_file_status(file_obj.name, result_text.value);
+                    dict.push({["uploaded_file_name"] : file_obj.name});
+                    dict.push({["uploaded_file_data"] : encoded_data});
+
+                    if (send_post_request(the_url, dict, result_text))
+                    {
+                        update_file_status(file_obj.name, "Uploaded (Queued For Processing)", null);
+                        monitor_file_status(file_obj.name, result_text.value);
+                        resolve();
+                    }
+                    else
+                    {
+                        alert(result_text.value);
+                        reject();
+                    }
                 }
-                else
-                {
-                    alert(result_text.value);
-                }
-            }
-            reader.readAsBinaryString(file_obj);
+                reader.readAsBinaryString(file_obj);
+            });
         }
 
         /// @function upload_selected_files
@@ -337,6 +361,8 @@ ${nav}
         {
             if (file_list.length > 0)
             {
+                let promises = [];
+
                 for (let i = 0; i < file_list.length; i++)
                 {
                     let file_obj = file_list[i];
@@ -350,9 +376,15 @@ ${nav}
                     }
                     else
                     {
-                        upload_file(file_obj);
+                        let promise = upload_file(file_obj);
+                        promises.push(promise);
                     }
                 }
+
+                document.body.style.cursor = "wait";
+
+                Promise.allSettled(promises).
+                    then((results) => { document.body.style.cursor = "default"; });
             }
             else
             {

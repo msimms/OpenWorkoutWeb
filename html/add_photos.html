@@ -94,17 +94,22 @@ ${nav}
         /// @function upload_selected_files
         function upload_selected_files()
         {
-            let promises = [];
-
             if (selected_photo_list.length > 0)
             {
+                let promises = [];
+
+                document.body.style.cursor = "wait";
+
                 for (let i = 0; i < selected_photo_list.length; i++)
                 {
                     let promise = upload_file(selected_photo_list[i]);
                     promises.push(promise);
                 }
                 Promise.allSettled(promises).
-                    then((results) => window.location.replace("${root_url}/activity/${activity_id}"));
+                    then((results) => {
+                        document.body.style.cursor = "default";
+                        window.location.replace("${root_url}/activity/${activity_id}")
+                    });
             }
             else
             {
