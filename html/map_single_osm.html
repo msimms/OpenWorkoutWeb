@@ -406,7 +406,13 @@ ${splits}
             {
                 let power_zones = compute_power_zone_distribution(${ftp}, new_data);
 
-                draw_bar_chart(power_zones, "Power Zone Distribution", "ForestGreen");
+                if (!${is_foot_based_activity})
+                {
+                    if (power_zones.length > 0 && Math.max.apply(Math, power_zones) > 0)
+                    {
+                        draw_bar_chart(power_zones, "Power Zone Distribution", "ForestGreen");
+                    }
+                }
                 draw_graph(start_time_ms, end_time_ms, new_data, key, "Watts", get_graph_color(key));
             }
             else if (key == "Temperature")
