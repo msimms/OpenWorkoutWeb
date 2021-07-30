@@ -233,15 +233,20 @@ function convert_speed_graph_to_pace_graph(unit_system, speed_list)
 /// @function compute_grade_adjusted_pace
 function compute_grade_adjusted_pace(gradient_list, time_pace_data)
 {
+    let num_gradients = graident_list.length;
     let gap_list = time_pace_data.map(function(x, i) {
-        let gradient = gradient_list[i];
-        let cost = (155.4 * (Math.pow(gradient, 5))) - (30.4 * Math.pow(gradient, 4)) - (43.4 * Math.pow(gradient, 3)) - (46.3 * (gradient * gradient)) - (19.5 * gradient) + 3.6;
-        let value = x.value + (cost - 3.6) / 3.6;
+        if (i < num_gradients)
+        {
+            let gradient = gradient_list[i];
+            let cost = (155.4 * (Math.pow(gradient, 5))) - (30.4 * Math.pow(gradient, 4)) - (43.4 * Math.pow(gradient, 3)) - (46.3 * (gradient * gradient)) - (19.5 * gradient) + 3.6;
+            let value = x.value + (cost - 3.6) / 3.6;
 
-        if (value < 0.0)
-            value = 0.0;
+            if (value < 0.0)
+                value = 0.0;
 
-        return {"date": new Date(x.date), "value": value};
+            return {"date": new Date(x.date), "value": value};
+        }
+        return {"date": new Date(x.date), "value": 0.0};        
     });
     return gap_list;
 }
