@@ -233,7 +233,7 @@ function convert_speed_graph_to_pace_graph(unit_system, speed_list)
 /// @function compute_grade_adjusted_pace
 function compute_grade_adjusted_pace(gradient_list, time_pace_data)
 {
-    let num_gradients = graident_list.length;
+    let num_gradients = gradient_list.length;
     let gap_list = time_pace_data.map(function(x, i) {
         if (i < num_gradients)
         {
