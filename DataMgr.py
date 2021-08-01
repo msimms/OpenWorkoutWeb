@@ -1580,6 +1580,7 @@ class DataMgr(Importer.ActivityWriter):
         all_activity_types.extend(Keys.CYCLING_ACTIVITIES)
         all_activity_types.extend(Keys.SWIMMING_ACTIVITIES)
         all_activity_types.extend(Keys.STRENGTH_ACTIVITIES)
+        all_activity_types.extend(Keys.MULTISPORT_ACTIVITIES)
         all_activity_types.append(Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY)
         return all_activity_types
 
