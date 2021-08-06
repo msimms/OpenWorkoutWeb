@@ -1119,7 +1119,7 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Clear the session.
-        self.user_mgr.clear_session()
+        self.user_mgr.clear_current_session()
 
         # Send the user back to the login screen.
         raise RedirectException(LOGIN_URL)

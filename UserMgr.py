@@ -58,9 +58,9 @@ class UserMgr(object):
         """Starts a new session."""
         return self.session_mgr.create_new_session(username)
 
-    def clear_session(self):
+    def clear_current_session(self):
         """Ends the current session."""
-        self.session_mgr.clear_session()
+        self.session_mgr.clear_current_session()
 
     def authenticate_user(self, email, password):
         """Validates a user against the credentials in the database."""

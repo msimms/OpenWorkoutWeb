@@ -25,6 +25,7 @@
 
 import cherrypy
 import flask
+import uuid
 import Keys
 import SessionException
 
@@ -46,12 +47,49 @@ class SessionMgr(object):
         """Starts a new session."""
         pass
 
-    def clear_session(self):
+    def clear_current_session(self):
+        """Ends the current session."""
+        pass
+
+class CustomSessionMgr(SessionMgr):
+    """Custom session manager, avoids the logic provided by the framework. Goal is a high performance session manager."""
+
+    def __init__(self):
+        super(SessionMgr, self).__init__()
+        self.session_cache = {}
+
+    def load_sessions(self):
+        """Loads existing session data into the cache."""
+        pass
+
+    def flush_session_data(self):
+        """Flushes session data to secondary storage."""
+        pass
+
+    def get_logged_in_user(self):
+        """Returns the username associated with the current session."""
+        user = None
+        return user
+
+    def get_logged_in_user_from_cookie(self, session_cookie):
+        """Returns the username associated with the specified session cookie."""
+        user = None
+        if session_cookie in self.session_cache:
+            return self.session_cache[session_cookie]
+        return user
+
+    def create_new_session(self, username):
+        """Starts a new session."""
+        session_cookie = uuid.uuid4()
+        self.session_cache[session_cookie] = username
+        return session_cookie
+
+    def clear_current_session(self):
         """Ends the current session."""
         pass
 
 class CherryPySessionMgr(SessionMgr):
-    """Class for managing sessions when using the cherrypy framework. A user may have more than one session"""
+    """Class for managing sessions when using the cherrypy framework. A user may have more than one session."""
 
     def __init__(self):
         super(SessionMgr, self).__init__()
@@ -61,12 +99,12 @@ class CherryPySessionMgr(SessionMgr):
         user = cherrypy.session.get(Keys.SESSION_KEY)
         return user
 
-    def get_logged_in_user_from_cookie(self, auth_cookie):
-        """Returns the username associated with the specified authentication cookie."""
+    def get_logged_in_user_from_cookie(self, session_cookie):
+        """Returns the username associated with the specified session cookie."""
         user = None
         cache_items = cherrypy.session.cache.items()
         for session_id, session in cache_items:
-            if session_id == auth_cookie:
+            if session_id == session_cookie:
                 session_user = session[0]
                 if Keys.SESSION_KEY in session_user:
                     user = session_user[Keys.SESSION_KEY]
@@ -80,13 +118,13 @@ class CherryPySessionMgr(SessionMgr):
         new_id = cherrypy.session.id
         return new_id
 
-    def clear_session(self):
+    def clear_current_session(self):
         """Ends the current session."""
         sess = cherrypy.session
         sess[Keys.SESSION_KEY] = None
 
 class FlaskSessionMgr(SessionMgr):
-    """Class for managing sessions when using the flask framework. A user may have more than one session"""
+    """Class for managing sessions when using the flask framework. A user may have more than one session."""
 
     def __init__(self):
         super(SessionMgr, self).__init__()
@@ -97,7 +135,7 @@ class FlaskSessionMgr(SessionMgr):
             return flask.session[Keys.SESSION_KEY]
         return None
 
-    def get_logged_in_user_from_cookie(self, auth_cookie):
+    def get_logged_in_user_from_cookie(self, session_cookie):
         """Returns the username associated with the specified authentication cookie."""
         pass
 
@@ -105,7 +143,7 @@ class FlaskSessionMgr(SessionMgr):
         """Starts a new session."""
         flask.session[Keys.SESSION_KEY] = username
 
-    def clear_session(self):
+    def clear_current_session(self):
         """Ends the current session."""
         flask.session.pop(Keys.SESSION_KEY, None)
         flask.session.clear()

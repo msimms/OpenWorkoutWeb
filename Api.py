@@ -573,7 +573,7 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
 
         # End the session
-        self.user_mgr.clear_session()
+        self.user_mgr.clear_current_session()
         self.user_id = None
         return True, "Logged Out"
 
