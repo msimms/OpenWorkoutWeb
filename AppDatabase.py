@@ -1555,10 +1555,14 @@ class MongoDatabase(Database.Database):
                     self.activities_collection.save(activity)
                     return True
 
-                # The metadata is a scalar, just make sure to only update it if it has actually changed.
+                # The metadata is a scalar, just make sure to only update it if it has actually changed or was previously non-existent.
                 elif key not in activity or activity[key] != value:
                     activity[key] = value
                     self.activities_collection.save(activity)
+                    return True
+
+                # It's ok if the value isn't being updated.
+                elif activity[key] == value:
                     return True
         except:
             self.log_error(traceback.format_exc())
