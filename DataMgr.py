@@ -42,7 +42,6 @@ import Summarizer
 import TrainingPaceCalculator
 import VO2MaxCalculator
 import celery
-from celery import states
 
 SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
 ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)

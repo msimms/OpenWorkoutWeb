@@ -15,3 +15,4 @@ unidecode
 Celery
 tensorflow
 pandas
+python-dateutil

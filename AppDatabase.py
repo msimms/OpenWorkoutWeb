@@ -29,7 +29,8 @@ import sys
 import traceback
 import uuid
 from bson.objectid import ObjectId
-from bson import Binary
+if sys.version_info[0] < 3:
+    from bson import Binary
 import pymongo
 import time
 import Database
@@ -2973,7 +2974,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.UPLOADED_FILE_DATA_KEY: Binary(file_data) }
+            if sys.version_info[0] < 3:
+                post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.UPLOADED_FILE_DATA_KEY: Binary(file_data) }
+            else:
+                post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.UPLOADED_FILE_DATA_KEY: bytes(file_data) }
             self.uploads_collection.insert(post)
             return True
         except:
