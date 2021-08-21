@@ -485,14 +485,16 @@ class Api(object):
         if not self.activity_belongs_to_logged_in_user(activity):
             raise ApiException.ApiAuthenticationException("Not activity owner.")
 
-        if Keys.ACTIVITY_NAME_KEY in values:
-            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, unquote_plus(values[Keys.ACTIVITY_NAME_KEY]), False)
-        if Keys.ACTIVITY_TYPE_KEY in values:
-            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, unquote_plus(values[Keys.ACTIVITY_TYPE_KEY]), False)
-        if Keys.ACTIVITY_DESCRIPTION_KEY in values:
-            self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_DESCRIPTION_KEY, unquote_plus(values[Keys.ACTIVITY_DESCRIPTION_KEY]), False)
+        result = False
 
-        return True, ""
+        if Keys.ACTIVITY_NAME_KEY in values:
+            result = self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, unquote_plus(values[Keys.ACTIVITY_NAME_KEY]), False)
+        if Keys.ACTIVITY_TYPE_KEY in values:
+            result = self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, unquote_plus(values[Keys.ACTIVITY_TYPE_KEY]), False)
+        if Keys.ACTIVITY_DESCRIPTION_KEY in values:
+            result = self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_DESCRIPTION_KEY, unquote_plus(values[Keys.ACTIVITY_DESCRIPTION_KEY]), False)
+
+        return result, ""
 
     def handle_login(self, values):
         """Called when an API message to log in is received."""
