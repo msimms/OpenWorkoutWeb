@@ -485,16 +485,17 @@ class Api(object):
         if not self.activity_belongs_to_logged_in_user(activity):
             raise ApiException.ApiAuthenticationException("Not activity owner.")
 
-        result = False
-
         if Keys.ACTIVITY_NAME_KEY in values:
-            result = self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, unquote_plus(values[Keys.ACTIVITY_NAME_KEY]), False)
+            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, unquote_plus(values[Keys.ACTIVITY_NAME_KEY]), False):
+                raise Exception("Failed to update activity name.")
         if Keys.ACTIVITY_TYPE_KEY in values:
-            result = self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, unquote_plus(values[Keys.ACTIVITY_TYPE_KEY]), False)
+            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, unquote_plus(values[Keys.ACTIVITY_TYPE_KEY]), False):
+                raise Exception("Failed to update activity type.")
         if Keys.ACTIVITY_DESCRIPTION_KEY in values:
-            result = self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_DESCRIPTION_KEY, unquote_plus(values[Keys.ACTIVITY_DESCRIPTION_KEY]), False)
+            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_DESCRIPTION_KEY, unquote_plus(values[Keys.ACTIVITY_DESCRIPTION_KEY]), False):
+                raise Exception("Failed to update activity description.")
 
-        return result, ""
+        return True, ""
 
     def handle_login(self, values):
         """Called when an API message to log in is received."""
