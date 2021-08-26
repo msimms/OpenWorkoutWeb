@@ -55,24 +55,6 @@ def convert_mass(value, in_units, out_units):
             return value / KGS_PER_POUND
     return value
 
-def convert_to_preferred_mass_units(user_mgr, user_id, value, in_units):
-    """Unit conversion for mass values. Converts to either metric or standard, depending on the user's preferences."""
-    selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-    if selected_units == Keys.UNITS_METRIC_KEY:
-        out_units = UNITS_MASS_KG
-    else:
-        out_units = UNITS_MASS_POUNDS
-    return convert_mass(value, in_units, out_units), out_units
-
-def convert_from_preferred_mass_units(user_mgr, user_id, value):
-    """Unit conversion for mass values. Converts from either metric or standard, depending on the user's preferences, to metric."""
-    selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-    if selected_units == Keys.UNITS_METRIC_KEY:
-        in_units = UNITS_MASS_KG
-    else:
-        in_units = UNITS_MASS_POUNDS
-    return convert_mass(value, in_units, UNITS_MASS_KG), UNITS_MASS_KG
-
 def convert_distance(value, in_units, out_units):
     """Unit conversion for distance values."""
     if in_units == UNITS_DISTANCE_METERS:
@@ -124,24 +106,6 @@ def convert_to_distance_for_the_specified_unit_system(unit_system, value, in_uni
     else:
         out_units = UNITS_DISTANCE_MILES
     return convert_distance(value, in_units, out_units), out_units
-
-def convert_to_preferred_height_units(user_mgr, user_id, value, in_units):
-    """Unit conversion for height values. Converts to either metric or standard, depending on the user's preferences."""
-    selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-    if selected_units == Keys.UNITS_METRIC_KEY:
-        out_units = UNITS_DISTANCE_METERS
-    else:
-        out_units = UNITS_DISTANCE_INCHES
-    return convert_distance(value, in_units, out_units), out_units
-
-def convert_from_preferred_height_units(user_mgr, user_id, value):
-    """Unit conversion for height values. Converts from either metric or standard, depending on the user's preferences, to metric."""
-    selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
-    if selected_units == Keys.UNITS_METRIC_KEY:
-        in_units = UNITS_DISTANCE_METERS
-    else:
-        in_units = UNITS_DISTANCE_INCHES
-    return convert_distance(value, in_units, UNITS_DISTANCE_METERS), UNITS_DISTANCE_METERS
 
 def convert_time(value, in_units, out_units):
     """Unit conversion for time values."""
