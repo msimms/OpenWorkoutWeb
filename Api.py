@@ -1620,18 +1620,16 @@ class Api(object):
 
         # Height.
         if Keys.HEIGHT_KEY in values:
-            height = values[Keys.HEIGHT_KEY].lower()
+            height = values[Keys.HEIGHT_KEY]
             if not InputChecker.is_float(height):
                 raise ApiException.ApiMalformedRequestException("Invalid height.")
-            height, _ = Units.convert_from_preferred_height_units(self.user_mgr, self.user_id, float(height))
             result = self.user_mgr.update_user_setting(self.user_id, Keys.HEIGHT_KEY, height)
 
         # Weight.
         if Keys.WEIGHT_KEY in values:
-            weight = values[Keys.WEIGHT_KEY].lower()
+            weight = values[Keys.WEIGHT_KEY]
             if not InputChecker.is_float(weight):
                 raise ApiException.ApiMalformedRequestException("Invalid weight.")
-            weight, _ = Units.convert_from_preferred_mass_units(self.user_mgr, self.user_id, float(weight))
             result = self.user_mgr.update_user_setting(self.user_id, Keys.WEIGHT_KEY, weight)
 
         # Gender.

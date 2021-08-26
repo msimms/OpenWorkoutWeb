@@ -177,9 +177,16 @@
     function update_height()
     {
         let the_url = "${root_url}/api/1.0/update_profile";
-        let height = document.getElementById("height").value;
+        let height = parseFloat(document.getElementById("height").value);
+        let height_units = document.getElementById("height_units").value;
         let dict = [];
         let result_text = {};
+
+        // Convert to metric.
+        if (height_units == "inches")
+        {
+            height *= 0.0254;
+        }
 
         dict.push({["height"] : height});
         if (send_post_request(the_url, dict, result_text))
@@ -193,9 +200,16 @@
     function update_weight()
     {
         let the_url = "${root_url}/api/1.0/update_profile";
-        let weight = document.getElementById("weight").value;
+        let weight = parseFloat(document.getElementById("weight").value);
+        let weight_units = document.getElementById("weight_units").value;
         let dict = [];
         let result_text = {};
+
+        // Convert to metric.
+        if (weight_units == "pounds")
+        {
+            weight /= 2.2;
+        }
 
         dict.push({["weight"] : weight});
         if (send_post_request(the_url, dict, result_text))

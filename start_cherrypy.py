@@ -648,6 +648,7 @@ class CherryPyFrontEnd(object):
         except:
             response = "Unspecified error."
             cherrypy.response.status = 500
+            self.log_error("Untyped exception")
         return response
 
     @cherrypy.expose
