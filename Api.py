@@ -1535,54 +1535,60 @@ class Api(object):
 
         result = True
 
+        # Is there a timestamp associated with this update? If not, use the current time.
+        if Keys.TIMESTAMP_KEY in values:
+            update_time = datetime.datetime.fromtimestamp(values[Keys.TIMESTAMP_KEY])
+        else:
+            update_time = datetime.datetime.utcnow()
+
         # Default privacy/visibility.
         if Keys.DEFAULT_PRIVACY_KEY in values:
             default_privacy = values[Keys.DEFAULT_PRIVACY_KEY].lower()
             if not (default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE):
                 raise ApiException.ApiMalformedRequestException("Invalid visibility value.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY_KEY, default_privacy)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY_KEY, default_privacy, update_time)
         
         # Metric or imperial?
         if Keys.PREFERRED_UNITS_KEY in values:
             preferred_units = values[Keys.PREFERRED_UNITS_KEY].lower()
             if not (preferred_units == Keys.UNITS_METRIC_KEY or preferred_units == Keys.UNITS_STANDARD_KEY):
                 raise ApiException.ApiMalformedRequestException("Invalid units value.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY, preferred_units)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY, preferred_units, update_time)
 
         # Preferred first day of week.
         if Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY in values:
             preferred_first_day_of_week = values[Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY]
             if not preferred_first_day_of_week in Keys.DAYS_OF_WEEK:
                 raise ApiException.ApiMalformedRequestException("Invalid day value.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY, preferred_first_day_of_week)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY, preferred_first_day_of_week, update_time)
 
         # Preferred long run day of the week.
         if Keys.PREFERRED_LONG_RUN_DAY_KEY in values:
             preferred_long_run_day = values[Keys.PREFERRED_LONG_RUN_DAY_KEY].lower()
             if not InputChecker.is_day_of_week(preferred_long_run_day):
                 raise ApiException.ApiMalformedRequestException("Invalid long run day.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day, update_time)
 
         # Goal.
         if Keys.GOAL_KEY in values:
             goal = values[Keys.GOAL_KEY]
             if not (goal in Keys.GOALS):
                 raise ApiException.ApiMalformedRequestException("Invalid goal.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal, update_time)
 
         # Goal date.
         if Keys.GOAL_DATE_KEY in values:
             if not InputChecker.is_integer(values[Keys.GOAL_DATE_KEY]):
                 raise ApiException.ApiMalformedRequestException("Invalid goal date.")
             goal_date = int(values[Keys.GOAL_DATE_KEY])
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date, update_time)
 
         # Goal type.
         if Keys.GOAL_TYPE_KEY in values:
             goal_type = values[Keys.GOAL_TYPE_KEY]
             if not (goal_type == Keys.GOAL_TYPE_COMPLETION or goal_type == Keys.GOAL_TYPE_SPEED):
                 raise ApiException.ApiMalformedRequestException("Invalid goal type.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_TYPE_KEY, goal_type)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_TYPE_KEY, goal_type, update_time)
 
         # Experience level.
         if Keys.EXPERIENCE_LEVEL_KEY in values:
@@ -1591,7 +1597,7 @@ class Api(object):
             level = int(values[Keys.EXPERIENCE_LEVEL_KEY])
             if not (level >= 1 and level <= 10):
                 raise ApiException.ApiMalformedRequestException("Invalid level.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.EXPERIENCE_LEVEL_KEY, level)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.EXPERIENCE_LEVEL_KEY, level, update_time)
 
         # Comfort level with structured training.
         if Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY in values:
@@ -1600,7 +1606,7 @@ class Api(object):
             level = int(values[Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY])
             if not (level >= 1 and level <= 10):
                 raise ApiException.ApiMalformedRequestException("Invalid level.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, level)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, level, update_time)
 
         return result, ""
 
@@ -1611,40 +1617,47 @@ class Api(object):
 
         result = True
 
+        # Is there a timestamp associated with this update? If not, use the current time.
+        if Keys.TIMESTAMP_KEY in values:
+            update_time = datetime.datetime.fromtimestamp(values[Keys.TIMESTAMP_KEY])
+        else:
+            update_time = datetime.datetime.utcnow()
+        print(update_time)
+
         # Birthday.
         if Keys.BIRTHDAY_KEY in values:
             birthday = values[Keys.BIRTHDAY_KEY].lower()
             if not InputChecker.is_integer(birthday):
                 raise ApiException.ApiMalformedRequestException("Invalid birthday.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.BIRTHDAY_KEY, birthday)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.BIRTHDAY_KEY, birthday, update_time)
 
         # Height.
         if Keys.HEIGHT_KEY in values:
             height = values[Keys.HEIGHT_KEY]
             if not InputChecker.is_float(height):
                 raise ApiException.ApiMalformedRequestException("Invalid height.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.HEIGHT_KEY, height)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.HEIGHT_KEY, height, update_time)
 
         # Weight.
         if Keys.WEIGHT_KEY in values:
             weight = values[Keys.WEIGHT_KEY]
             if not InputChecker.is_float(weight):
                 raise ApiException.ApiMalformedRequestException("Invalid weight.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.WEIGHT_KEY, weight)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.WEIGHT_KEY, weight, update_time)
 
         # Gender.
         if Keys.GENDER_KEY in values:
             gender = values[Keys.GENDER_KEY].lower()
             if not (gender == Keys.GENDER_MALE_KEY or gender == Keys.GENDER_FEMALE_KEY):
                 raise ApiException.ApiMalformedRequestException("Invalid gender value.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.GENDER_KEY, gender)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.GENDER_KEY, gender, update_time)
 
         # Resting Heart Rate.
         if Keys.RESTING_HEART_RATE_KEY in values:
             resting_hr = values[Keys.RESTING_HEART_RATE_KEY].lower()
             if not InputChecker.is_float(resting_hr):
                 raise ApiException.ApiMalformedRequestException("Invalid resting heart rate.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.RESTING_HEART_RATE_KEY, float(resting_hr))
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.RESTING_HEART_RATE_KEY, float(resting_hr), update_time)
 
         return result, ""
 

@@ -3,6 +3,7 @@
 
 from __future__ import absolute_import
 from CeleryWorker import celery_worker
+import datetime
 import json
 import logging
 import os
@@ -126,7 +127,7 @@ class ActivityAnalyzer(object):
 
                             existing_max_hrs = self.user_mgr.retrieve_user_setting(activity_user_id, Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY)
                             existing_max_hrs[str(sensor_analyzer.max_time)] = sensor_analyzer.max
-                            self.user_mgr.update_user_setting(activity_user_id, Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY, existing_max_hrs)
+                            self.user_mgr.update_user_setting(activity_user_id, Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY, existing_max_hrs, datetime.datetime.utcnow())
 
                         # Did we find the power meter for a cycling activity. If so, find the best 20 minute power.
                         # This list will be used to compute the user's estimated FTP.
@@ -134,7 +135,7 @@ class ActivityAnalyzer(object):
 
                             existing_20_minute_power_bests = self.user_mgr.retrieve_user_setting(activity_user_id, Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY)
                             existing_20_minute_power_bests[str(sensor_analyzer.max_time)] = self.summary_data[Keys.BEST_20_MIN_POWER]
-                            self.user_mgr.update_user_setting(activity_user_id, Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, existing_20_minute_power_bests)
+                            self.user_mgr.update_user_setting(activity_user_id, Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, existing_20_minute_power_bests, datetime.datetime.utcnow())
 
                     except:
                         self.log_error("Exception when analyzing activity " + sensor_type + " data.")

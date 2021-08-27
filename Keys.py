@@ -40,6 +40,7 @@ REQUESTING_USER_KEY = "requesting_user"
 PR_KEY = "pr" # Personal record
 EMAIL_KEY = "email" # User's email
 TARGET_EMAIL_KEY = "target_email" # Email address of another user
+TIMESTAMP_KEY = "timestamp" # Some app messages have timestamps on them
 API_KEYS = "api keys" # List of API keys belonging to the user
 API_KEY = "key" # API key being provided
 API_KEY_RATE = "rate" # The maximum number of requests allowed per day for the provided key
@@ -105,6 +106,7 @@ USER_SPECIFIED_MAX_HEART_RATE_KEY = "user specified max heart rate" # Maximum he
 BEST_CYCLING_20_MINUTE_POWER_LIST_KEY = "best 20 minute power list" # List of the best cycling 20 minute power values from each activity
 ESTIMATED_CYCLING_FTP_KEY = "estimated ftp" # Estimated FTP, in watts
 CAN_UPLOAD_PHOTOS_KEY = "can upload photos"
+LAST_UPDATED_KEY = "last updated" # Time of when the user settings where last updated
 USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, PREFERRED_UNITS_KEY, PREFERRED_FIRST_DAY_OF_WEEK_KEY, BIRTHDAY_KEY, HEIGHT_KEY, WEIGHT_KEY, GENDER_KEY, RESTING_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, USER_SPECIFIED_MAX_HEART_RATE_KEY, BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_KEY, GOAL_DATE_KEY, GOAL_TYPE_KEY, EXPERIENCE_LEVEL_KEY, PREFERRED_LONG_RUN_DAY_KEY, STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, CAN_UPLOAD_PHOTOS_KEY ]
 
 # Personal records

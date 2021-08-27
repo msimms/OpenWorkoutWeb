@@ -23,6 +23,7 @@
 # SOFTWARE.
 """Database implementation"""
 
+import datetime
 import json
 import re
 import sys
@@ -626,7 +627,7 @@ class MongoDatabase(Database.Database):
     # User settings methods
     #
 
-    def update_user_setting(self, user_id, key, value):
+    def update_user_setting(self, user_id, key, value, update_time):
         """Create/update method for user preferences."""
         if user_id is None:
             self.log_error(MongoDatabase.update_user_setting.__name__ + ": Unexpected empty object: user_id")
@@ -637,6 +638,9 @@ class MongoDatabase(Database.Database):
         if value is None:
             self.log_error(MongoDatabase.update_user_setting.__name__ + ": Unexpected empty object: value")
             return False
+        if update_time is None:
+            self.log_error(MongoDatabase.update_user_setting.__name__ + ": Unexpected empty object: update_time")
+            return False
 
         try:
             # Find the user.
@@ -645,6 +649,15 @@ class MongoDatabase(Database.Database):
 
             # If the user was found.
             if user is not None:
+
+                # Do not replace a newer value with an older value.
+                if Keys.LAST_UPDATED_KEY not in user:
+                    user[Keys.LAST_UPDATED_KEY] = {}
+                elif key in user[Keys.LAST_UPDATED_KEY] and user[Keys.LAST_UPDATED_KEY][key] > update_time:
+                    return False
+
+                # Update.
+                user[Keys.LAST_UPDATED_KEY][key] = update_time
                 user[key] = value
                 self.users_collection.save(user)
                 return True

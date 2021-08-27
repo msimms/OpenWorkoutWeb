@@ -285,7 +285,7 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         return self.database.delete_friend(user_id, target_id)
 
-    def update_user_setting(self, user_id, key, value):
+    def update_user_setting(self, user_id, key, value, update_time):
         """Create/update method for user preferences."""
         if self.database is None:
             raise Exception("No database.")
@@ -295,7 +295,7 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         if value is None:
             raise Exception("Bad parameter.")
-        return self.database.update_user_setting(user_id, key, value)
+        return self.database.update_user_setting(user_id, key, value, update_time)
 
     def estimate_max_heart_rate(self, user_id):
         """Looks through the list of maximum heart rate values in the database"""
