@@ -1622,7 +1622,6 @@ class Api(object):
             update_time = datetime.datetime.fromtimestamp(values[Keys.TIMESTAMP_KEY])
         else:
             update_time = datetime.datetime.utcnow()
-        print(update_time)
 
         # Birthday.
         if Keys.BIRTHDAY_KEY in values:
