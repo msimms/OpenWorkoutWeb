@@ -1658,6 +1658,13 @@ class Api(object):
                 raise ApiException.ApiMalformedRequestException("Invalid resting heart rate.")
             result = self.user_mgr.update_user_setting(self.user_id, Keys.RESTING_HEART_RATE_KEY, float(resting_hr), update_time)
 
+        # Max Heart Rate.
+        if Keys.MAXIMUM_HEART_RATE_KEY in values:
+            max_hr = values[Keys.MAXIMUM_HEART_RATE_KEY].lower()
+            if not InputChecker.is_float(max_hr):
+                raise ApiException.ApiMalformedRequestException("Invalid max heart rate.")
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.MAXIMUM_HEART_RATE_KEY, float(max_hr), update_time)
+
         return result, ""
 
     def handle_update_visibility(self, values):

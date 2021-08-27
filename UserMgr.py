@@ -357,6 +357,8 @@ class UserMgr(object):
             return Keys.GENDER_MALE_KEY
         if key == Keys.RESTING_HEART_RATE_KEY:
             return 0
+        if key == Keys.MAXIMUM_HEART_RATE_KEY:
+            return 0
         if key == Keys.ESTIMATED_MAX_HEART_RATE_KEY:
             return 0
         if key == Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY:

@@ -250,6 +250,22 @@
             alert("An error occurred!");
     }
 
+    /// @function update_maximum_hr
+    // Button handler for when the user updates their maximum heart rate.
+    function update_maximum_hr()
+    {
+        let the_url = "${root_url}/api/1.0/update_profile";
+        let max_hr = document.getElementById("max heart rate").value;
+        let dict = [];
+        let result_text = {};
+
+        dict.push({["max heart rate"] : max_hr});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Maximum heart rate updated!");
+        else
+            alert("An error occurred!");
+    }
+
     $(function()
     {
         $('#birthday').datepicker({
@@ -389,29 +405,35 @@
             {
                 if (key == "height")
                 {
-                    if (units == "standard")
+                    if (!isNaN(value))
                     {
-                        value *= 39.37008;
-                        height_units_obj.value = "inches";
+                        if (units == "standard")
+                        {
+                            value *= 39.37008;
+                            height_units_obj.value = "inches";
+                        }
+                        else
+                        {
+                            height_units_obj.value = "meters";
+                        }
+                        element.value = value.toFixed(1);
                     }
-                    else
-                    {
-                        height_units_obj.value = "meters";
-                    }
-                    element.value = value.toFixed(1);
                 }
                 else if (key == "weight")
                 {
-                    if (units == "standard")
+                    if (!isNaN(value))
                     {
-                        value *= 2.2;
-                        weight_units_obj.value = "pounds";
+                        if (units == "standard")
+                        {
+                            value *= 2.2;
+                            weight_units_obj.value = "pounds";
+                        }
+                        else
+                        {
+                            weight_units_obj.value = "kilograms";
+                        }
+                        element.value = value.toFixed(1);
                     }
-                    else
-                    {
-                        weight_units_obj.value = "kilograms";
-                    }
-                    element.value = value.toFixed(1);
                 }
                 else if (key == "birthday")
                 {
@@ -427,11 +449,25 @@
                 }
                 else if (key == "resting heart rate")
                 {
-                    element.value = value.toFixed(1);
+                    if (!isNaN(value) && value > 1.0)
+                    {
+                        element.value = value.toFixed(1);
+                    }
+                }
+                else if (key == "max heart rate")
+                {
+                    if (!isNaN(value) && value > 1.0)
+                    {
+                        element.value = value.toFixed(1);
+                    }
                 }
                 else if (key == "estimated max heart rate")
                 {
-                    get_hr_zones(value);
+                    if (!isNaN(value) && value > 1.0)
+                    {
+                        element.value = value.toFixed(1);
+                        get_hr_zones(value);
+                    }
                 }
             }
         }
@@ -547,7 +583,7 @@
     /// @function get_user_settings
     function get_user_settings()
     {
-        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=preferred%20units,height,weight,birthday,gender,resting%20heart%20rate,estimated%20max%20heart%20rate";
+        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=preferred%20units,height,weight,birthday,gender,resting%20heart%20rate,max%20heart%20rate,estimated%20max%20heart%20rate";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
@@ -631,9 +667,15 @@ ${nav}
             <button type="modern_button" onclick="return update_resting_hr()">Update</button>
         <hr>
 
+        <!-- Maximum Heart Rate -->
+        <h2>Maximum Heart Rate</h2>
+            <input type="text" id="max heart rate" value="Not set"> bpm<br>
+            <button type="modern_button" onclick="return update_maximum_hr()">Update</button>
+        <hr>
+
         <!-- Estimated Maximum Heart Rate -->
         <h2>Estimated Maximum Heart Rate</h2>
-            <input type="text" id="estimated max heart rate" value="Not calculated"> bpm<br>
+            <input style="border:0" type="text" value="Not calculated" id="estimated max heart rate" readonly> bpm</input>
         <hr>
 
         <!-- BMI -->
