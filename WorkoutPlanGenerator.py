@@ -176,8 +176,8 @@ class WorkoutPlanGenerator(object):
                 avg_running_distance = running_summary[Keys.TOTAL_DISTANCE] / num_runs
 
         # Compute an experience level for the user.
-        experience_level = self.user_mgr.retrieve_user_setting(user_id, Keys.EXPERIENCE_LEVEL_KEY)
-        comfort_level = self.user_mgr.retrieve_user_setting(user_id, Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY)
+        experience_level = self.user_mgr.retrieve_user_setting(user_id, Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY)
+        comfort_level = self.user_mgr.retrieve_user_setting(user_id, Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY)
 
         # Are we in a taper?
         # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
@@ -198,22 +198,22 @@ class WorkoutPlanGenerator(object):
             inputs[Keys.EASY_RUN_PACE] = None
         else:
             inputs = running_paces
-        inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY] = longest_run_in_four_weeks
-        inputs[Keys.LONGEST_RUN_WEEK_1_KEY] = longest_run_week_1
-        inputs[Keys.LONGEST_RUN_WEEK_2_KEY] = longest_run_week_2
-        inputs[Keys.LONGEST_RUN_WEEK_3_KEY] = longest_run_week_3
-        inputs[Keys.AGE_YEARS_KEY] = age_years
-        inputs[Keys.EXPERIENCE_LEVEL_KEY] = experience_level
-        inputs[Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
+        inputs[Keys.PLAN_INPUT_LONGEST_RUN_IN_FOUR_WEEKS_KEY] = longest_run_in_four_weeks
+        inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY] = longest_run_week_1
+        inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY] = longest_run_week_2
+        inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY] = longest_run_week_3
+        inputs[Keys.PLAN_INPUT_AGE_YEARS_KEY] = age_years
+        inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY] = experience_level
+        inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
         inputs[Keys.GOAL_KEY] = goal
         inputs[Keys.GOAL_TYPE_KEY] = goal_type
-        inputs[Keys.WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
-        inputs[Keys.IN_TAPER_KEY] = in_taper
-        inputs[Keys.NUM_WEEKS_BUILDING_KEY] = 0
-        inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = avg_running_distance
-        inputs[Keys.AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = avg_cycling_distance
-        inputs[Keys.NUM_RUNS_LAST_FOUR_WEEKS] = num_runs
-        inputs[Keys.NUM_RIDES_LAST_FOUR_WEEKS] = num_rides
+        inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
+        inputs[Keys.PLAN_INPUT_IN_TAPER_KEY] = in_taper
+        inputs[Keys.PLAN_INPUT_NUM_WEEKS_BUILDING_KEY] = 0
+        inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = avg_running_distance
+        inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = avg_cycling_distance
+        inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS] = num_runs
+        inputs[Keys.PLAN_INPUT_NUM_RIDES_LAST_FOUR_WEEKS] = num_rides
         inputs[Keys.THRESHOLD_POWER] = threshold_power
 
         # Adds the goal distances to the inputs.
@@ -263,22 +263,22 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.FUNCTIONAL_THRESHOLD_PACE])
         model_inputs.append(inputs[Keys.LONG_RUN_PACE])
         model_inputs.append(inputs[Keys.EASY_RUN_PACE])
-        model_inputs.append(inputs[Keys.LONGEST_RUN_IN_FOUR_WEEKS_KEY])
-        model_inputs.append(inputs[Keys.LONGEST_RUN_WEEK_1_KEY])
-        model_inputs.append(inputs[Keys.LONGEST_RUN_WEEK_2_KEY])
-        model_inputs.append(inputs[Keys.LONGEST_RUN_WEEK_3_KEY])
-        model_inputs.append(inputs[Keys.AGE_YEARS_KEY])
-        model_inputs.append(inputs[Keys.EXPERIENCE_LEVEL_KEY])
-        model_inputs.append(inputs[Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RUN_IN_FOUR_WEEKS_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_AGE_YEARS_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY])
         model_inputs.append(inputs[Keys.GOAL_KEY])
         model_inputs.append(inputs[Keys.GOAL_TYPE_KEY])
-        model_inputs.append(inputs[Keys.WEEKS_UNTIL_GOAL_KEY])
-        model_inputs.append(inputs[Keys.IN_TAPER_KEY])
-        model_inputs.append(inputs[Keys.NUM_WEEKS_BUILDING_KEY])
-        model_inputs.append(inputs[Keys.AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS])
-        model_inputs.append(inputs[Keys.AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS])
-        model_inputs.append(inputs[Keys.NUM_RUNS_LAST_FOUR_WEEKS])
-        model_inputs.append(inputs[Keys.NUM_RIDES_LAST_FOUR_WEEKS])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_IN_TAPER_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_NUM_WEEKS_BUILDING_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_NUM_RIDES_LAST_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.THRESHOLD_POWER])
 
         workouts = []

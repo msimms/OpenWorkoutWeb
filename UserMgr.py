@@ -373,9 +373,9 @@ class UserMgr(object):
             return int(time.time())
         if key == Keys.GOAL_TYPE_KEY:
             return Keys.GOAL_TYPE_COMPLETION
-        if key == Keys.EXPERIENCE_LEVEL_KEY:
+        if key == Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY:
             return 5
-        if key == Keys.PREFERRED_LONG_RUN_DAY_KEY:
+        if key == Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY:
             return "sunday"
         if key == Keys.CAN_UPLOAD_PHOTOS_KEY:
             return False

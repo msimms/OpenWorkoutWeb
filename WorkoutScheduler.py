@@ -111,7 +111,7 @@ class WorkoutScheduler(object):
         if self.user_id is not None:
 
             # When does the user want to do long runs?
-            preferred_long_run_day = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY)
+            preferred_long_run_day = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY)
             if preferred_long_run_day is not None:
 
                 for workout in workouts:

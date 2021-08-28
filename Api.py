@@ -1563,11 +1563,11 @@ class Api(object):
             result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY, preferred_first_day_of_week, update_time)
 
         # Preferred long run day of the week.
-        if Keys.PREFERRED_LONG_RUN_DAY_KEY in values:
-            preferred_long_run_day = values[Keys.PREFERRED_LONG_RUN_DAY_KEY].lower()
+        if Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY in values:
+            preferred_long_run_day = values[Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY].lower()
             if not InputChecker.is_day_of_week(preferred_long_run_day):
                 raise ApiException.ApiMalformedRequestException("Invalid long run day.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day, update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day, update_time)
 
         # Goal.
         if Keys.GOAL_KEY in values:
@@ -1591,22 +1591,22 @@ class Api(object):
             result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_TYPE_KEY, goal_type, update_time)
 
         # Experience level.
-        if Keys.EXPERIENCE_LEVEL_KEY in values:
-            if not InputChecker.is_integer(values[Keys.EXPERIENCE_LEVEL_KEY]):
+        if Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY in values:
+            if not InputChecker.is_integer(values[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY]):
                 raise ApiException.ApiMalformedRequestException("Invalid level.")
-            level = int(values[Keys.EXPERIENCE_LEVEL_KEY])
+            level = int(values[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY])
             if not (level >= 1 and level <= 10):
                 raise ApiException.ApiMalformedRequestException("Invalid level.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.EXPERIENCE_LEVEL_KEY, level, update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY, level, update_time)
 
         # Comfort level with structured training.
-        if Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY in values:
-            if not InputChecker.is_integer(values[Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY]):
+        if Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY in values:
+            if not InputChecker.is_integer(values[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY]):
                 raise ApiException.ApiMalformedRequestException("Invalid level.")
-            level = int(values[Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY])
+            level = int(values[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY])
             if not (level >= 1 and level <= 10):
                 raise ApiException.ApiMalformedRequestException("Invalid level.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, level, update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, level, update_time)
 
         return result, ""
 

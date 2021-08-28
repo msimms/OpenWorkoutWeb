@@ -66,21 +66,21 @@ GOAL_BIKE_DISTANCE_KEY = "Goal Bike Distance"
 GOAL_RUN_DISTANCE_KEY = "Goal Run Distance"
 
 # User settings that are exclusive to the workout plan generator.
-LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"
-LONGEST_RUN_WEEK_1_KEY = "Longest Run Week 1"
-LONGEST_RUN_WEEK_2_KEY = "Longest Run Week 2"
-LONGEST_RUN_WEEK_3_KEY = "Longest Run Week 3"
-AGE_YEARS_KEY = "Age In Years"
-EXPERIENCE_LEVEL_KEY = "Experience Level" # Athlete's experience level with running (scale 1-10)
-STRUCTURED_TRAINING_COMFORT_LEVEL_KEY = "Structured Training Comfort Level" # Athlete's comfort level (i.e. experience) with doing intervals, long runs, etc. (scale 1-10)
-WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
-IN_TAPER_KEY = "Is In Taper"
-NUM_WEEKS_BUILDING_KEY = "Num Weeks Building" # The number of consecutive weeks with increasing intensity
-AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
-AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
-NUM_RUNS_LAST_FOUR_WEEKS = "Number of Runs (Last 4 Weeks)"
-NUM_RIDES_LAST_FOUR_WEEKS = "Number of Rides (Last 4 Weeks)"
-PREFERRED_LONG_RUN_DAY_KEY = "Preferred Long Run Day" # Day of the week on which the user prefers to do their long runs
+PLAN_INPUT_LONGEST_RUN_IN_FOUR_WEEKS_KEY = "Longest Run In Four Weeks"
+PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY = "Longest Run Week 1"
+PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY = "Longest Run Week 2"
+PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY = "Longest Run Week 3"
+PLAN_INPUT_AGE_YEARS_KEY = "Age In Years"
+PLAN_INPUT_EXPERIENCE_LEVEL_KEY = "Experience Level" # Athlete's experience level with running (scale 1-10)
+PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY = "Structured Training Comfort Level" # Athlete's comfort level (i.e. experience) with doing intervals, long runs, etc. (scale 1-10)
+PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
+PLAN_INPUT_IN_TAPER_KEY = "Is In Taper"
+PLAN_INPUT_NUM_WEEKS_BUILDING_KEY = "Num Weeks Building" # The number of consecutive weeks with increasing intensity
+PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
+PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
+PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS = "Number of Runs (Last 4 Weeks)"
+PLAN_INPUT_NUM_RIDES_LAST_FOUR_WEEKS = "Number of Rides (Last 4 Weeks)"
+PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY = "Preferred Long Run Day" # Day of the week on which the user prefers to do their long runs
 
 # User settings
 REQUESTED_SETTING_KEY = "requested setting"
@@ -108,7 +108,7 @@ BEST_CYCLING_20_MINUTE_POWER_LIST_KEY = "best 20 minute power list" # List of th
 ESTIMATED_CYCLING_FTP_KEY = "estimated ftp" # Estimated FTP, in watts
 CAN_UPLOAD_PHOTOS_KEY = "can upload photos" # User is allowed to upload photos
 LAST_UPDATED_KEY = "last updated" # Time of when the user settings where last updated
-USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, PREFERRED_UNITS_KEY, PREFERRED_FIRST_DAY_OF_WEEK_KEY, BIRTHDAY_KEY, HEIGHT_KEY, WEIGHT_KEY, GENDER_KEY, RESTING_HEART_RATE_KEY, MAXIMUM_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, USER_SPECIFIED_MAX_HEART_RATE_KEY, BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_KEY, GOAL_DATE_KEY, GOAL_TYPE_KEY, EXPERIENCE_LEVEL_KEY, PREFERRED_LONG_RUN_DAY_KEY, STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, CAN_UPLOAD_PHOTOS_KEY ]
+USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, PREFERRED_UNITS_KEY, PREFERRED_FIRST_DAY_OF_WEEK_KEY, BIRTHDAY_KEY, HEIGHT_KEY, WEIGHT_KEY, GENDER_KEY, RESTING_HEART_RATE_KEY, MAXIMUM_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, USER_SPECIFIED_MAX_HEART_RATE_KEY, BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_KEY, GOAL_DATE_KEY, GOAL_TYPE_KEY, PLAN_INPUT_EXPERIENCE_LEVEL_KEY, PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, CAN_UPLOAD_PHOTOS_KEY ]
 
 # Personal records
 RECORDS_USER_ID = "user_id"
