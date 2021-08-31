@@ -1702,15 +1702,6 @@ class Api(object):
         self.data_mgr.analyze_activity(activity, activity_user_id)
         return True, ""
 
-    def handle_refresh_personal_records(self, values):
-        """Called when the user wants to refresh the list of personal records, in the event"""
-        """it may have become corrupted by deleting activities, or changing activity types."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-
-        self.data_mgr.refresh_user_personal_records(self.user_id)
-        return True, ""
-
     def handle_generate_workout_plan_for_user(self, values):
         """Called when the user wants to generate a workout plan."""
         if self.user_id is None:
@@ -2341,8 +2332,6 @@ class Api(object):
             return self.handle_update_visibility(values)
         elif request == 'refresh_analysis':
             return self.handle_refresh_analysis(values)
-        elif request == 'refresh_personal_records':
-            return self.handle_refresh_personal_records(values)
         elif request == 'generate_workout_plan':
             return self.handle_generate_workout_plan_for_user(values)
         elif request == 'generate_workout_plan_from_inputs':
