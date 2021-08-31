@@ -907,7 +907,7 @@ class DataMgr(Importer.ActivityWriter):
             goal_date = None
         return goal, goal_date
 
-    def update_activity_bests_and_personal_records(self, user_id, activity_id, activity_type, activity_time, bests):
+    def update_activity_bests_and_personal_records_cache(self, user_id, activity_id, activity_type, activity_time, activity_bests):
         """Update method for a user's personal records. Caches the bests from the given activity and updates"""
         """the personal record cache, if appropriate."""
         if self.database is None:
@@ -920,38 +920,37 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if activity_time is None:
             raise Exception("Bad parameter.")
-        if bests is None:
+        if activity_bests is None:
             raise Exception("Bad parameter.")
 
         # This object will keep track of the personal records.
         summarizer = Summarizer.Summarizer()
 
-        # Load existing personal records from the PR cache.
-        all_personal_records = self.database.retrieve_user_personal_records(user_id)
-        for record_activity_type in all_personal_records.keys():
-            summarizer.set_record_dictionary(record_activity_type, all_personal_records[record_activity_type])
-        do_update = len(all_personal_records) > 0
+        # Load existing activity bests into the summarizer.
+        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, None)
+        for old_activity_id in all_activity_bests:
+            if self.database.activity_exists(old_activity_id):
+                # Activity still exists, add its data to the summary.
+                old_activity_bests = all_activity_bests[old_activity_id]
+                old_activity_type = old_activity_bests[Keys.ACTIVITY_TYPE_KEY]
+                old_activity_time = old_activity_bests[Keys.ACTIVITY_START_TIME_KEY]
+                summarizer.add_activity_data(old_activity_id, old_activity_type, old_activity_time, old_activity_bests)
+            else:
+                # Activity no longer exists, remove it's summary from the database.
+                self.database.delete_activity_best_for_user(user_id, old_activity_id)
+        do_update = len(old_activity_bests) > 0
 
         # Add data from the new activity.
-        summarizer.add_activity_data(activity_id, activity_type, activity_time, bests)
- 
+        summarizer.add_activity_data(activity_id, activity_type, activity_time, activity_bests)
+
         # Create or update the personal records cache.
-        all_personal_records[activity_type] = summarizer.get_record_dictionary(activity_type)
         if do_update:
-            self.database.update_user_personal_records(user_id, all_personal_records)
+            self.database.update_user_personal_records(user_id, summarizer.bests)
         else:
-            self.database.create_user_personal_records(user_id, all_personal_records)
+            self.database.create_user_personal_records(user_id, summarizer.bests)
 
         # Cache the summary data from this activity so we don't have to recompute everything again.
-        return self.database.create_activity_bests(user_id, activity_id, activity_type, activity_time, bests)
-
-    def retrieve_user_personal_records(self, user_id):
-        """Retrieve method for a user's personal record."""
-        if self.database is None:
-            raise Exception("No database.")
-        if user_id is None:
-            raise Exception("Bad parameter.")
-        return self.database.retrieve_user_personal_records(user_id)
+        return self.database.create_activity_bests(user_id, activity_id, activity_type, activity_time, activity_bests)
 
     def delete_all_user_personal_records(self, user_id):
         """Delete method for a user's personal record."""
@@ -960,26 +959,6 @@ class DataMgr(Importer.ActivityWriter):
         if user_id is None:
             raise Exception("Bad parameter.")
         return self.database.delete_all_user_personal_records(user_id)
-
-    def refresh_user_personal_records(self, user_id):
-        """Delete method for a user's personal record."""
-        if self.database is None:
-            raise Exception("No database.")
-        if user_id is None:
-            raise Exception("Bad parameter.")
-
-        # This object will keep track of the personal records.
-        summarizer = Summarizer.Summarizer()
-
-        # Load existing personal records from the PR cache.
-        activity_bests = self.database.retrieve_activity_bests_for_user(user_id)
-        for activity_id in activity_bests.keys():
-            bests = activity_bests[activity_id]
-            if Keys.APP_TYPE_KEY in bests:
-                activity_type = bests[Keys.APP_TYPE_KEY]
-
-        # TODO
-        return True
 
     def create_workout(self, user_id, workout_obj):
         """Create method for a workout."""
@@ -1407,10 +1386,9 @@ class DataMgr(Importer.ActivityWriter):
 
         # Load cached summary data from all previous activities.
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
-        if all_activity_bests is not None:
-            for activity_id in all_activity_bests:
-                activity_bests = all_activity_bests[activity_id]
-                summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_START_TIME_KEY], activity_bests)
+        for activity_id in all_activity_bests:
+            activity_bests = all_activity_bests[activity_id]
+            summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_START_TIME_KEY], activity_bests)
 
         # Output is a dictionary for each sport type.
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
@@ -1430,10 +1408,9 @@ class DataMgr(Importer.ActivityWriter):
 
         # Load cached summary data from all previous activities.
         all_activity_bests = self.database.retrieve_bounded_activity_bests_for_user(user_id, cutoff_time_lower, cutoff_time_higher)
-        if all_activity_bests is not None:
-            for activity_id in all_activity_bests:
-                activity_bests = all_activity_bests[activity_id]
-                summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_START_TIME_KEY], activity_bests)
+        for activity_id in all_activity_bests:
+            activity_bests = all_activity_bests[activity_id]
+            summarizer.add_activity_data(activity_id, activity_bests[Keys.ACTIVITY_TYPE_KEY], activity_bests[Keys.ACTIVITY_START_TIME_KEY], activity_bests)
 
         # Output is a dictionary for each sport type.
         cycling_bests = summarizer.get_record_dictionary(Keys.TYPE_CYCLING_KEY)
@@ -1465,14 +1442,13 @@ class DataMgr(Importer.ActivityWriter):
 
         # Load cached summary data from all previous activities.
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, None)
-        if all_activity_bests is not None:
-            for activity_id in all_activity_bests:
-                activity_bests = all_activity_bests[activity_id]
-                if (Keys.ACTIVITY_TYPE_KEY in activity_bests) and (activity_bests[Keys.ACTIVITY_TYPE_KEY] == activity_type) and (key in activity_bests):
-                    record = []
-                    record.append(activity_bests[key])
-                    record.append(activity_id)
-                    bests.append(record)
+        for activity_id in all_activity_bests:
+            activity_bests = all_activity_bests[activity_id]
+            if (Keys.ACTIVITY_TYPE_KEY in activity_bests) and (activity_bests[Keys.ACTIVITY_TYPE_KEY] == activity_type) and (key in activity_bests):
+                record = []
+                record.append(activity_bests[key])
+                record.append(activity_id)
+                bests.append(record)
 
         bests.sort(compare)
         return bests

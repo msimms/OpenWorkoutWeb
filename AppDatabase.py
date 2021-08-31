@@ -742,25 +742,6 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_user_personal_records(self, user_id):
-        """Retrieve method for a user's personal records."""
-        if user_id is None:
-            self.log_error(MongoDatabase.retrieve_user_personal_records.__name__ + ": Unexpected empty object: user_id")
-            return {}
-
-        try:
-            # Find the user's records collection.
-            user_id_str = str(user_id)
-            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id_str })
-
-            # If the collection was found.
-            if user_records is not None and Keys.PERSONAL_RECORDS_KEY in user_records:
-                return user_records[Keys.PERSONAL_RECORDS_KEY]
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return {}
-
     def update_user_personal_records(self, user_id, records):
         """Create method for a user's personal record. These are the bests across all activities. Activity records are the bests for individual activities."""
         if user_id is None:
@@ -841,25 +822,6 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_activity_bests_for_user(self, user_id):
-        """Retrieve method for a user's activity records."""
-        if user_id is None:
-            self.log_error(MongoDatabase.retrieve_activity_bests_for_user.__name__ + ": Unexpected empty object: user_id")
-            return {}
-
-        try:
-            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
-            if user_records is not None:
-                bests = {}
-                for record in user_records:
-                    if InputChecker.is_uuid(record):
-                        bests[record] = user_records[record]
-                return bests
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return {}
-
     def retrieve_recent_activity_bests_for_user(self, user_id, cutoff_time):
         """Retrieve method for a user's activity records. Only activities more recent than the specified cutoff time will be returned."""
         if user_id is None:
@@ -870,11 +832,11 @@ class MongoDatabase(Database.Database):
             user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
             if user_records is not None:
                 bests = {}
-                for record in user_records:
-                    if InputChecker.is_uuid(record):
-                        activity_bests = user_records[record]
+                for activity_id in user_records:
+                    if InputChecker.is_uuid(activity_id):
+                        activity_bests = user_records[activity_id]
                         if (cutoff_time is None) or (activity_bests[Keys.ACTIVITY_START_TIME_KEY] > cutoff_time):
-                            bests[record] = activity_bests
+                            bests[activity_id] = activity_bests
                 return bests
         except:
             self.log_error(traceback.format_exc())
@@ -897,12 +859,12 @@ class MongoDatabase(Database.Database):
             user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
             if user_records is not None:
                 bests = {}
-                for record in user_records:
-                    if InputChecker.is_uuid(record):
-                        activity_bests = user_records[record]
+                for activity_id in user_records:
+                    if InputChecker.is_uuid(activity_id):
+                        activity_bests = user_records[activity_id]
                         activity_time = activity_bests[Keys.ACTIVITY_START_TIME_KEY]
                         if activity_time >= cutoff_time_lower and activity_time < cutoff_time_higher:
-                            bests[record] = activity_bests
+                            bests[activity_id] = activity_bests
                 return bests
         except:
             self.log_error(traceback.format_exc())
@@ -1162,6 +1124,22 @@ class MongoDatabase(Database.Database):
             deleted_result = self.activities_collection.delete_one({ Keys.ACTIVITY_ID_KEY: activity_id })
             if deleted_result is not None:
                 return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def activity_exists(self, activity_id):
+        """Determines whether or not there is a document corresonding to the activity ID."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.activity_exists.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.activity_exists.__name__ + ": Invalid object: activity_id")
+            return False
+
+        try:
+            return self.activities_collection.count_documents({ Keys.ACTIVITY_ID_KEY: activity_id }) > 0
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

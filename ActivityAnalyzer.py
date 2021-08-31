@@ -178,8 +178,8 @@ class ActivityAnalyzer(object):
                 if end_time_ms > 0:
                     self.data_mgr.update_activity_end_time(self.activity, end_time_secs)
 
-                print("Computing the intensity score...")
                 # If activity duration and distance have been calculated.
+                print("Computing the intensity score...")
                 if start_time_secs > 0 and end_time_secs > 0 and end_time_secs > start_time_secs and len(location_analyzer.distance_buf) > 0:
 
                     # These are used by both cycling and running stress calculations.
@@ -191,10 +191,12 @@ class ActivityAnalyzer(object):
                     if activity_type in Keys.RUNNING_ACTIVITIES:
 
                         # Compute training paces.
+                        print("* Computing the training paces...")
                         _, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(activity_user_id, DataMgr.SIX_MONTHS)
                         run_paces = self.data_mgr.compute_run_training_paces(activity_user_id, running_bests)
 
                         # We need to know the user's threshold pace to compute the intensity score.
+                        print("* Computing the intensity score...")
                         if Keys.FUNCTIONAL_THRESHOLD_PACE in run_paces:
                             threshold_pace_meters_per_hour = run_paces[Keys.FUNCTIONAL_THRESHOLD_PACE] * 60.0
                             calc = IntensityCalculator.IntensityCalculator()
@@ -217,7 +219,7 @@ class ActivityAnalyzer(object):
             if Keys.ACTIVITY_START_TIME_KEY in self.activity:
                 print("Updating personal bests...")
                 activity_time = self.activity[Keys.ACTIVITY_START_TIME_KEY]
-                if not self.data_mgr.update_activity_bests_and_personal_records(activity_user_id, activity_id, activity_type, activity_time, self.summary_data):
+                if not self.data_mgr.update_activity_bests_and_personal_records_cache(activity_user_id, activity_id, activity_type, activity_time, self.summary_data):
                     self.log_error("Error returned when updating personal records.")
             else:
                 self.log_error("Activity time not provided. Cannot update personal records.")
