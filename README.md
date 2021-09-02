@@ -275,6 +275,7 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 * Temperature data is now shown.
 * Pool swimming workouts can now be imported.
 * Default gear can now be specified.
+* Bug fixes to personal record tracking.
 
 ## Tech
 This software uses several other source projects to work properly:

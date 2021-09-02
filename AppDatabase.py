@@ -1139,7 +1139,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            return self.activities_collection.count_documents({ Keys.ACTIVITY_ID_KEY: activity_id }) > 0
+            return self.activities_collection.count({ Keys.ACTIVITY_ID_KEY: activity_id }) > 0
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
