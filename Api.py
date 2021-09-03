@@ -89,7 +89,9 @@ class Api(object):
                 lat = json_obj[Keys.APP_LOCATION_LAT_KEY]
                 lon = json_obj[Keys.APP_LOCATION_LON_KEY]
                 alt = json_obj[Keys.APP_LOCATION_ALT_KEY]
-                location = [date_time, lat, lon, alt]
+                horizontal_accuracy = json_obj[Keys.APP_HORIZONTAL_ACCURACY_KEY]
+                vertical_accuracy = json_obj[Keys.APP_VERTICAL_ACCURACY_KEY]
+                location = [date_time, lat, lon, alt, horizontal_accuracy, vertical_accuracy]
             except ValueError as e:
                 self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
             except KeyError as e:

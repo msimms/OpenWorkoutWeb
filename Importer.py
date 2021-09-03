@@ -51,10 +51,6 @@ class ActivityWriter(object):
         """Pure virtual method for starting a location track - creates the activity ID for the specified user."""
         pass
 
-    def create_activity_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
-        """Pure virtual method for processing a location read by the importer."""
-        pass
-
     def create_activity_locations(self, device_str, activity_id, locations):
         """Pure virtual method for processing multiple location reads. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
         pass

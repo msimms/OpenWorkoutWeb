@@ -194,6 +194,8 @@ APP_LOCATIONS_KEY = "locations" # Raw position data.
 APP_LOCATION_LAT_KEY = "Latitude"
 APP_LOCATION_LON_KEY = "Longitude"
 APP_LOCATION_ALT_KEY = "Altitude"
+APP_HORIZONTAL_ACCURACY_KEY = "Horizontal Accuracy"
+APP_VERTICAL_ACCURACY_KEY = "Vertical Accuracy"
 APP_ACCELEROMETER_KEY = "accelerometer" # Raw accelerometer list.
 APP_AXIS_NAME_X = "x"
 APP_AXIS_NAME_Y = "y"
@@ -202,6 +204,8 @@ APP_AXIS_NAME_Z = "z"
 LOCATION_LAT_KEY = "latitude"
 LOCATION_LON_KEY = "longitude"
 LOCATION_ALT_KEY = "altitude"
+LOCATION_HORIZONTAL_ACCURACY_KEY = "horizontal accuracy"
+LOCATION_VERTICAL_ACCURACY_KEY = "vertical accuracy"
 LOCATION_TIME_KEY = "time"
 
 ACCELEROMETER_AXIS_NAME_X = "x"

@@ -1077,12 +1077,12 @@ class MongoDatabase(Database.Database):
             # If the activity was found.
             if activity is not None:
 
-                # Update the locations.
+                # Update the locations. Location data is an array, the order is defined in Api.parse_json_loc_obj.
                 location_list = []
                 if Keys.ACTIVITY_LOCATIONS_KEY in activity:
                     location_list = activity[Keys.ACTIVITY_LOCATIONS_KEY]
                 for location in locations:
-                    value = { Keys.LOCATION_TIME_KEY: location[0], Keys.LOCATION_LAT_KEY: location[1], Keys.LOCATION_LON_KEY: location[2], Keys.LOCATION_ALT_KEY: location[3] }
+                    value = { Keys.LOCATION_TIME_KEY: location[0], Keys.LOCATION_LAT_KEY: location[1], Keys.LOCATION_LON_KEY: location[2], Keys.LOCATION_ALT_KEY: location[3], Keys.LOCATION_HORIZONTAL_ACCURACY_KEY: location[4], Keys.LOCATION_VERTICAL_ACCURACY_KEY: location[5] }
                     location_list.append(value)
                 location_list.sort(key=retrieve_time_from_location)
                 activity[Keys.ACTIVITY_LOCATIONS_KEY] = location_list
@@ -1194,57 +1194,6 @@ class MongoDatabase(Database.Database):
             # If the activity was found.
             if activity is not None:
                 activity[Keys.ACTIVITY_VISIBILITY_KEY] = visibility
-                self.activities_collection.save(activity)
-                return True
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return False
-
-    def create_activity_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
-        """Create method for a location."""
-        if device_str is None:
-            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: device_str")
-            return False
-        if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: activity_id")
-            return False
-        if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Invalid object: activity_id")
-            return False
-        if latitude is None:
-            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: latitude")
-            return False
-        if longitude is None:
-            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: longitude")
-            return False
-        if altitude is None:
-            self.log_error(MongoDatabase.create_activity_location.__name__ + ": Unexpected empty object: altitude")
-            return False
-
-        try:
-            # Find the activity.
-            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
-
-            # If the activity was not found then create it.
-            if activity is None:
-                if self.create_activity(activity_id, "", date_time / 1000, device_str):
-                    activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
-
-            # If the activity was found.
-            if activity is not None:
-                location_list = []
-
-                # Get the existing list.
-                if Keys.ACTIVITY_LOCATIONS_KEY in activity:
-                    location_list = activity[Keys.ACTIVITY_LOCATIONS_KEY]
-
-                value = { Keys.LOCATION_TIME_KEY: date_time, Keys.LOCATION_LAT_KEY: latitude, Keys.LOCATION_LON_KEY: longitude, Keys.LOCATION_ALT_KEY: altitude }
-                location_list.append(value)
-                location_list.sort(key=retrieve_time_from_location)
-
-                # Save the changes.
-                activity[Keys.ACTIVITY_LOCATIONS_KEY] = location_list
                 self.activities_collection.save(activity)
                 return True
         except:

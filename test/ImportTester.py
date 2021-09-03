@@ -86,15 +86,11 @@ class TestActivityWriter(Importer.ActivityWriter):
         """Inherited from ActivityWriter."""
         pass
 
-    def create_activity_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
-        """Inherited from ActivityWriter. Called for each location that is read from the input file."""
-        self.location_analyzer.append_location(date_time, latitude, longitude, altitude)
-        self.location_analyzer.update_speeds()
-
     def create_activity_locations(self, device_str, activity_id, locations):
         """Inherited from ActivityWriter. Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
         for location in locations:
-            self.create_activity_location(device_str, activity_id, location[0], location[1], location[2], location[3])
+            self.location_analyzer.append_location(location[0], location[1], location[2], location[3])
+        self.location_analyzer.update_speeds()
 
     def create_activity_sensor_reading(self, activity_id, date_time, sensor_type, value):
         """Inherited from ActivityWriter. Called for each sensor reading that is read from the input file."""

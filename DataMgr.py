@@ -209,12 +209,6 @@ class DataMgr(Importer.ActivityWriter):
         """Inherited from ActivityWriter."""
         pass
 
-    def create_activity_location(self, device_str, activity_id, date_time, latitude, longitude, altitude):
-        """Inherited from ActivityWriter. Create method for a location."""
-        if self.database is None:
-            raise Exception("No database.")
-        return self.database.create_activity_location(device_str, activity_id, date_time, latitude, longitude, altitude)
-
     def create_activity_locations(self, device_str, activity_id, locations):
         """Inherited from ActivityWriter. Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
         if self.database is None:
