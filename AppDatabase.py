@@ -77,7 +77,15 @@ class MongoDatabase(Database.Database):
         """Connects/creates the database"""
         try:
             self.conn = pymongo.MongoClient('localhost:27017')
-            self.database = self.conn['straendb']
+
+            # Database.
+            db_names = self.conn.list_database_names()
+            if 'openworkoutdb' in db_names:
+                self.database = self.conn['openworkoutdb']
+            else:
+                self.database = self.conn['straendb']
+
+            # Handles to the various collections.
             self.users_collection = self.database['users']
             self.activities_collection = self.database['activities']
             self.records_collection = self.database['records']
