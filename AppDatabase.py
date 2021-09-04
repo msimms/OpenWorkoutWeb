@@ -78,12 +78,12 @@ class MongoDatabase(Database.Database):
         try:
             self.conn = pymongo.MongoClient('localhost:27017')
 
-            # Database.
+            # Database. Try the old name, if not found then create or open it with the new name.
             db_names = self.conn.list_database_names()
-            if 'openworkoutdb' in db_names:
-                self.database = self.conn['openworkoutdb']
-            else:
+            if 'straendb' in db_names:
                 self.database = self.conn['straendb']
+            else:
+                self.database = self.conn['openworkoutdb']
 
             # Handles to the various collections.
             self.users_collection = self.database['users']
