@@ -113,13 +113,14 @@ ${nav}
             if ("horizontal accuracy" in obj_list[i])
             {
                 let accuracy = obj_list[i]["horizontal accuracy"];
-                valid_pos = (accuracy > 0.0)
+                valid_pos = (accuracy > 0 && accuracy < 50.0)
             }
             if ("vertical accuracy" in obj_list[i])
             {
                 let accuracy = obj_list[i]["vertical accuracy"];
 
-                if (accuracy < 0.0)
+                // Invalid altitude data, use last known good value.
+                if (accuracy < 0)
                 {
                     altitude = prev_alt;
                 }
