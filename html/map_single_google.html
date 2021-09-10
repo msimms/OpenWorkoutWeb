@@ -107,18 +107,27 @@ ${nav}
             let latitude = obj_list[i].latitude;
             let longitude = obj_list[i].longitude;
             let altitude = obj_list[i].altitude;
+            let valid_pos = true;
 
+            if ("horizontal accuracy" in obj_list[i])
+            {
+                let accuracy = obj_list[i]["horizontal accuracy"];
+                valid_pos = (accuracy > 0.0)
+            }
             if ("vertical accuracy" in obj_list[i])
             {
-                let v_acc = obj_list[i]["vertical accuracy"];
+                let accuracy = obj_list[i]["vertical accuracy"];
 
-                if (v_acc < 0.0)
+                if (accuracy < 0.0)
                 {
                     altitude = prev_alt;
                 }
             }
 
-            route_coordinates.push(new google.maps.LatLng(latitude, longitude));
+            if (valid_pos)
+            {
+                route_coordinates.push(new google.maps.LatLng(latitude, longitude));
+            }
             elevation_graph.push({"date": new Date(obj_list[i].time), "value": altitude});
 
             if (loc_start_time_ms == 0)
