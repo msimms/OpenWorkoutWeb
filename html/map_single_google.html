@@ -134,7 +134,7 @@ ${nav}
             {
                 loc_start_time_ms = obj_list[i].time;
             }
-            else
+            else if (valid_pos)
             {
                 let meters_traveled = haversine_distance(latitude, longitude, altitude, last_lat, last_lon, prev_alt);
 
@@ -151,10 +151,13 @@ ${nav}
                 }
             }
 
-            loc_end_time_ms = obj_list[i].time;
-            last_lat = latitude;
-            last_lon = longitude;
-            prev_alt = altitude;
+            if (valid_pos)
+            {
+                loc_end_time_ms = obj_list[i].time;
+                last_lat = latitude;
+                last_lon = longitude;
+                prev_alt = altitude;
+            }
         }
         route_path.setPath(route_coordinates);
         route_path.setMap(map);

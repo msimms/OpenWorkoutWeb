@@ -108,11 +108,30 @@ ${nav}
             let latitude = obj_list[i].latitude;
             let longitude = obj_list[i].longitude;
             let altitude = obj_list[i].altitude;
+            let valid_pos = true;
 
-            coordinates.push(new OpenLayers.LonLat(latitude, longitude));
+            if ("horizontal accuracy" in obj_list[i])
+            {
+                let accuracy = obj_list[i]["horizontal accuracy"];
+                valid_pos = (accuracy > 0.0)
+            }
+            if ("vertical accuracy" in obj_list[i])
+            {
+                let accuracy = obj_list[i]["vertical accuracy"];
+
+                if (accuracy < 0.0)
+                {
+                    altitude = prev_alt;
+                }
+            }
+
+            if (valid_pos)
+            {
+                coordinates.push(new OpenLayers.LonLat(latitude, longitude));
+            }
             elevation_graph.push(obj_list[i].altitude);
 
-            if (i > 0)
+            if (valid_pos && i > 0)
             {
                 let meters_traveled = haversine_distance(latitude, longitude, altitude, last_lat, last_lon, prev_alt);
 
@@ -128,9 +147,12 @@ ${nav}
                 }
             }
 
-            last_lat = latitude;
-            last_lon = longitude;
-            prev_alt = altitude;
+            if (valid_pos)
+            {
+                last_lat = latitude;
+                last_lon = longitude;
+                prev_alt = altitude;
+            }
         }
 
         last_lat = obj_list[obj_list.length - 1].latitude;
