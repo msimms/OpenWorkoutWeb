@@ -1078,38 +1078,59 @@ class MongoDatabase(Database.Database):
             if activity is not None:
 
                 # Update the locations. Location data is an array, the order is defined in Api.parse_json_loc_obj.
-                location_list = []
-                if Keys.ACTIVITY_LOCATIONS_KEY in activity:
-                    location_list = activity[Keys.ACTIVITY_LOCATIONS_KEY]
-                for location in locations:
-                    value = { Keys.LOCATION_TIME_KEY: location[0], Keys.LOCATION_LAT_KEY: location[1], Keys.LOCATION_LON_KEY: location[2], Keys.LOCATION_ALT_KEY: location[3], Keys.LOCATION_HORIZONTAL_ACCURACY_KEY: location[4], Keys.LOCATION_VERTICAL_ACCURACY_KEY: location[5] }
-                    location_list.append(value)
-                location_list.sort(key=retrieve_time_from_location)
-                activity[Keys.ACTIVITY_LOCATIONS_KEY] = location_list
+                if len(locations) > 0:
+
+                    # Find any existing location data.
+                    old_locations = []
+                    if Keys.ACTIVITY_LOCATIONS_KEY in activity:
+                        old_locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
+
+                    # Append the new locations.
+                    for location in locations:
+                        value = { Keys.LOCATION_TIME_KEY: location[0], Keys.LOCATION_LAT_KEY: location[1], Keys.LOCATION_LON_KEY: location[2], Keys.LOCATION_ALT_KEY: location[3], Keys.LOCATION_HORIZONTAL_ACCURACY_KEY: location[4], Keys.LOCATION_VERTICAL_ACCURACY_KEY: location[5] }
+                        old_locations.append(value)
+
+                    # Make sure everything is in the right order, no guarantee we got the updates in the correct order.
+                    old_locations.sort(key=retrieve_time_from_location)
+
+                    # Update the database.
+                    activity[Keys.ACTIVITY_LOCATIONS_KEY] = old_locations
 
                 # Update the sensor readings.
                 if sensor_readings_dict:
                     for sensor_type in sensor_readings_dict:
-                        value_list = []
+
+                        # Existing sensor values.
+                        old_value_list = []
                         if sensor_type in activity:
-                            value_list = activity[sensor_type]
+                            old_value_list = activity[sensor_type]
+
+                        # Append new values.
                         for value in sensor_readings_dict[sensor_type]:
                             time_value_pair = { str(value[0]): float(value[1]) }
-                            value_list.append(time_value_pair)
-                        value_list.sort(key=retrieve_time_from_time_value_pair)
-                        activity[sensor_type] = value_list
+                            old_value_list.append(time_value_pair)
+
+                        # Sort and update.
+                        old_value_list.sort(key=retrieve_time_from_time_value_pair)
+                        activity[sensor_type] = old_value_list
 
                 # Update the metadata readings.
                 if metadata_list_dict:
                     for metadata_type in metadata_list_dict:
-                        value_list = []
+
+                        # Existing metadata values.
+                        old_value_list = []
                         if metadata_type in activity:
-                            value_list = activity[metadata_type]
+                            old_value_list = activity[metadata_type]
+
+                        # Append new values.
                         for value in metadata_list_dict[metadata_type]:
                             time_value_pair = { str(value[0]): float(value[1]) }
-                            value_list.append(time_value_pair)
-                        value_list.sort(key=retrieve_time_from_time_value_pair)
-                        activity[metadata_type] = value_list
+                            old_value_list.append(time_value_pair)
+
+                        # Sort and update.
+                        old_value_list.sort(key=retrieve_time_from_time_value_pair)
+                        activity[metadata_type] = old_value_list
 
                 # Write out the changes.
                 self.activities_collection.save(activity)
