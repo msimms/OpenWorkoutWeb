@@ -153,7 +153,6 @@ class Api(object):
         activity_type = ""
         username = ""
         locations = []
-        accels = []
         sensor_readings_dict = {}
         metadata_list_dict = {}
 
@@ -169,11 +168,14 @@ class Api(object):
 
         if Keys.APP_LOCATIONS_KEY in values:
 
-            # Parse each of the location objects.
+            # Parse each of the location objects. Check for invalid data.
             encoded_locations = values[Keys.APP_LOCATIONS_KEY]
             for location_obj in encoded_locations:
                 location = self.parse_json_loc_obj(location_obj, sensor_readings_dict, metadata_list_dict)
-                locations.append(location)
+
+                # Horizontal accuracy of less than zero means the location is invalid.
+                if location[4] >= 0.0:
+                    locations.append(location)
 
             # Update the activity.
             self.data_mgr.update_moving_activity(device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict)
@@ -181,6 +183,7 @@ class Api(object):
         if Keys.APP_ACCELEROMETER_KEY in values:
 
             # Parse each of the accelerometer objects.
+            accels = []
             encoded_accel = values[Keys.APP_ACCELEROMETER_KEY]
             for accel_obj in encoded_accel:
                 accel = self.parse_json_accel_obj(accel_obj)
