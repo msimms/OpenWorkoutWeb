@@ -637,6 +637,14 @@ class DataMgr(Importer.ActivityWriter):
 
         return result
 
+    def activity_exists(self, activity_id):
+        """Determines whether or not there is a document corresonding to the activity ID."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.activity_exists(activity_id)
+
     def retrieve_activity_visibility(self, device_str, activity_id):
         """Returns the visibility setting for the specified activity."""
         if self.database is None:

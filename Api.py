@@ -1958,8 +1958,8 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity hash.")
 
         # Anything in the database?
-        activity = self.data_mgr.retrieve_activity(activity_id)
-        if activity is None:
+        exists = self.data_mgr.activity_exists(activity_id)
+        if not exists:
             return True, json.dumps( { Keys.CODE_KEY: 0, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity does not exist
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None:
