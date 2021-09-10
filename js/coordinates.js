@@ -237,16 +237,25 @@ function compute_grade_adjusted_pace(gradient_list, time_pace_data)
     let gap_list = time_pace_data.map(function(x, i) {
         if (i < num_gradients)
         {
-            let gradient = gradient_list[i];
-            let cost = (155.4 * (Math.pow(gradient, 5))) - (30.4 * Math.pow(gradient, 4)) - (43.4 * Math.pow(gradient, 3)) - (46.3 * (gradient * gradient)) - (19.5 * gradient) + 3.6;
-            let value = x.value + (cost - 3.6) / 3.6;
+            let pace = x.value;
 
-            if (value < 0.0)
-                value = 0.0;
-            if (value > 50.0)
-                value = 50.0;
+            if (pace > 0.1)
+            {
+                let gradient = gradient_list[i];
 
-            return {"date": new Date(x.date), "value": value};
+                if (gradient > 1.0)
+                    gradient = 1.0;
+                if (gradient < -1.0)
+                    gradient = -1.0;
+
+                let cost = (155.4 * (Math.pow(gradient, 5))) - (30.4 * Math.pow(gradient, 4)) - (43.4 * Math.pow(gradient, 3)) - (46.3 * (gradient * gradient)) - (19.5 * gradient) + 3.6;
+                pace = pace + (cost - 3.6) / 3.6;
+
+                if (pace < 0.0)
+                    pace = 0.0;
+            }
+
+            return {"date": new Date(x.date), "value": pace};
         }
         return {"date": new Date(x.date), "value": 0.0};        
     });
