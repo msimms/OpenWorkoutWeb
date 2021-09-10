@@ -838,7 +838,7 @@ class App(object):
             return self.render_error("The requested activity does not exist.")
 
         # Determine who owns the device, and hence the activity.
-        activity_user_id, activity_username, activity_user_realname = self.user_mgr.get_activity_user(activity)
+        activity_user_id, _, activity_user_realname = self.user_mgr.get_activity_user(activity)
         belongs_to_current_user = str(activity_user_id) == str(logged_in_user_id)
         if activity_user_realname is None:
             activity_user_realname = ""

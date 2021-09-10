@@ -645,15 +645,13 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.activity_exists(activity_id)
 
-    def retrieve_activity_visibility(self, device_str, activity_id):
+    def retrieve_activity_visibility(self, activity_id):
         """Returns the visibility setting for the specified activity."""
         if self.database is None:
             raise Exception("No database.")
-        if device_str is None or len(device_str) == 0:
-            raise Exception("Bad parameter.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_activity_visibility(device_str, activity_id)
+        return self.database.retrieve_activity_visibility(activity_id)
 
     def update_activity_visibility(self, activity_id, visibility):
         """Changes the visibility setting for the specified activity."""

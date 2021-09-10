@@ -472,3 +472,8 @@ class UserMgr(object):
             if user is not None:
                 return str(user[Keys.DATABASE_ID_KEY]), user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
         return None, None, None
+
+    def get_activity_id_user(self, activity_id):
+        """Returns the user record that corresponds with the given activity id."""
+        activity = self.database.retrieve_activity_small(activity_id)
+        return self.get_activity_user(activity)

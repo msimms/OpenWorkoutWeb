@@ -1049,6 +1049,26 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    def retrieve_activity_small(self, activity_id):
+        """Retrieve method for an activity, specified by the activity ID."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.retrieve_activity_small.__name__ + ": Unexpected empty object: activity_id")
+            return None
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.retrieve_activity_small.__name__ + ": Invalid object: activity_id")
+            return None
+
+        try:
+            # Things we don't need.
+            exclude_keys = self.list_excluded_activity_keys_activity_lists()
+
+            # Find the activity.
+            return self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: re.compile(activity_id, re.IGNORECASE) }, exclude_keys)
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return None
+
     def update_activity(self, device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict):
         """Updates locations, sensor readings, and metadata associated with a moving activity. Provided as a performance improvement over making several database updates."""
         if device_str is None:

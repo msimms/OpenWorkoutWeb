@@ -72,6 +72,14 @@ class Api(object):
         belongs_to_current_user = belongs_to_current_user = str(activity_user_id) == str(self.user_id)
         return self.data_mgr.is_activity_public(activity) or belongs_to_current_user
 
+    def activity_id_can_be_viewed(self, activity_id):
+        """Determine if the requesting user can view the activity."""
+        if self.user_id is None:
+            return self.data_mgr.is_activity_id_public(activity_id)
+        activity_user_id, _, _ = self.user_mgr.get_activity_id_user(activity_id)
+        belongs_to_current_user = belongs_to_current_user = str(activity_user_id) == str(self.user_id)
+        return self.data_mgr.is_activity_id_public(activity_id) or belongs_to_current_user
+
     def parse_json_loc_obj(self, json_obj, sensor_readings_dict, metadata_list_dict):
         """Helper function that parses the JSON object, which contains location data, and updates the database."""
         location = []
@@ -453,11 +461,8 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        # Get the activity from the database.
-        activity = self.data_mgr.retrieve_activity(activity_id)
-
         # Determine if the requesting user can view the activity.
-        if not self.activity_can_be_viewed(activity):
+        if not self.activity_id_can_be_viewed(activity_id):
             return self.error("The requested activity is not viewable to this user.")
 
         # Get the activity summary from the database.
