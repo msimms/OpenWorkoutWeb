@@ -243,6 +243,8 @@ function compute_grade_adjusted_pace(gradient_list, time_pace_data)
 
             if (value < 0.0)
                 value = 0.0;
+            if (value > 50.0)
+                value = 50.0;
 
             return {"date": new Date(x.date), "value": value};
         }
