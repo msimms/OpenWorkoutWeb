@@ -108,6 +108,16 @@ ${nav}
             let longitude = obj_list[i].longitude;
             let altitude = obj_list[i].altitude;
 
+            if ("vertical accuracy" in obj_list[i])
+            {
+                let v_acc = obj_list[i]["vertical accuracy"];
+
+                if (v_acc < 0.0)
+                {
+                    altitude = prev_alt;
+                }
+            }
+
             route_coordinates.push(new google.maps.LatLng(latitude, longitude));
             elevation_graph.push({"date": new Date(obj_list[i].time), "value": altitude});
 
@@ -126,6 +136,7 @@ ${nav}
                 else
                 {
                     let gradient = (altitude - prev_alt) / meters_traveled;
+
                     gradient_curve.push(gradient);
                     prev_gradient = gradient;
                 }
