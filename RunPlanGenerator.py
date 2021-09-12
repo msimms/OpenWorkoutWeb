@@ -296,7 +296,7 @@ class RunPlanGenerator(object):
         in_taper = inputs[Keys.PLAN_INPUT_IN_TAPER_KEY]
         avg_run_distance = inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
         num_runs = inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS]
-        exp_level = inputs[Keys.PLAN_INPUT_PLAN_INPUT_EXPERIENCE_LEVEL_KEY]
+        exp_level = inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY]
         comfort_level = inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY]
 
         # Handle situation in which the user hasn't run in four weeks.
