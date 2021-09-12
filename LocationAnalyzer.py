@@ -80,6 +80,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                 self.bests[record_name] = seconds
 
     def do_split_check(self, seconds, split_meters, split_buf):
+        """Helper function for computing split times."""
         units_traveled = self.total_distance / split_meters
         whole_units_traveled = int(units_traveled)
         if len(split_buf) < whole_units_traveled + 1:
