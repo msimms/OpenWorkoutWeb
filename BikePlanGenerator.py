@@ -21,6 +21,6 @@ class BikePlanGenerator(object):
         # Add critical workouts:
         # Long ride, culminating in (maybe) an overdistance ride.
 
-        avg_bike_distance = inputs[Keys.AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS]
+        avg_bike_distance = inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS]
 
         return workouts
