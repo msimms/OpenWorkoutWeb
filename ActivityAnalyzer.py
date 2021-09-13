@@ -97,12 +97,25 @@ class ActivityAnalyzer(object):
                 location_analyzer = LocationAnalyzer.LocationAnalyzer(activity_type)
                 locations = self.activity[Keys.ACTIVITY_LOCATIONS_KEY]
                 for location in locations:
+
+                    # Required elements.
                     end_time_ms = location[Keys.LOCATION_TIME_KEY]
                     latitude = location[Keys.LOCATION_LAT_KEY]
                     longitude = location[Keys.LOCATION_LON_KEY]
                     altitude = location[Keys.LOCATION_ALT_KEY]
-                    location_analyzer.append_location(end_time_ms, latitude, longitude, altitude)
+
+                    # Optional elements.
+                    horizontal_accuracy = 0.0
+                    vertical_accuracy = 0.0
+                    if Keys.LOCATION_HORIZONTAL_ACCURACY_KEY in location:
+                        horizontal_accuracy = location[Keys.LOCATION_HORIZONTAL_ACCURACY_KEY]
+                    if Keys.LOCATION_VERTICAL_ACCURACY_KEY in location:
+                        vertical_accuracy = location[Keys.LOCATION_VERTICAL_ACCURACY_KEY]
+
+                    # Update the analyzer.
+                    location_analyzer.append_location(end_time_ms, latitude, longitude, altitude, horizontal_accuracy, vertical_accuracy)
                     location_analyzer.update_speeds()
+
                     self.should_yield()
                 self.summary_data.update(location_analyzer.analyze())
             self.should_yield()

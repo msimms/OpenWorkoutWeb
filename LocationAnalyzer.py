@@ -170,8 +170,14 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                     continue
                 self.do_record_check(Keys.BEST_CENTURY, total_seconds, total_meters, Units.METERS_PER_MILE * 100.0)
 
-    def append_location(self, date_time_ms, latitude, longitude, altitude):
+    def append_location(self, date_time_ms, latitude, longitude, altitude, horizontal_accuracy, vertical_accuracy):
         """Adds another location to the analyzer. Locations should be sent in order."""
+        """Accuracy measurements are in meters, with -1 meaning the data is invalid."""
+
+        # Ignore invalid readings. Invalid lat/lon are indicated as -1, but extremely high values should be ignored too. Units are meters.
+        if horizontal_accuracy is not None:
+            if horizontal_accuracy < 0.0 or horizontal_accuracy > 50.0:
+                return
 
         # Not much we can do with the first location other than note the start time.
         if self.start_time_ms is None:
@@ -207,11 +213,22 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         """Adds many locations to the analyzer. Locations should be sent in order."""
 
         for location in locations:
+
+            # Required elements.
             date_time = location[Keys.LOCATION_TIME_KEY]
             latitude = location[Keys.LOCATION_LAT_KEY]
             longitude = location[Keys.LOCATION_LON_KEY]
             altitude = location[Keys.LOCATION_ALT_KEY]
-            self.append_location(date_time, latitude, longitude, altitude)
+
+            # Optional elements.
+            horizontal_accuracy = 0.0
+            vertical_accuracy = 0.0
+            if Keys.LOCATION_HORIZONTAL_ACCURACY_KEY in location:
+                horizontal_accuracy = location[Keys.LOCATION_HORIZONTAL_ACCURACY_KEY]
+            if Keys.LOCATION_VERTICAL_ACCURACY_KEY in location:
+                vertical_accuracy = location[Keys.LOCATION_VERTICAL_ACCURACY_KEY]
+
+            self.append_location(date_time, latitude, longitude, altitude, horizontal_accuracy, vertical_accuracy)
     
     def examine_interval_peak(self, start_index, end_index):
         """Examines a line of near-constant pace/speed."""
