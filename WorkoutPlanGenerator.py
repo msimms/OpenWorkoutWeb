@@ -314,6 +314,9 @@ class WorkoutPlanGenerator(object):
 
             # When was the last time a plan was generated?
 
+            # Note this attempt to generate a workout plan.
+            now = datetime.datetime.utcnow()
+            self.user_mgr.update_user_setting(user_id, Keys.USER_PLAN_LAST_GENERATED_TIME, now, now)
 
             # Compute the model inputs.
             inputs = self.calculate_inputs(user_id)
