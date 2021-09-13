@@ -931,16 +931,18 @@ class MongoDatabase(Database.Database):
     @Perf.statistics
     def retrieve_each_user_activity(self, context, user_id, callback_func):
         """Retrieves each user activity and calls the callback function for each one."""
+        """Returns TRUE on success, FALSE if an error was encountered."""
         try:
             activities_cursor = self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id })
             if activities_cursor is not None:
                 while activities_cursor.alive:
                     activity = activities_cursor.next()
                     callback_func(context, activity, user_id)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return False
 
     @Perf.statistics
     def retrieve_devices_activity_list(self, devices, start_time, end_time):

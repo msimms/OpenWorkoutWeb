@@ -148,6 +148,15 @@ class DataMgr(Importer.ActivityWriter):
 
         return end_time_sec
 
+    def get_activity_start_and_end_times(self, activity):
+        """Retrieves the start time and end time, computing the end time, if necessary."""
+        activity_start_time_sec = activity[Keys.ACTIVITY_START_TIME_KEY]
+        if Keys.ACTIVITY_END_TIME_KEY not in activity:
+            activity_end_time_sec = self.compute_and_store_activity_end_time(activity)
+        else:
+            activity_end_time_sec = activity[Keys.ACTIVITY_END_TIME_KEY]
+        return activity_start_time_sec, activity_end_time_sec
+
     def is_duplicate_activity(self, user_id, start_time_sec, optional_activity_id):
         """Inherited from ActivityWriter. Returns TRUE if the activity appears to be a duplicate of another activity. Returns FALSE otherwise."""
         if self.database is None:
@@ -165,11 +174,7 @@ class DataMgr(Importer.ActivityWriter):
             if Keys.ACTIVITY_START_TIME_KEY in activity:
 
                 # Get the activity start and end times.
-                activity_start_time_sec = activity[Keys.ACTIVITY_START_TIME_KEY]
-                if Keys.ACTIVITY_END_TIME_KEY not in activity:
-                    activity_end_time_sec = self.compute_and_store_activity_end_time(activity)
-                else:
-                    activity_end_time_sec = activity[Keys.ACTIVITY_END_TIME_KEY]
+                activity_start_time_sec, activity_end_time_sec = self.get_activity_start_and_end_times(activity)
 
                 # We're looking for activities that start within the bounds of another activity.
                 if start_time_sec >= activity_start_time_sec and start_time_sec < activity_end_time_sec:
@@ -549,7 +554,7 @@ class DataMgr(Importer.ActivityWriter):
                 self.database.retrieve_each_device_activity(context, user_id, device, cb)
 
         # List activities with no device that are associated with the user.
-        self.database.retrieve_each_user_activity(context, user_id, cb)
+        return self.database.retrieve_each_user_activity(context, user_id, cb)
 
     def retrieve_all_activities_visible_to_user(self, user_id, user_realname, start_time, end_time, num_results):
         """Returns a list containing all of the activities visible to the specified user, up to num_results. num_results can be None for all activiites."""
@@ -869,7 +874,9 @@ class DataMgr(Importer.ActivityWriter):
         for tag in tags:
             tag_distances[tag] = 0.0
 
-        self.retrieve_each_user_activity(tag_distances, user_id, DataMgr.distance_for_tag_cb)
+        # Retrieve each activity, tag_distances will be updated in the callback.
+        if not self.retrieve_each_user_activity(tag_distances, user_id, DataMgr.distance_for_tag_cb):
+            raise Exception("Error retrieving activities.")
         return tag_distances
 
     def create_activity_comment(self, activity_id, commenter_id, comment):

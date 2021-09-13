@@ -115,14 +115,15 @@ class WorkoutPlanGenerator(object):
         self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.SIX_MONTHS)
 
         # This will trigger the callback for each of the user's activities.
-        self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb)
+        if not self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb):
+            raise Exception("Error retrieving the user's activities.")
 
         #
         # Need cycling FTP and run training paces.
         #
 
         # Look through the user's six month records.
-        cycling_bests, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.SIX_MONTHS)
+        _, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.SIX_MONTHS)
 
         # Estimate running paces from the user's six month records.
         if running_bests is not None:
@@ -138,7 +139,7 @@ class WorkoutPlanGenerator(object):
         #
 
         # Look through the user's four week records.
-        cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.FOUR_WEEKS)
+        _, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.FOUR_WEEKS)
         if running_bests is not None and Keys.LONGEST_DISTANCE in running_bests:
             longest_run_in_four_weeks = running_bests[Keys.LONGEST_DISTANCE]
             longest_run_in_four_weeks = longest_run_in_four_weeks[0]
@@ -175,7 +176,7 @@ class WorkoutPlanGenerator(object):
                 num_runs = running_summary[Keys.TOTAL_ACTIVITIES]
                 avg_running_distance = running_summary[Keys.TOTAL_DISTANCE] / num_runs
 
-        # Compute an experience level for the user.
+        # Get the experience/comfort level for the user.
         experience_level = self.user_mgr.retrieve_user_setting(user_id, Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY)
         comfort_level = self.user_mgr.retrieve_user_setting(user_id, Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY)
 
@@ -321,9 +322,12 @@ class WorkoutPlanGenerator(object):
 
         try:
             user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY]
+
+            # Compute the model inputs.
             inputs = self.calculate_inputs(user_id)
 
-            # Generate the workouts.
+            # Generate the workouts. If an ML model was provided then use it. Otherwise, use the
+            # static logic of the hard-coded "expert" system.
             if model is None:
                 workouts = self.generate_workouts(user_id, inputs)
             else:
