@@ -180,15 +180,6 @@ class WorkoutPlanGenerator(object):
         experience_level = self.user_mgr.retrieve_user_setting(user_id, Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY)
         comfort_level = self.user_mgr.retrieve_user_setting(user_id, Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY)
 
-        # Are we in a taper?
-        # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
-        if weeks_until_goal < 2 and goal_type == Keys.GOAL_MARATHON_RUN_KEY:
-            in_taper = 1
-        elif weeks_until_goal < 1:
-            in_taper = 1
-        else:
-            in_taper = 0
-
         # Store all the inputs in a dictionary.
         inputs = {}
         if len(running_paces) == 0:
@@ -209,7 +200,6 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.GOAL_KEY] = goal
         inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
-        inputs[Keys.PLAN_INPUT_IN_TAPER_KEY] = in_taper
         inputs[Keys.PLAN_INPUT_NUM_WEEKS_BUILDING_KEY] = 0
         inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = avg_running_distance
         inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = avg_cycling_distance
@@ -274,7 +264,6 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.GOAL_KEY])
         model_inputs.append(inputs[Keys.GOAL_TYPE_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY])
-        model_inputs.append(inputs[Keys.PLAN_INPUT_IN_TAPER_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_NUM_WEEKS_BUILDING_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS])
@@ -322,6 +311,8 @@ class WorkoutPlanGenerator(object):
 
         try:
             user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY]
+
+            # When was the last time a plan was generated?
 
             # Compute the model inputs.
             inputs = self.calculate_inputs(user_id)

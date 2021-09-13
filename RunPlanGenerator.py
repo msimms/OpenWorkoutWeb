@@ -283,6 +283,7 @@ class RunPlanGenerator(object):
 
         goal_distance = inputs[Keys.GOAL_RUN_DISTANCE_KEY]
         goal_type = inputs[Keys.GOAL_TYPE_KEY]
+        weeks_until_goal = inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY]
         short_interval_run_pace = inputs[Keys.SHORT_INTERVAL_RUN_PACE]
         functional_threshold_pace = inputs[Keys.FUNCTIONAL_THRESHOLD_PACE]
         speed_run_pace = inputs[Keys.SPEED_RUN_PACE]
@@ -293,11 +294,18 @@ class RunPlanGenerator(object):
         longest_run_week_1 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY]
         longest_run_week_2 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY]
         longest_run_week_3 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY]
-        in_taper = inputs[Keys.PLAN_INPUT_IN_TAPER_KEY]
         avg_run_distance = inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
         num_runs = inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS]
         exp_level = inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY]
         comfort_level = inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY]
+
+        # Are we in a taper?
+        # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
+        in_taper = False
+        if weeks_until_goal <= 2 and goal_type == Keys.GOAL_MARATHON_RUN_KEY:
+            in_taper = True
+        if weeks_until_goal <= 1 and goal_type == Keys.GOAL_HALF_MARATHON_RUN_KEY:
+            in_taper = True
 
         # Handle situation in which the user hasn't run in four weeks.
         if not RunPlanGenerator.valid_float(longest_run_in_four_weeks):
@@ -322,8 +330,11 @@ class RunPlanGenerator(object):
 
         # Compute the longest run needed to accomplish the goal.
         # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.
-        # This equation was derived by playing with trendlines in a spreadsheet.
-        max_long_run_distance = ((-0.002 * goal_distance) *  (-0.002 * goal_distance)) + (0.7 * goal_distance) + 4.4
+        # The non-taper equation was derived by playing with trendlines in a spreadsheet.
+        if in_taper:
+            max_long_run_distance = 0.4 * goal_distance
+        else:
+            max_long_run_distance = ((-0.002 * goal_distance) *  (-0.002 * goal_distance)) + (0.7 * goal_distance) + 4.4
 
         # Handle situation in which the user is already meeting or exceeding the goal distance.
         if longest_run_in_four_weeks >= max_long_run_distance:
