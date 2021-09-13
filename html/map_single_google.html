@@ -63,6 +63,7 @@ ${nav}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="${root_url}/google_maps"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
     let loc_start_time_ms = 0;
@@ -73,12 +74,16 @@ ${nav}
     let marker = null;
     let info_window = null;
 
-    let last_lat = ${lastLat};
-    let last_lon = ${lastLon};
+    let last_lat = 0.0;
+    let last_lon = 0.0;
 
     let route_coordinates = [];
     let elevation_graph = [];
     let gradient_curve = [];
+    let split_times = [];
+
+    let total_meters_traveled = 0.0;
+    let total_ms_traveled = 0.0;
 
     /// @function append_to_summary_list
     function append_to_summary_list(key, value)
@@ -90,6 +95,32 @@ ${nav}
         ul.appendChild(li);
     }
 
+    /// @function do_split_check
+    /// Helper function for computing split times.
+    function do_split_check(split_meters)
+    {
+        let units_traveled = total_meters_traveled / split_meters;
+        let whole_units_traveled = parseInt(units_traveled);
+
+        if (split_times.length < whole_units_traveled + 1)
+            split_times.push(total_ms_traveled)
+        else
+            split_times[whole_units_traveled] = total_ms_traveled
+    }
+
+    /// @function draw_split_times_chart
+    function draw_split_times_chart()
+    {
+        let new_splits = split_times.map(function(item, index) {
+            if (index == 0)
+                return item / 1000.0;
+            return (item / 1000.0) - (split_times[index-1] / 1000.0);
+        });
+
+        if (new_splits.length > 0)
+            $(function() { draw_bar_chart(new_splits, "Split Times (seconds)", "LightSteelBlue") });
+    }
+
     var append_to_track = function(obj_list)
     {
         if (obj_list == null)
@@ -97,8 +128,6 @@ ${nav}
         if (obj_list.length == 0)
             return;
 
-        let last_lat = 0.0;
-        let last_lon = 0.0;
         let prev_alt = 0.0;
         let prev_gradient = 0.0;
 
@@ -109,6 +138,8 @@ ${nav}
             let altitude = obj_list[i].altitude;
             let valid_pos = true;
 
+            // Accuracy of -1 means the data is invalid.
+            // Excessively large values should also be considered invalid.
             if ("horizontal accuracy" in obj_list[i])
             {
                 let accuracy = obj_list[i]["horizontal accuracy"];
@@ -125,20 +156,25 @@ ${nav}
                 }
             }
 
-            if (valid_pos)
-            {
-                route_coordinates.push(new google.maps.LatLng(latitude, longitude));
-            }
-            elevation_graph.push({"date": new Date(obj_list[i].time), "value": altitude});
-
-            if (loc_start_time_ms == 0)
+            if (i == 0)
             {
                 loc_start_time_ms = obj_list[i].time;
             }
             else if (valid_pos)
             {
                 let meters_traveled = haversine_distance(latitude, longitude, altitude, last_lat, last_lon, prev_alt);
+                let new_meters_traveled = total_meters_traveled + meters_traveled;
 
+                // Update split times.
+                total_ms_traveled = obj_list[i].time - loc_start_time_ms;
+                if ("${unit_system}" == "metric")
+                    do_split_check(1000.0);
+                else
+                    do_split_check(1609.34);
+
+                total_meters_traveled = new_meters_traveled;
+
+                // Try to keep the gradient curve kinda smooth.
                 if (meters_traveled < 0.01)
                 {
                     gradient_curve.push(prev_gradient);
@@ -154,6 +190,9 @@ ${nav}
 
             if (valid_pos)
             {
+                route_coordinates.push(new google.maps.LatLng(latitude, longitude));
+                elevation_graph.push({"date": new Date(obj_list[i].time), "value": altitude});
+
                 last_lat = latitude;
                 last_lon = longitude;
                 prev_alt = altitude;
@@ -163,8 +202,9 @@ ${nav}
         route_path.setPath(route_coordinates);
         route_path.setMap(map);
 
-        last_lat = obj_list[obj_list.length - 1].latitude;
-        last_lon = obj_list[obj_list.length - 1].longitude;
+        // Center the map.
+        let center = new google.maps.LatLng(last_lat, last_lon);
+        map.panTo(center);
 
         // Analyze the route, compute the total distance, avg. speed, etc.
         let unit_system = "${unit_system}";
@@ -185,6 +225,9 @@ ${nav}
 
         // Request metadata for the info box.
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", cache: false, success: update_metadata, dataType: "json" });
+
+        // Draw the split times chart.
+        draw_split_times_chart();
 
         // Draw the elevation graph.
         draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", "PeachPuff");
@@ -296,19 +339,10 @@ ${summary}
 
 <div id="charts"/>
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
     let start_time_ms = 0;
     let end_time_ms = 0;
-
-    let splits = [
-${splits}
-    ];
-    let new_splits = splits.map(function(item) { return item / 1000.0 });
-
-    if (new_splits.length > 0)
-        $(function() { draw_bar_chart(new_splits, "Split Times (seconds)", "LightSteelBlue") });
 
     var process_summarydata = function(summarydata)
     {

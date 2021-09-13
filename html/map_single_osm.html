@@ -63,6 +63,7 @@ ${nav}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script type="text/javascript" src="${root_url}/js/OpenStreetMap.js"></script>
 <script type="text/javascript">
 
@@ -70,14 +71,19 @@ ${nav}
     let loc_end_time_ms = 0;
 
     let content_string = null;
-    let map = null;
+    let map = new OpenLayers.Map();
     let lgpx = null;
 
-    let last_lat = ${lastLat};
-    let last_lon = ${lastLon};
+    let last_lat = 0.0;
+    let last_lon = 0.0;
 
+    let route_coordinates = [];
     let elevation_graph = [];
     let gradient_curve = [];
+    let split_times = [];
+
+    let total_meters_traveled = 0.0;
+    let total_ms_traveled = 0.0;
 
     /// @function append_to_summary_list
     function append_to_summary_list(key, value)
@@ -89,6 +95,32 @@ ${nav}
         ul.appendChild(li);
     }
 
+    /// @function do_split_check
+    /// Helper function for computing split times.
+    function do_split_check(split_meters)
+    {
+        let units_traveled = total_meters_traveled / split_meters;
+        let whole_units_traveled = parseInt(units_traveled);
+
+        if (split_times.length < whole_units_traveled + 1)
+            split_times.push(total_ms_traveled)
+        else
+            split_times[whole_units_traveled] = total_ms_traveled
+    }
+
+    /// @function draw_split_times_chart
+    function draw_split_times_chart()
+    {
+        let new_splits = split_times.map(function(item, index) {
+            if (index == 0)
+                return item / 1000.0;
+            return (item / 1000.0) - (split_times[index-1] / 1000.0);
+        });
+
+        if (new_splits.length > 0)
+            $(function() { draw_bar_chart(new_splits, "Split Times (seconds)", "LightSteelBlue") });
+    }
+
     /// @function append_to_track
     var append_to_track = function(obj_list)
     {
@@ -97,11 +129,8 @@ ${nav}
         if (obj_list.length == 0)
             return;
 
-        let last_lat = 0.0;
-        let last_lon = 0.0;
         let prev_alt = 0.0;
         let prev_gradient = 0.0;
-        let coordinates = feature.getGeometry().getCoordinates();
 
         for (let i = 0; i < obj_list.length; ++i)
         {
@@ -110,6 +139,8 @@ ${nav}
             let altitude = obj_list[i].altitude;
             let valid_pos = true;
 
+            // Accuracy of -1 means the data is invalid.
+            // Excessively large values should also be considered invalid.
             if ("horizontal accuracy" in obj_list[i])
             {
                 let accuracy = obj_list[i]["horizontal accuracy"];
@@ -126,16 +157,25 @@ ${nav}
                 }
             }
 
-            if (valid_pos)
+            if (i == 0)
             {
-                coordinates.push(new OpenLayers.LonLat(latitude, longitude));
+                loc_start_time_ms = obj_list[i].time;
             }
-            elevation_graph.push(obj_list[i].altitude);
-
-            if (valid_pos && i > 0)
+            else if (valid_pos)
             {
                 let meters_traveled = haversine_distance(latitude, longitude, altitude, last_lat, last_lon, prev_alt);
+                let new_meters_traveled = total_meters_traveled + meters_traveled;
 
+                // Update split times.
+                total_ms_traveled = obj_list[i].time - loc_start_time_ms;
+                if ("${unit_system}" == "metric")
+                    do_split_check(1000.0);
+                else
+                    do_split_check(1609.34);
+
+                total_meters_traveled = new_meters_traveled;
+
+                // Try to keep the gradient curve kinda smooth.
                 if (meters_traveled < 0.01)
                 {
                     gradient_curve.push(prev_gradient);
@@ -143,6 +183,7 @@ ${nav}
                 else
                 {
                     let gradient = (altitude - prev_alt) / meters_traveled;
+
                     gradient_curve.push(gradient);
                     prev_gradient = gradient;
                 }
@@ -150,14 +191,41 @@ ${nav}
 
             if (valid_pos)
             {
+                route_coordinates.push(new OpenLayers.Geometry.Point(longitude, latitude));
+                elevation_graph.push({"date": new Date(obj_list[i].time), "value": altitude});
+
                 last_lat = latitude;
                 last_lon = longitude;
                 prev_alt = altitude;
             }
         }
 
-        last_lat = obj_list[obj_list.length - 1].latitude;
-        last_lon = obj_list[obj_list.length - 1].longitude;
+        let map_div = document.getElementById('map_canvas');
+        map_div.style = "display: block;";
+
+        let osm_layer = new OpenLayers.Layer.OSM("OSM");
+        map.addLayer(osm_layer);
+
+        let projection = new OpenLayers.Projection("EPSG:4326");
+
+        let my_line = new OpenLayers.Geometry.LineString(route_coordinates).transform(projection, map.getProjectionObject());
+        let my_line_style = { strokeColor: "red", strokeWidth: 3, strokeOpacity: 0.75 };
+        let my_feature = new OpenLayers.Feature.Vector(my_line, {}, my_line_style);
+        let my_vector = new OpenLayers.Layer.Vector("line test");
+
+        my_vector.addFeatures([my_feature]);
+        map.addLayers([my_vector]);
+
+        let lon_lat = new OpenLayers.LonLat(last_lon, last_lat).transform(projection, map.getProjectionObject());
+        let zoom = 15;
+        map.setCenter(lon_lat, zoom);
+        map.render(map_div);
+
+        // Draw the split times chart.
+        draw_split_times_chart();
+
+        // Draw the elevation graph.
+        draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", "PeachPuff");
     };
 
     /// @function update_metadata
@@ -196,9 +264,9 @@ ${nav}
 
         content_string += '</p></div></div>';
 
+        // Add the marker.
         let lon_lat = new OpenLayers.LonLat(last_lon, last_lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
         let markers = new OpenLayers.Layer.Markers("Markers");
-
         map.addLayer(markers);    
         markers.addMarker(new OpenLayers.Marker(lon_lat));
     };
@@ -220,92 +288,22 @@ ${nav}
         }
     }
 
+    /// @function initialize
     function initialize()
     {
-        map = new OpenLayers.Map("map_canvas", {
-            controls:[
-                new OpenLayers.Control.Navigation(),
-                new OpenLayers.Control.PanZoomBar(),
-                new OpenLayers.Control.LayerSwitcher(),
-                new OpenLayers.Control.Attribution()],
-            maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
-            maxResolution: 156543.0399,
-            numZoomLevels: 19,
-            units: 'm',
-            projection: new OpenLayers.Projection("EPSG:900913"),
-            displayProjection: new OpenLayers.Projection("EPSG:4326")
-        } );
-
-        // Data source.... export the activity as GPX.
-        let gpx_format = new OpenLayers.Format.GPX();
-        let vector_source = new OpenLayers.Protocol.HTTP({
-            url: "${root_url}/api/1.0/export_activity?activity_id=${activityId}&export_format=gpx",
-            format: gpx_format
-        });
-
-        // Add the layer with the GPX track.
-        proj = new OpenLayers.Projection("EPSG:4326");
-        lgpx = new OpenLayers.Layer.Vector("", {
-            strategies: [new OpenLayers.Strategy.Fixed()],
-            protocol: vector_source,
-            style: {strokeColor: "red", strokeWidth: 3, strokeOpacity: 0.75},
-            projection: proj
-        });
-        lgpx.events.register("loadend", lgpx, function()
-        {
-            let features = lgpx.features[0];
-            let route_coordinates = [];
-            let components = features.geometry.components;
-
-            for (let i = 0; i < components.length; ++i)
-            {
-                let lat_lon = OpenLayers.Projection.transform(components[i], 'EPSG:3857', 'EPSG:4326');
-                route_coordinates.push(lat_lon);
-
-            }
-
-            // Analyze the route, compute the total distance, avg. speed, etc.
-            let meters_traveled = total_distance_osm(route_coordinates);
-            let distance_traveled_str = convert_distance_to_unit_system_str("${unit_system}", meters_traveled);
-            append_to_summary_list("Distance", distance_traveled_str);
-            if (${is_foot_based_activity})
-            {
-                let pace_str = convert_distance_and_duration_to_pace_str("${unit_system}", meters_traveled, ${duration});
-                append_to_summary_list("Avg. Pace:", pace_str);
-            }
-            else
-            {
-                let speed_str = convert_distance_and_duration_to_speed_str("${unit_system}", meters_traveled, ${duration});
-                append_to_summary_list("Avg. Speed:", speed_str);
-            }
-
-            // Draw the elevation graph.
-            draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", "PeachPuff");
-        });
-        map.addLayer(lgpx);
-
-        // Define the map layer
-        map.addLayer(new OpenLayers.Layer.OSM.Mapnik("Mapnik"));
-
-        // Start position for the map (hardcoded here for simplicity,
-        // but maybe you want to get this from the URL params).
-        let lat = last_lat;
-        let lon = last_lon;
-        let zoom = 13;
-        let lon_lat = new OpenLayers.LonLat(lon, lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
-        map.setCenter(lon_lat, zoom);
-
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: update_metadata, dataType: "text" });
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=0", cache: false, success: append_to_track, dataType: "json" });
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", cache: false, success: update_metadata, dataType: "text" });
     }
 
     var check_for_updates = function()
     {
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}", success: append_to_track, dataType: "json" });
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", success: update_metadata, dataType: "text" });
+        let route_len = route_coordinates.length;
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=" + route_len, cache: false, success: append_to_track, dataType: "json" });
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", cache: false, success: update_metadata, dataType: "text" });
     };
 
     initialize();
-    //setInterval(check_for_updates, 30000);
+//    setInterval(check_for_updates, 30000);
 </script>
 
 </div>
@@ -322,19 +320,10 @@ ${summary}
 
 <div id="charts"/>
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
     let start_time_ms = 0;
     let end_time_ms = 0;
-
-    let splits = [
-${splits}
-    ];
-    let new_splits = splits.map(function(item) { return item / 1000.0 });
-
-    if (new_splits.length > 0)
-        $(function() { draw_bar_chart(new_splits, "Split Times (seconds)", "LightSteelBlue") });
 
     var process_summarydata = function(summarydata)
     {

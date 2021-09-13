@@ -586,7 +586,6 @@ class App(object):
 
         # Build the detailed analysis table from data that was computed out-of-band and cached.
         details_str = ""
-        splits_str = ""
         excluded_keys = Keys.UNSUMMARIZABLE_KEYS
         excluded_keys.append(Keys.LONGEST_DISTANCE)
         if summary_data is not None:
@@ -600,12 +599,6 @@ class App(object):
                     details_str += "<td><b>Intervals</b><td>"
                     details_str += App.render_intervals_str(summary_data[key])
                     details_str += "</td><tr>\n"
-                elif key == Keys.KM_SPLITS:
-                    if unit_system == Keys.UNITS_METRIC_KEY:
-                        splits_str = "\t\t" + App.render_difference_array(summary_data[key])
-                elif key == Keys.MILE_SPLITS:
-                    if unit_system == Keys.UNITS_STANDARD_KEY:
-                        splits_str = "\t\t" + App.render_difference_array(summary_data[key])
                 elif key not in excluded_keys:
                     details_str += "<td><b>"
                     details_str += key
@@ -668,19 +661,19 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if is_in_watopia and os.path.isfile(self.zwift_watopia_map_file) > 0:
             my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_WATOPIA_MAP_FILE_NAME)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, map_file_name=ZWIFT_WATOPIA_MAP_FILE_NAME)
         elif is_in_crit_city and os.path.isfile(self.zwift_crit_city_map_file) > 0:
             my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_CRIT_CITY_MAP_FILE_NAME)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, map_file_name=ZWIFT_CRIT_CITY_MAP_FILE_NAME)
         elif is_in_makuri_islands and os.path.isfile(self.zwift_makuri_islands_map_file) > 0:
             my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str, map_file_name=ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, map_file_name=ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME)
         elif self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, lastLat=last_lat, lastLon=last_lon, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, lastLat=last_lat, lastLon=last_lon, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str, splits=splits_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, duration=duration, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, delete=delete_str)
 
     def render_page_for_activity(self, activity, user_realname, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""
