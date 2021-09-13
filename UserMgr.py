@@ -343,21 +343,21 @@ class UserMgr(object):
 
         if key == Keys.DEFAULT_PRIVACY_KEY:
             return Keys.ACTIVITY_VISIBILITY_PUBLIC
-        if key == Keys.PREFERRED_UNITS_KEY:
+        if key == Keys.USER_PREFERRED_UNITS_KEY:
             return Keys.UNITS_STANDARD_KEY
-        if key == Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY:
+        if key == Keys.USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY:
             return Keys.DAYS_OF_WEEK[0]
-        if key == Keys.BIRTHDAY_KEY:
+        if key == Keys.USER_BIRTHDAY_KEY:
             return Keys.DEFAULT_BIRTHDAY_KEY
-        if key == Keys.HEIGHT_KEY:
+        if key == Keys.USER_HEIGHT_KEY:
             return Keys.DEFAULT_HEIGHT_KEY
-        if key == Keys.WEIGHT_KEY:
+        if key == Keys.USER_WEIGHT_KEY:
             return Keys.DEFAULT_WEIGHT_KEY
-        if key == Keys.GENDER_KEY:
+        if key == Keys.USER_GENDER_KEY:
             return Keys.GENDER_MALE_KEY
-        if key == Keys.RESTING_HEART_RATE_KEY:
+        if key == Keys.USER_RESTING_HEART_RATE_KEY:
             return 0
-        if key == Keys.MAXIMUM_HEART_RATE_KEY:
+        if key == Keys.USER_MAXIMUM_HEART_RATE_KEY:
             return 0
         if key == Keys.ESTIMATED_MAX_HEART_RATE_KEY:
             return 0
@@ -377,8 +377,10 @@ class UserMgr(object):
             return 5
         if key == Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY:
             return "sunday"
-        if key == Keys.CAN_UPLOAD_PHOTOS_KEY:
+        if key == Keys.USER_CAN_UPLOAD_PHOTOS_KEY:
             return False
+        if key == Keys.USER_PLAN_LAST_GENERATED_TIME:
+            return 0
         return ""
 
     def retrieve_user_setting(self, user_id, key):

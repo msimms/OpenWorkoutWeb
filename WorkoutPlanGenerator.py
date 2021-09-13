@@ -159,7 +159,7 @@ class WorkoutPlanGenerator(object):
             longest_run_week_3 = longest_run_week_3[0]
 
         # Compute the user's age in years.
-        birthday = int(self.user_mgr.retrieve_user_setting(user_id, Keys.BIRTHDAY_KEY))
+        birthday = int(self.user_mgr.retrieve_user_setting(user_id, Keys.USER_BIRTHDAY_KEY))
         age_years = (now - birthday) / (365.25 * 24 * 60 * 60)
 
         # Compute average running and cycling distances.
@@ -313,6 +313,7 @@ class WorkoutPlanGenerator(object):
             user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY]
 
             # When was the last time a plan was generated?
+
 
             # Compute the model inputs.
             inputs = self.calculate_inputs(user_id)

@@ -81,33 +81,38 @@ PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS = "Number of Runs (Last 4 Weeks)"
 PLAN_INPUT_NUM_RIDES_LAST_FOUR_WEEKS = "Number of Rides (Last 4 Weeks)"
 PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY = "Preferred Long Run Day" # Day of the week on which the user prefers to do their long runs
 
+# Unit systems
+UNITS_METRIC_KEY = "metric"
+UNITS_STANDARD_KEY = "standard"
+
+# Biological genders
+GENDER_MALE_KEY = "male" # Biological male
+GENDER_FEMALE_KEY = "female" # Bilological female
+
 # User settings
 REQUESTED_SETTING_KEY = "requested setting"
 REQUESTED_SETTINGS_KEY = "requested settings" # For requesting a list of settings (more efficient than requesting settings one by one)
 DEFAULT_PRIVACY_KEY = "default privacy"
-PREFERRED_UNITS_KEY = "preferred units" # The unit system preferred by the user, can be either UNITS_METRIC_KEY or UNITS_STANDARD_KEY
-UNITS_METRIC_KEY = "metric"
-UNITS_STANDARD_KEY = "standard"
-PREFERRED_FIRST_DAY_OF_WEEK_KEY = "preferred first day of week" # Which day of the week does the user consider to be the first day of the week?
-BIRTHDAY_KEY = "birthday" # User's birthday
+USER_PREFERRED_UNITS_KEY = "preferred units" # The unit system preferred by the user, can be either UNITS_METRIC_KEY or UNITS_STANDARD_KEY
+USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY = "preferred first day of week" # Which day of the week does the user consider to be the first day of the week?
+USER_BIRTHDAY_KEY = "birthday" # User's birthday
 DEFAULT_BIRTHDAY_KEY = "315532800"
-HEIGHT_KEY = "height" # User's height (weight)
+USER_HEIGHT_KEY = "height" # User's height (weight)
 DEFAULT_HEIGHT_KEY = "1.8" # Default height (meters)
-WEIGHT_KEY = "weight" # User's weight (kilograms)
+USER_WEIGHT_KEY = "weight" # User's weight (kilograms)
 DEFAULT_WEIGHT_KEY = "70" # Default weight (kilograms)
-GENDER_KEY = "gender" # The gender to use when computing calorie burn
-GENDER_MALE_KEY = "male" # Biological male
-GENDER_FEMALE_KEY = "female" # Bilological female
-RESTING_HEART_RATE_KEY = "resting heart rate" # Resting heart rate, in bpm
-MAXIMUM_HEART_RATE_KEY = "max heart rate" # Maximum heart rate, in bpm, specified by the user
+USER_GENDER_KEY = "gender" # The gender to use when computing calorie burn
+USER_RESTING_HEART_RATE_KEY = "resting heart rate" # Resting heart rate, in bpm
+USER_MAXIMUM_HEART_RATE_KEY = "max heart rate" # Maximum heart rate, in bpm, specified by the user
 ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate" # Maximum heart rate, in bpm, computed from activities
 ESTIMATED_MAX_HEART_RATE_LIST_KEY = "estimated max heart rate list" # List of all maximum heart rates, in bpm, computed from activities
 USER_SPECIFIED_MAX_HEART_RATE_KEY = "user specified max heart rate" # Maximum heart rate, in bpm, given by the user
 BEST_CYCLING_20_MINUTE_POWER_LIST_KEY = "best 20 minute power list" # List of the best cycling 20 minute power values from each activity
 ESTIMATED_CYCLING_FTP_KEY = "estimated ftp" # Estimated FTP, in watts
-CAN_UPLOAD_PHOTOS_KEY = "can upload photos" # User is allowed to upload photos
-LAST_UPDATED_KEY = "last updated" # Time of when the user settings where last updated
-USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, PREFERRED_UNITS_KEY, PREFERRED_FIRST_DAY_OF_WEEK_KEY, BIRTHDAY_KEY, HEIGHT_KEY, WEIGHT_KEY, GENDER_KEY, RESTING_HEART_RATE_KEY, MAXIMUM_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, USER_SPECIFIED_MAX_HEART_RATE_KEY, BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_KEY, GOAL_DATE_KEY, GOAL_TYPE_KEY, PLAN_INPUT_EXPERIENCE_LEVEL_KEY, PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, CAN_UPLOAD_PHOTOS_KEY ]
+USER_CAN_UPLOAD_PHOTOS_KEY = "can upload photos" # User is allowed to upload photos
+USER_PLAN_LAST_GENERATED_TIME = "workout plan last generated" # Time of when a workout plan was last generated
+USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, USER_PREFERRED_UNITS_KEY, USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY, USER_BIRTHDAY_KEY, USER_HEIGHT_KEY, USER_WEIGHT_KEY, USER_GENDER_KEY, USER_RESTING_HEART_RATE_KEY, USER_MAXIMUM_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, USER_SPECIFIED_MAX_HEART_RATE_KEY, BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_KEY, GOAL_DATE_KEY, GOAL_TYPE_KEY, PLAN_INPUT_EXPERIENCE_LEVEL_KEY, PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, USER_CAN_UPLOAD_PHOTOS_KEY, USER_PLAN_LAST_GENERATED_TIME ]
+USER_SETTINGS_LAST_UPDATED_KEY = "last updated" # Time of when the user settings where last updated
 
 # Personal records
 RECORDS_USER_ID = "user_id"

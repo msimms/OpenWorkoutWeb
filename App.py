@@ -546,7 +546,7 @@ class App(object):
 
         # User's preferred unit system.
         if logged_in:
-            unit_system = self.user_mgr.retrieve_user_setting(logged_in_user_id, Keys.PREFERRED_UNITS_KEY)
+            unit_system = self.user_mgr.retrieve_user_setting(logged_in_user_id, Keys.USER_PREFERRED_UNITS_KEY)
         else:
             unit_system = Keys.UNITS_STANDARD_KEY
 

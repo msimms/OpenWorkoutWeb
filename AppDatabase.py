@@ -122,7 +122,7 @@ class MongoDatabase(Database.Database):
         exclude_keys[Keys.FRIENDS_KEY] = False
         exclude_keys[Keys.PR_KEY] = False
         exclude_keys[Keys.DEFAULT_PRIVACY_KEY] = False
-        exclude_keys[Keys.PREFERRED_UNITS_KEY] = False
+        exclude_keys[Keys.USER_PREFERRED_UNITS_KEY] = False
         return exclude_keys
 
     def list_excluded_activity_keys_activity_lists(self):
@@ -659,13 +659,13 @@ class MongoDatabase(Database.Database):
             if user is not None:
 
                 # Do not replace a newer value with an older value.
-                if Keys.LAST_UPDATED_KEY not in user:
-                    user[Keys.LAST_UPDATED_KEY] = {}
-                elif key in user[Keys.LAST_UPDATED_KEY] and user[Keys.LAST_UPDATED_KEY][key] > update_time:
+                if Keys.USER_SETTINGS_LAST_UPDATED_KEY not in user:
+                    user[Keys.USER_SETTINGS_LAST_UPDATED_KEY] = {}
+                elif key in user[Keys.USER_SETTINGS_LAST_UPDATED_KEY] and user[Keys.USER_SETTINGS_LAST_UPDATED_KEY][key] > update_time:
                     return False
 
                 # Update.
-                user[Keys.LAST_UPDATED_KEY][key] = update_time
+                user[Keys.USER_SETTINGS_LAST_UPDATED_KEY][key] = update_time
                 user[key] = value
                 self.users_collection.save(user)
                 return True

@@ -192,7 +192,7 @@ def get_mass_units_str(mass_units):
 
 def get_preferred_mass_units_str(user_mgr, user_id):
     """Returns the units in which mass is displayed."""
-    selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+    selected_units = user_mgr.retrieve_user_setting(user_id, Keys.USER_PREFERRED_UNITS_KEY)
     if selected_units is not Keys.UNITS_METRIC_KEY:
         return get_mass_units_str(UNITS_MASS_POUNDS)
     return get_mass_units_str(UNITS_MASS_KG)
@@ -214,7 +214,7 @@ def get_distance_units_str(distance_units):
 def get_preferred_height_units_str(user_mgr, user_id):
     """Returns the units in which height is displayed."""
     if user_id is not None:
-        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.PREFERRED_UNITS_KEY)
+        selected_units = user_mgr.retrieve_user_setting(user_id, Keys.USER_PREFERRED_UNITS_KEY)
         if selected_units is not Keys.UNITS_METRIC_KEY:
             return get_distance_units_str(UNITS_DISTANCE_INCHES)
     return get_distance_units_str(UNITS_DISTANCE_METERS)

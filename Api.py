@@ -989,7 +989,7 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
 
         # Is the user allowed to upload photos?
-        can_upload = self.user_mgr.retrieve_user_setting(self.user_id, Keys.CAN_UPLOAD_PHOTOS_KEY)
+        can_upload = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_CAN_UPLOAD_PHOTOS_KEY)
         if not can_upload:
             raise ApiException.ApiAuthenticationException("User is not authorized to upload photos.")
 
@@ -1240,7 +1240,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
         export_format = values[Keys.WORKOUT_FORMAT_KEY]
 
-        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_PREFERRED_UNITS_KEY)
 
         # Get the workouts that belong to the logged in user.
         workout = self.data_mgr.retrieve_planned_workout(self.user_id, workout_id)
@@ -1562,18 +1562,18 @@ class Api(object):
             result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY_KEY, default_privacy, update_time)
         
         # Metric or imperial?
-        if Keys.PREFERRED_UNITS_KEY in values:
-            preferred_units = values[Keys.PREFERRED_UNITS_KEY].lower()
+        if Keys.USER_PREFERRED_UNITS_KEY in values:
+            preferred_units = values[Keys.USER_PREFERRED_UNITS_KEY].lower()
             if not (preferred_units == Keys.UNITS_METRIC_KEY or preferred_units == Keys.UNITS_STANDARD_KEY):
                 raise ApiException.ApiMalformedRequestException("Invalid units value.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY, preferred_units, update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_PREFERRED_UNITS_KEY, preferred_units, update_time)
 
         # Preferred first day of week.
-        if Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY in values:
-            preferred_first_day_of_week = values[Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY]
+        if Keys.USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY in values:
+            preferred_first_day_of_week = values[Keys.USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY]
             if not preferred_first_day_of_week in Keys.DAYS_OF_WEEK:
                 raise ApiException.ApiMalformedRequestException("Invalid day value.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.PREFERRED_FIRST_DAY_OF_WEEK_KEY, preferred_first_day_of_week, update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY, preferred_first_day_of_week, update_time)
 
         # Preferred long run day of the week.
         if Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY in values:
@@ -1637,46 +1637,46 @@ class Api(object):
             update_time = datetime.datetime.utcnow()
 
         # Birthday.
-        if Keys.BIRTHDAY_KEY in values:
-            birthday = values[Keys.BIRTHDAY_KEY].lower()
+        if Keys.USER_BIRTHDAY_KEY in values:
+            birthday = values[Keys.USER_BIRTHDAY_KEY].lower()
             if not InputChecker.is_integer(birthday):
                 raise ApiException.ApiMalformedRequestException("Invalid birthday.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.BIRTHDAY_KEY, birthday, update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_BIRTHDAY_KEY, birthday, update_time)
 
         # Height.
-        if Keys.HEIGHT_KEY in values:
-            height = values[Keys.HEIGHT_KEY]
+        if Keys.USER_HEIGHT_KEY in values:
+            height = values[Keys.USER_HEIGHT_KEY]
             if not InputChecker.is_float(height):
                 raise ApiException.ApiMalformedRequestException("Invalid height.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.HEIGHT_KEY, height, update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_HEIGHT_KEY, height, update_time)
 
         # Weight.
-        if Keys.WEIGHT_KEY in values:
-            weight = values[Keys.WEIGHT_KEY]
+        if Keys.USER_WEIGHT_KEY in values:
+            weight = values[Keys.USER_WEIGHT_KEY]
             if not InputChecker.is_float(weight):
                 raise ApiException.ApiMalformedRequestException("Invalid weight.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.WEIGHT_KEY, weight, update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_WEIGHT_KEY, weight, update_time)
 
         # Gender.
-        if Keys.GENDER_KEY in values:
-            gender = values[Keys.GENDER_KEY].lower()
+        if Keys.USER_GENDER_KEY in values:
+            gender = values[Keys.USER_GENDER_KEY].lower()
             if not (gender == Keys.GENDER_MALE_KEY or gender == Keys.GENDER_FEMALE_KEY):
                 raise ApiException.ApiMalformedRequestException("Invalid gender value.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.GENDER_KEY, gender, update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_GENDER_KEY, gender, update_time)
 
         # Resting Heart Rate.
-        if Keys.RESTING_HEART_RATE_KEY in values:
-            resting_hr = values[Keys.RESTING_HEART_RATE_KEY].lower()
+        if Keys.USER_RESTING_HEART_RATE_KEY in values:
+            resting_hr = values[Keys.USER_RESTING_HEART_RATE_KEY].lower()
             if not InputChecker.is_float(resting_hr):
                 raise ApiException.ApiMalformedRequestException("Invalid resting heart rate.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.RESTING_HEART_RATE_KEY, float(resting_hr), update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_RESTING_HEART_RATE_KEY, float(resting_hr), update_time)
 
         # Max Heart Rate.
-        if Keys.MAXIMUM_HEART_RATE_KEY in values:
-            max_hr = values[Keys.MAXIMUM_HEART_RATE_KEY].lower()
+        if Keys.USER_MAXIMUM_HEART_RATE_KEY in values:
+            max_hr = values[Keys.USER_MAXIMUM_HEART_RATE_KEY].lower()
             if not InputChecker.is_float(max_hr):
                 raise ApiException.ApiMalformedRequestException("Invalid max heart rate.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.MAXIMUM_HEART_RATE_KEY, float(max_hr), update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_MAXIMUM_HEART_RATE_KEY, float(max_hr), update_time)
 
         return result, ""
 
@@ -1992,7 +1992,7 @@ class Api(object):
         else:
             num_seconds = None
 
-        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_PREFERRED_UNITS_KEY)
         cycling_bests, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(self.user_id, num_seconds)
 
         for item in cycling_bests:
@@ -2019,7 +2019,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Best 5K not specified.")
 
         calc = TrainingPaceCalculator.TrainingPaceCalculator()
-        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_PREFERRED_UNITS_KEY)
         run_paces = calc.calc_from_race_distance_in_meters(5000, float(values[Keys.BEST_5K]) / 60)
         converted_paces = {}
         for run_pace in run_paces:
@@ -2044,7 +2044,7 @@ class Api(object):
         tags.append(tag)
 
         converted_distances = []
-        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_PREFERRED_UNITS_KEY)
         gear_distances = self.data_mgr.distance_for_tags(self.user_id, tags)
         for gear_name in gear_distances:
             converted_distance = Units.convert_to_string_in_specified_unit_system(unit_system, gear_distances[gear_name], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.TOTAL_DISTANCE)
@@ -2087,7 +2087,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         records = self.data_mgr.compute_progression(self.user_id, user_activities, activity_type, record_name)
-        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PREFERRED_UNITS_KEY)
+        unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_PREFERRED_UNITS_KEY)
         for record in records:
             record[0] = Units.convert_to_string_in_specified_unit_system(unit_system, record[0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
         return True, json.dumps(records)
@@ -2119,7 +2119,7 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        resting_hr = self.user_mgr.retrieve_user_setting(self.user_id, Keys.RESTING_HEART_RATE_KEY)
+        resting_hr = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_RESTING_HEART_RATE_KEY)
         estimated_max_hr = self.user_mgr.retrieve_user_setting(self.user_id, Keys.ESTIMATED_MAX_HEART_RATE_KEY)
         estimated_vo2_max = self.data_mgr.estimate_vo2_max(resting_hr, estimated_max_hr)
         return True, json.dumps(estimated_vo2_max)
@@ -2137,8 +2137,8 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        weight_metric = self.user_mgr.retrieve_user_setting(self.user_id, Keys.WEIGHT_KEY)
-        height_metric = self.user_mgr.retrieve_user_setting(self.user_id, Keys.HEIGHT_KEY)
+        weight_metric = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_WEIGHT_KEY)
+        height_metric = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_HEIGHT_KEY)
         bmi = self.data_mgr.estimate_bmi(weight_metric, height_metric)
         return True, json.dumps(bmi)
 

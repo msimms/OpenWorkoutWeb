@@ -51,7 +51,7 @@ class IcalServer(object):
         response += "METHOD:PUBLISH\r\n"
 
         for workout in workouts:
-            unit_system = self.user_mgr.retrieve_user_setting(workout.user_id, Keys.PREFERRED_UNITS_KEY)
+            unit_system = self.user_mgr.retrieve_user_setting(workout.user_id, Keys.USER_PREFERRED_UNITS_KEY)
             start_time = workout.scheduled_time
             if start_time is not None:
                 summary  = workout.export_to_text(None).replace("\n", "\\n")
