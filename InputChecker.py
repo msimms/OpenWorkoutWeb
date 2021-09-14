@@ -102,3 +102,14 @@ def is_valid_decoded_str(test_str):
     except:
         pass
     return False
+
+def is_valid_location(latitude, longitude, horizontal_accuracy):
+    """Sanity checks the lat/lon values."""
+    try:
+        if float(latitude) and latitude >= -90.0 and latitude <= 90.0 and float(longitude) and longitude >= -180.0 and longitude <= 180.0:
+            if horizontal_accuracy is not None and horizontal_accuracy < 0.0 or horizontal_accuracy >= 50.0:
+                return False
+            return True
+    except ValueError:
+        pass
+    return False

@@ -181,8 +181,8 @@ class Api(object):
             for location_obj in encoded_locations:
                 location = self.parse_json_loc_obj(location_obj, sensor_readings_dict, metadata_list_dict)
 
-                # Horizontal accuracy of less than zero means the location is invalid.
-                if location[4] >= 0.0:
+                # Ignore invalid readings. Invalid lat/lon are indicated as -1, but extremely high values should be ignored too. Units are meters.
+                if InputChecker.is_valid_location(location[1], location[2], location[4]):
                     locations.append(location)
 
             # Update the activity.

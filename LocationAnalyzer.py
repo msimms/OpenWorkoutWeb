@@ -5,6 +5,7 @@ import inspect
 import itertools
 import os
 import sys
+import InputChecker
 import Keys
 import LocationHeatMap
 import SensorAnalyzer
@@ -174,9 +175,8 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         """Accuracy measurements are in meters, with -1 meaning the data is invalid."""
 
         # Ignore invalid readings. Invalid lat/lon are indicated as -1, but extremely high values should be ignored too. Units are meters.
-        if horizontal_accuracy is not None:
-            if horizontal_accuracy < 0.0 or horizontal_accuracy > 50.0:
-                return
+        if not InputChecker.is_valid_location(latitude, longitude, horizontal_accuracy):
+            return
 
         # Not much we can do with the first location other than note the start time.
         if self.start_time_ms is None:
