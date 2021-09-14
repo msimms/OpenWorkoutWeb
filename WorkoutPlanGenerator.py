@@ -4,7 +4,6 @@
 from __future__ import absolute_import
 from CeleryWorker import celery_worker
 import argparse
-import celery
 import datetime
 import json
 import logging
