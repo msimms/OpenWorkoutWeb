@@ -297,7 +297,7 @@ class RunPlanGenerator(object):
         avg_run_distance = inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
         num_runs = inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS]
         exp_level = inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY]
-        comfort_level = inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY]
+        #comfort_level = inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY]
 
         # Are we in a taper?
         # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less

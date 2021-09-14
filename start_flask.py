@@ -12,7 +12,6 @@ import sys
 import traceback
 import flask
 
-import Api
 import ApiException
 import App
 import Config

@@ -10,7 +10,6 @@ import sys
 import InputChecker
 import Keys
 import UserMgr
-import WorkoutFactory
 
 # Locate and load the peaks module.
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))

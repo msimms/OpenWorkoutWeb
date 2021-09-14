@@ -1,11 +1,6 @@
 # Copyright 2018 Michael J Simms
 """Performs calculations on power data."""
 
-import inspect
-import os
-import sys
-
-import DataMgr
 import FtpCalculator
 import IntensityCalculator
 import Keys

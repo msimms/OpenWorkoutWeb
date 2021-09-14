@@ -26,7 +26,6 @@
 from __future__ import absolute_import
 from CeleryWorker import celery_worker
 import base64
-import celery
 import json
 import logging
 import os

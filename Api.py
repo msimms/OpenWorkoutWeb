@@ -1715,7 +1715,7 @@ class Api(object):
         self.data_mgr.analyze_activity(activity, activity_user_id)
         return True, ""
 
-    def handle_generate_workout_plan_for_user(self, values):
+    def handle_generate_workout_plan_for_user(self):
         """Called when the user wants to generate a workout plan."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -2346,7 +2346,7 @@ class Api(object):
         elif request == 'refresh_analysis':
             return self.handle_refresh_analysis(values)
         elif request == 'generate_workout_plan':
-            return self.handle_generate_workout_plan_for_user(values)
+            return self.handle_generate_workout_plan_for_user()
         elif request == 'generate_workout_plan_from_inputs':
             return self.handle_generate_workout_plan_from_inputs(values)
         elif request == 'generate_api_key':

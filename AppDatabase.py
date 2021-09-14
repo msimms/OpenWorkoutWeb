@@ -23,7 +23,6 @@
 # SOFTWARE.
 """Database implementation"""
 
-import datetime
 import json
 import re
 import sys

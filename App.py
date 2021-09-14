@@ -23,16 +23,13 @@
 # SOFTWARE.
 """Main application, contains all web page handlers"""
 
-import datetime
 import inspect
 import json
 import logging
 import markdown
 import os
 import sys
-import threading
 import time
-import timeit
 import traceback
 import cProfile
 import pstats

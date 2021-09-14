@@ -1260,13 +1260,15 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         self.workout_plan_gen_scheduler.add_user_to_queue(user_id, self)
 
-    def generate_workout_plan_from_inputs(self, inputs):
+    def generate_workout_plan_from_inputs(self, user_id, inputs):
         """Generates a workout plan from the specified inputs."""
         if self.workout_plan_gen_scheduler is None:
             raise Exception("No workout scheduler.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
         if inputs is None:
             raise Exception("Bad parameter.")
-        self.workout_plan_gen_scheduler.add_inputs_to_queue(inputs, self)
+        self.workout_plan_gen_scheduler.add_inputs_to_queue(user_id, inputs, self)
 
     def generate_api_key_for_user(self, user_id):
         """Generates a new API key for the specified user."""
