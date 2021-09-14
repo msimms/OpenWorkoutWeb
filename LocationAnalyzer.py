@@ -8,7 +8,6 @@ import sys
 import Keys
 import LocationHeatMap
 import SensorAnalyzer
-import SpeedHeatMap
 import Units
 
 # Locate and load the distance module as well as other LibMath modules.
