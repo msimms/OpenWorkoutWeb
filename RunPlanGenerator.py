@@ -7,9 +7,7 @@ import random
 from scipy.stats import norm
 
 import Keys
-import TrainingPaceCalculator
 import Units
-import Workout
 import WorkoutFactory
 
 # Max zone 1, zone 2, zone 3 intensity distributions for each training philosophy

@@ -8,7 +8,6 @@ import datetime
 import json
 import logging
 import os
-import numpy as np
 import pandas
 import sys
 import tensorflow as tf
