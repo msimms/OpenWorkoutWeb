@@ -24,6 +24,7 @@
 """Manages user accounts"""
 
 import bcrypt
+import datetime
 import sys
 import time
 import AppDatabase
@@ -380,7 +381,9 @@ class UserMgr(object):
         if key == Keys.USER_CAN_UPLOAD_PHOTOS_KEY:
             return False
         if key == Keys.USER_PLAN_LAST_GENERATED_TIME:
-            return 0
+            return datetime.datetime.fromtimestamp(0)
+        if key == Keys.USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED:
+            return datetime.datetime.fromtimestamp(0)
         return ""
 
     def retrieve_user_setting(self, user_id, key):
@@ -410,7 +413,7 @@ class UserMgr(object):
             result = self.default_user_setting(key)
 
         # Return numbers and bools now so that we can handle strings differently.
-        if isinstance(result, float) or isinstance(result, int) or isinstance(result, bool):
+        if isinstance(result, float) or isinstance(result, int) or isinstance(result, bool) or isinstance(result, datetime.datetime):
             return result
 
         # Return all strings as lowercase, just to keep things simple.

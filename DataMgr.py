@@ -40,6 +40,7 @@ import MapSearch
 import MergeTool
 import Summarizer
 import TrainingPaceCalculator
+import Units
 import VO2MaxCalculator
 import celery
 
@@ -914,9 +915,10 @@ class DataMgr(Importer.ActivityWriter):
             goal_date = None
         return goal, goal_date
 
-    def update_activity_bests_and_personal_records_cache(self, user_id, activity_id, activity_type, activity_time, activity_bests):
+    def update_activity_bests_and_personal_records_cache(self, user_id, activity_id, activity_type, activity_time, activity_bests, prune_activity_summary_cache):
         """Update method for a user's personal records. Caches the bests from the given activity and updates"""
         """the personal record cache, if appropriate."""
+        """Checking that each activity summary is still valid is expensive, so the option to skip that step is provided via prune_activity_summary_cache."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
@@ -936,7 +938,7 @@ class DataMgr(Importer.ActivityWriter):
         # Load existing activity bests into the summarizer.
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, None)
         for old_activity_id in all_activity_bests:
-            if self.activity_exists(old_activity_id):
+            if prune_activity_summary_cache and self.activity_exists(old_activity_id):
 
                 # Activity still exists, add its data to the summary.
                 old_activity_bests = all_activity_bests[old_activity_id]
@@ -1310,7 +1312,7 @@ class DataMgr(Importer.ActivityWriter):
         # Once a day we should reset the countesr. This algorithm is overly simplistic and
         # could almost certainly be improved but is good enough for now.
         now = time.time()
-        if now - g_last_api_reset > 86400:
+        if now - g_last_api_reset > Units.SECS_PER_DAY:
             g_api_key_rates = {}
             g_last_api_reset = now
 

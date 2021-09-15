@@ -16,6 +16,7 @@ import IntensityCalculator
 import Keys
 import LocationAnalyzer
 import SensorAnalyzerFactory
+import Units
 import UserMgr
 
 class ActivityAnalyzer(object):
@@ -54,6 +55,9 @@ class ActivityAnalyzer(object):
             return
 
         try:
+            # So we only do this once.
+            now = datetime.datetime.utcnow()
+
             # Want the variable in scope, but will set it later.
             activity_id = None
 
@@ -140,7 +144,7 @@ class ActivityAnalyzer(object):
 
                             existing_max_hrs = self.user_mgr.retrieve_user_setting(activity_user_id, Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY)
                             existing_max_hrs[str(sensor_analyzer.max_time)] = sensor_analyzer.max
-                            self.user_mgr.update_user_setting(activity_user_id, Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY, existing_max_hrs, datetime.datetime.utcnow())
+                            self.user_mgr.update_user_setting(activity_user_id, Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY, existing_max_hrs, now)
 
                         # Did we find the power meter for a cycling activity. If so, find the best 20 minute power.
                         # This list will be used to compute the user's estimated FTP.
@@ -148,7 +152,7 @@ class ActivityAnalyzer(object):
 
                             existing_20_minute_power_bests = self.user_mgr.retrieve_user_setting(activity_user_id, Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY)
                             existing_20_minute_power_bests[str(sensor_analyzer.max_time)] = self.summary_data[Keys.BEST_20_MIN_POWER]
-                            self.user_mgr.update_user_setting(activity_user_id, Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, existing_20_minute_power_bests, datetime.datetime.utcnow())
+                            self.user_mgr.update_user_setting(activity_user_id, Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, existing_20_minute_power_bests, now)
 
                     except:
                         self.log_error("Exception when analyzing activity " + sensor_type + " data.")
@@ -216,7 +220,7 @@ class ActivityAnalyzer(object):
                             stress = calc.estimate_intensity_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour)
                             self.summary_data[Keys.INTENSITY_SCORE] = stress
 
-                    # Cycling activity
+                    # Cycling activity.
                     elif activity_type in Keys.CYCLING_ACTIVITIES:
                         pass
 
@@ -232,7 +236,14 @@ class ActivityAnalyzer(object):
             if Keys.ACTIVITY_START_TIME_KEY in self.activity:
                 print("Updating personal bests...")
                 activity_time = self.activity[Keys.ACTIVITY_START_TIME_KEY]
-                if not self.data_mgr.update_activity_bests_and_personal_records_cache(activity_user_id, activity_id, activity_type, activity_time, self.summary_data):
+
+                # Cleaning up the activity summary cache is expensive so don't do it if it was done recently.
+                last_pruned_time = self.user_mgr.retrieve_user_setting(activity_user_id, Keys.USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED)
+                prune_activity_summary_cache = (now - last_pruned_time).total_seconds() > Units.SECS_PER_DAY
+                if prune_activity_summary_cache:
+                    self.user_mgr.update_user_setting(activity_user_id, Keys.USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED, now, now)
+
+                if not self.data_mgr.update_activity_bests_and_personal_records_cache(activity_user_id, activity_id, activity_type, activity_time, self.summary_data, prune_activity_summary_cache):
                     self.log_error("Error returned when updating personal records.")
             else:
                 self.log_error("Activity time not provided. Cannot update personal records.")
