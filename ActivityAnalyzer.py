@@ -192,10 +192,10 @@ class ActivityAnalyzer(object):
                     self.data_mgr.update_activity_end_time(self.activity, end_time_secs)
 
                 # If activity duration and distance have been calculated.
-                print("Computing the intensity score...")
+                print("Computing the intensity score and training paces...")
                 if start_time_secs > 0 and end_time_secs > 0 and end_time_secs > start_time_secs and len(location_analyzer.distance_buf) > 0:
 
-                    # These are used by both cycling and running stress calculations.
+                    # These are used by both cycling and running intensity calculations.
                     distance_entry = location_analyzer.distance_buf[-1]
                     workout_duration_secs = end_time_secs - start_time_secs
                     avg_workout_pace_meters_per_sec =  distance_entry[1] / workout_duration_secs
@@ -204,7 +204,7 @@ class ActivityAnalyzer(object):
                     if activity_type in Keys.RUNNING_ACTIVITIES:
 
                         # Compute training paces.
-                        print("* Computing the training paces...")
+                        print("* (Re)computing the training paces...")
                         _, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(activity_user_id, DataMgr.SIX_MONTHS)
                         run_paces = self.data_mgr.compute_run_training_paces(activity_user_id, running_bests)
 
