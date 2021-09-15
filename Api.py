@@ -322,7 +322,7 @@ class Api(object):
                 if len(response) > 1:
                     response += ","
                 value = int(activity_time)
-                response += json.dumps({"name": Keys.APP_TIME_KEY, "value": activity_time})
+                response += json.dumps({"name": "Time", "value": activity_time})
 
         if Keys.APP_DISTANCE_KEY in activity:
             distances = activity[Keys.APP_DISTANCE_KEY]
