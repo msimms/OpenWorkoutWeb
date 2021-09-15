@@ -936,13 +936,15 @@ class DataMgr(Importer.ActivityWriter):
         # Load existing activity bests into the summarizer.
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, None)
         for old_activity_id in all_activity_bests:
-            if self.database.activity_exists(old_activity_id):
+            if self.activity_exists(old_activity_id):
+
                 # Activity still exists, add its data to the summary.
                 old_activity_bests = all_activity_bests[old_activity_id]
                 old_activity_type = old_activity_bests[Keys.ACTIVITY_TYPE_KEY]
                 old_activity_time = old_activity_bests[Keys.ACTIVITY_START_TIME_KEY]
                 summarizer.add_activity_data(old_activity_id, old_activity_type, old_activity_time, old_activity_bests)
             else:
+
                 # Activity no longer exists, remove it's summary from the database.
                 self.database.delete_activity_best_for_user(user_id, old_activity_id)
         do_update = len(old_activity_bests) > 0

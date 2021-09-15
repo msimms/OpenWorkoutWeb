@@ -1276,10 +1276,12 @@ class MongoDatabase(Database.Database):
                 if Keys.ACTIVITY_LOCATIONS_KEY in activity:
                     location_list = activity[Keys.ACTIVITY_LOCATIONS_KEY]
 
+                # Append the new locations.
                 for location in locations:
                     value = { Keys.LOCATION_TIME_KEY: location[0], Keys.LOCATION_LAT_KEY: location[1], Keys.LOCATION_LON_KEY: location[2], Keys.LOCATION_ALT_KEY: location[3] }
                     location_list.append(value)
 
+                # Make sure everything is in order.
                 location_list.sort(key=retrieve_time_from_location)
 
                 # Save the changes.
