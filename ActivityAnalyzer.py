@@ -241,6 +241,7 @@ class ActivityAnalyzer(object):
                 last_pruned_time = self.user_mgr.retrieve_user_setting(activity_user_id, Keys.USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED)
                 prune_activity_summary_cache = (now - last_pruned_time).total_seconds() > Units.SECS_PER_DAY
                 if prune_activity_summary_cache:
+                    print("Will prune the activity summaries...")
                     self.user_mgr.update_user_setting(activity_user_id, Keys.USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED, now, now)
 
                 if not self.data_mgr.update_activity_bests_and_personal_records_cache(activity_user_id, activity_id, activity_type, activity_time, self.summary_data, prune_activity_summary_cache):
