@@ -316,14 +316,13 @@ class Api(object):
                     response += ","
                 response += json.dumps({"name": "Description", "value": activity_description})
 
-        if Keys.APP_TIME_KEY in activity:
-            times = activity[Keys.APP_TIME_KEY]
-            if times is not None and len(times) > 0:
+        if Keys.ACTIVITY_START_TIME_KEY in activity:
+            activity_time = activity[Keys.ACTIVITY_START_TIME_KEY]
+            if activity_time is not None:
                 if len(response) > 1:
                     response += ","
-                localtimezone = tzlocal()
-                value_str = datetime.datetime.fromtimestamp(times[-1][1] / 1000, localtimezone).strftime('%Y-%m-%d %H:%M:%S')
-                response += json.dumps({"name": Keys.APP_TIME_KEY, "value": value_str})
+                value = int(activity_time)
+                response += json.dumps({"name": Keys.APP_TIME_KEY, "value": activity_time})
 
         if Keys.APP_DISTANCE_KEY in activity:
             distances = activity[Keys.APP_DISTANCE_KEY]
