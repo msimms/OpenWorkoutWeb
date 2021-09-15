@@ -34,6 +34,7 @@ GPX_TAG_NAME_TRACKSEGMENT = "trkseg"
 GPX_TAG_NAME_TRACKPOINT = "trkpt"
 GPX_TAG_NAME_ELEVATION = "ele"
 GPX_TAG_NAME_TIME = "time"
+GPX_TAG_NAME_TYPE = "type"
 GPX_ATTR_NAME_VERSION = "version"
 GPX_ATTR_NAME_CREATOR = "creator"
 GPX_ATTR_NAME_LATITUDE = "lat"
@@ -74,6 +75,9 @@ class GpxWriter(XmlWriter.XmlWriter):
 
     def write_name(self, name):
         self.write_tag_and_value(GPX_TAG_NAME_NAME, name)
+
+    def write_type(self, activity_type):
+        self.write_tag_and_value(GPX_TAG_NAME_TYPE, activity_type)
 
     def start_track(self):
         self.open_tag(GPX_TAG_NAME_TRACK)

@@ -144,6 +144,7 @@ class Exporter(object):
         writer.write_metadata(start_time_ms)
 
         writer.start_track()
+        writer.write_type(activity[Keys.ACTIVITY_TYPE_KEY])
         writer.start_track_segment()
 
         done = False
