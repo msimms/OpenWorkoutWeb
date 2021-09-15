@@ -45,6 +45,9 @@ INCHES_PER_METER = 39.3701
 INCHES_PER_FOOT = 12.0
 KGS_PER_POUND = 2.2
 
+METERS_PER_HALF_MARATHON = 13.1 * METERS_PER_MILE
+METERS_PER_MARATHON = 26.2 * METERS_PER_MILE
+
 def convert_mass(value, in_units, out_units):
     """Unit conversion for mass values."""
     if in_units == UNITS_MASS_KG:

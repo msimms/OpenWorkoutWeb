@@ -27,10 +27,6 @@ import WorkoutScheduler
 
 g_model = None
 
-METERS_PER_HALF_MARATHON = 13.1 * Units.METERS_PER_MILE
-METERS_PER_MARATHON = 26.2 * Units.METERS_PER_MILE
-METERS_PER_50_MILE = 50.0 * Units.METERS_PER_MILE
-
 class WorkoutPlanGenerator(object):
     """Class for performing the computationally expensive workout plan generation tasks."""
 
@@ -66,13 +62,13 @@ class WorkoutPlanGenerator(object):
         elif goal_lower == Keys.GOAL_15K_RUN_KEY.lower():
             inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 15000.0
         elif goal_lower == Keys.GOAL_HALF_MARATHON_RUN_KEY.lower():
-            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = METERS_PER_HALF_MARATHON
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = Units.METERS_PER_HALF_MARATHON
         elif goal_lower == Keys.GOAL_MARATHON_RUN_KEY.lower():
-            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = METERS_PER_MARATHON
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = Units.METERS_PER_MARATHON
         elif goal_lower == Keys.GOAL_50K_RUN_KEY.lower():
             inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 50000.0
         elif goal_lower == Keys.GOAL_50_MILE_RUN_KEY.lower():
-            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = METERS_PER_50_MILE
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = Units.METERS_PER_50_MILE
 
         return inputs
 

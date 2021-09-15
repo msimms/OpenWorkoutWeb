@@ -12,9 +12,6 @@ import Units
 import Workout
 import WorkoutFactory
 
-METERS_PER_HALF_MARATHON = 13.1 * Units.METERS_PER_MILE
-METERS_PER_MARATHON = 26.2 * Units.METERS_PER_MILE
-
 # Max zone 1, zone 2, zone 3 intensity distributions for each training philosophy
 TID_THRESHOLD = [55, 55, 20]
 TID_POLARIZED = [85, 10, 25]
@@ -156,10 +153,10 @@ class RunPlanGenerator(object):
         # If the goal is less than a 10K then favor the shorter interval workouts. If greater than a 1/2 marathon, favor the longer.
         if goal_distance < 10000:
             mod_densities = np.append(densities[1:len(densities)], densities[0])
-        elif goal_distance >= METERS_PER_MARATHON:
+        elif goal_distance >= Units.METERS_PER_MARATHON:
             mod_densities = np.append(densities[-1], densities[0:len(densities)-1])
             mod_densities = np.append(densities[-1], densities[0:len(densities)-1])
-        elif goal_distance >= METERS_PER_HALF_MARATHON:
+        elif goal_distance >= Units.METERS_PER_HALF_MARATHON:
             mod_densities = np.append(densities[-1], densities[0:len(densities)-1])
         else:
             mod_densities = densities
