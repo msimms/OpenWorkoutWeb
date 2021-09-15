@@ -25,8 +25,12 @@
 
 from __future__ import absolute_import
 import celery
+import datetime
 
 import DataMgr
+import Keys
+import UserMgr
+import Units
 import WorkoutPlanGeneratorScheduler
 
 celery_worker = celery.Celery('straen_worker', include=['ActivityAnalyzer', 'ImportWorker', 'WorkoutPlanGenerator'])
@@ -35,10 +39,16 @@ celery_worker.config_from_object('CeleryConfig')
 @celery_worker.task()
 def check_for_ungenerated_workout_plans():
     """Checks for users that need their workout plan regenerated."""
+    now = datetime.datetime.utcnow()
     data_mgr = DataMgr.DataMgr(None, "", None, None, WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
+    user_mgr = UserMgr.UserMgr(None)
     user_ids = data_mgr.retrieve_users_without_scheduled_workouts()
     for user_id in user_ids:
-        data_mgr.generate_workout_plan_for_user(user_id)
+        last_gen_time = user_mgr.retrieve_user_setting(user_id, Keys.USER_PLAN_LAST_GENERATED_TIME)
+        gen = (now - last_gen_time).total_seconds() > Units.SECS_PER_DAY
+        if gen:
+            data_mgr.generate_workout_plan_for_user(user_id)
+            user_mgr.update_user_setting(user_id, Keys.USER_PLAN_LAST_GENERATED_TIME, now, now)
 
 @celery_worker.task()
 def prune_deferred_tasks_list():
