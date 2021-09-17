@@ -293,6 +293,7 @@ class Api(object):
         py_version = sys.version_info[0]
 
         response_dict = {}
+        response_dict[Keys.ACTIVITY_ID_KEY] = activity_id
 
         if Keys.ACTIVITY_NAME_KEY in activity:
             activity_name = activity[Keys.ACTIVITY_NAME_KEY]
