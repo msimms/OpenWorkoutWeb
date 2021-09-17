@@ -221,7 +221,6 @@ function draw_simple_graph(data, title, color)
     });
 }
 
-
 /// @function draw_graph
 /// If existing_graph is provided, a new line will be appended to that graph.
 function draw_graph(graph_start_time_ms, graph_end_time_ms, data, title, units, color)
