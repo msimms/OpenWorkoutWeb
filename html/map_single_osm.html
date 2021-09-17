@@ -226,6 +226,9 @@ ${nav}
 
         // Draw the elevation graph.
         draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", "PeachPuff");
+
+        // Now that we have the track, request the metadata so we can display an info box.
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", cache: false, success: update_metadata, dataType: "text" });
     };
 
     /// @function update_metadata
@@ -241,26 +244,20 @@ ${nav}
             '<div id="bodyContent">' +
             '<p>';
 
-        if (response.length >= 3)
-        {
-            let obj_list = JSON.parse(response);
-            if (obj_list == null)
-                return;
+        Object.keys(response).forEach(function(key) {
+            let value = response[key];
 
-            for (let i = 0; i < obj_list.length; ++i)
+            if ((key != "Name") && (key != "Avg. Speed") && (key != "Activity ID") && (key != "Time"))
             {
-                if ((obj_list[i].name != "Name") && (obj_list[i].name != "Avg. Speed"))
+                if ((key != "Type") && (key != "Description"))
                 {
-                    if ((obj_list[i].name != "Type") && (obj_list[i].name != "Description"))
-                    {
-                        content_string += obj_list[i].name;
-                        content_string += " = ";
-                    }
-                    content_string += obj_list[i].value;
-                    content_string += "<br>";
+                    content_string += key;
+                    content_string += " = ";
                 }
+                content_string += value;
+                content_string += "<br>";
             }
-        }
+        });
 
         content_string += '</p></div></div>';
 
@@ -292,14 +289,12 @@ ${nav}
     function initialize()
     {
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=0", cache: false, success: append_to_track, dataType: "json" });
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", cache: false, success: update_metadata, dataType: "text" });
     }
 
     var check_for_updates = function()
     {
         let route_len = route_coordinates.length;
         $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=" + route_len, cache: false, success: append_to_track, dataType: "json" });
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=${activityId}", cache: false, success: update_metadata, dataType: "text" });
     };
 
     initialize();

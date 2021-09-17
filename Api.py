@@ -292,114 +292,92 @@ class Api(object):
         # Need to know which version of python we're working with.
         py_version = sys.version_info[0]
 
-        response = "["
+        response_dict = {}
 
         if Keys.ACTIVITY_NAME_KEY in activity:
             activity_name = activity[Keys.ACTIVITY_NAME_KEY]
             if activity_name is not None and len(activity_name) > 0:
-                if len(response) > 1:
-                    response += ","
-                response += json.dumps({"name": "Name", "value": activity_name})
+                response_dict["Name"] = activity_name
 
         if Keys.ACTIVITY_TYPE_KEY in activity:
             activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
             if activity_type is not None and len(activity_type) > 0:
                 is_foot_based = activity_type in Keys.FOOT_BASED_ACTIVITIES
-                if len(response) > 1:
-                    response += ","
-                response += json.dumps({"name": "Type", "value": activity_type})
+                response_dict["Type"] = activity_type
 
         if Keys.ACTIVITY_DESCRIPTION_KEY in activity:
             activity_description = activity[Keys.ACTIVITY_DESCRIPTION_KEY]
             if activity_description is not None and len(activity_description) > 0:
-                if len(response) > 1:
-                    response += ","
-                response += json.dumps({"name": "Description", "value": activity_description})
+                response_dict["Description"] = activity_description
 
         if Keys.ACTIVITY_START_TIME_KEY in activity:
             activity_time = activity[Keys.ACTIVITY_START_TIME_KEY]
             if activity_time is not None:
-                if len(response) > 1:
-                    response += ","
-                value = int(activity_time)
-                response += json.dumps({"name": "Time", "value": activity_time})
+                response_dict["Time"] = activity_time
 
         if Keys.APP_DISTANCE_KEY in activity:
             distances = activity[Keys.APP_DISTANCE_KEY]
             if distances is not None and len(distances) > 0:
-                if len(response) > 1:
-                    response += ","
                 distance = distances[-1]
                 if py_version < 3:
                     value = float(distance.values()[0])
                 else:
                     value = float(list(distance.values())[0])
-                response += json.dumps({"name": Keys.APP_DISTANCE_KEY, "value": "{:.2f}".format(value)})
+                response_dict[Keys.APP_DISTANCE_KEY] = value
 
         if Keys.APP_AVG_SPEED_KEY in activity:
             avg_speeds = activity[Keys.APP_AVG_SPEED_KEY]
             if avg_speeds is not None and len(avg_speeds) > 0:
-                if len(response) > 1:
-                    response += ","
                 speed = avg_speeds[-1]
                 if py_version < 3:
                     value = float(speed.values()[0])
                 else:
                     value = float(list(speed.values())[0])
-                response += json.dumps({"name": Keys.APP_AVG_SPEED_KEY, "value": "{:.2f}".format(value)})
+                response_dict[Keys.APP_AVG_SPEED_KEY] = value
 
         if Keys.APP_MOVING_SPEED_KEY in activity:
             moving_speeds = activity[Keys.APP_MOVING_SPEED_KEY]
             if moving_speeds is not None and len(moving_speeds) > 0:
-                if len(response) > 1:
-                    response += ","
                 speed = moving_speeds[-1]
                 if py_version < 3:
                     value = float(speed.values()[0])
                 else:
                     value = float(list(speed.values())[0])
-                response += json.dumps({"name": Keys.APP_MOVING_SPEED_KEY, "value": "{:.2f}".format(value)})
+                response_dict[Keys.APP_MOVING_SPEED_KEY] = value
 
         if Keys.APP_HEART_RATE_KEY in activity:
             heart_rates = activity[Keys.APP_HEART_RATE_KEY]
             if heart_rates is not None and len(heart_rates) > 0:
-                if len(response) > 1:
-                    response += ","
                 heart_rate = heart_rates[-1]
                 if py_version < 3:
                     value = float(heart_rate.values()[0])
                 else:
                     value = float(list(heart_rate.values())[0])
-                response += json.dumps({"name": Keys.APP_HEART_RATE_KEY, "value": "{:.2f} bpm".format(value)})
+                response_dict[Keys.APP_HEART_RATE_KEY] = value
 
         if Keys.APP_CADENCE_KEY in activity:
             cadences = activity[Keys.APP_CADENCE_KEY]
             if cadences is not None and len(cadences) > 0:
-                if len(response) > 1:
-                    response += ","
                 cadence = cadences[-1]
                 if py_version < 3:
                     value = float(cadence.values()[0])
                 else:
                     value = float(list(cadence.values())[0])
                 if is_foot_based:
-                    response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} spm".format(value * 2.0)})
-                else:
-                    response += json.dumps({"name": Keys.APP_CADENCE_KEY, "value": "{:.1f} rpm".format(value)})
+                    value = value * 2.0
+                response_dict[Keys.APP_CADENCE_KEY] = value
 
         if Keys.APP_POWER_KEY in activity:
             powers = activity[Keys.APP_POWER_KEY]
             if powers is not None and len(powers) > 0:
-                if len(response) > 1:
-                    response += ","
                 power = powers[-1]
                 if py_version < 3:
                     value = float(power.values()[0])
                 else:
                     value = float(list(power.values())[0])
-                response += json.dumps({"name": Keys.APP_POWER_KEY, "value": "{:.2f} watts".format(value)})
+                response_dict[Keys.APP_POWER_KEY] = value
 
-        response += "]"
+        response = json.dumps(response_dict)
 
         return True, response
 

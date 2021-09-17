@@ -245,19 +245,20 @@ ${nav}
             '<div id="bodyContent">' +
             '<p>';
 
-        for (let i = 0; i < obj_list.length; ++i)
-        {
-            if ((obj_list[i].name != "Name") && (obj_list[i].name != "Avg. Speed"))
+        Object.keys(obj_list).forEach(function(key) {
+            let value = obj_list[key];
+
+            if ((key != "Name") && (key != "Avg. Speed") && (key != "Activity ID") && (key != "Time"))
             {
-                if ((obj_list[i].name != "Type") && (obj_list[i].name != "Description"))
+                if ((key != "Type") && (key != "Description"))
                 {
-                    content_string += obj_list[i].name;
+                    content_string += key;
                     content_string += " = ";
                 }
-                content_string += obj_list[i].value;
+                content_string += value;
                 content_string += "<br>";
             }
-        }
+        });
 
         content_string += '</p></div></div>';
 
