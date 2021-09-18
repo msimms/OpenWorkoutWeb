@@ -281,6 +281,8 @@ class Api(object):
 
         # Get the activity from the database.
         activity = self.data_mgr.retrieve_activity(activity_id)
+        if activity is None:
+            raise ApiException.ApiMalformedRequestException("Invalid activity.")
 
         # Determine if the requesting user can view the activity.
         if not self.activity_can_be_viewed(activity):
@@ -397,7 +399,7 @@ class Api(object):
         # Get the activity from the database.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if activity is None:
-            raise ApiException.ApiMalformedRequestException("Invalid activity object.")
+            raise ApiException.ApiMalformedRequestException("Invalid activity.")
 
         # Determine if the requesting user can view the activity.
         if not self.activity_can_be_viewed(activity):
@@ -471,6 +473,8 @@ class Api(object):
 
         # Get the activity from the database.
         activity = self.data_mgr.retrieve_activity(activity_id)
+        if not activity:
+            raise ApiException.ApiMalformedRequestException("Activity not found.")
 
         # Get the ID of the user that owns the activity and make sure it's the current user.
         if not self.activity_belongs_to_logged_in_user(activity):
