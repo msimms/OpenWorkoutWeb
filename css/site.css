@@ -46,10 +46,14 @@ h2 {
 }
 
 .summary li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 2em;
     float: left;
     color: white;
     margin: 0px;
-    padding: 10px 16px;
+    padding: 0.5em 1em;
     text-decoration: none;
 }
 
