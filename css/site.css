@@ -275,6 +275,10 @@ button .fa {
     font-size: 36px;
 }
 
+.block text {
+    font-size: 36px;
+}
+
 .block select {
     width: 250px;
     margin: 5px;

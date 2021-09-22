@@ -639,105 +639,105 @@ ${nav}
     <div>
         <!-- Birthday -->
         <h2>Birthday</h2>
-        <input type="text" name="birthday" id="birthday"><br>
-        <button type="modern_button" onclick="return update_birthday()">Update</button>
+            <input type="text" name="birthday" id="birthday"><br>
+            <button type="modern_button" onclick="return update_birthday()">Update</button>
         <hr>
 
         <!-- Height -->
         <h2>Height</h2>
-        <input type="text" id="height" value="Not set"> <input style="border:0" type="text" id="height_units" readonly></input><br>
-        <button type="modern_button" onclick="return update_height()">Update</button>
+            <input type="text" id="height" value="Not set"> <input style="border:0" type="text" id="height_units" readonly></input></input><br>
+            <button type="modern_button" onclick="return update_height()">Update</button>
         <hr>
 
         <!-- Weight -->
         <h2>Weight</h2>
-        <input type="text" id="weight" value="Not set"> <input style="border:0" type="text" id="weight_units" readonly></input><br>
-        <button type="modern_button" onclick="return update_weight()">Update</button>
+            <input type="text" id="weight" value="Not set"> <input style="border:0" type="text" id="weight_units" readonly></input></input><br>
+            <button type="modern_button" onclick="return update_weight()">Update</button>
         <hr>
 
         <!-- Gender -->
         <h2>Gender</h2>
-        <select id="gender" >
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-        </select><br>
-        <button type="modern_button" onclick="return update_gender()">Update</button>
+            <select id="gender" >
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select><br>
+            <button type="modern_button" onclick="return update_gender()">Update</button>
         <hr>
 
         <!-- Resting Heart Rate -->
         <h2>Resting Heart Rate</h2>
-            <input type="text" id="resting heart rate" value="Not set"> bpm<br>
+            <input type="text" id="resting heart rate" value="Not set"> <input style="border:0" type="text" value="bpm" readonly></input></input><br>
             <button type="modern_button" onclick="return update_resting_hr()">Update</button>
         <hr>
 
         <!-- Maximum Heart Rate -->
         <h2>Maximum Heart Rate</h2>
-            <input type="text" id="max heart rate" value="Not set"> bpm<br>
+            <input type="text" id="max heart rate" value="Not set"> <input style="border:0" type="text" value="bpm" readonly></input></input><br>
             <button type="modern_button" onclick="return update_maximum_hr()">Update</button>
         <hr>
 
         <!-- Estimated Maximum Heart Rate -->
         <h2>Estimated Maximum Heart Rate</h2>
-            <input style="border:0" type="text" value="Not calculated" id="estimated max heart rate" readonly> bpm</input>
+            <input style="border:0" type="text" value="Not calculated" id="estimated max heart rate" readonly> <input style="border:0" type="text" value="bpm" readonly></input></input>
         <hr>
 
         <!-- BMI -->
         <h2>BMI</h2>
-        <p>
-            Your Body Mass Index is your weight relative to your height.
-        </p>
-        <input style="border:0" type="text" id="bmi" readonly></input>
+            <p>
+                Your Body Mass Index is your weight relative to your height.
+            </p>
+            <input style="border:0" type="text" id="bmi" readonly></input>
         <hr>
 
         <!-- VO2 Max -->
         <h2>VO2 Max</h2>
-        <input style="border:0" type="text" id="vo2_max" readonly></input>
+            <input style="border:0" type="text" id="vo2_max" readonly></input>
         <hr>
 
         <!-- Heart Rate Zones -->
         <h2>Heart Rate Zones</h2>
-        <p>
-            Heart rate zones are based on estimated maximum heart rate.
-        </p>
-        <table id="hr_zones">
-        </table>
+            <p>
+                Heart rate zones are based on estimated maximum heart rate.
+            </p>
+            <table id="hr_zones">
+            </table>
         <hr>
 
         <!-- FTP -->
         <h2>Estimated Functional Threshold Power (FTP)</h2>
-        <p>
-            Functional Threshold Power is the amount of power that you can exert over one hour at maximum effort. It is estimated from recent activity.
-        </p>
-        <input style="border:0" type="text" id="ftp" readonly></input>
-        <p id="ftp_error"></p>
+            <p>
+                Functional Threshold Power is the amount of power that you can exert over one hour at maximum effort. It is estimated from recent activity.
+            </p>
+            <input style="border:0" type="text" id="ftp" readonly></input>
+            <p id="ftp_error"></p>
         <hr>
 
         <!-- Power Training Zones -->
         <h2>Power Training Zones</h2>
-        <p>
-            Power zones are based on estimated FTP.
-        </p>
-        <table id="power_zones">
-        </table>
+            <p>
+                Power zones are based on estimated FTP.
+            </p>
+            <table id="power_zones">
+            </table>
         <hr>
 
         <!-- Personal Records -->
         <h2>Personal Records</h2>
-        <h3>Cycling</h3>
-        <table id="Cycling">
-        </table>
-        <h3>Running</h3>
-        <table id="Running">
-        </table>
+            <h3>Cycling</h3>
+                <table id="Cycling">
+                </table>
+            <h3>Running</h3>
+                <table id="Running">
+                </table>
         <hr>
 
         <!-- Default Gear -->
         <h2>Default Gear</h2>
-        <table id="Defaults">
-        </table>
-        <div class="block" id="gear_defaults" style="width: 560px">
-        </div>
-        <button type="modern_button" onclick="return add_default_gear_info()">Add Default</button>
+            <table id="Defaults">
+            </table>
+            <div id="gear_defaults" style="width: 560px">
+            </div>
+            <button type="modern_button" onclick="return add_default_gear_info()">Add Default</button>
     </div>
 </section>
 
