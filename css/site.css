@@ -272,6 +272,7 @@ button .fa {
 .block input {
     width: 600px;
     height: 40px;
+    font-size: 36px;
 }
 
 .block select {

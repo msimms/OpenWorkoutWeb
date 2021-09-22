@@ -103,7 +103,7 @@
     /// @function add_default_gear_info
     function add_default_gear_info()
     {
-        let outer_div = document.getElementById("new_gear_default_block");
+        let outer_div = document.getElementById("gear_defaults");
         let inner_div = document.createElement('div');
 
         inner_div.id = "new_gear_default_div";
@@ -341,7 +341,10 @@
 
         cell.appendChild(document.createTextNode(default_info.activity_type));
         cell = new_row.insertCell();
-        cell.appendChild(document.createTextNode(default_info.name));
+        if (default_info.name.length == 0)
+            cell.appendChild(document.createTextNode("Not Set"));
+        else
+            cell.appendChild(document.createTextNode(default_info.name));
     }
 
     /// @function append_to_power_zones_table
@@ -732,7 +735,7 @@ ${nav}
         <h2>Default Gear</h2>
         <table id="Defaults">
         </table>
-        <div class="block" id="new_gear_default_block" style="width: 560px">
+        <div class="block" id="gear_defaults" style="width: 560px">
         </div>
         <button type="modern_button" onclick="return add_default_gear_info()">Add Default</button>
     </div>
