@@ -318,6 +318,10 @@ class Api(object):
             if activity_time is not None:
                 response_dict["Time"] = activity_time
 
+        if Keys.ACTIVITY_TAGS_KEY in activity:
+            tags = activity[Keys.ACTIVITY_TAGS_KEY]
+            response_dict[Keys.ACTIVITY_TAGS_KEY] = tags
+
         if Keys.APP_DISTANCE_KEY in activity:
             distances = activity[Keys.APP_DISTANCE_KEY]
             if distances is not None and len(distances) > 0:

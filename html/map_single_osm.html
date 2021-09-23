@@ -247,9 +247,9 @@ ${nav}
         Object.keys(response).forEach(function(key) {
             let value = response[key];
 
-            if ((key != "Name") && (key != "Avg. Speed") && (key != "activity_id") && (key != "Time"))
+            if ((key != "Name") && (key != "Avg. Speed") && (key != "activity_id") && (key != "Time") && (key != "Type") && (key != "tags"))
             {
-                if ((key != "Type") && (key != "Description"))
+                if (key != "Description")
                 {
                     content_string += key;
                     content_string += " = ";
@@ -587,23 +587,6 @@ ${summary}
     {
         let api_url = "${root_url}/api/1.0/list_activity_photos?activity_id=${activityId}";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photos_list, dataType: "json" });
-    }
-
-    var process_tags = function(tags)
-    {
-        tags = eval(tags)
-        for (let tag in tags)
-        {
-            if (tags[tag] == "Race")
-                document.getElementById("overlay").style.display = "block";
-        }
-    }
-
-    /// @function list_tags
-    function list_tags()
-    {
-        let api_url = "${root_url}/api/1.0/list_tags?activity_id=${activityId}";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_tags, dataType: "text" });
     }
 
     /// @function create_tags
