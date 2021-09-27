@@ -270,7 +270,7 @@ button .fa {
 }
 
 .block input {
-    width: 600px;
+    width: 40%;
     height: 40px;
     font-size: 36px;
 }
@@ -295,6 +295,11 @@ button .fa {
 .block table {
     width: 600px;
     margin: auto 0;
+}
+
+.block textarea {
+    width: 80%;
+    max-width: 80%;
 }
 
 .comment textarea {

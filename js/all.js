@@ -170,8 +170,11 @@ function create_local_file(data, filename, type)
 /// @function add_number_entry_node
 function add_number_entry_node(div, name)
 {
-    let label = document.createTextNode(name + ": ");
+    let label = document.createTextNode(name + " ");
     div.appendChild(label);
+
+    let br = document.createElement("br");
+    div.appendChild(br);
 
     let value = document.createElement("input");
     value.name = name;
@@ -180,15 +183,18 @@ function add_number_entry_node(div, name)
     value.setAttribute("value", 0.0);
     div.appendChild(value);
 
-    let br = document.createElement("br");
+    br = document.createElement("br");
     div.appendChild(br);
 }
 
 /// @function add_text_entry_node
 function add_text_entry_node(div, name)
 {
-    let label = document.createTextNode(name + ": ");
+    let label = document.createTextNode(name + " ");
     div.appendChild(label);
+
+    let br = document.createElement("br");
+    div.appendChild(br);
 
     let value = document.createElement("input");
     value.name = name;
@@ -197,6 +203,26 @@ function add_text_entry_node(div, name)
     value.setAttribute("value", "");
     div.appendChild(value);
 
+    br = document.createElement("br");
+    div.appendChild(br);
+}
+
+/// @function add_text_area_node
+function add_text_area_node(div, name)
+{
+    let label = document.createTextNode(name + " ");
+    div.appendChild(label);
+
     let br = document.createElement("br");
+    div.appendChild(br);
+
+    let value = document.createElement("textarea");
+    value.name = name;
+    value.setAttribute("id", name);
+    value.setAttribute("value", "");
+    value.setAttribute("rows", 4);
+    div.appendChild(value);
+
+    br = document.createElement("br");
     div.appendChild(br);
 }

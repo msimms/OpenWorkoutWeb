@@ -74,15 +74,13 @@
             outer_div.removeChild(outer_div.firstChild);
         }
 
-        // Determine which data fields are needed.
-        let fields = ["Description"];
-
         // Add a line break.
         outer_div.appendChild(document.createElement("hr"));
         inner_div.appendChild(document.createElement("br"));
 
         // Add a label for the date picker.
-        inner_div.appendChild(document.createTextNode("Date: "));
+        inner_div.appendChild(document.createTextNode("Date "));
+        inner_div.appendChild(document.createElement("br"));
 
         // Add the date picker.
         let today = new Date();
@@ -90,18 +88,15 @@
         start_date.type = "input";
         start_date.id = "start_date";
         start_date.className = "pickDate";
-        $(start_date).datepicker({showButtonPanel: true, defaultDate: today});
+        $(start_date).datepicker( { showButtonPanel: true, defaultDate: today } );
         $(start_date).datepicker('setDate', today);
         inner_div.appendChild(start_date);
 
         // Add a line break.
         inner_div.appendChild(document.createElement("br"));
 
-        // Add the data fields.
-        for (i = 0, len = fields.length; i < len; i++)
-        {
-            add_text_entry_node(inner_div, fields[i]);
-        }
+        // Add the description.
+        add_text_area_node(inner_div, "Description");
 
         // Add to the div.
         outer_div.appendChild(inner_div);
@@ -257,7 +252,7 @@ ${nav}
                 <td><b>Date</b></td><td><b>Description</b></td><td></td><tr>
             </table>
         </p>
-        <div class="block" id="new_service_record_block" style="width: 560px">
+        <div class="block" id="new_service_record_block" style="width: 95%">
         </div>
         <button type="button" onclick="return get_new_service_record_info()">Add Service Record</button>
 
