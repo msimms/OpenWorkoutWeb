@@ -276,6 +276,7 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 * Pool swimming workouts can now be imported.
 * Default gear can now be specified.
 * Bug fixes to personal record tracking.
+* Style fixes.
 
 ## Tech
 This software uses several other source projects to work properly:
