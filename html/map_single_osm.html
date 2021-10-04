@@ -68,6 +68,7 @@ ${nav}
 <script type="text/javascript">
 
     let activity_id = "${activityId}";
+    let is_foot_based_activity = ${is_foot_based_activity};
 
     let loc_start_time_ms = 0;
     let loc_end_time_ms = 0;
@@ -301,7 +302,7 @@ ${nav}
     };
 
     initialize();
-//    setInterval(check_for_updates, 30000);
+    //setInterval(check_for_updates, 30000);
 </script>
 
 </div>
@@ -360,7 +361,7 @@ ${summary}
             pace_units = "mins/mile";
         }
 
-        if (${is_foot_based_activity})
+        if (is_foot_based_activity)
         {
             let speed_data = convert_speed_graph_to_display_units(unit_system, data);
             let pace_data = convert_speed_graph_to_pace_graph(unit_system, data);
@@ -416,7 +417,7 @@ ${summary}
             {
                 let power_zones = compute_power_zone_distribution(${ftp}, new_data);
 
-                if (!${is_foot_based_activity})
+                if (!is_foot_based_activity)
                 {
                     if (power_zones.length > 0 && Math.max.apply(Math, power_zones) > 0)
                     {
