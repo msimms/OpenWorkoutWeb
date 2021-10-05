@@ -61,8 +61,12 @@ def secureheaders():
     headers = cherrypy.response.headers
     headers['X-Frame-Options'] = 'DENY'
     headers['X-XSS-Protection'] = '1; mode=block'
-    headers['Content-Security-Policy'] = "default-src='self'"
-
+    headers['Content-Security-Policy'] = "default-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://*.googleapis.com;"\
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://*.googleapis.com https://maps.gstatic.com;"\
+        "object-src 'self';"\
+        "font-src 'self' https://fonts.gstatic.com;"\
+        "style-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://*.googleapis.com;"\
+        "img-src 'self' *;"
 
 def do_auth_check(*args, **kwargs):
     global g_app
