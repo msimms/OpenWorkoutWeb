@@ -53,7 +53,6 @@
     {
         let activity_type_select = document.getElementById("activity_type");
 
-        activity_type_list = eval(activity_type_list);
         activity_type_list.sort();
 
         for (let i = 0; i < activity_type_list.length; i++)
@@ -72,7 +71,6 @@
     {
         let gear_list_select = document.getElementById("gear");
 
-        gear_list = eval(gear_list);
         gear_list.sort();
 
         for (let i = 0; i < gear_list.length; i++)
@@ -90,14 +88,14 @@
     function list_activity_types()
     {
         let api_url = "${root_url}/api/1.0/list_activity_types";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_activity_type_list, dataType: "text" });
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_activity_type_list, dataType: "json" });
     }
 
     /// @function list_gear
     function list_gear()
     {
         let api_url = "${root_url}/api/1.0/list_gear";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_gear_list, dataType: "text" });
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_gear_list, dataType: "json" });
     }
 
     /// @function add_default_gear_info
