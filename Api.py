@@ -252,20 +252,11 @@ class Api(object):
         if not self.activity_can_be_viewed(activity):
             return self.error("The requested activity is not viewable to this user.")
 
-        response = "["
-
+        # Format the locations track as JSON.
+        response = ""
         if Keys.APP_LOCATIONS_KEY in activity:
-
             locations = activity[Keys.APP_LOCATIONS_KEY]
-            for location in locations[num_points:]:
-                if len(response) > 1:
-                    response += ","
-                if Keys.LOCATION_HORIZONTAL_ACCURACY_KEY in location and Keys.LOCATION_VERTICAL_ACCURACY_KEY in location:
-                    response += json.dumps({Keys.LOCATION_LAT_KEY: location[Keys.LOCATION_LAT_KEY], Keys.LOCATION_LON_KEY: location[Keys.LOCATION_LON_KEY], Keys.LOCATION_ALT_KEY: location[Keys.LOCATION_ALT_KEY], Keys.LOCATION_TIME_KEY: location[Keys.LOCATION_TIME_KEY], Keys.LOCATION_HORIZONTAL_ACCURACY_KEY: location[Keys.LOCATION_HORIZONTAL_ACCURACY_KEY], Keys.LOCATION_VERTICAL_ACCURACY_KEY: location[Keys.LOCATION_VERTICAL_ACCURACY_KEY]})
-                else:
-                    response += json.dumps({Keys.LOCATION_LAT_KEY: location[Keys.LOCATION_LAT_KEY], Keys.LOCATION_LON_KEY: location[Keys.LOCATION_LON_KEY], Keys.LOCATION_ALT_KEY: location[Keys.LOCATION_ALT_KEY], Keys.LOCATION_TIME_KEY: location[Keys.LOCATION_TIME_KEY]})
-
-        response += "]"
+            response += json.dumps(locations[num_points:])
 
         return True, response
 
