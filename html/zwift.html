@@ -533,24 +533,6 @@ ${summary}
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photos_list, dataType: "json" });
     }
 
-    /// @function process_tags
-    var process_tags = function(tags)
-    {
-        tags = eval(tags)
-        for (let tag in tags)
-        {
-            if (tags[tag] == "Race")
-                document.getElementById("overlay").style.display = "block";
-        }
-    }
-
-    /// @function list_tags
-    function list_tags()
-    {
-        let api_url = "${root_url}/api/1.0/list_tags?activity_id=${activityId}";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_tags, dataType: "text" });
-    }
-
     /// @function create_tags
     function create_tags(tags)
     {
