@@ -60,9 +60,9 @@ ${nav}
 <script type="text/javascript" src="${root_url}/js/graphs.js"></script>
 <script type="text/javascript" src="${root_url}/js/coordinates.js"></script>
 <script type="text/javascript" src="${root_url}/js/power.js"></script>
+<script type="text/javascript" src="${root_url}/google_maps"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="${root_url}/google_maps"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
@@ -212,18 +212,17 @@ ${nav}
 
         // Analyze the route, compute the total distance, avg. speed, etc.
         let unit_system = "${unit_system}";
-        let duration = ${duration};
         let meters_traveled = total_distance_google(route_coordinates);
         let distance_traveled_str = convert_distance_to_unit_system_str(unit_system, meters_traveled);
         append_to_summary_list("Distance", distance_traveled_str);
         if (is_foot_based_activity)
         {
-            let pace_str = convert_distance_and_duration_to_pace_str(unit_system, meters_traveled, duration);
+            let pace_str = convert_distance_and_duration_to_pace_str(unit_system, meters_traveled, total_ms_traveled);
             append_to_summary_list("Avg. Pace:", pace_str);
         }
         else
         {
-            let speed_str = convert_distance_and_duration_to_speed_str(unit_system, meters_traveled, duration);
+            let speed_str = convert_distance_and_duration_to_speed_str(unit_system, meters_traveled, total_ms_traveled);
             append_to_summary_list("Avg. Speed:", speed_str);
         }
 
@@ -331,7 +330,6 @@ ${nav}
 
     google.maps.event.addDomListener(window, 'load', initialize);
 
-    initialize();
     //setInterval(check_for_updates, 30000);
 </script>
 
@@ -479,7 +477,6 @@ ${summary}
     }
 
     draw_graphs();
-
 </script>
 
 </div>
@@ -647,7 +644,6 @@ ${summary}
     });
 
     list_photos();
-
 </script>
 
 <hr>

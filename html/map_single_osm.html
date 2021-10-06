@@ -60,15 +60,16 @@ ${nav}
 <script type="text/javascript" src="${root_url}/js/graphs.js"></script>
 <script type="text/javascript" src="${root_url}/js/coordinates.js"></script>
 <script type="text/javascript" src="${root_url}/js/power.js"></script>
+<script type="text/javascript" src="${root_url}/js/OpenStreetMap.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
-<script type="text/javascript" src="${root_url}/js/OpenStreetMap.js"></script>
 <script type="text/javascript">
 
     let activity_id = "${activityId}";
     let is_foot_based_activity = ${is_foot_based_activity};
+    let root_url = "${root_url}";
 
     let loc_start_time_ms = 0;
     let loc_end_time_ms = 0;
@@ -231,7 +232,7 @@ ${nav}
         draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", "PeachPuff");
 
         // Now that we have the track, request the metadata so we can display an info box.
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_metadata?activity_id=" + activity_id, cache: false, success: update_metadata, dataType: "text" });
+        $.ajax({ type: 'GET', url: root_url + "/api/1.0/activity_metadata?activity_id=" + activity_id, cache: false, success: update_metadata, dataType: "text" });
     };
 
     /// @function update_metadata
@@ -291,14 +292,14 @@ ${nav}
     /// @function initialize
     function initialize()
     {
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=0", cache: false, success: append_to_track, dataType: "json" });
+        $.ajax({ type: 'GET', url: root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=0", cache: false, success: append_to_track, dataType: "json" });
     }
 
     /// @function check_for_updates
     var check_for_updates = function()
     {
         let route_len = route_coordinates.length;
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=" + route_len, cache: false, success: append_to_track, dataType: "json" });
+        $.ajax({ type: 'GET', url: root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=" + route_len, cache: false, success: append_to_track, dataType: "json" });
     };
 
     initialize();
@@ -338,7 +339,7 @@ ${summary}
     /// @function retrieve_summary_data
     function retrieve_summary_data()
     {
-        let api_url = "${root_url}/api/1.0/activity_summarydata?activity_id=" + activity_id + "&summary_items=intervals";
+        let api_url = root_url + "/api/1.0/activity_summarydata?activity_id=" + activity_id + "&summary_items=intervals";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
     }
 
@@ -438,7 +439,7 @@ ${summary}
     /// @function retrieve_sensor_data
     function retrieve_sensor_data()
     {
-        let api_url = "${root_url}/api/1.0/activity_sensordata?activity_id=" + activity_id + "&sensors=Current%20Speed,Heart%20Rate,Cadence,Power,Temperature";
+        let api_url = root_url + "/api/1.0/activity_sensordata?activity_id=" + activity_id + "&sensors=Current%20Speed,Heart%20Rate,Cadence,Power,Temperature";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
     }
 
@@ -459,7 +460,7 @@ ${summary}
     /// @function refresh_analysis
     function refresh_analysis()
     {
-        let the_url = "${root_url}/api/1.0/refresh_analysis";
+        let the_url = root_url + "/api/1.0/refresh_analysis";
         let dict = [];
         let result_text = {};
 
@@ -473,7 +474,7 @@ ${summary}
     /// @function create_comment
     function create_comment()
     {
-        let the_url = "${root_url}/api/1.0/create_comment";
+        let the_url = root_url + "/api/1.0/create_comment";
         let comment = document.getElementById("comment").value;
         let dict = [];
         let result_text = {};
@@ -489,7 +490,7 @@ ${summary}
     /// @function export_activity
     function export_activity()
     {
-        let the_url = "${root_url}/api/1.0/export_activity";
+        let the_url = root_url + "/api/1.0/export_activity";
         let format = document.getElementById("format").value;
         let dict = [];
         let result_text = {};
@@ -505,14 +506,14 @@ ${summary}
     /// @function edit_activity
     function edit_activity()
     {
-        let the_url = "${root_url}/edit_activity/" + activity_id;
+        let the_url = root_url + "/edit_activity/" + activity_id;
         window.location.replace(the_url);
     }
 
     /// @function add_photos
     function add_photos()
     {
-        let the_url = "${root_url}/add_photos/" + activity_id;
+        let the_url = root_url + "/add_photos/" + activity_id;
         window.location.replace(the_url);
     }
 
@@ -521,13 +522,13 @@ ${summary}
     {
         if (confirm('Are you sure you want to do this?'))
         {
-            let the_url = "${root_url}/api/1.0/delete_activity";
+            let the_url = root_url + "/api/1.0/delete_activity";
             let dict = [];
             let result_text = {};
 
             dict.push({["activity_id"] : activity_id});
             if (send_post_request(the_url, dict, result_text))
-                window.location.replace("${root_url}");
+                window.location.replace(root_url);
             else
                 alert(result_text.value);
         }
@@ -538,7 +539,7 @@ ${summary}
     {
         if (confirm('Are you sure you want to delete the above photo?'))
         {
-            let the_url = "${root_url}/api/1.0/delete_activity_photo";
+            let the_url = root_url + "/api/1.0/delete_activity_photo";
             let dict = [];
             let result_text = {};
 
@@ -564,7 +565,7 @@ ${summary}
 
             for (let i = 0; i < photo_ids.length; ++i)
             {
-                let photo_url = "${root_url}/photos/${userId}/" + photo_ids[i];
+                let photo_url = root_url + "/photos/${userId}/" + photo_ids[i];
                 let imgTd = document.createElement("td");
                 let img = document.createElement("img");
                 let deleteTd = document.createElement("td");
@@ -589,14 +590,14 @@ ${summary}
 
     function list_photos()
     {
-        let api_url = "${root_url}/api/1.0/list_activity_photos?activity_id=" + activity_id;
+        let api_url = root_url + "/api/1.0/list_activity_photos?activity_id=" + activity_id;
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photos_list, dataType: "json" });
     }
 
     /// @function create_tags
     function create_tags(tags)
     {
-        let the_url = "${root_url}/api/1.0/create_tags_on_activity";
+        let the_url = root_url + "/api/1.0/create_tags_on_activity";
         let dict = [];
         let result_text = {};
 

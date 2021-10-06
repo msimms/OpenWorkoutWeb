@@ -78,6 +78,9 @@ ${nav}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script type="text/javascript">
+    let activity_id = "${activityId}";
+    let root_url = "${root_url}";
+
     let loc_start_time_ms = 0;
     let loc_end_time_ms = 0;
 
@@ -247,15 +250,14 @@ ${nav}
         draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", "PeachPuff");
     };
 
-    var check_for_updates = function()
+    /// @function initialize
+    function initialize()
     {
-        let route_len = route_coordinates.length;
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/activity_track?activity_id=${activityId}&num_points=" + route_len, cache: false, success: append_to_track, dataType: "json" });
+        $.ajax({ type: 'GET', url: root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=0", cache: false, success: append_to_track, dataType: "json" });
     };
 
     // Things we need when the page is loaded.
-    check_for_updates();
-
+    initialize();
 </script>
 
 <canvas id="canvas">
@@ -296,7 +298,7 @@ ${summary}
     /// @function retrieve_summary_data
     function retrieve_summary_data()
     {
-        let api_url = "${root_url}/api/1.0/activity_summarydata?activity_id=${activityId}&summary_items=intervals";
+        let api_url = root_url + "/api/1.0/activity_summarydata?activity_id=" + activity_id + "&summary_items=intervals";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
     }
 
@@ -384,7 +386,7 @@ ${summary}
     /// @function retrieve_sensor_data
     function retrieve_sensor_data()
     {
-        let api_url = "${root_url}/api/1.0/activity_sensordata?activity_id=${activityId}&sensors=Current%20Speed,Heart%20Rate,Cadence,Power";
+        let api_url = root_url + "/api/1.0/activity_sensordata?activity_id=" + activity_id + "&sensors=Current%20Speed,Heart%20Rate,Cadence,Power";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
     }
 
@@ -405,11 +407,11 @@ ${summary}
     /// @function refresh_analysis
     function refresh_analysis()
     {
-        let the_url = "${root_url}/api/1.0/refresh_analysis";
+        let the_url = root_url + "/api/1.0/refresh_analysis";
         let dict = [];
         let result_text = {};
 
-        dict.push({["activity_id"] : "${activityId}"});
+        dict.push({["activity_id"] : activity_id});
         if (send_post_request(the_url, dict, result_text))
             window.location.reload();
         else
@@ -419,12 +421,12 @@ ${summary}
     /// @function create_comment
     function create_comment()
     {
-        let the_url = "${root_url}/api/1.0/create_comment";
+        let the_url = root_url + "/api/1.0/create_comment";
         let comment = document.getElementById("comment").value;
         let dict = [];
         let result_text = {};
 
-        dict.push({["activity_id"] : "${activityId}"});
+        dict.push({["activity_id"] : activity_id});
         dict.push({["comment"] : comment});
         if (send_post_request(the_url, dict, result_text))
             window.location.reload();
@@ -435,15 +437,15 @@ ${summary}
     /// @function export_activity
     function export_activity()
     {
-        let the_url = "${root_url}/api/1.0/export_activity";
+        let the_url = root_url + "/api/1.0/export_activity";
         let format = document.getElementById("format").value;
         let dict = [];
         let result_text = {};
 
-        dict.push({["activity_id"] : "${activityId}"});
+        dict.push({["activity_id"] : activity_id});
         dict.push({["export_format"] : format});
         if (send_post_request(the_url, dict, result_text))
-            create_local_file(result_text.value, "${activityId}." + format, "text/plain;charset=utf-8");
+            create_local_file(result_text.value, activity_id + "." + format, "text/plain;charset=utf-8");
         else
             alert(result_text.value);
     }
@@ -451,7 +453,7 @@ ${summary}
     /// @function edit_activity
     function edit_activity()
     {
-        let the_url = "${root_url}/edit_activity/${activityId}";
+        let the_url = root_url + "/edit_activity/" + activity_id;
         window.location.replace(the_url);
     }
 
@@ -460,13 +462,13 @@ ${summary}
     {
         if (confirm('Are you sure you want to do this?'))
         {
-            let the_url = "${root_url}/api/1.0/delete_activity";
+            let the_url = root_url + "/api/1.0/delete_activity";
             let dict = [];
             let result_text = {};
 
-            dict.push({["activity_id"] : "${activityId}"});
+            dict.push({["activity_id"] : activity_id});
             if (send_post_request(the_url, dict, result_text))
-                window.location.replace("${root_url}");
+                window.location.replace(root_url);
             else
                 alert(result_text.value);
         }
@@ -477,11 +479,11 @@ ${summary}
     {
         if (confirm('Are you sure you want to delete the above photo?'))
         {
-            let the_url = "${root_url}/api/1.0/delete_activity_photo";
+            let the_url = root_url + "/api/1.0/delete_activity_photo";
             let dict = [];
             let result_text = {};
 
-            dict.push({["activity_id"] : "${activityId}"});
+            dict.push({["activity_id"] : activity_id});
             dict.push({["photo_id"] : photo_id});
             if (send_post_request(the_url, dict, result_text))
                 window.location.reload();
@@ -503,7 +505,7 @@ ${summary}
 
             for (let i = 0; i < photo_ids.length; ++i)
             {
-                let photo_url = "${root_url}/photos/${userId}/" + photo_ids[i];
+                let photo_url = root_url + "/photos/${userId}/" + photo_ids[i];
                 let imgTd = document.createElement("td");
                 let img = document.createElement("img");
                 let deleteTd = document.createElement("td");
@@ -529,18 +531,18 @@ ${summary}
     /// @function list_photos
     function list_photos()
     {
-        let api_url = "${root_url}/api/1.0/list_activity_photos?activity_id=${activityId}";
+        let api_url = root_url + "/api/1.0/list_activity_photos?activity_id=" + activity_id;
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photos_list, dataType: "json" });
     }
 
     /// @function create_tags
     function create_tags(tags)
     {
-        let the_url = "${root_url}/api/1.0/create_tags_on_activity";
+        let the_url = root_url + "/api/1.0/create_tags_on_activity";
         let dict = [];
         let result_text = {};
 
-        dict.push({["activity_id"] : "${activityId}"});
+        dict.push({["activity_id"] : activity_id});
         for (let tag in tags)
             dict.push({["tag" + tag] : tags[tag]});
         if (!send_post_request(the_url, dict, result_text))
