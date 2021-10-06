@@ -77,6 +77,8 @@ ${nav}
     let content_string = null;
     let map = new OpenLayers.Map();
     let lgpx = null;
+    let markers_layer = null;
+    let marker = null;
 
     let last_lat = 0.0;
     let last_lon = 0.0;
@@ -93,9 +95,23 @@ ${nav}
     function append_to_summary_list(key, value)
     {
         let ul = document.getElementById("summary");
-        let li = document.createElement("li");
 
-        li.appendChild(document.createTextNode(key + " " + value));
+        // If a text item for the specified item doesn't exist then create it.
+        let li = document.getElementById(key);
+        if (li)
+        {
+            while (li.firstChild)
+            {
+                li.removeChild(li.firstChild);
+            }
+        }
+        else
+        {
+            li = document.createElement("li");
+            li.id = key;
+        }
+        let text_item = document.createTextNode(key + " " + value);
+        li.appendChild(text_item);
         ul.appendChild(li);
     }
 
@@ -161,7 +177,7 @@ ${nav}
                 }
             }
 
-            if (i == 0)
+            if (loc_start_time_ms == 0)
             {
                 loc_start_time_ms = obj_list[i].time;
             }
@@ -220,10 +236,26 @@ ${nav}
         my_vector.addFeatures([my_feature]);
         map.addLayers([my_vector]);
 
+        // Center and zoom the map.
         let lon_lat = new OpenLayers.LonLat(last_lon, last_lat).transform(projection, map.getProjectionObject());
         let zoom = 15;
         map.setCenter(lon_lat, zoom);
         map.render(map_div);
+
+        // Analyze the route, compute the total distance, avg. speed, etc.
+        let unit_system = "${unit_system}";
+        let distance_traveled_str = convert_distance_to_unit_system_str(unit_system, total_meters_traveled);
+        append_to_summary_list("Distance", distance_traveled_str);
+        if (is_foot_based_activity)
+        {
+            let pace_str = convert_distance_and_duration_to_pace_str(unit_system, total_meters_traveled, total_ms_traveled);
+            append_to_summary_list("Avg. Pace:", pace_str);
+        }
+        else
+        {
+            let speed_str = convert_distance_and_duration_to_speed_str(unit_system, total_meters_traveled, total_ms_traveled);
+            append_to_summary_list("Avg. Speed:", speed_str);
+        }
 
         // Draw the split times chart.
         draw_split_times_chart();
@@ -265,11 +297,20 @@ ${nav}
 
         content_string += '</p></div></div>';
 
-        // Add the marker.
+        // Add the marker. Remove it if it already exists and then re-add it.
         let lon_lat = new OpenLayers.LonLat(last_lon, last_lat).transform(new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject());
-        let markers = new OpenLayers.Layer.Markers("Markers");
-        map.addLayer(markers);    
-        markers.addMarker(new OpenLayers.Marker(lon_lat));
+        if (!markers_layer)
+        {
+            markers_layer = new OpenLayers.Layer.Markers("Markers");
+            map.addLayer(markers_layer);
+        }
+        if (marker)
+        {
+            markers_layer.removeMarker(marker);
+            marker = null;
+        }
+        marker = new OpenLayers.Marker(lon_lat);
+        markers_layer.addMarker(marker);
     };
 
     /// @function route_loaded
@@ -303,7 +344,7 @@ ${nav}
     };
 
     initialize();
-    //setInterval(check_for_updates, 30000);
+    setInterval(check_for_updates, 30000);
 </script>
 
 </div>

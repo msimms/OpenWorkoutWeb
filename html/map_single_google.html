@@ -93,9 +93,23 @@ ${nav}
     function append_to_summary_list(key, value)
     {
         let ul = document.getElementById("summary");
-        let li = document.createElement("li");
 
-        li.appendChild(document.createTextNode(key + " " + value));
+        // If a text item for the specified item doesn't exist then create it.
+        let li = document.getElementById(key);
+        if (li)
+        {
+            while (li.firstChild)
+            {
+                li.removeChild(li.firstChild);
+            }
+        }
+        else
+        {
+            li = document.createElement("li");
+            li.id = key;
+        }
+        let text_item = document.createTextNode(key + " " + value);
+        li.appendChild(text_item);
         ul.appendChild(li);
     }
 
@@ -160,7 +174,7 @@ ${nav}
                 }
             }
 
-            if (i == 0)
+            if (loc_start_time_ms == 0)
             {
                 loc_start_time_ms = obj_list[i].time;
             }
@@ -212,17 +226,16 @@ ${nav}
 
         // Analyze the route, compute the total distance, avg. speed, etc.
         let unit_system = "${unit_system}";
-        let meters_traveled = total_distance_google(route_coordinates);
-        let distance_traveled_str = convert_distance_to_unit_system_str(unit_system, meters_traveled);
+        let distance_traveled_str = convert_distance_to_unit_system_str(unit_system, total_meters_traveled);
         append_to_summary_list("Distance", distance_traveled_str);
         if (is_foot_based_activity)
         {
-            let pace_str = convert_distance_and_duration_to_pace_str(unit_system, meters_traveled, total_ms_traveled);
+            let pace_str = convert_distance_and_duration_to_pace_str(unit_system, total_meters_traveled, total_ms_traveled);
             append_to_summary_list("Avg. Pace:", pace_str);
         }
         else
         {
-            let speed_str = convert_distance_and_duration_to_speed_str(unit_system, meters_traveled, total_ms_traveled);
+            let speed_str = convert_distance_and_duration_to_speed_str(unit_system, total_meters_traveled, total_ms_traveled);
             append_to_summary_list("Avg. Speed:", speed_str);
         }
 
@@ -330,7 +343,7 @@ ${nav}
 
     google.maps.event.addDomListener(window, 'load', initialize);
 
-    //setInterval(check_for_updates, 30000);
+    setInterval(check_for_updates, 30000);
 </script>
 
 </div>
