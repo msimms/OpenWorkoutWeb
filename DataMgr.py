@@ -536,7 +536,7 @@ class DataMgr(Importer.ActivityWriter):
 
         return activities
 
-    def retrieve_each_user_activity(self, context, user_id, cb=None):
+    def retrieve_each_user_activity(self, context, user_id, cb, return_all_data):
         """Fires a callback for all of the user's activities. num_results can be None for all activiites."""
         if self.database is None:
             raise Exception("No database.")
@@ -546,16 +546,18 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if cb is None:
             raise Exception("Bad parameter.")
+        if return_all_data is None:
+            raise Exception("Bad parameter.")
 
         # List activities recorded on devices registered to the user.
         devices = self.database.retrieve_user_devices(user_id)
         devices = list(set(devices)) # De-duplicate
         if devices is not None:
             for device in devices:
-                self.database.retrieve_each_device_activity(context, user_id, device, cb)
+                self.database.retrieve_each_device_activity(context, user_id, device, cb, return_all_data)
 
         # List activities with no device that are associated with the user.
-        return self.database.retrieve_each_user_activity(context, user_id, cb)
+        return self.database.retrieve_each_user_activity(context, user_id, cb, return_all_data)
 
     def retrieve_all_activities_visible_to_user(self, user_id, user_realname, start_time, end_time, num_results):
         """Returns a list containing all of the activities visible to the specified user, up to num_results. num_results can be None for all activiites."""
@@ -876,7 +878,7 @@ class DataMgr(Importer.ActivityWriter):
             tag_distances[tag] = 0.0
 
         # Retrieve each activity, tag_distances will be updated in the callback.
-        if not self.retrieve_each_user_activity(tag_distances, user_id, DataMgr.distance_for_tag_cb):
+        if not self.retrieve_each_user_activity(tag_distances, user_id, DataMgr.distance_for_tag_cb, False):
             raise Exception("Error retrieving activities.")
         return tag_distances
 

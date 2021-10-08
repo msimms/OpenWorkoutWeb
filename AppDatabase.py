@@ -133,7 +133,6 @@ class MongoDatabase(Database.Database):
         exclude_keys[Keys.APP_HEART_RATE_KEY] = False
         exclude_keys[Keys.APP_CADENCE_KEY] = False
         exclude_keys[Keys.APP_POWER_KEY] = False
-        exclude_keys[Keys.ACTIVITY_SUMMARY_KEY] = False
         return exclude_keys
 
     #
@@ -908,6 +907,7 @@ class MongoDatabase(Database.Database):
     @Perf.statistics
     def retrieve_user_activity_list(self, user_id, start_time, end_time, return_all_data):
         """Retrieves the list of activities associated with the specified user."""
+        """If return_all_data is False then only metadata is returned."""
         if user_id is None:
             self.log_error(MongoDatabase.retrieve_user_activity_list.__name__ + ": Unexpected empty object: user_id")
             return []
@@ -928,11 +928,18 @@ class MongoDatabase(Database.Database):
         return []
 
     @Perf.statistics
-    def retrieve_each_user_activity(self, context, user_id, callback_func):
+    def retrieve_each_user_activity(self, context, user_id, callback_func, return_all_data):
         """Retrieves each user activity and calls the callback function for each one."""
         """Returns TRUE on success, FALSE if an error was encountered."""
+        """If return_all_data is False then only metadata is returned."""
         try:
-            activities_cursor = self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id })
+            # Things we don't need.
+            if return_all_data:
+                exclude_keys = {}
+            else:
+                exclude_keys = self.list_excluded_activity_keys_activity_lists()
+
+            activities_cursor = self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys)
             if activities_cursor is not None:
                 while activities_cursor.alive:
                     activity = activities_cursor.next()
@@ -969,10 +976,17 @@ class MongoDatabase(Database.Database):
         return []
 
     @Perf.statistics
-    def retrieve_each_device_activity(self, context, user_id, device_str, callback_func):
+    def retrieve_each_device_activity(self, context, user_id, device_str, callback_func, return_all_data):
         """Retrieves each device activity and calls the callback function for each one."""
+        """If return_all_data is False then only metadata is returned."""
         try:
-            activities_cursor = self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
+            # Things we don't need.
+            if return_all_data:
+                exclude_keys = {}
+            else:
+                exclude_keys = self.list_excluded_activity_keys_activity_lists()
+
+            activities_cursor = self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys)
             if activities_cursor is not None:
                 try:
                     while activities_cursor.alive:

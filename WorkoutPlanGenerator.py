@@ -109,7 +109,7 @@ class WorkoutPlanGenerator(object):
         self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.SIX_MONTHS)
 
         # This will trigger the callback for each of the user's activities.
-        if not self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb):
+        if not self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb, False):
             raise Exception("Error retrieving the user's activities.")
 
         #
