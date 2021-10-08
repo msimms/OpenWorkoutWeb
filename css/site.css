@@ -157,12 +157,6 @@ tr:hover {
     opacity: 1.0;
 }
 
-.user_search_form {
-    width: 200px;
-    margin: 50px auto;
-    padding: 25px;
-}
-
 .user_search_form ul {
     margin: 0px;
     padding: 0px;
@@ -171,10 +165,6 @@ tr:hover {
 .user_search_form li {
     display: inline;
     padding-bottom: .25cm;
-}
-
-.user_search_form input {
-    width: 400px;
 }
 
 .activities_list {
