@@ -1957,7 +1957,7 @@ class Api(object):
         if hash_from_db != activity_hash:
             return True, json.dumps( { Keys.CODE_KEY: 2, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, has does not match
 
-        return True, json.dumps( { Keys.CODE_KEY: 3, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, has matches
+        return True, json.dumps( { Keys.CODE_KEY: 3, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash matches as well
 
     def handle_list_personal_records(self, values):
         """Returns the user's personal records. Result is a JSON string."""
