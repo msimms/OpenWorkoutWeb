@@ -942,9 +942,16 @@ class Api(object):
         # Validate the activity ID.
         desired_activity_id = None
         if Keys.ACTIVITY_ID_KEY in values:
+
+            # Is it a valid ID?
             desired_activity_id = values[Keys.ACTIVITY_ID_KEY]
             if not InputChecker.is_uuid(desired_activity_id):
                 raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+            # Do we already have an activity with this ID?
+            exists = self.data_mgr.activity_exists(desired_activity_id)
+            if exists:
+                raise ApiException.ApiMalformedRequestException("Duplicate activity ID.")
 
         # Parse the file and store it's contents in the database.
         task_id = self.data_mgr.import_activity_from_file(username, self.user_id, uploaded_file_data, uploaded_file_name, desired_activity_id)
