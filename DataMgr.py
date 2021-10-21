@@ -1044,16 +1044,6 @@ class DataMgr(Importer.ActivityWriter):
                 new_workouts_list.append(workout)
         return self.database.update_workouts_for_user(user_id, new_workouts_list)
 
-    def delete_workout(self, user_id, workout_id):
-        """Delete method for the workout with the specified ID and belonging to the specified user."""
-        if self.database is None:
-            raise Exception("No database.")
-        if user_id is None:
-            raise Exception("Bad parameter.")
-        if workout_id is None:
-            raise Exception("Bad parameter.")
-        return self.database.delete_workout(user_id, workout_id)
-
     def retrieve_users_without_scheduled_workouts(self):
         """Returns a list of user IDs for users who have workout plans that need to be re-run."""
         if self.database is None:
