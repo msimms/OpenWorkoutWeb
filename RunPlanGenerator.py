@@ -10,7 +10,7 @@ import Keys
 import Units
 import WorkoutFactory
 
-# Max zone 1, zone 2, zone 3 intensity distributions for each training philosophy
+# Max zone 1, zone 2, zone 3 total intensity distributions for each training philosophy
 TID_THRESHOLD = [55, 55, 20]
 TID_POLARIZED = [85, 10, 25]
 TID_PYRAMIDAL = [75, 25, 10]
@@ -20,11 +20,8 @@ class RunPlanGenerator(object):
 
     def __init__(self, user_id, training_intensity_distribution):
         self.user_id = user_id
-        self.easy_distance_total_meters = 0.0
-        self.hard_distance_total_meters = 0.0
-        self.total_easy_seconds = 0.0 # Total weekly seconds spent running easy
-        self.total_hard_seconds = 0.0 # Total weekly seconds spent running hard
         self.training_intensity_distribution = training_intensity_distribution
+        self.clear_intensity_distribution()
 
     def is_workout_plan_possible(self, inputs):
         """Returns TRUE if we can actually generate a plan with the given contraints."""
@@ -54,6 +51,54 @@ class RunPlanGenerator(object):
     def round_distance(distance):
         return float(math.ceil(distance / 100.0)) * 100.0
 
+    def clear_intensity_distribution(self):
+        """Resets all intensity distribution tracking variables."""
+
+        # Distribution of distance spent in each intensity zone.
+        # 0 index is most intense.
+        self.intensity_distribution_meters = []
+        self.intensity_distribution_meters.append(0.0)
+        self.intensity_distribution_meters.append(0.0)
+        self.intensity_distribution_meters.append(0.0)
+
+        # Distribution of time spent in each intensity zone.
+        # 0 index is most intense.
+        self.intensity_distribution_seconds = []
+        self.intensity_distribution_seconds.append(0.0)
+        self.intensity_distribution_seconds.append(0.0)
+        self.intensity_distribution_seconds.append(0.0)
+
+        # Paces that determine the cutoffs for intensity distribution.
+        self.cutoff_pace_1 = 0.0
+        self.cutoff_pace_2 = 0.0
+
+    def update_intensity_distribution(self, seconds, meters):
+        """Updates the variables used to track intensity distribution."""
+
+         # Distance not specified
+        if meters < 0.01:
+            pace = 0.0
+        else:
+            pace = seconds / meters
+
+        # Above L2 pace.
+        if pace > self.cutoff_pace_2:
+            self.intensity_distribution_seconds[2] += seconds
+            self.intensity_distribution_meters[2] += meters
+
+        # Above L1 pace.
+        elif pace > self.cutoff_pace_1:
+            self.intensity_distribution_seconds[1] += seconds
+            self.intensity_distribution_meters[1] += meters
+
+        # Easy pace.
+        else:
+            self.intensity_distribution_seconds[0] += seconds
+            self.intensity_distribution_meters[0] += meters
+
+    def check_intensity_distribution(self):
+        return True
+
     def gen_easy_run(self, pace, min_run_distance, max_run_distance):
         """Utility function for creating an easy run of some random distance between min and max."""
 
@@ -73,10 +118,7 @@ class RunPlanGenerator(object):
         workout.add_interval(1, interval_distance_meters, pace, 0, 0)
 
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        self.easy_distance_total_meters += interval_distance_meters
-
-        # Tally up the easy and hard seconds.
-        self.total_easy_seconds += interval_distance_meters * pace
+        self.update_intensity_distribution(interval_distance_meters * pace, interval_distance_meters)
 
         return workout
 
@@ -107,15 +149,10 @@ class RunPlanGenerator(object):
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
         total_rest_meters = ((num_intervals - 1) * interval_distance_meters)
         total_hard_meters = (num_intervals * interval_distance_meters)
-        self.easy_distance_total_meters += (warmup_duration / easy_run_pace)
-        self.easy_distance_total_meters += (cooldown_duration / easy_run_pace)
-        self.easy_distance_total_meters += (total_rest_meters)
-        self.hard_distance_total_meters += (total_hard_meters)
-
-        # Tally up the easy and hard seconds.
-        self.total_easy_seconds += (warmup_duration + cooldown_duration)
-        self.total_easy_seconds += (total_rest_meters * easy_run_pace)
-        self.total_hard_seconds += (total_hard_meters * tempo_run_pace)
+        self.update_intensity_distribution(total_rest_meters * easy_run_pace, total_rest_meters)
+        self.update_intensity_distribution(total_hard_meters * tempo_run_pace, total_hard_meters)
+        self.update_intensity_distribution(warmup_duration, 0.0)
+        self.update_intensity_distribution(cooldown_duration, 0.0)
 
         return workout
 
@@ -188,15 +225,10 @@ class RunPlanGenerator(object):
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
         total_rest_meters = ((selected_reps - 1) * rest_interval_distance)
         total_hard_meters = (selected_reps * interval_distance)
-        self.easy_distance_total_meters += (warmup_duration / easy_run_pace)
-        self.easy_distance_total_meters += (cooldown_duration / easy_run_pace)
-        self.easy_distance_total_meters += (total_rest_meters)
-        self.hard_distance_total_meters += (total_hard_meters)
-
-        # Tally up the easy and hard seconds.
-        self.total_easy_seconds += (warmup_duration + cooldown_duration)
-        self.total_easy_seconds += (total_rest_meters * easy_run_pace)
-        self.total_hard_seconds += (total_hard_meters * interval_pace)
+        self.update_intensity_distribution(total_rest_meters * easy_run_pace, total_rest_meters)
+        self.update_intensity_distribution(total_hard_meters * interval_pace, total_hard_meters)
+        self.update_intensity_distribution(warmup_duration, 0.0)
+        self.update_intensity_distribution(cooldown_duration, 0.0)
 
         return workout
 
@@ -217,14 +249,11 @@ class RunPlanGenerator(object):
         workout.add_interval(1, interval_distance_meters, long_run_pace, 0, 0)
 
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        self.easy_distance_total_meters += interval_distance_meters
-
-        # Tally up the easy and hard seconds.
-        self.total_easy_seconds += interval_distance_meters * long_run_pace
+        self.update_intensity_distribution(interval_distance_meters * long_run_pace, interval_distance_meters)
 
         return workout
 
-    def gen_free_run(self):
+    def gen_free_run(self, easy_run_pace):
         """Utility function for creating a free run workout."""
 
         # Roll the dice to figure out the distance.
@@ -237,7 +266,7 @@ class RunPlanGenerator(object):
         workout.add_interval(1, interval_distance_meters, 0, 0, 0)
 
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        self.easy_distance_total_meters += interval_distance_meters
+        self.update_intensity_distribution(interval_distance_meters * easy_run_pace, interval_distance_meters)
 
         return workout
 
@@ -294,6 +323,10 @@ class RunPlanGenerator(object):
         exp_level = inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY]
         #comfort_level = inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY]
 
+        # Cutoff paces.
+        self.cutoff_pace_1 = tempo_run_pace
+        self.cutoff_pace_2 = speed_run_pace
+
         # Are we in a taper?
         # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
         in_taper = False
@@ -304,14 +337,14 @@ class RunPlanGenerator(object):
 
         # Handle situation in which the user hasn't run in four weeks.
         if not RunPlanGenerator.valid_float(longest_run_in_four_weeks):
-            workouts.append(self.gen_free_run())
-            workouts.append(self.gen_free_run())
+            workouts.append(self.gen_free_run(easy_run_pace))
+            workouts.append(self.gen_free_run(easy_run_pace))
             return workouts
         
         # Handle situation in which the user hasn't run *much* in the last four weeks.
         if num_runs is None or num_runs < 4:
-            workouts.append(self.gen_free_run())
-            workouts.append(self.gen_free_run())
+            workouts.append(self.gen_free_run(easy_run_pace))
+            workouts.append(self.gen_free_run(easy_run_pace))
             return workouts
 
         # No pace data?
@@ -363,10 +396,7 @@ class RunPlanGenerator(object):
             workouts = []
 
             # Keep track of the number of easy miles/kms and the number of hard miles/kms we're expecting the user to run so we can balance the two.
-            self.easy_distance_total_meters = 0.0
-            self.hard_distance_total_meters = 0.0
-            self.total_easy_seconds = 0.0
-            self.total_hard_seconds = 0.0
+            self.clear_intensity_distribution()
 
             # Add a long run.
             long_run_workout = self.gen_long_run(long_run_pace, longest_run_in_four_weeks, min_run_distance, max_long_run_distance)
@@ -380,7 +410,7 @@ class RunPlanGenerator(object):
             tempo_run_workout = self.gen_tempo_run(tempo_run_pace, easy_run_pace, max_tempo_run_distance)
             workouts.append(tempo_run_workout)
 
-            # The user cares about speed as well as completing the distance. Also note that we should add strikes to one of the other workouts.
+            # The user cares about speed as well as completing the distance. Also note that we should add strides to one of the other workouts.
             if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower():
 
                 # Add an interval/speed session.
@@ -392,8 +422,8 @@ class RunPlanGenerator(object):
             workouts.append(easy_run_workout)
 
             # Keep track of the total distance as well as the easy distance to keep from planning too many intense miles/kms.
-            total_distance = self.easy_distance_total_meters + self.hard_distance_total_meters
-            easy_distance_percentage = self.easy_distance_total_meters / total_distance
+            total_distance = sum(self.intensity_distribution_meters)
+            easy_distance_percentage = self.intensity_distribution_meters[0] / total_distance
 
             # This is used to make sure we don't loop forever.
             iter_count = iter_count + 1
