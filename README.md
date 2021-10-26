@@ -278,6 +278,9 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 * Bug fixes to personal record tracking.
 * Style fixes.
 
+### 0.42
+* Bug fixes and performance optimizations.
+
 ## Tech
 This software uses several other source projects to work properly:
 
