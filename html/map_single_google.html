@@ -139,6 +139,46 @@ ${nav}
             $(function() { draw_bar_chart(new_splits, "Split Times (seconds)", "LightSteelBlue") });
     }
 
+    /// @function add_current_location_marker
+    function add_current_location_marker()
+    {
+        let content_string = '<div id="content">' +
+            '<div id="siteNotice">' +
+            '</div>' +
+            '<h2 id="firstHeading" class="firstHeading">Last Known Position</h2>' +
+            '</div>';
+
+        if (info_window)
+        {
+            info_window.close();
+            info_window = null;
+        }
+        if (marker)
+        {
+            marker.setMap(null);
+            marker = null;
+        }
+
+        info_window = new google.maps.InfoWindow
+        ({
+            content: content_string
+        });
+
+        marker = new google.maps.Marker
+        ({
+            position: new google.maps.LatLng(last_lat, last_lon),
+            map: map,
+            title: 'Current Position'
+        });
+
+        google.maps.event.addListener(marker, 'click', function()
+        {
+            info_window.open(map, marker);
+        });
+
+        info_window.open(map, marker);
+    };
+
     var append_to_track = function(obj_list)
     {
         if (obj_list == null)
@@ -223,6 +263,9 @@ ${nav}
         // Center the map.
         let center = new google.maps.LatLng(last_lat, last_lon);
         map.panTo(center);
+        
+        // Add the current location marker.
+        add_current_location_marker();
 
         // Analyze the route, compute the total distance, avg. speed, etc.
         let unit_system = "${unit_system}";
@@ -239,74 +282,11 @@ ${nav}
             append_to_summary_list("Avg. Speed:", speed_str);
         }
 
-        // Request metadata for the info box.
-        $.ajax({ type: 'GET', url: root_url + "/api/1.0/activity_metadata?activity_id=" + activity_id, cache: false, success: update_metadata, dataType: "json" });
-
         // Draw the split times chart.
         draw_split_times_chart();
 
         // Draw the elevation graph.
         draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", "PeachPuff");
-    };
-
-    var update_metadata = function(obj_list)
-    {
-        if (obj_list == null)
-            return;
-
-        let content_string = '<div id="content">' +
-            '<div id="siteNotice">' +
-            '</div>' +
-            '<h2 id="firstHeading" class="firstHeading">Last Known Position</h2>' +
-            '<div id="bodyContent">' +
-            '<p>';
-
-        Object.keys(obj_list).forEach(function(key) {
-            let value = obj_list[key];
-
-            if ((key != "Name") && (key != "Avg. Speed") && (key != "activity_id") && (key != "Time") && (key != "Type") && (key != "tags"))
-            {
-                if (key != "Description")
-                {
-                    content_string += key;
-                    content_string += " = ";
-                }
-                content_string += value;
-                content_string += "<br>";
-            }
-        });
-
-        content_string += '</p></div></div>';
-
-        if (info_window)
-        {
-            info_window.close();
-            info_window = null;
-        }
-        if (marker)
-        {
-            marker.setMap(null);
-            marker = null;
-        }
-
-        info_window = new google.maps.InfoWindow
-        ({
-            content: content_string
-        });
-
-        marker = new google.maps.Marker
-        ({
-            position: new google.maps.LatLng(last_lat, last_lon),
-            map: map,
-            title: 'Current Position'
-        });
-
-        google.maps.event.addListener(marker, 'click', function()
-        {
-            info_window.open(map, marker);
-        });
-
-        info_window.open(map, marker);
     };
 
     /// @function initialize
