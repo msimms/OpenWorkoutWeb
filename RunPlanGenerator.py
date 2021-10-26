@@ -20,6 +20,8 @@ class RunPlanGenerator(object):
 
     def __init__(self, user_id, training_intensity_distribution):
         self.user_id = user_id
+        self.cutoff_pace_1 = 0.0
+        self.cutoff_pace_2 = 0.0
         self.training_intensity_distribution = training_intensity_distribution
         self.clear_intensity_distribution()
 
@@ -55,18 +57,18 @@ class RunPlanGenerator(object):
         """Resets all intensity distribution tracking variables."""
 
         # Distribution of distance spent in each intensity zone.
-        # 0 index is most intense.
+        # 0 index is least intense.
         self.intensity_distribution_meters = []
         self.intensity_distribution_meters.append(0.0)
         self.intensity_distribution_meters.append(0.0)
         self.intensity_distribution_meters.append(0.0)
 
         # Distribution of time spent in each intensity zone.
-        # 0 index is most intense.
+        # 0 index is least intense.
         self.intensity_distribution_seconds = []
-        self.intensity_distribution_seconds.append(0.0)
-        self.intensity_distribution_seconds.append(0.0)
-        self.intensity_distribution_seconds.append(0.0)
+        self.intensity_distribution_seconds.append(0)
+        self.intensity_distribution_seconds.append(0)
+        self.intensity_distribution_seconds.append(0)
 
         # Paces that determine the cutoffs for intensity distribution.
         self.cutoff_pace_1 = 0.0
@@ -75,7 +77,7 @@ class RunPlanGenerator(object):
     def update_intensity_distribution(self, seconds, meters):
         """Updates the variables used to track intensity distribution."""
 
-         # Distance not specified
+         # Distance not specified.
         if meters < 0.01:
             pace = 0.0
         else:
