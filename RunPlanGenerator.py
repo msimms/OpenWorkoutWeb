@@ -127,7 +127,7 @@ class RunPlanGenerator(object):
     def gen_tempo_run(self, tempo_run_pace, easy_run_pace, max_run_distance):
         """Utility function for creating a tempo workout."""
 
-	    # Decide on the number of intervals and their distance.
+        # Decide on the number of intervals and their distance.
         num_intervals = 1
         temp_distance = (30.0 * tempo_run_pace) / num_intervals
         interval_distance_meters = RunPlanGenerator.nearest_interval_distance(temp_distance, 2000.0)
@@ -153,14 +153,40 @@ class RunPlanGenerator(object):
         total_hard_meters = (num_intervals * interval_distance_meters)
         self.update_intensity_distribution(total_rest_meters * easy_run_pace, total_rest_meters)
         self.update_intensity_distribution(total_hard_meters * tempo_run_pace, total_hard_meters)
-        self.update_intensity_distribution(warmup_duration, 0.0)
-        self.update_intensity_distribution(cooldown_duration, 0.0)
+        self.update_intensity_distribution(warmup_duration, easy_run_pace)
+        self.update_intensity_distribution(cooldown_duration, easy_run_pace)
 
         return workout
 
     def gen_threshold_run(self, threshold_run_pace, easy_run_pace, max_run_distance):
         """Utility function for creating a threshold workout."""
-        pass
+
+        # Decide on the number of intervals and their distance.
+        temp_distance = 20.0 * threshold_run_pace
+        interval_distance_meters = RunPlanGenerator.nearest_interval_distance(temp_distance, 2000.0)
+
+        # Sanity check.
+        if interval_distance_meters > max_run_distance:
+            interval_distance_meters = max_run_distance
+        if interval_distance_meters < 1000:
+            interval_distance_meters = 1000
+
+        warmup_duration = 10 * 60 # Ten minute warmup
+        cooldown_duration = 10 * 60 # Ten minute cooldown
+
+        # Create the workout object.
+        workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_THRESHOLD_RUN, self.user_id)
+        workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.add_warmup(warmup_duration)
+        workout.add_interval(1, interval_distance_meters, threshold_run_pace, 0, 0)
+        workout.add_cooldown(cooldown_duration)
+
+        # Tally up the easy and hard distance so we can keep the weekly plan in check.
+        self.update_intensity_distribution(interval_distance_meters * threshold_run_pace, interval_distance_meters)
+        self.update_intensity_distribution(warmup_duration, easy_run_pace)
+        self.update_intensity_distribution(cooldown_duration, easy_run_pace)
+
+        return workout
 
     def gen_speed_run(self, short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance):
         """Utility function for creating a speed/interval workout."""
@@ -415,9 +441,20 @@ class RunPlanGenerator(object):
             # The user cares about speed as well as completing the distance. Also note that we should add strides to one of the other workouts.
             if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower():
 
-                # Add an interval/speed session.
-                interval_workout = self.gen_speed_run(short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance)
-                workouts.append(interval_workout)
+                # Decide which workout we're going to do.
+                workout_probability = random.uniform(0, 100)
+
+                if workout_probability < 50:
+
+                    # Add an interval/speed session.
+                    interval_workout = self.gen_speed_run(short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance)
+                    workouts.append(interval_workout)
+
+                else:
+
+                    # Add a threshold session.
+                    interval_workout = self.gen_threshold_run(functional_threshold_pace, easy_run_pace, goal_distance)
+                    workouts.append(interval_workout)
 
             # Add an easy run.
             easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
