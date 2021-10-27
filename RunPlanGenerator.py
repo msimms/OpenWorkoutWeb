@@ -20,9 +20,17 @@ class RunPlanGenerator(object):
 
     def __init__(self, user_id, training_intensity_distribution):
         self.user_id = user_id
+
         self.cutoff_pace_1 = 0.0
         self.cutoff_pace_2 = 0.0
-        self.training_intensity_distribution = training_intensity_distribution
+
+        if training_intensity_distribution == Keys.TRAINING_INTENSITY_DIST_THRESHOLD:
+            self.training_intensity_distribution = TID_THRESHOLD
+        elif training_intensity_distribution == Keys.TRAINING_INTENSITY_DIST_POLARIZED:
+            self.training_intensity_distribution = TID_POLARIZED
+        elif training_intensity_distribution == Keys.TRAINING_INTENSITY_DIST_PYRAMIDAL:
+            self.training_intensity_distribution = TID_PYRAMIDAL
+
         self.clear_intensity_distribution()
 
     def is_workout_plan_possible(self, inputs):
@@ -70,10 +78,6 @@ class RunPlanGenerator(object):
         self.intensity_distribution_seconds.append(0)
         self.intensity_distribution_seconds.append(0)
 
-        # Paces that determine the cutoffs for intensity distribution.
-        self.cutoff_pace_1 = 0.0
-        self.cutoff_pace_2 = 0.0
-
     def update_intensity_distribution(self, seconds, meters):
         """Updates the variables used to track intensity distribution."""
 
@@ -99,7 +103,11 @@ class RunPlanGenerator(object):
             self.intensity_distribution_meters[0] += meters
 
     def check_intensity_distribution(self):
-        return True
+        """How far are these workouts from the ideal intensity distribution?"""
+        total_meters = sum(self.intensity_distribution_meters)
+        intensity_distribution_percent = [(x / total_meters) * 100.0 for x in self.intensity_distribution_meters]
+        intensity_distribution_score = sum([abs(x - y) for x, y in zip(intensity_distribution_percent, self.training_intensity_distribution)])
+        return intensity_distribution_score
 
     def gen_easy_run(self, pace, min_run_distance, max_run_distance):
         """Utility function for creating an easy run of some random distance between min and max."""
@@ -409,15 +417,9 @@ class RunPlanGenerator(object):
         if min_run_distance > max_easy_run_distance:
             min_run_distance = max_easy_run_distance
 
-        # We'll also set the percentage of easy miles/kms based on the experience level.
-        if exp_level <= 5:
-            min_easy_distance_percentage = 0.90
-        elif exp_level <= 7:
-            min_easy_distance_percentage = 0.80
-        else:
-            min_easy_distance_percentage = 0.75
-
         iter_count = 0
+        best_intensity_distribution_score = None
+        best_workouts = []
         done = False
         while not done:
 
@@ -460,9 +462,11 @@ class RunPlanGenerator(object):
             easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
             workouts.append(easy_run_workout)
 
-            # Keep track of the total distance as well as the easy distance to keep from planning too many intense miles/kms.
-            total_distance = sum(self.intensity_distribution_meters)
-            easy_distance_percentage = self.intensity_distribution_meters[0] / total_distance
+            # How far are these workouts from the ideal intensity distribution?
+            intensity_distribution_score = self.check_intensity_distribution()
+            if best_intensity_distribution_score is None or intensity_distribution_score < best_intensity_distribution_score:
+                best_intensity_distribution_score = intensity_distribution_score
+                best_workouts = workouts
 
             # This is used to make sure we don't loop forever.
             iter_count = iter_count + 1
@@ -470,11 +474,9 @@ class RunPlanGenerator(object):
             # Exit conditions:
             if iter_count >= 6:
                 done = True
-            if easy_distance_percentage >= min_easy_distance_percentage:
-                done = True
 
         # Calculate the total stress for each workout.
-        for workout in workouts:
+        for workout in best_workouts:
             workout.calculate_estimated_intensity_score(functional_threshold_pace)
 
-        return workouts
+        return best_workouts
