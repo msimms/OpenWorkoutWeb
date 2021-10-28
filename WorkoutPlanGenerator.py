@@ -139,15 +139,15 @@ class WorkoutPlanGenerator(object):
             longest_run_in_four_weeks = longest_run_in_four_weeks[0]
 
         # Get some data from prior weeks data.
-        cycling_bests_week1, running_bests_week_1, cycling_summary_week_1, running_summary_week_1 = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.ONE_WEEK)
+        cycling_bests_week1, running_bests_week_1, _, _ = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.ONE_WEEK)
         if running_bests_week_1 is not None and Keys.LONGEST_DISTANCE in running_bests_week_1:
             longest_run_week_1 = running_bests_week_1[Keys.LONGEST_DISTANCE]
             longest_run_week_1 = longest_run_week_1[0]
-        cycling_bests_week2, running_bests_week_2, cycling_summary_week_2, running_summary_week_2 = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 2), now - (DataMgr.ONE_WEEK * 1))
+        cycling_bests_week2, running_bests_week_2, _, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 2), now - (DataMgr.ONE_WEEK * 1))
         if running_bests_week_2 is not None and Keys.LONGEST_DISTANCE in running_bests_week_2:
             longest_run_week_2 = running_bests_week_2[Keys.LONGEST_DISTANCE]
             longest_run_week_2 = longest_run_week_2[0]
-        cycling_bests_week3, running_bests_week_3, cycling_summary_week_3, running_summary_week_3 = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 3), now - (DataMgr.ONE_WEEK * 2))
+        cycling_bests_week3, running_bests_week_3, _, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 3), now - (DataMgr.ONE_WEEK * 2))
         if running_bests_week_3 is not None and Keys.LONGEST_DISTANCE in running_bests_week_3:
             longest_run_week_3 = running_bests_week_3[Keys.LONGEST_DISTANCE]
             longest_run_week_3 = longest_run_week_3[0]

@@ -339,9 +339,10 @@ class RunPlanGenerator(object):
 
         workouts = []
 
-        # 3 Critical runs: Speed session, tempo run, and long run
+        # 3 Critical runs: Speed session, tempo or threshold run, and long run
 
         goal_distance = inputs[Keys.GOAL_RUN_DISTANCE_KEY]
+        goal = inputs[Keys.GOAL_KEY]
         goal_type = inputs[Keys.GOAL_TYPE_KEY]
         weeks_until_goal = inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY]
         short_interval_run_pace = inputs[Keys.SHORT_INTERVAL_RUN_PACE]
@@ -358,18 +359,6 @@ class RunPlanGenerator(object):
         num_runs = inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS]
         exp_level = inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY]
         #comfort_level = inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY]
-
-        # Cutoff paces.
-        self.cutoff_pace_1 = tempo_run_pace
-        self.cutoff_pace_2 = speed_run_pace
-
-        # Are we in a taper?
-        # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
-        in_taper = False
-        if weeks_until_goal <= 2 and goal_type == Keys.GOAL_MARATHON_RUN_KEY:
-            in_taper = True
-        if weeks_until_goal <= 1 and goal_type == Keys.GOAL_HALF_MARATHON_RUN_KEY:
-            in_taper = True
 
         # Handle situation in which the user hasn't run in four weeks.
         if not RunPlanGenerator.valid_float(longest_run_in_four_weeks):
@@ -391,6 +380,18 @@ class RunPlanGenerator(object):
         if longest_run_week_1 and longest_run_week_2 and longest_run_week_3:
             if longest_run_week_1 >= longest_run_week_2 and longest_run_week_2 >= longest_run_week_3:
                 longest_run_in_four_weeks *= 0.75
+
+        # Cutoff paces.
+        self.cutoff_pace_1 = tempo_run_pace
+        self.cutoff_pace_2 = speed_run_pace
+
+        # Are we in a taper?
+        # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
+        in_taper = False
+        if weeks_until_goal <= 2 and goal == Keys.GOAL_MARATHON_RUN_KEY:
+            in_taper = True
+        if weeks_until_goal <= 1 and goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
+            in_taper = True
 
         # Compute the longest run needed to accomplish the goal.
         # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.

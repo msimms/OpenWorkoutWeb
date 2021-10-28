@@ -56,6 +56,8 @@ GOAL_HALF_MARATHON_RUN_KEY = "Half Marathon"
 GOAL_MARATHON_RUN_KEY = "Marathon"
 GOAL_50K_RUN_KEY = "50K Run"
 GOAL_50_MILE_RUN_KEY = "50 Mile Run"
+
+# Goal types.
 GOAL_TYPE_KEY = "goal type" # Extra info about the user's goal, such as whether they care about speed or just finishing a race
 GOAL_TYPE_COMPLETION = "Completion"
 GOAL_TYPE_SPEED = "Speed"
