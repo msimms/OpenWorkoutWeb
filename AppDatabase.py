@@ -91,6 +91,10 @@ class MongoDatabase(Database.Database):
             self.workouts_collection = self.database['workouts']
             self.tasks_collection = self.database['tasks']
             self.uploads_collection = self.database['uploads']
+
+            # Create indexes.
+            self.activities_collection.create_index(Keys.ACTIVITY_ID_KEY)
+
             return True
         except pymongo.errors.ConnectionFailure as e:
             self.log_error("Could not connect to MongoDB: %s" % e)
@@ -1047,6 +1051,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    @Perf.statistics
     def retrieve_activity(self, activity_id):
         """Retrieve method for an activity, specified by the activity ID."""
         if activity_id is None:
@@ -1064,6 +1069,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
+    @Perf.statistics
     def retrieve_activity_small(self, activity_id):
         """Retrieve method for an activity, specified by the activity ID."""
         if activity_id is None:
