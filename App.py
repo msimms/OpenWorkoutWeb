@@ -536,10 +536,8 @@ class App(object):
             return self.render_page_for_errored_activity(activity_id, logged_in, belongs_to_current_user)
 
         last_loc = locations[-1]
-        first_loc = locations[0]
         last_lat = last_loc[Keys.LOCATION_LAT_KEY]
         last_lon = last_loc[Keys.LOCATION_LON_KEY]
-        duration = last_loc[Keys.LOCATION_TIME_KEY] - first_loc[Keys.LOCATION_TIME_KEY] # Duration of the activity, in milliseconds
 
         # User's preferred unit system.
         if logged_in:
