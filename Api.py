@@ -1072,7 +1072,8 @@ class Api(object):
             tag = unquote_plus(values[tag_name])
             if not InputChecker.is_valid_decoded_str(tag):
                 raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-            tags.append(tag)
+            if len(tag) > 0:
+                tags.append(tag)
             tag_index = tag_index + 1
             tag_name = Keys.ACTIVITY_TAG_KEY + str(tag_index)
 
