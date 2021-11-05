@@ -93,6 +93,8 @@ class WorkoutPlanGenerator(object):
             raise Exception("A goal has not been defined.")
         if goal_date is None:
             raise Exception("A goal date has not been defined.")
+
+        # Compute the time remaining until the goal.
         if goal is not Keys.GOAL_FITNESS_KEY:
 
             # Sanity-check the goal date.
