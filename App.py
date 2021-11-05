@@ -530,15 +530,6 @@ class App(object):
         # Is the user logged in?
         logged_in = logged_in_user_id is not None
 
-        # Sanity check.
-        locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
-        if locations is None or len(locations) == 0:
-            return self.render_page_for_errored_activity(activity_id, logged_in, belongs_to_current_user)
-
-        last_loc = locations[-1]
-        last_lat = last_loc[Keys.LOCATION_LAT_KEY]
-        last_lon = last_loc[Keys.LOCATION_LON_KEY]
-
         # User's preferred unit system.
         if logged_in:
             unit_system = self.user_mgr.retrieve_user_setting(logged_in_user_id, Keys.USER_PREFERRED_UNITS_KEY)
@@ -649,9 +640,21 @@ class App(object):
             page_title = "Activity"
 
         # Was this a virtual activity in Zwift's Watopia?
-        is_in_watopia = App.is_activity_in_zwift_watopia(activity_type, last_lat, last_lon)
-        is_in_crit_city = App.is_activity_in_zwift_crit_city(activity_type, last_lat, last_lon)
-        is_in_makuri_islands = App.is_activity_in_zwift_makuri_islands(activity_type, last_lat, last_lon)
+        is_in_watopia = False
+        is_in_crit_city = False
+        is_in_makuri_islands = False
+        if activity_type == Keys.TYPE_VIRTUAL_CYCLING_KEY:
+            locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
+            if locations is None or len(locations) == 0:
+                return self.render_page_for_errored_activity(activity_id, logged_in, belongs_to_current_user)
+
+            last_loc = locations[-1]
+            last_lat = last_loc[Keys.LOCATION_LAT_KEY]
+            last_lon = last_loc[Keys.LOCATION_LON_KEY]
+
+            is_in_watopia = App.is_activity_in_zwift_watopia(activity_type, last_lat, last_lon)
+            is_in_crit_city = App.is_activity_in_zwift_crit_city(activity_type, last_lat, last_lon)
+            is_in_makuri_islands = App.is_activity_in_zwift_makuri_islands(activity_type, last_lat, last_lon)
 
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if is_in_watopia and os.path.isfile(self.zwift_watopia_map_file) > 0:
