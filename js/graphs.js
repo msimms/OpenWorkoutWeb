@@ -82,7 +82,6 @@ function draw_simple_graph(data, title, color)
             .style("opacity", 0)
             .style("position", "absolute")
             .style("visibility", "hidden")
-            .style("background-color", "white")
             .style("z-index", 1)
             .style("cursor", "pointer")
     let mouseover = function() {
@@ -124,6 +123,7 @@ function draw_simple_graph(data, title, color)
         .domain(d3.extent(data, function(d) { return d.date; }))
         .range([ 0, width ]);
     let x_axis = svg.append("g")
+        .attr("class", "axis")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x));
 
@@ -132,10 +132,12 @@ function draw_simple_graph(data, title, color)
         .domain(d3.extent(data, function(d) { return d.value; }))
         .range([ height, 0 ]);
     let y_axis = svg.append("g")
+        .attr("class", "axis")
         .call(d3.axisLeft(y));
     svg.append("text")
+        .attr("class", "axis")
         .attr("transform", "rotate(-90)")
-        .attr("y", 0-margin.left)
+        .attr("y", 0 - (margin.left))
         .attr("x", 0 - (height / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")
@@ -272,7 +274,6 @@ function draw_graph(graph_start_time_ms, graph_end_time_ms, data, title, units, 
             .style("opacity", 0)
             .style("position", "absolute")
             .style("visibility", "hidden")
-            .style("background-color", "white")
             .style("z-index", 1)
             .style("cursor", "pointer")
     let mouseover = function() {
@@ -340,6 +341,7 @@ function draw_graph(graph_start_time_ms, graph_end_time_ms, data, title, units, 
 
     // Add the x axis.
     let x_axis = svg.append("g")
+        .attr("class", "axis")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x_scale));
 
@@ -356,6 +358,7 @@ function draw_graph(graph_start_time_ms, graph_end_time_ms, data, title, units, 
 
     // Add the title.
     svg.append("text")
+        .attr("class", "axis")
         .attr("transform", "rotate(-90)")
         .attr("y", 0 - (margin.left))
         .attr("x", 0 - (height / 2))
@@ -407,6 +410,7 @@ function draw_graph(graph_start_time_ms, graph_end_time_ms, data, title, units, 
 
     // Add the y axis.
     let y_axis = svg.append("g")
+        .attr("class", "axis")
         .call(d3.axisLeft(y_scale));
 
     // Create the line.
@@ -448,7 +452,6 @@ function draw_bar_chart(data, title, color)
             .style("opacity", 0)
             .style("position", "absolute")
             .style("visibility", "hidden")
-            .style("background-color", "white")
             .style("z-index", 1)
             .style("cursor", "pointer")
     let mouseover = function() {
@@ -491,20 +494,22 @@ function draw_bar_chart(data, title, color)
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
     svg.append("text")
+        .attr("class", "axis")
         .attr("transform", "rotate(-90)")
-        .attr("y", 0-margin.left)
-        .attr("x",0 - (height / 2))
+        .attr("y", 0 - (margin.left))
+        .attr("x", 0 - (height / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")
         .text(title);  
     svg.append("g")
-        .attr("class", "y axis")
+        .attr("class", "axis")
         .call(y_axis)
         .append("text")
         .attr("transform", "rotate(-90)")
         .attr("dy", ".71em")
         .style("text-anchor", "end");
     svg.append("g")
+        .attr("class", "axis")
         .attr("transform", "translate(0," + height + ")")
         .call(d3.axisBottom(x));
     svg.selectAll("bar")

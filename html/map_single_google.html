@@ -31,21 +31,6 @@
         height: 75px;	/* Gets overriden by D3-assigned height below */
         background-color: teal;
     }
-
-    .axis path,
-    .axis line
-    {
-        fill: none;
-        stroke: #000;
-        stroke-width: 1;
-        shape-rendering: crispEdges;
-    }
-    .axis-grid line
-    {
-        fill: none;
-        stroke: #def;
-        stroke-width: 1;
-    }
 </style>
 
 <body>
@@ -142,11 +127,7 @@ ${nav}
     /// @function add_current_location_marker
     function add_current_location_marker()
     {
-        let content_string = '<div id="content">' +
-            '<div id="siteNotice">' +
-            '</div>' +
-            '<h2 id="firstHeading" class="firstHeading">Last Known Position</h2>' +
-            '</div>';
+        let content_string = '<div id="content" class="map"><div></div><h2>Last Known Position</h2></div>';
 
         if (info_window)
         {

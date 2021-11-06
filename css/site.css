@@ -1,5 +1,36 @@
+/* Light mode */
+@media (prefers-color-scheme: light) {
+    body {
+        --theme: #FFFFFF;
+        --text: #000000;
+        --navbkgnd: #333;
+        --navtext: #FFFFFF;
+        --navhover: #111;
+        --gradientmin: #FFFFFF;
+        --gradientmax: #CCC;
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    body {
+        --theme: #000000;
+        --text: #FFFFFF;
+        --navbkgnd: #000000;
+        --navtext: #FFFFFF;
+        --navhover: #EEE;
+        --gradientmin: #000000;
+        --gradientmax: #000000;
+    }
+}
+
+body {
+    background-color: var(--theme);
+    color: var(--text);
+}
+
 h1 {
-    color: #000000;
+    color: var(--text);
     text-transform: uppercase;
     text-align: left;
     font-size: 250%;
@@ -8,14 +39,19 @@ h1 {
 }
 
 h2 {
-    color: #000000;
-    background: #FFFFFF;
+    color: var(--text);
+    background: var(--theme);
+}
+
+.map h2 {
+    color: var(--theme);
+    background: var(--info);
 }
 
 .nav ul {
     list-style-type: none;
     overflow: hidden;
-    background-color: #333;
+    background-color: var(--navbkgnd);
     margin: 0px;
     padding: 0px;
 }
@@ -26,7 +62,7 @@ h2 {
 
 .nav li a {
     display: inline-block;
-    color: white;
+    color: var(--navtext);
     text-align: center;
     margin: 0px;
     padding: 14px 16px;
@@ -34,13 +70,13 @@ h2 {
 }
 
 .nav li a:hover {
-    background-color: #111;
+    background-color: var(--navhover);
 }
 
 .summary ul {
     list-style-type: none;
     overflow: hidden;
-    background-color: #333;
+    background-color: var(--navbkgnd);
     margin: 0px;
     padding: 0px;
 }
@@ -51,15 +87,15 @@ h2 {
     align-items: center;
     height: 2em;
     float: left;
-    color: white;
+    color: var(--navtext);
     margin: 0px;
     padding: 0.5em 1em;
     text-decoration: none;
 }
 
 section {
-    color: #000000;
-    background: #FFFFFF;
+    color: var(--text);
+    background: var(--theme);
     vertical-align: top;
     margin: 0px;
     padding: 0px;
@@ -69,39 +105,19 @@ section {
     opacity: 1.0;
 }
 
-.left {
-    display: inline-block;
-    background-color: #777713;
-    width: 250px;
-}
-
-.right {
-    display: inline-block;
-    background-color: #FFFFFF;
-    width: 1000px;
-}
-
-.left img {
-    margin: 20px;
-    width: 200px;
-    border: 3px;
-    border-style: solid;
-    border-color: #000000;
-}
-
 table {
     font-family: arial, sans-serif;
-    background: linear-gradient(to left, #FFFFFF , #DDDDDD);
+    background: linear-gradient(to left, var(--gradientmin) , var(--gradientmax));
     margin-left: auto;
     margin-right: auto;
     width: 100%;
 }
 
 td {
-    border: 1px solid #FFFFFF;
+    border: 1px solid var(--theme);
     padding: 2px;
     border-radius: 2px;
-    text-shadow: 1px 1px #FFFFFF;
+    text-shadow: 1px 1px var(--theme);
     text-align: center;
 }
 
@@ -114,7 +130,7 @@ tr {
 
 .import table {
     font-family: arial, sans-serif;
-    background: linear-gradient(to left, #FFFFFF , #DDDDDD);
+    background: linear-gradient(to left, var(--gradientmin) , var(--gradientmax));
     margin-top: 16px;
     margin-left: auto;
     margin-right: auto;
@@ -128,7 +144,7 @@ tr {
 
 .analysis table {
     font-family: arial, sans-serif;
-    background: linear-gradient(to left, #FFFFFF , #FFFFFF);
+    background: linear-gradient(to left, var(--theme) , var(--theme));
     margin-left: auto;
     margin-right: auto;
     width: 100%;
@@ -136,14 +152,14 @@ tr {
 
 .activity_control table {
     font-family: arial, sans-serif;
-    background: linear-gradient(to left, #FFFFFF , #FFFFFF);
+    background: linear-gradient(to left, var(--theme) , var(--theme));
     margin-left: auto;
     margin-right: auto;
     width: 100%;
 }
 
 .activity_control td {
-    border: 1px solid #FFFFFF;
+    border: 1px solid var(--theme);
     padding: 2px;
     border-radius: 2px;
     text-align: left;
@@ -153,22 +169,28 @@ tr {
     opacity: 0.7;
 }
 
+.axis path,
+.axis line
+{
+    fill: none;
+    stroke: var(--text);
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+.axis-grid line
+{
+    fill: none;
+    stroke: var(--theme);
+    stroke-width: 1;
+}
+
+.axis
+{
+    stroke: var(--text);
+}
+
 tr:hover {
     opacity: 1.0;
-}
-
-.user_search_form ul {
-    margin: 0px;
-    padding: 0px;
-}
-
-.user_search_form li {
-    display: inline;
-    padding-bottom: .25cm;
-}
-
-.activities_list {
-    padding: 25px 25px 25px 25px;
 }
 
 select {
