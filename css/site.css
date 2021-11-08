@@ -170,22 +170,18 @@ tr {
 }
 
 .axis path,
-.axis line
-{
+.axis line {
     fill: none;
     stroke: var(--text);
     stroke-width: 1;
     shape-rendering: crispEdges;
 }
-.axis-grid line
-{
+.axis-grid line {
     fill: none;
     stroke: var(--theme);
     stroke-width: 1;
 }
-
-.axis
-{
+.axis {
     stroke: var(--text);
 }
 
