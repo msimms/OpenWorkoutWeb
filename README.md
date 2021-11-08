@@ -281,6 +281,10 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 ### 0.42
 * Bug fixes and performance optimizations.
 
+### 0.43
+* Bug fixes and performance optimizations.
+* Added support for browser dark mode.
+
 ## Tech
 This software uses several other source projects to work properly:
 
