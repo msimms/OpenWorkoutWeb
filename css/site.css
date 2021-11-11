@@ -161,6 +161,11 @@ tr {
     width: 100%;
 }
 
+.activity_control textarea {
+    border: 0px;
+    width: 100%;
+}
+
 .activity_control td {
     border: 1px solid var(--theme);
     padding: 2px;
@@ -317,10 +322,6 @@ button .fa {
 .block textarea {
     width: 80%;
     max-width: 80%;
-}
-
-.comment textarea {
-    border: 0px;
 }
 
 .map_canvas {
