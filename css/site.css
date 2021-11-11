@@ -43,6 +43,9 @@ h2 {
     background: var(--theme);
 }
 
+a:link { color: var(--text) }
+a:visited { color: var(--text) }
+
 .map h2 {
     color: var(--theme);
     background: var(--info);
