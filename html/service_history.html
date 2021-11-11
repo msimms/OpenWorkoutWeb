@@ -36,6 +36,23 @@
         return a.date < b.date ? -1 : 1;
     }
 
+    /// @function update_gear_name
+    function update_gear_name()
+    {
+        let the_url = "${root_url}/api/1.0/update_gear";
+        let dict = [];
+        let result_text = {};
+        let gear_name_title = document.getElementById("GearName").value;
+
+        dict.push({["gear_id"] : "${gear_id}"});
+        dict.push({["name"] : gear_name_title});
+
+        if (!send_post_request(the_url, dict, result_text))
+        {
+            alert(result_text.value);
+        }
+    }
+
     /// @function create_service_record
     function create_service_record(target)
     {
@@ -179,7 +196,7 @@
                 // Add the title.
                 let gear_name_title = document.getElementById("GearName");
                 gear_name = gear_record.name
-                gear_name_title.innerText = gear_name;
+                gear_name_title.value = gear_name;
 
                 // Add the description.
                 let gear_desc_title = document.getElementById("GearDescription");
@@ -235,28 +252,26 @@ ${nav}
 </section>
 
 <section class="block">
-    <div class="block" style="width: 600px">
 
-        <h2 id="GearName"></h2>
-        <h3>Description</h3>
-        <p id="GearDescription"></p>
-        <h3>Distance</h3>
-        <p id="GearDistance"></p>
-        <h3>Date Added</h3>
-        <p id="GearAdded"></p>
-        <h3>Date Retired</h3>
-        <p id="GearRetired"></p>
-        <h3>Service History</h3>
-        <p>
-            <table id="ServiceHistory">
-                <td><b>Date</b></td><td><b>Description</b></td><td></td><tr>
-            </table>
-        </p>
-        <div class="block" id="new_service_record_block" style="width: 95%">
-        </div>
-        <button type="button" onclick="return get_new_service_record_info()">Add Service Record</button>
-
+    <input type="text" name="GearName" id="GearName" value="" onchange="update_gear_name()"><br>
+    <h3>Description</h3>
+    <p id="GearDescription"></p>
+    <h3>Distance</h3>
+    <p id="GearDistance"></p>
+    <h3>Date Added</h3>
+    <p id="GearAdded"></p>
+    <h3>Date Retired</h3>
+    <p id="GearRetired"></p>
+    <h3>Service History</h3>
+    <p>
+        <table id="ServiceHistory">
+            <td><b>Date</b></td><td><b>Description</b></td><td></td><tr>
+        </table>
+    </p>
+    <div class="block" id="new_service_record_block" style="width: 95%">
     </div>
+    <button type="button" onclick="return get_new_service_record_info()">Add Service Record</button>
+
 </section>
 
 </body>

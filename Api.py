@@ -1368,11 +1368,9 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         # Retired date is optional.
-        if Keys.GEAR_RETIRE_TIME_KEY in values and values[Keys.GEAR_RETIRE_TIME_KEY] is not None and len(values[Keys.GEAR_RETIRE_TIME_KEY]) > 0:
+        if Keys.GEAR_RETIRE_TIME_KEY in values:
             gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
-            if gear_retire_time == 'NaN':
-                gear_retire_time = 0
-            elif not InputChecker.is_integer(gear_retire_time):
+            if not InputChecker.is_integer(gear_retire_time):
                 raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         else:
             gear_retire_time = 0
@@ -1400,44 +1398,47 @@ class Api(object):
         """Called when an API message to update gear for a user is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        if Keys.GEAR_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.GEAR_TYPE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.GEAR_NAME_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.GEAR_DESCRIPTION_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.GEAR_ADD_TIME_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         gear_id = values[Keys.GEAR_ID_KEY]
         if not InputChecker.is_uuid(gear_id):
             raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
-        gear_type = values[Keys.GEAR_TYPE_KEY]
-        if not InputChecker.is_valid_decoded_str(gear_type):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        gear_name = values[Keys.GEAR_NAME_KEY]
-        if not InputChecker.is_valid_decoded_str(gear_name):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        gear_description = values[Keys.GEAR_DESCRIPTION_KEY]
-        if not InputChecker.is_valid_decoded_str(gear_description):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
-        if not InputChecker.is_integer(gear_add_time):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        # Retired date is optional.
-        if Keys.GEAR_RETIRE_TIME_KEY in values and len(values[Keys.GEAR_RETIRE_TIME_KEY]) > 0:
-            gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
-            if gear_retire_time == 'NaN':
-                gear_retire_time = 0
-            elif not InputChecker.is_integer(gear_retire_time):
+        if Keys.GEAR_TYPE_KEY in values:
+            gear_type = values[Keys.GEAR_TYPE_KEY]
+            if not InputChecker.is_valid_decoded_str(gear_type):
                 raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         else:
-            gear_retire_time = 0
+            gear_type = None
 
-        result = self.data_mgr.update_gear(self.user_id, gear_id, gear_type, gear_name, gear_description, int(gear_add_time), int(gear_retire_time))
+        if Keys.GEAR_NAME_KEY in values:
+            gear_name = values[Keys.GEAR_NAME_KEY]
+            if not InputChecker.is_valid_decoded_str(gear_name):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        else:
+            gear_name = None
+
+        if Keys.GEAR_DESCRIPTION_KEY in values:
+            gear_description = values[Keys.GEAR_DESCRIPTION_KEY]
+            if not InputChecker.is_valid_decoded_str(gear_description):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        else:
+            gear_description = None
+
+        if Keys.GEAR_ADD_TIME_KEY in values:
+            gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
+            if not InputChecker.is_integer(gear_add_time):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        else:
+            gear_add_time = None
+
+        if Keys.GEAR_RETIRE_TIME_KEY in values:
+            gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
+            if not InputChecker.is_integer(gear_retire_time):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        else:
+            gear_retire_time = None
+
+        result = self.data_mgr.update_gear(self.user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
         return result, ""
 
     def handle_update_gear_defaults(self, values):
