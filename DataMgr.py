@@ -516,7 +516,7 @@ class DataMgr(Importer.ActivityWriter):
         # List activities recorded on devices registered to the user.
         devices = self.database.retrieve_user_devices(user_id)
         devices = list(set(devices)) # De-duplicate
-        device_activities = self.database.retrieve_devices_activity_list(devices, start_time, end_time)
+        device_activities = self.database.retrieve_devices_activity_list(devices, start_time, end_time, False)
         if device_activities is not None:
             for device_activity in device_activities:
                 device_activity[Keys.REALNAME_KEY] = user_realname
@@ -696,7 +696,7 @@ class DataMgr(Importer.ActivityWriter):
         if device_str is None or len(device_str) == 0:
             raise Exception("Bad parameter.")
 
-        activity = self.database.retrieve_most_recent_activity_for_device(device_str)
+        activity = self.database.retrieve_most_recent_activity_for_device(device_str, False)
         if activity is None:
             return None
         return activity[Keys.ACTIVITY_ID_KEY]
@@ -707,7 +707,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if device_str is None or len(device_str) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_most_recent_activity_for_device(device_str)
+        return self.database.retrieve_most_recent_activity_for_device(device_str, False)
 
     def retrieve_most_recent_activity_for_user(self, user_devices):
         """Returns the most recent activity id for the specified user."""
@@ -716,10 +716,15 @@ class DataMgr(Importer.ActivityWriter):
         if user_devices is None:
             raise Exception("Bad parameter.")
 
+        # Search through each device registered to the user.
         most_recent_activity = None
         for device_str in user_devices:
+
+            # Find the most recent activity for the specified device.
             device_activity = self.retrieve_most_recent_activity_for_device(device_str)
             if device_activity is not None:
+
+                # Is this more recent than our current most recent activity?
                 if most_recent_activity is None:
                     most_recent_activity = device_activity
                 elif Keys.ACTIVITY_START_TIME_KEY in device_activity and Keys.ACTIVITY_START_TIME_KEY in most_recent_activity:
@@ -727,6 +732,7 @@ class DataMgr(Importer.ActivityWriter):
                     prev_activity_time = most_recent_activity[Keys.ACTIVITY_START_TIME_KEY]
                     if curr_activity_time > prev_activity_time:
                         most_recent_activity = device_activity
+
         return most_recent_activity
 
     def create_activity_summary(self, activity_id, summary_data):

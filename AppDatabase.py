@@ -919,7 +919,7 @@ class MongoDatabase(Database.Database):
         try:
             # Things we don't need.
             if return_all_data:
-                exclude_keys = {}
+                exclude_keys = None
             else:
                 exclude_keys = self.list_excluded_activity_keys_activity_lists()
 
@@ -939,7 +939,7 @@ class MongoDatabase(Database.Database):
         try:
             # Things we don't need.
             if return_all_data:
-                exclude_keys = {}
+                exclude_keys = None
             else:
                 exclude_keys = self.list_excluded_activity_keys_activity_lists()
 
@@ -955,7 +955,7 @@ class MongoDatabase(Database.Database):
         return False
 
     @Perf.statistics
-    def retrieve_devices_activity_list(self, devices, start_time, end_time):
+    def retrieve_devices_activity_list(self, devices, start_time, end_time, return_all_data):
         """Retrieves the list of activities associated with the specified devices."""
         if devices is None:
             self.log_error(MongoDatabase.retrieve_devices_activity_list.__name__ + ": Unexpected empty object: devices")
@@ -963,7 +963,10 @@ class MongoDatabase(Database.Database):
 
         try:
             # Things we don't need.
-            exclude_keys = self.list_excluded_activity_keys_activity_lists()
+            if return_all_data:
+                exclude_keys = None
+            else:
+                exclude_keys = self.list_excluded_activity_keys_activity_lists()
 
             # Build part of the exptression while sanity checking the input.
             device_list = []
@@ -983,10 +986,20 @@ class MongoDatabase(Database.Database):
     def retrieve_each_device_activity(self, context, user_id, device_str, callback_func, return_all_data):
         """Retrieves each device activity and calls the callback function for each one."""
         """If return_all_data is False then only metadata is returned."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_each_device_activity.__name__ + ": Unexpected empty object: device_str")
+            return None
+        if device_str is None:
+            self.log_error(MongoDatabase.retrieve_each_device_activity.__name__ + ": Unexpected empty object: device_str")
+            return None
+        if callback_func is None:
+            self.log_error(MongoDatabase.retrieve_each_device_activity.__name__ + ": Unexpected empty object: device_str")
+            return None
+
         try:
             # Things we don't need.
             if return_all_data:
-                exclude_keys = {}
+                exclude_keys = None
             else:
                 exclude_keys = self.list_excluded_activity_keys_activity_lists()
 
@@ -1004,14 +1017,20 @@ class MongoDatabase(Database.Database):
         return None
 
     @Perf.statistics
-    def retrieve_most_recent_activity_for_device(self, device_str):
+    def retrieve_most_recent_activity_for_device(self, device_str, return_all_data):
         """Retrieves the ID for the most recent activity to be associated with the specified device."""
         if device_str is None:
             self.log_error(MongoDatabase.retrieve_most_recent_activity_for_device.__name__ + ": Unexpected empty object: device_str")
             return None
 
         try:
-            device_activities = self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }).sort(Keys.DATABASE_ID_KEY, -1).limit(1)
+            # Things we don't need.
+            if return_all_data:
+                exclude_keys = None
+            else:
+                exclude_keys = self.list_excluded_activity_keys_activity_lists()
+
+            device_activities = self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).limit(1)
             if device_activities is not None and device_activities.count() > 0:
                 activity = device_activities.next()
                 return activity

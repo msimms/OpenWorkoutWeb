@@ -753,6 +753,10 @@ class App(object):
     def live_activity(self, activity, activity_user):
         """Renders the map page for the specified (in progress) activity."""
 
+        # Sanity check.
+        if activity is None:
+            return self.render_error("No activity.")
+
         # Get the logged in user (if any).
         logged_in_user_id = None
         logged_in_username = self.user_mgr.get_logged_in_user()
@@ -760,7 +764,10 @@ class App(object):
             logged_in_user_id, _, _ = self.user_mgr.retrieve_user(logged_in_username)
 
         # Is the activity still live? After one day, the activity is no longer considered live.
-        end_time = self.data_mgr.compute_activity_end_time(activity) / 1000
+        if Keys.END_TIME_KEY in activity:
+            end_time = activity[Keys.END_TIME_KEY]
+        else:
+            end_time = self.data_mgr.compute_activity_end_time(activity) / 1000
         now = time.time()
         diff = now - end_time
         diff_hours = diff / 60 / 60
