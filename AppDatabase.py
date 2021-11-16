@@ -1030,10 +1030,8 @@ class MongoDatabase(Database.Database):
             else:
                 exclude_keys = self.list_excluded_activity_keys_activity_lists()
 
-            device_activities = self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys).sort(Keys.DATABASE_ID_KEY, -1).limit(1)
-            if device_activities is not None and device_activities.count() > 0:
-                activity = device_activities.next()
-                return activity
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys, sort=[( '_id', pymongo.DESCENDING )])
+            return activity
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
