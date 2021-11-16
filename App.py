@@ -755,7 +755,9 @@ class App(object):
 
         # Sanity check.
         if activity is None:
-            return self.render_error("No activity.")
+            return self.render_error()
+        if activity_user is None:
+            return self.render_error()
 
         # Get the logged in user (if any).
         logged_in_user_id = None
@@ -764,16 +766,12 @@ class App(object):
             logged_in_user_id, _, _ = self.user_mgr.retrieve_user(logged_in_username)
 
         # Is the activity still live? After one day, the activity is no longer considered live.
-        if Keys.END_TIME_KEY in activity:
-            end_time = activity[Keys.END_TIME_KEY]
-        else:
-            end_time = self.data_mgr.compute_activity_end_time(activity) / 1000
         now = time.time()
-        diff = now - end_time
+        diff = now - activity[Keys.ACTIVITY_START_TIME_KEY]
         diff_hours = diff / 60 / 60
         diff_days = diff_hours / 24
         if diff_days >= 1.0:
-            return self.render_error("The user has not posted any data in over 24 hours.")
+            return self.render_error("The user has not started an activity in over 24 hours.")
 
         # Determine if the current user can view the activity.
         activity_user_id = activity_user[Keys.DATABASE_ID_KEY]
@@ -787,6 +785,10 @@ class App(object):
     @Perf.statistics
     def live_device(self, device_str):
         """Renders the map page for the current activity from a single device."""
+
+        # Sanity check.
+        if device_str is None:
+            return self.render_error()
 
         # Determine the ID of the most recent activity logged from the specified device.
         activity = self.data_mgr.retrieve_most_recent_activity_for_device(device_str)
@@ -802,6 +804,10 @@ class App(object):
     @Perf.statistics
     def live_user(self, user_str):
         """Renders the map page for the current activity for a given user."""
+
+        # Sanity check.
+        if user_str is None:
+            return self.render_error()
 
         # Look up the user.
         user = self.user_mgr.retrieve_user_details(user_str)
