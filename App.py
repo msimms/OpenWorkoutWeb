@@ -677,22 +677,12 @@ class App(object):
         """Helper function for rendering the page corresonding to a specific activity."""
 
         try:
-        
-            # Does the activity contain any location data?
-            if Keys.ACTIVITY_LOCATIONS_KEY in activity and len(activity[Keys.ACTIVITY_LOCATIONS_KEY]) > 0:
-                return self.render_page_for_mapped_activity(user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
-
             # Does the activity contain accelerometer data, as with lifting activities recorded from the companion app?
-            elif Keys.APP_ACCELEROMETER_KEY in activity or Keys.APP_SETS_KEY in activity:
+            if activity[Keys.ACTIVITY_TYPE_KEY] in Keys.STRENGTH_ACTIVITIES:
                 return self.render_page_for_unmapped_activity(user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
 
-            # Does the activity contain any sensor data at all, if so then we can still render something?
-            elif any(x in activity for x in Keys.SENSOR_KEYS):
-                return self.render_page_for_unmapped_activity(user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
-
-            # No idea what to do with this.
-            else:
-                return self.render_page_for_errored_activity(activity[Keys.ACTIVITY_ID_KEY], logged_in_user_id is not None, belongs_to_current_user)
+            # Assume it's a location based activity.
+            return self.render_page_for_mapped_activity(user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
