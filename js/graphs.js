@@ -556,3 +556,10 @@ function draw_intervals_graph(start_time_ms, end_time_ms, interval_data)
         draw_graph(start_time_ms, end_time_ms, interval_graph, "Intervals", "", "Gray");
     }
 }
+
+/// @function clear_graphs
+function clear_graphs()
+{
+    let svg = d3.select("#charts");
+    svg.selectAll("*").remove();
+}

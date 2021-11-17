@@ -263,15 +263,28 @@ ${nav}
             append_to_summary_list("Avg. Speed:", speed_str);
         }
 
+        // Clear all existing charts.
+        clear_graphs();
+
         // Draw the split times chart.
         draw_split_times_chart();
 
         // Draw the elevation graph.
         draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", "PeachPuff");
+
+        // Draw all the other graphs.
+        draw_sensor_and_interval_graphs();
     };
 
-    /// @function initialize
-    function initialize()
+    /// @function check_for_updates
+    var check_for_updates = function()
+    {
+        let route_len = route_coordinates.length;
+        $.ajax({ type: 'GET', url: root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=" + route_len, cache: false, success: append_to_track, dataType: "json" });
+    };
+
+    /// @function initialize_map
+    function initialize_map()
     {
         var mapOptions =
         {
@@ -292,19 +305,12 @@ ${nav}
         // Draw the route on the map.
         route_path.setMap(map);
 
-        $.ajax({ type: 'GET', url: root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=0", cache: false, success: append_to_track, dataType: "json" });
+        // Get the route data and set a timer so we can get route updates.
+        check_for_updates();
+        setInterval(check_for_updates, 60000);
     }
 
-    /// @function check_for_updates
-    var check_for_updates = function()
-    {
-        let route_len = route_coordinates.length;
-        $.ajax({ type: 'GET', url: root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=" + route_len, cache: false, success: append_to_track, dataType: "json" });
-    };
-
-    google.maps.event.addDomListener(window, 'load', initialize);
-
-    setInterval(check_for_updates, 60000);
+    google.maps.event.addDomListener(window, 'load', initialize_map);
 </script>
 
 </div>
@@ -326,6 +332,7 @@ ${summary}
     let start_time_ms = 0;
     let end_time_ms = 0;
 
+    /// @function process_summarydata
     var process_summarydata = function(summarydata)
     {
         for (key in summarydata)
@@ -335,13 +342,6 @@ ${summary}
                 draw_intervals_graph(start_time_ms, end_time_ms, summarydata[key]);
             }
         }
-    }
-
-    /// @function retrieve_summary_data
-    function retrieve_summary_data()
-    {
-        let api_url = root_url + "/api/1.0/activity_summarydata?activity_id=" + activity_id + "&summary_items=intervals";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
     }
 
     /// @function draw_speed_graph
@@ -433,24 +433,17 @@ ${summary}
                 draw_graph(start_time_ms, end_time_ms, new_data, key, "Temperature", get_graph_color(key));
             }
         }
-
-        //retrieve_summary_data();
     }
 
-    /// @function retrieve_sensor_data
-    function retrieve_sensor_data()
+    /// @function draw_sensor_and_interval_graphs
+    function draw_sensor_and_interval_graphs()
     {
         let api_url = root_url + "/api/1.0/activity_sensordata?activity_id=" + activity_id + "&sensors=Current%20Speed,Heart%20Rate,Cadence,Power,Temperature";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
-    }
 
-    /// @function draw_graphs
-    function draw_graphs()
-    {
-        retrieve_sensor_data();
+        //let api_url = root_url + "/api/1.0/activity_summarydata?activity_id=" + activity_id + "&summary_items=intervals";
+        //$.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
     }
-
-    draw_graphs();
 </script>
 
 </div>
