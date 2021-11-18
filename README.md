@@ -284,6 +284,7 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 ### 0.43
 * Bug fixes and performance optimizations.
 * Added support for browser dark mode.
+* Added the ability to edit gear names.
 
 ## Tech
 This software uses several other source projects to work properly:
