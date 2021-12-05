@@ -385,6 +385,23 @@
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_calendar_url, dataType: "text" });
     }
 
+    /// @function add_race
+    function add_race()
+    {
+        let outer_div = document.getElementById("new_race");
+        let race_date = document.getElementById("race_date");
+        let n = new Date();
+
+        race_date.placeholder = n.toLocaleDateString();
+        race_date.value = n.toLocaleDateString();
+        outer_div.style = "display: block;";
+    }
+
+    /// @function create_race
+    function create_race()
+    {
+    }
+
     $(document).ready(function()
     {
         // Things we need when the page is loaded.
@@ -416,6 +433,22 @@ ${nav}
             </select>
             on 
             <input type="text" name="goal_date" id="goal_date" style="font-size: 24px;height: 28px; border: 0px; margin: 0px" onchange="return set_goal_date()">
+        </p>
+
+        <hr>
+
+        <h2>Race Calendar</h2>
+        <p>
+            <div id="new_race" style="display: none;">
+                <h2>Add Race</h2>
+                <p>Name<br><input type="text" name="name" id="name"><br></p>
+                <p>Distance<br><input type="text" name="distance" id="distance"><br></p>
+                <p>Date<br><input type="text" name="race_date" id="race_date"><br></p>
+                <button type="modern_button" onclick="return create_race()">Save</button>
+                <hr>
+            </div>
+
+            <button type="button" onclick="return add_race()">Add Race</button>
         </p>
 
         <hr>

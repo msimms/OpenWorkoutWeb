@@ -24,6 +24,7 @@
 """Data store abstraction"""
 
 import base64
+import datetime
 import hashlib
 import os
 import sys
@@ -1346,6 +1347,31 @@ class DataMgr(Importer.ActivityWriter):
 
         merge_tool = MergeTool.MergeTool()
 
+    def create_race(self, user_id, race_name, race_date, race_distance):
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if race_name is None:
+            raise Exception("Bad parameter.")
+        if race_date is None:
+            raise Exception("Bad parameter.")
+        if race_distance is None:
+            raise Exception("Bad parameter.")
+
+        new_race = {}
+        new_race[Keys.NEW_RACE_NAME_KEY] = race_name
+        new_race[Keys.NEW_RACE_DATE_KEY] = race_date
+        new_race[Keys.NEW_RACE_DISTANCE_KEY] = race_distance
+
+        user_races = self.database.retrieve_user_setting(user_id, Keys.USER_RACES)
+        if user_races is None:
+            user_races = []
+        user_races.append(new_race)
+
+        update_time = datetime.datetime.utcnow()
+        return self.database.update_user_setting(user_id, Keys.USER_RACES, user_races, update_time)
+
     def get_location_description(self, activity_id):
         """Returns the political location that corresponds to an activity."""
         if self.database is None:
@@ -1363,6 +1389,7 @@ class DataMgr(Importer.ActivityWriter):
         if locations and len(locations) > 0:
             first_loc = locations[0]
             location_description = self.map_search.search_map(float(first_loc[Keys.LOCATION_LAT_KEY]), float(first_loc[Keys.LOCATION_LON_KEY]))
+
         return location_description
 
     def compute_location_heat_map(self, activities):
@@ -1389,6 +1416,7 @@ class DataMgr(Importer.ActivityWriter):
                         heat_map[locations_str] = heat_map[locations_str] + 1
                     else:
                         heat_map[locations_str] = 1
+
         return heat_map
 
     def retrieve_recent_bests(self, user_id, timeframe):

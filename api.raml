@@ -552,6 +552,15 @@ version: v1
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
+/create_race:
+    description: Adds a race to the calendar.
+    get:
+    post:
+        responses:
+            200: Empty string
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
 /create_pace_plan:
     description: Creates a pace plan.
     get:
