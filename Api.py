@@ -1810,16 +1810,16 @@ class Api(object):
         """Called when the user wants to add a race to their calendar."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        if Keys.NEW_RACE_NAME_KEY not in values:
+        if Keys.RACE_NAME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("File data not specified.")
-        if Keys.NEW_RACE_DATE_KEY not in values:
+        if Keys.RACE_DATE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("File data not specified.")
-        if Keys.NEW_RACE_DISTANCE_KEY not in values:
+        if Keys.RACE_DISTANCE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("File data not specified.")
 
-        race_name = values[Keys.NEW_RACE_NAME_KEY]
-        race_date = values[Keys.NEW_RACE_DATE_KEY]
-        race_distance = values[Keys.NEW_RACE_DISTANCE_KEY]
+        race_name = values[Keys.RACE_NAME_KEY]
+        race_date = values[Keys.RACE_DATE_KEY]
+        race_distance = values[Keys.RACE_DISTANCE_KEY]
 
         # Validate.
         if len(race_name) == 0:
@@ -1831,6 +1831,21 @@ class Api(object):
 
         created = self.data_mgr.create_race(self.user_id, race_name, race_date, race_distance)
         return created, ""
+
+    def handle_delete_race(self, values):
+        """Called when the user wants to delete a race from their calendar."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        return False, ""
+
+    def handle_list_races(self, values):
+        """Called when the user wants to list all of the races on their calendar."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        races = self.data_mgr.list_races(self.user_id)
+        json_result = json.dumps(races)
+        return True, json_result
 
     def handle_create_pace_plan(self, values):
         """Called when the user is uploading a pace plan, typically from the mobile app."""
@@ -2231,6 +2246,8 @@ class Api(object):
             return self.handle_list_planned_workouts(values)
         elif request == 'list_interval_workouts':
             return self.handle_list_interval_workouts(values)
+        elif request == 'list_races':
+            return self.handle_list_races(values)
         elif request == 'list_pace_plans':
             return self.handle_list_pace_plans(values)
         elif request == 'export_activity':
@@ -2347,6 +2364,8 @@ class Api(object):
             return self.handle_delete_service_record(values)
         elif request == 'create_race':
             return self.handle_create_race(values)
+        elif request == 'delete_race':
+            return self.handle_delete_race(values)
         elif request == 'create_pace_plan':
             return self.handle_create_pace_plan(values)        
         elif request == 'delete_pace_plan':
