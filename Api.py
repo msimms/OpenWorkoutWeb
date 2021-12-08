@@ -1368,7 +1368,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         # Retired date is optional.
-        if Keys.GEAR_RETIRE_TIME_KEY in values:
+        if Keys.GEAR_RETIRE_TIME_KEY in values and values[Keys.GEAR_RETIRE_TIME_KEY] is not None:
             gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
             if not InputChecker.is_integer(gear_retire_time):
                 raise ApiException.ApiMalformedRequestException("Invalid parameter.")
