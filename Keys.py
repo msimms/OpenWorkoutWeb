@@ -177,6 +177,7 @@ UPLOADED_FILE1_DATA_KEY = "uploaded_file1_data"
 UPLOADED_FILE2_DATA_KEY = "uploaded_file2_data"
 
 # Keys associated with adding a new race.
+RACE_ID_KEY = "race_id"
 RACE_NAME_KEY = "race_name"
 RACE_DATE_KEY = "race_date"
 RACE_DISTANCE_KEY = "race_distance"

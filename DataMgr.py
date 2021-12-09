@@ -1363,6 +1363,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         new_race = {}
+        new_race[Keys.RACE_ID_KEY] = uuid.uuid4()
         new_race[Keys.RACE_NAME_KEY] = race_name
         new_race[Keys.RACE_DATE_KEY] = race_date
         new_race[Keys.RACE_DISTANCE_KEY] = race_distance
@@ -1375,22 +1376,21 @@ class DataMgr(Importer.ActivityWriter):
         update_time = datetime.datetime.utcnow()
         return self.database.update_user_setting(user_id, Keys.USER_RACES, user_races, update_time)
 
-    def delete_race(self, user_id, race_name):
+    def delete_race(self, user_id, race_id):
         """Removes a race to the user's calendar."""
         """Returns TRUE on success."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        if race_name is None:
+        if race_id is None:
             raise Exception("Bad parameter.")
 
-        found = False
         user_races = self.database.retrieve_user_setting(user_id, Keys.USER_RACES)
-        for race in user_races:
-            if race[Keys.RACE_NAME_KEY] == race_name:
-                found = True
-        return found
+        updated_list = [x for x in user_races if str(x[Keys.RACE_ID_KEY]) != race_id]
+
+        update_time = datetime.datetime.utcnow()
+        return self.database.update_user_setting(user_id, Keys.USER_RACES, updated_list, update_time)
 
     def list_races(self, user_id):
         """Returns user's race calendar."""

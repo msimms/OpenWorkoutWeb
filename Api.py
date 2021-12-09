@@ -1811,11 +1811,11 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
         if Keys.RACE_NAME_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("File data not specified.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.RACE_DATE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("File data not specified.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.RACE_DISTANCE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("File data not specified.")
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         race_name = values[Keys.RACE_NAME_KEY]
         race_date = values[Keys.RACE_DATE_KEY]
@@ -1836,7 +1836,16 @@ class Api(object):
         """Called when the user wants to delete a race from their calendar."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        return False, ""
+        if Keys.RACE_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Validate.
+        race_id = values[Keys.RACE_ID_KEY]
+        if not InputChecker.is_uuid(race_id):
+            raise ApiException.ApiMalformedRequestException("Invalid race ID.")
+
+        deleted = self.data_mgr.delete_race(self.user_id, race_id)
+        return deleted, ""
 
     def handle_list_races(self, values):
         """Called when the user wants to list all of the races on their calendar."""
@@ -1844,6 +1853,12 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
 
         races = self.data_mgr.list_races(self.user_id)
+        for race in races:
+
+            # Stringify the UUID since UUID isn't JSON serializable.
+            if Keys.RACE_ID_KEY in race:
+                race[Keys.RACE_ID_KEY] = str(race[Keys.RACE_ID_KEY])
+
         json_result = json.dumps(races)
         return True, json_result
 
