@@ -364,10 +364,37 @@
         element.innerHTML = paragraph;
     }
 
+    /// @function append_to_race_table
+    function append_to_race_table(table, race)
+    {
+        let new_row = table.insertRow();
+
+        let cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(unix_time_to_local_date_string(race.race_date)));
+
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(race.race_name));
+
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(race.race_distance));
+    }
+
     /// @function process_race_list
     // Results handler for when the server returns the user's race list.
     var process_race_list = function(race_list)
     {
+        let race_table = document.getElementById("Races");
+        let sorted_race_list = race_list.sort(function(a,b) {
+            return a.race_date < b.race_date;
+        });
+
+        if (sorted_race_list.length > 0)
+        {
+            for (let race of sorted_race_list)
+            {
+                append_to_race_table(race_table, race);
+            }
+        }
     }
 
     /// @function get_personal_records
@@ -400,7 +427,7 @@
     function get_race_list()
     {
         let api_url = "${root_url}/api/1.0/list_races";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_race_list, dataType: "text" });
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_race_list, dataType: "json" });
     }
 
     /// @function add_race
@@ -491,6 +518,9 @@ ${nav}
 
         <h2>Race Calendar</h2>
         <p>
+            <table id="Races">
+            </table>
+
             <div id="new_race" style="display: none;">
                 <h2>Add Race</h2>
                 <p>Name<br><input type="text" name="race_name" id="race_name"><br></p>
