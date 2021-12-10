@@ -370,8 +370,6 @@ class UserMgr(object):
             return {}
         if key == Keys.ESTIMATED_CYCLING_FTP_KEY:
             return 0
-        if key == Keys.GOAL_DATE_KEY:
-            return int(time.time())
         if key == Keys.GOAL_TYPE_KEY:
             return Keys.GOAL_TYPE_COMPLETION
         if key == Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY:

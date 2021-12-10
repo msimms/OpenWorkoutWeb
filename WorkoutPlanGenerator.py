@@ -45,7 +45,7 @@ class WorkoutPlanGenerator(object):
     @staticmethod
     def calculate_goal_distances(inputs):
         """Adds the goal distances to the inputs."""
-        goal = inputs[Keys.GOAL_KEY]
+        goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
         goal_lower = goal.lower()
 
         inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 0.0
@@ -193,7 +193,7 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.PLAN_INPUT_AGE_YEARS_KEY] = age_years
         inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY] = experience_level
         inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
-        inputs[Keys.GOAL_KEY] = goal
+        inputs[Keys.PLAN_INPUT_GOAL_KEY] = goal
         inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
         inputs[Keys.PLAN_INPUT_NUM_WEEKS_BUILDING_KEY] = 0
@@ -257,7 +257,7 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.PLAN_INPUT_AGE_YEARS_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY])
-        model_inputs.append(inputs[Keys.GOAL_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_GOAL_KEY])
         model_inputs.append(inputs[Keys.GOAL_TYPE_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_NUM_WEEKS_BUILDING_KEY])

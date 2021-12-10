@@ -342,7 +342,7 @@ class RunPlanGenerator(object):
         # 3 Critical runs: Speed session, tempo or threshold run, and long run
 
         goal_distance = inputs[Keys.GOAL_RUN_DISTANCE_KEY]
-        goal = inputs[Keys.GOAL_KEY]
+        goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
         goal_type = inputs[Keys.GOAL_TYPE_KEY]
         weeks_until_goal = inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY]
         short_interval_run_pace = inputs[Keys.SHORT_INTERVAL_RUN_PACE]

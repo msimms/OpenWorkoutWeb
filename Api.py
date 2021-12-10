@@ -1568,20 +1568,6 @@ class Api(object):
                 raise ApiException.ApiMalformedRequestException("Invalid long run day.")
             result = self.user_mgr.update_user_setting(self.user_id, Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day, update_time)
 
-        # Goal.
-        if Keys.GOAL_KEY in values:
-            goal = values[Keys.GOAL_KEY]
-            if not (goal in Keys.GOALS):
-                raise ApiException.ApiMalformedRequestException("Invalid goal.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_KEY, goal, update_time)
-
-        # Goal date.
-        if Keys.GOAL_DATE_KEY in values:
-            if not InputChecker.is_integer(values[Keys.GOAL_DATE_KEY]):
-                raise ApiException.ApiMalformedRequestException("Invalid goal date.")
-            goal_date = int(values[Keys.GOAL_DATE_KEY])
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_DATE_KEY, goal_date, update_time)
-
         # Goal type.
         if Keys.GOAL_TYPE_KEY in values:
             goal_type = values[Keys.GOAL_TYPE_KEY]

@@ -394,7 +394,7 @@
     {
         let race_table = document.getElementById("Races");
         let sorted_race_list = race_list.sort(function(a,b) {
-            return a.race_date > b.race_date;
+            return a["Race Date"] > b["Race Date"];
         });
 
         if (sorted_race_list.length > 0)
@@ -536,24 +536,6 @@ ${nav}
 <section class="block">
     <div>
 
-        <h2>Goal</h2>
-        <p>
-            <select name="goal" id="goal" class="right" onchange="return set_goal()">
-                <option value="Fitness">Fitness</option>
-                <option value="5K Run">5K Run</option>
-                <option value="10K Run">10K Run</option>
-                <option value="15K Run">15K Run</option>
-                <option value="Half Marathon">Half Marathon</option>
-                <option value="Marathon">Marathon</option>
-                <option value="50K Run">50K Run</option>
-                <option value="50 Mile Run">50 Mile Run</option>
-            </select>
-            on 
-            <input type="text" name="goal_date" id="goal_date" style="font-size: 24px;height: 28px; border: 0px; margin: 0px" onchange="return set_goal_date()">
-        </p>
-
-        <hr>
-
         <h2>Race Calendar</h2>
         <p>
             <table id="Races">
@@ -564,24 +546,23 @@ ${nav}
                 <p>Name<br><input type="text" name="race_name" id="race_name"><br></p>
                 <p>Date<br><input type="text" name="race_date" id="race_date"><br></p>
                 <p>Distance<br>
-                <select name="race_distance" id="race_distance" class="right">
-                    <option value="5K Run">5K Run</option>
-                    <option value="10K Run">10K Run</option>
-                    <option value="15K Run">15K Run</option>
-                    <option value="Half Marathon">Half Marathon</option>
-                    <option value="Marathon">Marathon</option>
-                    <option value="50K Run">50K Run</option>
-                    <option value="50 Mile Run">50 Mile Run</option>
-                </select>
-                <br></p>
+                    <select name="race_distance" id="race_distance" class="right">
+                        <option value="5K Run">5K Run</option>
+                        <option value="10K Run">10K Run</option>
+                        <option value="15K Run">15K Run</option>
+                        <option value="Half Marathon">Half Marathon</option>
+                        <option value="Marathon">Marathon</option>
+                        <option value="50K Run">50K Run</option>
+                        <option value="50 Mile Run">50 Mile Run</option>
+                    </select><br>
+                </p>
                 <p>Importance<br>
-                <select name="race_importance" id="race_importance" class="right">
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                </select>
-                <br></p>
-
+                    <select name="race_importance" id="race_importance" class="right">
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                    </select><br>
+                </p>
                 <button type="modern_button" onclick="return create_race()">Save</button>
                 <button type="button" onclick="return cancel_create_race()">Cancel</button>
                 <hr>
@@ -628,7 +609,7 @@ ${nav}
 
         <h2>Calendar</h2>
         <p>
-            Planned workouts will be added to the <a href="${root_url}/my_activities"><b>My Activities</b></a> calendar.
+            Planned workouts will be added to the <a href="${root_url}/my_activities"><b>My Activities</b></a> calendar, along with races from the race calendar.
         </p>
         <p id="calendar_url">
         </p>

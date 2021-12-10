@@ -916,12 +916,23 @@ class DataMgr(Importer.ActivityWriter):
         if user_id is None:
             raise Exception("Bad parameter.")
 
-        goal = self.database.retrieve_user_setting(user_id, Keys.GOAL_KEY)
-        goal_date_str = self.database.retrieve_user_setting(user_id, Keys.GOAL_DATE_KEY)
-        if goal_date_str is not None:
-            goal_date = int(goal_date_str)
-        else:
-            goal_date = None
+        # Defaults.
+        goal = Keys.GOAL_FITNESS_KEY
+        goal_date = None
+        goal_importance = None
+
+        # Read the user's race calendar and find the next A race, or B race if an A race is not specified.
+        # If no race is specified then return "Fitness" as a the goal with no specified date.
+        user_races = self.database.retrieve_user_setting(user_id, Keys.USER_RACES)
+        if user_races is not None:
+            for race in user_races:
+
+                # Best goal not found or race is newer and equal or higher priority.
+                if goal_date is None or (race[Keys.RACE_DATE_KEY] < goal_date and race[Keys.RACE_IMPORTANCE_KEY] <= goal_importance):
+                    goal = race[Keys.RACE_DISTANCE_KEY]
+                    goal_date = race[Keys.RACE_DATE_KEY]
+                    goal_importance = race[Keys.RACE_IMPORTANCE_KEY]
+
         return goal, goal_date
 
     def update_activity_bests_and_personal_records_cache(self, user_id, activity_id, activity_type, activity_time, activity_bests, prune_activity_summary_cache):
