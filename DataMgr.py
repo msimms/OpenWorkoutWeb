@@ -1348,7 +1348,7 @@ class DataMgr(Importer.ActivityWriter):
 
         merge_tool = MergeTool.MergeTool()
 
-    def create_race(self, user_id, race_name, race_date, race_distance):
+    def create_race(self, user_id, race_name, race_date, race_distance, race_importance):
         """Adds a race to the user's calendar."""
         """Returns TRUE on success."""
         if self.database is None:
@@ -1361,12 +1361,15 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if race_distance is None:
             raise Exception("Bad parameter.")
+        if race_importance is None:
+            raise Exception("Bad parameter.")
 
         new_race = {}
         new_race[Keys.RACE_ID_KEY] = uuid.uuid4()
         new_race[Keys.RACE_NAME_KEY] = race_name
         new_race[Keys.RACE_DATE_KEY] = race_date
         new_race[Keys.RACE_DISTANCE_KEY] = race_distance
+        new_race[Keys.RACE_IMPORTANCE_KEY] = race_importance
 
         user_races = self.database.retrieve_user_setting(user_id, Keys.USER_RACES)
         if user_races is None:

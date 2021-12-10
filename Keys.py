@@ -177,10 +177,11 @@ UPLOADED_FILE1_DATA_KEY = "uploaded_file1_data"
 UPLOADED_FILE2_DATA_KEY = "uploaded_file2_data"
 
 # Keys associated with adding a new race.
-RACE_ID_KEY = "race_id"
-RACE_NAME_KEY = "race_name"
-RACE_DATE_KEY = "race_date"
-RACE_DISTANCE_KEY = "race_distance"
+RACE_ID_KEY = "Race ID"
+RACE_NAME_KEY = "Race Name"
+RACE_DATE_KEY = "Race Date"
+RACE_DISTANCE_KEY = "Race Distance"
+RACE_IMPORTANCE_KEY = "Race Importance"
 
 # Keys inherited from the mobile app. Some of these are also used by the web app.
 APP_NAME_KEY = "Name"

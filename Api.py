@@ -1816,10 +1816,13 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.RACE_DISTANCE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        if Keys.RACE_IMPORTANCE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         race_name = values[Keys.RACE_NAME_KEY]
         race_date = values[Keys.RACE_DATE_KEY]
         race_distance = values[Keys.RACE_DISTANCE_KEY]
+        race_importance = values[Keys.RACE_IMPORTANCE_KEY]
 
         # Validate.
         if len(race_name) == 0:
@@ -1829,7 +1832,7 @@ class Api(object):
         else:
             raise ApiException.ApiMalformedRequestException("Invalid date.")
 
-        created = self.data_mgr.create_race(self.user_id, race_name, race_date, race_distance)
+        created = self.data_mgr.create_race(self.user_id, race_name, race_date, race_distance, race_importance)
         return created, ""
 
     def handle_delete_race(self, values):

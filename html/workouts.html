@@ -371,11 +371,11 @@
         let cell = new_row.insertCell();
 
         // Add the race info.
-        cell.appendChild(document.createTextNode(unix_time_to_local_date_string(race.race_date)));
+        cell.appendChild(document.createTextNode(unix_time_to_local_date_string(race["Race Date"])));
         cell = new_row.insertCell();
-        cell.appendChild(document.createTextNode(race.race_name));
+        cell.appendChild(document.createTextNode(race["Race Name"]));
         cell = new_row.insertCell();
-        cell.appendChild(document.createTextNode(race.race_distance));
+        cell.appendChild(document.createTextNode(race["Race Distance"]));
 
         // Add a delete button.
         let btn = document.createElement('button');
@@ -383,7 +383,7 @@
         btn.appendChild(btn_txt);
         btn.title = "Delete";
         btn.style = "color:red";
-        btn.addEventListener('click', function() { delete_race(race.race_id); });
+        btn.addEventListener('click', function() { delete_race(race["Race ID"]); });
         cell = new_row.insertCell();
         cell.appendChild(btn);
     }
@@ -394,7 +394,7 @@
     {
         let race_table = document.getElementById("Races");
         let sorted_race_list = race_list.sort(function(a,b) {
-            return a.race_date < b.race_date;
+            return a.race_date > b.race_date;
         });
 
         if (sorted_race_list.length > 0)
@@ -464,6 +464,7 @@
         let the_url = "${root_url}/api/1.0/create_race";
         let race_name = document.getElementById("race_name").value;
         let race_distance = document.getElementById("race_distance").value;
+        let race_importance = document.getElementById("race_importance").value;
         let race_date_obj = document.getElementById("race_date");
         let race_date = 0;
         let dict = [];
@@ -483,9 +484,10 @@
             race_date = Date.parse(race_date_obj.value) / 1000;
         }
 
-        dict.push({["race_name"] : race_name});
-        dict.push({["race_date"] : race_date});
-        dict.push({["race_distance"] : race_distance});
+        dict.push({["Race Name"] : race_name});
+        dict.push({["Race Date"] : race_date});
+        dict.push({["Race Distance"] : race_distance});
+        dict.push({["Race Importance"] : race_importance});
 
         if (send_post_request(the_url, dict, result_text))
         {
@@ -504,7 +506,7 @@
         let dict = [];
         let result_text = {};
 
-        dict.push({["race_id"] : race_id});
+        dict.push({["Race ID"] : race_id});
 
         if (send_post_request(the_url, dict, result_text))
         {
@@ -560,8 +562,26 @@ ${nav}
             <div id="new_race" style="display: none;">
                 <h2>Add Race</h2>
                 <p>Name<br><input type="text" name="race_name" id="race_name"><br></p>
-                <p>Distance<br><input type="text" name="race_distance" id="race_distance"><br></p>
                 <p>Date<br><input type="text" name="race_date" id="race_date"><br></p>
+                <p>Distance<br>
+                <select name="race_distance" id="race_distance" class="right">
+                    <option value="5K Run">5K Run</option>
+                    <option value="10K Run">10K Run</option>
+                    <option value="15K Run">15K Run</option>
+                    <option value="Half Marathon">Half Marathon</option>
+                    <option value="Marathon">Marathon</option>
+                    <option value="50K Run">50K Run</option>
+                    <option value="50 Mile Run">50 Mile Run</option>
+                </select>
+                <br></p>
+                <p>Importance<br>
+                <select name="race_importance" id="race_importance" class="right">
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                </select>
+                <br></p>
+
                 <button type="modern_button" onclick="return create_race()">Save</button>
                 <button type="button" onclick="return cancel_create_race()">Cancel</button>
                 <hr>
