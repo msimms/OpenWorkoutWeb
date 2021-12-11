@@ -399,9 +399,15 @@
 
         if (sorted_race_list.length > 0)
         {
+            // Don't show any races that are more than one day old.
+            const one_day_ago = Math.floor(Date.now() / 1000) - 86400;
+
             for (let race of sorted_race_list)
             {
-                append_to_race_table(race_table, race);
+                if (race["Race Date"] >= one_day_ago)
+                {
+                    append_to_race_table(race_table, race);
+                }
             }
         }
     }
