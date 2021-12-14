@@ -123,7 +123,7 @@ class DataMgr(Importer.ActivityWriter):
         return end_time_ms
 
     def update_activity_end_time(self, activity, end_time_sec):
-        """Utility function for updating the activitiy's end time in the database."""
+        """Utility function for updating the activity's end time in the database."""
         if self.database is None:
             raise Exception("No database.")
         self.database.create_activity_metadata(activity[Keys.ACTIVITY_ID_KEY], int(end_time_sec * 1000), Keys.ACTIVITY_END_TIME_KEY, int(end_time_sec), False)
