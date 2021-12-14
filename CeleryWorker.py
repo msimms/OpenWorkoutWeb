@@ -42,8 +42,12 @@ def check_for_ungenerated_workout_plans():
     now = datetime.datetime.utcnow()
     data_mgr = DataMgr.DataMgr(None, "", None, None, WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
     user_mgr = UserMgr.UserMgr(None)
+
+    # These users don't have any pending workouts.
     user_ids = data_mgr.retrieve_users_without_scheduled_workouts()
     for user_id in user_ids:
+
+        # Make sure we're not thrashing by only allowing workout generation once per day per user.
         last_gen_time = user_mgr.retrieve_user_setting(user_id, Keys.USER_PLAN_LAST_GENERATED_TIME)
         gen = (now - last_gen_time).total_seconds() > Units.SECS_PER_DAY
         if gen:
