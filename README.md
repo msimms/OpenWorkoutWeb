@@ -40,9 +40,9 @@ cd OpenWorkoutWeb
 python setup.py
 ```
 
-Install other package dependencies:
+Install other package dependencies, specifically `mongodb` and `rabbitmq`:
 
-For macOS:
+### macOS:
 ```
 # Install mongod and start the service.
 brew tap mongodb/brew
