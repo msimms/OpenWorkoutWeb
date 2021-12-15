@@ -2261,10 +2261,9 @@ class MongoDatabase(Database.Database):
         """Returns a list of user IDs for users who have workout plans that need to be re-run."""
         try:
             user_ids = []
-            now = time.time()
-            workout_docs = self.workouts_collection.find({ Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY: { "$lt": now } })
+            workout_docs = self.workouts_collection.find({ Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY: { "$lt": time.time() } })
             for workout_doc in workout_docs:
-                if Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY in workout_doc and workout_doc[Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY] < now:
+                if Keys.WORKOUT_PLAN_USER_ID_KEY in workout_doc:
                     user_id = workout_doc[Keys.WORKOUT_PLAN_USER_ID_KEY]
                     user_ids.append(user_id)
         except:
