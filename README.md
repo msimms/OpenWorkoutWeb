@@ -34,10 +34,24 @@ To clone the source code:
 git clone https://github.com/msimms/OpenWorkoutWeb
 ```
 
-To install the dependencies:
+To install the python dependencies:
 ```
 cd OpenWorkoutWeb
 python setup.py
+```
+
+Install other package dependencies:
+
+For macOS:
+```
+# Install mongod and start the service.
+brew tap mongodb/brew
+brew install mongodb-community@5.0
+brew services start mongodb/brew/mongodb-community
+
+# Install rabbitmq and start the service.
+brew install rabbitmq
+brew services restart rabbitmq
 ```
 
 ## Execution
