@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-requirements = ['cherrypy', 'gpxpy', 'mako', 'bson', 'pymongo', 'bcrypt', 'fitparse', 'flask', 'lxml', 'markdown', 'scipy', 'sklearn', 'unidecode', 'Celery', 'tensorflow', 'pandas']
+requirements = ['cherrypy', 'gpxpy', 'mako', 'bson', 'pymongo', 'bcrypt', 'fitparse', 'flask', 'lxml', 'markdown', 'requests', 'scipy', 'sklearn', 'unidecode', 'Celery', 'tensorflow', 'pandas']
 
 setup(
     name='openworkoutweb',

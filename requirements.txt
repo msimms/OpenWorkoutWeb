@@ -8,7 +8,7 @@ fitparse
 flask
 lxml
 markdown
-unidecode
+requests
 scipy
 sklearn
 unidecode
