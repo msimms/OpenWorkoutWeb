@@ -42,9 +42,9 @@ def send_get_request(url, payload, cookies):
         s.cookies = cookies
     response = s.get(url, data=json.dumps(payload), headers={'X-Requested-With':'XMLHttpRequest'})
 
-    print("URL: " + url)
-    print("Response code: " + str(response.status_code))
-    print("Response text: " + response.text)
+    print(f"URL: {url}")
+    print(f"Response code: {response.status_code}")
+    print(f"Response text: {response.text}")
     return response.status_code, response.text
 
 def send_post_request(url, payload, cookies):
@@ -54,9 +54,9 @@ def send_post_request(url, payload, cookies):
         s.cookies = cookies
     response = s.post(url, data=json.dumps(payload), headers={'X-Requested-With':'XMLHttpRequest'})
 
-    print("URL: " + url)
-    print("Response code: " + str(response.status_code))
-    print("Response text: " + response.text)
+    print(f"URL: {url}")
+    print(f"Response code: {response.status_code}")
+    print(f"Response text: {response.text}")
     return response.status_code, response.text, s.cookies
 
 def create_login(root_url, username, password, realname):

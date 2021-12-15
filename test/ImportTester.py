@@ -270,7 +270,7 @@ def run_unit_tests():
                     elapsed_time = time.time() - start_time
                     total_time = total_time + elapsed_time
                     num_files_processed = num_files_processed + 1
-                    print("Elapsed Processing Time: " + str(elapsed_time) + " seconds")
+                    print(f"Elapsed Processing Time: {elapsed_time} seconds")
                     print("Success!\n")
                     successes.append(current_file)
                 else:
