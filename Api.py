@@ -99,7 +99,7 @@ class Api(object):
                 alt = json_obj[Keys.APP_LOCATION_ALT_KEY]
                 horizontal_accuracy = json_obj[Keys.APP_HORIZONTAL_ACCURACY_KEY]
                 vertical_accuracy = json_obj[Keys.APP_VERTICAL_ACCURACY_KEY]
-                location = [date_time, lat, lon, alt, horizontal_accuracy, vertical_accuracy]
+                location = [ date_time, lat, lon, alt, horizontal_accuracy, vertical_accuracy ]
             except ValueError as e:
                 self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
             except KeyError as e:
@@ -113,22 +113,22 @@ class Api(object):
                 time_value_pair = []
                 time_value_pair.append(date_time)
                 time_value_pair.append(float(item[1]))
-                if key in [Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY]:
+                if key in [ Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY ]:
                     if key not in sensor_readings_dict:
                         sensor_readings_dict[key] = []
                     value_list = sensor_readings_dict[key]
                     value_list.append(time_value_pair)
-                elif key in [Keys.APP_CURRENT_SPEED_KEY, Keys.APP_CURRENT_PACE_KEY]:
+                elif key in [ Keys.APP_CURRENT_SPEED_KEY, Keys.APP_CURRENT_PACE_KEY ]:
                     if key not in metadata_list_dict:
                         metadata_list_dict[key] = []
                     value_list = metadata_list_dict[key]
                     value_list.append(time_value_pair)
         except ValueError as e:
-            self.log_error("ValueError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
+            self.log_error("ValueError in JSON meta and sensor data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except KeyError as e:
-            self.log_error("KeyError in JSON location data - reason " + str(e) + ". JSON str = " + str(json_obj))
+            self.log_error("KeyError in JSON meta and sensor data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except:
-            self.log_error("Error parsing JSON location data. JSON object = " + str(json_obj))
+            self.log_error("Error parsing JSON meta and sensor data. JSON object = " + str(json_obj))
         return location
 
     def parse_json_accel_obj(self, json_obj):
@@ -145,7 +145,7 @@ class Api(object):
             x = json_obj[Keys.APP_AXIS_NAME_X]
             y = json_obj[Keys.APP_AXIS_NAME_Y]
             z = json_obj[Keys.APP_AXIS_NAME_Z]
-            accel = [date_time, x, y, z]
+            accel = [ date_time, x, y, z ]
         except ValueError as e:
             self.log_error("ValueError in JSON accelerometer data - reason " + str(e) + ". JSON str = " + str(json_obj))
         except KeyError as e:
@@ -1546,7 +1546,7 @@ class Api(object):
             if not (default_privacy == Keys.ACTIVITY_VISIBILITY_PUBLIC or default_privacy == Keys.ACTIVITY_VISIBILITY_PRIVATE):
                 raise ApiException.ApiMalformedRequestException("Invalid visibility value.")
             result = self.user_mgr.update_user_setting(self.user_id, Keys.DEFAULT_PRIVACY_KEY, default_privacy, update_time)
-        
+
         # Metric or imperial?
         if Keys.USER_PREFERRED_UNITS_KEY in values:
             preferred_units = values[Keys.USER_PREFERRED_UNITS_KEY].lower()
