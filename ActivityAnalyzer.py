@@ -84,7 +84,7 @@ class ActivityAnalyzer(object):
             print("Computing the start time...")
             start_time_secs = self.data_mgr.update_activity_start_time(self.activity)
 
-            # We'll use this to ompute the end time.
+            # We'll use this to compute the end time.
             end_time_ms = 0
 
             # Hash the activity.
