@@ -187,7 +187,7 @@ class App(object):
 
         # Build a list of table rows from the device information.
         page_stats_str = "<td><b>Page</b></td><td><b>Num Accesses</b></td><td><b>Avg Time (secs)</b></td><tr>\n"
-        for key, count_value in temp_stats_count.iteritems():
+        for key, count_value in temp_stats_count.items():
             page_stats_str += "\t\t<tr><td>"
             page_stats_str += str(key)
             page_stats_str += "</td><td>"
