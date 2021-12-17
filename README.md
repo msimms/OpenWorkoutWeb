@@ -300,6 +300,10 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 * Added support for browser dark mode.
 * Added the ability to edit gear names.
 
+### 0.44
+* Bug fixes and performance optimizations.
+* Added a race calendar, to replace manually specifying goals.
+
 ## Tech
 This software uses several other source projects to work properly:
 
