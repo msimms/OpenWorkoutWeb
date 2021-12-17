@@ -115,7 +115,7 @@ USER_PLAN_LAST_GENERATED_TIME = "workout plan last generated" # Time of when a w
 USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED = "activity summary cache last pruned" # Time at which we last cleaned up the activity summary cache
 USER_RACES = "races" # List of races the user intends to do
 USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, USER_PREFERRED_UNITS_KEY, USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY, USER_BIRTHDAY_KEY, USER_HEIGHT_KEY, USER_WEIGHT_KEY, USER_GENDER_KEY, USER_RESTING_HEART_RATE_KEY, USER_MAXIMUM_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, USER_SPECIFIED_MAX_HEART_RATE_KEY, BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_TYPE_KEY, PLAN_INPUT_EXPERIENCE_LEVEL_KEY, PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, USER_CAN_UPLOAD_PHOTOS_KEY, USER_PLAN_LAST_GENERATED_TIME, USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED, USER_RACES ]
-USER_SETTINGS_LAST_UPDATED_KEY = "last updated" # Time of when the user settings where last updated
+USER_SETTINGS_LAST_UPDATED_KEY = "last updated" # Time when the user settings where last updated
 
 # Personal records
 RECORDS_USER_ID = "user_id"
@@ -220,14 +220,14 @@ LOCATION_LON_KEY = "longitude"
 LOCATION_ALT_KEY = "altitude"
 LOCATION_HORIZONTAL_ACCURACY_KEY = "horizontal accuracy"
 LOCATION_VERTICAL_ACCURACY_KEY = "vertical accuracy"
-LOCATION_TIME_KEY = "time"
+LOCATION_TIME_KEY = "time" # UNIX timestamp in milliseconds
 
-ACCELEROMETER_AXIS_NAME_X = "x"
-ACCELEROMETER_AXIS_NAME_Y = "y"
-ACCELEROMETER_AXIS_NAME_Z = "z"
-ACCELEROMETER_TIME_KEY = "time"
+ACCELEROMETER_AXIS_NAME_X = "x" # X-axis G force
+ACCELEROMETER_AXIS_NAME_Y = "y" # Y-axis G force
+ACCELEROMETER_AXIS_NAME_Z = "z" # Z-axis G force
+ACCELEROMETER_TIME_KEY = "time" # UNIX timestamp in milliseconds
 
-# Keys used exclusively by the web app.
+# Keys inherited from the web app.
 ACTIVITY_ID_KEY = "activity_id" # Unique identifier for the activity
 ACTIVITY_HASH_KEY = "activity_hash"
 ACTIVITY_TYPE_KEY = "activity_type"
@@ -236,7 +236,7 @@ ACTIVITY_USER_ID_KEY = "user_id"
 ACTIVITY_DEVICE_STR_KEY = "device_str"
 ACTIVITY_LOCATIONS_KEY = "locations"
 ACTIVITY_NAME_KEY = "name"
-ACTIVITY_START_TIME_KEY = "time"
+ACTIVITY_START_TIME_KEY = "time" # UNIX timestamp in seconds
 ACTIVITY_END_TIME_KEY = "end_time"
 ACTIVITY_VISIBILITY_KEY = "visibility"
 ACTIVITY_VISIBILITY_PUBLIC = "public"
@@ -253,6 +253,7 @@ ACTIVITY_LOCATION_DESCRIPTION_KEY = "location_description" # Political descripti
 ACTIVITY_INTERVALS_KEY = "intervals" # Intervals that were computed from the workout
 ACTIVITY_PHOTO_ID_KEY = "photo_id" # Unique identifier for a specific photo
 ACTIVITY_PHOTOS_KEY = "photos" # List of all photo IDs
+ACTIVITY_LAST_UPDATED_KEY = "last updated" # Time when the activity was last updated
 
 # Keys used to summarize activity data.
 BEST_SPEED = "Best Speed" # Highest speed seen during the activity

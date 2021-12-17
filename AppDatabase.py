@@ -39,6 +39,26 @@ import Keys
 import Perf
 import Workout
 
+def insert_into_collection(collection, doc):
+    """Handles differences in document insertion between pymongo 3 and 4."""
+    if int(pymongo.__version__[0]) < 4:
+        collection.insert(doc)
+    else:
+        collection.insert_one(doc)
+
+def update_collection(collection, doc):
+    """Handles differences in document updates between pymongo 3 and 4."""
+    if int(pymongo.__version__[0]) < 4:
+        collection.save(doc)
+    else:
+        query = { Keys.DATABASE_ID_KEY: doc[Keys.DATABASE_ID_KEY] }
+        new_values = { "$set": doc }
+        collection.update_one(query, new_values)
+
+def update_activities_collection(self, activity):
+    """Handles differences in document updates between pymongo 3 and 4 with activities collection-specific logic."""
+    activity[Keys.ACTIVITY_LAST_UPDATED_KEY] = time.time()
+    update_collection(self.activities_collection, activity)
 
 def retrieve_time_from_location(location):
     """Used with the sort function."""
@@ -166,7 +186,7 @@ class MongoDatabase(Database.Database):
 
         try:
             post = { Keys.USERNAME_KEY: username, Keys.REALNAME_KEY: realname, Keys.HASH_KEY: passhash, Keys.DEVICES_KEY: [], Keys.FRIENDS_KEY: [], Keys.DEFAULT_PRIVACY_KEY: Keys.ACTIVITY_VISIBILITY_PUBLIC }
-            self.users_collection.insert(post)
+            insert_into_collection(self.users_collection, post)
             return True
         except:
             self.log_error(traceback.format_exc())
@@ -284,7 +304,7 @@ class MongoDatabase(Database.Database):
                 user[Keys.REALNAME_KEY] = realname
                 if passhash is not None:
                     user[Keys.HASH_KEY] = passhash
-                self.users_collection.save(user)
+                update_collection(self.users_collection, user)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -362,7 +382,7 @@ class MongoDatabase(Database.Database):
             if device_str not in devices:
                 devices.append(device_str)
                 user[Keys.DEVICES_KEY] = devices
-                self.users_collection.save(user)
+                update_collection(self.users_collection, user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -444,7 +464,7 @@ class MongoDatabase(Database.Database):
                 if user_id not in pending_friends_list:
                     pending_friends_list.append(user_id)
                     user[Keys.FRIEND_REQUESTS_KEY] = pending_friends_list
-                    self.users_collection.save(user)
+                    update_collection(self.users_collection, user)
                     return True
         except:
             self.log_error(traceback.format_exc())
@@ -514,7 +534,7 @@ class MongoDatabase(Database.Database):
                 if target_id in pending_friends_list:
                     pending_friends_list.remove(target_id)
                     user[Keys.FRIEND_REQUESTS_KEY] = pending_friends_list
-                    self.users_collection.save(user)
+                    update_collection(self.users_collection, user)
                     return True
         except:
             self.log_error(traceback.format_exc())
@@ -549,7 +569,7 @@ class MongoDatabase(Database.Database):
                 if target_id not in friends_list:
                     friends_list.append(target_id)
                     user[Keys.FRIENDS_KEY] = friends_list
-                    self.users_collection.save(user)
+                    update_collection(self.users_collection, user)
 
                 # Update the target user's friends list.
                 friends_list = []
@@ -558,7 +578,7 @@ class MongoDatabase(Database.Database):
                 if user_id not in friends_list:
                     friends_list.append(user_id)
                     target_user[Keys.FRIENDS_KEY] = friends_list
-                    self.users_collection.save(target_user)
+                    update_collection(self.users_collection, target_user)
 
                 return True
         except:
@@ -616,7 +636,7 @@ class MongoDatabase(Database.Database):
                 if target_id in friends_list:
                     friends_list.remove(target_id)
                     user[Keys.FRIENDS_KEY] = friends_list
-                    self.users_collection.save(user)
+                    update_collection(self.users_collection, user)
 
                 # Update the target user's friends list.
                 friends_list = []
@@ -625,7 +645,7 @@ class MongoDatabase(Database.Database):
                 if user_id in friends_list:
                     friends_list.remove(user_id)
                     target_user[Keys.FRIENDS_KEY] = friends_list
-                    self.users_collection.save(target_user)
+                    update_collection(self.users_collection, target_user)
 
                 return True
         except:
@@ -669,7 +689,7 @@ class MongoDatabase(Database.Database):
                 # Update.
                 user[Keys.USER_SETTINGS_LAST_UPDATED_KEY][key] = update_time
                 user[key] = value
-                self.users_collection.save(user)
+                update_collection(self.users_collection, user)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -745,7 +765,7 @@ class MongoDatabase(Database.Database):
             # If the collection was found.
             if user_records is None:
                 post = { Keys.RECORDS_USER_ID: user_id_str, Keys.PERSONAL_RECORDS_KEY: records }
-                self.records_collection.insert(post)
+                insert_into_collection(self.records_collection, post)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -769,7 +789,7 @@ class MongoDatabase(Database.Database):
             # If the collection was found.
             if user_records is not None:
                 user_records[Keys.PERSONAL_RECORDS_KEY] = records
-                self.records_collection.save(user_records)
+                update_collection(self.records_collection, user_records)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -825,7 +845,7 @@ class MongoDatabase(Database.Database):
                 bests[Keys.ACTIVITY_TYPE_KEY] = activity_type
                 bests[Keys.ACTIVITY_START_TIME_KEY] = activity_time
                 user_records[activity_id] = bests
-                self.records_collection.save(user_records)
+                update_collection(self.records_collection, user_records)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -897,7 +917,7 @@ class MongoDatabase(Database.Database):
             user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
             if user_records is not None:
                 user_records.pop(activity_id, None)
-                self.records_collection.save(user_records)
+                update_collection(self.records_collection, user_records)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -1061,7 +1081,7 @@ class MongoDatabase(Database.Database):
 
             # Create the activity.
             post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_NAME_KEY: activty_name, Keys.ACTIVITY_START_TIME_KEY: date_time, Keys.ACTIVITY_DEVICE_STR_KEY: device_str, Keys.ACTIVITY_VISIBILITY_KEY: "public", Keys.ACTIVITY_LOCATIONS_KEY: [] }
-            self.activities_collection.insert(post)
+            insert_into_collection(self.activities_collection, post)
             return True
         except:
             self.log_error(traceback.format_exc())
@@ -1191,7 +1211,7 @@ class MongoDatabase(Database.Database):
                         activity[metadata_type] = old_value_list
 
                 # Write out the changes.
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -1227,54 +1247,6 @@ class MongoDatabase(Database.Database):
 
         try:
             return self.activities_collection.count_documents({ Keys.ACTIVITY_ID_KEY: activity_id }, limit = 1) != 0
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return False
-
-    def retrieve_activity_visibility(self, activity_id):
-        """Returns the visibility setting for the specified activity."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_activity_visibility.__name__ + ": Unexpected empty object: activity_id")
-            return None
-        if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.retrieve_activity_visibility.__name__ + ": Invalid object: activity_id")
-            return None
-
-        try:
-            # Find the activity.
-            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
-
-            # If the activity was found and it has a visibility setting.
-            if activity is not None and Keys.ACTIVITY_VISIBILITY_KEY in activity:
-                visibility = activity[Keys.ACTIVITY_VISIBILITY_KEY]
-                return visibility
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return None
-
-    def update_activity_visibility(self, activity_id, visibility):
-        """Changes the visibility setting for the specified activity."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.update_activity_visibility.__name__ + ": Unexpected empty object: activity_id")
-            return False
-        if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.update_activity_visibility.__name__ + ": Invalid object: activity_id")
-            return False
-        if visibility is None:
-            self.log_error(MongoDatabase.update_activity_visibility.__name__ + ": Unexpected empty object: visibility")
-            return False
-
-        try:
-            # Find the activity.
-            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
-
-            # If the activity was found.
-            if activity is not None:
-                activity[Keys.ACTIVITY_VISIBILITY_KEY] = visibility
-                self.activities_collection.save(activity)
-                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1323,7 +1295,7 @@ class MongoDatabase(Database.Database):
 
                 # Save the changes.
                 activity[Keys.ACTIVITY_LOCATIONS_KEY] = location_list
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -1389,7 +1361,7 @@ class MongoDatabase(Database.Database):
 
                 # Save the changes.
                 activity[sensor_type] = value_list
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -1431,7 +1403,7 @@ class MongoDatabase(Database.Database):
 
                 # Save the changes.
                 activity[sensor_type] = value_list
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -1493,7 +1465,7 @@ class MongoDatabase(Database.Database):
 
                 # Save the changes.
                 activity[Keys.APP_EVENTS_KEY] = events_list
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -1529,32 +1501,32 @@ class MongoDatabase(Database.Database):
 
                 # Save the changes.
                 activity[Keys.APP_EVENTS_KEY] = events_list
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_activity_metadata(self, activity_id, date_time, key, value, create_list):
+    def create_or_update_activity_metadata(self, activity_id, date_time, key, value, create_list):
         """Create method for a piece of metaadata. When dealing with a list, will append values."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_or_update_activity_metadata.__name__ + ": Unexpected empty object: activity_id")
             return False
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Invalid object: activity_id")
+            self.log_error(MongoDatabase.create_or_update_activity_metadata.__name__ + ": Invalid object: activity_id")
             return False
-        if date_time is None:
-            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: date_time")
+        if date_time is None and create_list:
+            self.log_error(MongoDatabase.create_or_update_activity_metadata.__name__ + ": Unexpected empty object: date_time")
             return False
         if key is None:
-            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: key")
+            self.log_error(MongoDatabase.create_or_update_activity_metadata.__name__ + ": Unexpected empty object: key")
             return False
         if value is None:
-            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: value")
+            self.log_error(MongoDatabase.create_or_update_activity_metadata.__name__ + ": Unexpected empty object: value")
             return False
         if create_list is None:
-            self.log_error(MongoDatabase.create_activity_metadata.__name__ + ": Unexpected empty object: create_list")
+            self.log_error(MongoDatabase.create_or_update_activity_metadata.__name__ + ": Unexpected empty object: create_list")
             return False
 
         try:
@@ -1582,13 +1554,13 @@ class MongoDatabase(Database.Database):
                     value_list.append(time_value_pair)
                     value_list.sort(key=retrieve_time_from_time_value_pair)
                     activity[key] = value_list
-                    self.activities_collection.save(activity)
+                    update_activities_collection(self, activity)
                     return True
 
                 # The metadata is a scalar, just make sure to only update it if it has actually changed or was previously non-existent.
                 elif key not in activity or activity[key] != value:
                     activity[key] = value
-                    self.activities_collection.save(activity)
+                    update_activities_collection(self, activity)
                     return True
 
                 # It's ok if the value isn't being updated.
@@ -1599,19 +1571,19 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def create_activity_metadata_list(self, activity_id, key, values):
+    def create_or_update_activity_metadata_list(self, activity_id, key, values):
         """Create method for a list of metaadata values. Will overwrite existing data."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_metadata_list.__name__ + ": Unexpected empty object: activity_id")
+            self.log_error(MongoDatabase.create_or_update_activity_metadata_list.__name__ + ": Unexpected empty object: activity_id")
             return False
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_metadata_list.__name__ + ": Invalid object: activity_id")
+            self.log_error(MongoDatabase.create_or_update_activity_metadata_list.__name__ + ": Invalid object: activity_id")
             return False
         if key is None:
-            self.log_error(MongoDatabase.create_activity_metadata_list.__name__ + ": Unexpected empty object: key")
+            self.log_error(MongoDatabase.create_or_update_activity_metadata_list.__name__ + ": Unexpected empty object: key")
             return False
         if values is None:
-            self.log_error(MongoDatabase.create_activity_metadata_list.__name__ + ": Unexpected empty object: values")
+            self.log_error(MongoDatabase.create_or_update_activity_metadata_list.__name__ + ": Unexpected empty object: values")
             return False
 
         try:
@@ -1628,7 +1600,7 @@ class MongoDatabase(Database.Database):
 
                 value_list.sort(key=retrieve_time_from_time_value_pair)
                 activity[key] = value_list
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -1654,7 +1626,7 @@ class MongoDatabase(Database.Database):
             # If the activity was found.
             if activity is not None:
                 activity[Keys.APP_SETS_KEY] = sets
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -1704,7 +1676,7 @@ class MongoDatabase(Database.Database):
                         accel_list.append(value)
 
                 activity[Keys.APP_ACCELEROMETER_KEY] = accel_list
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -1730,33 +1702,12 @@ class MongoDatabase(Database.Database):
             # If the activity was found.
             if activity is not None:
                 activity[Keys.ACTIVITY_SUMMARY_KEY] = summary_data
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
-
-    def retrieve_activity_summary(self, activity_id):
-        """Returns the activity summary data. Summary data is data computed from the raw data."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_activity_summary.__name__ + ": Unexpected empty object: activity_id")
-            return None
-        if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.retrieve_activity_summary.__name__ + ": Invalid object: activity_id")
-            return None
-
-        try:
-            # Find the activity.
-            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
-
-            # If the activity was found.
-            if activity is not None and Keys.ACTIVITY_SUMMARY_KEY in activity:
-                return activity[Keys.ACTIVITY_SUMMARY_KEY]
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return None
 
     def delete_activity_summary(self, activity_id):
         """Delete method for activity summary data. Summary data is data computed from the raw data."""
@@ -1776,7 +1727,7 @@ class MongoDatabase(Database.Database):
 
                 # Currently left out for performance reasons.
                 #activity[Keys.ACTIVITY_SUMMARY_KEY] = {}
-                #self.activities_collection.save(activity)
+                #update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -1810,7 +1761,7 @@ class MongoDatabase(Database.Database):
                     data = activity[Keys.ACTIVITY_TAGS_KEY]
                 data.append(tag)
                 activity[Keys.ACTIVITY_TAGS_KEY] = data
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -1828,7 +1779,7 @@ class MongoDatabase(Database.Database):
 
         try:
             activity[Keys.ACTIVITY_TAGS_KEY] = tags
-            self.activities_collection.save(activity)
+            update_activities_collection(self, activity)
             return True
         except:
             self.log_error(traceback.format_exc())
@@ -1854,33 +1805,12 @@ class MongoDatabase(Database.Database):
             # If the activity was found then add the tags.
             if activity is not None:
                 activity[Keys.ACTIVITY_TAGS_KEY] = tags
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
-
-    def retrieve_tags(self, activity_id):
-        """Retrieves all the tags for the specified activity."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_tags.__name__ + ": Unexpected empty object: activity_id")
-            return []
-        if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.retrieve_tags.__name__ + ": Invalid object: activity_id")
-            return []
-
-        try:
-            # Find the activity.
-            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
-
-            # If the activity was found and contains tags.
-            if activity is not None and Keys.ACTIVITY_TAGS_KEY in activity:
-                return activity[Keys.ACTIVITY_TAGS_KEY]
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return []
 
     def delete_tag(self, activity_id, tag):
         """Deletes the specified tag from the activity with the given ID."""
@@ -1903,7 +1833,7 @@ class MongoDatabase(Database.Database):
                 data = activity[Keys.ACTIVITY_TAGS_KEY]
                 data.remove(tag)
                 activity[Keys.ACTIVITY_TAGS_KEY] = data
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -1942,33 +1872,12 @@ class MongoDatabase(Database.Database):
                 entry_str = json.dumps(entry_dict)
                 data.append(entry_str)
                 activity[Keys.ACTIVITY_COMMENTS_KEY] = data
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
-
-    def retrieve_activity_comments(self, activity_id):
-        """Returns a list containing all of the comments on the specified activity."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_activity_comments.__name__ + ": Unexpected empty object: activity_id")
-            return None
-        if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.retrieve_activity_comments.__name__ + ": Invalid object: activity_id")
-            return False
-
-        try:
-            # Find the activity.
-            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
-
-            # If the activity was found and contains comments.
-            if activity is not None and Keys.ACTIVITY_COMMENTS_KEY in activity:
-                return activity[Keys.ACTIVITY_COMMENTS_KEY]
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return None
 
     #
     # Activity photo management methods
@@ -2007,36 +1916,12 @@ class MongoDatabase(Database.Database):
 
                 # Save the updated activity.
                 activity[Keys.ACTIVITY_PHOTOS_KEY] = photos
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
-
-    def list_activity_photos(self, activity_id):
-        """Lists all photos associated with an activity. Response is a list of identifiers."""
-        if activity_id is None:
-            self.log_error(MongoDatabase.list_activity_photos.__name__ + ": Unexpected empty object: activity_id")
-            return []
-        if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.list_activity_photos.__name__ + ": Invalid object: activity_id")
-            return []
-
-        try:
-            # Things we don't need.
-            exclude_keys = self.list_excluded_activity_keys_activity_lists()
-
-            # Find the activity.
-            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id }, exclude_keys)
-
-            # If the activity was found and contains comments.
-            if activity is not None and Keys.ACTIVITY_PHOTOS_KEY in activity:
-                return activity[Keys.ACTIVITY_PHOTOS_KEY]
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return []
 
     def delete_activity_photo(self, activity_id, photo_id):
         """Deletes the specified tag from the activity with the given ID."""
@@ -2059,7 +1944,7 @@ class MongoDatabase(Database.Database):
                 photos = activity[Keys.ACTIVITY_PHOTOS_KEY]
                 photos.remove(photo_id)
                 activity[Keys.ACTIVITY_PHOTOS_KEY] = photos
-                self.activities_collection.save(activity)
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -2089,7 +1974,7 @@ class MongoDatabase(Database.Database):
                 post[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
                 post[Keys.WORKOUT_PLAN_CALENDAR_ID_KEY] = str(uuid.uuid4()) # Create a calendar ID
                 post[Keys.WORKOUT_LIST_KEY] = []
-                self.workouts_collection.insert(post)
+                insert_into_collection(self.workouts_collection, post)
                 workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
 
             # If the workouts document was found (or created).
@@ -2115,7 +2000,7 @@ class MongoDatabase(Database.Database):
                 # Update and save the document.
                 workouts_doc[Keys.WORKOUT_LIST_KEY] = workouts_list
                 workouts_doc[Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY] = last_scheduled_workout
-                self.workouts_collection.save(workouts_doc)
+                update_collection(self.workouts_collection, workouts_doc)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -2240,7 +2125,7 @@ class MongoDatabase(Database.Database):
                 post = {}
                 post[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
                 post[Keys.WORKOUT_LIST_KEY] = []
-                self.workouts_collection.insert(post)
+                insert_into_collection(self.workouts_collection, post)
                 workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
 
             # If the workouts document was found (or created).
@@ -2250,7 +2135,7 @@ class MongoDatabase(Database.Database):
                 workouts_doc[Keys.WORKOUT_LIST_KEY] = []
                 for workout_obj in workout_objs:
                     workouts_doc[Keys.WORKOUT_LIST_KEY].append(workout_obj.to_dict())
-                self.workouts_collection.save(workouts_doc)
+                update_collection(self.workouts_collection, workouts_doc)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -2338,7 +2223,7 @@ class MongoDatabase(Database.Database):
                 gear_defaults_list.append(gear)
 
                 user[Keys.GEAR_DEFAULTS_KEY] = gear_defaults_list
-                self.users_collection.save(user)
+                update_collection(self.users_collection, user)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -2392,7 +2277,7 @@ class MongoDatabase(Database.Database):
                 new_gear[Keys.GEAR_RETIRE_TIME_KEY] = int(gear_retire_time)
                 gear_list.append(new_gear)
                 user[Keys.GEAR_KEY] = gear_list
-                self.users_collection.save(user)
+                update_collection(self.users_collection, user)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -2411,13 +2296,8 @@ class MongoDatabase(Database.Database):
             user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
 
             # If the user's document was found.
-            if user is not None:
-
-                # Read the gear list.
-                gear_list = []
-                if Keys.GEAR_KEY in user:
-                    gear_list = user[Keys.GEAR_KEY]
-                return gear_list
+            if user is not None and Keys.GEAR_KEY in user:
+                return user[Keys.GEAR_KEY]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2460,7 +2340,7 @@ class MongoDatabase(Database.Database):
                             gear_list.pop(gear_index)
                             gear_list.append(gear)
                             user[Keys.GEAR_KEY] = gear_list
-                            self.users_collection.save(user)
+                            update_collection(self.users_collection, user)
                             return True
                         gear_index = gear_index + 1
         except:
@@ -2494,7 +2374,7 @@ class MongoDatabase(Database.Database):
                         if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
                             gear_list.pop(gear_index)
                             user[Keys.GEAR_KEY] = gear_list
-                            self.users_collection.save(user)
+                            update_collection(self.users_collection, user)
                             return True
                         gear_index = gear_index + 1
         except:
@@ -2519,7 +2399,7 @@ class MongoDatabase(Database.Database):
                 # Update the gear list.
                 if Keys.GEAR_KEY in user:
                     user[Keys.GEAR_KEY] = []
-                    self.users_collection.save(user)
+                    update_collection(self.users_collection, user)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -2571,7 +2451,7 @@ class MongoDatabase(Database.Database):
                             service_history.append(service_rec)
                             gear[Keys.GEAR_SERVICE_HISTORY] = service_history
 
-                            self.users_collection.save(user)
+                            update_collection(self.users_collection, user)
                             return True
         except:
             self.log_error(traceback.format_exc())
@@ -2617,7 +2497,7 @@ class MongoDatabase(Database.Database):
                                         service_history.pop(record_index)
                                         gear[Keys.GEAR_SERVICE_HISTORY] = service_history
 
-                                        self.users_collection.save(user)
+                                        update_collection(self.users_collection, user)
                                         return True
 
                                     record_index = record_index + 1
@@ -2690,7 +2570,7 @@ class MongoDatabase(Database.Database):
                 new_pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
                 pace_plan_list.append(new_pace_plan)
                 user[Keys.PACE_PLANS_KEY] = pace_plan_list
-                self.users_collection.save(user)
+                update_collection(self.users_collection, user)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -2776,7 +2656,7 @@ class MongoDatabase(Database.Database):
                             pace_plan_list.pop(pace_plan_index)
                             pace_plan_list.append(pace_plan)
                             user[Keys.PACE_PLANS_KEY] = pace_plan_list
-                            self.users_collection.save(user)
+                            update_collection(self.users_collection, user)
                             return True
                         pace_plan_index = pace_plan_index + 1
         except:
@@ -2810,7 +2690,7 @@ class MongoDatabase(Database.Database):
                         if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(pace_plan_id):
                             pace_plan_list.pop(pace_plan_index)
                             user[Keys.PACE_PLANS_KEY] = pace_plan_list
-                            self.users_collection.save(user)
+                            update_collection(self.users_collection, user)
                             return True
                         pace_plan_index = pace_plan_index + 1
         except:
@@ -2850,7 +2730,7 @@ class MongoDatabase(Database.Database):
             # If the user's tasks document was not found then create it.
             if user_tasks is None:
                 post = { Keys.DEFERRED_TASKS_USER_ID: user_id }
-                self.tasks_collection.insert(post)
+                insert_into_collection(self.tasks_collection, post)
                 user_tasks = self.tasks_collection.find_one({ Keys.DEFERRED_TASKS_USER_ID: user_id_str })
 
             # If the user's tasks document was found.
@@ -2874,7 +2754,7 @@ class MongoDatabase(Database.Database):
                 user_tasks[Keys.TASKS_KEY] = deferred_tasks
 
                 # Update the database.
-                self.tasks_collection.save(user_tasks)
+                update_collection(self.tasks_collection, user_tasks)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -2933,7 +2813,7 @@ class MongoDatabase(Database.Database):
                         break
 
                 # Update the database.
-                self.tasks_collection.save(user_tasks)
+                update_collection(self.tasks_collection, user_tasks)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -2959,7 +2839,7 @@ class MongoDatabase(Database.Database):
                     user_tasks[Keys.TASKS_KEY] = new_list
 
                     # Update the database.
-                    self.tasks_collection.save(user_tasks)
+                    update_collection(self.tasks_collection, user_tasks)
 
             return True
         except:
@@ -2981,7 +2861,7 @@ class MongoDatabase(Database.Database):
                 post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.UPLOADED_FILE_DATA_KEY: Binary(file_data) }
             else:
                 post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.UPLOADED_FILE_DATA_KEY: bytes(file_data) }
-            self.uploads_collection.insert(post)
+            insert_into_collection(self.uploads_collection, post)
             return True
         except:
             self.log_error(traceback.format_exc())
@@ -3032,7 +2912,7 @@ class MongoDatabase(Database.Database):
                 key_dict = { Keys.API_KEY: str(key), Keys.API_KEY_RATE: int(rate) }
                 key_list.append(key_dict)
                 user[Keys.API_KEYS] = key_list
-                self.users_collection.save(user)
+                update_collection(self.users_collection, user)
                 return True
         except:
             self.log_error(traceback.format_exc())
@@ -3085,7 +2965,7 @@ class MongoDatabase(Database.Database):
                         key_list.remove(item)
                         break
                 user[Keys.API_KEYS] = key_list
-                self.users_collection.save(user)
+                update_collection(self.users_collection, user)
                 return True
         except:
             self.log_error(traceback.format_exc())

@@ -126,7 +126,7 @@ class DataMgr(Importer.ActivityWriter):
         """Utility function for updating the activity's end time in the database."""
         if self.database is None:
             raise Exception("No database.")
-        self.database.create_activity_metadata(activity[Keys.ACTIVITY_ID_KEY], int(end_time_sec * 1000), Keys.ACTIVITY_END_TIME_KEY, int(end_time_sec), False)
+        return self.database.create_or_update_activity_metadata(activity[Keys.ACTIVITY_ID_KEY], int(end_time_sec * 1000), Keys.ACTIVITY_END_TIME_KEY, int(end_time_sec), False)
 
     def compute_and_store_activity_end_time(self, activity):
         """Examines the activity and computes the time at which the activity ended, storing it so we don't have to do this again."""
@@ -204,12 +204,12 @@ class DataMgr(Importer.ActivityWriter):
         if not self.database.create_activity(activity_id, stream_name, start_time, device_str):
             return None, None
         if activity_type is not None and len(activity_type) > 0:
-            self.database.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
+            self.database.create_or_update_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
             self.create_default_tags_on_activity(user_id, activity_type, activity_id)
 
         # If given a user ID then associate the activity with the user.
         if user_id is not None:
-            self.database.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_USER_ID_KEY, user_id, False)
+            self.database.create_or_update_activity_metadata(activity_id, 0, Keys.ACTIVITY_USER_ID_KEY, user_id, False)
         return device_str, activity_id
 
     def create_activity_track(self, device_str, activity_id, track_name, track_description):
@@ -272,7 +272,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No key.")
         if value is None:
             raise Exception("No value.")
-        return self.database.create_activity_metadata(activity_id, date_time, key, value, create_list)
+        return self.database.create_or_update_activity_metadata(activity_id, date_time, key, value, create_list)
 
     def create_activity_metadata_list(self, activity_id, key, values):
         """Create method for activity metadata."""
@@ -284,7 +284,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No key.")
         if values is None:
             raise Exception("No values.")
-        return self.database.create_activity_metadata_list(activity_id, key, values)
+        return self.database.create_or_update_activity_metadata_list(activity_id, key, values)
 
     def create_activity_sets_and_reps_data(self, activity_id, sets):
         """Create method for activity set and rep data."""
@@ -308,7 +308,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
-        return self.database.create_activity_metadata(activity_id, end_time_ms, Keys.ACTIVITY_END_TIME_KEY, int(end_time_ms / 1000), False)
+        return self.database.create_or_update_activity_metadata(activity_id, int(end_time_ms), Keys.ACTIVITY_END_TIME_KEY, int(end_time_ms / 1000), False)
 
     def create_deferred_task(self, user_id, task_type, celery_task_id, internal_task_id, details):
         """Called by the importer to store data associated with an ongoing import task."""
@@ -442,9 +442,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Could not save the photo.")
 
         # Attach the hash to the activity.
-        result = self.database.create_activity_photo(user_id, activity_id, hash_str)
-
-        return result
+        return self.database.create_activity_photo(user_id, activity_id, hash_str)
 
     def list_activity_photos(self, activity_id):
         """Lists all photos associated with an activity. Response is a list of identifiers."""
@@ -452,7 +450,11 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
-        return self.database.list_activity_photos(activity_id)
+
+        activity = self.database.retrieve_activity_small(activity_id)
+        if activity is not None and Keys.ACTIVITY_PHOTOS_KEY in activity:
+            return activity[Keys.ACTIVITY_PHOTOS_KEY]
+        return None
 
     def delete_activity_photo(self, activity_id, photo_id):
         """Lists all photos associated with an activity. Response is a list of identifiers."""
@@ -481,7 +483,7 @@ class DataMgr(Importer.ActivityWriter):
                 time_num = first_loc[Keys.LOCATION_TIME_KEY] / 1000 # Milliseconds to seconds
                 activity_id = activity[Keys.ACTIVITY_ID_KEY]
                 activity[Keys.ACTIVITY_START_TIME_KEY] = time_num
-                self.create_activity_metadata(activity_id, time_num, Keys.ACTIVITY_START_TIME_KEY, time_num, False)
+                self.create_or_update_activity_metadata(activity_id, time_num, Keys.ACTIVITY_START_TIME_KEY, time_num, False)
         return time_num
 
     def update_moving_activity(self, device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict):
@@ -660,7 +662,11 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_activity_visibility(activity_id)
+
+        activity = self.database.retrieve_activity_small(activity_id)
+        if activity is not None and Keys.ACTIVITY_VISIBILITY_KEY in activity:
+            return activity[Keys.ACTIVITY_VISIBILITY_KEY]
+        return None
 
     def update_activity_visibility(self, activity_id, visibility):
         """Changes the visibility setting for the specified activity."""
@@ -670,7 +676,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if visibility is None:
             raise Exception("Bad parameter.")
-        return self.database.update_activity_visibility(activity_id, visibility)
+        return self.database.create_or_update_activity_metadata(activity_id, None, Keys.ACTIVITY_VISIBILITY_KEY, visibility, False)
 
     def retrieve_activity_locations(self, activity_id):
         """Returns the location list for the specified activity."""
@@ -752,7 +758,11 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_activity_summary(activity_id)
+
+        activity = self.database.retrieve_activity_small(activity_id)
+        if activity is not None and Keys.ACTIVITY_SUMMARY_KEY in activity:
+            return activity[Keys.ACTIVITY_SUMMARY_KEY]
+        return None
 
     def delete_activity_summary(self, activity_id):
         """Delete method for activity summary data. Summary data is data computed from the raw data."""
@@ -810,7 +820,11 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_tags(activity_id)
+
+        activity = self.database.retrieve_activity_small(activity_id)
+        if activity is not None and Keys.ACTIVITY_TAGS_KEY in activity:
+            return activity[Keys.ACTIVITY_TAGS_KEY]
+        return []
 
     def create_tags_on_activity(self, activity, tags):
         """Adds tags to an activity."""
@@ -907,7 +921,11 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_activity_comments(activity_id)
+
+        activity = self.database.retrieve_activity_small(activity_id)
+        if activity is not None and Keys.ACTIVITY_COMMENTS_KEY in activity:
+            return activity[Keys.ACTIVITY_COMMENTS_KEY]
+        return []
 
     def retrieve_user_goal(self, user_id):
         """Retrieves the user's current goal."""
