@@ -29,21 +29,24 @@ Why develop a workout tracker when there are so many closed-source options avail
 [Full bug and feature tracking](https://github.com/msimms/OpenWorkoutWeb/issues).
 
 ## Installation
-To clone the source code:
+1. Clone the source code:
 ```
 git clone https://github.com/msimms/OpenWorkoutWeb
 ```
 
-To install the python dependencies:
+2. Install the python dependencies:
 ```
 cd OpenWorkoutWeb
 python setup.py
 ```
 
-Install other package dependencies, specifically `mongodb` and `rabbitmq`:
+3. Install other package dependencies, specifically `mongodb` and `rabbitmq`, which are services the application depends on:
 
-### macOS:
 ```
+#
+# Example for macOS:
+#
+
 # Install mongod and start the service.
 brew tap mongodb/brew
 brew install mongodb-community@5.0
