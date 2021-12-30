@@ -241,7 +241,7 @@ class Api(object):
 
         # Validate the number of points to retrieve.
         num_points = values[Keys.ACTIVITY_NUM_POINTS]
-        if not InputChecker.is_integer(num_points):
+        if not InputChecker.is_unsigned_integer(num_points):
             raise ApiException.ApiMalformedRequestException("Invalid number of points.")
         num_points = int(num_points)
 
@@ -716,9 +716,9 @@ class Api(object):
             device_info[Keys.APP_DEVICE_ID_KEY] = device_id
             activity = self.data_mgr.retrieve_most_recent_activity_for_device(device_id)
             if activity is not None:
-                device_info[Keys.DEVICE_LAST_HEARD_FROM] = activity[Keys.ACTIVITY_START_TIME_KEY]
+                device_info[Keys.DEVICE_LAST_HEARD_FROM_KEY] = activity[Keys.ACTIVITY_START_TIME_KEY]
             else:
-                device_info[Keys.DEVICE_LAST_HEARD_FROM] = 0
+                device_info[Keys.DEVICE_LAST_HEARD_FROM_KEY] = 0
             devices.append(device_info)
 
         json_result = json.dumps(devices, ensure_ascii=False)
@@ -738,13 +738,13 @@ class Api(object):
             end_time = int(datetime.datetime.strptime(values[Keys.END_DATE_KEY], '%Y-%m-%d').strftime("%s"))
         if Keys.START_TIME_KEY in values:
             start_time = values[Keys.START_TIME_KEY]
-            if InputChecker.is_integer(start_time):
+            if InputChecker.is_unsigned_integer(start_time):
                 start_time = int(start_time)
             else:
                 raise ApiException.ApiMalformedRequestException("Invalid start time.")
         if Keys.END_TIME_KEY in values:
             end_time = values[Keys.END_TIME_KEY]
-            if InputChecker.is_integer(end_time):
+            if InputChecker.is_unsigned_integer(end_time):
                 end_time = int(end_time)
             else:
                 raise ApiException.ApiMalformedRequestException("Invalid end time.")
@@ -828,7 +828,7 @@ class Api(object):
 
         # Validate the activity start time.
         start_time = values[Keys.ACTIVITY_START_TIME_KEY]
-        if not InputChecker.is_integer(start_time):
+        if not InputChecker.is_unsigned_integer(start_time):
             raise ApiException.ApiMalformedRequestException("Invalid start time.")
 
         # Add the activity to the database.
@@ -881,7 +881,7 @@ class Api(object):
 
         # Validate the activity start time.
         start_time = values[Keys.ACTIVITY_START_TIME_KEY]
-        if not InputChecker.is_integer(start_time):
+        if not InputChecker.is_unsigned_integer(start_time):
             raise ApiException.ApiMalformedRequestException("Invalid start time.")
 
         # Validate the activity type.
@@ -1364,13 +1364,13 @@ class Api(object):
         if not InputChecker.is_valid_decoded_str(gear_description):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
-        if not InputChecker.is_integer(gear_add_time):
+        if not InputChecker.is_unsigned_integer(gear_add_time):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         # Retired date is optional.
         if Keys.GEAR_RETIRE_TIME_KEY in values and values[Keys.GEAR_RETIRE_TIME_KEY] is not None:
             gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
-            if not InputChecker.is_integer(gear_retire_time):
+            if not InputChecker.is_unsigned_integer(gear_retire_time):
                 raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         else:
             gear_retire_time = 0
@@ -1426,14 +1426,14 @@ class Api(object):
 
         if Keys.GEAR_ADD_TIME_KEY in values:
             gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
-            if not InputChecker.is_integer(gear_add_time):
+            if not InputChecker.is_unsigned_integer(gear_add_time):
                 raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         else:
             gear_add_time = None
 
         if Keys.GEAR_RETIRE_TIME_KEY in values:
             gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
-            if not InputChecker.is_integer(gear_retire_time):
+            if not InputChecker.is_unsigned_integer(gear_retire_time):
                 raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         else:
             gear_retire_time = None
@@ -1501,7 +1501,7 @@ class Api(object):
         if not InputChecker.is_uuid(gear_id):
             raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
         service_date = values[Keys.SERVICE_RECORD_DATE_KEY]
-        if not InputChecker.is_integer(service_date):
+        if not InputChecker.is_unsigned_integer(service_date):
             raise ApiException.ApiMalformedRequestException("Invalid service date.")
         description = values[Keys.SERVICE_RECORD_DESCRIPTION_KEY]
         if not InputChecker.is_valid_decoded_str(description):
@@ -1577,7 +1577,7 @@ class Api(object):
 
         # Experience level.
         if Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY in values:
-            if not InputChecker.is_integer(values[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY]):
+            if not InputChecker.is_unsigned_integer(values[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY]):
                 raise ApiException.ApiMalformedRequestException("Invalid level.")
             level = int(values[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY])
             if not (level >= 1 and level <= 10):
@@ -1586,7 +1586,7 @@ class Api(object):
 
         # Comfort level with structured training.
         if Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY in values:
-            if not InputChecker.is_integer(values[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY]):
+            if not InputChecker.is_unsigned_integer(values[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY]):
                 raise ApiException.ApiMalformedRequestException("Invalid level.")
             level = int(values[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY])
             if not (level >= 1 and level <= 10):
@@ -1611,7 +1611,7 @@ class Api(object):
         # Birthday.
         if Keys.USER_BIRTHDAY_KEY in values:
             birthday = values[Keys.USER_BIRTHDAY_KEY].lower()
-            if not InputChecker.is_integer(birthday):
+            if not InputChecker.is_unsigned_integer(birthday):
                 raise ApiException.ApiMalformedRequestException("Invalid birthday.")
             result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_BIRTHDAY_KEY, birthday, update_time)
 
@@ -1759,13 +1759,13 @@ class Api(object):
             end_time = int(datetime.datetime.strptime(values[Keys.END_DATE_KEY], '%Y-%m-%d').strftime("%s"))
         if Keys.START_TIME_KEY in values:
             start_time = values[Keys.START_TIME_KEY]
-            if InputChecker.is_integer(start_time):
+            if InputChecker.is_unsigned_integer(start_time):
                 start_time = int(start_time)
             else:
                 raise ApiException.ApiMalformedRequestException("Invalid start time.")
         if Keys.END_TIME_KEY in values:
             end_time = values[Keys.END_TIME_KEY]
-            if InputChecker.is_integer(end_time):
+            if InputChecker.is_unsigned_integer(end_time):
                 end_time = int(end_time)
             else:
                 raise ApiException.ApiMalformedRequestException("Invalid end time.")
@@ -1813,7 +1813,7 @@ class Api(object):
         # Validate.
         if len(race_name) == 0:
             raise ApiException.ApiMalformedRequestException('Empty race name.')
-        if InputChecker.is_integer(race_date):
+        if InputChecker.is_unsigned_integer(race_date):
             race_date = int(race_date)
         else:
             raise ApiException.ApiMalformedRequestException("Invalid date.")
@@ -1894,7 +1894,7 @@ class Api(object):
         if not InputChecker.is_float(splits):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         last_updated_time = unquote_plus(values[Keys.PACE_PLAN_LAST_UPDATED_KEY])
-        if not InputChecker.is_integer(last_updated_time):
+        if not InputChecker.is_unsigned_integer(last_updated_time):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         result = self.data_mgr.create_pace_plan(self.user_id, plan_id, plan_name, target_pace, target_distance, target_pace_units, target_distance_units, splits, last_updated_time)
@@ -2214,11 +2214,19 @@ class Api(object):
         """Returns the list of all activity types the software understands."""
         return True, json.dumps(self.data_mgr.retrieve_activity_types())
 
-    def handle_device_sync(self, values):
+    def handle_list_unsynched_activities(self, values):
         """Returns any changes since the last time the device synched."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
-        pass
+        if Keys.DEVICE_LAST_SYNCHED_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Last synched time not specified.")
+
+        last_synched_time = values[Keys.DEVICE_LAST_SYNCHED_KEY]
+        if not InputChecker.is_unsigned_integer(last_synched_time):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        activity_ids = self.data_mgr.list_unsynched_activities(self.user_id, last_synched_time)
+        return True, json.dumps(activity_ids)
 
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
@@ -2302,8 +2310,8 @@ class Api(object):
             return self.handle_list_api_keys()
         elif request == 'list_activity_types':
             return self.handle_list_activity_types()
-        elif request == 'device_sync':
-            return self.handle_device_sync(values)
+        elif request == 'list_unsynched_activities':
+            return self.handle_list_unsynched_activities(values)
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):

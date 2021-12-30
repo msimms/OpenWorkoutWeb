@@ -300,7 +300,8 @@ ESTIMATED_MARATHON_KEY = "Estimated Marathon"
 
 # API-only keys.
 SECONDS = "seconds"
-DEVICE_LAST_HEARD_FROM = "last_heard_from"
+DEVICE_LAST_HEARD_FROM_KEY = "last_heard_from" # Time when we last received an activity from the device
+DEVICE_LAST_SYNCHED_KEY = "last_synched" # Time when the device last synchronized
 
 # Running paces.
 LONG_RUN_PACE = "Long Run Pace"

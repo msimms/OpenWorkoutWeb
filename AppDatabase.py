@@ -1252,6 +1252,26 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def list_activities_with_last_updated_times_before(self, user_id, last_modified_time):
+        """Returns a list of activity IDs with last modified times greater than the date provided."""
+        if user_id is None:
+            self.log_error(MongoDatabase.list_activities_with_last_updated_times_before.__name__ + ": Unexpected empty object: user_id")
+            return []
+        if last_modified_time is None:
+            self.log_error(MongoDatabase.list_activities_with_last_updated_times_before.__name__ + ": Unexpected empty object: last_modified_time")
+            return []
+
+        try:
+            return list(self.activities_collection.find({ Keys.ACTIVITY_LAST_UPDATED_KEY: {'$eq': last_modified_time} }, { Keys.ACTIVITY_ID_KEY: 1 }))
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return []
+
+    #
+    # Activity data methods
+    #
+
     def create_activity_locations(self, device_str, activity_id, locations):
         """Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
         if device_str is None:
@@ -1682,6 +1702,10 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
+
+    #
+    # Activity summary methods
+    #
 
     def create_activity_summary(self, activity_id, summary_data):
         """Create method for activity summary data. Summary data is data computed from the raw data."""

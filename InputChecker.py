@@ -72,6 +72,15 @@ def is_integer(test_str):
         pass
     return False
 
+def is_unsigned_integer(test_str):
+    """Returns True if the string appears to be a valid unsigned integer."""
+    try:
+        x = int(test_str)
+        return x >= 0
+    except ValueError:
+        pass
+    return False
+
 def is_float(test_str):
     """Returns True if the string appears to be a valid float."""
     try:

@@ -1366,6 +1366,17 @@ class DataMgr(Importer.ActivityWriter):
             g_api_key_rate_lock.release()
         return result
 
+    def list_unsynched_activities(self, user_id, last_sync_date):
+        """Returns a list of activity IDs with last modified times greater than the date provided."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if last_sync_date is None:
+            raise Exception("Bad parameter.")
+
+        return self.database.list_activities_with_last_updated_times_before(user_id, last_sync_date)
+
     def merge_activities(self, user_id, uploaded_file1_data, uploaded_file2_data):
         """Takes two recordings of the same activity and merges them into one."""
         if user_id is None:
