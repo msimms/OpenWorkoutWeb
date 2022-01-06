@@ -206,7 +206,7 @@ class Api(object):
         if len(activity_type) > 0:
 
             # If the activity type was updated then set the default gear (will be done later after user id validation).
-            activity_type_updated = self.data_mgr.create_or_update_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
+            activity_type_updated = self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, activity_type, False)
 
         # Valid user?
         if len(username) > 0:
@@ -476,13 +476,13 @@ class Api(object):
             raise ApiException.ApiAuthenticationException("Not activity owner.")
 
         if Keys.ACTIVITY_NAME_KEY in values:
-            if not self.data_mgr.create_or_update_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, unquote_plus(values[Keys.ACTIVITY_NAME_KEY]), False):
+            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, unquote_plus(values[Keys.ACTIVITY_NAME_KEY]), False):
                 raise Exception("Failed to update activity name.")
         if Keys.ACTIVITY_TYPE_KEY in values:
-            if not self.data_mgr.create_or_update_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, unquote_plus(values[Keys.ACTIVITY_TYPE_KEY]), False):
+            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, unquote_plus(values[Keys.ACTIVITY_TYPE_KEY]), False):
                 raise Exception("Failed to update activity type.")
         if Keys.ACTIVITY_DESCRIPTION_KEY in values:
-            if not self.data_mgr.create_or_update_activity_metadata(activity_id, 0, Keys.ACTIVITY_DESCRIPTION_KEY, unquote_plus(values[Keys.ACTIVITY_DESCRIPTION_KEY]), False):
+            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_DESCRIPTION_KEY, unquote_plus(values[Keys.ACTIVITY_DESCRIPTION_KEY]), False):
                 raise Exception("Failed to update activity description.")
 
         return True, ""
@@ -838,8 +838,8 @@ class Api(object):
         _, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time), None)
 
         # Add the activity data to the database.
-        self.data_mgr.create_or_update_activity_metadata(activity_id, 0, Keys.APP_DISTANCE_KEY, float(values[Keys.APP_DISTANCE_KEY]), False)
-        self.data_mgr.create_or_update_activity_metadata(activity_id, 0, Keys.APP_DURATION_KEY, float(values[Keys.APP_DURATION_KEY]), False)
+        self.data_mgr.create_activity_metadata(activity_id, 0, Keys.APP_DISTANCE_KEY, float(values[Keys.APP_DISTANCE_KEY]), False)
+        self.data_mgr.create_activity_metadata(activity_id, 0, Keys.APP_DURATION_KEY, float(values[Keys.APP_DURATION_KEY]), False)
 
         return ""
 

@@ -483,7 +483,7 @@ class DataMgr(Importer.ActivityWriter):
                 time_num = first_loc[Keys.LOCATION_TIME_KEY] / 1000 # Milliseconds to seconds
                 activity_id = activity[Keys.ACTIVITY_ID_KEY]
                 activity[Keys.ACTIVITY_START_TIME_KEY] = time_num
-                self.create_or_update_activity_metadata(activity_id, time_num, Keys.ACTIVITY_START_TIME_KEY, time_num, False)
+                self.create_activity_metadata(activity_id, time_num, Keys.ACTIVITY_START_TIME_KEY, time_num, False)
         return time_num
 
     def update_moving_activity(self, device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict):
