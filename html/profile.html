@@ -176,7 +176,7 @@
     {
         let the_url = "${root_url}/api/1.0/update_profile";
         let height = parseFloat(document.getElementById("height").value);
-        let height_units = document.getElementById("height_units").value;
+        let height_units = document.getElementById("height_units").innerHTML;
         let dict = [];
         let result_text = {};
 
@@ -199,7 +199,7 @@
     {
         let the_url = "${root_url}/api/1.0/update_profile";
         let weight = parseFloat(document.getElementById("weight").value);
-        let weight_units = document.getElementById("weight_units").value;
+        let weight_units = document.getElementById("weight_units").innerHTML;
         let dict = [];
         let result_text = {};
 
@@ -411,11 +411,11 @@
                         if (units == "standard")
                         {
                             value *= 39.37008;
-                            height_units_obj.value = "inches";
+                            height_units_obj.innerHTML = "inches";
                         }
                         else
                         {
-                            height_units_obj.value = "meters";
+                            height_units_obj.innerHTML = "meters";
                         }
                         element.value = value.toFixed(1);
                     }
@@ -427,11 +427,11 @@
                         if (units == "standard")
                         {
                             value *= 2.2;
-                            weight_units_obj.value = "pounds";
+                            weight_units_obj.innerHTML = "pounds";
                         }
                         else
                         {
-                            weight_units_obj.value = "kilograms";
+                            weight_units_obj.innerHTML = "kilograms";
                         }
                         element.value = value.toFixed(1);
                     }
@@ -643,13 +643,13 @@ ${nav}
 
         <!-- Height -->
         <h2>Height</h2>
-            <input type="text" id="height" value="Not set"> <input style="border:0" type="text" id="height_units" readonly></input></input><br>
+            <input type="text" id="height" value="Not set"></input>  <label id="height_units"></label><br>
             <button type="modern_button" onclick="return update_height()">Update</button>
         <hr>
 
         <!-- Weight -->
         <h2>Weight</h2>
-            <input type="text" id="weight" value="Not set"> <input style="border:0" type="text" id="weight_units" readonly></input></input><br>
+            <input type="text" id="weight" value="Not set"></input>  <label id="weight_units"></label><br>
             <button type="modern_button" onclick="return update_weight()">Update</button>
         <hr>
 
@@ -664,19 +664,19 @@ ${nav}
 
         <!-- Resting Heart Rate -->
         <h2>Resting Heart Rate</h2>
-            <input type="text" id="resting heart rate" value="Not set"> <input style="border:0" type="text" value="bpm" readonly></input></input><br>
+            <input type="text" id="resting heart rate" value="Not set"></input>  <label>bpm</label><br>
             <button type="modern_button" onclick="return update_resting_hr()">Update</button>
         <hr>
 
         <!-- Maximum Heart Rate -->
         <h2>Maximum Heart Rate</h2>
-            <input type="text" id="max heart rate" value="Not set"> <input style="border:0" type="text" value="bpm" readonly></input></input><br>
+            <input type="text" id="max heart rate" value="Not set"></input>  <label>bpm</label><br>
             <button type="modern_button" onclick="return update_maximum_hr()">Update</button>
         <hr>
 
         <!-- Estimated Maximum Heart Rate -->
         <h2>Estimated Maximum Heart Rate</h2>
-            <input style="border:0" type="text" value="Not calculated" id="estimated max heart rate" readonly> <input style="border:0" type="text" value="bpm" readonly></input></input>
+            <input style="border:0" type="text" value="Not calculated" id="estimated max heart rate" readonly>  </input><label>bpm</label>
         <hr>
 
         <!-- BMI -->

@@ -297,6 +297,13 @@ button .fa {
     font-size: 36px;
 }
 
+.block label {
+    width: 40%;
+    height: 40px;
+    font-size: 36px;
+    color: var(--info);
+}
+
 .block text {
     font-size: 36px;
 }
