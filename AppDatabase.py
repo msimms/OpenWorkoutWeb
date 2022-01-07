@@ -123,17 +123,23 @@ class MongoDatabase(Database.Database):
     def total_users_count(self):
         """Returns the number of users in the database."""
         try:
-            return self.users_collection.count()
+            if int(pymongo.__version__[0]) < 4:
+                return self.users_collection.count()
+            return self.users_collection.count_documents({})
         except:
-            self.log_error(MongoDatabase.total_users_count.__name__ + ": Exception")
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
         return 0
 
     def total_activities_count(self):
         """Returns the number of activities in the database."""
         try:
-            return self.activities_collection.count()
+            if int(pymongo.__version__[0]) < 4:
+                return self.activities_collection.count()
+            return self.activities_collection.count_documents({})
         except:
-            self.log_error(MongoDatabase.total_activities_count.__name__ + ": Exception")
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
         return 0
 
     def list_excluded_user_keys(self):
