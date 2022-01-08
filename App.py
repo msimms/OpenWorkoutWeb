@@ -329,9 +329,11 @@ class App(object):
         logged_in = logged_in_username is not None
 
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
-        summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
-        if summary_data is None or len(summary_data) == 0:
-            self.data_mgr.analyze_activity(activity, activity_user_id)
+        summary_data = None
+        if Keys.ACTIVITY_SUMMARY_KEY in activity:
+            summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
+            if summary_data is None or len(summary_data) == 0:
+                self.data_mgr.analyze_activity(activity, activity_user_id)
 
         # Find the sets data.
         sets = None
@@ -550,9 +552,12 @@ class App(object):
             is_foot_based_activity_str = "true"
 
         # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
-        summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
-        if summary_data is None or len(summary_data) == 0:
-            self.data_mgr.analyze_activity(activity, activity_user_id)
+        summary_data = None
+        if Keys.ACTIVITY_SUMMARY_KEY in activity:
+            summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
+            if not is_live:
+                if summary_data is None or len(summary_data) == 0:
+                    self.data_mgr.analyze_activity(activity, activity_user_id)
 
         # Start with the activity type.
         summary = "\t<li>" + activity_type + "</li>\n"
