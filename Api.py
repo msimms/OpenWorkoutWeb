@@ -2225,7 +2225,7 @@ class Api(object):
         if not InputChecker.is_unsigned_integer(last_synched_time):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        activity_ids = self.data_mgr.list_unsynched_activities(self.user_id, last_synched_time)
+        activity_ids = self.data_mgr.list_unsynched_activities(self.user_id, int(last_synched_time))
         return True, json.dumps(activity_ids)
 
     def handle_api_1_0_get_request(self, request, values):

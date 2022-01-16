@@ -1268,7 +1268,9 @@ class MongoDatabase(Database.Database):
             return []
 
         try:
-            return list(self.activities_collection.find({ Keys.ACTIVITY_LAST_UPDATED_KEY: {'$eq': last_modified_time} }, { Keys.ACTIVITY_ID_KEY: 1 }))
+            results = list(self.activities_collection.find({ Keys.ACTIVITY_LAST_UPDATED_KEY: {'$gt': last_modified_time} }, { Keys.DATABASE_ID_KEY: 0, Keys.ACTIVITY_ID_KEY: 1 }))
+            results = [x[Keys.ACTIVITY_ID_KEY] for x in results]
+            return results
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
