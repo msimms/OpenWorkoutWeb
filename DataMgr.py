@@ -941,15 +941,19 @@ class DataMgr(Importer.ActivityWriter):
 
         # Read the user's race calendar and find the next A race, or B race if an A race is not specified.
         # If no race is specified then return "Fitness" as a the goal with no specified date.
+        now = datetime.datetime.utcnow()
         user_races = self.database.retrieve_user_setting(user_id, Keys.USER_RACES)
         if user_races is not None:
             for race in user_races:
 
                 # Best goal not found or race is newer and equal or higher priority.
-                if goal_date is None or (race[Keys.RACE_DATE_KEY] < goal_date and race[Keys.RACE_IMPORTANCE_KEY] <= goal_importance):
-                    goal = race[Keys.RACE_DISTANCE_KEY]
-                    goal_date = race[Keys.RACE_DATE_KEY]
-                    goal_importance = race[Keys.RACE_IMPORTANCE_KEY]
+                race_date = race[Keys.RACE_DATE_KEY]
+                race_importance = race[Keys.RACE_IMPORTANCE_KEY]
+                if race_date > now:
+                    if goal_date is None or (race_date < goal_date and race_importance <= goal_importance):
+                        goal = race[Keys.RACE_DISTANCE_KEY]
+                        goal_date = race[Keys.RACE_DATE_KEY]
+                        goal_importance = race[Keys.RACE_IMPORTANCE_KEY]
 
         return goal, goal_date
 
