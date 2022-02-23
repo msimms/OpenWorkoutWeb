@@ -941,7 +941,7 @@ class DataMgr(Importer.ActivityWriter):
 
         # Read the user's race calendar and find the next A race, or B race if an A race is not specified.
         # If no race is specified then return "Fitness" as a the goal with no specified date.
-        now = datetime.datetime.utcnow()
+        now = time.time()
         user_races = self.database.retrieve_user_setting(user_id, Keys.USER_RACES)
         if user_races is not None:
             for race in user_races:
