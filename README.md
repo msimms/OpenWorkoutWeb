@@ -307,6 +307,9 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 * Bug fixes and performance optimizations.
 * Added a race calendar, to replace manually specifying goals.
 
+### 0.45
+* Bug fixes.
+
 ## Tech
 This software uses several other source projects to work properly:
 
