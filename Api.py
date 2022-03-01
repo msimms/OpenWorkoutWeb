@@ -291,7 +291,7 @@ class Api(object):
         if Keys.ACTIVITY_NAME_KEY in activity:
             activity_name = activity[Keys.ACTIVITY_NAME_KEY]
             if activity_name is not None and len(activity_name) > 0:
-                response_dict["Name"] = activity_name
+                response_dict[Keys.ACTIVITY_NAME_KEY] = activity_name
 
         if Keys.ACTIVITY_TYPE_KEY in activity:
             activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
@@ -302,7 +302,7 @@ class Api(object):
         if Keys.ACTIVITY_DESCRIPTION_KEY in activity:
             activity_description = activity[Keys.ACTIVITY_DESCRIPTION_KEY]
             if activity_description is not None and len(activity_description) > 0:
-                response_dict["Description"] = activity_description
+                response_dict[Keys.ACTIVITY_DESCRIPTION_KEY] = activity_description
 
         if Keys.ACTIVITY_START_TIME_KEY in activity:
             activity_time = activity[Keys.ACTIVITY_START_TIME_KEY]

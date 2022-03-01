@@ -265,9 +265,9 @@ ${nav}
         Object.keys(response).forEach(function(key) {
             let value = response[key];
 
-            if ((key != "Name") && (key != "Avg. Speed") && (key != "activity_id") && (key != "Time") && (key != "Type") && (key != "tags"))
+            if ((key != "name") && (key != "Avg. Speed") && (key != "activity_id") && (key != "Time") && (key != "Type") && (key != "tags"))
             {
-                if (key != "Description")
+                if (key != "description")
                 {
                     content_string += key;
                     content_string += " = ";
