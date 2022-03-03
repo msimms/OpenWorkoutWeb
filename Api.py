@@ -476,13 +476,13 @@ class Api(object):
             raise ApiException.ApiAuthenticationException("Not activity owner.")
 
         if Keys.ACTIVITY_NAME_KEY in values:
-            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, unquote_plus(values[Keys.ACTIVITY_NAME_KEY]), False):
+            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, values[Keys.ACTIVITY_NAME_KEY], False):
                 raise Exception("Failed to update activity name.")
         if Keys.ACTIVITY_TYPE_KEY in values:
-            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, unquote_plus(values[Keys.ACTIVITY_TYPE_KEY]), False):
+            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, values[Keys.ACTIVITY_TYPE_KEY], False):
                 raise Exception("Failed to update activity type.")
         if Keys.ACTIVITY_DESCRIPTION_KEY in values:
-            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_DESCRIPTION_KEY, unquote_plus(values[Keys.ACTIVITY_DESCRIPTION_KEY]), False):
+            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_DESCRIPTION_KEY, values[Keys.ACTIVITY_DESCRIPTION_KEY], False):
                 raise Exception("Failed to update activity description.")
 
         return True, ""
@@ -860,7 +860,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
         # Convert the array string to an actual array (note: I realize I could use eval for this, but that seems dangerous)
-        sets = unquote_plus(values[Keys.APP_SETS_KEY])
+        sets = values[Keys.APP_SETS_KEY]
         if len(sets) <= 2:
             raise ApiException.ApiMalformedRequestException("Malformed set data.")
         sets = sets[1:-1] # Remove the brackets
