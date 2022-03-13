@@ -1276,6 +1276,16 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return []
 
+    def retrieve_unanalyzed_activity_list(self, limit):
+        try:
+            results = list(self.activities_collection.find({ Keys.ACTIVITY_SUMMARY_KEY: {'$exists': 0} }, { Keys.DATABASE_ID_KEY: 0, Keys.ACTIVITY_ID_KEY: 1 }, limit = limit))
+            results = [x[Keys.ACTIVITY_ID_KEY] for x in results]
+            return results
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return []
+
     #
     # Activity data methods
     #

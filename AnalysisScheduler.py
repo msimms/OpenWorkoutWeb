@@ -39,8 +39,9 @@ class AnalysisScheduler(object):
         logger = logging.getLogger()
         logger.error(log_str)
 
-    def add_activity_to_queue(self, activity, activity_user_id, data_mgr):
+    def add_activity_to_queue(self, activity):
         """Adds the activity ID to the list of activities to be analyzed."""
+        """Returns [celery task id, our task id]."""
         from bson.json_util import dumps
         from ActivityAnalyzer import analyze_activity
 
@@ -50,10 +51,8 @@ class AnalysisScheduler(object):
             activity_str = dumps(activity)
             internal_task_id = uuid.uuid4()
             analysis_task = analyze_activity.delay(activity_str, internal_task_id)
-            #analysis_task = analyze_activity.apply_async(queue='default', args=(activity_str))
-            data_mgr.create_deferred_task(activity_user_id, Keys.ANALYSIS_TASK_KEY, analysis_task.task_id, internal_task_id, None)
-            return internal_task_id
+            return analysis_task.task_id, internal_task_id
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return None, None

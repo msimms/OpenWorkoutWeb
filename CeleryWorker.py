@@ -26,6 +26,7 @@
 from __future__ import absolute_import
 import celery
 import datetime
+import random
 
 import DataMgr
 import Keys
@@ -37,8 +38,17 @@ celery_worker = celery.Celery('straen_worker', include=['ActivityAnalyzer', 'Imp
 celery_worker.config_from_object('CeleryConfig')
 
 @celery_worker.task()
+def check_for_unanalyzed_activities():
+    """Check for activities that need to be analyzed. Do one, if any are found."""
+    data_mgr = DataMgr.DataMgr(None, "", None, None, None)
+    unanalyzed_activity_list = data_mgr.retrieve_unanalyzed_activity_list(64)
+    if len(unanalyzed_activity_list) > 0:
+        activity_id = random.choice(unanalyzed_activity_list)
+        data_mgr.analyze_activity_by_id(activity_id, user_id)
+
+@celery_worker.task()
 def check_for_ungenerated_workout_plans():
-    """Checks for users that need their workout plan regenerated."""
+    """Checks for users that need their workout plan regenerated. Generates workout plans for each of those users."""
     now = datetime.datetime.utcnow()
     data_mgr = DataMgr.DataMgr(None, "", None, None, WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
     user_mgr = UserMgr.UserMgr(None)
@@ -62,5 +72,6 @@ def prune_deferred_tasks_list():
 
 @celery_worker.on_after_configure.connect
 def setup_periodic_tasks(**kwargs):
+    celery_worker.add_periodic_task(700.0, prune_deferred_tasks_list.s(), name='Removes completed tasks from the deferred tasks list.')
     celery_worker.add_periodic_task(600.0, check_for_ungenerated_workout_plans.s(), name='Check for workout plans that need to be re-generated.')
-    celery_worker.add_periodic_task(600.0, prune_deferred_tasks_list.s(), name='Removes completed tasks from the deferred tasks list.')
+    celery_worker.add_periodic_task(500.0, check_for_unanalyzed_activities.s(), name='Check for activities that need to be analyzed. Do one, if any are found.')

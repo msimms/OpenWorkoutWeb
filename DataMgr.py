@@ -100,7 +100,14 @@ class DataMgr(Importer.ActivityWriter):
     def analyze_activity(self, activity, activity_user_id):
         """Schedules the specified activity for analysis."""
         activity[Keys.ACTIVITY_USER_ID_KEY] = activity_user_id
-        self.analysis_scheduler.add_activity_to_queue(activity, activity_user_id, self)
+        task_id, internal_task_id = self.analysis_scheduler.add_activity_to_queue(activity)
+        if [activity_user_id, task_id, internal_task_id].count(None) == 0:
+            self.create_deferred_task(activity_user_id, Keys.ANALYSIS_TASK_KEY, task_id, internal_task_id, None)
+
+    def analyze_activity_by_id(self, activity_id, activity_user_id):
+        """Schedules the specified activity for analysis."""
+        complete_activity_data = self.retrieve_activity(activity_id)
+        self.analyze_activity(complete_activity_data, activity_user_id)
 
     def compute_activity_end_time(self, activity):
         """Examines the activity and computes the time at which the activity ended."""
@@ -1024,6 +1031,11 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.delete_all_user_personal_records(user_id)
 
+    def retrieve_unanalyzed_activity_list(self, limit):
+        if self.database is None:
+            raise Exception("No database.")
+        return self.database.retrieve_unanalyzed_activity_list(limit)
+
     def create_workout(self, user_id, workout_obj):
         """Create method for a workout."""
         if self.database is None:
@@ -1608,8 +1620,7 @@ class DataMgr(Importer.ActivityWriter):
                 if cutoff_time is None or activity_time > cutoff_time:
                     if activity_id not in all_activity_bests:
                         num_unanalyzed = num_unanalyzed + 1
-                        complete_activity_data = self.retrieve_activity(activity_id)
-                        self.analyze_activity(complete_activity_data, user_id)
+                        self.analyze_activity_by_id(self, activity_id, user_id)
 
         return num_unanalyzed
 
