@@ -44,7 +44,7 @@ def check_for_unanalyzed_activities():
     unanalyzed_activity_list = data_mgr.retrieve_unanalyzed_activity_list(64)
     if len(unanalyzed_activity_list) > 0:
         activity_id = random.choice(unanalyzed_activity_list)
-        data_mgr.analyze_activity_by_id(activity_id, user_id)
+        data_mgr.analyze_activity_by_id(activity_id, None)
 
 @celery_worker.task()
 def check_for_ungenerated_workout_plans():
