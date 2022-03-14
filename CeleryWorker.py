@@ -46,6 +46,7 @@ def check_for_unanalyzed_activities():
     unanalyzed_activity_list = data_mgr.retrieve_unanalyzed_activity_list(64)
     if len(unanalyzed_activity_list) > 0:
         activity_id = random.choice(unanalyzed_activity_list)
+        print("Selected " + activity_id + " for analysis.")
         data_mgr.analyze_activity_by_id(activity_id, None)
 
 @celery_worker.task()
