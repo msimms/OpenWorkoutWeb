@@ -50,8 +50,14 @@ def check_for_unanalyzed_activities():
         activity_id = str(random.choice(unanalyzed_activity_list))
         print("Selected " + activity_id + " for analysis.")
         complete_activity_data = data_mgr.retrieve_activity(activity_id)
-        activity_user_id = user_mgr.retrieve_user_from_activity(complete_activity_data)
-        data_mgr.analyze_activity(complete_activity_data, activity_user_id)
+        if complete_activity_data:
+            activity_user_id = user_mgr.retrieve_user_from_activity(complete_activity_data)
+            if activity_user_id:
+                data_mgr.analyze_activity(complete_activity_data, activity_user_id)
+            else:
+                print("The activity owner could not be determined.")
+        else:
+            print("The activity could no be loaded.")
 
 @celery_worker.task()
 def check_for_ungenerated_workout_plans():
