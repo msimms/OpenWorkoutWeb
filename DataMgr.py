@@ -1003,6 +1003,7 @@ class DataMgr(Importer.ActivityWriter):
         all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, None)
 
         # Cleanup the activity summary, removing any items that are no longer valid, or not.
+        old_activity_bests = {}
         if prune_activity_summary_cache:
             for old_activity_id in all_activity_bests:
                 if self.activity_exists(old_activity_id):
