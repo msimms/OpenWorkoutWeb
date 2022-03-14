@@ -99,6 +99,9 @@ class DataMgr(Importer.ActivityWriter):
 
     def analyze_activity(self, activity, activity_user_id):
         """Schedules the specified activity for analysis."""
+        if activity is None:
+            raise Exception("No activity object.")
+
         if activity_user_id is not None:
             activity[Keys.ACTIVITY_USER_ID_KEY] = activity_user_id
         task_id, internal_task_id = self.analysis_scheduler.add_activity_to_queue(activity)
@@ -107,6 +110,9 @@ class DataMgr(Importer.ActivityWriter):
 
     def analyze_activity_by_id(self, activity_id, activity_user_id):
         """Schedules the specified activity for analysis."""
+        if activity_id is None:
+            raise Exception("No activity ID.")
+
         complete_activity_data = self.retrieve_activity(activity_id)
         self.analyze_activity(complete_activity_data, activity_user_id)
 
@@ -1621,7 +1627,7 @@ class DataMgr(Importer.ActivityWriter):
                 if cutoff_time is None or activity_time > cutoff_time:
                     if activity_id not in all_activity_bests:
                         num_unanalyzed = num_unanalyzed + 1
-                        self.analyze_activity_by_id(self, activity_id, user_id)
+                        self.analyze_activity_by_id(activity_id, user_id)
 
         return num_unanalyzed
 
