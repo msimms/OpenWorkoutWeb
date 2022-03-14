@@ -237,6 +237,19 @@ class UserMgr(object):
             raise Exception("Device string not provided.")
         return self.database.retrieve_user_from_device(device_str)
 
+    def retrieve_user_from_activity(self, activity):
+        """Given an activity object, determines the user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity is None:
+            raise Exception("No activity object.")
+        
+        if Keys.ACTIVITY_USER_ID_KEY in activity:
+            return activity[Keys.ACTIVITY_USER_ID_KEY]
+        if Keys.ACTIVITY_DEVICE_STR_KEY in activity:
+            return self.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
+        return None
+
     def request_to_be_friends(self, user_id, target_id):
         """Appends a user to the pending friends list of the user with the specified id."""
         if self.database is None:

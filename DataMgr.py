@@ -101,17 +101,20 @@ class DataMgr(Importer.ActivityWriter):
         """Schedules the specified activity for analysis."""
         if activity is None:
             raise Exception("No activity object.")
+        if activity_user_id is None:
+            raise Exception("No activity user ID.")
 
-        if activity_user_id is not None:
-            activity[Keys.ACTIVITY_USER_ID_KEY] = activity_user_id
+        activity[Keys.ACTIVITY_USER_ID_KEY] = activity_user_id
         task_id, internal_task_id = self.analysis_scheduler.add_activity_to_queue(activity)
-        if [activity_user_id, task_id, internal_task_id].count(None) == 0:
+        if [task_id, internal_task_id].count(None) == 0:
             self.create_deferred_task(activity_user_id, Keys.ANALYSIS_TASK_KEY, task_id, internal_task_id, None)
 
     def analyze_activity_by_id(self, activity_id, activity_user_id):
         """Schedules the specified activity for analysis."""
         if activity_id is None:
             raise Exception("No activity ID.")
+        if activity_user_id is None:
+            raise Exception("No activity user ID.")
 
         complete_activity_data = self.retrieve_activity(activity_id)
         self.analyze_activity(complete_activity_data, activity_user_id)
@@ -140,6 +143,8 @@ class DataMgr(Importer.ActivityWriter):
         """Utility function for updating the activity's end time in the database."""
         if self.database is None:
             raise Exception("No database.")
+        if activity is None:
+            raise Exception("No activity object.")
         return self.database.create_or_update_activity_metadata(activity[Keys.ACTIVITY_ID_KEY], int(end_time_sec * 1000), Keys.ACTIVITY_END_TIME_KEY, int(end_time_sec), False)
 
     def compute_and_store_activity_end_time(self, activity):
@@ -166,6 +171,9 @@ class DataMgr(Importer.ActivityWriter):
 
     def get_activity_start_and_end_times(self, activity):
         """Retrieves the start time and end time, computing the end time, if necessary."""
+        if activity is None:
+            raise Exception("No activity object.")
+
         activity_start_time_sec = activity[Keys.ACTIVITY_START_TIME_KEY]
         if Keys.ACTIVITY_END_TIME_KEY not in activity:
             activity_end_time_sec = self.compute_and_store_activity_end_time(activity)
