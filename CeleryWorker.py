@@ -50,7 +50,7 @@ def check_for_unanalyzed_activities():
         activity_id = str(random.choice(unanalyzed_activity_list))
         print("Selected " + activity_id + " for analysis.")
         complete_activity_data = data_mgr.retrieve_activity(activity_id)
-        activity_user_id = user_mgr.retrieve_user_from_activity()
+        activity_user_id = user_mgr.retrieve_user_from_activity(complete_activity_data)
         data_mgr.analyze_activity(complete_activity_data, activity_user_id)
 
 @celery_worker.task()
