@@ -99,7 +99,8 @@ class DataMgr(Importer.ActivityWriter):
 
     def analyze_activity(self, activity, activity_user_id):
         """Schedules the specified activity for analysis."""
-        activity[Keys.ACTIVITY_USER_ID_KEY] = activity_user_id
+        if activity_user_id is not None:
+            activity[Keys.ACTIVITY_USER_ID_KEY] = activity_user_id
         task_id, internal_task_id = self.analysis_scheduler.add_activity_to_queue(activity)
         if [activity_user_id, task_id, internal_task_id].count(None) == 0:
             self.create_deferred_task(activity_user_id, Keys.ANALYSIS_TASK_KEY, task_id, internal_task_id, None)

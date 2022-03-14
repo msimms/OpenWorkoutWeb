@@ -28,6 +28,7 @@ import celery
 import datetime
 import random
 
+import AnalysisScheduler
 import DataMgr
 import Keys
 import UserMgr
@@ -40,7 +41,8 @@ celery_worker.config_from_object('CeleryConfig')
 @celery_worker.task()
 def check_for_unanalyzed_activities():
     """Check for activities that need to be analyzed. Do one, if any are found."""
-    data_mgr = DataMgr.DataMgr(None, "", None, None, None)
+    analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
+    data_mgr = DataMgr.DataMgr(None, "", analysis_scheduler, None, None)
     unanalyzed_activity_list = data_mgr.retrieve_unanalyzed_activity_list(64)
     if len(unanalyzed_activity_list) > 0:
         activity_id = random.choice(unanalyzed_activity_list)
