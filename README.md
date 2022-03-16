@@ -310,6 +310,10 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 ### 0.45
 * Bug fixes.
 
+### 0.46
+* Bug fixes.
+* Analysis service now scans for unanalyzed activities.
+
 ## Tech
 This software uses several other source projects to work properly:
 
