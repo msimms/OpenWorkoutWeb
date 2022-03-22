@@ -4,25 +4,19 @@
 import argparse
 import functools
 import json
-import logging
-import mako
 import os
 import signal
 import sys
 import traceback
 import flask
 
-import ApiException
 import App
+import ApiException
+import AppFactory
 import Config
-import DataMgr
-import AnalysisScheduler
-import ImportScheduler
 import Keys
 import SessionException
 import SessionMgr
-import UserMgr
-import WorkoutPlanGeneratorScheduler
 
 
 CSS_DIR = 'css'
@@ -126,6 +120,15 @@ def photos(user_id, file_name):
         g_app.log_error('Unhandled exception in ' + photos.__name__)
     return g_app.render_error()
 
+@g_flask_app.route('/error')
+def error(error_str=None):
+    """Renders the error page."""
+    try:
+        return g_app.render_error(error_str)
+    except:
+        pass
+    return g_app.render_error()
+
 @g_flask_app.route('/stats')
 @login_requred
 def stats():
@@ -136,16 +139,7 @@ def stats():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + stats.__name__)
-    return g_app.render_error()
-
-@g_flask_app.route('/error')
-def error(error_str=None):
-    """Renders the error page."""
-    try:
-        return g_app.render_error(error_str)
-    except:
-        pass
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/live/<device_str>')
 def live(device_str):
@@ -156,7 +150,7 @@ def live(device_str):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + live.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/live_user/<user_str>')
 def live_user(user_str):
@@ -167,7 +161,7 @@ def live_user(user_str):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + live_user.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/activity/<activity_id>')
 def activity(activity_id):
@@ -178,7 +172,7 @@ def activity(activity_id):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + activity.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/edit_activity/<activity_id>')
 def edit_activity(activity_id):
@@ -189,7 +183,7 @@ def edit_activity(activity_id):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + edit_activity.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/add_photos/<activity_id>')
 def add_photos(activity_id):
@@ -200,7 +194,7 @@ def add_photos(activity_id):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + add_photos.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/device/<device_str>')
 def device(device_str):
@@ -211,7 +205,7 @@ def device(device_str):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + device.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/my_activities')
 @login_requred
@@ -225,7 +219,7 @@ def my_activities():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + my_activities.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/all_activities')
 @login_requred
@@ -239,7 +233,7 @@ def all_activities():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + all_activities.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/record_progression/<activity_type>/<record_name>')
 @login_requred
@@ -253,7 +247,7 @@ def record_progression(activity_type, record_name):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + record_progression.__name__)
-    return g_app.error()
+    return error()
 
 @g_flask_app.route('/workouts')
 @login_requred
@@ -267,7 +261,7 @@ def workouts():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + workouts.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/workout/<workout_id>')
 @login_requred
@@ -281,7 +275,7 @@ def workout(workout_id):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + workout.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/statistics')
 @login_requred
@@ -295,7 +289,7 @@ def statistics():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + statistics.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/gear')
 @login_requred
@@ -309,7 +303,7 @@ def gear():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + gear.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/service_history/<gear_id>')
 @login_requred
@@ -323,7 +317,7 @@ def service_history(gear_id):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + service_history.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/friends')
 @login_requred
@@ -337,7 +331,7 @@ def friends():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + friends.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/device_list')
 @login_requred
@@ -351,7 +345,7 @@ def device_list():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + device_list.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/manual_entry/<activity_type>')
 @login_requred
@@ -365,7 +359,7 @@ def manual_entry(activity_type):
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + manual_entry.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/import_activity')
 @login_requred
@@ -379,7 +373,7 @@ def import_activity():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + import_activity.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/pace_plans')
 @login_requred
@@ -393,7 +387,7 @@ def pace_plans():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + pace_plans.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/task_status')
 @login_requred
@@ -407,7 +401,7 @@ def task_status():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + task_status.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/profile')
 @login_requred
@@ -421,7 +415,7 @@ def profile():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + profile.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/settings')
 @login_requred
@@ -435,7 +429,7 @@ def settings():
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
         g_app.log_error('Unhandled exception in ' + settings.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/login')
 def login():
@@ -446,7 +440,7 @@ def login():
         return flask.redirect(e.url, code=302)
     except:
         g_app.log_error('Unhandled exception in ' + login.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/create_login')
 def create_login():
@@ -455,7 +449,7 @@ def create_login():
         return g_app.create_login()
     except:
         g_app.log_error('Unhandled exception in ' + g_flask_app.__name__)
-    return g_app.render_error()
+    return error()
 
 @g_flask_app.route('/logout')
 def logout():
@@ -468,8 +462,6 @@ def logout():
         response = flask.redirect(e.url, code=302)
         response.set_cookie(Keys.SESSION_KEY, '', expires=0)
         return response
-    except:
-        return g_app.render_error()
     return g_app.render_error()
 
 @g_flask_app.route('/about')
@@ -496,11 +488,8 @@ def status():
 def ical(calendar_id):
     """Returns the ical calendar with the specified ID."""
     result = ""
-    code = 200
     try:
-        handled, response = g_app.ical(calendar_id)
-        if not handled:
-            code = 400
+        _, response = g_app.ical(calendar_id)
         return response
     except:
         result = g_app.render_error()
@@ -537,7 +526,7 @@ def api(version, method):
         user_id = None
         if Keys.API_KEY in params:
 
-            # Session key
+            # Session key.
             key = params[Keys.API_KEY]
 
             # Which user is associated with this key?
@@ -587,6 +576,7 @@ def api(version, method):
 
 @g_flask_app.route('/google_maps')
 def google_maps():
+    """Returns the Google Maps API key."""
     return flask.redirect("https://maps.googleapis.com/maps/api/js?key=" + g_app.google_maps_key, code=302)
 
 @g_flask_app.route('/')
@@ -598,8 +588,9 @@ def main():
     """Entry point for the flask version of the app."""
     global g_app
     global g_flask_app
+    global g_session_mgr
 
-    # Parse command line options.
+    # Parse the command line options.
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, action="store", default="", help="The configuration file.", required=False)
 
@@ -609,52 +600,18 @@ def main():
         parser.error(e)
         sys.exit(1)
 
+    # Load the config file.
     config = Config.Config()
     if len(args.config) > 0:
         config.load(args.config)
 
-    debug_enabled = config.is_debug_enabled()
-    profiling_enabled = config.is_profiling_enabled()
-    host = config.get_hostname()
-    hostport = config.get_hostport()
-    googlemaps_key = config.get_google_maps_key()
-
-    if config.is_https_enabled():
-        protocol = "https"
-    else:
-        protocol = "http"
-
-    if len(host) == 0:
-        if debug_enabled:
-            host = "127.0.0.1"
-        else:
-            host = "openworkout.cloud"
-        print("Hostname not provided, will use " + host)
-
-    root_url = protocol + "://" + host
-    if hostport > 0:
-        root_url = root_url + ":" + str(hostport)
-    print("Root URL is " + root_url)
-
+    # Register the signal handler.
     signal.signal(signal.SIGINT, signal_handler)
-    mako.collection_size = 100
-    mako.directories = "templates"
 
-    session_mgr = SessionMgr.FlaskSessionMgr()
-    user_mgr = UserMgr.UserMgr(session_mgr)
-    analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
-    import_scheduler = ImportScheduler.ImportScheduler()
-    workout_plan_gen = WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler()
-    data_mgr = DataMgr.DataMgr(config, root_url, analysis_scheduler, import_scheduler, workout_plan_gen)
-    g_app = App.App(user_mgr, data_mgr, g_root_dir, root_url, googlemaps_key, profiling_enabled, debug_enabled)
-
-    logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-
-    # The markdown library is kinda spammy.
-    markdown_logger = logging.getLogger("MARKDOWN")
-    markdown_logger.setLevel(logging.ERROR)
-
-    g_flask_app.run(host=config.get_bindname(), port=config.get_bindport(), debug=debug_enabled)
+    # Create all the objects that actually implement the functionality.
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    g_app = AppFactory.create_flask(config, root_dir, g_session_mgr)
+    g_flask_app.run(host=config.get_bindname(), port=config.get_bindport(), debug=config.is_debug_enabled())
 
 if __name__ == '__main__':
     main()

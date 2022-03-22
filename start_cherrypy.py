@@ -5,7 +5,6 @@ import argparse
 import cherrypy
 import json
 import logging
-import mako
 import os
 import signal
 import sys
@@ -13,14 +12,9 @@ import traceback
 
 import ApiException
 import App
+import AppFactory
 import Config
-import DataMgr
-import AnalysisScheduler
-import ImportScheduler
 import Keys
-import SessionMgr
-import UserMgr
-import WorkoutPlanGeneratorScheduler
 
 from cherrypy import tools
 from cherrypy.process import plugins
@@ -28,7 +22,6 @@ from cherrypy.process.plugins import Daemonizer
 
 
 ACCESS_LOG = 'access.log'
-ERROR_LOG = 'error.log'
 LOGIN_URL = '/login'
 
 
@@ -148,16 +141,6 @@ class CherryPyFrontEnd(object):
         logger.error(log_str)
 
     @cherrypy.expose
-    @require()
-    def stats(self):
-        """Renders the internal statistics page."""
-        try:
-            return self.app.performance_stats()
-        except:
-            pass
-        return self.app.render_error("")
-
-    @cherrypy.expose
     def error(self, error_str=None):
         """Renders the error page."""
         try:
@@ -175,6 +158,16 @@ class CherryPyFrontEnd(object):
         except:
             pass
         return self.app.render_error("")
+
+    @cherrypy.expose
+    @require()
+    def stats(self):
+        """Renders the internal statistics page."""
+        try:
+            return self.app.performance_stats()
+        except:
+            pass
+        return self.error()
 
     @cherrypy.expose
     def live(self, device_str):
@@ -575,12 +568,17 @@ class CherryPyFrontEnd(object):
     @require()
     def api_keys(self):
         """Renders the api key management page."""
-        result = ""
         try:
-            result = self.app.api_keys()
+            return self.app.api_keys()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
         except:
-            result = self.error()
-        return result
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.api_keys.__name__)
+        return self.error()
 
     @cherrypy.expose
     def api(self, *args, **kw):
@@ -657,6 +655,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     def google_maps(self):
+        """Returns the Google Maps API key."""
         raise cherrypy.HTTPRedirect("https://maps.googleapis.com/maps/api/js?key=" + self.app.google_maps_key)
 
     @cherrypy.expose
@@ -668,7 +667,7 @@ def main():
     """Entry point for the cherrypy version of the app."""
     global g_app
 
-    # Parse command line options.
+    # Parse the command line options.
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, action="store", default="", help="The configuration file.", required=False)
 
@@ -678,67 +677,35 @@ def main():
         parser.error(e)
         sys.exit(1)
 
+    # Load the config file.
     config = Config.Config()
     if len(args.config) > 0:
         config.load(args.config)
 
-    debug_enabled = config.is_debug_enabled()
-    profiling_enabled = config.is_profiling_enabled()
-    host = config.get_hostname()
-    hostport = config.get_hostport()
-    googlemaps_key = config.get_google_maps_key()
-
+    # HTTPS stuff.
     if config.is_https_enabled():
         cert_file = config.get_certificate_file()
         privkey_file = config.get_private_key_file()
+
         print("Running HTTPS....")
+        print("Certificate File: " + cert_file)
+        print("Private Key File: " + privkey_file)
+
         cherrypy.server.ssl_module = 'builtin'
         cherrypy.server.ssl_certificate = cert_file
-        print("Certificate File: " + cert_file)
         cherrypy.server.ssl_private_key = privkey_file
-        print("Private Key File: " + privkey_file)
-        protocol = "https"
-    else:
-        protocol = "http"
 
-    if len(host) == 0:
-        if debug_enabled:
-            host = "127.0.0.1"
-        else:
-            host = "openworkout.cloud"
-        print("Hostname not provided, will use " + host)
-
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    root_url = protocol + "://" + host
-    if hostport > 0:
-        root_url = root_url + ":" + str(hostport)
-    print("Root URL is " + root_url)
-
-    if not debug_enabled:
+    # Just leave everything in the foreground when we're debugging because it makes life easier.
+    if not config.is_debug_enabled():
         Daemonizer(cherrypy.engine).subscribe()
 
     # Register the signal handler.
     signal.signal(signal.SIGINT, signal_handler)
 
-    # Configure the template engine.
-    mako.collection_size = 100
-    mako.directories = "templates"
-
-    session_mgr = SessionMgr.CherryPySessionMgr()
-    user_mgr = UserMgr.UserMgr(session_mgr)
-    analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
-    import_scheduler = ImportScheduler.ImportScheduler()
-    workout_plan_gen = WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler()
-    data_mgr = DataMgr.DataMgr(config, root_url, analysis_scheduler, import_scheduler, workout_plan_gen)
-    backend = App.App(user_mgr, data_mgr, root_dir, root_url, googlemaps_key, profiling_enabled, debug_enabled)
+    # Create all the objects that actually implement the functionality.
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    backend = AppFactory.create_cherrypy(config, root_dir)
     g_app = CherryPyFrontEnd(backend)
-
-    # Configure the error logger.
-    logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-
-    # The markdown library is kinda spammy.
-    markdown_logger = logging.getLogger("MARKDOWN")
-    markdown_logger.setLevel(logging.ERROR)
 
     # The direcory for session objects.
     if sys.version_info[0] < 3:
