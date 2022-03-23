@@ -1089,6 +1089,8 @@ class Api(object):
         """Called when an API message to delete a tag from an activity is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         # Validate the activity ID.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
