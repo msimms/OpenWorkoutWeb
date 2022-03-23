@@ -35,6 +35,10 @@ def secureheaders():
         "style-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://*.googleapis.com;"\
         "img-src 'self' *;"
 
+def respond_to_redirect_exception(e, start_response):
+    start_response('302 Found', [('Location', e.urls[0])])
+    return []
+
 def log_error(log_str):
     """Writes an error message to the log file."""
     logger = logging.getLogger()
@@ -52,9 +56,8 @@ def stats(env, start_response):
         content = g_front_end.stats().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -65,9 +68,8 @@ def live(env, start_response):
         content = g_front_end.live().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -78,9 +80,8 @@ def live_user(env, start_response):
         content = g_front_end.live_user().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -91,9 +92,8 @@ def activity(env, start_response):
         content = g_front_end.activity().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -104,9 +104,8 @@ def edit_activity(env, start_response):
         content = g_front_end.edit_activity().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -117,9 +116,8 @@ def add_photos(env, start_response):
         content = g_front_end.add_photos().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -130,9 +128,8 @@ def device(env, start_response):
         content = g_front_end.device().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -143,9 +140,8 @@ def my_activities(env, start_response):
         content = g_front_end.my_activities().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -156,9 +152,8 @@ def all_activities(env, start_response):
         content = g_front_end.all_activities().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -169,9 +164,8 @@ def record_progression(env, start_response):
         content = g_front_end.record_progression().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -182,9 +176,8 @@ def workouts(env, start_response):
         content = g_front_end.workouts().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -195,9 +188,8 @@ def workout(env, start_response):
         content = g_front_end.workout().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -208,9 +200,8 @@ def statistics(env, start_response):
         content = g_front_end.statistics().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -221,9 +212,8 @@ def gear(env, start_response):
         content = g_front_end.gear().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -234,9 +224,8 @@ def service_history(env, start_response):
         content = g_front_end.service_history().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -247,9 +236,8 @@ def friends(env, start_response):
         content = g_front_end.friends().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -260,9 +248,8 @@ def device_list(env, start_response):
         content = g_front_end.device_list().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -273,9 +260,8 @@ def manual_entry(env, start_response):
         content = g_front_end.manual_entry().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -286,9 +272,8 @@ def import_activity(env, start_response):
         content = g_front_end.import_activity().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -299,9 +284,8 @@ def pace_plans(env, start_response):
         content = g_front_end.pace_plans().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -312,9 +296,8 @@ def task_status(env, start_response):
         content = g_front_end.task_status().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -325,9 +308,8 @@ def profile(env, start_response):
         content = g_front_end.profile().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -338,9 +320,8 @@ def settings(env, start_response):
         content = g_front_end.settings().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -351,9 +332,8 @@ def login(env, start_response):
         content = g_front_end.login().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -379,6 +359,8 @@ def about(env, start_response):
         content = g_front_end.about().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -389,6 +371,8 @@ def status(env, start_response):
         content = g_front_end.status().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -403,9 +387,8 @@ def api_keys(env, start_response):
         content = g_front_end.api_keys().encode('utf-8')
         start_response('200 OK', [('Content-Type', 'text/html')])
         return [content]
-    except App.RedirectException as e:
-        start_response('302 Found', [('Location', e.url)])
-        return []
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
     except:
         pass # Fall through to error()
     return error(env, start_response)
@@ -492,6 +475,7 @@ def main():
 
     # Create the cherrypy object.
     g_front_end = CherryPyFrontEnd.CherryPyFrontEnd(backend)
+    cherrypy.config.update(cherrypy_config)
     app = cherrypy.tree.mount(g_front_end, '/')
     app.merge(cherrypy_config)
 
