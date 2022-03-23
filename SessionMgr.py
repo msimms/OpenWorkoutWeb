@@ -25,6 +25,7 @@
 
 import cherrypy
 import flask
+import logging
 import uuid
 import Keys
 import SessionException
@@ -34,6 +35,11 @@ class SessionMgr(object):
 
     def __init__(self):
         super(SessionMgr, self).__init__()
+
+    def log_error(self, log_str):
+        """Writes an error message to the log file."""
+        logger = logging.getLogger()
+        logger.error(log_str)
 
     def get_logged_in_user(self):
         """Returns the username associated with the current session."""
@@ -96,18 +102,26 @@ class CherryPySessionMgr(SessionMgr):
 
     def get_logged_in_user(self):
         """Returns the username associated with the current session."""
-        user = cherrypy.session.get(Keys.SESSION_KEY)
+        try:
+            user = cherrypy.session.get(Keys.SESSION_KEY)
+        except AttributeError:
+            self.log_error("cherrypy.session has not been instantiated.")
+            user = None
         return user
 
     def get_logged_in_user_from_cookie(self, session_cookie):
         """Returns the username associated with the specified session cookie."""
-        user = None
-        cache_items = cherrypy.session.cache.items()
-        for session_id, session in cache_items:
-            if session_id == session_cookie:
-                session_user = session[0]
-                if Keys.SESSION_KEY in session_user:
-                    user = session_user[Keys.SESSION_KEY]
+        try:
+            user = None
+            cache_items = cherrypy.session.cache.items()
+            for session_id, session in cache_items:
+                if session_id == session_cookie:
+                    session_user = session[0]
+                    if Keys.SESSION_KEY in session_user:
+                        user = session_user[Keys.SESSION_KEY]
+        except AttributeError:
+            self.log_error("cherrypy.session has not been instantiated.")
+            user = None
         return user
 
     def create_new_session(self, username):
