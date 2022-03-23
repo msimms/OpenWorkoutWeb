@@ -42,7 +42,7 @@ def log_error(log_str):
 
 def error(env, start_response):
     """Renders the error page."""
-    content = g_front_end.render_error().encode('utf-8')
+    content = g_front_end.error().encode('utf-8')
     start_response('500', [('Content-Type', 'text/html')])
     return [content]
 
