@@ -14,6 +14,7 @@ import UserMgr
 import WorkoutPlanGeneratorScheduler
 
 ERROR_LOG = 'error.log'
+ACCESS_LOG = 'access.log'
 
 def create_cherrypy(config, root_dir):
     """Factory method for creating the backend when we're using the cherrypy framework."""
@@ -65,9 +66,77 @@ def create_cherrypy(config, root_dir):
     markdown_logger = logging.getLogger("MARKDOWN")
     markdown_logger.setLevel(logging.ERROR)
 
-    return backend
+    # The direcory for session objects.
+    if sys.version_info[0] < 3:
+        session_dir = os.path.join(root_dir, 'sessions2')
+    else:
+        session_dir = os.path.join(root_dir, 'sessions3')
+    if not os.path.exists(session_dir):
+        os.makedirs(session_dir)
 
-def create_flask(config, root_dir, session_mgr):
+    cherrypy_config = {
+        '/':
+        {
+            'tools.staticdir.root': root_dir,
+            'tools.sessions.on': True,
+            'tools.sessions.httponly': True,
+            'tools.sessions.name': 'web_auth',
+            'tools.sessions.storage_type': 'file',
+            'tools.sessions.storage_path': session_dir,
+            'tools.sessions.timeout': 129600,
+            'tools.sessions.locking': 'early',
+            'tools.secureheaders.on': True
+        },
+        '/api':
+        {
+            'tools.response_headers.on': True,
+            'tools.response_headers.headers': [('Access-Control-Allow-Origin', '*')],
+        },
+        '/css':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'css'
+        },
+        '/data':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'data'
+        },
+        '/js':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'js'
+        },
+        '/jquery-timepicker':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'jquery-timepicker'
+        },
+        '/images':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'images',
+        },
+        '/media':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'media',
+        },
+        '/photos':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': 'photos',
+        },
+        '/.well-known':
+        {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': '.well-known',
+        },
+    }
+
+    return backend, cherrypy_config
+
+def create_flask(config, root_dir):
     """Factory method for creating the backend when we're using the flask framework."""
 
     # Config file things we need.
@@ -102,6 +171,7 @@ def create_flask(config, root_dir, session_mgr):
     mako.directories = "templates"
 
     # Create all the objects that actually implement the functionality.
+    session_mgr = SessionMgr.FlaskSessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr)
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
     import_scheduler = ImportScheduler.ImportScheduler()

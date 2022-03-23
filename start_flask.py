@@ -16,8 +16,6 @@ import AppFactory
 import Config
 import Keys
 import SessionException
-import SessionMgr
-
 
 CSS_DIR = 'css'
 DATA_DIR = 'data'
@@ -27,14 +25,10 @@ MEDIA_DIR = 'media'
 PHOTOS_DIR = 'photos'
 ERROR_LOG = 'error.log'
 
-
 g_flask_app = flask.Flask(__name__)
 g_flask_app.secret_key = 'UB2s60qJrithXHt2w71f'
 g_flask_app.url_map.strict_slashes = False
-g_root_dir = os.path.dirname(os.path.abspath(__file__))
 g_app = None
-g_session_mgr = SessionMgr.FlaskSessionMgr()
-
 
 def signal_handler(signal, frame):
     global g_app
@@ -47,8 +41,8 @@ def signal_handler(signal, frame):
 def login_requred(function_to_protect):
     @functools.wraps(function_to_protect)
     def wrapper(*args, **kwargs):
-        global g_session_mgr
-        user = g_session_mgr.get_logged_in_user()
+        global g_app
+        user = g_app.user_mgr.session_mgr.get_logged_in_user()
         if user:
             return function_to_protect(*args, **kwargs)
         return flask.redirect(flask.url_for('login'))
@@ -526,15 +520,15 @@ def api(version, method):
         user_id = None
         if Keys.API_KEY in params:
 
-            # Session key.
-            key = params[Keys.API_KEY]
+            # API key.
+            api_key = params[Keys.API_KEY]
 
             # Which user is associated with this key?
             user_id, _, _, max_rate = g_app.user_mgr.retrieve_user_from_api_key(key)
             if user_id is not None:
 
                 # Make sure the key is not being abused.
-                if not g_app.data_mgr.check_api_rate(key, max_rate):
+                if not g_app.data_mgr.check_api_rate(api_key, max_rate):
                     user_id = None
                     code = 429
                     response = "Excessive API requests."
