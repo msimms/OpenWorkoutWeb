@@ -10,6 +10,7 @@ import sys
 import AppFactory
 import CherryPyFrontEnd
 import Config
+import SessionMgr
 
 from cherrypy import tools
 from cherrypy.process import plugins
@@ -91,7 +92,7 @@ def main():
 
     # Create all the objects that actually implement the functionality.
     root_dir = os.path.dirname(os.path.abspath(__file__))
-    backend, cherrypy_config = AppFactory.create_cherrypy(config, root_dir)
+    backend, cherrypy_config = AppFactory.create_cherrypy(config, root_dir, SessionMgr.CherryPySessionMgr())
 
     # Create the cherrypy object.
     g_front_end = CherryPyFrontEnd.CherryPyFrontEnd(backend)

@@ -26,7 +26,10 @@
 import cherrypy
 import flask
 import logging
+import os
+import sys
 import uuid
+
 import Keys
 import SessionException
 
@@ -57,12 +60,23 @@ class SessionMgr(object):
         """Ends the current session."""
         pass
 
+    def session_dir(self, root_dir):
+        """Returns the directory to be used for session storage."""
+        if sys.version_info[0] < 3:
+            session_dir = os.path.join(root_dir, 'sessions2')
+        else:
+            session_dir = os.path.join(root_dir, 'sessions3')
+        if not os.path.exists(session_dir):
+            os.makedirs(session_dir)
+        return session_dir
+
 class CustomSessionMgr(SessionMgr):
     """Custom session manager, avoids the logic provided by the framework. Goal is a high performance session manager."""
 
     def __init__(self):
         super(SessionMgr, self).__init__()
         self.session_cache = {}
+        self.load_sessions()
 
     def load_sessions(self):
         """Loads existing session data into the cache."""
@@ -74,8 +88,9 @@ class CustomSessionMgr(SessionMgr):
 
     def get_logged_in_user(self):
         """Returns the username associated with the current session."""
-        user = None
-        return user
+        if Keys.SESSION_KEY in self.session_cache:
+            return self.session_cache[Keys.SESSION_KEY]
+        return None
 
     def get_logged_in_user_from_cookie(self, session_cookie):
         """Returns the username associated with the specified session cookie."""
@@ -92,7 +107,15 @@ class CustomSessionMgr(SessionMgr):
 
     def clear_current_session(self):
         """Ends the current session."""
-        pass
+        if Keys.SESSION_KEY in flask.session:
+            self.session_cache.pop(Keys.SESSION_KEY)
+
+    def session_dir(self, root_dir):
+        """Returns the directory to be used for session storage."""
+        session_dir = os.path.join(root_dir, 'session_cache')
+        if not os.path.exists(session_dir):
+            os.makedirs(session_dir)
+        return session_dir
 
 class CherryPySessionMgr(SessionMgr):
     """Class for managing sessions when using the cherrypy framework. A user may have more than one session."""

@@ -48,7 +48,7 @@ def do_auth_check(*args, **kwargs):
         # to view it. First check to see if it's a public activity.
         if first_url_part == "device":
 
-            # Have to do this differently for python2 and 3.
+            # Have to do this differently for python2 and python3.
             if sys.version_info[0] < 3:
                 url_params = requested_url_parts[1].split("?")
             else:
@@ -145,7 +145,7 @@ class CherryPyFrontEnd(object):
         return self.error()
 
     @cherrypy.expose
-    def activity(self, activity_id, *args, **kw):
+    def activity(self, activity_id):
         """Renders the details page for an activity."""
         try:
             return self.backend.activity(activity_id)
@@ -156,7 +156,7 @@ class CherryPyFrontEnd(object):
         return self.error()
 
     @cherrypy.expose
-    def edit_activity(self, activity_id, *args, **kw):
+    def edit_activity(self, activity_id):
         """Renders the edit page for an activity."""
         try:
             return self.backend.edit_activity(activity_id)
@@ -167,7 +167,7 @@ class CherryPyFrontEnd(object):
         return self.error()
 
     @cherrypy.expose
-    def add_photos(self, activity_id, *args, **kw):
+    def add_photos(self, activity_id):
         """Renders the add photos page for an activity."""
         try:
             return self.backend.add_photos(activity_id)
@@ -178,7 +178,7 @@ class CherryPyFrontEnd(object):
         return self.error()
 
     @cherrypy.expose
-    def device(self, device_str, *args, **kw):
+    def device(self, device_str):
         """Renders the map page for a single device."""
         try:
             return self.backend.device(device_str)
@@ -190,7 +190,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def my_activities(self, *args, **kw):
+    def my_activities(self):
         """Renders the list of the specified user's activities."""
         try:
             return self.backend.my_activities()
@@ -206,7 +206,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def all_activities(self, *args, **kw):
+    def all_activities(self):
         """Renders the list of all activities the specified user is allowed to view."""
         try:
             return self.backend.all_activities()
@@ -238,7 +238,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def workouts(self, *args, **kw):
+    def workouts(self):
         """Renders the workouts view."""
         try:
             return self.backend.workouts()
@@ -254,7 +254,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def workout(self, workout_id, *args, **kw):
+    def workout(self, workout_id):
         """Renders the view for an individual workout."""
         try:
             return self.backend.workout(workout_id)
@@ -270,7 +270,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def statistics(self, *args, **kw):
+    def statistics(self):
         """Renders the statistics view."""
         try:
             return self.backend.user_stats()
@@ -286,7 +286,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def gear(self, *args, **kw):
+    def gear(self):
         """Renders the list of all gear belonging to the logged in user."""
         try:
             return self.backend.gear()
@@ -302,7 +302,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def service_history(self, gear_id, *args, **kw):
+    def service_history(self, gear_id):
         """Renders the service history for a particular piece of gear."""
         try:
             return self.backend.service_history(gear_id)
@@ -318,7 +318,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def friends(self, *args, **kw):
+    def friends(self):
         """Renders the list of users who are friends with the logged in user."""
         try:
             return self.backend.friends()
@@ -334,7 +334,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def device_list(self, *args, **kw):
+    def device_list(self):
         """Renders the list of a user's devices."""
         try:
             return self.backend.device_list()
@@ -366,7 +366,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def import_activity(self, *args, **kw):
+    def import_activity(self):
         """Renders the import page."""
         try:
             return self.backend.import_activity()
@@ -382,7 +382,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def pace_plans(self, *args, **kw):
+    def pace_plans(self):
         """Renders the pace plans page."""
         try:
             return self.backend.pace_plans()
@@ -398,7 +398,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def task_status(self, *args, **kw):
+    def task_status(self):
         """Renders the import status page."""
         try:
             return self.backend.task_status()
@@ -414,7 +414,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def profile(self, *args, **kw):
+    def profile(self):
         """Renders the user's profile page."""
         try:
             return self.backend.profile()
@@ -430,7 +430,7 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
-    def settings(self, *args, **kw):
+    def settings(self):
         """Renders the user's settings page."""
         try:
             return self.backend.settings()
@@ -484,6 +484,10 @@ class CherryPyFrontEnd(object):
         """Renders the about page."""
         try:
             return self.backend.about()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -540,7 +544,7 @@ class CherryPyFrontEnd(object):
         """Endpoint for API calls."""
         response = ""
         try:
-            # The the API params.
+            # The API params.
             if cherrypy.request.method == "GET":
                 verb = "GET"
                 params = kw

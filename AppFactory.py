@@ -2,8 +2,6 @@
 
 import logging
 import mako
-import os
-import sys
 
 import App
 import DataMgr
@@ -16,7 +14,7 @@ import WorkoutPlanGeneratorScheduler
 ERROR_LOG = 'error.log'
 ACCESS_LOG = 'access.log'
 
-def create_cherrypy(config, root_dir):
+def create_cherrypy(config, root_dir, session_mgr):
     """Factory method for creating the backend when we're using the cherrypy framework."""
 
     # Config file things we need.
@@ -51,7 +49,6 @@ def create_cherrypy(config, root_dir):
     mako.directories = "templates"
 
     # Create all the objects that actually implement the functionality.
-    session_mgr = SessionMgr.CherryPySessionMgr()
     user_mgr = UserMgr.UserMgr(session_mgr)
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
     import_scheduler = ImportScheduler.ImportScheduler()
@@ -67,12 +64,7 @@ def create_cherrypy(config, root_dir):
     markdown_logger.setLevel(logging.ERROR)
 
     # The direcory for session objects.
-    if sys.version_info[0] < 3:
-        session_dir = os.path.join(root_dir, 'sessions2')
-    else:
-        session_dir = os.path.join(root_dir, 'sessions3')
-    if not os.path.exists(session_dir):
-        os.makedirs(session_dir)
+    session_dir = session_mgr.session_dir(root_dir)
 
     cherrypy_config = {
         '/':

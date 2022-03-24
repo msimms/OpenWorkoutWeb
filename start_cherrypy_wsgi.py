@@ -6,12 +6,18 @@ import logging
 import os
 import signal
 import sys
-import traceback
 
-import App
 import AppFactory
 import CherryPyFrontEnd
 import Config
+import SessionMgr
+
+CSS_DIR = 'css'
+DATA_DIR = 'data'
+JS_DIR = 'js'
+IMAGES_DIR = 'images'
+MEDIA_DIR = 'media'
+PHOTOS_DIR = 'photos'
 
 g_front_end = None
 
@@ -39,369 +45,444 @@ def respond_to_redirect_exception(e, start_response):
     start_response('302 Found', [('Location', e.urls[0])])
     return []
 
+def handle_error_404(start_response):
+    """Renders the error page."""
+    content = g_front_end.error().encode('utf-8')
+    headers = [('Content-type', 'text/plain; charset=utf-8')]
+    start_response('500 Internal Server Error', headers)
+    return [content]
+
+def handle_error_500(start_response):
+    """Renders the error page."""
+    content = g_front_end.error().encode('utf-8')
+    headers = [('Content-type', 'text/plain; charset=utf-8')]
+    start_response('500 Internal Server Error', headers)
+    return [content]
+
+def handle_dynamic_page_request(start_response, content):
+    content = content.encode('utf-8')
+    headers = [('Content-type', 'text/html; charset=utf-8')]
+    start_response('200 OK', headers)
+    return [content]
+
+def handle_static_file_request(start_response, dir, file_name, mime_type):
+    # Sanity checks.
+    if [start_response, dir, file_name, mime_type].count(None) > 0:
+        return handle_error_404(start_response)
+    if dir.find('..') != -1:
+        return handle_error_404(start_response)
+    if file_name.find('..') != -1:
+        return handle_error_404(start_response)
+
+    # Clean up the provided file name. A leading slash will screw everything up.
+    if file_name[0] == '/':
+        file_name = file_name[1:]
+
+    # Calculate the local file name.
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    local_file_name = os.path.join(root_dir, dir, file_name)
+
+    # Read and return the file.
+    if os.path.exists(local_file_name):
+        with open(local_file_name, "rb") as in_file:
+            content = in_file.read()
+            headers = [('Content-type', mime_type)]
+            start_response('200 OK', headers)
+            return [content]
+
+    # Something went wrong. Return an error.
+    headers = [('Content-type', 'text/plain; charset=utf-8')]
+    start_response('404 Not Found', headers)
+    return []
+
 def log_error(log_str):
     """Writes an error message to the log file."""
     logger = logging.getLogger()
     logger.error(log_str)
 
+def css(env, start_response):
+    """Returns the CSS page."""
+    try:
+        return handle_static_file_request(start_response, CSS_DIR, env['PATH_INFO'], 'text/css')
+    except:
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
+
+def data(env, start_response):
+    """Returns the data page."""
+    try:
+        return handle_static_file_request(start_response, DATA_DIR, env['PATH_INFO'], 'text/plain')
+    except:
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
+
+def js(env, start_response):
+    """Returns the JS page."""
+    try:
+        return handle_static_file_request(start_response, JS_DIR, env['PATH_INFO'], 'text/html')
+    except:
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
+
+def images(env, start_response):
+    """Returns images."""
+    try:
+        return handle_static_file_request(start_response, IMAGES_DIR, env['PATH_INFO'], 'text/html')
+    except:
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
+
+def media(env, start_response):
+    """Returns media files (icons, etc.)."""
+    try:
+        return handle_static_file_request(start_response, MEDIA_DIR, env['PATH_INFO'], 'text/html')
+    except:
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
+
+def photos(env, start_response):
+    """Returns an activity photo."""
+    try:
+        return handle_static_file_request(start_response, PHOTOS_DIR, os.path.join(env['user_id'], env['PATH_INFO']), 'text/html')
+    except:
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
+
 def error(env, start_response):
     """Renders the error page."""
-    content = g_front_end.error().encode('utf-8')
-    start_response('500', [('Content-Type', 'text/html')])
-    return [content]
+    try:
+        return handle_dynamic_page_request(start_response, g_front_end.error())
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
+    except:
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def stats(env, start_response):
     """Renders the internal statistics page."""
     try:
-        content = g_front_end.stats().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.stats())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def live(env, start_response):
     """Renders the map page for the current activity from a single device."""
     try:
-        content = g_front_end.live().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        device_str = env['PATH_INFO']
+        device_str = device_str[1:]
+        return handle_dynamic_page_request(start_response, g_front_end.livedevice_str())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def live_user(env, start_response):
     """Renders the map page for the current activity from a specified user."""
     try:
-        content = g_front_end.live_user().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        user_str = env['PATH_INFO']
+        user_str = user_str[1:]
+        return handle_dynamic_page_request(start_response, g_front_end.live_user(user_str))
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def activity(env, start_response):
     """Renders the details page for an activity."""
     try:
-        content = g_front_end.activity().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        activity_id = env['PATH_INFO']
+        activity_id = activity_id[1:]
+        return handle_dynamic_page_request(start_response, g_front_end.activity(activity_id))
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def edit_activity(env, start_response):
     """Renders the edit page for an activity."""
     try:
-        content = g_front_end.edit_activity().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        activity_id = env['PATH_INFO']
+        activity_id = activity_id[1:]
+        return handle_dynamic_page_request(start_response, g_front_end.edit_activity(activity_id))
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def add_photos(env, start_response):
     """Renders the add photos page for an activity."""
     try:
-        content = g_front_end.add_photos().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        activity_id = env['PATH_INFO']
+        activity_id = activity_id[1:]
+        return handle_dynamic_page_request(start_response, g_front_end.add_photos(activity_id))
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def device(env, start_response):
     """Renders the map page for a single device."""
     try:
-        content = g_front_end.device().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        device_str = env['PATH_INFO']
+        device_str = device_str[1:]
+        return handle_dynamic_page_request(start_response, g_front_end.device(device_str))
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def my_activities(env, start_response):
     """Renders the list of the specified user's activities."""
     try:
-        content = g_front_end.my_activities().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.my_activities())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def all_activities(env, start_response):
     """Renders the list of all activities the specified user is allowed to view."""
     try:
-        content = g_front_end.all_activities().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.all_activities())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def record_progression(env, start_response):
     """Renders the list of records, in order of progression, for the specified user and record type."""
     try:
-        content = g_front_end.record_progression().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.record_progression())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def workouts(env, start_response):
     """Renders the workouts view."""
     try:
-        content = g_front_end.workouts().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.workouts())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def workout(env, start_response):
     """Renders the view for an individual workout."""
     try:
-        content = g_front_end.workout().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.workout())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def statistics(env, start_response):
     """Renders the statistics view."""
     try:
-        content = g_front_end.statistics().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.statistics())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def gear(env, start_response):
     """Renders the list of all gear belonging to the logged in user."""
     try:
-        content = g_front_end.gear().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.gear())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def service_history(env, start_response):
     """Renders the service history for a particular piece of gear."""
     try:
-        content = g_front_end.service_history().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        gear_id = env['PATH_INFO']
+        gear_id = gear_id[1:]
+        return handle_dynamic_page_request(start_response, g_front_end.service_history(gear_id))
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def friends(env, start_response):
     """Renders the list of users who are friends with the logged in user."""
     try:
-        content = g_front_end.friends().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.friends())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def device_list(env, start_response):
     """Renders the list of a user's devices."""
     try:
-        content = g_front_end.device_list().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.device_list())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def manual_entry(env, start_response):
     """Called when the user selects an activity type, indicating they want to make a manual data entry."""
     try:
-        content = g_front_end.manual_entry().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.manual_entry())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def import_activity(env, start_response):
     """Renders the import page."""
     try:
-        content = g_front_end.import_activity().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.import_activity())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def pace_plans(env, start_response):
     """Renders the pace plans page."""
     try:
-        content = g_front_end.pace_plans().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.pace_plans())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def task_status(env, start_response):
     """Renders the import status page."""
     try:
-        content = g_front_end.task_status().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.task_status())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def profile(env, start_response):
     """Renders the user's profile page."""
     try:
-        content = g_front_end.profile().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.profile())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def settings(env, start_response):
     """Renders the user's settings page."""
     try:
-        content = g_front_end.settings().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.settings())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def login(env, start_response):
     """Renders the login page."""
     try:
-        content = g_front_end.login().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.login())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def create_login(env, start_response):
     """Renders the create login page."""
     try:
-        content = g_front_end.create_login().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.create_login())
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def logout(env, start_response):
     """Ends the logged in session."""
     start_response('200 OK', [('Content-Type', 'text/html')])
-    return error(env, start_response)
+    return handle_error_500(start_response)
 
 def about(env, start_response):
     """Renders the about page."""
     try:
-        content = g_front_end.about().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.about())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def status(env, start_response):
     """Renders the status page. Used as a simple way to tell if the site is up."""
     try:
-        content = g_front_end.status().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.status())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def ical(env, start_response):
     """Returns the ical calendar with the specified ID."""
-    return error(env, start_response)
+    try:
+        calendar_id = env['PATH_INFO']
+        calendar_id = calendar_id[1:]
+        return handle_dynamic_page_request(start_response, g_front_end.ical(calendar_id))
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
+    except:
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def api_keys(env, start_response):
     """Renders the api key management page."""
     try:
-        content = g_front_end.api_keys().encode('utf-8')
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        return [content]
+        return handle_dynamic_page_request(start_response, g_front_end.api_keys())
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
-        pass # Fall through to error()
-    return error(env, start_response)
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def api(env, start_response):
     """Endpoint for API calls."""
-    return error(env, start_response)
+#    print(env)
+    verb = env['REQUEST_METHOD']
+    path = env['REQUEST_URI']
+    return handle_error_500(start_response)
 
 def google_maps(env, start_response):
     """Returns the Google Maps API key."""
-    global g_front_end
-    start_response('302 Found', [('Location', 'https://maps.googleapis.com/maps/api/js?key=' + g_front_end.google_maps_key)])
-    return []
+    try:
+        return handle_dynamic_page_request(start_response, g_front_end.google_maps())
+    except cherrypy.HTTPRedirect as e:
+        return respond_to_redirect_exception(e, start_response)
+    except:
+        pass # Fall through to the error handler
+    return handle_error_500(start_response)
 
 def index(env, start_response):
     """Renders the index page."""
@@ -431,10 +512,15 @@ def main():
 
     # Create all the objects that actually implement the functionality.
     root_dir = os.path.dirname(os.path.abspath(__file__))
-    backend, cherrypy_config = AppFactory.create_cherrypy(config, root_dir)
+    backend, cherrypy_config = AppFactory.create_cherrypy(config, root_dir, SessionMgr.CustomSessionMgr())
 
     # Mount the application.
-    cherrypy.tree.graft(log_error, "/log_error")
+    cherrypy.tree.graft(css, "/css")
+    cherrypy.tree.graft(data, "/data")
+    cherrypy.tree.graft(js, "/js")
+    cherrypy.tree.graft(images, "/images")
+    cherrypy.tree.graft(media, "/media")
+    cherrypy.tree.graft(photos, "/photos")
     cherrypy.tree.graft(stats, "/stats")
     cherrypy.tree.graft(error, "/error")
     cherrypy.tree.graft(live, "/live")
