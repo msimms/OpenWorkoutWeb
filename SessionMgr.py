@@ -28,6 +28,7 @@ import flask
 import logging
 import os
 import sys
+import time
 import uuid
 
 import Keys
@@ -89,21 +90,24 @@ class CustomSessionMgr(SessionMgr):
     def get_logged_in_user(self):
         """Returns the username associated with the current session."""
         if Keys.SESSION_KEY in self.session_cache:
-            return self.session_cache[Keys.SESSION_KEY]
+            session = self.session_cache[Keys.SESSION_KEY]
+            return session[0]
         return None
 
     def get_logged_in_user_from_cookie(self, session_cookie):
         """Returns the username associated with the specified session cookie."""
         user = None
         if session_cookie in self.session_cache:
-            return self.session_cache[session_cookie]
+            session = self.session_cache[session_cookie]
+            return session[0]
         return user
 
     def create_new_session(self, username):
         """Starts a new session."""
         session_cookie = str(uuid.uuid4())
-        self.session_cache[Keys.SESSION_KEY] = username
-        self.session_cache[session_cookie] = username
+        now = time.time()
+        self.session_cache[Keys.SESSION_KEY] = ( username, now )
+        self.session_cache[session_cookie] =  ( username, now )
         return session_cookie
 
     def clear_current_session(self):
