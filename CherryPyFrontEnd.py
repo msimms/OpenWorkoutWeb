@@ -539,77 +539,95 @@ class CherryPyFrontEnd(object):
             self.log_error('Unhandled exception in ' + CherryPyFrontEnd.api_keys.__name__)
         return self.error()
 
+    def api_internal(self, verb, path, params):
+        # Return values.
+        response = ""
+        http_status = 200
+
+        # Get the logged in user, or lookup the user using the API key.
+        user_id = None
+        if Keys.API_KEY in params:
+
+            # Session key.
+            key = params[Keys.API_KEY]
+
+            # Which user is associated with this key?
+            user_id, _, _, max_rate = self.backend.user_mgr.retrieve_user_from_api_key(key)
+            if user_id is not None:
+
+                # Make sure the key is not being abused.
+                if not self.backend.data_mgr.check_api_rate(key, max_rate):
+                    user_id = None
+                    response = "Excessive API requests."
+                    http_status = 429
+                    self.log_error(response)
+
+        else:
+
+            # API key not provided, check the session key.
+            username = self.backend.user_mgr.get_logged_in_user()
+            if username is not None:
+                user_id, _, _ = self.backend.user_mgr.retrieve_user(username)
+
+        # Process the API request.
+        if len(path) > 0:
+            api_version = path[0]
+            if api_version == '1.0':
+                method = path[1:]
+                handled, response = self.backend.api(user_id, verb, method[0], params)
+                if not handled:
+                    response = "Failed to handle request: " + str(method)
+                    self.log_error(response)
+                    http_status = 400
+                else:
+                    http_status = 200
+            else:
+                self.log_error("Failed to handle request for api version " + api_version)
+                http_status = 400
+        else:
+            http_status = 400
+
+        return response, http_status
+
     @cherrypy.expose
     def api(self, *args, **kw):
         """Endpoint for API calls."""
+
+        # Return values.
         response = ""
+        http_status = 200
+        params = {}
+
         try:
+            # Things we need.
+            verb = cherrypy.request.method
+
             # The API params.
-            if cherrypy.request.method == "GET":
-                verb = "GET"
+            if verb == "GET":
                 params = kw
             else:
-                verb = "POST"
-                cl = int(cherrypy.request.headers['Content-Length'])
-                if cl > 0:
-                    params = cherrypy.request.body.read(cl)
+                content_len = int(cherrypy.request.headers['Content-Length'])
+                if content_len > 0:
+                    params = cherrypy.request.body.read(content_len)
                     params = json.loads(params)
-                else:
-                    params = []
 
-            # Get the logged in user, or lookup the user using the API key.
-            user_id = None
-            if Keys.API_KEY in params:
+            # Pass off to the internal handler, i.e. the method that doesn't use cherrypy objects.
+            response, http_status = self.api_internal(verb, args, params)
 
-                # Session key
-                key = params[Keys.API_KEY]
-
-                # Which user is associated with this key?
-                user_id, _, _, max_rate = self.backend.user_mgr.retrieve_user_from_api_key(key)
-                if user_id is not None:
-
-                    # Make sure the key is not being abused.
-                    if not self.backend.data_mgr.check_api_rate(key, max_rate):
-                        user_id = None
-                        response = "Excessive API requests."
-                        cherrypy.response.status = 429
-                        self.log_error(response)
-            else:
-
-                # API key not provided, check the session key.
-                username = self.backend.user_mgr.get_logged_in_user()
-                if username is not None:
-                    user_id, _, _ = self.backend.user_mgr.retrieve_user(username)
-
-            # Process the API request.
-            if len(args) > 0:
-                api_version = args[0]
-                if api_version == '1.0':
-                    method = args[1:]
-                    handled, response = self.backend.api(user_id, verb, method[0], params)
-                    if not handled:
-                        response = "Failed to handle request: " + str(method)
-                        self.log_error(response)
-                        cherrypy.response.status = 400
-                    else:
-                        cherrypy.response.status = 200
-                else:
-                    self.log_error("Failed to handle request for api version " + api_version)
-                    cherrypy.response.status = 400
-            else:
-                cherrypy.response.status = 400
         except ApiException.ApiException as e:
             response = e.message
-            cherrypy.response.status = e.code
+            http_status = e.code
             self.log_error(str(e))
         except Exception as e:
             response = "Unhandled error."
-            cherrypy.response.status = 500
+            http_status = 500
             self.log_error(str(e))
         except:
             response = "Unspecified error."
-            cherrypy.response.status = 500
+            http_status = 500
             self.log_error("Untyped exception")
+
+        cherrypy.response.status = http_status
         return response
 
     @cherrypy.expose

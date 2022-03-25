@@ -12,6 +12,11 @@ import CherryPyFrontEnd
 import Config
 import SessionMgr
 
+if sys.version_info[0] < 3:
+    from urllib import parse_qs
+else:
+    from urllib.parse import parse_qs
+
 CSS_DIR = 'css'
 DATA_DIR = 'data'
 JS_DIR = 'js'
@@ -59,9 +64,9 @@ def handle_error_500(start_response):
     start_response('500 Internal Server Error', headers)
     return [content]
 
-def handle_dynamic_page_request(start_response, content):
+def handle_dynamic_page_request(start_response, content, mime_type='text/html; charset=utf-8'):
     content = content.encode('utf-8')
-    headers = [('Content-type', 'text/html; charset=utf-8')]
+    headers = [('Content-type', mime_type)]
     start_response('200 OK', headers)
     return [content]
 
@@ -469,9 +474,19 @@ def api_keys(env, start_response):
 
 def api(env, start_response):
     """Endpoint for API calls."""
-#    print(env)
-    verb = env['REQUEST_METHOD']
-    path = env['REQUEST_URI']
+    try:
+        verb = env['REQUEST_METHOD']
+        path = env['REQUEST_URI'].split('/')[2:]
+        method = path[1].split('?')
+        path[1] = method[0]
+        params1 = parse_qs(method[1])
+        params2 = {}
+        for k in params1:
+            params2[k] = (params1[k])[0]
+        content, response_code = g_front_end.api_internal(verb, tuple(path), params2)
+        return handle_dynamic_page_request(start_response, content, mime_type='application/json')
+    except:
+        pass
     return handle_error_500(start_response)
 
 def google_maps(env, start_response):
