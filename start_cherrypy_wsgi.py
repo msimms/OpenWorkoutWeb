@@ -50,19 +50,20 @@ def respond_to_redirect_exception(e, start_response):
     start_response('302 Found', [('Location', e.urls[0])])
     return []
 
-def handle_error_404(start_response):
+def handle_error(start_response, error_code):
     """Renders the error page."""
     content = g_front_end.error().encode('utf-8')
     headers = [('Content-type', 'text/plain; charset=utf-8')]
-    start_response('500 Internal Server Error', headers)
+    start_response(str(error_code), headers)
     return [content]
+
+def handle_error_404(start_response):
+    """Renders the error page."""
+    return handle_error(start_response, '404 Not Found')
 
 def handle_error_500(start_response):
     """Renders the error page."""
-    content = g_front_end.error().encode('utf-8')
-    headers = [('Content-type', 'text/plain; charset=utf-8')]
-    start_response('500 Internal Server Error', headers)
-    return [content]
+    return handle_error(start_response, '500 Internal Server Error')
 
 def handle_dynamic_page_request(start_response, content, mime_type='text/html; charset=utf-8'):
     content = content.encode('utf-8')
@@ -484,7 +485,9 @@ def api(env, start_response):
         for k in params1:
             params2[k] = (params1[k])[0]
         content, response_code = g_front_end.api_internal(verb, tuple(path), params2)
-        return handle_dynamic_page_request(start_response, content, mime_type='application/json')
+        if response_code == 200:
+            return handle_dynamic_page_request(start_response, content, mime_type='application/json')
+        return handle_error(start_response, response_code)
     except:
         pass
     return handle_error_500(start_response)
