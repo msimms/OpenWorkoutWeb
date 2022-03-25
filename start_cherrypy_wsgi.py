@@ -2,6 +2,7 @@
 
 import argparse
 import cherrypy
+import json
 import logging
 import os
 import signal
@@ -478,13 +479,20 @@ def api(env, start_response):
     try:
         verb = env['REQUEST_METHOD']
         path = env['REQUEST_URI'].split('/')[2:]
+
         method = path[1].split('?')
         path[1] = method[0]
-        params1 = parse_qs(method[1])
-        params2 = {}
-        for k in params1:
-            params2[k] = (params1[k])[0]
-        content, response_code = g_front_end.api_internal(verb, tuple(path), params2)
+
+        params = {}
+        if verb == 'GET':
+            temp_params = parse_qs(method[1])
+            for k in temp_params:
+                params[k] = (temp_params[k])[0]
+        else:
+            params = env['wsgi.input'].read()
+            params = json.loads(params)
+
+        content, response_code = g_front_end.api_internal(verb, tuple(path), params)
         if response_code == 200:
             return handle_dynamic_page_request(start_response, content, mime_type='application/json')
         return handle_error(start_response, response_code)
