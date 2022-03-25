@@ -521,6 +521,36 @@ def index(env, start_response):
     """Renders the index page."""
     return login(env, start_response)
 
+def create_server(config, port_num):
+    """Returns a cherrypy server object."""
+
+    # Instantiate a new server object.
+    server = cherrypy._cpserver.Server()
+
+    # Configure the server object.
+    server.socket_host = "0.0.0.0"
+    server.socket_port = port_num
+    server.thread_pool = 30
+    
+    # HTTPS stuff.
+    if config.is_https_enabled():
+        cert_file = config.get_certificate_file()
+        privkey_file = config.get_private_key_file()
+
+        print("Running HTTPS....")
+        print("Certificate File: " + cert_file)
+        print("Private Key File: " + privkey_file)
+
+        server.ssl_module = 'pyopenssl'
+        server.ssl_certificate = cert_file
+        server.ssl_private_key = privkey_file
+        # server.ssl_certificate_chain = 'ssl/bundle.crt'
+
+    # Subscribe this server.
+    server.subscribe()
+
+    return server
+
 def main():
     """Entry point for the cherrypy+wsgi version of the app."""
     global g_front_end
@@ -599,41 +629,13 @@ def main():
     app.merge(cherrypy_config)
 
     # Instantiate a new server object.
-    server = cherrypy._cpserver.Server()
-
-    # Configure the server object.
-    server.socket_host = "0.0.0.0"
-    server.socket_port = 8080
-    server.thread_pool = 30
-    
-    # HTTPS stuff.
-    if config.is_https_enabled():
-        cert_file = config.get_certificate_file()
-        privkey_file = config.get_private_key_file()
-
-        print("Running HTTPS....")
-        print("Certificate File: " + cert_file)
-        print("Private Key File: " + privkey_file)
-
-        server.ssl_module = 'pyopenssl'
-        server.ssl_certificate = cert_file
-        server.ssl_private_key = privkey_file
-        # server.ssl_certificate_chain = 'ssl/bundle.crt'
-
-    # Subscribe this server.
-    server.subscribe()
-
-    # Example for a 2nd server (same steps as above):
-    # Remember to use a different port
-
-    # server2             = cherrypy._cpserver.Server()
-
-    # server2.socket_host = "0.0.0.0"
-    # server2.socket_port = 8081
-    # server2.thread_pool = 30
-    # server2.subscribe()
-
-    # Start the server engine (Option 1 *and* 2)
+    servers = []
+    port_num = config.get_bindport()
+    num_servers = config.get_num_servers()
+    if num_servers <= 0:
+        num_servers = 1
+    for i in range(0, num_servers):
+        servers.append(create_server(config, port_num + i))
 
     cherrypy.config.update(cherrypy_config)
     cherrypy.engine.start()

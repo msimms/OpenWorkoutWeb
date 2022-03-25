@@ -101,6 +101,9 @@ class Config(object):
     def get_bindport(self):
         return self.get_int('Network', 'Bind Port')
 
+    def get_num_servers(self):
+        return self.get_int('Network', 'Num Servers')
+
     def get_photos_dir(self):
         return self.get_str('Photos', 'Directory')
 
