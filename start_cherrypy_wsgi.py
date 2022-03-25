@@ -270,7 +270,10 @@ def all_activities(env, start_response):
 def record_progression(env, start_response):
     """Renders the list of records, in order of progression, for the specified user and record type."""
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.record_progression())
+        params = env['PATH_INFO']
+        activity_type = params[1]
+        record_name = params[2]
+        return handle_dynamic_page_request(start_response, g_front_end.record_progression(activity_type, record_name))
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
@@ -290,7 +293,9 @@ def workouts(env, start_response):
 def workout(env, start_response):
     """Renders the view for an individual workout."""
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.workout())
+        workout_id = env['PATH_INFO']
+        workout_id = workout_id[1:]
+        return handle_dynamic_page_request(start_response, g_front_end.workout(workout_id))
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
@@ -352,7 +357,9 @@ def device_list(env, start_response):
 def manual_entry(env, start_response):
     """Called when the user selects an activity type, indicating they want to make a manual data entry."""
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.manual_entry())
+        activity_type = env['PATH_INFO']
+        activity_type = activity_type[1:]
+        return handle_dynamic_page_request(start_response, g_front_end.manual_entry(activity_type))
     except cherrypy.HTTPRedirect as e:
         return respond_to_redirect_exception(e, start_response)
     except:
