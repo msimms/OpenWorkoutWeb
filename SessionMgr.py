@@ -101,7 +101,8 @@ class CustomSessionMgr(SessionMgr):
 
     def create_new_session(self, username):
         """Starts a new session."""
-        session_cookie = uuid.uuid4()
+        session_cookie = str(uuid.uuid4())
+        self.session_cache[Keys.SESSION_KEY] = username
         self.session_cache[session_cookie] = username
         return session_cookie
 
