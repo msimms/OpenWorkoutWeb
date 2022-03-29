@@ -29,7 +29,7 @@ class ActivityAnalyzer(object):
         self.summary_data = {}
         self.speed_graph = None
         root_dir = os.path.dirname(os.path.abspath(__file__))
-        self.data_mgr = DataMgr.DataMgr(config=None, root_url="file://" + root_dir, analysis_scheduler=None, import_scheduler=None, workout_plan_gen_scheduler=None)
+        self.data_mgr = DataMgr.DataMgr(config=Config.Config(), root_url="file://" + root_dir, analysis_scheduler=None, import_scheduler=None, workout_plan_gen_scheduler=None)
         self.user_mgr = UserMgr.UserMgr(config=Config.Config(), session_mgr=None)
         self.last_yield = time.time()
         super(ActivityAnalyzer, self).__init__()
