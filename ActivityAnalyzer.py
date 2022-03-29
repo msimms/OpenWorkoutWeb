@@ -11,6 +11,7 @@ import sys
 import time
 import traceback
 import ActivityHasher
+import Config
 import DataMgr
 import IntensityCalculator
 import Keys
@@ -28,8 +29,8 @@ class ActivityAnalyzer(object):
         self.summary_data = {}
         self.speed_graph = None
         root_dir = os.path.dirname(os.path.abspath(__file__))
-        self.data_mgr = DataMgr.DataMgr(None, "file://" + root_dir, None, None, None)
-        self.user_mgr = UserMgr.UserMgr(None)
+        self.data_mgr = DataMgr.DataMgr(config=None, root_url="file://" + root_dir, analysis_scheduler=None, import_scheduler=None, workout_plan_gen_scheduler=None)
+        self.user_mgr = UserMgr.UserMgr(config=Config.Config(), session_mgr=None)
         self.last_yield = time.time()
         super(ActivityAnalyzer, self).__init__()
 
@@ -133,7 +134,7 @@ class ActivityAnalyzer(object):
 
                     try:
                         # Do the analysis.
-                        sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type], activity_type, activity_user_id, self.data_mgr)
+                        sensor_analyzer = SensorAnalyzerFactory.create_with_data(sensor_type, self.activity[sensor_type], activity_type, activity_user_id, self.data_mgr, self.user_mgr)
 
                         # Save the results to the database.
                         self.summary_data.update(sensor_analyzer.analyze())

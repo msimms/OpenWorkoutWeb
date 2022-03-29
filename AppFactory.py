@@ -49,11 +49,11 @@ def create_cherrypy(config, root_dir, session_mgr):
     mako.directories = "templates"
 
     # Create all the objects that actually implement the functionality.
-    user_mgr = UserMgr.UserMgr(session_mgr)
+    user_mgr = UserMgr.UserMgr(config=config, session_mgr=session_mgr)
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
     import_scheduler = ImportScheduler.ImportScheduler()
     workout_plan_gen = WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler()
-    data_mgr = DataMgr.DataMgr(config, root_url, analysis_scheduler, import_scheduler, workout_plan_gen)
+    data_mgr = DataMgr.DataMgr(config=config, root_url=root_url, analysis_scheduler=analysis_scheduler, import_scheduler=import_scheduler, workout_plan_gen_scheduler=workout_plan_gen)
     backend = App.App(user_mgr, data_mgr, root_dir, root_url, googlemaps_key, profiling_enabled, debug_enabled)
 
     # Configure the error logger.
@@ -164,7 +164,7 @@ def create_flask(config, root_dir):
 
     # Create all the objects that actually implement the functionality.
     session_mgr = SessionMgr.FlaskSessionMgr()
-    user_mgr = UserMgr.UserMgr(session_mgr)
+    user_mgr = UserMgr.UserMgr(config=config, session_mgr=session_mgr)
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
     import_scheduler = ImportScheduler.ImportScheduler()
     workout_plan_gen = WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler()

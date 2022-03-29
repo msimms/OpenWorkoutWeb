@@ -29,6 +29,7 @@ import datetime
 import random
 
 import AnalysisScheduler
+import Config
 import DataMgr
 import Keys
 import UserMgr
@@ -42,8 +43,8 @@ celery_worker.config_from_object('CeleryConfig')
 def check_for_unanalyzed_activities():
     """Check for activities that need to be analyzed. Do one, if any are found."""
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
-    data_mgr = DataMgr.DataMgr(None, "", analysis_scheduler, None, None)
-    user_mgr = UserMgr.UserMgr(None)
+    data_mgr = DataMgr.DataMgr(config=None, root_url="", analysis_scheduler=analysis_scheduler, import_scheduler=None, workout_plan_gen_scheduler=None)
+    user_mgr = UserMgr.UserMgr(config=Config.Config(), session_mgr=None)
 
     unanalyzed_activity_list = data_mgr.retrieve_unanalyzed_activity_list(64)
     if len(unanalyzed_activity_list) > 0:
@@ -63,8 +64,8 @@ def check_for_unanalyzed_activities():
 def check_for_ungenerated_workout_plans():
     """Checks for users that need their workout plan regenerated. Generates workout plans for each of those users."""
     now = datetime.datetime.utcnow()
-    data_mgr = DataMgr.DataMgr(None, "", None, None, WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
-    user_mgr = UserMgr.UserMgr(None)
+    data_mgr = DataMgr.DataMgr(config=None, root_url="", analysis_scheduler=None, import_scheduler=None, workout_plan_gen_scheduler=WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
+    user_mgr = UserMgr.UserMgr(config=Config.Config(), session_mgr=None)
 
     # These users don't have any pending workouts.
     user_ids = data_mgr.retrieve_users_without_scheduled_workouts()
@@ -80,7 +81,7 @@ def check_for_ungenerated_workout_plans():
 @celery_worker.task()
 def prune_deferred_tasks_list():
     """Checks for users that need their workout plan regenerated."""
-    data_mgr = DataMgr.DataMgr(None, "", None, None, None)
+    data_mgr = DataMgr.DataMgr(config=None, root_url="", analysis_scheduler=None, import_scheduler=None, workout_plan_gen_scheduler=None)
     data_mgr.prune_deferred_tasks_list()
 
 @celery_worker.on_after_configure.connect

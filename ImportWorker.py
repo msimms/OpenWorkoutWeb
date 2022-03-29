@@ -56,7 +56,7 @@ def import_activity(import_str, internal_task_id):
         uploaded_file_data = import_obj['uploaded_file_data']
         uploaded_file_name = import_obj['uploaded_file_name']
         desired_activity_id = import_obj['desired_activity_id']
-        data_mgr = DataMgr.DataMgr(None, "", None, None, None)
+        data_mgr = DataMgr.DataMgr(config=None, root_url="", analysis_scheduler=None, import_scheduler=None, workout_plan_gen_scheduler=None)
         importer = Importer.Importer(data_mgr)
 
         # Generate a random name for the local file.

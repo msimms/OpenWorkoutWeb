@@ -16,6 +16,7 @@ import traceback
 import uuid
 import AnalysisScheduler
 import BikePlanGenerator
+import Config
 import DataMgr
 import UserMgr
 import Keys
@@ -31,8 +32,8 @@ class WorkoutPlanGenerator(object):
 
     def __init__(self, user_obj):
         self.user_obj = user_obj
-        self.data_mgr = DataMgr.DataMgr(None, "", AnalysisScheduler.AnalysisScheduler(), None, None)
-        self.user_mgr = UserMgr.UserMgr(None)
+        self.data_mgr = DataMgr.DataMgr(config=None, root_url="", analysis_scheduler=AnalysisScheduler.AnalysisScheduler(), import_scheduler=None, workout_plan_gen_scheduler=None)
+        self.user_mgr = UserMgr.UserMgr(config=Config.Config(), session_mgr=None)
         super(WorkoutPlanGenerator, self).__init__()
 
     def log_error(self, log_str):

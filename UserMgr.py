@@ -37,10 +37,11 @@ MIN_PASSWORD_LEN  = 8
 class UserMgr(object):
     """Class for managing user accounts"""
 
-    def __init__(self, session_mgr):
+    def __init__(self, *, config, session_mgr):
+        """Constructor"""
         self.session_mgr = session_mgr
         self.database = AppDatabase.MongoDatabase()
-        self.database.connect()
+        self.database.connect(config)
         super(UserMgr, self).__init__()
 
     def terminate(self):

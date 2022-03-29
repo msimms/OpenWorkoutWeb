@@ -11,10 +11,10 @@ import UserMgr
 class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on power data."""
 
-    def __init__(self, activity_type, activity_user_id, data_mgr):
+    def __init__(self, activity_type, activity_user_id, data_mgr, user_mgr):
         SensorAnalyzer.SensorAnalyzer.__init__(self, Keys.APP_POWER_KEY, Units.get_power_units_str(), activity_type)
         self.data_mgr = data_mgr
-        self.user_mgr = UserMgr.UserMgr(None)
+        self.user_mgr = user_mgr
         self.np_buf = []
         self.current_30_sec_buf = []
         self.current_30_sec_buf_start_time = 0

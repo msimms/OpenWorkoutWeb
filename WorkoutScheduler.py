@@ -7,6 +7,7 @@ import inspect
 import os
 import random
 import sys
+import Config
 import InputChecker
 import Keys
 import UserMgr
@@ -23,7 +24,7 @@ class WorkoutScheduler(object):
 
     def __init__(self, user_id):
         self.user_id = user_id
-        self.user_mgr = UserMgr.UserMgr(None)
+        self.user_mgr = UserMgr.UserMgr(config=Config.Config(), session_mgr=None)
 
     def score_schedule(self, week):
         """Computes a score for the schedule, based on the daily stress scores."""

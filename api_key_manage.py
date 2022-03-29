@@ -30,20 +30,20 @@ import AppDatabase
 
 def create_key(username, rate):
     db = AppDatabase.MongoDatabase()
-    db.connect()
+    db.connect(None)
     user_id, _, _ = db.retrieve_user(username)
     key = str(uuid.uuid4())
     return db.create_api_key(user_id, key, rate)
 
 def list_keys(username):
     db = AppDatabase.MongoDatabase()
-    db.connect()
+    db.connect(None)
     user_id, _, _ = db.retrieve_user(username)
     return db.retrieve_api_keys(user_id)
 
 def revoke_key(key):
     db = AppDatabase.MongoDatabase()
-    db.connect()
+    db.connect(None)
     user_id, _, _ = db.retrieve_user_from_api_key(key)
     return db.delete_api_key(user_id, key)
 

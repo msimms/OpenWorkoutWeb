@@ -92,10 +92,12 @@ class MongoDatabase(Database.Database):
     def __init__(self):
         Database.Database.__init__(self)
 
-    def connect(self):
+    def connect(self, config):
         """Connects/creates the database"""
         try:
-            self.conn = pymongo.MongoClient('localhost:27017')
+            # If we weren't given a database URL then assume localhost and default port.
+            database_url = config.get_database_url()
+            self.conn = pymongo.MongoClient(database_url)
 
             # Database. Try the old name, if not found then create or open it with the new name.
             db_names = self.conn.list_database_names()

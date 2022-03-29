@@ -113,5 +113,11 @@ class Config(object):
     def get_import_max_file_size(self):
         return self.get_int('Import', 'Max File Size')
 
+    def get_database_url(self):
+        database_url = self.get_str('Database', 'Database URL')
+        if database_url is None or len(database_url) == 0:
+            database_url = 'localhost:27017'
+        return database_url
+
     def get_broker_url(self):
         return self.get_str('Celery', 'Broker URL')
