@@ -33,7 +33,6 @@ import sys
 import traceback
 import uuid
 import zlib
-import AnalysisScheduler
 import Config
 import DataMgr
 import Importer
