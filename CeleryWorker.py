@@ -36,7 +36,7 @@ import UserMgr
 import Units
 import WorkoutPlanGeneratorScheduler
 
-celery_worker = celery.Celery('straen_worker', include=['ActivityAnalyzer', 'ImportWorker', 'WorkoutPlanGenerator'])
+celery_worker = celery.Celery(Keys.CELERY_PROJECT_NAME, include=['ActivityAnalyzer', 'ImportWorker', 'WorkoutPlanGenerator'])
 celery_worker.config_from_object('CeleryConfig')
 
 @celery_worker.task()

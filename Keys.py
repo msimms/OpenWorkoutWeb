@@ -21,7 +21,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Key strings for all key/value pairs used in the app"""
+"""Key strings for all key/value pairs used in the app."""
+"""Basically this contains all the string constants."""
 
 # Keys associated with user management.
 SESSION_KEY = "_straen_username"
@@ -44,6 +45,9 @@ TIMESTAMP_KEY = "timestamp" # Some app messages have timestamps on them
 API_KEYS = "api keys" # List of API keys belonging to the user
 API_KEY = "key" # API key being provided
 API_KEY_RATE = "rate" # The maximum number of requests allowed per day for the provided key
+
+# Celery.
+CELERY_PROJECT_NAME = "openworkoutweb_worker"
 
 # Goals.
 GOAL_FITNESS_KEY = "Fitness"

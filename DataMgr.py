@@ -73,7 +73,7 @@ class DataMgr(Importer.ActivityWriter):
         self.database = AppDatabase.MongoDatabase()
         self.database.connect(config)
         self.map_search = None
-        self.celery_worker = celery.Celery('straen_worker')
+        self.celery_worker = celery.Celery(Keys.CELERY_PROJECT_NAME)
         self.celery_worker.config_from_object('CeleryConfig')
         if config is not None:
             self.celery_worker.conf.broker_url = config.get_broker_url()
