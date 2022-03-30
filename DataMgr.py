@@ -513,6 +513,10 @@ class DataMgr(Importer.ActivityWriter):
         """Updates locations, sensor readings, and metadata associated with a moving activity. Provided as a performance improvement over making several database updates."""
         if self.database is None:
             raise Exception("No database.")
+        if device_str is None:
+            raise Exception("Bad parameter.")
+        if activity_id is None:
+            raise Exception("Bad parameter.")
         return self.database.update_activity(device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict)
 
     def is_activity_public(self, activity):
@@ -524,6 +528,9 @@ class DataMgr(Importer.ActivityWriter):
 
     def is_activity_id_public(self, activity_id):
         """Helper function for returning whether or not an activity is publically visible."""
+        if activity_id is None:
+            raise Exception("Bad parameter.")
+
         visibility = self.retrieve_activity_visibility(activity_id)
         if visibility is not None:
             if visibility == "private":
