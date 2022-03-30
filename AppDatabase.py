@@ -107,6 +107,7 @@ class MongoDatabase(Database.Database):
                 self.database = self.conn['openworkoutdb']
             if self.database is None:
                 self.log_error("Could not connect to MongoDB")
+                return False
 
             # Handles to the various collections.
             self.users_collection = self.database['users']
