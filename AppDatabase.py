@@ -105,6 +105,8 @@ class MongoDatabase(Database.Database):
                 self.database = self.conn['straendb']
             else:
                 self.database = self.conn['openworkoutdb']
+            if self.database is None:
+                self.log_error("Could not connect to MongoDB")
 
             # Handles to the various collections.
             self.users_collection = self.database['users']
