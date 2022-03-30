@@ -43,6 +43,7 @@ photos/
 
 # Session management
 sessions*/
+session_cache/
 
 # Celery
 celerybeat-schedule
