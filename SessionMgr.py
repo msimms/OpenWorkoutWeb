@@ -63,10 +63,7 @@ class SessionMgr(object):
 
     def session_dir(self, root_dir):
         """Returns the directory to be used for session storage."""
-        if sys.version_info[0] < 3:
-            session_dir = os.path.join(root_dir, 'sessions2')
-        else:
-            session_dir = os.path.join(root_dir, 'sessions3')
+        session_dir = os.path.join(root_dir, 'sessions3')
         if not os.path.exists(session_dir):
             os.makedirs(session_dir)
         return session_dir

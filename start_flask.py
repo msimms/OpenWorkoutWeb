@@ -584,6 +584,11 @@ def main():
     global g_flask_app
     global g_session_mgr
 
+    # Make sure we have a compatible version of python.
+    if sys.version_info[0] < 3:
+        print("This application requires python 3.")
+        sys.exit(1)
+
     # Parse the command line options.
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, action="store", default="", help="The configuration file.", required=False)

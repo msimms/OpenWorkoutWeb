@@ -347,11 +347,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
         """Returns a list of time, value pairs for speed."""
         graph = []
         if len(self.speed_graph) == len(self.speed_times):
-            if sys.version_info[0] < 3:
-                zip_func = itertools.izip
-            else:
-                zip_func = zip
-            for time_val, speed_val in zip_func(self.speed_times, self.speed_graph):
+            for time_val, speed_val in zip(self.speed_times, self.speed_graph):
                 point = []
                 point.append(time_val)
                 point.append(float(speed_val))

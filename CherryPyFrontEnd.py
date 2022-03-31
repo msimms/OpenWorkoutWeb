@@ -37,23 +37,13 @@ def do_auth_check(*args, **kwargs):
         requested_url = cherrypy.request.request_line.split()[1]
         requested_url_parts = requested_url.split('/')
         requested_url_parts = filter(lambda part: part != '', requested_url_parts)
-
-        # Have to do this differently for python2 and python3.
-        if sys.version_info[0] < 3:
-            first_url_part = requested_url_parts[0]
-        else:
-            first_url_part = next(requested_url_parts)
+        first_url_part = next(requested_url_parts)
 
         # If the user is trying to view an activity then make sure they have permissions
         # to view it. First check to see if it's a public activity.
         if first_url_part == "device":
 
-            # Have to do this differently for python2 and python3.
-            if sys.version_info[0] < 3:
-                url_params = requested_url_parts[1].split("?")
-            else:
-                url_params = next(requested_url_parts)
-
+            url_params = next(requested_url_parts)
             if url_params is not None and len(url_params) >= 2:
                 activity_params = url_params[1].split("=")
                 if activity_params is not None and len(activity_params) >= 2:

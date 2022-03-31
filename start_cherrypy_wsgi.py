@@ -13,10 +13,7 @@ import CherryPyFrontEnd
 import Config
 import SessionMgr
 
-if sys.version_info[0] < 3:
-    from urllib import parse_qs
-else:
-    from urllib.parse import parse_qs
+from urllib.parse import parse_qs
 
 CSS_DIR = 'css'
 DATA_DIR = 'data'
@@ -554,6 +551,11 @@ def create_server(config, port_num):
 def main():
     """Entry point for the cherrypy+wsgi version of the app."""
     global g_front_end
+
+    # Make sure we have a compatible version of python.
+    if sys.version_info[0] < 3:
+        print("This application requires python 3.")
+        sys.exit(1)
 
     # Parse the command line options.
     parser = argparse.ArgumentParser()

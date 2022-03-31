@@ -1,7 +1,6 @@
 # Copyright 2022 Michael J Simms
 
 import argparse
-import flask
 import signal
 import logging
 import os
@@ -454,6 +453,11 @@ def index(env, start_response):
 def main():
     """Entry point for the flask+wsgi version of the app."""
     global g_app
+
+    # Make sure we have a compatible version of python.
+    if sys.version_info[0] < 3:
+        print("This application requires python 3.")
+        sys.exit(1)
 
     # Parse the command line options.
     parser = argparse.ArgumentParser()

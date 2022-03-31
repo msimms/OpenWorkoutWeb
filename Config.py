@@ -23,13 +23,7 @@
 # SOFTWARE.
 """Abstracts the configuration file."""
 
-import io
-import sys
-
-if sys.version_info[0] < 3:
-    import ConfigParser as configparser
-else:
-    import configparser
+import configparser
 
 
 class Config(object):
@@ -42,12 +36,7 @@ class Config(object):
     def load(self, config_file_name):
         """Loads the configuration file."""
         self.config = configparser.RawConfigParser(allow_no_value=True)
-        if sys.version_info[0] < 3:
-            with open(config_file_name) as f:
-                sample_config = f.read()
-            self.config.readfp(io.BytesIO(sample_config))
-        else:
-            self.config.read(config_file_name)
+        self.config.read(config_file_name)
 
     def get_str(self, section, setting):
         try:

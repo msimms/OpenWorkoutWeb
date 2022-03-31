@@ -36,10 +36,7 @@ import Keys
 import Units
 import TrainingPaceCalculator
 
-if sys.version_info[0] < 3:
-    from urllib import unquote_plus
-else:
-    from urllib.parse import unquote_plus
+from urllib.parse import unquote_plus
 
 class Api(object):
     """Class for managing API messages."""
@@ -282,9 +279,6 @@ class Api(object):
         # Is this is a foot based activity? Need to know so we can display steps per minute instead of revs per minute.
         is_foot_based = False
 
-        # Need to know which version of python we're working with.
-        py_version = sys.version_info[0]
-
         response_dict = {}
         response_dict[Keys.ACTIVITY_ID_KEY] = activity_id
 
@@ -317,50 +311,35 @@ class Api(object):
             distances = activity[Keys.APP_DISTANCE_KEY]
             if distances is not None and len(distances) > 0:
                 distance = distances[-1]
-                if py_version < 3:
-                    value = float(distance.values()[0])
-                else:
-                    value = float(list(distance.values())[0])
+                value = float(list(distance.values())[0])
                 response_dict[Keys.APP_DISTANCE_KEY] = value
 
         if Keys.APP_AVG_SPEED_KEY in activity:
             avg_speeds = activity[Keys.APP_AVG_SPEED_KEY]
             if avg_speeds is not None and len(avg_speeds) > 0:
                 speed = avg_speeds[-1]
-                if py_version < 3:
-                    value = float(speed.values()[0])
-                else:
-                    value = float(list(speed.values())[0])
+                value = float(list(speed.values())[0])
                 response_dict[Keys.APP_AVG_SPEED_KEY] = value
 
         if Keys.APP_MOVING_SPEED_KEY in activity:
             moving_speeds = activity[Keys.APP_MOVING_SPEED_KEY]
             if moving_speeds is not None and len(moving_speeds) > 0:
                 speed = moving_speeds[-1]
-                if py_version < 3:
-                    value = float(speed.values()[0])
-                else:
-                    value = float(list(speed.values())[0])
+                value = float(list(speed.values())[0])
                 response_dict[Keys.APP_MOVING_SPEED_KEY] = value
 
         if Keys.APP_HEART_RATE_KEY in activity:
             heart_rates = activity[Keys.APP_HEART_RATE_KEY]
             if heart_rates is not None and len(heart_rates) > 0:
                 heart_rate = heart_rates[-1]
-                if py_version < 3:
-                    value = float(heart_rate.values()[0])
-                else:
-                    value = float(list(heart_rate.values())[0])
+                value = float(list(heart_rate.values())[0])
                 response_dict[Keys.APP_HEART_RATE_KEY] = value
 
         if Keys.APP_CADENCE_KEY in activity:
             cadences = activity[Keys.APP_CADENCE_KEY]
             if cadences is not None and len(cadences) > 0:
                 cadence = cadences[-1]
-                if py_version < 3:
-                    value = float(cadence.values()[0])
-                else:
-                    value = float(list(cadence.values())[0])
+                value = float(list(cadence.values())[0])
                 if is_foot_based:
                     value = value * 2.0
                 response_dict[Keys.APP_CADENCE_KEY] = value
@@ -369,10 +348,7 @@ class Api(object):
             powers = activity[Keys.APP_POWER_KEY]
             if powers is not None and len(powers) > 0:
                 power = powers[-1]
-                if py_version < 3:
-                    value = float(power.values()[0])
-                else:
-                    value = float(list(power.values())[0])
+                value = float(list(power.values())[0])
                 response_dict[Keys.APP_POWER_KEY] = value
 
         response = json.dumps(response_dict)

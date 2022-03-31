@@ -29,11 +29,10 @@ import sys
 import traceback
 import uuid
 from bson.objectid import ObjectId
-if sys.version_info[0] < 3:
-    from bson import Binary
 import pymongo
 import time
 import Database
+import DatabaseException
 import InputChecker
 import Keys
 import Perf
@@ -66,8 +65,6 @@ def retrieve_time_from_location(location):
 
 def retrieve_time_from_time_value_pair(value):
     """Used with the sort function."""
-    if sys.version_info[0] < 3:
-        return value.keys()[0]
     return list(value.keys())[0]
 
 
@@ -2904,10 +2901,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            if sys.version_info[0] < 3:
-                post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.UPLOADED_FILE_DATA_KEY: Binary(file_data) }
-            else:
-                post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.UPLOADED_FILE_DATA_KEY: bytes(file_data) }
+            post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.UPLOADED_FILE_DATA_KEY: bytes(file_data) }
             insert_into_collection(self.uploads_collection, post)
             return True
         except:

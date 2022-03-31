@@ -73,14 +73,8 @@ class FtpCalculator(object):
         """Takes the list of power readings and determines how many belong in each power zone, based on the user's FTP."""
         zones = self.power_training_zones(ftp)
         distribution = [0.0] * (len(zones) + 1)
-        py_version = sys.version_info[0]
         for datum in powers:
-
-            if py_version < 3:
-                value = float(datum.values()[0])
-            else:
-                value = float(list(datum.values())[0])
-
+            value = float(list(datum.values())[0])
             index = 0
             found = False
             for zone_cutoff in zones:

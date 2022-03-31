@@ -59,7 +59,6 @@ brew services restart rabbitmq
 
 ## Execution
 The software is designed to work within multiple frameworks. Currently, cherrypy and flask are supported.
-It is also designed to work with both python2 and python3.
 
 To run the web service under the cherrypy framework:
 ```

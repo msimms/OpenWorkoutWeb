@@ -2,7 +2,7 @@
 # 
 # # MIT License
 # 
-# Copyright (c) 2019 Mike Simms
+# Copyright (c) 2022 Mike Simms
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,34 +21,15 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Reads a GeoJson file."""
+"""Exceptions thrown by the database."""
 
-import json
-import sys
-import urllib.request
+class DatabaseException(Exception):
+    """Exception thrown by the database."""
 
-class GeoJsonReader(object):
-    """Reads a GeoJson file."""
+    def __init__(self, *args):
+        Exception.__init__(self, args)
 
-    def __init__(self):
-        self.data = None
-        super(GeoJsonReader, self).__init__()
-
-    def read(self, url):
-        """Loads the GEO JSON data from the specified URL."""
-        if sys.version_info > (3, 0):
-            with urllib.request.urlopen(url) as url:
-                self.data = json.loads(url.read().decode())
-        else:
-            response = urllib.urlopen(url)
-            self.data = json.loads(response.read())
-
-    def name_to_coordinate_map(self):
-        """Returns a dictionary that maps the name of the geo region to it's coordinates, as an array (or array of arrays) of lat/lon."""
-        geomap = {}
-        feature_list = self.data['features']
-        for feature in feature_list:
-            feature_name = feature['properties']['name']
-            coordinate_data = feature['geometry']['coordinates']
-            geomap[feature_name] = coordinate_data
-        return geomap
+    def __init__(self, code, message):
+        self.code = code
+        self.message = message
+        Exception.__init__(self, code, message)
