@@ -2,7 +2,6 @@
 """Performs calculations on a location track."""
 
 import inspect
-import itertools
 import os
 import sys
 import InputChecker

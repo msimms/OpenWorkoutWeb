@@ -27,7 +27,6 @@ import base64
 import datetime
 import hashlib
 import os
-import sys
 import threading
 import time
 import uuid

@@ -6,7 +6,6 @@ import IntensityCalculator
 import Keys
 import SensorAnalyzer
 import Units
-import UserMgr
 
 class PowerAnalyzer(SensorAnalyzer.SensorAnalyzer):
     """Class for performing calculations on power data."""

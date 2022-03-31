@@ -24,7 +24,6 @@
 """Handles ical calendar requests."""
 
 import IcsWriter
-import Keys
 
 class IcalServer(object):
     """Handles ical calendar requests."""

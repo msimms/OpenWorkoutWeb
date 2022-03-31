@@ -24,7 +24,6 @@
 """Estimates the user's Functional Threshold Power based on activity summary data."""
 
 import time
-import sys
 import Keys
 
 class FtpCalculator(object):

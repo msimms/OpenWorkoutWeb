@@ -27,7 +27,6 @@ import calendar
 import datetime
 import json
 import logging
-import sys
 import time
 import ApiException
 import Exporter
