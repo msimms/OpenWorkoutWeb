@@ -14,6 +14,7 @@ import App
 import ApiException
 import AppFactory
 import Config
+import DatabaseException
 import Keys
 import SessionException
 
@@ -599,18 +600,22 @@ def main():
         parser.error(e)
         sys.exit(1)
 
-    # Load the config file.
-    config = Config.Config()
-    if len(args.config) > 0:
-        config.load(args.config)
+    try:
+        # Load the config file.
+        config = Config.Config()
+        if len(args.config) > 0:
+            config.load(args.config)
 
-    # Register the signal handler.
-    signal.signal(signal.SIGINT, signal_handler)
+        # Register the signal handler.
+        signal.signal(signal.SIGINT, signal_handler)
 
-    # Create all the objects that actually implement the functionality.
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    g_app = AppFactory.create_flask(config, root_dir, g_session_mgr)
-    g_flask_app.run(host=config.get_bindname(), port=config.get_bindport(), debug=config.is_debug_enabled())
+        # Create all the objects that actually implement the functionality.
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        g_app = AppFactory.create_flask(config, root_dir, g_session_mgr)
+        g_flask_app.run(host=config.get_bindname(), port=config.get_bindport(), debug=config.is_debug_enabled())
+    except DatabaseException.DatabaseException as e:
+        print(e.message)
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

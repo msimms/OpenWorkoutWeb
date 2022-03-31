@@ -10,6 +10,7 @@ import traceback
 import App
 import AppFactory
 import Config
+import DatabaseException
 
 g_app = None
 
@@ -469,17 +470,21 @@ def main():
         parser.error(e)
         sys.exit(1)
 
-    # Load the config file.
-    config = Config.Config()
-    if len(args.config) > 0:
-        config.load(args.config)
+    try:
+        # Load the config file.
+        config = Config.Config()
+        if len(args.config) > 0:
+            config.load(args.config)
 
-    # Register the signal handler.
-    signal.signal(signal.SIGINT, signal_handler)
+        # Register the signal handler.
+        signal.signal(signal.SIGINT, signal_handler)
 
-    # Create all the objects that actually implement the functionality.
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    g_app = AppFactory.create_flask(config, root_dir)
+        # Create all the objects that actually implement the functionality.
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        g_app = AppFactory.create_flask(config, root_dir)
+    except DatabaseException.DatabaseException as e:
+        print(e.message)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

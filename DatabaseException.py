@@ -29,7 +29,6 @@ class DatabaseException(Exception):
     def __init__(self, *args):
         Exception.__init__(self, args)
 
-    def __init__(self, code, message):
-        self.code = code
+    def __init__(self, message):
         self.message = message
-        Exception.__init__(self, code, message)
+        Exception.__init__(self, message)

@@ -103,8 +103,7 @@ class MongoDatabase(Database.Database):
             else:
                 self.database = self.conn['openworkoutdb']
             if self.database is None:
-                self.log_error("Could not connect to MongoDB")
-                return False
+                raise DatabaseException.DatabaseException("Could not connect to MongoDB.")
 
             # Handles to the various collections.
             self.users_collection = self.database['users']
@@ -116,11 +115,8 @@ class MongoDatabase(Database.Database):
 
             # Create indexes.
             self.activities_collection.create_index(Keys.ACTIVITY_ID_KEY)
-
-            return True
         except pymongo.errors.ConnectionFailure as e:
-            self.log_error("Could not connect to MongoDB: %s" % e)
-        return False
+            raise DatabaseException.DatabaseException("Could not connect to MongoDB: %s" % e)
 
     def total_users_count(self):
         """Returns the number of users in the database."""

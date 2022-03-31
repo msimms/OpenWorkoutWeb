@@ -10,6 +10,7 @@ import sys
 import AppFactory
 import CherryPyFrontEnd
 import Config
+import DatabaseException
 import SessionMgr
 
 from cherrypy import tools
@@ -70,49 +71,53 @@ def main():
         parser.error(e)
         sys.exit(1)
 
-    # Load the config file.
-    config = Config.Config()
-    if len(args.config) > 0:
-        config.load(args.config)
+    try:
+        # Load the config file.
+        config = Config.Config()
+        if len(args.config) > 0:
+            config.load(args.config)
 
-    # HTTPS stuff.
-    if config.is_https_enabled():
-        cert_file = config.get_certificate_file()
-        privkey_file = config.get_private_key_file()
+        # HTTPS stuff.
+        if config.is_https_enabled():
+            cert_file = config.get_certificate_file()
+            privkey_file = config.get_private_key_file()
 
-        print("Running HTTPS....")
-        print("Certificate File: " + cert_file)
-        print("Private Key File: " + privkey_file)
+            print("Running HTTPS....")
+            print("Certificate File: " + cert_file)
+            print("Private Key File: " + privkey_file)
 
-        cherrypy.server.ssl_module = 'builtin'
-        cherrypy.server.ssl_certificate = cert_file
-        cherrypy.server.ssl_private_key = privkey_file
+            cherrypy.server.ssl_module = 'builtin'
+            cherrypy.server.ssl_certificate = cert_file
+            cherrypy.server.ssl_private_key = privkey_file
 
-    # Just leave everything in the foreground when we're debugging because it makes life easier.
-    if not config.is_debug_enabled():
-        Daemonizer(cherrypy.engine).subscribe()
+        # Just leave everything in the foreground when we're debugging because it makes life easier.
+        if not config.is_debug_enabled():
+            Daemonizer(cherrypy.engine).subscribe()
 
-    # Register the signal handler.
-    signal.signal(signal.SIGINT, signal_handler)
+        # Register the signal handler.
+        signal.signal(signal.SIGINT, signal_handler)
 
-    # Create all the objects that actually implement the functionality.
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    backend, cherrypy_config = AppFactory.create_cherrypy(config, root_dir, SessionMgr.CherryPySessionMgr())
+        # Create all the objects that actually implement the functionality.
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        backend, cherrypy_config = AppFactory.create_cherrypy(config, root_dir, SessionMgr.CherryPySessionMgr())
 
-    # Create the cherrypy object.
-    g_front_end = CherryPyFrontEnd.CherryPyFrontEnd(backend)
+        # Create the cherrypy object.
+        g_front_end = CherryPyFrontEnd.CherryPyFrontEnd(backend)
 
-    reload_feature = ReloadFeature(cherrypy.engine)
-    reload_feature.subscribe()
+        reload_feature = ReloadFeature(cherrypy.engine)
+        reload_feature.subscribe()
 
-    cherrypy.tools.web_auth = cherrypy.Tool('before_handler', CherryPyFrontEnd.do_auth_check)
-    cherrypy.config.update({
-        'server.socket_host': config.get_bindname(),
-        'server.socket_port': config.get_bindport(),
-        'requests.show_tracebacks': False,
-        'error_page.404': g_front_end.error_404,
-        'log.access_file': ACCESS_LOG})
-    cherrypy.quickstart(g_front_end, config=cherrypy_config)
+        cherrypy.tools.web_auth = cherrypy.Tool('before_handler', CherryPyFrontEnd.do_auth_check)
+        cherrypy.config.update({
+            'server.socket_host': config.get_bindname(),
+            'server.socket_port': config.get_bindport(),
+            'requests.show_tracebacks': False,
+            'error_page.404': g_front_end.error_404,
+            'log.access_file': ACCESS_LOG})
+        cherrypy.quickstart(g_front_end, config=cherrypy_config)
+    except DatabaseException.DatabaseException as e:
+        print(e.message)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

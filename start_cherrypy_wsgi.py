@@ -11,6 +11,7 @@ import sys
 import AppFactory
 import CherryPyFrontEnd
 import Config
+import DatabaseException
 import SessionMgr
 
 from urllib.parse import parse_qs
@@ -575,73 +576,77 @@ def main():
     # Register the signal handler.
     signal.signal(signal.SIGINT, signal_handler)
 
-    # Create all the objects that actually implement the functionality.
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    backend, cherrypy_config = AppFactory.create_cherrypy(config, root_dir, SessionMgr.CustomSessionMgr())
+    try:
+        # Create all the objects that actually implement the functionality.
+        root_dir = os.path.dirname(os.path.abspath(__file__))
+        backend, cherrypy_config = AppFactory.create_cherrypy(config, root_dir, SessionMgr.CustomSessionMgr())
 
-    # Mount the application.
-    cherrypy.tree.graft(css, "/css")
-    cherrypy.tree.graft(data, "/data")
-    cherrypy.tree.graft(js, "/js")
-    cherrypy.tree.graft(images, "/images")
-    cherrypy.tree.graft(media, "/media")
-    cherrypy.tree.graft(photos, "/photos")
-    cherrypy.tree.graft(stats, "/stats")
-    cherrypy.tree.graft(error, "/error")
-    cherrypy.tree.graft(live, "/live")
-    cherrypy.tree.graft(live_user, "/live_user")
-    cherrypy.tree.graft(activity, "/activity")
-    cherrypy.tree.graft(edit_activity, "/edit_activity")
-    cherrypy.tree.graft(add_photos, "/add_photos")
-    cherrypy.tree.graft(device, "/device")
-    cherrypy.tree.graft(my_activities, "/my_activities")
-    cherrypy.tree.graft(all_activities, "/all_activities")
-    cherrypy.tree.graft(record_progression, "/record_progression")
-    cherrypy.tree.graft(workouts, "/workouts")
-    cherrypy.tree.graft(workout, "/workout")
-    cherrypy.tree.graft(statistics, "/statistics")
-    cherrypy.tree.graft(gear, "/gear")
-    cherrypy.tree.graft(service_history, "/service_history")
-    cherrypy.tree.graft(friends, "/friends")
-    cherrypy.tree.graft(device_list, "/device_list")
-    cherrypy.tree.graft(manual_entry, "/manual_entry")
-    cherrypy.tree.graft(import_activity, "/import_activity")
-    cherrypy.tree.graft(pace_plans, "/pace_plans")
-    cherrypy.tree.graft(task_status, "/task_status")
-    cherrypy.tree.graft(profile, "/profile")
-    cherrypy.tree.graft(settings, "/settings")
-    cherrypy.tree.graft(login, "/login")
-    cherrypy.tree.graft(create_login, "/create_login")
-    cherrypy.tree.graft(logout, "/logout")
-    cherrypy.tree.graft(about, "/about")
-    cherrypy.tree.graft(status, "/status")
-    cherrypy.tree.graft(ical, "/ical")
-    cherrypy.tree.graft(api_keys, "/api_keys")
-    cherrypy.tree.graft(api, "/api")
-    cherrypy.tree.graft(google_maps, "/google_maps")
-    cherrypy.tree.graft(index, "/")
+        # Mount the application.
+        cherrypy.tree.graft(css, "/css")
+        cherrypy.tree.graft(data, "/data")
+        cherrypy.tree.graft(js, "/js")
+        cherrypy.tree.graft(images, "/images")
+        cherrypy.tree.graft(media, "/media")
+        cherrypy.tree.graft(photos, "/photos")
+        cherrypy.tree.graft(stats, "/stats")
+        cherrypy.tree.graft(error, "/error")
+        cherrypy.tree.graft(live, "/live")
+        cherrypy.tree.graft(live_user, "/live_user")
+        cherrypy.tree.graft(activity, "/activity")
+        cherrypy.tree.graft(edit_activity, "/edit_activity")
+        cherrypy.tree.graft(add_photos, "/add_photos")
+        cherrypy.tree.graft(device, "/device")
+        cherrypy.tree.graft(my_activities, "/my_activities")
+        cherrypy.tree.graft(all_activities, "/all_activities")
+        cherrypy.tree.graft(record_progression, "/record_progression")
+        cherrypy.tree.graft(workouts, "/workouts")
+        cherrypy.tree.graft(workout, "/workout")
+        cherrypy.tree.graft(statistics, "/statistics")
+        cherrypy.tree.graft(gear, "/gear")
+        cherrypy.tree.graft(service_history, "/service_history")
+        cherrypy.tree.graft(friends, "/friends")
+        cherrypy.tree.graft(device_list, "/device_list")
+        cherrypy.tree.graft(manual_entry, "/manual_entry")
+        cherrypy.tree.graft(import_activity, "/import_activity")
+        cherrypy.tree.graft(pace_plans, "/pace_plans")
+        cherrypy.tree.graft(task_status, "/task_status")
+        cherrypy.tree.graft(profile, "/profile")
+        cherrypy.tree.graft(settings, "/settings")
+        cherrypy.tree.graft(login, "/login")
+        cherrypy.tree.graft(create_login, "/create_login")
+        cherrypy.tree.graft(logout, "/logout")
+        cherrypy.tree.graft(about, "/about")
+        cherrypy.tree.graft(status, "/status")
+        cherrypy.tree.graft(ical, "/ical")
+        cherrypy.tree.graft(api_keys, "/api_keys")
+        cherrypy.tree.graft(api, "/api")
+        cherrypy.tree.graft(google_maps, "/google_maps")
+        cherrypy.tree.graft(index, "/")
 
-    # Unsubscribe the default server.
-    cherrypy.server.unsubscribe()
+        # Unsubscribe the default server.
+        cherrypy.server.unsubscribe()
 
-    # Create the cherrypy object.
-    g_front_end = CherryPyFrontEnd.CherryPyFrontEnd(backend)
-    cherrypy.config.update(cherrypy_config)
-    app = cherrypy.tree.mount(g_front_end, '/')
-    app.merge(cherrypy_config)
+        # Create the cherrypy object.
+        g_front_end = CherryPyFrontEnd.CherryPyFrontEnd(backend)
+        cherrypy.config.update(cherrypy_config)
+        app = cherrypy.tree.mount(g_front_end, '/')
+        app.merge(cherrypy_config)
 
-    # Instantiate a new server object.
-    servers = []
-    port_num = config.get_bindport()
-    num_servers = config.get_num_servers()
-    if num_servers <= 0:
-        num_servers = 1
-    for i in range(0, num_servers):
-        servers.append(create_server(config, port_num + i))
+        # Instantiate a new server object.
+        servers = []
+        port_num = config.get_bindport()
+        num_servers = config.get_num_servers()
+        if num_servers <= 0:
+            num_servers = 1
+        for i in range(0, num_servers):
+            servers.append(create_server(config, port_num + i))
 
-    cherrypy.config.update(cherrypy_config)
-    cherrypy.engine.start()
-    cherrypy.engine.block()
+        cherrypy.config.update(cherrypy_config)
+        cherrypy.engine.start()
+        cherrypy.engine.block()
+    except DatabaseException.DatabaseException as e:
+        print(e.message)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
