@@ -728,6 +728,16 @@ class App(object):
             pass
         return ""
 
+    def render_no_live_data_error(self, user_str):
+        """Renders the error page."""
+        try:
+            error_html_file = os.path.join(self.root_dir, HTML_DIR, 'no_live_data.html')
+            my_template = Template(filename=error_html_file, module_directory=self.tempmod_dir)
+            return my_template.render(product=PRODUCT_NAME, root_url=self.root_url, user_str=user_str)
+        except:
+            pass
+        return self.render_error()
+
     def render_page_not_found(self):
         """Renders the 404 error page."""
         try:
@@ -736,7 +746,7 @@ class App(object):
             return my_template.render(product=PRODUCT_NAME, root_url=self.root_url)
         except:
             pass
-        return ""
+        return self.render_error()
 
     @Perf.statistics
     def live_activity(self, activity, activity_user):
@@ -760,7 +770,7 @@ class App(object):
         diff_hours = diff / 60 / 60
         diff_days = diff_hours / 24
         if diff_days >= 1.0:
-            return self.render_error("The user has not started an activity in over 24 hours.")
+            return self.render_no_live_data_error(activity_user[Keys.REALNAME_KEY])
 
         # Determine if the current user can view the activity.
         activity_user_id = activity_user[Keys.DATABASE_ID_KEY]
@@ -806,7 +816,7 @@ class App(object):
         user_devices = self.user_mgr.retrieve_user_devices(user_id)
         activity = self.data_mgr.retrieve_most_recent_activity_for_user(user_devices)
         if activity is None:
-            return self.render_error()
+            return self.render_no_live_data_error(user_str)
 
         # Render the page.
         return self.live_activity(activity, user)

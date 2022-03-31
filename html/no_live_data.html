@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+<title>${product} - No Live Data</title>
+
+<link rel="stylesheet" href="${root_url}/css/normalize.css">
+<link rel="stylesheet" href="${root_url}/css/unauth_style.css">
+
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+<meta http-equiv="refresh" content="60">
+
+</head>
+
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+
+<body>
+
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+
+<section class="errorbackground" id="errorbackground">
+    <label><b>${user_str} has not started an activity in over 24 hours. This page will refresh every minute.</b></label>
+</section>
+
+<script type="text/javascript">
+    set_background_style("${root_url}", "errorbackground");
+</script>
+
+</body>
+
+</html>
