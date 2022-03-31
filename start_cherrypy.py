@@ -82,13 +82,15 @@ def main():
             cert_file = config.get_certificate_file()
             privkey_file = config.get_private_key_file()
 
-            print("Running HTTPS....")
-            print("Certificate File: " + cert_file)
-            print("Private Key File: " + privkey_file)
+            if len(cert_file) > 0 and len(privkey_file) > 0:
+                print("Certificate File: " + cert_file)
+                print("Private Key File: " + privkey_file)
 
-            cherrypy.server.ssl_module = 'builtin'
-            cherrypy.server.ssl_certificate = cert_file
-            cherrypy.server.ssl_private_key = privkey_file
+                cherrypy.server.ssl_module = 'builtin'
+                cherrypy.server.ssl_certificate = cert_file
+                cherrypy.server.ssl_private_key = privkey_file
+            else:
+                print("No certs provided.")
 
         # Just leave everything in the foreground when we're debugging because it makes life easier.
         if not config.is_debug_enabled():

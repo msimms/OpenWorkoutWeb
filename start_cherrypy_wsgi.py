@@ -535,14 +535,16 @@ def create_server(config, port_num):
         cert_file = config.get_certificate_file()
         privkey_file = config.get_private_key_file()
 
-        print("Running HTTPS....")
-        print("Certificate File: " + cert_file)
-        print("Private Key File: " + privkey_file)
+        if len(cert_file) > 0 and len(privkey_file) > 0:
+            print("Certificate File: " + cert_file)
+            print("Private Key File: " + privkey_file)
 
-        server.ssl_module = 'pyopenssl'
-        server.ssl_certificate = cert_file
-        server.ssl_private_key = privkey_file
-        # server.ssl_certificate_chain = 'ssl/bundle.crt'
+            server.ssl_module = 'pyopenssl'
+            server.ssl_certificate = cert_file
+            server.ssl_private_key = privkey_file
+            # server.ssl_certificate_chain = 'ssl/bundle.crt'
+        else:
+            print("No certs provided.")
 
     # Subscribe this server.
     server.subscribe()
