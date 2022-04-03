@@ -24,7 +24,6 @@ JS_DIR = 'js'
 IMAGES_DIR = 'images'
 MEDIA_DIR = 'media'
 PHOTOS_DIR = 'photos'
-ERROR_LOG = 'error.log'
 
 g_flask_app = flask.Flask(__name__)
 g_flask_app.secret_key = 'UB2s60qJrithXHt2w71f'
