@@ -12,7 +12,6 @@ import UserMgr
 import WorkoutPlanGeneratorScheduler
 
 ERROR_LOG = 'error.log'
-ACCESS_LOG = 'access.log'
 
 def create_cherrypy(config, root_dir, session_mgr):
     """Factory method for creating the backend when we're using the cherrypy framework."""
