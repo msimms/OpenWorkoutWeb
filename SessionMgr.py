@@ -105,11 +105,12 @@ class CustomSessionMgr(SessionMgr):
         now = time.time()
         self.session_cache[Keys.SESSION_KEY] = ( username, now )
         self.session_cache[session_cookie] =  ( username, now )
+        self.flush_session_data()
         return session_cookie
 
     def clear_current_session(self):
         """Ends the current session."""
-        if Keys.SESSION_KEY in flask.session:
+        if Keys.SESSION_KEY in self.session_cache:
             self.session_cache.pop(Keys.SESSION_KEY)
 
     def session_dir(self, root_dir):
