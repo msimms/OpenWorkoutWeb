@@ -7,23 +7,21 @@ import logging
 import os
 import signal
 import sys
+import traceback
 
 import AppFactory
 import CherryPyFrontEnd
 import Config
 import DatabaseException
+import Dirs
 import SessionMgr
 
 from urllib.parse import parse_qs
 
-CSS_DIR = 'css'
-DATA_DIR = 'data'
-JS_DIR = 'js'
-IMAGES_DIR = 'images'
-MEDIA_DIR = 'media'
-PHOTOS_DIR = 'photos'
+SESSION_COOKIE = 'session_cookie'
 
 g_front_end = None
+g_session_mgr = SessionMgr.CustomSessionMgr()
 
 def signal_handler(signal, frame):
     global g_front_end
@@ -45,15 +43,105 @@ def secureheaders():
         "style-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://*.googleapis.com;"\
         "img-src 'self' *;"
 
-def respond_to_redirect_exception(e, start_response):
-    start_response('302 Found', [('Location', e.urls[0])])
-    return []
+def get_verb_path_params_and_cookie(env):
+    """Gets all the thigns we need from an HTTP request."""
+
+    verb = env['REQUEST_METHOD']
+    path = env['REQUEST_URI'].split('/')[2:] # Don't need the first part of the path
+    params = {}
+    cookie = None
+
+    # Look for our custom session cookie.
+    if 'HTTP_COOKIE' in env:
+        cookie_list_str = env['HTTP_COOKIE']
+        cookie_list = cookie_list_str.split('; ')
+        for temp_cookie in cookie_list:
+            cookie_index = temp_cookie.find(SESSION_COOKIE)
+            if cookie_index == 0:
+                cookie = temp_cookie[len(SESSION_COOKIE) + 1:]
+
+    # Parse the path and read any params.
+    num_path_elems = len(path)
+    if num_path_elems > 0:
+
+        # GET requests will have the parameters in the URL.
+        if verb == 'GET':
+
+            # Split off the params from a GET request
+            method_and_params = path[num_path_elems - 1].split('?')
+            path[num_path_elems - 1] = method_and_params[0]
+
+            # Did we find any parameters?
+            if len(method_and_params) > 1:
+                temp_params = parse_qs(method_and_params[1])
+                for k in temp_params:
+                    params[k] = (temp_params[k])[0]
+
+        # POST requests will have the parameters in the body.
+        elif verb == 'POST':
+            params = env['wsgi.input'].read()
+            if len(params) > 0:
+                params = json.loads(params)
+
+    return verb, path, params, cookie
+
+def do_auth_check(f):
+    """Function decorator for endpoints that require the user to be logged in."""
+
+    def auth_check(*args, **kwargs):
+        global g_session_mgr
+
+        # Extract the things we need from the request.
+        env = args[0]
+        _, _, _, cookie = get_verb_path_params_and_cookie(env)
+        if g_session_mgr.get_logged_in_user_from_cookie(cookie) is not None:
+
+            # User had a valid session token, so set it, do the request, and clear.
+            g_session_mgr.set_current_session(cookie)
+            response = f(*args, **kwargs)
+            g_session_mgr.clear_current_session()
+
+        # User does not have a valid session token, redirect to the login page.
+        else:
+            global g_front_end
+
+            start_response = args[1]
+            content = g_front_end.backend.login()
+            start_response('401 Unauthorized', [])
+            response = [content.encode('utf-8')]
+ 
+        return response
+
+    return auth_check
+
+def do_session_check(f):
+    """Function decorator for endpoints that where logging in is optional."""
+
+    def auth_check(*args, **kwargs):
+        global g_session_mgr
+
+        # Extract the things we need from the request.
+        env = args[0]
+        _, _, _, cookie = get_verb_path_params_and_cookie(env)
+
+        # User had a valid session token, so set it, do the request, and clear.
+        if cookie is not None:
+            g_session_mgr.set_current_session(cookie)
+        response = f(*args, **kwargs)
+        g_session_mgr.clear_current_session()
+ 
+        return response
+
+    return auth_check
 
 def handle_error(start_response, error_code):
     """Renders the error page."""
+    global g_front_end
+
     content = g_front_end.error().encode('utf-8')
     headers = [('Content-type', 'text/plain; charset=utf-8')]
     start_response(str(error_code), headers)
+    g_session_mgr.clear_current_session() # Housekeeping
     return [content]
 
 def handle_error_404(start_response):
@@ -64,13 +152,32 @@ def handle_error_500(start_response):
     """Renders the error page."""
     return handle_error(start_response, '500 Internal Server Error')
 
-def handle_dynamic_page_request(start_response, content, mime_type='text/html; charset=utf-8'):
+def handle_redirect_exception(e, start_response):
+    """Returns the redirect response."""
+    start_response('302 Found', [('Location', e.urls[0])])
+    return []
+
+def handle_dynamic_page_request(env, start_response, content, mime_type='text/html; charset=utf-8'):
+    """Utility function called for each page handler."""
+    """Makes sure the response is encoded correctly and that the headers are set correctly."""
+
+    # Perform the page logic and encode the response.
     content = content.encode('utf-8')
-    headers = [('Content-type', mime_type)]
+
+    # Build the response headers.
+    headers = []
+    if mime_type is not None:
+        headers.append(('Content-type', mime_type))
+
+    # Return the response headers.
     start_response('200 OK', headers)
+
+    # Return the page contents.
     return [content]
 
 def handle_static_file_request(start_response, dir, file_name, mime_type):
+    """Utility function called for each static resource request."""
+
     # Sanity checks.
     if [start_response, dir, file_name, mime_type].count(None) > 0:
         return handle_error_404(start_response)
@@ -108,409 +215,575 @@ def log_error(log_str):
 def css(env, start_response):
     """Returns the CSS page."""
     try:
-        return handle_static_file_request(start_response, CSS_DIR, env['PATH_INFO'], 'text/css')
+        return handle_static_file_request(start_response, Dirs.CSS_DIR, env['PATH_INFO'], 'text/css')
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
 def data(env, start_response):
     """Returns the data page."""
     try:
-        return handle_static_file_request(start_response, DATA_DIR, env['PATH_INFO'], 'text/plain')
+        return handle_static_file_request(start_response, Dirs.DATA_DIR, env['PATH_INFO'], 'text/plain')
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
 def js(env, start_response):
     """Returns the JS page."""
     try:
-        return handle_static_file_request(start_response, JS_DIR, env['PATH_INFO'], 'text/html')
+        return handle_static_file_request(start_response, Dirs.JS_DIR, env['PATH_INFO'], 'text/html')
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
 def images(env, start_response):
     """Returns images."""
     try:
-        return handle_static_file_request(start_response, IMAGES_DIR, env['PATH_INFO'], 'text/html')
+        return handle_static_file_request(start_response, Dirs.IMAGES_DIR, env['PATH_INFO'], 'text/html')
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
 def media(env, start_response):
     """Returns media files (icons, etc.)."""
     try:
-        return handle_static_file_request(start_response, MEDIA_DIR, env['PATH_INFO'], 'text/html')
+        return handle_static_file_request(start_response, Dirs.MEDIA_DIR, env['PATH_INFO'], 'text/html')
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
 def photos(env, start_response):
     """Returns an activity photo."""
     try:
-        return handle_static_file_request(start_response, PHOTOS_DIR, os.path.join(env['user_id'], env['PATH_INFO']), 'text/html')
+        return handle_static_file_request(start_response, Dirs.PHOTOS_DIR, os.path.join(env['user_id'], env['PATH_INFO']), 'text/html')
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
 def error(env, start_response):
     """Renders the error page."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.error())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.render_error())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def stats(env, start_response):
     """Renders the internal statistics page."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.stats())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.performance_stats())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_session_check
 def live(env, start_response):
     """Renders the map page for the current activity from a single device."""
+    global g_front_end
+
     try:
         device_str = env['PATH_INFO']
         device_str = device_str[1:]
-        return handle_dynamic_page_request(start_response, g_front_end.livedevice_str())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.live_device(device_str))
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_session_check
 def live_user(env, start_response):
     """Renders the map page for the current activity from a specified user."""
+    global g_front_end
+
     try:
         user_str = env['PATH_INFO']
         user_str = user_str[1:]
-        return handle_dynamic_page_request(start_response, g_front_end.live_user(user_str))
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.live_user(user_str))
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_session_check
 def activity(env, start_response):
     """Renders the details page for an activity."""
+    global g_front_end
+
     try:
         activity_id = env['PATH_INFO']
         activity_id = activity_id[1:]
-        return handle_dynamic_page_request(start_response, g_front_end.activity(activity_id))
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.activity(activity_id))
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def edit_activity(env, start_response):
     """Renders the edit page for an activity."""
+    global g_front_end
+
     try:
         activity_id = env['PATH_INFO']
         activity_id = activity_id[1:]
-        return handle_dynamic_page_request(start_response, g_front_end.edit_activity(activity_id))
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.edit_activity(activity_id))
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def add_photos(env, start_response):
     """Renders the add photos page for an activity."""
+    global g_front_end
+
     try:
         activity_id = env['PATH_INFO']
         activity_id = activity_id[1:]
-        return handle_dynamic_page_request(start_response, g_front_end.add_photos(activity_id))
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.add_photos(activity_id))
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_session_check
 def device(env, start_response):
     """Renders the map page for a single device."""
+    global g_front_end
+
     try:
         device_str = env['PATH_INFO']
         device_str = device_str[1:]
-        return handle_dynamic_page_request(start_response, g_front_end.device(device_str))
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.device(device_str))
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def my_activities(env, start_response):
     """Renders the list of the specified user's activities."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.my_activities())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.my_activities())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def all_activities(env, start_response):
     """Renders the list of all activities the specified user is allowed to view."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.all_activities())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.all_activities())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def record_progression(env, start_response):
     """Renders the list of records, in order of progression, for the specified user and record type."""
+    global g_front_end
+
     try:
         params = env['PATH_INFO']
         activity_type = params[1]
         record_name = params[2]
-        return handle_dynamic_page_request(start_response, g_front_end.record_progression(activity_type, record_name))
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.record_progression(activity_type, record_name))
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def workouts(env, start_response):
     """Renders the workouts view."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.workouts())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.workouts())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def workout(env, start_response):
     """Renders the view for an individual workout."""
+    global g_front_end
+
     try:
         workout_id = env['PATH_INFO']
         workout_id = workout_id[1:]
-        return handle_dynamic_page_request(start_response, g_front_end.workout(workout_id))
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.workout(workout_id))
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def statistics(env, start_response):
     """Renders the statistics view."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.statistics())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.statistics())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def gear(env, start_response):
     """Renders the list of all gear belonging to the logged in user."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.gear())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.gear())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def service_history(env, start_response):
     """Renders the service history for a particular piece of gear."""
+    global g_front_end
+
     try:
         gear_id = env['PATH_INFO']
         gear_id = gear_id[1:]
-        return handle_dynamic_page_request(start_response, g_front_end.service_history(gear_id))
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.service_history(gear_id))
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def friends(env, start_response):
     """Renders the list of users who are friends with the logged in user."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.friends())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.friends())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def device_list(env, start_response):
     """Renders the list of a user's devices."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.device_list())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.device_list())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def manual_entry(env, start_response):
     """Called when the user selects an activity type, indicating they want to make a manual data entry."""
+    global g_front_end
+
     try:
         activity_type = env['PATH_INFO']
         activity_type = activity_type[1:]
-        return handle_dynamic_page_request(start_response, g_front_end.manual_entry(activity_type))
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.manual_entry(activity_type))
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def import_activity(env, start_response):
     """Renders the import page."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.import_activity())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.import_activity())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def pace_plans(env, start_response):
     """Renders the pace plans page."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.pace_plans())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.pace_plans())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def task_status(env, start_response):
     """Renders the import status page."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.task_status())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.task_status())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def profile(env, start_response):
     """Renders the user's profile page."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.profile())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.profile())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def settings(env, start_response):
     """Renders the user's settings page."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.settings())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.settings())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
 def login(env, start_response):
     """Renders the login page."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.login())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.login())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
 def create_login(env, start_response):
     """Renders the create login page."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.create_login())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.create_login())
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
 def logout(env, start_response):
     """Ends the logged in session."""
-    start_response('200 OK', [('Content-Type', 'text/html')])
-    return handle_error_500(start_response)
+    global g_session_mgr
+
+    _, _, _, cookie = get_verb_path_params_and_cookie(env)
+    g_session_mgr.invalidate_session_token(cookie)
+    return handle_dynamic_page_request(env, start_response, g_front_end.backend.login())
 
 def about(env, start_response):
     """Renders the about page."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.about())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.about())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
 def status(env, start_response):
     """Renders the status page. Used as a simple way to tell if the site is up."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.status())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.status())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
 def ical(env, start_response):
     """Returns the ical calendar with the specified ID."""
+    global g_front_end
+
     try:
         calendar_id = env['PATH_INFO']
         calendar_id = calendar_id[1:]
-        return handle_dynamic_page_request(start_response, g_front_end.ical(calendar_id))
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.ical(calendar_id))
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
 def api_keys(env, start_response):
     """Renders the api key management page."""
+    global g_front_end
+
     try:
-        return handle_dynamic_page_request(start_response, g_front_end.api_keys())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.api_keys())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
-        pass # Fall through to the error handler
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
 def api(env, start_response):
     """Endpoint for API calls."""
+    global g_front_end
+
     try:
-        verb = env['REQUEST_METHOD']
-        path = env['REQUEST_URI'].split('/')[2:]
+        # Extract the things we need from the request.
+        verb, path, params, cookie = get_verb_path_params_and_cookie(env)
+        g_session_mgr.set_current_session(cookie)
 
-        method = path[1].split('?')
-        path[1] = method[0]
+        # Handle the API request.
+        content, response_code = g_front_end.api_internal(verb, tuple(path), params, cookie)
 
-        params = {}
-        if verb == 'GET':
-            temp_params = parse_qs(method[1])
-            for k in temp_params:
-                params[k] = (temp_params[k])[0]
-        else:
-            params = env['wsgi.input'].read()
-            params = json.loads(params)
+        # Housekeeping.
+        g_session_mgr.clear_current_session()
 
-        content, response_code = g_front_end.api_internal(verb, tuple(path), params)
+        # Return the response headers.
         if response_code == 200:
-            return handle_dynamic_page_request(start_response, content, mime_type='application/json')
-        return handle_error(start_response, response_code)
+            headers = []
+            headers.append(('Content-type', 'application/json'))
+
+            content = content.encode('utf-8')
+            start_response('200 OK', headers)
+            return [content]
+        elif response_code == 404:
+            return handle_error_404(start_response)
     except:
-        pass
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
 def google_maps(env, start_response):
     """Returns the Google Maps API key."""
+    global g_front_end
+
     try:
         return handle_dynamic_page_request(start_response, g_front_end.google_maps())
     except cherrypy.HTTPRedirect as e:
-        return respond_to_redirect_exception(e, start_response)
+        return handle_redirect_exception(e, start_response)
     except:
         pass # Fall through to the error handler
     return handle_error_500(start_response)
@@ -532,6 +805,7 @@ def create_server(config, port_num):
     
     # HTTPS stuff.
     if config.is_https_enabled():
+
         cert_file = config.get_certificate_file()
         privkey_file = config.get_private_key_file()
 
@@ -542,7 +816,6 @@ def create_server(config, port_num):
             server.ssl_module = 'pyopenssl'
             server.ssl_certificate = cert_file
             server.ssl_private_key = privkey_file
-            # server.ssl_certificate_chain = 'ssl/bundle.crt'
         else:
             print("No certs provided.")
 
@@ -554,6 +827,7 @@ def create_server(config, port_num):
 def main():
     """Entry point for the cherrypy+wsgi version of the app."""
     global g_front_end
+    global g_session_mgr
 
     # Make sure we have a compatible version of python.
     if sys.version_info[0] < 3:
@@ -581,7 +855,7 @@ def main():
     try:
         # Create all the objects that actually implement the functionality.
         root_dir = os.path.dirname(os.path.abspath(__file__))
-        backend, cherrypy_config = AppFactory.create_cherrypy(config, root_dir, SessionMgr.CustomSessionMgr())
+        backend, cherrypy_config = AppFactory.create_cherrypy(config, root_dir, g_session_mgr)
 
         # Mount the application.
         cherrypy.tree.graft(css, "/css")

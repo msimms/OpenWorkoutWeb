@@ -167,7 +167,7 @@ def create_flask(config, root_dir):
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
     import_scheduler = ImportScheduler.ImportScheduler()
     workout_plan_gen = WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler()
-    data_mgr = DataMgr.DataMgr(config, root_url, analysis_scheduler, import_scheduler, workout_plan_gen)
+    data_mgr = DataMgr.DataMgr(config=config, root_url=root_url, analysis_scheduler=analysis_scheduler, import_scheduler=import_scheduler, workout_plan_gen_scheduler=workout_plan_gen)
     backend = App.App(user_mgr, data_mgr, root_dir, root_url, googlemaps_key, profiling_enabled, debug_enabled)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')

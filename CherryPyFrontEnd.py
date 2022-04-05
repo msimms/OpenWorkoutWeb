@@ -15,6 +15,7 @@ LOGIN_URL = '/login'
 g_front_end = None
 
 def require(*conditions):
+
     # A decorator that appends conditions to the auth.require config variable.
     def decorate(f):
         if not hasattr(f, '_cp_config'):
@@ -529,12 +530,21 @@ class CherryPyFrontEnd(object):
             self.log_error('Unhandled exception in ' + CherryPyFrontEnd.api_keys.__name__)
         return self.error()
 
-    def api_internal(self, verb, path, params):
-        # Return values.
+    def api_internal(self, verb, path, params, cookie):
+        """Common code for handling API calls."""
+
+        #
+        # Default return values.
+        #
+
         response = ""
         http_status = 200
 
-        # Get the logged in user, or lookup the user using the API key.
+        #
+        # Who made this request.
+        #
+
+        # Lookup the user using the API key.
         user_id = None
         if Keys.API_KEY in params:
 
@@ -552,9 +562,14 @@ class CherryPyFrontEnd(object):
                     http_status = 429
                     self.log_error(response)
 
-        else:
+        # API key not provided, check the web cookie.
+        if user_id == None:
+            username = self.backend.user_mgr.get_logged_in_user_from_cookie(cookie)
+            if username is not None:
+                user_id, _, _ = self.backend.user_mgr.retrieve_user(username)
 
-            # API key not provided, check the session key.
+        # Web cookie not provided, check the session key.
+        if user_id == None:
             username = self.backend.user_mgr.get_logged_in_user()
             if username is not None:
                 user_id, _, _ = self.backend.user_mgr.retrieve_user(username)
@@ -602,7 +617,7 @@ class CherryPyFrontEnd(object):
                     params = json.loads(params)
 
             # Pass off to the internal handler, i.e. the method that doesn't use cherrypy objects.
-            response, http_status = self.api_internal(verb, args, params)
+            response, http_status = self.api_internal(verb, args, params, None)
 
         except ApiException.ApiException as e:
             response = e.message

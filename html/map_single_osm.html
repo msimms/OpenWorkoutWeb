@@ -575,9 +575,13 @@ ${summary}
         }
     }
 
+    /// @function process_photos_list
     var process_photos_list = function(photos_list)
     {
         let photo_ids = photos_list["photo ids"]
+
+        if (photo_ids == null)
+            return;
 
         if (photo_ids.length > 0)
         {

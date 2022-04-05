@@ -27,7 +27,6 @@ import cherrypy
 import flask
 import logging
 import os
-import sys
 import time
 import uuid
 
@@ -47,18 +46,30 @@ class SessionMgr(object):
 
     def get_logged_in_user(self):
         """Returns the username associated with the current session."""
-        pass
+        return None
 
     def get_logged_in_user_from_cookie(self, auth_cookie):
         """Returns the username associated with the specified authentication cookie."""
-        pass
+        return None
 
     def create_new_session(self, username):
         """Starts a new session."""
         pass
 
+    def set_current_session(self, cookie):
+        """Accessor method for setting the cookie associated with the current session."""
+        pass
+
+    def get_current_session(self):
+        """Accessor method for getting the cookie associated with the current session."""
+        return None
+
     def clear_current_session(self):
         """Ends the current session."""
+        pass
+
+    def invalidate_session_token(self, session_cookie):
+        """Removes the session token from the cache, and anywhere else it might be stored."""
         pass
 
     def session_dir(self, root_dir):
@@ -74,6 +85,7 @@ class CustomSessionMgr(SessionMgr):
     def __init__(self):
         super(SessionMgr, self).__init__()
         self.session_cache = {}
+        self.current_session_cookie = None
         self.load_sessions()
 
     def load_sessions(self):
@@ -86,10 +98,7 @@ class CustomSessionMgr(SessionMgr):
 
     def get_logged_in_user(self):
         """Returns the username associated with the current session."""
-        if Keys.SESSION_KEY in self.session_cache:
-            session = self.session_cache[Keys.SESSION_KEY]
-            return session[0]
-        return None
+        return self.get_logged_in_user_from_cookie(self.current_session_cookie)
 
     def get_logged_in_user_from_cookie(self, session_cookie):
         """Returns the username associated with the specified session cookie."""
@@ -103,15 +112,27 @@ class CustomSessionMgr(SessionMgr):
         """Starts a new session."""
         session_cookie = str(uuid.uuid4())
         now = time.time()
-        self.session_cache[Keys.SESSION_KEY] = ( username, now )
+        self.current_session_cookie = session_cookie
         self.session_cache[session_cookie] =  ( username, now )
         self.flush_session_data()
         return session_cookie
 
+    def set_current_session(self, cookie):
+        """Accessor method for setting the cookie associated with the current session."""
+        self.current_session_cookie = cookie
+
+    def get_current_session(self):
+        """Accessor method for getting the cookie associated with the current session."""
+        return self.current_session_cookie
+
     def clear_current_session(self):
         """Ends the current session."""
-        if Keys.SESSION_KEY in self.session_cache:
-            self.session_cache.pop(Keys.SESSION_KEY)
+        self.current_session_cookie = None
+
+    def invalidate_session_token(self, session_cookie):
+        """Removes the session token from the cache, and anywhere else it might be stored."""
+        if session_cookie in self.session_cache:
+            self.flush_session_data()
 
     def session_dir(self, root_dir):
         """Returns the directory to be used for session storage."""
@@ -160,8 +181,8 @@ class CherryPySessionMgr(SessionMgr):
 
     def clear_current_session(self):
         """Ends the current session."""
-        sess = cherrypy.session
-        sess[Keys.SESSION_KEY] = None
+        current_session = cherrypy.session
+        current_session[Keys.SESSION_KEY] = None
 
 class FlaskSessionMgr(SessionMgr):
     """Class for managing sessions when using the flask framework. A user may have more than one session."""

@@ -15,14 +15,10 @@ import ApiException
 import AppFactory
 import Config
 import DatabaseException
+import Dirs
 import Keys
 import SessionException
 
-CSS_DIR = 'css'
-DATA_DIR = 'data'
-JS_DIR = 'js'
-IMAGES_DIR = 'images'
-MEDIA_DIR = 'media'
 PHOTOS_DIR = 'photos'
 
 g_flask_app = flask.Flask(__name__)
@@ -52,7 +48,7 @@ def login_requred(function_to_protect):
 def css(file_name):
     """Returns the CSS page."""
     try:
-        return flask.send_from_directory(CSS_DIR, file_name)
+        return flask.send_from_directory(Dirs.CSS_DIR, file_name)
     except:
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
@@ -63,7 +59,7 @@ def css(file_name):
 def data(file_name):
     """Returns the data page."""
     try:
-        return flask.send_from_directory(DATA_DIR, file_name)
+        return flask.send_from_directory(Dirs.DATA_DIR, file_name)
     except:
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
@@ -74,7 +70,7 @@ def data(file_name):
 def js(file_name):
     """Returns the JS page."""
     try:
-        return flask.send_from_directory(JS_DIR, file_name)
+        return flask.send_from_directory(Dirs.JS_DIR, file_name)
     except:
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
@@ -85,7 +81,7 @@ def js(file_name):
 def images(file_name):
     """Returns images."""
     try:
-        return flask.send_from_directory(IMAGES_DIR, file_name)
+        return flask.send_from_directory(Dirs.IMAGES_DIR, file_name)
     except:
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
@@ -96,7 +92,7 @@ def images(file_name):
 def media(file_name):
     """Returns media files (icons, etc.)."""
     try:
-        return flask.send_from_directory(MEDIA_DIR, file_name)
+        return flask.send_from_directory(Dirs.MEDIA_DIR, file_name)
     except:
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
@@ -107,7 +103,7 @@ def media(file_name):
 def photos(user_id, file_name):
     """Returns an activity photo."""
     try:
-        return flask.send_from_directory(PHOTOS_DIR, os.path.join(user_id, file_name))
+        return flask.send_from_directory(Dirs.PHOTOS_DIR, os.path.join(user_id, file_name))
     except:
         g_app.log_error(traceback.format_exc())
         g_app.log_error(sys.exc_info()[0])
@@ -169,6 +165,7 @@ def activity(activity_id):
     return error()
 
 @g_flask_app.route('/edit_activity/<activity_id>')
+@login_requred
 def edit_activity(activity_id):
     """Renders the edit page for an activity."""
     try:
@@ -180,6 +177,7 @@ def edit_activity(activity_id):
     return error()
 
 @g_flask_app.route('/add_photos/<activity_id>')
+@login_requred
 def add_photos(activity_id):
     """Renders the add photos page for an activity."""
     try:
@@ -582,7 +580,6 @@ def main():
     """Entry point for the flask version of the app."""
     global g_app
     global g_flask_app
-    global g_session_mgr
 
     # Make sure we have a compatible version of python.
     if sys.version_info[0] < 3:
@@ -610,7 +607,7 @@ def main():
 
         # Create all the objects that actually implement the functionality.
         root_dir = os.path.dirname(os.path.abspath(__file__))
-        g_app = AppFactory.create_flask(config, root_dir, g_session_mgr)
+        g_app = AppFactory.create_flask(config, root_dir)
         g_flask_app.run(host=config.get_bindname(), port=config.get_bindport(), debug=config.is_debug_enabled())
     except DatabaseException.DatabaseException as e:
         print(e.message)

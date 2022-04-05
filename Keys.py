@@ -25,7 +25,7 @@
 """Basically this contains all the string constants."""
 
 # Keys associated with user management.
-SESSION_KEY = "_straen_username"
+SESSION_KEY = "current_session_key"
 DATABASE_ID_KEY = "_id"
 USERNAME_KEY = "username" # Login name for a user
 PASSWORD_KEY = "password" # User's password

@@ -482,6 +482,9 @@ ${summary}
     {
         let photo_ids = photos_list["photo ids"]
 
+        if (photo_ids == null)
+            return;
+
         if (photo_ids.length > 0)
         {
             let photo_table = document.getElementById("photos");

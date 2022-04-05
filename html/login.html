@@ -28,14 +28,21 @@
         let username = document.getElementById("username").value;
         let password = document.getElementById("password").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["username"] : username});
         dict.push({["password"] : password});
-        if (send_post_request(the_url, dict, result_text))
-            window.location.replace("${root_url}/all_activities");
-        else
-            alert("Authentication failed!");
+
+        send_post_request_async(the_url, dict, function(s, m) {
+            if (s == 200)
+            {
+                document.cookie = "session_cookie=" + m + "; ";
+                window.location.replace("${root_url}/all_activities");
+            }
+            else
+            {
+                alert("Authentication failed!");
+            }
+        });
     }
 
 </script>
