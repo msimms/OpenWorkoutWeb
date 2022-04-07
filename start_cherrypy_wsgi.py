@@ -21,7 +21,7 @@ from urllib.parse import parse_qs
 SESSION_COOKIE = 'session_cookie'
 
 g_front_end = None
-g_session_mgr = SessionMgr.CustomSessionMgr()
+g_session_mgr = None
 
 def signal_handler(signal, frame):
     global g_front_end
@@ -855,6 +855,7 @@ def main():
     try:
         # Create all the objects that actually implement the functionality.
         root_dir = os.path.dirname(os.path.abspath(__file__))
+        g_session_mgr = SessionMgr.CustomSessionMgr(config)
         backend, cherrypy_config = AppFactory.create_cherrypy(config, root_dir, g_session_mgr)
 
         # Mount the application.

@@ -30,6 +30,7 @@ import os
 import time
 import uuid
 
+import AppDatabase
 import Keys
 import SessionException
 
@@ -74,7 +75,7 @@ class SessionMgr(object):
 
     def session_dir(self, root_dir):
         """Returns the directory to be used for session storage."""
-        session_dir = os.path.join(root_dir, 'sessions3')
+        session_dir = os.path.join(root_dir, 'session_cache')
         if not os.path.exists(session_dir):
             os.makedirs(session_dir)
         return session_dir
@@ -82,19 +83,11 @@ class SessionMgr(object):
 class CustomSessionMgr(SessionMgr):
     """Custom session manager, avoids the logic provided by the framework. Goal is a high performance session manager."""
 
-    def __init__(self):
+    def __init__(self, config):
         super(SessionMgr, self).__init__()
-        self.session_cache = {}
         self.current_session_cookie = None
-        self.load_sessions()
-
-    def load_sessions(self):
-        """Loads existing session data into the cache."""
-        pass
-
-    def flush_session_data(self):
-        """Flushes session data to secondary storage."""
-        pass
+        self.database = AppDatabase.MongoDatabase()
+        self.database.connect(config)
 
     def get_logged_in_user(self):
         """Returns the username associated with the current session."""
@@ -102,20 +95,17 @@ class CustomSessionMgr(SessionMgr):
 
     def get_logged_in_user_from_cookie(self, session_cookie):
         """Returns the username associated with the specified session cookie."""
-        user = None
-        if session_cookie in self.session_cache:
-            session = self.session_cache[session_cookie]
-            return session[0]
+        user, _ = self.database.retrieve_session_token(session_cookie)
         return user
 
     def create_new_session(self, username):
         """Starts a new session."""
         session_cookie = str(uuid.uuid4())
-        now = time.time()
-        self.current_session_cookie = session_cookie
-        self.session_cache[session_cookie] =  ( username, now )
-        self.flush_session_data()
-        return session_cookie
+        expiry = time.time() + 86400
+        if self.database.create_session_token(session_cookie, username, expiry):
+            self.current_session_cookie = session_cookie
+            return session_cookie
+        return None
 
     def set_current_session(self, cookie):
         """Accessor method for setting the cookie associated with the current session."""
@@ -131,15 +121,7 @@ class CustomSessionMgr(SessionMgr):
 
     def invalidate_session_token(self, session_cookie):
         """Removes the session token from the cache, and anywhere else it might be stored."""
-        if session_cookie in self.session_cache:
-            self.flush_session_data()
-
-    def session_dir(self, root_dir):
-        """Returns the directory to be used for session storage."""
-        session_dir = os.path.join(root_dir, 'session_cache')
-        if not os.path.exists(session_dir):
-            os.makedirs(session_dir)
-        return session_dir
+        self.database.delete_session_token(session_cookie)
 
 class CherryPySessionMgr(SessionMgr):
     """Class for managing sessions when using the cherrypy framework. A user may have more than one session."""

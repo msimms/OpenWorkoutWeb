@@ -46,6 +46,11 @@ API_KEYS = "api keys" # List of API keys belonging to the user
 API_KEY = "key" # API key being provided
 API_KEY_RATE = "rate" # The maximum number of requests allowed per day for the provided key
 
+# Keys associated with session management.
+SESSION_TOKEN_KEY = "cookie"
+SESSION_USER_KEY = "user"
+SESSION_EXPIRY_KEY = "expiry"
+
 # Celery.
 CELERY_PROJECT_NAME = "openworkoutweb_worker"
 

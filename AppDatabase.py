@@ -85,6 +85,7 @@ class MongoDatabase(Database.Database):
     workouts_collection = None
     tasks_collectoin = None
     uploads_collection = None
+    sessoins_collection = None
 
     def __init__(self):
         Database.Database.__init__(self)
@@ -112,6 +113,7 @@ class MongoDatabase(Database.Database):
             self.workouts_collection = self.database['workouts']
             self.tasks_collection = self.database['tasks']
             self.uploads_collection = self.database['uploads']
+            self.sessions_collection = self.database['sessions']
 
             # Create indexes.
             self.activities_collection.create_index(Keys.ACTIVITY_ID_KEY)
@@ -343,11 +345,13 @@ class MongoDatabase(Database.Database):
             return user_list
 
         try:
+            # Match on usernames.
             matched_usernames = self.users_collection.find({ Keys.USERNAME_KEY: { "$regex": username } })
             if matched_usernames is not None:
                 for matched_user in matched_usernames:
                     user_list.append(matched_user[Keys.USERNAME_KEY])
 
+            # Match real names too.
             matched_realnames = self.users_collection.find({ Keys.REALNAME_KEY: { "$regex": username } })
             if matched_realnames is not None:
                 for matched_user in matched_realnames:
@@ -3003,6 +3007,60 @@ class MongoDatabase(Database.Database):
                         break
                 user[Keys.API_KEYS] = key_list
                 update_collection(self.users_collection, user)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    #
+    # Session token management methods
+    #
+
+    def create_session_token(self, token, user, expiry):
+        """Create method for a session token."""
+        if token is None:
+            self.log_error(MongoDatabase.create_session_token.__name__ + ": Unexpected empty object: token")
+            return False
+        if user is None:
+            self.log_error(MongoDatabase.create_session_token.__name__ + ": Unexpected empty object: user")
+            return False
+        if expiry is None:
+            self.log_error(MongoDatabase.create_session_token.__name__ + ": Unexpected empty object: expiry")
+            return False
+
+        try:
+            post = { Keys.SESSION_TOKEN_KEY: token, Keys.SESSION_USER_KEY: user, Keys.SESSION_EXPIRY_KEY: expiry }
+            insert_into_collection(self.sessions_collection, post)
+            return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def retrieve_session_token(self, token):
+        """Retrieve method for a session token."""
+        if token is None:
+            self.log_error(MongoDatabase.retrieve_session_token.__name__ + ": Unexpected empty object: token")
+            return (None, None)
+
+        try:
+            session_data = self.sessions_collection.find_one({ Keys.SESSION_TOKEN_KEY: token })
+            return session_data[Keys.SESSION_USER_KEY], session_data[Keys.SESSION_EXPIRY_KEY]
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return (None, None)
+
+    def delete_session_token(self, token):
+        """Delete method for a session token."""
+        if token is None:
+            self.log_error(MongoDatabase.delete_session_token.__name__ + ": Unexpected empty object: token")
+            return False
+
+        try:
+            deleted_result = self.sessions_collection.delete_one({ Keys.SESSION_TOKEN_KEY: token })
+            if deleted_result is not None:
                 return True
         except:
             self.log_error(traceback.format_exc())
