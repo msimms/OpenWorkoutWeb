@@ -117,7 +117,7 @@ def do_auth_check(f):
 def do_session_check(f):
     """Function decorator for endpoints that where logging in is optional."""
 
-    def auth_check(*args, **kwargs):
+    def session_check(*args, **kwargs):
         global g_session_mgr
 
         # Extract the things we need from the request.
@@ -132,7 +132,7 @@ def do_session_check(f):
  
         return response
 
-    return auth_check
+    return session_check
 
 def handle_error(start_response, error_code):
     """Renders the error page."""
@@ -652,6 +652,7 @@ def settings(env, start_response):
         log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_session_check
 def login(env, start_response):
     """Renders the login page."""
     global g_front_end
@@ -666,6 +667,7 @@ def login(env, start_response):
         log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_session_check
 def create_login(env, start_response):
     """Renders the create login page."""
     global g_front_end

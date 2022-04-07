@@ -3046,7 +3046,8 @@ class MongoDatabase(Database.Database):
 
         try:
             session_data = self.sessions_collection.find_one({ Keys.SESSION_TOKEN_KEY: token })
-            return session_data[Keys.SESSION_USER_KEY], session_data[Keys.SESSION_EXPIRY_KEY]
+            if session_data is not None:
+                return session_data[Keys.SESSION_USER_KEY], session_data[Keys.SESSION_EXPIRY_KEY]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
