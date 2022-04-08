@@ -22,12 +22,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 """Abstracts the configuration file."""
+"""The example configuration file documents the purpose of each item."""
 
 import configparser
 
 
 class Config(object):
     """Class that abstracts the configuration file."""
+    """The example configuration file documents the purpose of each item."""
 
     def __init__(self):
         self.config = None
