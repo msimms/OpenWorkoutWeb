@@ -29,18 +29,19 @@ Why develop a workout tracker when there are so many closed-source options avail
 [Full bug and feature tracking](https://github.com/msimms/OpenWorkoutWeb/issues).
 
 ## Installation
-1. Clone the source code:
+
+**Step 1**. Clone the source code:
 ```
 git clone https://github.com/msimms/OpenWorkoutWeb
 ```
 
-2. Install the python dependencies:
+**Step 2**. Install the python dependencies:
 ```
 cd OpenWorkoutWeb
 python setup.py
 ```
 
-3. Install other package dependencies, specifically `mongodb` and `rabbitmq`, which are services the application depends on:
+**Step 3**. Install other package dependencies, specifically `mongodb` and `rabbitmq`, which are services the application depends on:
 
 ```
 #
@@ -55,22 +56,44 @@ brew services start mongodb/brew/mongodb-community
 # Install rabbitmq and start the service.
 brew install rabbitmq
 brew services restart rabbitmq
+
+#
+# Example for Ubuntu Linux:
+#
+
+# Install mongo.
+curl -fsSL https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+sudo apt update
+sudo apt install mongodb-org
+sudo systemctl start mongod.service
+sudo systemctl status mongod
+
+# Install rabbitmq.
+sudo apt install rabbitmq-server
+sudo rabbitmqctl add_user openworkout <password>
+sudo rabbitmqctl add_vhost openworkout_vhost
+sudo rabbitmqctl set_user_tags openworkout openworkout_tag
+sudo rabbitmqctl set_permissions -p openworkout_vhost openworkout ".*" ".*" ".*"
+sudo service rabbitmq-server start
 ```
 
 ## Execution
 The software is designed to work within multiple frameworks. Currently, cherrypy and flask are supported.
 
-To run the web service under the cherrypy framework:
+**Option 1** To run the web service under the cherrypy framework, the wsgi option is the preferred option if the app is sitting behind a proper web server, such as ngnix:
 ```
 python start_cherrypy.py --config openworkout.config
+or
+python start_cherrypy_wsgi.py --config openworkout.config
 ```
 
-To run the web service under the flask framework:
+**Option 2** To run the web service under the flask framework:
 ```
 python start_flask.py --config openworkout.config
 ```
 
-*If a Google Maps key is not provided, OpenStreetMap will be used instead.*
+*If a Google Maps key is not provided in the configuration file, OpenStreetMap will be used instead.*
 
 ## Architecture
 
