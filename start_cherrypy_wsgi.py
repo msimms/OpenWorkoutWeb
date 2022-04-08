@@ -489,7 +489,7 @@ def statistics(env, start_response):
     global g_front_end
 
     try:
-        return handle_dynamic_page_request(env, start_response, g_front_end.backend.statistics())
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.user_stats())
     except cherrypy.HTTPRedirect as e:
         return handle_redirect_exception(e, start_response)
     except:
