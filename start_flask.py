@@ -522,7 +522,7 @@ def api(version, method):
             api_key = params[Keys.API_KEY]
 
             # Which user is associated with this key?
-            user_id, _, _, max_rate = g_app.user_mgr.retrieve_user_from_api_key(key)
+            user_id, _, _, max_rate = g_app.user_mgr.retrieve_user_from_api_key(api_key)
             if user_id is not None:
 
                 # Make sure the key is not being abused.
