@@ -584,12 +584,12 @@ ${nav}
                         <option value="C">C</option>
                     </select><br>
                 </p>
-                <button type="modern_button" onclick="return create_race()">Save</button>
-                <button type="button" onclick="return cancel_create_race()">Cancel</button>
+                <button type="modern_button" onclick="create_race()">Save</button>
+                <button type="button" onclick="cancel_create_race()">Cancel</button>
                 <hr>
             </div>
 
-            <button type="button" onclick="return add_race()">Add Race</button>
+            <button type="button" onclick="add_race()">Add Race</button>
         </p>
 
         <hr>
@@ -597,7 +597,7 @@ ${nav}
         <h2>Preferences</h2>
         <p>
             Which day of the week is most suitable for doing long runs?<br>
-            <select name="preferred_long_run_day" id="preferred_long_run_day" class="right" value="Weekday" onchange="return set_preferred_long_run_day()">
+            <select name="preferred_long_run_day" id="preferred_long_run_day" class="right" value="Weekday" onchange="set_preferred_long_run_day()">
                 <option value="Sunday">Sunday</option>
                 <option value="Monday">Monday</option>
                 <option value="Tuesday">Tuesday</option>
@@ -607,12 +607,12 @@ ${nav}
                 <option value="Saturday">Saturday</option>
             </select><br>
             Are you interested in speed/pace or just finishing?<br>
-            <select name="goal_type" id="goal_type" class="right" onchange="return set_goal_type()">
+            <select name="goal_type" id="goal_type" class="right" onchange="set_goal_type()">
                 <option value="Completion">Completion</option>
                 <option value="Speed">Speed</option>
             </select><br>
-            Experience Level: <br><input type="range" min="1" max="10" value="5" class="slider" id="exp_level" style="height:10px" onchange="return set_exp_level()"><br>
-            Comfort Level With Structured Training: <br><input type="range" min="1" max="10" value="5" class="slider" id="structured_training_comfort_level" style="height:10px" onchange="return set_structured_training_comfort_level()"><br>
+            Experience Level: <br><input type="range" min="1" max="10" value="5" class="slider" id="exp_level" style="height:10px" onchange="set_exp_level()"><br>
+            Comfort Level With Structured Training: <br><input type="range" min="1" max="10" value="5" class="slider" id="structured_training_comfort_level" style="height:10px" onchange="set_structured_training_comfort_level()"><br>
         </p>
 
         <hr>

@@ -224,7 +224,7 @@ ${nav}
         <p>Description<br><input type="text" name="description" id="description"><br></p>
         <p>Date Added<br><input type="text" name="date_added" id="date_added"><br></p>
         <p>Date Retired<br><input type="text" name="date_retired" id="date_retired"><br></p>
-        <button type="modern_button" onclick="return create_gear('${root_url}', new_gear_type)">Save</button>
+        <button type="modern_button" onclick="create_gear('${root_url}', new_gear_type)">Save</button>
         <hr>
     </div>
 
@@ -233,7 +233,7 @@ ${nav}
         <table id="bikes" style="display: none;">
             <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
         </table>
-        <button type="button" onclick="return get_new_bike_info()">Add New Bike</button>
+        <button type="button" onclick="get_new_bike_info()">Add New Bike</button>
 
         <hr>
 
@@ -241,7 +241,7 @@ ${nav}
         <table id="shoes" style="display: none;">
             <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
         </table>
-        <button type="button" onclick="return get_new_shoes_info()">Add New Shoes</button>
+        <button type="button" onclick="get_new_shoes_info()">Add New Shoes</button>
 
         <hr>
 
