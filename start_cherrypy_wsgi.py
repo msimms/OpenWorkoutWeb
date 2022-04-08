@@ -9,6 +9,7 @@ import signal
 import sys
 import traceback
 
+import App
 import AppFactory
 import CherryPyFrontEnd
 import Config
@@ -67,7 +68,7 @@ def get_verb_path_params_and_cookie(env):
         # GET requests will have the parameters in the URL.
         if verb == 'GET':
 
-            # Split off the params from a GET request
+            # Split off the params from a GET request.
             method_and_params = path[num_path_elems - 1].split('?')
             path[num_path_elems - 1] = method_and_params[0]
 
@@ -152,9 +153,9 @@ def handle_error_500(start_response):
     """Renders the error page."""
     return handle_error(start_response, '500 Internal Server Error')
 
-def handle_redirect_exception(e, start_response):
+def handle_redirect_exception(url, start_response):
     """Returns the redirect response."""
-    start_response('302 Found', [('Location', e.urls[0])])
+    start_response('302 Found', [('Location', url)])
     return []
 
 def handle_dynamic_page_request(env, start_response, content, mime_type='text/html; charset=utf-8'):
@@ -278,8 +279,8 @@ def error(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.render_error())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -293,8 +294,8 @@ def stats(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.performance_stats())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -310,8 +311,8 @@ def live(env, start_response):
         device_str = env['PATH_INFO']
         device_str = device_str[1:]
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.live_device(device_str))
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -327,8 +328,8 @@ def live_user(env, start_response):
         user_str = env['PATH_INFO']
         user_str = user_str[1:]
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.live_user(user_str))
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -344,8 +345,8 @@ def activity(env, start_response):
         activity_id = env['PATH_INFO']
         activity_id = activity_id[1:]
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.activity(activity_id))
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -361,8 +362,8 @@ def edit_activity(env, start_response):
         activity_id = env['PATH_INFO']
         activity_id = activity_id[1:]
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.edit_activity(activity_id))
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -378,8 +379,8 @@ def add_photos(env, start_response):
         activity_id = env['PATH_INFO']
         activity_id = activity_id[1:]
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.add_photos(activity_id))
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -395,8 +396,8 @@ def device(env, start_response):
         device_str = env['PATH_INFO']
         device_str = device_str[1:]
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.device(device_str))
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -410,8 +411,8 @@ def my_activities(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.my_activities())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -425,8 +426,8 @@ def all_activities(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.all_activities())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -443,8 +444,8 @@ def record_progression(env, start_response):
         activity_type = params[1]
         record_name = params[2]
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.record_progression(activity_type, record_name))
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -458,8 +459,8 @@ def workouts(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.workouts())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -475,8 +476,8 @@ def workout(env, start_response):
         workout_id = env['PATH_INFO']
         workout_id = workout_id[1:]
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.workout(workout_id))
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -490,8 +491,8 @@ def statistics(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.user_stats())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -505,8 +506,8 @@ def gear(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.gear())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -522,8 +523,8 @@ def service_history(env, start_response):
         gear_id = env['PATH_INFO']
         gear_id = gear_id[1:]
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.service_history(gear_id))
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -537,8 +538,8 @@ def friends(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.friends())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -552,8 +553,8 @@ def device_list(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.device_list())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -569,8 +570,8 @@ def manual_entry(env, start_response):
         activity_type = env['PATH_INFO']
         activity_type = activity_type[1:]
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.manual_entry(activity_type))
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -584,8 +585,8 @@ def import_activity(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.import_activity())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -599,8 +600,8 @@ def pace_plans(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.pace_plans())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -614,8 +615,8 @@ def task_status(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.task_status())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -629,8 +630,8 @@ def profile(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.profile())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -644,8 +645,8 @@ def settings(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.settings())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -659,8 +660,8 @@ def login(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.login())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -694,8 +695,8 @@ def about(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.about())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -708,8 +709,8 @@ def status(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.status())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -724,8 +725,8 @@ def ical(env, start_response):
         calendar_id = env['PATH_INFO']
         calendar_id = calendar_id[1:]
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.ical(calendar_id))
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -739,8 +740,8 @@ def api_keys(env, start_response):
 
     try:
         return handle_dynamic_page_request(env, start_response, g_front_end.backend.api_keys())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
@@ -784,12 +785,13 @@ def google_maps(env, start_response):
 
     try:
         return handle_dynamic_page_request(start_response, g_front_end.google_maps())
-    except cherrypy.HTTPRedirect as e:
-        return handle_redirect_exception(e, start_response)
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
     except:
         pass # Fall through to the error handler
     return handle_error_500(start_response)
 
+@do_session_check
 def index(env, start_response):
     """Renders the index page."""
     return login(env, start_response)
