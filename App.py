@@ -41,6 +41,7 @@ except ImportError:
 
 import Keys
 import Api
+import Dirs
 import IcalServer
 import InputChecker
 import Perf
@@ -60,9 +61,6 @@ PRODUCT_NAME = 'OpenWorkout'
 
 LOGIN_URL = '/login'
 DEFAULT_LOGGED_IN_URL = '/all_activities'
-TASK_STATUS_URL = '/task_status'
-HTML_DIR = 'html'
-MEDIA_DIR = 'media'
 ZWIFT_WATOPIA_MAP_FILE_NAME = 'watopia.png'
 ZWIFT_CRIT_CITY_MAP_FILE_NAME = 'crit_city.png'
 ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME = 'makuri_islands.png'
@@ -87,16 +85,16 @@ class App(object):
         self.tempmod_dir = os.path.join(self.root_dir, 'tempmod3')
         self.google_maps_key = google_maps_key
         self.debug = debug
-        self.zwift_watopia_map_file = os.path.join(root_dir, MEDIA_DIR, ZWIFT_WATOPIA_MAP_FILE_NAME)
-        self.zwift_crit_city_map_file = os.path.join(root_dir, MEDIA_DIR, ZWIFT_CRIT_CITY_MAP_FILE_NAME)
-        self.zwift_makuri_islands_map_file = os.path.join(root_dir, MEDIA_DIR, ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME)
-        self.zwift_html_file = os.path.join(root_dir, HTML_DIR, 'zwift.html')
-        self.unmapped_activity_html_file = os.path.join(root_dir, HTML_DIR, 'unmapped_activity.html')
-        self.map_single_osm_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_osm.html')
-        self.map_single_google_html_file = os.path.join(root_dir, HTML_DIR, 'map_single_google.html')
-        self.map_multi_html_file = os.path.join(root_dir, HTML_DIR, 'map_multi_google.html')
-        self.error_logged_in_html_file = os.path.join(root_dir, HTML_DIR, 'error_logged_in.html')
-        self.error_activity_html_file = os.path.join(root_dir, HTML_DIR, 'error_activity.html')
+        self.zwift_watopia_map_file = os.path.join(root_dir, Dirs.MEDIA_DIR, ZWIFT_WATOPIA_MAP_FILE_NAME)
+        self.zwift_crit_city_map_file = os.path.join(root_dir, Dirs.MEDIA_DIR, ZWIFT_CRIT_CITY_MAP_FILE_NAME)
+        self.zwift_makuri_islands_map_file = os.path.join(root_dir, Dirs.MEDIA_DIR, ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME)
+        self.zwift_html_file = os.path.join(root_dir, Dirs.HTML_DIR, 'zwift.html')
+        self.unmapped_activity_html_file = os.path.join(root_dir, Dirs.HTML_DIR, 'unmapped_activity.html')
+        self.map_single_osm_html_file = os.path.join(root_dir, Dirs.HTML_DIR, 'map_single_osm.html')
+        self.map_single_google_html_file = os.path.join(root_dir, Dirs.HTML_DIR, 'map_single_google.html')
+        self.map_multi_html_file = os.path.join(root_dir, Dirs.HTML_DIR, 'map_multi_google.html')
+        self.error_logged_in_html_file = os.path.join(root_dir, Dirs.HTML_DIR, 'error_logged_in.html')
+        self.error_activity_html_file = os.path.join(root_dir, Dirs.HTML_DIR, 'error_activity.html')
         self.ical_server = IcalServer.IcalServer(user_mgr, data_mgr, self.root_url)
 
         self.logged_in_navbar = "<nav>\n\t<ul>\n" \
@@ -203,7 +201,7 @@ class App(object):
             self.log_error("Exception while getting counts.")
 
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'stats.html')
+        html_file = os.path.join(self.root_dir, Dirs.HTML_DIR, 'stats.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, page_stats=page_stats_str, total_activities=total_activities_str, total_users=total_users_str)
 
@@ -222,7 +220,7 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, template_file_name)
+        html_file = os.path.join(self.root_dir, Dirs.HTML_DIR, template_file_name)
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, **kwargs)
 
@@ -719,7 +717,7 @@ class App(object):
     def render_error(self, error_str=None):
         """Renders the error page."""
         try:
-            error_html_file = os.path.join(self.root_dir, HTML_DIR, 'error.html')
+            error_html_file = os.path.join(self.root_dir, Dirs.HTML_DIR, 'error.html')
             my_template = Template(filename=error_html_file, module_directory=self.tempmod_dir)
             if error_str is None:
                 error_str = "Internal Error."
@@ -731,7 +729,7 @@ class App(object):
     def render_no_live_data_error(self, user_str):
         """Renders the error page."""
         try:
-            error_html_file = os.path.join(self.root_dir, HTML_DIR, 'no_live_data.html')
+            error_html_file = os.path.join(self.root_dir, Dirs.HTML_DIR, 'no_live_data.html')
             my_template = Template(filename=error_html_file, module_directory=self.tempmod_dir)
             return my_template.render(product=PRODUCT_NAME, root_url=self.root_url, user_str=user_str)
         except:
@@ -741,7 +739,7 @@ class App(object):
     def render_page_not_found(self):
         """Renders the 404 error page."""
         try:
-            error_html_file = os.path.join(self.root_dir, HTML_DIR, 'error_404.html')
+            error_html_file = os.path.join(self.root_dir, Dirs.HTML_DIR, 'error_404.html')
             my_template = Template(filename=error_html_file, module_directory=self.tempmod_dir)
             return my_template.render(product=PRODUCT_NAME, root_url=self.root_url)
         except:
@@ -899,7 +897,7 @@ class App(object):
             description_str = activity[Keys.ACTIVITY_DESCRIPTION_KEY]
 
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'edit_activity.html')
+        html_file = os.path.join(self.root_dir, Dirs.HTML_DIR, 'edit_activity.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id, activity_name=activity_name_str, activity_type=activity_type_str, description=description_str)
 
@@ -923,7 +921,7 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Render from template.
-        html_file = os.path.join(self.root_dir, HTML_DIR, 'add_photos.html')
+        html_file = os.path.join(self.root_dir, Dirs.HTML_DIR, 'add_photos.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id)
 
@@ -1101,14 +1099,14 @@ class App(object):
             extensions = ['extra', 'smarty']
             html = markdown.markdown(md, extensions=extensions, output_format='html5')
 
-        login_html_file = os.path.join(self.root_dir, HTML_DIR, 'login.html')
+        login_html_file = os.path.join(self.root_dir, Dirs.HTML_DIR, 'login.html')
         my_template = Template(filename=login_html_file, module_directory=self.tempmod_dir)
         return my_template.render(product=PRODUCT_NAME, root_url=self.root_url, readme=html)
 
     @Perf.statistics
     def create_login(self):
         """Renders the create login page."""
-        create_login_html_file = os.path.join(self.root_dir, HTML_DIR, 'create_login.html')
+        create_login_html_file = os.path.join(self.root_dir, Dirs.HTML_DIR, 'create_login.html')
         my_template = Template(filename=create_login_html_file, module_directory=self.tempmod_dir)
         return my_template.render(product=PRODUCT_NAME, root_url=self.root_url)
 

@@ -25,6 +25,7 @@
 
 CSS_DIR = 'css'
 DATA_DIR = 'data'
+HTML_DIR = 'html'
 JS_DIR = 'js'
 IMAGES_DIR = 'images'
 MEDIA_DIR = 'media'
