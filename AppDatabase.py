@@ -95,7 +95,7 @@ class MongoDatabase(Database.Database):
         try:
             # If we weren't given a database URL then assume localhost and default port.
             database_url = config.get_database_url()
-            self.conn = pymongo.MongoClient(database_url)
+            self.conn = pymongo.MongoClient('mongodb://' + database_url + '/?uuidRepresentation=pythonLegacy')
 
             # Database. Try the old name, if not found then create or open it with the new name.
             db_names = self.conn.list_database_names()

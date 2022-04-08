@@ -1808,7 +1808,7 @@ class Api(object):
         # Validate.
         race_id = values[Keys.RACE_ID_KEY]
         if not InputChecker.is_uuid(race_id):
-            raise ApiException.ApiMalformedRequestException("Invalid race ID.")
+            raise ApiException.ApiMalformedRequestException("Invalid race ID: " + str(race_id) + ".")
 
         deleted = self.data_mgr.delete_race(self.user_id, race_id)
         return deleted, ""
@@ -1823,7 +1823,8 @@ class Api(object):
 
             # Stringify the UUID since UUID isn't JSON serializable.
             if Keys.RACE_ID_KEY in race:
-                race[Keys.RACE_ID_KEY] = str(race[Keys.RACE_ID_KEY])
+                race_id = race[Keys.RACE_ID_KEY]
+                race[Keys.RACE_ID_KEY] = str(race_id)
 
         json_result = json.dumps(races)
         return True, json_result
