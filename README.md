@@ -313,6 +313,10 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 * Bug fixes.
 * Analysis service now scans for unanalyzed activities.
 
+### 0.47
+* Bug fixes.
+* First cut at a wsgi front end.
+
 ## Tech
 This software uses several other source projects to work properly:
 
