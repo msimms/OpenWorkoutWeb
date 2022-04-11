@@ -2196,7 +2196,7 @@ class MongoDatabase(Database.Database):
         """Retrieve method for the gear with the specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.retrieve_gear_defaults.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return []
 
         try:
             # Find the user's document.
