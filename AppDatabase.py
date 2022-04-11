@@ -483,7 +483,7 @@ class MongoDatabase(Database.Database):
         """Returns the user ids for all users that are pending confirmation as friends of the specified user."""
         if user_id is None:
             self.log_error(MongoDatabase.retrieve_pending_friends.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return []
 
         try:
             # Things we don't need.
@@ -598,7 +598,7 @@ class MongoDatabase(Database.Database):
         """Returns the user ids for all users that are friends with the user who has the specified id."""
         if user_id is None:
             self.log_error(MongoDatabase.retrieve_friends.__name__ + ": Unexpected empty object: user_id")
-            return None
+            return []
 
         try:
             # Things we don't need.
