@@ -340,6 +340,9 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 * Bug fixes.
 * First cut at a wsgi front end.
 
+### 0.48
+* Bug fixes.
+
 ## Tech
 This software uses several other source projects to work properly:
 
