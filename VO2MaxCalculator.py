@@ -31,12 +31,24 @@ class VO2MaxCalculator(object):
 
     @staticmethod
     def estimate_vo2max_from_heart_rate(max_hr, resting_hr):
+        if max_hr == None:
+            return 0.0
+        if resting_hr == None:
+            return 0.0
         if resting_hr == 0:
-            return 0
+            return 0.0
+
         return 15.3 * (max_hr / resting_hr)
 
     @staticmethod
     def estimate_vo2max_from_race_distance_in_meters(race_distance_meters, race_time_minutes):
+        if race_distance_meters == None:
+            return 0.0
+        if race_time_minutes == None:
+            return 0.0
+        if race_time_minutes == 0:
+            return 0.0
+
         speed = race_distance_meters / race_time_minutes
         vo2max = -4.60 + 0.182258 * speed + 0.000104 * speed * speed
         if vo2max > 100.0:
