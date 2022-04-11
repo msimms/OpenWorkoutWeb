@@ -171,13 +171,7 @@
     /// @function process_friends_list
     function process_friends_list(records, is_pending_request)
     {
-        if (records.length == 0)
-        {
-            let para = document.getElementById("description");
-
-            para.innerHTML = "You have no friends.";
-        }
-        else
+        if (records.length > 0)
         {
             let friends_table = document.getElementById("Friends");
 
@@ -198,9 +192,25 @@
             $.get("${root_url}/api/1.0/list_pending_friends", function(users) { pending_friends = users; }),
             $.get("${root_url}/api/1.0/list_friends", function(users) { friends = users; }),
         ).then(function() {
-            process_friends_list(JSON.parse(pending_friends), true);
-            process_friends_list(JSON.parse(friends), false);
+            if (pending_friends.length == 0 && friends.length == 0)
+            {
+                let para = document.getElementById("description");
+                para.innerHTML = "You have no friends.";
+            }
+            else
+            {
+                process_friends_list(JSON.parse(pending_friends), true);
+                process_friends_list(JSON.parse(friends), false);
+            }
         });
+    }
+
+    function search_text_click_press(event)
+    {
+        if (event.keyCode == 13)
+        {
+            search();
+        }
     }
 
     $(document).ready(function()
@@ -219,7 +229,7 @@ ${nav}
 
     <div style="width: 80%">
         <h2>Search for a user</h2>
-        <p>User Email or Name:</p><p><input type="text" id="searchname"><br></p>
+        <p>User Email or Name:</p><p><input type="text" id="searchname" onkeypress="search_text_click_press(event)"><br></p>
         <button type="button" onclick="search()">Search</button>
     </div>
 

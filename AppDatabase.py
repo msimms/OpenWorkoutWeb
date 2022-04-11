@@ -142,18 +142,6 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return 0
 
-    def list_excluded_user_keys(self):
-        """This is the list of stuff we don't need to return when we're building a friends list. Helps with efficiency and privacy by not exposing more than we need."""
-        exclude_keys = {}
-        exclude_keys[Keys.HASH_KEY] = False
-        exclude_keys[Keys.DEVICES_KEY] = False
-        exclude_keys[Keys.FRIEND_REQUESTS_KEY] = False
-        exclude_keys[Keys.FRIENDS_KEY] = False
-        exclude_keys[Keys.PR_KEY] = False
-        exclude_keys[Keys.DEFAULT_PRIVACY_KEY] = False
-        exclude_keys[Keys.USER_PREFERRED_UNITS_KEY] = False
-        return exclude_keys
-
     def list_excluded_activity_keys_activity_lists(self):
         """This is the list of stuff we don't need to return when we're summarizing activities."""
         exclude_keys = {}
@@ -486,12 +474,12 @@ class MongoDatabase(Database.Database):
             return []
 
         try:
-            # Things we don't need.
-            exclude_keys = self.list_excluded_user_keys()
+            # Only return these keys.
+            result_keys = { Keys.USERNAME_KEY: 1, Keys.REALNAME_KEY: 1, Keys.REQUESTING_USER_KEY: 1 }
 
             # Find the users whose friendship we have requested.
             pending_friends_list = []
-            pending_friends = self.users_collection.find({ Keys.FRIEND_REQUESTS_KEY: user_id }, exclude_keys)
+            pending_friends = self.users_collection.find({ Keys.FRIEND_REQUESTS_KEY: user_id }, result_keys)
             for pending_friend in pending_friends:
                 pending_friend[Keys.DATABASE_ID_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
                 pending_friend[Keys.REQUESTING_USER_KEY] = "self"
@@ -508,7 +496,7 @@ class MongoDatabase(Database.Database):
                     temp_friend_id_list = user[Keys.FRIEND_REQUESTS_KEY]
                 for temp_friend_id in temp_friend_id_list:
                     temp_friend_id_obj = ObjectId(str(temp_friend_id))
-                    pending_friend = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: temp_friend_id_obj }, exclude_keys)
+                    pending_friend = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: temp_friend_id_obj }, result_keys)
                     if pending_friend is not None:
                         pending_friend[Keys.DATABASE_ID_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
                         pending_friend[Keys.REQUESTING_USER_KEY] = str(pending_friend[Keys.DATABASE_ID_KEY])
@@ -601,12 +589,12 @@ class MongoDatabase(Database.Database):
             return []
 
         try:
-            # Things we don't need.
-            exclude_keys = self.list_excluded_user_keys()
+            # Only return these keys.
+            result_keys = { Keys.USERNAME_KEY: 1, Keys.REALNAME_KEY: 1 }
 
             # Find the user's friends list.
             friends_list = []
-            friends = self.users_collection.find({ Keys.FRIENDS_KEY: user_id }, exclude_keys)
+            friends = self.users_collection.find({ Keys.FRIENDS_KEY: user_id }, result_keys)
             for friend in friends:
                 friend[Keys.DATABASE_ID_KEY] = str(friend[Keys.DATABASE_ID_KEY])
                 friends_list.append(friend)
