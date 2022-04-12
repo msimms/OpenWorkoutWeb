@@ -46,11 +46,11 @@ class Exporter(object):
     def nearest_sensor_reading(self, time_ms, current_reading, sensor_iter):
         try:
             if current_reading is None:
-                current_reading = sensor_iter.next()
+                current_reading = next(sensor_iter)
             else:
                 sensor_time = float(current_reading.keys()[0])
                 while sensor_time < time_ms:
-                    current_reading = sensor_iter.next()
+                    current_reading = next(sensor_iter)
                     sensor_time = float(current_reading.keys()[0])
         except StopIteration:
             return None
@@ -151,7 +151,7 @@ class Exporter(object):
         while not done:
             try:
                 # Get the next location.
-                current_location = location_iter.next()
+                current_location = next(location_iter)
                 current_lat = current_location[Keys.LOCATION_LAT_KEY]
                 current_lon = current_location[Keys.LOCATION_LON_KEY]
                 current_alt = current_location[Keys.LOCATION_ALT_KEY]
@@ -257,7 +257,7 @@ class Exporter(object):
 
                 try:
                     # Get the next location.
-                    current_location = location_iter.next()
+                    current_location = next(location_iter)
                     current_lat = current_location[Keys.LOCATION_LAT_KEY]
                     current_lon = current_location[Keys.LOCATION_LON_KEY]
                     current_alt = current_location[Keys.LOCATION_ALT_KEY]
