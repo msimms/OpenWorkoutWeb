@@ -786,6 +786,8 @@ def google_maps(env, start_response):
 
     try:
         return handle_dynamic_page_request(start_response, g_front_end.google_maps())
+    except cherrypy.HTTPRedirect as e:
+        return handle_redirect_exception(e.urls[0], start_response)
     except App.RedirectException as e:
         return handle_redirect_exception(e.url, start_response)
     except:
