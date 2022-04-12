@@ -724,7 +724,9 @@ def ical(env, start_response):
     try:
         calendar_id = env['PATH_INFO']
         calendar_id = calendar_id[1:]
-        return handle_dynamic_page_request(env, start_response, g_front_end.backend.ical(calendar_id))
+        handled, response = g_front_end.backend.ical(calendar_id)
+        if handled:
+            return handle_dynamic_page_request(env, start_response, response)
     except App.RedirectException as e:
         return handle_redirect_exception(e.url, start_response)
     except:
