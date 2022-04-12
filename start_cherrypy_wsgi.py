@@ -779,6 +779,7 @@ def api(env, start_response):
         log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_session_check
 def google_maps(env, start_response):
     """Returns the Google Maps API key."""
     global g_front_end
