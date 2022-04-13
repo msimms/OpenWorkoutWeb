@@ -103,9 +103,9 @@ Being a web app, it requires a web framework. I have tried to keep the design fl
 
 Notable modules:
 
-**App.py** contains the logic for handling each page and is framework-agnostic. The page handlers for each framework call into this module.
-**Api.py** contains all of the API handlers and is also framework-agnostic. Isolating this in its own module also facilitates deploying the API as a microservice.
-**Session.py** contains the session management code. It has an abstract base class along with subclasses for cherrypy, flask, as well as a custom session manager.
+* **App.py** contains the logic for handling each page and is framework-agnostic. The page handlers for each framework call into this module.
+* **Api.py** contains all of the API handlers and is also framework-agnostic. Isolating this in its own module also facilitates deploying the API as a microservice.
+* **Session.py** contains the session management code. It has an abstract base class along with subclasses for cherrypy, flask, as well as a custom session manager.
 
 The software is written in python. It was started in python2 and later converted to python3.
 
