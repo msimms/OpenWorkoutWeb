@@ -99,6 +99,16 @@ python start_flask.py --config openworkout.config
 
 The software architecture makes it possible to use this system with different front-end technologies. Also, computationally expensive analysis tasks are kept separate from the main application, communicating via RabbitMQ.
 
+Being a web app, it requires a web framework. I have tried to keep the design flexible enough to support multiple frameworks, to both appease different audiences and also allow the software to be relevant when the fashion in web frameworks inevitably changes. To this end, it currently supports cherrypy and flask with the implementation details for each being isolated in their own modules. A wsgi front end for cherrypy is also provided.
+
+Notable modules:
+
+**App.py** contains the logic for handling each page and is framework-agnostic. The page handlers for each framework call into this module.
+**Api.py** contains all of the API handlers and is also framework-agnostic. Isolating this in its own module also facilitates deploying the API as a microservice.
+**Session.py** contains the session management code. It has an abstract base class along with subclasses for cherrypy, flask, as well as a custom session manager.
+
+The software is written in python. It was started in python2 and later converted to python3.
+
 ![Architecture Diagram](https://github.com/msimms/OpenWorkoutWeb/blob/master/docs/architecture/Architecture.png?raw=true)
 
 ## Workout Plans
@@ -341,6 +351,9 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 * First cut at a wsgi front end.
 
 ### 0.48
+* Bug fixes.
+
+### 0.49
 * Bug fixes.
 
 ## Tech
