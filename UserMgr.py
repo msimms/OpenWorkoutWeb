@@ -75,19 +75,13 @@ class UserMgr(object):
 
         _, db_hash1, _ = self.database.retrieve_user(email)
         if db_hash1 is None:
-            raise Exception("The user could not be found.")
+            raise Exception("The user (" + email + ") could not be found.")
 
-        if sys.version_info[0] < 3:
-            db_hash2 = bcrypt.hashpw(password.encode('utf-8'), db_hash1.encode('utf-8'))
-            if db_hash1 != db_hash2:
-                raise Exception("The password is invalid.")
-        else:
-            if isinstance(password, str):
-                password = password.encode()
-            if isinstance(db_hash1, str):
-                db_hash1 = db_hash1.encode()
-            return bcrypt.checkpw(password, db_hash1)
-        return True
+        if isinstance(password, str):
+            password = password.encode()
+        if isinstance(db_hash1, str):
+            db_hash1 = db_hash1.encode()
+        return bcrypt.checkpw(password, db_hash1)
 
     def create_user(self, email, realname, password1, password2, device_str):
         """Adds a user to the database."""
