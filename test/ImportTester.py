@@ -100,7 +100,7 @@ class TestActivityWriter(Importer.ActivityWriter):
                 found = True
                 break
         if not found:
-            sensor_analyzer = SensorAnalyzerFactory.create(sensor_type, self.current_activity_type, None, None)
+            sensor_analyzer = SensorAnalyzerFactory.create(sensor_type, self.current_activity_type, None, None, None)
             if sensor_analyzer:
                 sensor_analyzer.append_sensor_value(date_time, value)
                 self.sensor_analyzers.append(sensor_analyzer)
@@ -225,12 +225,12 @@ def print_records(store, activity_type):
         # Print the training zones.
         zones = store.summarizer.ftp_calc.power_training_zones(estimated_ftp)
         zone_index = 1
-        for zone in zones:
+        for zone_wattage in zones:
             print("Zone " + str(zone_index) + ": "),
             if zone_index == 1:
-                print("0 watts to {:.2f} watts").format(zone)
+                print("0 watts to {:.2f} watts".format(zone_wattage))
             else:
-                print("{:.2f} watts to {:.2f} watts").format(zones[zone_index - 1], zone)
+                print("{:.2f} watts to {:.2f} watts".format(zones[zone_index - 1], zone_wattage))
             zone_index = zone_index + 1
         print("\n")
 
@@ -296,8 +296,8 @@ def run_unit_tests(test_files_dir_name):
     title_str = "Summary:"
     print(title_str)
     print("=" * len(title_str))
-    print("Num success: " + str(len(successes)))
-    print("Num failures: " + str(len(failures)))
+    print("Num successful imports: " + str(len(successes)))
+    print("Num failed imports: " + str(len(failures)))
     for failure in failures:
         print("- " + failure)
 

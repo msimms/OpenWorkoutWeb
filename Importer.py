@@ -156,9 +156,12 @@ class Importer(object):
             if len(gpx.tracks) > 0:
                 sport_type = Importer.normalize_activity_type(gpx.tracks[0].type, None, file_name)
 
-            # Find the start timestamp.
-            start_time_tuple = gpx.time.timetuple()
-            start_time_unix = calendar.timegm(start_time_tuple)
+            start_time_unix = 0
+            if gpx.time is not None:
+
+                # Find the start timestamp.
+                start_time_tuple = gpx.time.timetuple()
+                start_time_unix = calendar.timegm(start_time_tuple)
 
             # Make sure this is not a duplicate activity.
             if self.activity_writer.is_duplicate_activity(user_id, start_time_unix, desired_activity_id):
@@ -267,9 +270,16 @@ class Importer(object):
         # Find the start timestamp.
         start_time_unix = 0
         if hasattr(activity, 'Id'):
-            start_time_obj = datetime.datetime.strptime(str(activity.Id), "%Y-%m-%dT%H:%M:%S.%fZ")
-            start_time_tuple = start_time_obj.timetuple()
-            start_time_unix = calendar.timegm(start_time_tuple)
+
+            # The start time may or may not have milliseconds.
+            start_time_obj = None
+            try:
+                start_time_obj = datetime.datetime.strptime(str(activity.Id), "%Y-%m-%dT%H:%M:%S.%fZ")
+            except ValueError:
+                start_time_obj = datetime.datetime.strptime(str(activity.Id), "%Y-%m-%dT%H:%M:%SZ")
+            if start_time_obj is not None:
+                start_time_tuple = start_time_obj.timetuple()
+                start_time_unix = calendar.timegm(start_time_tuple)
 
         # Make sure this is not a duplicate activity.
         if self.activity_writer.is_duplicate_activity(user_id, start_time_unix, desired_activity_id):
@@ -299,8 +309,11 @@ class Importer(object):
                         if hasattr(track, 'Trackpoint'):
                             for point in track.Trackpoint:
 
-                                # Read the timestamp.
-                                dt_obj = datetime.datetime.strptime(str(point.Time), "%Y-%m-%dT%H:%M:%S.%fZ")
+                                # Read the timestamp, which may or may not have milliseconds.
+                                try:
+                                    dt_obj = datetime.datetime.strptime(str(point.Time), "%Y-%m-%dT%H:%M:%S.%fZ")
+                                except ValueError:
+                                    dt_obj = datetime.datetime.strptime(str(point.Time), "%Y-%m-%dT%H:%M:%SZ")
                                 dt_tuple = dt_obj.timetuple()
                                 dt_unix = calendar.timegm(dt_tuple) * 1000
                                 dt_unix = dt_unix + dt_obj.microsecond / 1000

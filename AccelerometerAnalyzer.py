@@ -55,7 +55,7 @@ class AccelerometerAnalyzer(SensorAnalyzer.SensorAnalyzer):
 
         # Search for peaks in the data.
         sets = []
-        peak_list = peaks.find_peaks_in_numeric_array(smoothed_graph, 0.2)
+        peak_list = peaks.find_peaks_in_numeric_array_over_threshold(smoothed_graph, 0.2)
         num_peaks = len(peak_list)
 
         # Need more than one peak to bother doing any further analysis. Also, one or zero will cause a crash, so there's that.
