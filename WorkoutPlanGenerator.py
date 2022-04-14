@@ -10,7 +10,6 @@ import logging
 import os
 import pandas
 import sys
-import tensorflow as tf
 import time
 import traceback
 import uuid
@@ -26,6 +25,11 @@ import SwimPlanGenerator
 import WorkoutScheduler
 
 g_model = None
+
+try:
+    import tensorflow as tf
+except ModuleNotFoundError:
+    pass
 
 class WorkoutPlanGenerator(object):
     """Class for performing the computationally expensive workout plan generation tasks."""

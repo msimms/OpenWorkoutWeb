@@ -115,8 +115,12 @@ def is_valid_decoded_str(test_str):
 def is_valid_location(latitude, longitude, horizontal_accuracy):
     """Sanity checks the lat/lon values."""
     try:
+        if longitude is None:
+            return False
+        if longitude is None:
+            return False
         if float(latitude) and latitude >= -90.0 and latitude <= 90.0 and float(longitude) and longitude >= -180.0 and longitude <= 180.0:
-            if horizontal_accuracy is not None and horizontal_accuracy < 0.0 or horizontal_accuracy >= 50.0:
+            if horizontal_accuracy is not None and (horizontal_accuracy < 0.0 or horizontal_accuracy >= 50.0):
                 return False
             return True
     except ValueError:

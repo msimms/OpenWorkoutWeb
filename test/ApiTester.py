@@ -26,9 +26,16 @@
 
 import argparse
 import json
+import logging
 import requests
 import sys
+from urllib.parse import urljoin
 
+ERROR_LOG = 'error.log'
+
+def create_api_url(site_url):
+    """Utility function for creating the API URL from the website's URL."""
+    return urljoin(site_url, "/api/1.0/")
 
 def print_test_title(title):
     """Utility function for print a string followed by a line of equal lenth."""
@@ -92,11 +99,8 @@ def logout(root_url, cookie):
     url = root_url + "logout"
     return send_post_request(url, {}, cookie)
 
-def run_unit_tests(url, username, password, realname):
-    """Entry point for the unit tests."""
-
-    # Append the API path.
-    api_url = url + "/api/1.0/"
+def run_login_tests(api_url, username, password, realname):
+    """Logs in, or creates the user if the user does not exist."""
 
     # Login.
     print_test_title("Login")
@@ -119,6 +123,29 @@ def run_unit_tests(url, username, password, realname):
     else:
         raise Exception("Login status check failed.")
 
+    return cookies
+
+def run_logout_test(api_url, cookies):
+    """Logs out the test user."""
+
+    print_test_title("Logout")
+    code, _, _ = logout(api_url, cookies)
+    if code == 200:
+        print("Test passed!\n")
+    else:
+        raise Exception("Failed to logout.")
+
+def run_unit_tests(url, username, password, realname):
+    """Entry point for the unit tests."""
+
+    # Append the API path.
+    print(url)
+    api_url = create_api_url(url)
+    print(api_url)
+
+    # Login
+    cookies = run_login_tests(api_url, username, password, realname)
+
     # Generate an API key.
     print_test_title("Generate an API Key")
     code, api_key, _ = generate_api_key(api_url, cookies)
@@ -136,14 +163,12 @@ def run_unit_tests(url, username, password, realname):
         raise Exception("Failed to delete the API key.")
 
     # Logout.
-    print_test_title("Logout")
-    code, _, _ = logout(api_url, cookies)
-    if code == 200:
-        print("Test passed!\n")
-    else:
-        raise Exception("Failed to logout.")
+    run_logout_test(api_url, cookies)
 
 def main():
+    # Setup the logger.
+    logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
     # Parse command line options.
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", default="https://127.0.0.1", help="The root address of the website", required=False)
@@ -157,6 +182,7 @@ def main():
         parser.error(e)
         sys.exit(1)
 
+    # Do the tests.
     try:
         run_unit_tests(args.url, args.username, args.password, args.realname)
     except Exception as e:

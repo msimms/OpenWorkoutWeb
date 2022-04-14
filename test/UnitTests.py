@@ -24,22 +24,54 @@
 # SOFTWARE.
 """Unit tests."""
 
+import argparse
 import inspect
 import os
+import sys
 
 import ApiTester
 import CsvToJson
 import ImportTester
 import WorkoutPlanTester
 
-testdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+ERROR_LOG = 'error.log'
 
+def do_api_tests(url, username, password, realname):
+    ApiTester.run_unit_tests(url, username, password, realname)
 
-def main():
+def do_importer_tests(test_files_dir_name):
+    ImportTester.run_unit_tests(test_files_dir_name)
+
+def do_workout_plan_tests():
+    testdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     csv_file_name = os.path.join(testdir, "WorkoutTrainingInputs.csv")
     json_file_name = os.path.join(testdir, "input.json")
     CsvToJson.make_json(csv_file_name, json_file_name)
     WorkoutPlanTester.run_unit_tests(json_file_name)
+
+def main():
+    # Parse command line options.
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--url", default="https://127.0.0.1:8080", help="The root address of the website", required=True)
+    parser.add_argument("--username", default="foo@example.com", help="The username to use for the test", required=False)
+    parser.add_argument("--password", default="foobar123", help="The password to use for the test", required=False)
+    parser.add_argument("--realname", default="Mr Foo", help="The user's real name", required=False)
+    parser.add_argument("--importdir", default=os.path.dirname(os.path.realpath(__file__)), help="Directory of files to to import", required=True, type=str, action="store",)
+
+    try:
+        args = parser.parse_args()
+    except IOError as e:
+        parser.error(e)
+        sys.exit(1)
+
+    # Do the tests.
+    try:
+        do_api_tests(args.url, args.username, args.password, args.realname)
+        do_importer_tests(args.importdir)
+        do_workout_plan_tests()
+    except Exception as e:
+        print("Test aborted!\n")
+        print(e)
 
 if __name__ == "__main__":
     main()

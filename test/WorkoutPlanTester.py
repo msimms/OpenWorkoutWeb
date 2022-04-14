@@ -87,6 +87,7 @@ def run_unit_tests(input_file_name):
 def main():
     """Starts the tests."""
 
+    # Setup the logger.
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
     # Parse the command line arguments.
@@ -99,7 +100,12 @@ def main():
         parser.error(e)
         sys.exit(1)
 
-    run_unit_tests(args.file)
+    # Do the tests.
+    try:
+        run_unit_tests(args.file)
+    except Exception as e:
+        print("Test aborted!\n")
+        print(e)
 
 if __name__ == "__main__":
     main()

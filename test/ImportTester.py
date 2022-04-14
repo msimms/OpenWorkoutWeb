@@ -45,7 +45,6 @@ import Units
 
 ERROR_LOG = 'error.log'
 
-
 class TestActivityWriter(Importer.ActivityWriter):
     """Subclass that implements the location writer and will receive the locations as they are read from the file."""
 
@@ -235,21 +234,20 @@ def print_records(store, activity_type):
             zone_index = zone_index + 1
         print("\n")
 
-def run_unit_tests():
+def run_unit_tests(test_files_dir_name):
     """Entry point for the unit tests."""
     successes = []
     failures = []
 
     store = TestActivityWriter()
     importer = Importer.Importer(store)
-    test_dir = os.path.abspath(os.path.join('.', args.dir))
 
     # Process each file in the specified directory as well as its subdirectories.
     total_time = 0
     num_files_processed = 0
-    for subdir, _, files in os.walk(test_dir):
+    for subdir, _, files in os.walk(test_files_dir_name):
 
-        title_str = "Processing all files in " + test_dir + ":"
+        title_str = "Processing all files in " + test_files_dir_name + ":"
         print(title_str + "\n")
         for current_file in files:
 
@@ -260,22 +258,29 @@ def run_unit_tests():
             full_path = os.path.join(subdir, current_file)
             _, temp_file_ext = os.path.splitext(full_path)
             if temp_file_ext in ['.gpx', '.tcx', '.csv']:
-                title_str = "Processing: " + full_path
-                print("=" * len(title_str))
-                print(title_str)
-                print("=" * len(title_str))
-                start_time = time.time()
-                success, device_id, activity_id = importer.import_activity_from_file("test user", "", full_path, current_file, temp_file_ext)
-                if success:
-                    elapsed_time = time.time() - start_time
-                    total_time = total_time + elapsed_time
-                    num_files_processed = num_files_processed + 1
-                    print(f"Elapsed Processing Time: {elapsed_time} seconds")
-                    print("Success!\n")
-                    successes.append(current_file)
-                else:
-                    print("Failure!\n")
-                    failures.append(current_file)
+
+                try:
+                    title_str = "Processing: " + full_path
+                    print("=" * len(title_str))
+                    print(title_str)
+                    print("=" * len(title_str))
+                    start_time = time.time()
+
+                    desired_activity_id = str(uuid.uuid4())
+                    success, _, activity_id = importer.import_activity_from_file("test user", "", full_path, current_file, temp_file_ext, desired_activity_id)
+                    if success:
+                        elapsed_time = time.time() - start_time
+                        total_time = total_time + elapsed_time
+                        num_files_processed = num_files_processed + 1
+                        print(f"Elapsed Processing Time: {elapsed_time} seconds")
+                        print("Success!\n")
+                        successes.append(current_file)
+                    else:
+                        print("Failure!\n")
+                        failures.append(current_file)
+                except Exception as e:
+                    print("Test failed!\n")
+                    print(e)
 
     # Print the summary data.
     print_records(store, Keys.TYPE_RUNNING_KEY)
@@ -307,6 +312,7 @@ def run_unit_tests():
 def main():
     """Starts the tests."""
 
+    # Setup the logger.
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
     # Parse the command line arguments.
@@ -319,7 +325,12 @@ def main():
         parser.error(e)
         sys.exit(1)
 
-
+    # Do the tests.
+    try:
+        run_unit_tests(args.dir)
+    except Exception as e:
+        print("Test aborted!\n")
+        print(e)
 
 if __name__ == "__main__":
     main()
