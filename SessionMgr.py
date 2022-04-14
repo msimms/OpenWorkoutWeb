@@ -85,6 +85,7 @@ class CustomSessionMgr(SessionMgr):
 
     def __init__(self, config):
         super(SessionMgr, self).__init__()
+        assert config is not None
         self.current_session_cookie = None
         self.database = AppDatabase.MongoDatabase()
         self.database.connect(config)

@@ -32,17 +32,18 @@ import logging
 import os
 import sys
 
-# Locate and load the importer module.
+# Locate and load modules from the main source directory.
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
+import Config
 import Keys
 import WorkoutPlanGenerator
 import WorkoutScheduler
 
 ERROR_LOG = 'error.log'
 
-def run_unit_tests(input_file_name):
+def run_unit_tests(config, input_file_name):
     """Entry point for the unit tests."""
 
     successes = []
@@ -53,7 +54,7 @@ def run_unit_tests(input_file_name):
         test_json = json.load(f)
         test_inputs = test_json["inputs"]
 
-        generator = WorkoutPlanGenerator.WorkoutPlanGenerator(None)
+        generator = WorkoutPlanGenerator.WorkoutPlanGenerator(config, None)
         scheduler = WorkoutScheduler.WorkoutScheduler(None)
 
         today = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0).date()
@@ -92,6 +93,7 @@ def main():
 
     # Parse the command line arguments.
     parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default="", help="The configuration file.", type=str, action="store", required=True)
     parser.add_argument("--file", type=str, action="store", default=os.path.dirname(os.path.realpath(__file__)), help="File to process", required=True)
 
     try:
@@ -100,9 +102,14 @@ def main():
         parser.error(e)
         sys.exit(1)
 
+    # Load the config file.
+    config = Config.Config()
+    if len(args.config) > 0:
+        config.load(args.config)
+
     # Do the tests.
     try:
-        run_unit_tests(args.file)
+        run_unit_tests(config, args.file)
     except Exception as e:
         print("Test aborted!\n")
         print(e)

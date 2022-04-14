@@ -28,11 +28,18 @@ import argparse
 import inspect
 import os
 import sys
+import traceback
 
 import ApiTester
 import CsvToJson
 import ImportTester
 import WorkoutPlanTester
+
+# Locate and load the config module.
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+import Config
 
 ERROR_LOG = 'error.log'
 
@@ -42,16 +49,17 @@ def do_api_tests(url, username, password, realname):
 def do_importer_tests(test_files_dir_name):
     ImportTester.run_unit_tests(test_files_dir_name)
 
-def do_workout_plan_tests():
+def do_workout_plan_tests(config):
     testdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     csv_file_name = os.path.join(testdir, "WorkoutTrainingInputs.csv")
     json_file_name = os.path.join(testdir, "input.json")
     CsvToJson.make_json(csv_file_name, json_file_name)
-    WorkoutPlanTester.run_unit_tests(json_file_name)
+    WorkoutPlanTester.run_unit_tests(config, json_file_name)
 
 def main():
     # Parse command line options.
     parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default="", help="The configuration file.", type=str, action="store", required=True)
     parser.add_argument("--url", default="https://127.0.0.1:8080", help="The root address of the website", required=True)
     parser.add_argument("--username", default="foo@example.com", help="The username to use for the test", required=False)
     parser.add_argument("--password", default="foobar123", help="The password to use for the test", required=False)
@@ -64,13 +72,26 @@ def main():
         parser.error(e)
         sys.exit(1)
 
+    # Load the config file.
+    config = Config.Config()
+    if len(args.config) > 0:
+        config.load(args.config)
+
     # Do the tests.
     try:
+        print("API Tests:")
         do_api_tests(args.url, args.username, args.password, args.realname)
+        print("Importer Tests:")
         do_importer_tests(args.importdir)
-        do_workout_plan_tests()
+        print("Workout Plan Tests:")
+        do_workout_plan_tests(config)
+    except AssertionError as e:
+        print("Test aborted due to an assertion failure!\n")
+        print(traceback.format_exc())
+        print(e)
     except Exception as e:
         print("Test aborted!\n")
+        print(traceback.format_exc())
         print(e)
 
 if __name__ == "__main__":

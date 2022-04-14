@@ -39,6 +39,7 @@ class UserMgr(object):
 
     def __init__(self, *, config, session_mgr):
         """Constructor"""
+        assert config is not None
         self.session_mgr = session_mgr
         self.database = AppDatabase.MongoDatabase()
         self.database.connect(config)

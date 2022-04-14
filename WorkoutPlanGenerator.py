@@ -34,10 +34,10 @@ except ModuleNotFoundError:
 class WorkoutPlanGenerator(object):
     """Class for performing the computationally expensive workout plan generation tasks."""
 
-    def __init__(self, user_obj):
+    def __init__(self, config, user_obj):
         self.user_obj = user_obj
-        self.data_mgr = DataMgr.DataMgr(config=None, root_url="", analysis_scheduler=AnalysisScheduler.AnalysisScheduler(), import_scheduler=None, workout_plan_gen_scheduler=None)
-        self.user_mgr = UserMgr.UserMgr(config=Config.Config(), session_mgr=None)
+        self.data_mgr = DataMgr.DataMgr(config=config, root_url="", analysis_scheduler=AnalysisScheduler.AnalysisScheduler(), import_scheduler=None, workout_plan_gen_scheduler=None)
+        self.user_mgr = UserMgr.UserMgr(config=config, session_mgr=None)
         super(WorkoutPlanGenerator, self).__init__()
 
     def log_error(self, log_str):
@@ -445,7 +445,7 @@ def generate_workout_plan_for_user(user_str, internal_task_id):
     print("Starting workout plan generation...")
 
     user_obj = json.loads(user_str)
-    generator = WorkoutPlanGenerator(user_obj)
+    generator = WorkoutPlanGenerator(None, user_obj)
     generator.generate_plan_for_user(g_model)
 
     print("Workout plan generation finished.")
@@ -457,7 +457,7 @@ def generate_workout_plan_from_inputs(inputs, internal_task_id):
 
     print("Starting workout plan generation...")
 
-    generator = WorkoutPlanGenerator(None)
+    generator = WorkoutPlanGenerator(None, None)
     generator.generate_plan_from_inputs(g_model, inputs)
 
     print("Workout plan generation finished.")
