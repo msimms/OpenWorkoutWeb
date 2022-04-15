@@ -1082,21 +1082,35 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_planned_workouts_for_user(user_id, start_time, end_time)
 
-    def retrieve_workouts_calendar_id_for_user(self, user_id):
+    def retrieve_planned_workouts_calendar_id_for_user(self, user_id):
         """Retrieve method for the ical calendar ID for with specified ID."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_workouts_calendar_id_for_user(user_id)
+        return self.database.retrieve_planned_workouts_calendar_id_for_user(user_id)
 
-    def retrieve_workouts_by_calendar_id(self, calendar_id):
+    def retrieve_planned_workouts_by_calendar_id(self, calendar_id):
         """Retrieve method for all workouts pertaining to the calendar with the specified ID."""
         if self.database is None:
             raise Exception("No database.")
         if calendar_id is None:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_workouts_by_calendar_id(calendar_id)
+        return self.database.retrieve_planned_workouts_by_calendar_id(calendar_id)
+
+    def update_planned_workout(self, user_id, updated_workout_obj):
+        """Create method for a workout."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if updated_workout_obj is None:
+            raise Exception("Bad parameter.")
+        
+        workout_objs = self.database.retrieve_planned_workouts_for_user(user_id, None, None)
+        new_workout_objs = [ workout_obj for workout_obj in workout_objs if workout_obj.workout_id != updated_workout_obj.workout_id ]
+        new_workout_objs.append(updated_workout_obj)
+        return self.database.update_planned_workouts_for_user(user_id, new_workout_objs)
 
     def delete_workouts_for_date_range(self, user_id, start_time, end_time):
         """Delete method for all workouts pertaining for the specified user within the given date range."""
@@ -1114,7 +1128,7 @@ class DataMgr(Importer.ActivityWriter):
         for workout in old_workouts_list:
             if workout.scheduled_time is not None and (workout.scheduled_time < start_time or workout.scheduled_time > end_time):
                 new_workouts_list.append(workout)
-        return self.database.update_workouts_for_user(user_id, new_workouts_list)
+        return self.database.update_planned_workouts_for_user(user_id, new_workouts_list)
 
     def retrieve_users_without_scheduled_workouts(self):
         """Returns a list of user IDs for users who have workout plans that need to be re-run."""

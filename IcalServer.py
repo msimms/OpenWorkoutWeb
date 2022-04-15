@@ -37,7 +37,7 @@ class IcalServer(object):
     def handle_request(self, calendar_id):
         calendar_name = "Planned Workouts"
 
-        workouts = self.data_mgr.retrieve_workouts_by_calendar_id(calendar_id)
+        workouts = self.data_mgr.retrieve_planned_workouts_by_calendar_id(calendar_id)
         if workouts is None:
             return False, ""
         ics_writer = IcsWriter.IcsWriter()

@@ -9,8 +9,10 @@
 <link rel="stylesheet" href="${root_url}/css/site.css">
 
 <meta charset="UTF-8">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <meta name="description" content="User profile">
 <meta name="keywords" content="profile">
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 
 </head>
 
@@ -264,15 +266,6 @@
             alert("An error occurred!");
     }
 
-    $(function()
-    {
-        $('#birthday').datepicker({
-            yearRange: '1910:2010',
-            changeYear: true,
-            changeMonth: true
-        });
-    });
-
     /// @function append_to_pr_table
     function append_to_pr_table(table, row_name, row_value)
     {
@@ -439,7 +432,7 @@
                 else if (key == "birthday")
                 {
                     let n = new Date(value * 1000);
-                    element.placeholder=n.toLocaleDateString();
+                    element.placeholder = n.toLocaleDateString();
                 }
                 else if (key == "gender")
                 {
@@ -615,6 +608,16 @@
         let api_url = "${root_url}/api/1.0/list_hr_zones?estimated%20max%20heart%20rate=" + max_hr;
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_hr_zones, error: process_hr_zones_error, dataType: "json" });
     }
+
+    $(function()
+    {
+        $('#birthday').datepicker({
+            value: new Date(),
+            yearRange: '1910:2020',
+            changeYear: true,
+            changeMonth: true
+        });
+    });
 
     $(document).ready(function()
     {

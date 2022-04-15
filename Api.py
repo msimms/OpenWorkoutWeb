@@ -1444,6 +1444,7 @@ class Api(object):
         if Keys.GEAR_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Do we have a valid gear ID?
         gear_id = values[Keys.GEAR_ID_KEY]
         if not InputChecker.is_uuid(gear_id):
             raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
@@ -1458,6 +1459,7 @@ class Api(object):
         if Keys.GEAR_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Do we have a valid gear ID?
         gear_id = values[Keys.GEAR_ID_KEY]
         if not InputChecker.is_uuid(gear_id):
             raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
@@ -1494,9 +1496,12 @@ class Api(object):
         if Keys.SERVICE_RECORD_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Do we have a valid gear ID?
         gear_id = values[Keys.GEAR_ID_KEY]
         if not InputChecker.is_uuid(gear_id):
             raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
+
+        # Do we have a valid service record ID?
         service_record_id = values[Keys.SERVICE_RECORD_ID_KEY]
         if not InputChecker.is_uuid(service_record_id):
             raise ApiException.ApiMalformedRequestException("Invalid service record ID.")
@@ -1638,11 +1643,17 @@ class Api(object):
         if Keys.ACTIVITY_VISIBILITY_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Visibility not specified.")
 
+        # Do we have a valid activity ID?
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # Do we have a valid visibility value?
         visibility = values[Keys.ACTIVITY_VISIBILITY_KEY].lower()
         if not (visibility == Keys.ACTIVITY_VISIBILITY_PUBLIC or visibility == Keys.ACTIVITY_VISIBILITY_PRIVATE):
             raise ApiException.ApiMalformedRequestException("Invalid visibility value.")
 
-        result = self.data_mgr.update_activity_visibility(values[Keys.ACTIVITY_ID_KEY], visibility)
+        result = self.data_mgr.update_activity_visibility(activity_id, visibility)
         return result, ""
 
     def handle_refresh_analysis(self, values):
@@ -1652,6 +1663,7 @@ class Api(object):
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
+        # Do we have a valid activity ID?
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
@@ -1721,6 +1733,40 @@ class Api(object):
         # Parse the file and store it's contents in the database.
         merged_data = self.data_mgr.merge_activities(self.user_id, uploaded_file1_data, uploaded_file2_data)
         return True, merged_data
+
+    def handle_create_workout(self, values):
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.WORKOUT_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Workout ID not specified.")
+
+        # Do we have a valid workout ID?
+        workout_id = values[Keys.WORKOUT_ID_KEY]
+        if not InputChecker.is_uuid(workout_id):
+            raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
+
+        return True, ""
+
+    def handle_update_workout(self, values):
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        if Keys.WORKOUT_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Workout ID not specified.")
+
+        # Do we have a valid workout ID?
+        workout_id = values[Keys.WORKOUT_ID_KEY]
+        if not InputChecker.is_uuid(workout_id):
+            raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
+
+        # Get the workout object from the database.
+        workout_obj = self.data_mgr.retrieve_planned_workout(self.user_id, workout_id)
+        if workout_obj is None:
+            raise ApiException.ApiMalformedRequestException("Unknown workout ID.")
+
+        workout_obj.from_dict(values)
+        result = self.data_mgr.update_planned_workout(self.user_id, workout_obj)
+
+        return result, ""
 
     def handle_list_planned_workouts(self, values):
         """Called when the user wants wants a list of their planned workouts. Result is a JSON string."""
@@ -1906,7 +1952,7 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        calendar_id = self.data_mgr.retrieve_workouts_calendar_id_for_user(self.user_id)
+        calendar_id = self.data_mgr.retrieve_planned_workouts_calendar_id_for_user(self.user_id)
         url = self.root_url + "/ical/" + str(calendar_id)
         return True, url
 
@@ -2386,6 +2432,10 @@ class Api(object):
             return self.handle_delete_api_key(values)
         elif request == 'merge_activities':
             return self.handle_merge_activities(values)
+        elif request == 'create_workout':
+            return self.handle_create_workout(values)
+        elif request == 'update_workout':
+            return self.handle_update_workout(values)
         return False, ""
 
     def handle_api_1_0_request(self, verb, request, values):

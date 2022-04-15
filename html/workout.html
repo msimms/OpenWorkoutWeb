@@ -8,26 +8,23 @@
 <link rel="stylesheet" href="${root_url}/css/normalize.css">
 <link rel="stylesheet" href="${root_url}/css/site.css">
 
+<meta charset="UTF-8">
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-<meta name="description" content="Allows the user to generate workout plans">
+<meta name="description" content="Allows the user to view workout specifics">
 <meta name="keywords" content="automated workout plan generation">
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-<meta content="utf-8" http-equiv="encoding">
-
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
 
 </head>
+
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
 
 <body>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script type="text/javascript">
 
     /// @function export_workout_to_zwo
@@ -48,9 +45,29 @@
         }, dataType: "text" });
     }
 
-	var process_workout_description = function(response)
-	{
-		if (response && response.length >= 3)
+    /// @function change_scheduled_time
+    // Shows the date picker and submits a change to the workout date.
+    function change_scheduled_time()
+    {
+        let the_url = "${root_url}/api/1.0/update_workout";
+        let scheduled_time = document.getElementById("scheduled_time").value;
+        let dict = [];
+        let result_text = {};
+        let timestamp = Date.parse(scheduled_time) / 1000;
+
+        dict.push({["workout_id"] : "${workout_id}"});
+        dict.push({["scheduled time"] : timestamp});
+        if (send_post_request(the_url, dict, result_text))
+            alert("Scheduled workout time updated!");
+        else
+            alert("An error occurred!");
+    }
+
+    // Called when the workout description is returned.
+    var process_workout_description = function(response)
+    {
+        // Basic sanity check.
+        if (response && response.length >= 3)
         {
             let obj_list = JSON.parse(response);
             if (obj_list == null)
@@ -58,19 +75,37 @@
 
             document.getElementById("type").textContent = obj_list.type;
 
-            let description = obj_list.description;
-            description = description.split("\\n").join("<br>");
-    		let elem = document.getElementById("description");
-            elem.innerHTML = description;
+            let desc_elem = document.getElementById("description");
+            let description = obj_list["description"];
+            description = "<br>" + description.split("\\n").join("<br>");
+            desc_elem.innerHTML = description;
+
+            let scheduled_time_elem = document.getElementById("scheduled_time");
+            let scheduled_time = obj_list["scheduled time"];;
+            let n = new Date(scheduled_time * 1000);
+            scheduled_time_elem.placeholder = n.toLocaleDateString();
         }
-	};
+        else
+        {
+            alert("An invalid response was received!");
+        }
+    };
 
     /// @function get_workout_description
     // Request the URL that allows iCal to subscribe to the workouts calendar.
     function get_workout_description()
     {
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=json", cache: false, success: process_workout_description, dataType: "text" });
-	};
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=json", cache: false, success: process_workout_description, dataType: "text" });
+    };
+
+    $(function()
+    {
+        $('#scheduled_time').datepicker({
+            value: new Date(),
+            changeYear: true,
+            changeMonth: true
+        });
+    });
 
     $(document).ready(function()
     {
@@ -85,15 +120,25 @@ ${nav}
 </section>
 
 <section class="block">
+
     <div>
-
         <h2 id="type"></h2>
-        <p id="description">
-        </p> 
+    </div>
 
-        <button type="button" onclick="export_workout_to_zwo()">Export to ZWO</button><br>
-        <button type="button" onclick="export_workout_to_ical()">Export to iCal</button>
+    <div style="margin-left:50px; margin-right:50px;">
 
+        <p id="description"></p>
+        <p>
+            <br>
+            <input type="text" name="scheduled_time" id="scheduled_time"><br>
+            <button type="modern_button" onclick="change_scheduled_time()">Update</button>
+        </p>
+
+    </div>
+
+    <div>
+        <button type="modern_button" onclick="export_workout_to_zwo()">Export to ZWO</button><br>
+        <button type="modern_button" onclick="export_workout_to_ical()">Export to iCal</button>
     </div>
 </section>
 

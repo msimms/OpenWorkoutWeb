@@ -2095,10 +2095,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return workouts
 
-    def retrieve_workouts_calendar_id_for_user(self, user_id):
+    def retrieve_planned_workouts_calendar_id_for_user(self, user_id):
         """Retrieve method for all workouts pertaining to the user with the specified ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_workouts_calendar_id_for_user.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.retrieve_planned_workouts_calendar_id_for_user.__name__ + ": Unexpected empty object: user_id")
             return None
 
         try:
@@ -2113,10 +2113,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def retrieve_workouts_by_calendar_id(self, calendar_id):
+    def retrieve_planned_workouts_by_calendar_id(self, calendar_id):
         """Retrieve method for all workouts pertaining to the user with the specified ID."""
         if calendar_id is None:
-            self.log_error(MongoDatabase.retrieve_workouts_by_calendar_id.__name__ + ": Unexpected empty object: calendar_id")
+            self.log_error(MongoDatabase.retrieve_planned_workouts_by_calendar_id.__name__ + ": Unexpected empty object: calendar_id")
             return None
 
         workouts = []
@@ -2139,13 +2139,13 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return workouts
 
-    def update_workouts_for_user(self, user_id, workout_objs):
+    def update_planned_workouts_for_user(self, user_id, workout_objs):
         """Update method for a list of workout objects."""
         if user_id is None:
-            self.log_error(MongoDatabase.update_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.update_planned_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
             return False
         if workout_objs is None:
-            self.log_error(MongoDatabase.update_workouts_for_user.__name__ + ": Unexpected empty object: workout_objs")
+            self.log_error(MongoDatabase.update_planned_workouts_for_user.__name__ + ": Unexpected empty object: workout_objs")
             return False
 
         try:
@@ -2160,13 +2160,11 @@ class MongoDatabase(Database.Database):
                 insert_into_collection(self.workouts_collection, post)
                 workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
 
-            # If the workouts document was found (or created).
+            # If the workouts document was found.
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
 
                 # Update and save the document.
-                workouts_doc[Keys.WORKOUT_LIST_KEY] = []
-                for workout_obj in workout_objs:
-                    workouts_doc[Keys.WORKOUT_LIST_KEY].append(workout_obj.to_dict())
+                workouts_doc[Keys.WORKOUT_LIST_KEY] = [ workout_obj.to_dict() for workout_obj in workout_objs ]
                 update_collection(self.workouts_collection, workouts_doc)
                 return True
         except:
