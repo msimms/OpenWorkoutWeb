@@ -43,8 +43,9 @@ celery_worker.config_from_object('CeleryConfig')
 def check_for_unanalyzed_activities():
     """Check for activities that need to be analyzed. Do one, if any are found."""
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
-    data_mgr = DataMgr.DataMgr(config=Config.Config(), root_url="", analysis_scheduler=analysis_scheduler, import_scheduler=None, workout_plan_gen_scheduler=None)
-    user_mgr = UserMgr.UserMgr(config=Config.Config(), session_mgr=None)
+    config = Config.Config()
+    data_mgr = DataMgr.DataMgr(config=config, root_url="", analysis_scheduler=analysis_scheduler, import_scheduler=None, workout_plan_gen_scheduler=None)
+    user_mgr = UserMgr.UserMgr(config=config, session_mgr=None)
 
     unanalyzed_activity_list = data_mgr.retrieve_unanalyzed_activity_list(64)
     if len(unanalyzed_activity_list) > 0:

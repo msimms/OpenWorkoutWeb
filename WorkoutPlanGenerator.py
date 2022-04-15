@@ -445,7 +445,7 @@ def generate_workout_plan_for_user(user_str, internal_task_id):
     print("Starting workout plan generation...")
 
     user_obj = json.loads(user_str)
-    generator = WorkoutPlanGenerator(None, user_obj)
+    generator = WorkoutPlanGenerator(Config.Config(), user_obj)
     generator.generate_plan_for_user(g_model)
 
     print("Workout plan generation finished.")
@@ -457,7 +457,7 @@ def generate_workout_plan_from_inputs(inputs, internal_task_id):
 
     print("Starting workout plan generation...")
 
-    generator = WorkoutPlanGenerator(None, None)
+    generator = WorkoutPlanGenerator(Config.Config(), None)
     generator.generate_plan_from_inputs(g_model, inputs)
 
     print("Workout plan generation finished.")
