@@ -355,6 +355,7 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 
 ### 0.49
 * Bug fixes.
+* Updated unit tests.
 
 ## Tech
 This software uses several other source projects to work properly:
