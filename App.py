@@ -675,7 +675,7 @@ class App(object):
 
         try:
             # Does the activity contain accelerometer data, as with lifting activities recorded from the companion app?
-            if activity[Keys.ACTIVITY_TYPE_KEY] in Keys.STRENGTH_ACTIVITIES:
+            if activity[Keys.ACTIVITY_TYPE_KEY] in Keys.STRENGTH_ACTIVITIES or activity[Keys.ACTIVITY_TYPE_KEY] == Keys.WORKOUT_TYPE_POOL_WATER_SWIM:
                 return self.render_page_for_unmapped_activity(user_realname, activity[Keys.ACTIVITY_ID_KEY], activity, activity_user_id, logged_in_user_id, belongs_to_current_user, is_live)
 
             # Assume it's a location based activity.
