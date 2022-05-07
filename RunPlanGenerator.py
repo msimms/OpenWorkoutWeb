@@ -334,6 +334,24 @@ class RunPlanGenerator(object):
 
         return workout
 
+    def max_taper_distance(self, race_distance):
+        """Returns the maximum distance for a single run during the taper."""
+        if race_distance == Keys.GOAL_5K_RUN_KEY:
+            return 5000
+        if race_distance == Keys.GOAL_10K_RUN_KEY:
+            return 10000
+        if race_distance == Keys.GOAL_15K_RUN_KEY:
+            return 0.9 * 15000
+        if race_distance == Keys.GOAL_HALF_MARATHON_RUN_KEY:
+            return 0.75 * Units.METERS_PER_HALF_MARATHON
+        if race_distance == Keys.GOAL_MARATHON_RUN_KEY:
+            return Units.METERS_PER_HALF_MARATHON
+        if race_distance == Keys.GOAL_50K_RUN_KEY:
+            return Units.METERS_PER_HALF_MARATHON
+        if race_distance == Keys.GOAL_50_MILE_RUN_KEY:
+            return Units.METERS_PER_HALF_MARATHON
+        return Units.METERS_PER_HALF_MARATHON
+
     def gen_workouts_for_next_week(self, inputs):
         """Generates the workouts for the next week, but doesn't schedule them."""
 
@@ -358,7 +376,6 @@ class RunPlanGenerator(object):
         avg_run_distance = inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
         num_runs = inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS]
         exp_level = inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY]
-        #comfort_level = inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY]
 
         # Handle situation in which the user hasn't run in four weeks.
         if not RunPlanGenerator.valid_float(longest_run_in_four_weeks):
@@ -397,7 +414,7 @@ class RunPlanGenerator(object):
         # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.
         # The non-taper equation was derived by playing with trendlines in a spreadsheet.
         if in_taper:
-            max_long_run_distance = 0.4 * goal_distance
+            max_long_run_distance = self.max_taper_distance(goal_distance)
         else:
             max_long_run_distance = ((-0.002 * goal_distance) *  (-0.002 * goal_distance)) + (0.7 * goal_distance) + 4.4
 
@@ -430,8 +447,9 @@ class RunPlanGenerator(object):
             self.clear_intensity_distribution()
 
             # Add a long run.
-            long_run_workout = self.gen_long_run(long_run_pace, longest_run_in_four_weeks, min_run_distance, max_long_run_distance)
-            workouts.append(long_run_workout)
+            if not in_taper:
+                long_run_workout = self.gen_long_run(long_run_pace, longest_run_in_four_weeks, min_run_distance, max_long_run_distance)
+                workouts.append(long_run_workout)
 
             # Add an easy run.
             easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
