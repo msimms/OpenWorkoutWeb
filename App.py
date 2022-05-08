@@ -280,6 +280,8 @@ class App(object):
     @staticmethod
     def render_export_control(has_location_data, has_accel_data):
         """Helper function for building the exports string that appears on the activity details screens."""
+        if not (has_location_data or has_accel_data):
+            return ""
         exports_str = "<td><select id=\"format\" >\n"
         if has_location_data:
             exports_str += "\t<option value=\"tcx\" selected>TCX</option>\n"
