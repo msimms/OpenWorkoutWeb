@@ -70,7 +70,7 @@ class Exporter(object):
             buf = self.write_or_buffer(local_file, key + "\n")
             readings = activity[key]
             for reading in readings:
-                ts = reading.keys()[0]
+                ts = next(iter(reading.keys()))
                 buf += self.write_or_buffer(local_file, str(ts) + "," + str(reading[ts]) + "\n")
         return buf
 
