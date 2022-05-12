@@ -182,7 +182,8 @@ class Api(object):
                     locations.append(location)
 
             # Update the activity.
-            self.data_mgr.update_moving_activity(device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict)
+            if locations:
+                self.data_mgr.update_moving_activity(device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict)
 
         if Keys.APP_ACCELEROMETER_KEY in values:
 
