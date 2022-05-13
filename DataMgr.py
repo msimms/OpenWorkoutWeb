@@ -670,7 +670,7 @@ class DataMgr(Importer.ActivityWriter):
             self.database.delete_uploaded_file(activity_id)
 
             # Recreate the user's all-time PR list as the previous one could have contained data from the now deleted activity.
-            result = self.refresh_user_personal_records(user_id)
+            result = self.rebuild_user_personal_records(user_id)
 
         return result
 
@@ -1050,6 +1050,10 @@ class DataMgr(Importer.ActivityWriter):
         if user_id is None:
             raise Exception("Bad parameter.")
         return self.database.delete_all_user_personal_records(user_id)
+
+    def rebuild_user_personal_records(self, user_id):
+        """Called when we need to rebuild the personal records cache after deleting an activity, for example."""
+        pass
 
     def retrieve_unanalyzed_activity_list(self, limit):
         if self.database is None:
