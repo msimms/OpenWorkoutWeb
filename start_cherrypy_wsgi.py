@@ -9,6 +9,7 @@ import signal
 import sys
 import traceback
 
+import ApiException
 import App
 import AppFactory
 import CherryPyFrontEnd
@@ -140,7 +141,7 @@ def handle_error(start_response, error_code):
     global g_front_end
 
     content = g_front_end.error().encode('utf-8')
-    headers = [('Content-type', 'text/plain; charset=utf-8')]
+    headers = [('Content-type', 'text/html; charset=utf-8')]
     start_response(str(error_code), headers)
     g_session_mgr.clear_current_session() # Housekeeping
     return [content]
@@ -775,6 +776,8 @@ def api(env, start_response):
             return [content]
         elif response_code == 404:
             return handle_error_404(start_response)
+    except ApiException.ApiException as e:
+        return handle_error(start_response, e.code)
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
