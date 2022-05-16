@@ -58,7 +58,7 @@ class UserMgr(object):
         return self.session_mgr.get_logged_in_user_from_cookie(auth_cookie)
 
     def create_new_session(self, username):
-        """Starts a new session."""
+        """Starts a new session. Returns the session cookie and it's expiry date."""
         return self.session_mgr.create_new_session(username)
 
     def clear_current_session(self):

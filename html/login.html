@@ -35,7 +35,8 @@
         send_post_request_async(the_url, dict, function(s, m) {
             if (s == 200)
             {
-                document.cookie = "session_cookie=" + m + "; ";
+                let obj_list = JSON.parse(m);
+                document.cookie = "session_cookie=" + obj_list.cookie + "; ";
                 window.location.replace("${root_url}/all_activities");
             }
             else

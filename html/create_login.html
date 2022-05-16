@@ -37,10 +37,18 @@
         dict.push({["password1"] : password1});
         dict.push({["password2"] : password2});
 
-        if (send_post_request(the_url, dict, result_text))
-            window.location.replace("${root_url}/all_activities");
-        else
-            alert("Failed to create a new login!");
+        send_post_request_async(the_url, dict, function(s, m) {
+            if (s == 200)
+            {
+                let obj_list = JSON.parse(m);
+                document.cookie = "session_cookie=" + obj_list.cookie + "; ";
+                window.location.replace("${root_url}/all_activities");
+            }
+            else
+            {
+                alert("Failed to create a new login!");
+            }
+        });
     }
 
 </script>

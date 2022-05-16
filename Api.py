@@ -490,8 +490,14 @@ class Api(object):
         else:
             result = True
 
-        cookie = self.user_mgr.create_new_session(email)
-        return result, str(cookie)
+        cookie, expiry = self.user_mgr.create_new_session(email)
+
+        result = {}
+        result[Keys.SESSION_TOKEN_KEY] = cookie
+        result[Keys.SESSION_EXPIRY_KEY] = expiry
+        json_result = json.dumps(result, ensure_ascii=False)
+
+        return result, json_result
 
     def handle_create_login(self, values):
         """Called when an API message to create an account is received."""
@@ -527,8 +533,14 @@ class Api(object):
         except:
             raise Exception("User creation failed.")
 
-        cookie = self.user_mgr.create_new_session(email)
-        return True, str(cookie)
+        cookie, expiry = self.user_mgr.create_new_session(email)
+
+        result = {}
+        result[Keys.SESSION_TOKEN_KEY] = cookie
+        result[Keys.SESSION_EXPIRY_KEY] = expiry
+        json_result = json.dumps(result, ensure_ascii=False)
+
+        return result, json_result
 
     def handle_login_status(self, values):
         """Called when an API message to check the login status in is received."""

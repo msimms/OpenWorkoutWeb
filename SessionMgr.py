@@ -55,7 +55,7 @@ class SessionMgr(object):
 
     def create_new_session(self, username):
         """Starts a new session."""
-        pass
+        return None, None
 
     def set_current_session(self, cookie):
         """Accessor method for setting the cookie associated with the current session."""
@@ -103,13 +103,13 @@ class CustomSessionMgr(SessionMgr):
         return None
 
     def create_new_session(self, username):
-        """Starts a new session."""
+        """Starts a new session. Returns the session cookie and it's expiry date."""
         session_cookie = str(uuid.uuid4())
         expiry = time.time() + 86400
         if self.database.create_session_token(session_cookie, username, expiry):
             self.current_session_cookie = session_cookie
-            return session_cookie
-        return None
+            return session_cookie, expiry
+        return None, None
 
     def set_current_session(self, cookie):
         """Accessor method for setting the cookie associated with the current session."""
@@ -163,7 +163,7 @@ class CherryPySessionMgr(SessionMgr):
         cherrypy.session.regenerate()
         cherrypy.session[Keys.SESSION_KEY] = cherrypy.request.login = username
         new_id = cherrypy.session.id
-        return new_id
+        return new_id, None
 
     def clear_current_session(self):
         """Ends the current session."""
@@ -189,6 +189,7 @@ class FlaskSessionMgr(SessionMgr):
     def create_new_session(self, username):
         """Starts a new session."""
         flask.session[Keys.SESSION_KEY] = username
+        return None, None
 
     def clear_current_session(self):
         """Ends the current session."""
