@@ -3024,10 +3024,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_session_token(self, token):
-        """Retrieve method for a session token."""
+    def retrieve_session_data(self, token):
+        """Retrieve method for session data."""
         if token is None:
-            self.log_error(MongoDatabase.retrieve_session_token.__name__ + ": Unexpected empty object: token")
+            self.log_error(MongoDatabase.retrieve_session_data.__name__ + ": Unexpected empty object: token")
             return (None, None)
 
         try:

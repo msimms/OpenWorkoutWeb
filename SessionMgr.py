@@ -96,7 +96,7 @@ class CustomSessionMgr(SessionMgr):
 
     def get_logged_in_user_from_cookie(self, session_cookie):
         """Returns the username associated with the specified session cookie."""
-        session_data = self.database.retrieve_session_token(session_cookie)
+        session_data = self.database.retrieve_session_data(session_cookie)
         if session_data is not None:
             user = session_data[0]
             return user

@@ -562,7 +562,7 @@ class CherryPyFrontEnd(object):
                     http_status = 429
                     self.log_error(response)
 
-        # API key not provided, check the web cookie.
+        # API key not provided, check the web session cookie.
         if user_id == None:
             username = self.backend.user_mgr.get_logged_in_user_from_cookie(cookie)
             if username is not None:
