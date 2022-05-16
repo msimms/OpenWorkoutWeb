@@ -492,10 +492,10 @@ class Api(object):
 
         cookie, expiry = self.user_mgr.create_new_session(email)
 
-        result = {}
-        result[Keys.SESSION_TOKEN_KEY] = cookie
-        result[Keys.SESSION_EXPIRY_KEY] = expiry
-        json_result = json.dumps(result, ensure_ascii=False)
+        session_data = {}
+        session_data[Keys.SESSION_TOKEN_KEY] = cookie
+        session_data[Keys.SESSION_EXPIRY_KEY] = expiry
+        json_result = json.dumps(session_data, ensure_ascii=False)
 
         return result, json_result
 
@@ -535,10 +535,10 @@ class Api(object):
 
         cookie, expiry = self.user_mgr.create_new_session(email)
 
-        result = {}
-        result[Keys.SESSION_TOKEN_KEY] = cookie
-        result[Keys.SESSION_EXPIRY_KEY] = expiry
-        json_result = json.dumps(result, ensure_ascii=False)
+        session_data = {}
+        session_data[Keys.SESSION_TOKEN_KEY] = cookie
+        session_data[Keys.SESSION_EXPIRY_KEY] = expiry
+        json_result = json.dumps(session_data, ensure_ascii=False)
 
         return result, json_result
 
