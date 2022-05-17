@@ -466,7 +466,7 @@ class Api(object):
     def handle_login(self, values):
         """Called when an API message to log in is received."""
         if self.user_id is not None:
-            return True, self.user_mgr.get_logged_in_user()
+            return True, ""
 
         if Keys.USERNAME_KEY not in values:
             raise ApiException.ApiAuthenticationException("Username not specified.")
@@ -491,6 +491,10 @@ class Api(object):
             result = True
 
         cookie, expiry = self.user_mgr.create_new_session(email)
+        if not cookie:
+            raise ApiException.ApiAuthenticationException("Session cookie not generated.")
+        if not expiry:
+            raise ApiException.ApiAuthenticationException("Session expiry not generated.")
 
         session_data = {}
         session_data[Keys.SESSION_TOKEN_KEY] = cookie
@@ -534,13 +538,17 @@ class Api(object):
             raise Exception("User creation failed.")
 
         cookie, expiry = self.user_mgr.create_new_session(email)
+        if not cookie:
+            raise ApiException.ApiAuthenticationException("Session cookie not generated.")
+        if not expiry:
+            raise ApiException.ApiAuthenticationException("Session expiry not generated.")
 
         session_data = {}
         session_data[Keys.SESSION_TOKEN_KEY] = cookie
         session_data[Keys.SESSION_EXPIRY_KEY] = expiry
         json_result = json.dumps(session_data, ensure_ascii=False)
 
-        return result, json_result
+        return True, json_result
 
     def handle_login_status(self, values):
         """Called when an API message to check the login status in is received."""

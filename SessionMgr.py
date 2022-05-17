@@ -61,10 +61,6 @@ class SessionMgr(object):
         """Accessor method for setting the cookie associated with the current session."""
         pass
 
-    def get_current_session(self):
-        """Accessor method for getting the cookie associated with the current session."""
-        return None
-
     def clear_current_session(self):
         """Ends the current session."""
         pass
@@ -105,7 +101,7 @@ class CustomSessionMgr(SessionMgr):
     def create_new_session(self, username):
         """Starts a new session. Returns the session cookie and it's expiry date."""
         session_cookie = str(uuid.uuid4())
-        expiry = time.time() + 86400
+        expiry = int(time.time() + 90.0 * 86400.0)
         if self.database.create_session_token(session_cookie, username, expiry):
             self.current_session_cookie = session_cookie
             return session_cookie, expiry
@@ -114,10 +110,6 @@ class CustomSessionMgr(SessionMgr):
     def set_current_session(self, cookie):
         """Accessor method for setting the cookie associated with the current session."""
         self.current_session_cookie = cookie
-
-    def get_current_session(self):
-        """Accessor method for getting the cookie associated with the current session."""
-        return self.current_session_cookie
 
     def clear_current_session(self):
         """Ends the current session."""
@@ -163,7 +155,8 @@ class CherryPySessionMgr(SessionMgr):
         cherrypy.session.regenerate()
         cherrypy.session[Keys.SESSION_KEY] = cherrypy.request.login = username
         new_id = cherrypy.session.id
-        return new_id, None
+        expiry = int(time.time() + 90.0 * 86400.0)
+        return new_id, expiry
 
     def clear_current_session(self):
         """Ends the current session."""
@@ -189,7 +182,8 @@ class FlaskSessionMgr(SessionMgr):
     def create_new_session(self, username):
         """Starts a new session."""
         flask.session[Keys.SESSION_KEY] = username
-        return None, None
+        expiry = int(time.time() + 90.0 * 86400.0)
+        return None, expiry
 
     def clear_current_session(self):
         """Ends the current session."""
