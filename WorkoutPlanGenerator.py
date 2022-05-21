@@ -140,7 +140,7 @@ class WorkoutPlanGenerator(object):
         #
 
         # Look through the user's six month records.
-        _, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.SIX_MONTHS)
+        _, running_bests, _, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - DataMgr.SIX_MONTHS, now)
 
         # Estimate running paces from the user's six month records.
         if running_bests is not None:
