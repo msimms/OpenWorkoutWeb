@@ -405,10 +405,11 @@ class RunPlanGenerator(object):
         # Are we in a taper?
         # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
         in_taper = False
-        if weeks_until_goal <= 2 and goal == Keys.GOAL_MARATHON_RUN_KEY:
-            in_taper = True
-        if weeks_until_goal <= 1 and goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
-            in_taper = True
+        if weeks_until_goal is not None:
+            if weeks_until_goal <= 2 and goal == Keys.GOAL_MARATHON_RUN_KEY:
+                in_taper = True
+            if weeks_until_goal <= 1 and goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
+                in_taper = True
 
         # Compute the longest run needed to accomplish the goal.
         # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.

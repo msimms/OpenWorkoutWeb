@@ -97,7 +97,7 @@ class WorkoutPlanGenerator(object):
     def calculate_inputs(self, user_id):
         """Looks through the user's data and calculates the algorithm's inputs."""
 
-        now = time.time()- DataMgr.FOUR_WEEKS - DataMgr.FOUR_WEEKS
+        now = time.time()
         weeks_until_goal = None # Number of weeks until the goal, or None if not applicable
         longest_run_in_four_weeks = 0.0 # Longest run in the last four weeks
         longest_runs_by_week = [0.0] * 4 # Longest run for each of the recent four weeks
@@ -154,7 +154,7 @@ class WorkoutPlanGenerator(object):
         #
 
         # Look through the user's four week records.
-        cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.FOUR_WEEKS)
+        cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 4), now)
 
         # Find the longest run in the last four weeks.
         if running_bests is not None and Keys.LONGEST_DISTANCE in running_bests:
