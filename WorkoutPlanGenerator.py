@@ -82,27 +82,41 @@ class WorkoutPlanGenerator(object):
         if Keys.ACTIVITY_SUMMARY_KEY not in activity:
             context.data_mgr.analyze_activity(activity, user_id)
 
+    def optional_fetch_from_dict(self, dict, key):
+        """Utility function for calculate_inputs."""
+        if key in dict:
+            return dict[key]
+        return 0.0
+
+    def optional_fetch_from_dict_with_array(self, dict, key):
+        """Utility function for calculate_inputs."""
+        if key in dict:
+            return dict[key][0]
+        return 0.0
+
     def calculate_inputs(self, user_id):
         """Looks through the user's data and calculates the algorithm's inputs."""
 
-        now = time.time()
+        now = time.time()- DataMgr.FOUR_WEEKS - DataMgr.FOUR_WEEKS
         weeks_until_goal = None # Number of weeks until the goal, or None if not applicable
-        longest_run_in_four_weeks = None  # Longest run in the last four weeks
-        longest_run_week_1 = None
-        longest_run_week_2 = None
-        longest_run_week_3 = None
+        longest_run_in_four_weeks = 0.0 # Longest run in the last four weeks
+        longest_runs_by_week = [0.0] * 4 # Longest run for each of the recent four weeks
+        longest_rides_by_week = [0.0] * 4 # Longest bike rides for each of the recent four weeks
+        run_intensity_by_week = [0.0] * 4 # Total training intensity for each of the recent four weeks
+        cycling_intensity_by_week = [0.0] * 4 # Total training intensity for each of the recent four weeks
+        running_paces = {}
 
-        # Fetch the detail of the user's goal.
+        # Fetch the details of the user's goal.
         goal, goal_date = self.data_mgr.retrieve_user_goal(user_id)
         if goal is None:
             raise Exception("A goal has not been defined.")
-        if goal_date is None:
-            raise Exception("A goal date has not been defined.")
 
         # Compute the time remaining until the goal.
         if goal is not Keys.GOAL_FITNESS_KEY:
 
             # Sanity-check the goal date.
+            if goal_date is None:
+                raise Exception("A goal date has not been defined.")
             if goal_date <= now:
                 raise Exception("The goal date should be in the future.")
 
@@ -113,7 +127,9 @@ class WorkoutPlanGenerator(object):
         goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
 
         # Analyze any unanalyzed activities.
-        self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.SIX_MONTHS)
+        num_unanalyzed_activities = self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.SIX_MONTHS)
+        if num_unanalyzed_activities > 0:
+            raise Exception("Too many unanalyzed activities to generate a workout plan.")
 
         # This will trigger the callback for each of the user's activities.
         if not self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb, False):
@@ -129,8 +145,6 @@ class WorkoutPlanGenerator(object):
         # Estimate running paces from the user's six month records.
         if running_bests is not None:
             running_paces = self.data_mgr.compute_run_training_paces(user_id, running_bests)
-        else:
-            running_paces = {}
 
         # Get the user's current estimated cycling FTP.
         threshold_power = self.user_mgr.estimate_ftp(user_id)
@@ -140,24 +154,33 @@ class WorkoutPlanGenerator(object):
         #
 
         # Look through the user's four week records.
-        _, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.FOUR_WEEKS)
-        if running_bests is not None and Keys.LONGEST_DISTANCE in running_bests:
-            longest_run_in_four_weeks = running_bests[Keys.LONGEST_DISTANCE]
-            longest_run_in_four_weeks = longest_run_in_four_weeks[0]
+        cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.FOUR_WEEKS)
 
-        # Get some data from prior weeks data.
-        cycling_bests_week1, running_bests_week_1, _, _ = self.data_mgr.retrieve_recent_bests(user_id, DataMgr.ONE_WEEK)
-        if running_bests_week_1 is not None and Keys.LONGEST_DISTANCE in running_bests_week_1:
-            longest_run_week_1 = running_bests_week_1[Keys.LONGEST_DISTANCE]
-            longest_run_week_1 = longest_run_week_1[0]
-        cycling_bests_week2, running_bests_week_2, _, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 2), now - (DataMgr.ONE_WEEK * 1))
-        if running_bests_week_2 is not None and Keys.LONGEST_DISTANCE in running_bests_week_2:
-            longest_run_week_2 = running_bests_week_2[Keys.LONGEST_DISTANCE]
-            longest_run_week_2 = longest_run_week_2[0]
-        cycling_bests_week3, running_bests_week_3, _, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 3), now - (DataMgr.ONE_WEEK * 2))
-        if running_bests_week_3 is not None and Keys.LONGEST_DISTANCE in running_bests_week_3:
-            longest_run_week_3 = running_bests_week_3[Keys.LONGEST_DISTANCE]
-            longest_run_week_3 = longest_run_week_3[0]
+        # Find the longest run in the last four weeks.
+        if running_bests is not None and Keys.LONGEST_DISTANCE in running_bests:
+            longest_run_in_four_weeks = running_bests[Keys.LONGEST_DISTANCE][0]
+
+        # Get some data from prior four weeks.
+        cycling_best_summary, running_best_summary, cycling_week_summary, running_week_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 1), now - (DataMgr.ONE_WEEK * 0))
+        longest_runs_by_week[0] = self.optional_fetch_from_dict_with_array(running_best_summary, Keys.LONGEST_DISTANCE)
+        longest_rides_by_week[0] = self.optional_fetch_from_dict_with_array(cycling_best_summary, Keys.LONGEST_DISTANCE)
+        run_intensity_by_week[0] = self.optional_fetch_from_dict(running_week_summary, Keys.TOTAL_INTENSITY_SCORE)
+        cycling_intensity_by_week[0] = self.optional_fetch_from_dict(cycling_week_summary, Keys.TOTAL_INTENSITY_SCORE)
+        cycling_best_summary, running_best_summary, cycling_week_summary, running_week_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 2), now - (DataMgr.ONE_WEEK * 1))
+        longest_runs_by_week[1] = self.optional_fetch_from_dict_with_array(running_best_summary, Keys.LONGEST_DISTANCE)
+        longest_rides_by_week[1] = self.optional_fetch_from_dict_with_array(cycling_best_summary, Keys.LONGEST_DISTANCE)
+        run_intensity_by_week[1] = self.optional_fetch_from_dict(running_week_summary, Keys.TOTAL_INTENSITY_SCORE)
+        cycling_intensity_by_week[1] = self.optional_fetch_from_dict(cycling_week_summary, Keys.TOTAL_INTENSITY_SCORE)
+        cycling_best_summary, running_best_summary, cycling_week_summary, running_week_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 3), now - (DataMgr.ONE_WEEK * 2))
+        longest_runs_by_week[2] = self.optional_fetch_from_dict_with_array(running_best_summary, Keys.LONGEST_DISTANCE)
+        longest_rides_by_week[2] = self.optional_fetch_from_dict_with_array(cycling_best_summary, Keys.LONGEST_DISTANCE)
+        run_intensity_by_week[2] = self.optional_fetch_from_dict(running_week_summary, Keys.TOTAL_INTENSITY_SCORE)
+        cycling_intensity_by_week[2] = self.optional_fetch_from_dict(cycling_week_summary, Keys.TOTAL_INTENSITY_SCORE)
+        cycling_best_summary, running_best_summary, cycling_week_summary, running_week_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 4), now - (DataMgr.ONE_WEEK * 3))
+        longest_runs_by_week[3] = self.optional_fetch_from_dict_with_array(running_best_summary, Keys.LONGEST_DISTANCE)
+        longest_rides_by_week[3] = self.optional_fetch_from_dict_with_array(cycling_best_summary, Keys.LONGEST_DISTANCE)
+        run_intensity_by_week[3] = self.optional_fetch_from_dict(running_week_summary, Keys.TOTAL_INTENSITY_SCORE)
+        cycling_intensity_by_week[3] = self.optional_fetch_from_dict(cycling_week_summary, Keys.TOTAL_INTENSITY_SCORE)
 
         # Compute the user's age in years.
         birthday = int(self.user_mgr.retrieve_user_setting(user_id, Keys.USER_BIRTHDAY_KEY))
@@ -168,11 +191,11 @@ class WorkoutPlanGenerator(object):
         avg_running_distance = 0.0
         num_rides = 0.0
         num_runs = 0.0
-        if cycling_summary is not None and Keys.TOTAL_ACTIVITIES in cycling_summary and Keys.TOTAL_DISTANCE in cycling_summary:
+        if Keys.TOTAL_ACTIVITIES in cycling_summary and Keys.TOTAL_DISTANCE in cycling_summary:
             if cycling_summary[Keys.TOTAL_ACTIVITIES] > 0:
                 num_rides = cycling_summary[Keys.TOTAL_ACTIVITIES]
                 avg_cycling_distance = cycling_summary[Keys.TOTAL_DISTANCE] / num_rides
-        if running_summary is not None and Keys.TOTAL_ACTIVITIES in running_summary and Keys.TOTAL_DISTANCE in running_summary:
+        if Keys.TOTAL_ACTIVITIES in running_summary and Keys.TOTAL_DISTANCE in running_summary:
             if running_summary[Keys.TOTAL_ACTIVITIES] > 0:
                 num_runs = running_summary[Keys.TOTAL_ACTIVITIES]
                 avg_running_distance = running_summary[Keys.TOTAL_DISTANCE] / num_runs
@@ -192,9 +215,18 @@ class WorkoutPlanGenerator(object):
         else:
             inputs = running_paces
         inputs[Keys.PLAN_INPUT_LONGEST_RUN_IN_FOUR_WEEKS_KEY] = longest_run_in_four_weeks
-        inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY] = longest_run_week_1
-        inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY] = longest_run_week_2
-        inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY] = longest_run_week_3
+        inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY] = longest_runs_by_week[0]
+        inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY] = longest_runs_by_week[1]
+        inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY] = longest_runs_by_week[2]
+        inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_4_KEY] = longest_runs_by_week[3]
+        inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_1_KEY] = longest_rides_by_week[0]
+        inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_2_KEY] = longest_rides_by_week[1]
+        inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_3_KEY] = longest_rides_by_week[2]
+        inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_4_KEY] = longest_rides_by_week[3]
+        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_1_KEY] = run_intensity_by_week[0] + cycling_intensity_by_week[0]
+        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_2_KEY] = run_intensity_by_week[1] + cycling_intensity_by_week[1]
+        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_3_KEY] = run_intensity_by_week[2] + cycling_intensity_by_week[2]
+        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_4_KEY] = run_intensity_by_week[3] + cycling_intensity_by_week[3]
         inputs[Keys.PLAN_INPUT_AGE_YEARS_KEY] = age_years
         inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY] = experience_level
         inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
@@ -259,6 +291,15 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_4_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_1_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_2_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_3_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_4_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_1_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_2_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_3_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_4_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_AGE_YEARS_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY])

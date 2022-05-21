@@ -383,6 +383,8 @@ class UserMgr(object):
             return Keys.GOAL_TYPE_COMPLETION
         if key == Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY:
             return 5
+        if key == Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY:
+            return 5
         if key == Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY:
             return "sunday"
         if key == Keys.USER_CAN_UPLOAD_PHOTOS_KEY:
