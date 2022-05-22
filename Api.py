@@ -904,6 +904,7 @@ class Api(object):
             Keys.TYPE_CYCLING_KEY : self.handle_add_time_and_distance_activity,
             Keys.TYPE_OPEN_WATER_SWIMMING_KEY : self.handle_add_time_and_distance_activity,
             Keys.TYPE_POOL_SWIMMING_KEY : self.handle_add_time_and_distance_activity,
+            Keys.TYPE_BENCH_PRESS_KEY : self.handle_add_sets_and_reps_activity,
             Keys.TYPE_PULL_UP_KEY : self.handle_add_sets_and_reps_activity,
             Keys.TYPE_PUSH_UP_KEY : self.handle_add_sets_and_reps_activity
         }
