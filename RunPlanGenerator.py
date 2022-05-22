@@ -359,6 +359,7 @@ class RunPlanGenerator(object):
 
         # 3 Critical runs: Speed session, tempo or threshold run, and long run
 
+        # Extract the necessary inputs.
         goal_distance = inputs[Keys.GOAL_RUN_DISTANCE_KEY]
         goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
         goal_type = inputs[Keys.GOAL_TYPE_KEY]
@@ -373,6 +374,11 @@ class RunPlanGenerator(object):
         longest_run_week_1 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY]
         longest_run_week_2 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY]
         longest_run_week_3 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY]
+        longest_run_week_4 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_4_KEY]
+        total_intensity_week_1 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_1_KEY]
+        total_intensity_week_2 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_2_KEY]
+        total_intensity_week_3 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_3_KEY]
+        total_intensity_week_4 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_4_KEY]
         avg_run_distance = inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
         num_runs = inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS]
         exp_level = inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY]

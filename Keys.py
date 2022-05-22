@@ -93,7 +93,6 @@ PLAN_INPUT_AGE_YEARS_KEY = "Age In Years"
 PLAN_INPUT_EXPERIENCE_LEVEL_KEY = "Experience Level" # Athlete's experience level with running (scale 1-10)
 PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY = "Structured Training Comfort Level" # Athlete's comfort level (i.e. experience) with doing intervals, long runs, etc. (scale 1-10)
 PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
-PLAN_INPUT_NUM_WEEKS_BUILDING_KEY = "Num Weeks Building" # The number of consecutive weeks with increasing intensity
 PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
 PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
 PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS = "Number of Runs (Last 4 Weeks)"

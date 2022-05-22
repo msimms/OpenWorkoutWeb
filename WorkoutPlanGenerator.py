@@ -154,7 +154,7 @@ class WorkoutPlanGenerator(object):
         #
 
         # Look through the user's four week records.
-        cycling_bests, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 4), now)
+        _, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 4), now)
 
         # Find the longest run in the last four weeks.
         if running_bests is not None and Keys.LONGEST_DISTANCE in running_bests:
@@ -233,7 +233,6 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.PLAN_INPUT_GOAL_KEY] = goal
         inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
-        inputs[Keys.PLAN_INPUT_NUM_WEEKS_BUILDING_KEY] = 0
         inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = avg_running_distance
         inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = avg_cycling_distance
         inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS] = num_runs
@@ -306,7 +305,6 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.PLAN_INPUT_GOAL_KEY])
         model_inputs.append(inputs[Keys.GOAL_TYPE_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY])
-        model_inputs.append(inputs[Keys.PLAN_INPUT_NUM_WEEKS_BUILDING_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS])

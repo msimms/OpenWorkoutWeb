@@ -25,9 +25,9 @@
 """Unit tests for workout plan generation."""
 
 import argparse
+import csv
 import datetime
 import inspect
-import json
 import logging
 import os
 import sys
@@ -51,37 +51,57 @@ def run_unit_tests(config, input_file_name):
 
     # Load the test data.
     with open(input_file_name, 'r') as f:
-        test_json = json.load(f)
-        test_inputs = test_json["inputs"]
+        csv_data = csv.reader(f)
 
         generator = WorkoutPlanGenerator.WorkoutPlanGenerator(config, None)
         scheduler = WorkoutScheduler.WorkoutScheduler(None)
 
         today = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0).date()
         start_time = today + datetime.timedelta(days=7-today.weekday())
+        key_names = {}
 
         # Generate a plan for each test input.
-        for test_input in test_inputs:
+        for test_input in csv_data:
 
-            # Run the inputs through the workout generator.
-            print("-" * 40)
-            print("Input: ")
-            print("-" * 40)
-            print(test_input)
-            print("-" * 40)
-            print("Generating workouts...")
-            print("-" * 40)
-            workouts = generator.generate_plan_from_inputs(None, test_input)
-            print("-" * 40)
-            print("Exporting workouts...")
-            print("-" * 40)
-            WorkoutPlanGenerator.export_workouts(workouts, 'text')
-            print("-" * 40)
-            print("Scheduling workouts...")
-            print("-" * 40)
-            schedule = scheduler.schedule_workouts(workouts, start_time)
-            for workout in schedule:
-                print(workout.export_to_text(Keys.UNITS_METRIC_KEY))
+            # The first row has the key names.
+            if not key_names:
+                key_names = test_input
+
+            # Subsequent rows are test data.
+            else:
+
+                # Cleanup the inputs, convert strings to numbers where applicable.
+                sanitized_inputs = []
+                for item in test_input:
+                    try:
+                        sanitized_inputs.append(float(item))
+                    except:
+                        sanitized_inputs.append(item)
+
+                input_dict = dict(zip(key_names, sanitized_inputs))
+                print(input_dict)
+
+                # Run the inputs through the workout generator.
+                print("-" * 40)
+                print("Input: ")
+                print("-" * 40)
+                print(test_input)
+                print("-" * 40)
+                print("Generating workouts...")
+                print("-" * 40)
+                workouts = generator.generate_plan_from_inputs(None, input_dict)
+                print("-" * 40)
+                print("Exporting workouts...")
+                print("-" * 40)
+                WorkoutPlanGenerator.export_workouts(workouts, 'text')
+                print("-" * 40)
+                print("Scheduling workouts...")
+                print("-" * 40)
+
+                # Run the workouts through the schedule.
+                schedule = scheduler.schedule_workouts(workouts, start_time)
+                for workout in schedule:
+                    print(workout.export_to_text(Keys.UNITS_METRIC_KEY))
 
     return len(failures) == 0
 
@@ -94,7 +114,7 @@ def main():
     # Parse the command line arguments.
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="", help="The configuration file.", type=str, action="store", required=True)
-    parser.add_argument("--file", type=str, action="store", default=os.path.dirname(os.path.realpath(__file__)), help="File to process", required=True)
+    parser.add_argument("--file", help="CSV test file to process", type=str, action="store", required=True)
 
     try:
         args = parser.parse_args()
