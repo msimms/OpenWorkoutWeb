@@ -80,6 +80,7 @@ class RunPlanGenerator(object):
 
     def update_intensity_distribution(self, seconds, meters):
         """Updates the variables used to track intensity distribution."""
+        """Intensity distribution is calculated by tracking the time and distance at easy pace, L1 pace, and L2 pace."""
 
          # Distance not specified.
         if meters < 0.01:
@@ -417,6 +418,13 @@ class RunPlanGenerator(object):
             if weeks_until_goal <= 1 and goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
                 in_taper = True
 
+        # Is it time for an easy week?
+        easy_week = False
+        if not in_taper:
+            if total_intensity_week_1 and total_intensity_week_2 and total_intensity_week_3:
+                if total_intensity_week_1 >= total_intensity_week_2 and total_intensity_week_2 >= total_intensity_week_3:
+                    easy_week = True
+
         # Compute the longest run needed to accomplish the goal.
         # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.
         # The non-taper equation was derived by playing with trendlines in a spreadsheet.
@@ -488,11 +496,27 @@ class RunPlanGenerator(object):
             easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
             workouts.append(easy_run_workout)
 
+            # Calculate the total intensity for each workout.
+            total_intensity = 0.0
+            for workout in best_workouts:
+                workout.calculate_estimated_intensity_score(functional_threshold_pace)
+                total_intensity = total_intensity + workout.estimated_intensity_score
+
+            # If this is supposed to be an easy week then the total intensity should be less than last week's intensity.
+            # Otherwise, it should be more.
+            valid_total_intensity = True
+            if total_intensity_week_1 > 0.1: # First week in the training plan won't have any prior data.
+                if easy_week:
+                    valid_total_intensity = total_intensity < total_intensity_week_1
+                else:
+                    valid_total_intensity = total_intensity > total_intensity_week_1
+
             # How far are these workouts from the ideal intensity distribution?
-            intensity_distribution_score = self.check_intensity_distribution()
-            if best_intensity_distribution_score is None or intensity_distribution_score < best_intensity_distribution_score:
-                best_intensity_distribution_score = intensity_distribution_score
-                best_workouts = workouts
+            if valid_total_intensity:
+                intensity_distribution_score = self.check_intensity_distribution()
+                if best_intensity_distribution_score is None or intensity_distribution_score < best_intensity_distribution_score:
+                    best_intensity_distribution_score = intensity_distribution_score
+                    best_workouts = workouts
 
             # This is used to make sure we don't loop forever.
             iter_count = iter_count + 1
@@ -500,9 +524,5 @@ class RunPlanGenerator(object):
             # Exit conditions:
             if iter_count >= 6:
                 done = True
-
-        # Calculate the total stress for each workout.
-        for workout in best_workouts:
-            workout.calculate_estimated_intensity_score(functional_threshold_pace)
 
         return best_workouts
