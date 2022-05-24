@@ -357,6 +357,11 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 * Bug fixes.
 * Updated unit tests.
 
+### 0.50
+* Bug fixes.
+* Updated unit tests for workout plan generation.
+* More work on workout plan generation.
+
 ## Tech
 This software uses several other source projects to work properly:
 
