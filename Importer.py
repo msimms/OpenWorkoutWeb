@@ -231,13 +231,18 @@ class Importer(object):
                                 temperature_readings.append(reading)
 
             # Write all the locations at once.
-            self.activity_writer.create_activity_locations(device_str, activity_id, locations)
+            if locations:
+                self.activity_writer.create_activity_locations(device_str, activity_id, locations)
 
             # Write all the sensor readings at once.
-            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
-            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
-            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
-            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_TEMP_KEY, temperature_readings)
+            if cadences:
+                self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
+            if heart_rate_readings:
+                self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
+            if power_readings:
+                self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
+            if temperature_readings:
+                self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_TEMP_KEY, temperature_readings)
 
             # Let it be known that we are finished with this activity.
             self.activity_writer.finish_activity(activity_id, end_time_unix)
@@ -357,12 +362,16 @@ class Importer(object):
                                             power_readings.append(reading)
 
         # Write all the locations at once.
-        self.activity_writer.create_activity_locations(device_str, activity_id, locations)
+        if locations:
+            self.activity_writer.create_activity_locations(device_str, activity_id, locations)
 
         # Write all the sensor readings at once.
-        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
-        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
-        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
+        if cadences:
+            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
+        if heart_rate_readings:
+            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
+        if power_readings:
+            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
 
         # Let it be known that we are finished with this activity.
         self.activity_writer.finish_activity(activity_id, end_time_unix)
@@ -468,14 +477,20 @@ class Importer(object):
         device_str, activity_id = self.activity_writer.create_activity(username, user_id, activity_name, "", normalized_activity_type, start_time_unix, desired_activity_id)
 
         # Write all the locations at once.
-        self.activity_writer.create_activity_locations(device_str, activity_id, locations)
+        if locations:
+            self.activity_writer.create_activity_locations(device_str, activity_id, locations)
 
         # Write all the sensor readings at once.
-        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
-        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
-        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
-        self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_TEMP_KEY, temperatures)
-        self.activity_writer.create_activity_events(activity_id, events)
+        if cadences:
+            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_CADENCE_KEY, cadences)
+        if heart_rate_readings:
+            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_HEART_RATE_KEY, heart_rate_readings)
+        if power_readings:
+            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_POWER_KEY, power_readings)
+        if temperatures:
+            self.activity_writer.create_activity_sensor_readings(activity_id, Keys.APP_TEMP_KEY, temperatures)
+        if events:
+            self.activity_writer.create_activity_events(activity_id, events)
 
         # Let it be known that we are finished with this activity.
         self.activity_writer.finish_activity(activity_id, end_time_unix)
