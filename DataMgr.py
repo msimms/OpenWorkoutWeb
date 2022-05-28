@@ -104,6 +104,8 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity object.")
         if activity_user_id is None:
             raise Exception("No activity user ID.")
+        if self.analysis_scheduler is None:
+            raise Exception("No analysis scheduler.")
 
         activity[Keys.ACTIVITY_USER_ID_KEY] = activity_user_id
         task_id, internal_task_id = self.analysis_scheduler.add_activity_to_queue(activity)

@@ -104,8 +104,8 @@ def import_activity(import_str, internal_task_id):
             data_mgr.update_deferred_task(user_id, internal_task_id, activity_id, Keys.TASK_STATUS_FINISHED)
 
             # Schedule the activity for analysis.
-            print("Importing was successful, performing analysis...")
-            data_mgr.analyze_activity_by_id(activity_id, user_id)
+            #print("Importing was successful, performing analysis...")
+            #data_mgr.analyze_activity_by_id(activity_id, user_id)
 
         # The import failed.
         else:
