@@ -267,7 +267,8 @@ def media(env, start_response):
 def photos(env, start_response):
     """Returns an activity photo."""
     try:
-        return handle_static_file_request(start_response, Dirs.PHOTOS_DIR, os.path.join(env['user_id'], env['PATH_INFO']), 'text/html')
+        parts = os.path.split(env['PATH_INFO'])
+        return handle_static_file_request(start_response, Dirs.PHOTOS_DIR, os.path.join(parts[0], parts[1]), 'text/html')
     except:
         # Log the error and then fall through to the error page response.
         log_error(traceback.format_exc())
