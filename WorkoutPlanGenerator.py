@@ -182,10 +182,6 @@ class WorkoutPlanGenerator(object):
         run_intensity_by_week[3] = self.optional_fetch_from_dict(running_week_summary, Keys.TOTAL_INTENSITY_SCORE)
         cycling_intensity_by_week[3] = self.optional_fetch_from_dict(cycling_week_summary, Keys.TOTAL_INTENSITY_SCORE)
 
-        # Compute the user's age in years.
-        birthday = int(self.user_mgr.retrieve_user_setting(user_id, Keys.USER_BIRTHDAY_KEY))
-        age_years = (now - birthday) / (365.25 * 24 * 60 * 60)
-
         # Compute average running and cycling distances.
         avg_cycling_distance = 0.0
         avg_running_distance = 0.0
@@ -200,7 +196,16 @@ class WorkoutPlanGenerator(object):
                 num_runs = running_summary[Keys.TOTAL_ACTIVITIES]
                 avg_running_distance = running_summary[Keys.TOTAL_DISTANCE] / num_runs
 
+        #
+        # Need information about the user.
+        #
+
+        # Compute the user's age in years.
+        birthday = int(self.user_mgr.retrieve_user_setting(user_id, Keys.USER_BIRTHDAY_KEY))
+        age_years = (now - birthday) / (365.25 * 24 * 60 * 60)
+
         # Get the experience/comfort level for the user.
+	    # This is meant to give us an idea as to how quickly we can ramp up the intensity.
         experience_level = self.user_mgr.retrieve_user_setting(user_id, Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY)
         comfort_level = self.user_mgr.retrieve_user_setting(user_id, Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY)
 
@@ -249,25 +254,27 @@ class WorkoutPlanGenerator(object):
         """Generates workouts for the specified user to perform in the next week."""
 
         workouts = []
-        training_intensity_distribution = Keys.TRAINING_INTENSITY_DIST_POLARIZED
 
-        swim_planner = SwimPlanGenerator.SwimPlanGenerator(user_id)
-        bike_planner = BikePlanGenerator.BikePlanGenerator(user_id)
-        run_planner = RunPlanGenerator.RunPlanGenerator(user_id, training_intensity_distribution)
+        # The training philosophy indicates how much time we intended
+        # to spend in each training zone.
+        training_philosophy = Keys.TRAINING_PHILOSOPHY_POLARIZED
 
         # Generate the swim workouts.
+        swim_planner = SwimPlanGenerator.SwimPlanGenerator(user_id)
         if not swim_planner.is_workout_plan_possible(inputs):
             raise Exception("The swim distance goal is not feasible in the time alloted.")
         swim_workouts = swim_planner.gen_workouts_for_next_week(inputs)
         workouts.extend(swim_workouts)
 
         # Generate the bike workouts.
+        bike_planner = BikePlanGenerator.BikePlanGenerator(user_id, training_philosophy)
         if not bike_planner.is_workout_plan_possible(inputs):
             raise Exception("The bike distance goal is not feasible in the time alloted.")
         bike_workouts = bike_planner.gen_workouts_for_next_week(inputs)
         workouts.extend(bike_workouts)
 
         # Generate the run workouts.
+        run_planner = RunPlanGenerator.RunPlanGenerator(user_id, training_philosophy)
         if not run_planner.is_workout_plan_possible(inputs):
             raise Exception("The run distance goal is not feasible in the time alloted.")
         run_workouts = run_planner.gen_workouts_for_next_week(inputs)

@@ -10,26 +10,29 @@ import Keys
 import Units
 import WorkoutFactory
 
-# Max zone 1, zone 2, zone 3 total intensity distributions for each training philosophy
-TID_THRESHOLD = [55, 55, 20]
-TID_POLARIZED = [85, 10, 25]
-TID_PYRAMIDAL = [75, 25, 10]
-
 class RunPlanGenerator(object):
     """Class for generating a run plan for the specifiied user."""
 
-    def __init__(self, user_id, training_intensity_distribution):
+    def __init__(self, user_id, training_philosophy):
+        """Constructor"""
         self.user_id = user_id
 
+        # Time below cutoff_pace_1 counts towards the first bucket.
+        # Time between cutoff_pace_1 and cutoff_pace_2 counts towards the second bucket.
+        # Time above cutoff_pace_2 counts towards the third bucket.
         self.cutoff_pace_1 = 0.0
         self.cutoff_pace_2 = 0.0
 
-        if training_intensity_distribution == Keys.TRAINING_INTENSITY_DIST_THRESHOLD:
-            self.training_intensity_distribution = TID_THRESHOLD
-        elif training_intensity_distribution == Keys.TRAINING_INTENSITY_DIST_POLARIZED:
-            self.training_intensity_distribution = TID_POLARIZED
-        elif training_intensity_distribution == Keys.TRAINING_INTENSITY_DIST_PYRAMIDAL:
-            self.training_intensity_distribution = TID_PYRAMIDAL
+        # The training philosophy indicates how much time we intended
+        # to spend in each training zone.
+        if training_philosophy == Keys.TRAINING_PHILOSOPHY_THRESHOLD:
+            self.training_zone_distribution = Keys.TID_THRESHOLD
+        elif training_philosophy == Keys.TRAINING_PHILOSOPHY_POLARIZED:
+            self.training_zone_distribution = Keys.TID_POLARIZED
+        elif training_philosophy == Keys.TRAINING_PHILOSOPHY_PYRAMIDAL:
+            self.training_zone_distribution = Keys.TID_PYRAMIDAL
+        else:
+            self.training_zone_distribution = Keys.TID_POLARIZED
 
         self.clear_intensity_distribution()
 
@@ -107,7 +110,7 @@ class RunPlanGenerator(object):
         """How far are these workouts from the ideal intensity distribution?"""
         total_meters = sum(self.intensity_distribution_meters)
         intensity_distribution_percent = [(x / total_meters) * 100.0 for x in self.intensity_distribution_meters]
-        intensity_distribution_score = sum([abs(x - y) for x, y in zip(intensity_distribution_percent, self.training_intensity_distribution)])
+        intensity_distribution_score = sum([abs(x - y) for x, y in zip(intensity_distribution_percent, self.training_zone_distribution)])
         return intensity_distribution_score
 
     def gen_easy_run(self, pace, min_run_distance, max_run_distance):
@@ -192,6 +195,25 @@ class RunPlanGenerator(object):
 
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
         self.update_intensity_distribution(interval_distance_meters * threshold_run_pace, interval_distance_meters)
+        self.update_intensity_distribution(warmup_duration, easy_run_pace)
+        self.update_intensity_distribution(cooldown_duration, easy_run_pace)
+
+        return workout
+
+    def gen_norwegian_intervals(self, threshold_run_pace, easy_run_pace):
+        """4x4 minutes fast with 3 minutes easy jog"""
+
+        warmup_duration = 10 * 60 # Ten minute warmup
+        cooldown_duration = 10 * 60 # Ten minute cooldown
+
+        # Create the workout object.
+        workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_RUN, self.user_id)
+        workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.add_warmup(warmup_duration)
+        #workout.add_interval(4, interval_distance, threshold_run_pace, rest_interval_distance, easy_run_pace)
+        workout.add_cooldown(cooldown_duration)
+
+        # Tally up the easy and hard distance so we can keep the weekly plan in check.
         self.update_intensity_distribution(warmup_duration, easy_run_pace)
         self.update_intensity_distribution(cooldown_duration, easy_run_pace)
 

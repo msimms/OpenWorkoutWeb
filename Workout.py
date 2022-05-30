@@ -289,7 +289,7 @@ class Workout(object):
         elif self.type == Keys.WORKOUT_TYPE_EASY_RIDE:
             result += "Purpose: Easy rides build aerobic capacity while keeping the wear and tear on the body to a minimum.\n"
         elif self.type == Keys.WORKOUT_TYPE_SWEET_SPOT_RIDE:
-            result += "Purpose: .\n"
+            result += "Purpose: Sweet spot rides are hard enough to improve fitness while being easy enough to do frequently.\n"
         elif self.type == Keys.WORKOUT_TYPE_OPEN_WATER_SWIM:
             result += "Purpose: Open water swims get you used to race day conditions.\n"
         elif self.type == Keys.WORKOUT_TYPE_POOL_WATER_SWIM:

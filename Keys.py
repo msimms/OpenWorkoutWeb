@@ -140,9 +140,15 @@ RECORD_NAME_KEY = "record_name"
 PERSONAL_RECORDS_KEY = "records"
 
 # Workout training intensity distribution
-TRAINING_INTENSITY_DIST_POLARIZED = "polarized"
-TRAINING_INTENSITY_DIST_PYRAMIDAL = "pyramidal"
-TRAINING_INTENSITY_DIST_THRESHOLD = "threshold"
+TRAINING_PHILOSOPHY_POLARIZED = "polarized"
+TRAINING_PHILOSOPHY_PYRAMIDAL = "pyramidal"
+TRAINING_PHILOSOPHY_THRESHOLD = "threshold"
+
+# Max Zone 1, Zone 2, and Zone 3 total intensity distributions for each training load philosophy.
+# The buckets correspond to the amount of time spent in each lactate zone.
+TID_THRESHOLD = [55, 55, 20]
+TID_POLARIZED = [85, 10, 25]
+TID_PYRAMIDAL = [75, 25, 10]
 
 # Workout plans
 WORKOUT_PLAN_USER_ID_KEY = "user_id"
@@ -176,7 +182,7 @@ WORKOUT_TYPE_MIDDLE_DISTANCE_RUN = "Middle Distance Run" # 2 hour run for advanc
 WORKOUT_TYPE_SPEED_INTERVAL_RIDE = "Speed Interval Ride" # A bike ride with speed intervals
 WORKOUT_TYPE_TEMPO_RIDE = "Tempo Ride" # A bike ride at tempo pace/power
 WORKOUT_TYPE_EASY_RIDE = "Easy Ride" # A bike ride at an easy pace/power
-WORKOUT_TYPE_SWEET_SPOT_RIDE = "Sweet Spot Ride"
+WORKOUT_TYPE_SWEET_SPOT_RIDE = "Sweet Spot Ride" # A bike ride with intervals just below threshold power
 WORKOUT_TYPE_OPEN_WATER_SWIM = "Open Water Swimming"
 WORKOUT_TYPE_POOL_WATER_SWIM = "Pool Swimming"
 
