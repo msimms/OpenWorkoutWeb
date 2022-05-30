@@ -16,6 +16,7 @@ import CherryPyFrontEnd
 import Config
 import DatabaseException
 import Dirs
+import InputChecker
 import SessionMgr
 
 from urllib.parse import parse_qs
@@ -146,6 +147,10 @@ def handle_error(start_response, error_code):
     g_session_mgr.clear_current_session() # Housekeeping
     return [content]
 
+def handle_error_403(start_response):
+    """Renders the error page."""
+    return handle_error(start_response, '403 Forbidden')
+
 def handle_error_404(start_response):
     """Renders the error page."""
     return handle_error(start_response, '404 Not Found')
@@ -195,6 +200,10 @@ def handle_static_file_request(start_response, dir, file_name, mime_type):
     # Calculate the local file name.
     root_dir = os.path.dirname(os.path.abspath(__file__))
     local_file_name = os.path.join(root_dir, dir, file_name)
+
+    # Sanity check the local file.
+    if not InputChecker.is_safe_path(local_file_name):
+        return handle_error_403(start_response)
 
     # Read and return the file.
     if os.path.exists(local_file_name):
