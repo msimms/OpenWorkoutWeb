@@ -66,6 +66,8 @@ function get_graph_color(key)
         return "ForestGreen";
     if (key == "Lap Time")
         return "LightSteelBlue";
+    if (key == "Threat Count")
+        return "FireBrick";
     return "Gray";
 }
 

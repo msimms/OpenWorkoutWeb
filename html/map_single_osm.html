@@ -366,7 +366,6 @@ ${summary}
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
     }
 
-
     /// @function draw_speed_graph
     function draw_speed_graph(start_time_ms, end_time_ms, data)
     {
@@ -454,6 +453,10 @@ ${summary}
             {
                 draw_graph(start_time_ms, end_time_ms, new_data, key, "Temperature", get_graph_color(key));
             }
+            else if (key == "Threat Count")
+            {
+                draw_graph(start_time_ms, end_time_ms, new_data, key, "Threat Count", get_graph_color(key));
+            }
             else if (key == "accelerometer")
             {
                 let accel_data = sensordata[key];
@@ -481,7 +484,7 @@ ${summary}
     /// @function retrieve_sensor_data
     function retrieve_sensor_data()
     {
-        let api_url = root_url + "/api/1.0/activity_sensordata?activity_id=" + activity_id + "&sensors=Current%20Speed,Heart%20Rate,Cadence,Power,Temperature,accelerometer";
+        let api_url = root_url + "/api/1.0/activity_sensordata?activity_id=" + activity_id + "&sensors=Current%20Speed,Heart%20Rate,Cadence,Power,Temperature,Threat%20Count,accelerometer";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
     }
 
