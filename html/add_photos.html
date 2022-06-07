@@ -31,10 +31,28 @@ ${nav}
     <h2>Photos</h2>
     <input type="file" id="photo_picker" class="modern_button" style="font-size:12px" accept=".png,.jpg,.jpeg,.gif" name="photo_list" webkitdirectory multiple><br>
     <button type="button" class="modern_button" onclick="upload_selected_files()">Upload Photos</button><br>
+    <table class="import" id="upload_table" style="display: none;"></table><br>
 
     <script type="text/javascript">
         let picker = document.getElementById('photo_picker');
         let selected_photo_list = [];
+
+        /// @function update_file_status
+        function update_file_status(file_name, status_text)
+        {
+            let upload_table = document.getElementById("upload_table");
+
+            upload_table.style = "display: inline-block;";
+
+            for (let i = 0, row; row = upload_table.rows[i]; i++)
+            {
+                if (row.cells[0].innerText.localeCompare(file_name) == 0)
+                {
+                    row.cells[1].innerText = status_text;
+                    break;
+                }
+            }
+        }
 
         /// @function upload_file
         // Sends the chosen photos to the cloud.
@@ -79,6 +97,7 @@ ${nav}
 
                     if (send_post_request(the_url, dict, result_text))
                     {
+                        update_file_status(file_obj.name, "Uploading....");
                         resolve();
                     }
                     else
@@ -118,8 +137,19 @@ ${nav}
         }
 
         picker.addEventListener('change', e => {
+            let upload_table = document.getElementById("upload_table");
+
             for (let file of Array.from(e.target.files))
             {
+                let new_row = upload_table.insertRow();
+                let cell = new_row.insertCell();
+                let text = document.createTextNode(file.name);
+
+                cell.appendChild(text);
+                cell = new_row.insertCell();
+                text = document.createTextNode("Waiting");
+                cell.appendChild(text);
+
                 selected_photo_list.push(file);
             };
         });
