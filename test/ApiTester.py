@@ -46,9 +46,7 @@ def print_test_title(title):
 def send_get_request(url, payload, cookies):
     """Utility function for sending an HTTP GET and returning the status code and response text."""
     s = requests.Session()
-    if cookies:
-        s.cookies = cookies
-    response = s.get(url, data=json.dumps(payload), headers={'X-Requested-With':'XMLHttpRequest'})
+    response = s.get(url, params=payload, headers={'X-Requested-With':'XMLHttpRequest'}, cookies=cookies)
 
     print(f"URL: {url}")
     print(f"Response code: {response.status_code}")
@@ -58,97 +56,109 @@ def send_get_request(url, payload, cookies):
 def send_post_request(url, payload, cookies):
     """Utility function for sending an HTTP POST and returning the status code and response text."""
     s = requests.Session()
-    if cookies:
-        s.cookies = cookies
-    response = s.post(url, data=json.dumps(payload), headers={'X-Requested-With':'XMLHttpRequest'})
+    response = s.post(url, data=json.dumps(payload), headers={'X-Requested-With':'XMLHttpRequest'}, cookies=cookies)
 
     print(f"URL: {url}")
     print(f"Response code: {response.status_code}")
     print(f"Response text: {response.text}")
     return response.status_code, response.text, s.cookies
 
-def create_login(root_url, username, password, realname):
+def create_login(api_url, username, password, realname):
     """Creates a new login and session."""
-    url = root_url + "create_login"
+    url = api_url + "create_login"
     payload = {'username': username, 'password1': password, 'password2': password, 'realname': realname}
     return send_post_request(url, payload, None)
 
-def login(root_url, username, password):
+def login(api_url, username, password):
     """Starts a new session."""
-    url = root_url + "login"
+    url = api_url + "login"
     payload = {'username': username, 'password': password}
     return send_post_request(url, payload, None)
 
-def login_status(root_url, cookie):
+def login_status(api_url, cookies):
     """Validates a session."""
-    url = root_url + "login_status"
-    return send_get_request(url, {}, cookie)
+    url = api_url + "login_status"
+    return send_get_request(url, {}, cookies)
 
-def generate_api_key(root_url, cookie):
+def generate_api_key(api_url, cookies):
     """Generates a new API key."""
-    url = root_url + "generate_api_key"
-    return send_post_request(url, {}, cookie)
+    url = api_url + "generate_api_key"
+    return send_post_request(url, {}, cookies)
 
-def delete_api_key(root_url, api_key, cookie):
+def delete_api_key(api_url, api_key, cookies):
     """Deletes an API key."""
-    url = root_url + "delete_api_key"
+    url = api_url + "delete_api_key"
     payload = {'key': api_key}
-    return send_post_request(url, payload, cookie)
+    return send_post_request(url, payload, cookies)
 
-def request_workout_intensity_total(root_url, start_time, end_time):
+def request_workout_intensity_total(api_url, cookies, start_time, end_time):
     """Tests get_training_intensity_for_timeframe()."""
-    url = root_url + "get_training_intensity_for_timeframe"
+    url = api_url + "get_training_intensity_for_timeframe"
     payload = {'start_time': start_time, 'end_time': end_time}
-    return send_post_request(url, payload, None)
+    return send_get_request(url, payload, cookies)
 
-def logout(root_url, cookie):
+def logout(root_url, cookies):
     """Ends the existing session."""
     url = root_url + "logout"
-    return send_post_request(url, {}, cookie)
+    return send_post_request(url, {}, cookies)
 
 def run_login_tests(api_url, username, password, realname):
     """Logs in, or creates the user if the user does not exist."""
 
     # Login.
     print_test_title("Login")
-    code, _, cookies = login(api_url, username, password)
+    code, response_str, cookies = login(api_url, username, password)
     if code == 200:
         print("Test passed!\n")
     elif code == 401:
         print_test_title("Create Login")
-        code, _, cookies = create_login(api_url, username, password, realname)
+        code, response_str, cookies = create_login(api_url, username, password, realname)
         if code != 200:
             raise Exception("Failed to create login.")
     else:
         raise Exception("Failed to login.")
 
+    # Where's the session key?
+    response_json = json.loads(response_str)
+    cookies = {}
+    cookies['session_cookie'] = response_json['cookie']
+
     # Login status.
     print_test_title("Login Status")
     code, _ = login_status(api_url, cookies)
-    if code == 200:
-        print("Test passed!\n")
-    else:
+    if code != 200:
         raise Exception("Login status check failed.")
+    print("Test passed!\n")
 
     return cookies
 
+def run_workout_analysis_tests(api_url, cookies):
+    """Runs unit tests relating to workout analysis."""
+    print_test_title("Request a sum of workout intensities")
+    start_time = int(time.time())
+    end_time = start_time - (86400 * 7)
+    code, _ = request_workout_intensity_total(api_url, cookies, start_time, end_time)
+    if code != 200:
+        raise Exception("Failed to logout.")
+    print("Test passed!\n")
+
 def run_logout_test(api_url, cookies):
     """Logs out the test user."""
-
     print_test_title("Logout")
     code, _, _ = logout(api_url, cookies)
-    if code == 200:
-        print("Test passed!\n")
-    else:
+    if code != 200:
         raise Exception("Failed to logout.")
+    print("Test passed!\n")
 
 def run_unit_tests(url, username, password, realname):
     """Entry point for the unit tests."""
 
     # Append the API path.
-    print(url)
+    print_test_title("Root URL")
+    print(url + "\n")
     api_url = create_api_url(url)
-    print(api_url)
+    print_test_title("Root API URL")
+    print(api_url + "\n")
 
     # Login
     cookies = run_login_tests(api_url, username, password, realname)
@@ -156,24 +166,19 @@ def run_unit_tests(url, username, password, realname):
     # Generate an API key.
     print_test_title("Generate an API Key")
     code, api_key, _ = generate_api_key(api_url, cookies)
-    if code == 200:
-        print("Test passed! API key is {0}\n".format(api_key))
-    else:
+    if code != 200:
         raise Exception("Failed to generate an API key.")
+    print("Test passed! API key is {0}\n".format(api_key))
 
     # Delete the API key.
     print_test_title("Delete the API Key")
     code, _, _ = delete_api_key(api_url, api_key, cookies)
-    if code == 200:
-        print("Test passed! API key {0} was deleted\n".format(api_key))
-    else:
+    if code != 200:
         raise Exception("Failed to delete the API key.")
+    print("Test passed! API key {0} was deleted\n".format(api_key))
 
     # Workout analysis.
-    print_test_title("Request a sum of workout intensities")
-    start_time = time.time()
-    end_time = start_time - (86400 * 7)
-    request_workout_intensity_total(start_time, end_time)
+    run_workout_analysis_tests(api_url, cookies)
 
     # Logout.
     run_logout_test(api_url, cookies)
