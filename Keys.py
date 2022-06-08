@@ -225,6 +225,7 @@ APP_HEART_RATE_KEY = "Heart Rate"  # Raw heart rate list.
 APP_AVG_HEART_RATE_KEY = "Average Heart Rate" # Computed average heart rate.
 APP_CURRENT_PACE_KEY = "Current Pace" # Computed pace list.
 APP_POWER_KEY = "Power" # Raw power data list.
+APP_THREAT_COUNT_KEY = "Threat Count" # Threat count, like from a cycling radar unit.
 APP_EVENTS_KEY = "Events" # Raw event data (gear shifts, etc.)
 APP_SETS_KEY = "Sets"
 APP_DISTANCES_KEY = "distances" # Distance between data points.

@@ -109,7 +109,7 @@ class Api(object):
                 time_value_pair = []
                 time_value_pair.append(date_time)
                 time_value_pair.append(float(item[1]))
-                if key in [ Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY ]:
+                if key in [ Keys.APP_CADENCE_KEY, Keys.APP_HEART_RATE_KEY, Keys.APP_POWER_KEY, Keys.APP_THREAT_COUNT_KEY ]:
                     if key not in sensor_readings_dict:
                         sensor_readings_dict[key] = []
                     value_list = sensor_readings_dict[key]
@@ -226,6 +226,8 @@ class Api(object):
 
     def handle_retrieve_activity_track(self, values):
         """Called when an API message to get the activity track is received. Result is a JSON string."""
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
         if Keys.ACTIVITY_NUM_POINTS not in values:
@@ -259,6 +261,8 @@ class Api(object):
 
     def handle_retrieve_activity_metadata(self, values):
         """Called when an API message to get the activity metadata. Result is a JSON string."""
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
@@ -357,6 +361,8 @@ class Api(object):
 
     def handle_retrieve_activity_sensordata(self, values):
         """Called when an API message to get the activity sensordata. Result is a JSON string."""
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
         if Keys.SENSOR_LIST_KEY not in values:
@@ -405,6 +411,8 @@ class Api(object):
 
     def handle_retrieve_activity_summarydata(self, values):
         """Called when an API message to get the interval segments computed from the activity is received. Result is a JSON string."""
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
         if Keys.SUMMARY_ITEMS_LIST_KEY not in values:
@@ -434,6 +442,8 @@ class Api(object):
         """Called when an API message to update the activity metadata."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
@@ -468,11 +478,13 @@ class Api(object):
         if self.user_id is not None:
             return True, ""
 
+        # Required parameters.
         if Keys.USERNAME_KEY not in values:
             raise ApiException.ApiAuthenticationException("Username not specified.")
         if Keys.PASSWORD_KEY not in values:
             raise ApiException.ApiAuthenticationException("Password not specified.")
 
+        # Decode and validate the required parameters.
         email = unquote_plus(values[Keys.USERNAME_KEY])
         if not InputChecker.is_email_address(email):
             raise ApiException.ApiAuthenticationException("Invalid email address.")
@@ -508,6 +520,7 @@ class Api(object):
         if self.user_id is not None:
             raise Exception("Already logged in.")
 
+        # Required parameters.
         if Keys.USERNAME_KEY not in values:
             raise ApiException.ApiAuthenticationException("Username not specified.")
         if Keys.REALNAME_KEY not in values:
@@ -517,6 +530,7 @@ class Api(object):
         if Keys.PASSWORD2_KEY not in values:
             raise ApiException.ApiAuthenticationException("Password confirmation not specified.")
 
+        # Decode and validate the required parameters.
         email = unquote_plus(values[Keys.USERNAME_KEY])
         if not InputChecker.is_email_address(email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
@@ -570,6 +584,8 @@ class Api(object):
         """Updates the user's email address."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.EMAIL_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Email not specified.")
 
@@ -593,6 +609,8 @@ class Api(object):
         """Updates the user's password."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if 'old_password' not in values:
             raise ApiException.ApiMalformedRequestException("Old password not specified.")
         if 'new_password1' not in values:
@@ -626,6 +644,8 @@ class Api(object):
         """Removes the current user's gear data."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.PASSWORD_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Password not specified.")
 
@@ -647,6 +667,8 @@ class Api(object):
         """Removes the current user's activity data."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.PASSWORD_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Password not specified.")
 
@@ -672,6 +694,8 @@ class Api(object):
         """Removes the current user and all associated data."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.PASSWORD_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Password not specified.")
 
@@ -782,6 +806,8 @@ class Api(object):
         """Removes the specified activity."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
@@ -808,6 +834,8 @@ class Api(object):
         """Called when an API message to add a new activity based on time and distance is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.APP_DISTANCE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Distance not specified.")
         if Keys.APP_DURATION_KEY not in values:
@@ -843,6 +871,8 @@ class Api(object):
         """Called when an API message to add a new activity based on sets and reps is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.APP_SETS_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Sets not specified.")
         if Keys.ACTIVITY_START_TIME_KEY not in values:
@@ -895,6 +925,8 @@ class Api(object):
         """Called when an API message to add a new activity is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_TYPE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity type not specified.")
 
@@ -916,6 +948,8 @@ class Api(object):
         """Called when an API message to create a new activity from data within a file is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.UPLOADED_FILE_NAME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("File name not specified.")
         if Keys.UPLOADED_FILE_DATA_KEY not in values:
@@ -959,6 +993,8 @@ class Api(object):
         """Called when an API message to upload a photo to an activity is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.UPLOADED_FILE_DATA_KEY not in values:
             raise ApiException.ApiMalformedRequestException("File data not specified.")
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -1001,6 +1037,8 @@ class Api(object):
 
     def handle_list_activity_photos(self, values):
         """Lists all photos associated with an activity."""
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
@@ -1020,6 +1058,8 @@ class Api(object):
         """Called when an API message to delete a photo and remove it from an activity is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.ACTIVITY_PHOTO_ID_KEY not in values:
@@ -1054,6 +1094,8 @@ class Api(object):
         """Called when an API message to add a tag to an activity is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
@@ -1086,6 +1128,8 @@ class Api(object):
         """Called when an API message to delete a tag from an activity is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
@@ -1100,6 +1144,8 @@ class Api(object):
         """Called when an API message to list users is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if 'searchname' not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
@@ -1136,12 +1182,16 @@ class Api(object):
         """Called when an API message request to friend another user is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.TARGET_EMAIL_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Decode and validate the required parameters.
         target_email = unquote_plus(values[Keys.TARGET_EMAIL_KEY])
         if not InputChecker.is_email_address(target_email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
+
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise ApiException.ApiMalformedRequestException("Target user does not exist.")
@@ -1154,12 +1204,16 @@ class Api(object):
         """Takes a user to the pending friends list and adds them to the actual friends list."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.TARGET_EMAIL_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Decode and validate the required parameters.
         target_email = unquote_plus(values[Keys.TARGET_EMAIL_KEY])
         if not InputChecker.is_email_address(target_email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
+
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise ApiException.ApiMalformedRequestException("Target user does not exist.")
@@ -1172,12 +1226,16 @@ class Api(object):
         """Called when an API message request to unfriend another user is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.TARGET_EMAIL_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Decode and validate the required parameters.
         target_email = unquote_plus(values[Keys.TARGET_EMAIL_KEY])
         if not InputChecker.is_email_address(target_email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
+
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise ApiException.ApiMalformedRequestException("Target user does not exist.")
@@ -1188,15 +1246,17 @@ class Api(object):
 
     def handle_export_activity(self, values):
         """Called when an API message request to export an activity is received."""
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Missing activity ID parameter.")
         if Keys.ACTIVITY_EXPORT_FORMAT_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Missing format parameter.")
 
+        # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
-
         export_format = values[Keys.ACTIVITY_EXPORT_FORMAT_KEY]
         if not export_format in ['csv', 'gpx', 'tcx']:
             raise ApiException.ApiMalformedRequestException("Invalid format.")
@@ -1214,11 +1274,14 @@ class Api(object):
         """Called when an API message request to export a workout description is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.WORKOUT_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Workout ID not specified.")
         if Keys.WORKOUT_FORMAT_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Export format not specified.")
 
+        # Decode and validate the required parameters.
         workout_id = values[Keys.WORKOUT_ID_KEY]
         if not InputChecker.is_uuid(workout_id):
             raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
@@ -1243,6 +1306,8 @@ class Api(object):
         """Called when an API message request to associate a device with the logged in user is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if 'device_id' not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
@@ -1253,15 +1318,17 @@ class Api(object):
         """Called when an API message create a tag is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.ACTIVITY_TAG_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
-
         tag = values[Keys.ACTIVITY_TAG_KEY]
         if not InputChecker.is_valid_decoded_str(tag):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -1275,15 +1342,17 @@ class Api(object):
         """Called when an API message delete a tag is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.ACTIVITY_TAG_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
-
         tag = values[Keys.ACTIVITY_TAG_KEY]
         if not InputChecker.is_valid_decoded_str(tag):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -1295,9 +1364,12 @@ class Api(object):
         """Called when an API message create list tags associated with an activity is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
@@ -1310,11 +1382,14 @@ class Api(object):
         """Called when an API message create a comment is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.ACTIVITY_COMMENT_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
@@ -1329,9 +1404,12 @@ class Api(object):
         """Called when an API message to list comments associated with an activity is received. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
@@ -1344,6 +1422,8 @@ class Api(object):
         """Called when an API message to create gear for a user is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.GEAR_TYPE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.GEAR_NAME_KEY not in values:
@@ -1353,6 +1433,7 @@ class Api(object):
         if Keys.GEAR_ADD_TIME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Decode and validate the required parameters.
         gear_type = values[Keys.GEAR_TYPE_KEY]
         if not InputChecker.is_valid_decoded_str(gear_type):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -1444,11 +1525,14 @@ class Api(object):
         """Called when an API message to update the gear a user wants to associate with an activity type, by default, is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_TYPE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.GEAR_NAME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Decode and validate the required parameters.
         activity_type = values[Keys.ACTIVITY_TYPE_KEY]
         if not InputChecker.is_valid_decoded_str(activity_type):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -1463,6 +1547,8 @@ class Api(object):
         """Called when an API message to delete gear for a user is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.GEAR_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
@@ -1478,6 +1564,8 @@ class Api(object):
         """Called when an API message to retire gear for a user is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.GEAR_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
@@ -1493,11 +1581,14 @@ class Api(object):
         """Called when an API message to create a service record for an item of gear is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.SERVICE_RECORD_DATE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.SERVICE_RECORD_DESCRIPTION_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Decode and validate the required parameters.
         gear_id = values[Keys.GEAR_ID_KEY]
         if not InputChecker.is_uuid(gear_id):
             raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
@@ -1515,6 +1606,8 @@ class Api(object):
         """Called when an API message to delete a service record for an item of gear is received."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.SERVICE_RECORD_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
@@ -1660,6 +1753,8 @@ class Api(object):
         """Called when the user updates the visibility of an activity."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
         if Keys.ACTIVITY_VISIBILITY_KEY not in values:
@@ -1682,6 +1777,8 @@ class Api(object):
         """Called when the user wants to recalculate the summary data."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
@@ -1726,6 +1823,8 @@ class Api(object):
         """Deletes the specified API key."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.API_KEY not in values:
             raise ApiException.ApiMalformedRequestException("A key was not specified.")
 
@@ -1737,6 +1836,8 @@ class Api(object):
         """Takes two files and attempts to merge them."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.UPLOADED_FILE1_DATA_KEY not in values:
             raise ApiException.ApiMalformedRequestException("File data not specified.")
         if Keys.UPLOADED_FILE2_DATA_KEY not in values:
@@ -1772,6 +1873,8 @@ class Api(object):
     def handle_update_workout(self, values):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.WORKOUT_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Workout ID not specified.")
 
@@ -1841,6 +1944,8 @@ class Api(object):
         """Called when the user wants to add a race to their calendar."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.RACE_NAME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.RACE_DATE_KEY not in values:
@@ -1870,6 +1975,8 @@ class Api(object):
         """Called when the user wants to delete a race from their calendar."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.RACE_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
@@ -1901,6 +2008,8 @@ class Api(object):
         """Called when the user is uploading a pace plan, typically from the mobile app."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.PACE_PLAN_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.PACE_PLAN_NAME_KEY not in values:
@@ -1918,6 +2027,7 @@ class Api(object):
         if Keys.PACE_PLAN_LAST_UPDATED_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Decode and validate the required parameters.
         plan_id = unquote_plus(values[Keys.PACE_PLAN_ID_KEY])
         if not InputChecker.is_uuid(plan_id):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -1950,9 +2060,12 @@ class Api(object):
         """Called when the user wants to delete a pace plan."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.PACE_PLAN_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
+        # Decode and validate the required parameters.
         plan_id = values[Keys.PACE_PLAN_ID_KEY]
         if not InputChecker.is_uuid(plan_id):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -1982,9 +2095,12 @@ class Api(object):
         """Called when the user wants get the political location that corresponds to an activity."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
+        # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
@@ -2008,6 +2124,8 @@ class Api(object):
         """Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
@@ -2027,6 +2145,8 @@ class Api(object):
         """Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
         if Keys.ACTIVITY_HASH_KEY not in values:
@@ -2092,6 +2212,8 @@ class Api(object):
         """Returns the user's estimated running paces. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.BEST_5K not in values:
             raise ApiException.ApiMalformedRequestException("Best 5K not specified.")
 
@@ -2110,6 +2232,8 @@ class Api(object):
         """Returns the amount of distance logged to activities with the given tag. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_TAG_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Tag not specified.")
 
@@ -2140,6 +2264,8 @@ class Api(object):
         """Returns an ordered list containing the time and activity ID of the user's record progression for the specified record and activity type, i.e. best running 5K. Result is a JSON string."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.ACTIVITY_TYPE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity type specified.")
         if Keys.RECORD_NAME_KEY not in values:
@@ -2169,10 +2295,39 @@ class Api(object):
             record[0] = Units.convert_to_string_in_specified_unit_system(unit_system, record[0], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, record_name)
         return True, json.dumps(records)
 
+    def handle_get_training_intensity_for_timeframe(self, values):
+        """Returns the total training intensity for all the activities in the specified range."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
+        if Keys.START_TIME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Start time not specified.")
+        if Keys.END_TIME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("End time not specified.")
+
+        # Decode and validate the required parameters.
+        if not InputChecker.is_unsigned_integer(values[Keys.START_TIME_KEY]):
+            raise ApiException.ApiMalformedRequestException("Invalid start time.")
+        if not InputChecker.is_unsigned_integer(values[Keys.END_TIME_KEY]):
+            raise ApiException.ApiMalformedRequestException("Invalid end time.")
+        start_time = int(values[Keys.START_TIME_KEY])
+        end_time = int(values[Keys.END_TIME_KEY])
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise ApiException.ApiMalformedRequestException("Empty username.")
+
+        result = self.data_mgr.compute_training_intensity_for_timeframe(self.user_id, start_time, end_time)
+        return True, str(result)
+
     def handle_get_user_setting(self, values):
         """Returns the value associated with the specified user setting."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.REQUESTED_SETTING_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Setting not specified.")
 
@@ -2184,6 +2339,8 @@ class Api(object):
         """Returns the value associated with the specified user settings. Settings are a list of strings."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.REQUESTED_SETTINGS_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Settings not specified.")
 
@@ -2221,9 +2378,12 @@ class Api(object):
 
     def handle_list_power_zones(self, values):
         """Returns power zones corresponding to the specified FTP value."""
+
+        # Required parameters.
         if Keys.ESTIMATED_CYCLING_FTP_KEY not in values:
             raise ApiException.ApiMalformedRequestException("FTP not specified.")
 
+        # Decode and validate the required parameters.
         ftp = values[Keys.ESTIMATED_CYCLING_FTP_KEY]
         if not InputChecker.is_float(ftp):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -2233,9 +2393,12 @@ class Api(object):
 
     def handle_list_hr_zones(self, values):
         """Returns heart rate zones corresponding to the specified resting heart rate value."""
+
+        # Required parameters.
         if Keys.ESTIMATED_MAX_HEART_RATE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Maximum heart rate not specified.")
 
+        # Decode and validate the required parameters.
         max_hr = values[Keys.ESTIMATED_MAX_HEART_RATE_KEY]
         if not InputChecker.is_float(max_hr):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -2264,9 +2427,12 @@ class Api(object):
         """Returns any changes since the last time the device synched."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.DEVICE_LAST_SYNCHED_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Last synched time not specified.")
 
+        # Decode and validate the required parameters.
         last_synched_time = values[Keys.DEVICE_LAST_SYNCHED_KEY]
         if not InputChecker.is_unsigned_integer(last_synched_time):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -2338,6 +2504,8 @@ class Api(object):
             return self.handle_get_task_statuses(values)
         elif request == 'get_record_progression':
             return self.handle_get_record_progression(values)
+        elif request == 'get_training_intensity_for_timeframe':
+            return self.handle_get_training_intensity_for_timeframe(values)
         elif request == 'get_user_setting':
             return self.handle_get_user_setting(values)
         elif request == 'get_user_settings':

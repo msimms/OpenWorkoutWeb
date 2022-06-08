@@ -1634,33 +1634,30 @@ class DataMgr(Importer.ActivityWriter):
         bests.sort(compare)
         return bests
 
-    def analyze_unanalyzed_activities(self, user_id, timeframe):
+    def analyze_unanalyzed_activities(self, user_id, start_time, end_time):
         """Looks through the user's activities (within the given timeframe) and schedules any unanalyzed ones for analysis."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-
-        # We're only interested in activities from this time forward.
-        now = time.time()
-        if timeframe is None:
-            cutoff_time = None
-        else:
-            cutoff_time = now - timeframe
+        if start_time is None:
+            raise Exception("Bad parameter.")
+        if end_time is None:
+            raise Exception("Bad parameter.")
 
         num_unanalyzed = 0
 
-        all_activities = self.retrieve_user_activity_list(user_id, None, cutoff_time, now, None)
-        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, cutoff_time)
+        all_activities = self.retrieve_user_activity_list(user_id, None, start_time, end_time, None)
+        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, end_time)
 
         for activity in all_activities:
             activity_id = activity[Keys.ACTIVITY_ID_KEY]
+
             if Keys.ACTIVITY_START_TIME_KEY in activity:
                 activity_time = activity[Keys.ACTIVITY_START_TIME_KEY]
-                if cutoff_time is None or activity_time > cutoff_time:
-                    if activity_id not in all_activity_bests:
-                        num_unanalyzed = num_unanalyzed + 1
-                        self.analyze_activity_by_id(activity_id, user_id)
+                if activity_time > end_time and activity_id not in all_activity_bests:
+                    num_unanalyzed = num_unanalyzed + 1
+                    self.analyze_activity_by_id(activity_id, user_id)
 
         return num_unanalyzed
 
@@ -1702,6 +1699,27 @@ class DataMgr(Importer.ActivityWriter):
                                 best_value = current_value
 
         return bests
+
+    @staticmethod
+    def update_training_intensity_cb(intensities, activity, user_id):
+        if intensities is None:
+            return
+        if activity is not None and Keys.ACTIVITY_SUMMARY_KEY in activity:
+            activity[Keys.ACTIVITY_SUMMARY_KEY]
+
+    def compute_training_intensity_for_timeframe(self, user_id, start_time, end_time):
+
+        num_unanalyzed_activities = self.analyze_unanalyzed_activities(user_id, start_time, end_time)
+        if num_unanalyzed_activities > 0:
+            raise Exception("Too many unanalyzed activities to sum activity intensities.")
+
+        # Initialize.
+        intensities = []
+
+        if not self.retrieve_each_user_activity(intensities, user_id, DataMgr.update_training_intensity_cb, False):
+            raise Exception("Error retrieving the user's activities.")
+
+        return sum(intensities)
 
     def compute_run_training_paces(self, user_id, running_bests):
         """Computes the user's run training paces by searching the list of running 'bests' for the fastest 5K."""

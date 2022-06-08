@@ -29,6 +29,7 @@ import json
 import logging
 import requests
 import sys
+import time
 from urllib.parse import urljoin
 
 ERROR_LOG = 'error.log'
@@ -93,6 +94,12 @@ def delete_api_key(root_url, api_key, cookie):
     url = root_url + "delete_api_key"
     payload = {'key': api_key}
     return send_post_request(url, payload, cookie)
+
+def request_workout_intensity_total(root_url, start_time, end_time):
+    """Tests get_training_intensity_for_timeframe()."""
+    url = root_url + "get_training_intensity_for_timeframe"
+    payload = {'start_time': start_time, 'end_time': end_time}
+    return send_post_request(url, payload, None)
 
 def logout(root_url, cookie):
     """Ends the existing session."""
@@ -161,6 +168,12 @@ def run_unit_tests(url, username, password, realname):
         print("Test passed! API key {0} was deleted\n".format(api_key))
     else:
         raise Exception("Failed to delete the API key.")
+
+    # Workout analysis.
+    print_test_title("Request a sum of workout intensities")
+    start_time = time.time()
+    end_time = start_time - (86400 * 7)
+    request_workout_intensity_total(start_time, end_time)
 
     # Logout.
     run_logout_test(api_url, cookies)

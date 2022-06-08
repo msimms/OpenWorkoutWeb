@@ -127,7 +127,8 @@ class WorkoutPlanGenerator(object):
         goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
 
         # Analyze any unanalyzed activities.
-        num_unanalyzed_activities = self.data_mgr.analyze_unanalyzed_activities(user_id, DataMgr.SIX_MONTHS)
+        now = time.time()
+        num_unanalyzed_activities = self.data_mgr.analyze_unanalyzed_activities(user_id, now - DataMgr.SIX_MONTHS, now)
         if num_unanalyzed_activities > 0:
             raise Exception("Too many unanalyzed activities to generate a workout plan.")
 
