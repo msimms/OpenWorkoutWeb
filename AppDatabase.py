@@ -142,7 +142,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return 0
 
-    def list_excluded_activity_keys_activity_lists(self):
+    def list_excluded_activity_keys(self):
         """This is the list of stuff we don't need to return when we're summarizing activities."""
         exclude_keys = {}
         exclude_keys[Keys.APP_LOCATIONS_KEY] = False
@@ -937,7 +937,7 @@ class MongoDatabase(Database.Database):
             if return_all_data:
                 exclude_keys = None
             else:
-                exclude_keys = self.list_excluded_activity_keys_activity_lists()
+                exclude_keys = self.list_excluded_activity_keys()
 
             if start_time is None or end_time is None:
                 return list(self.activities_collection.find({ "$and": [ { Keys.ACTIVITY_USER_ID_KEY: { '$eq': user_id } } ]}, exclude_keys))
@@ -957,13 +957,16 @@ class MongoDatabase(Database.Database):
             if return_all_data:
                 exclude_keys = None
             else:
-                exclude_keys = self.list_excluded_activity_keys_activity_lists()
+                exclude_keys = self.list_excluded_activity_keys()
 
             activities_cursor = self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys)
             if activities_cursor is not None:
-                while activities_cursor.alive:
-                    activity = activities_cursor.next()
-                    callback_func(context, activity, user_id)
+                try:
+                    while activities_cursor.alive:
+                        activity = activities_cursor.next()
+                        callback_func(context, activity, user_id)
+                except StopIteration:
+                    pass
             return True
         except:
             self.log_error(traceback.format_exc())
@@ -982,7 +985,7 @@ class MongoDatabase(Database.Database):
             if return_all_data:
                 exclude_keys = None
             else:
-                exclude_keys = self.list_excluded_activity_keys_activity_lists()
+                exclude_keys = self.list_excluded_activity_keys()
 
             # Build part of the exptression while sanity checking the input.
             device_list = []
@@ -1017,7 +1020,7 @@ class MongoDatabase(Database.Database):
             if return_all_data:
                 exclude_keys = None
             else:
-                exclude_keys = self.list_excluded_activity_keys_activity_lists()
+                exclude_keys = self.list_excluded_activity_keys()
 
             activities_cursor = self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys)
             if activities_cursor is not None:
@@ -1044,7 +1047,7 @@ class MongoDatabase(Database.Database):
             if return_all_data:
                 exclude_keys = None
             else:
-                exclude_keys = self.list_excluded_activity_keys_activity_lists()
+                exclude_keys = self.list_excluded_activity_keys()
 
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys, sort=[( '_id', pymongo.DESCENDING )])
             return activity
@@ -1114,7 +1117,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Things we don't need.
-            exclude_keys = self.list_excluded_activity_keys_activity_lists()
+            exclude_keys = self.list_excluded_activity_keys()
 
             # Find the activity.
             return self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: re.compile(activity_id, re.IGNORECASE) }, exclude_keys)
