@@ -993,6 +993,10 @@ class MongoDatabase(Database.Database):
                 if InputChecker.is_uuid(device_str):
                     device_list.append( { Keys.ACTIVITY_DEVICE_STR_KEY: {'$eq': device_str} } )
 
+            # If the device list is empty then just return as there's nothing to do and we'll just get a db error.
+            if not device_list:
+                return []
+
             if start_time is None or end_time is None:
                 return list(self.activities_collection.find({ "$or": device_list }, exclude_keys))
             return list(self.activities_collection.find({ "$and": [ { "$or": device_list }, { Keys.ACTIVITY_START_TIME_KEY: { '$gt': start_time } }, { Keys.ACTIVITY_START_TIME_KEY: { '$lt': end_time } } ] }, exclude_keys))
