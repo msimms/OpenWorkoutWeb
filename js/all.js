@@ -31,6 +31,21 @@ function set_background_style(root_url, background_id)
     section.style.backgroundImage = img_str;
 }
 
+/// @function set_background_style_for_error
+function set_background_style_for_error(root_url, background_id, error_code)
+{
+    let section = document.getElementById(background_id);
+    switch (error_code)
+    {
+    case 404:
+        let img_str = 'url("' + root_url + '/images/road_closed.jpg")';
+        section.style.backgroundImage = img_str;
+        break;
+    default:
+        set_background_style(root_url, background_id);
+    }
+}
+
 /// @function unix_time_to_local_string
 function unix_time_to_local_string(unix_time)
 {

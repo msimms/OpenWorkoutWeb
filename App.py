@@ -740,6 +740,10 @@ class App(object):
             pass
         return self.render_error()
 
+    def error_404(self, status, message, traceback, version):
+        """This method only exists so that cherrypy's 404 handler has something to call."""
+        return self.render_page_not_found()
+
     def render_page_not_found(self):
         """Renders the 404 error page."""
         try:

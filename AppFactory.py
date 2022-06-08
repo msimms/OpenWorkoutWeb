@@ -76,7 +76,8 @@ def create_cherrypy(config, root_dir, session_mgr):
             'tools.sessions.storage_path': session_dir,
             'tools.sessions.timeout': 129600,
             'tools.sessions.locking': 'early',
-            'tools.secureheaders.on': True
+            'tools.secureheaders.on': True,
+            'error_page.404': backend.error_404,
         },
         '/api':
         {
