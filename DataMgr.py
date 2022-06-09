@@ -567,15 +567,15 @@ class DataMgr(Importer.ActivityWriter):
 
         return activities
 
-    def retrieve_each_user_activity(self, context, user_id, cb, return_all_data):
+    def retrieve_each_user_activity(self, user_id, context, cb_func, start_time, end_time, return_all_data):
         """Fires a callback for all of the user's activities. num_results can be None for all activiites."""
         if self.database is None:
             raise Exception("No database.")
-        if context is None:
-            raise Exception("Bad parameter.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        if cb is None:
+        if context is None:
+            raise Exception("Bad parameter.")
+        if cb_func is None:
             raise Exception("Bad parameter.")
         if return_all_data is None:
             raise Exception("Bad parameter.")
@@ -585,10 +585,10 @@ class DataMgr(Importer.ActivityWriter):
         devices = list(set(devices)) # De-duplicate
         if devices is not None:
             for device in devices:
-                self.database.retrieve_each_device_activity(context, user_id, device, cb, return_all_data)
+                self.database.retrieve_each_device_activity(user_id, device, context, cb_func, start_time, end_time, return_all_data)
 
         # List activities with no device that are associated with the user.
-        return self.database.retrieve_each_user_activity(context, user_id, cb, return_all_data)
+        return self.database.retrieve_each_user_activity(user_id, context, cb_func, start_time, end_time, return_all_data)
 
     def retrieve_all_activities_visible_to_user(self, user_id, user_realname, start_time, end_time, num_results):
         """Returns a list containing all of the activities visible to the specified user, up to num_results. num_results can be None for all activiites."""
@@ -927,7 +927,7 @@ class DataMgr(Importer.ActivityWriter):
             tag_distances[tag] = 0.0
 
         # Retrieve each activity, tag_distances will be updated in the callback.
-        if not self.retrieve_each_user_activity(tag_distances, user_id, DataMgr.distance_for_tag_cb, False):
+        if not self.retrieve_each_user_activity(user_id, tag_distances, DataMgr.distance_for_tag_cb, None, None, False):
             raise Exception("Error retrieving activities.")
         return tag_distances
 
@@ -1705,10 +1705,13 @@ class DataMgr(Importer.ActivityWriter):
         if intensities is None:
             return
         if activity is not None and Keys.ACTIVITY_SUMMARY_KEY in activity:
-            activity[Keys.ACTIVITY_SUMMARY_KEY]
+            summary = activity[Keys.ACTIVITY_SUMMARY_KEY]
+            if Keys.INTENSITY_SCORE in summary:
+                activity_intensity = summary[Keys.INTENSITY_SCORE]
+                intensities.append(activity_intensity)
 
     def compute_training_intensity_for_timeframe(self, user_id, start_time, end_time):
-
+        """Returns the sum of intensity calculations for all activities logged between the start and end time."""
         num_unanalyzed_activities = self.analyze_unanalyzed_activities(user_id, start_time, end_time)
         if num_unanalyzed_activities > 0:
             raise Exception("Too many unanalyzed activities to sum activity intensities.")
@@ -1716,7 +1719,7 @@ class DataMgr(Importer.ActivityWriter):
         # Initialize.
         intensities = []
 
-        if not self.retrieve_each_user_activity(intensities, user_id, DataMgr.update_training_intensity_cb, False):
+        if not self.retrieve_each_user_activity(user_id, intensities, DataMgr.update_training_intensity_cb, start_time, end_time, False):
             raise Exception("Error retrieving the user's activities.")
 
         return sum(intensities)

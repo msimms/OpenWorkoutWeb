@@ -135,8 +135,10 @@ def run_login_tests(api_url, username, password, realname):
 def run_workout_analysis_tests(api_url, cookies):
     """Runs unit tests relating to workout analysis."""
     print_test_title("Request a sum of workout intensities")
-    start_time = int(time.time())
-    end_time = start_time - (86400 * 7)
+    one_week = 86400 * 7
+    now = int(time.time())
+    start_time = now - one_week
+    end_time = now
     code, _ = request_workout_intensity_total(api_url, cookies, start_time, end_time)
     if code != 200:
         raise Exception("Failed to logout.")

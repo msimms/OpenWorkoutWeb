@@ -948,10 +948,14 @@ class MongoDatabase(Database.Database):
         return []
 
     @Perf.statistics
-    def retrieve_each_user_activity(self, context, user_id, callback_func, return_all_data):
+    def retrieve_each_user_activity(self, user_id, context, callback_func, start_time, end_time, return_all_data):
         """Retrieves each user activity and calls the callback function for each one."""
         """Returns TRUE on success, FALSE if an error was encountered."""
         """If return_all_data is False then only metadata is returned."""
+        if user_id is None:
+            self.log_error(MongoDatabase.retrieve_each_user_activity.__name__ + ": Unexpected empty object: user_id")
+            return False
+
         try:
             # Things we don't need.
             if return_all_data:
@@ -959,7 +963,12 @@ class MongoDatabase(Database.Database):
             else:
                 exclude_keys = self.list_excluded_activity_keys()
 
-            activities_cursor = self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys)
+            # Get an iterator to the activities.
+            if start_time is None or end_time is None:
+                activities_cursor = self.activities_collection.find({ Keys.ACTIVITY_USER_ID_KEY: user_id }, exclude_keys)
+            activities_cursor = self.activities_collection.find({ "$and": [ { Keys.ACTIVITY_START_TIME_KEY: { '$gt': start_time } }, { Keys.ACTIVITY_START_TIME_KEY: { '$lt': end_time } } ]}, exclude_keys)
+
+            # Iterate over the results, triggering the callback for each.
             if activities_cursor is not None:
                 try:
                     while activities_cursor.alive:
@@ -1006,7 +1015,7 @@ class MongoDatabase(Database.Database):
         return []
 
     @Perf.statistics
-    def retrieve_each_device_activity(self, context, user_id, device_str, callback_func, return_all_data):
+    def retrieve_each_device_activity(self, user_id, device_str, context, callback_func, start_time, end_time, return_all_data):
         """Retrieves each device activity and calls the callback function for each one."""
         """If return_all_data is False then only metadata is returned."""
         if user_id is None:
@@ -1026,7 +1035,12 @@ class MongoDatabase(Database.Database):
             else:
                 exclude_keys = self.list_excluded_activity_keys()
 
-            activities_cursor = self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys)
+            # Get an iterator to the activities.
+            if start_time is None or end_time is None:
+                activities_cursor = self.activities_collection.find({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys)
+            activities_cursor = self.activities_collection.find({ "$and": [ { Keys.ACTIVITY_DEVICE_STR_KEY: { '$eq': device_str } }, { Keys.ACTIVITY_START_TIME_KEY: { '$gt': start_time } }, { Keys.ACTIVITY_START_TIME_KEY: { '$lt': end_time } } ]}, exclude_keys)
+
+            # Iterate over the results, triggering the callback for each.
             if activities_cursor is not None:
                 try:
                     while activities_cursor.alive:
@@ -1053,8 +1067,8 @@ class MongoDatabase(Database.Database):
             else:
                 exclude_keys = self.list_excluded_activity_keys()
 
-            activity = self.activities_collection.find_one({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys, sort=[( '_id', pymongo.DESCENDING )])
-            return activity
+            # Find the activity.
+            return self.activities_collection.find_one({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str }, exclude_keys, sort=[( '_id', pymongo.DESCENDING )])
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

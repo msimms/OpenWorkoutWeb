@@ -133,7 +133,7 @@ class WorkoutPlanGenerator(object):
             raise Exception("Too many unanalyzed activities to generate a workout plan.")
 
         # This will trigger the callback for each of the user's activities.
-        if not self.data_mgr.retrieve_each_user_activity(self, user_id, WorkoutPlanGenerator.update_summary_data_cb, False):
+        if not self.data_mgr.retrieve_each_user_activity(user_id, self, WorkoutPlanGenerator.update_summary_data_cb, None, None, False):
             raise Exception("Error retrieving the user's activities.")
 
         #
