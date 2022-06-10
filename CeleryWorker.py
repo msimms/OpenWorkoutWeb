@@ -42,11 +42,14 @@ celery_worker.config_from_object('CeleryConfig')
 @celery_worker.task()
 def check_for_unanalyzed_activities():
     """Check for activities that need to be analyzed. Do one, if any are found."""
+    print("Looking for unanalyzed activities.")
+
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
     config = Config.Config()
     data_mgr = DataMgr.DataMgr(config=config, root_url="", analysis_scheduler=analysis_scheduler, import_scheduler=None, workout_plan_gen_scheduler=None)
     user_mgr = UserMgr.UserMgr(config=config, session_mgr=None)
 
+    # We need a randomly selected activity that is missing the summary section.
     unanalyzed_activity_list = data_mgr.retrieve_unanalyzed_activity_list(64)
     if len(unanalyzed_activity_list) > 0:
         activity_id = str(random.choice(unanalyzed_activity_list))
@@ -60,13 +63,19 @@ def check_for_unanalyzed_activities():
                 print("The activity owner could not be determined.")
         else:
             print("The activity could no be loaded.")
+    else:
+        print("None found")
 
 @celery_worker.task()
 def check_for_ungenerated_workout_plans():
     """Checks for users that need their workout plan regenerated. Generates workout plans for each of those users."""
+    print("Looking for user with ungenerated workout plans.")
+
     now = datetime.datetime.utcnow()
-    data_mgr = DataMgr.DataMgr(config=Config.Config(), root_url="", analysis_scheduler=None, import_scheduler=None, workout_plan_gen_scheduler=WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler())
-    user_mgr = UserMgr.UserMgr(config=Config.Config(), session_mgr=None)
+    workout_plan_gen_scheduler = WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler()
+    config = Config.Config()
+    data_mgr = DataMgr.DataMgr(config=config, root_url="", analysis_scheduler=None, import_scheduler=None, workout_plan_gen_scheduler=workout_plan_gen_scheduler)
+    user_mgr = UserMgr.UserMgr(config=config, session_mgr=None)
 
     # These users don't have any pending workouts.
     user_ids = data_mgr.retrieve_users_without_scheduled_workouts()
@@ -82,11 +91,13 @@ def check_for_ungenerated_workout_plans():
 @celery_worker.task()
 def prune_deferred_tasks_list():
     """Checks for users that need their workout plan regenerated."""
+    print("Pruning the deferred tasks list.")
     data_mgr = DataMgr.DataMgr(config=Config.Config(), root_url="", analysis_scheduler=None, import_scheduler=None, workout_plan_gen_scheduler=None)
     data_mgr.prune_deferred_tasks_list()
 
 @celery_worker.on_after_configure.connect
 def setup_periodic_tasks(**kwargs):
+    print("Registering periodic tasks.")
     celery_worker.add_periodic_task(700.0, prune_deferred_tasks_list.s(), name='Removes completed tasks from the deferred tasks list.')
     celery_worker.add_periodic_task(600.0, check_for_ungenerated_workout_plans.s(), name='Check for workout plans that need to be re-generated.')
     celery_worker.add_periodic_task(500.0, check_for_unanalyzed_activities.s(), name='Check for activities that need to be analyzed. Do one, if any are found.')
