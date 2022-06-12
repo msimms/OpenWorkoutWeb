@@ -127,17 +127,37 @@ class Workout(object):
         self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERHIGH] = 0.25
         self.cooldown[ZwoTags.ZWO_ATTR_NAME_PACE] = None
 
-    def add_interval(self, repeat, distance, pace, recovery_distance, recovery_pace):
-        """Appends an interval to the workout."""
+    def add_distance_interval(self, repeat, interval_distance, interval_pace, recovery_distance, recovery_pace):
+        """Appends an interval to the workout. The interval is expressed in terms of distance."""
         interval = {}
         interval[Keys.INTERVAL_WORKOUT_REPEAT_KEY] = int(repeat)
-        interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY] = float(distance)
-        interval[Keys.INTERVAL_WORKOUT_PACE_KEY] = float(pace)
+        interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY] = float(interval_distance)
+        interval[Keys.INTERVAL_WORKOUT_TIME_KEY] = 0.0
+        interval[Keys.INTERVAL_WORKOUT_PACE_KEY] = float(interval_pace)
         if repeat > 1:
             interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = float(recovery_distance)
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_TIME_KEY] = 0.0
             interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = float(recovery_pace)
         else:
             interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = 0.0
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_TIME_KEY] = 0.0
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = 0.0
+        self.intervals.append(interval)
+
+    def add_time_interval(self, repeat, interval_seconds, interval_pace, recovery_seconds, recovery_pace):
+        """Appends an interval to the workout. The interval is expressed in terms of time."""
+        interval = {}
+        interval[Keys.INTERVAL_WORKOUT_REPEAT_KEY] = int(repeat)
+        interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY] = 0.0
+        interval[Keys.INTERVAL_WORKOUT_TIME_KEY] = float(interval_seconds)
+        interval[Keys.INTERVAL_WORKOUT_PACE_KEY] = float(interval_pace)
+        if repeat > 1:
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = 0.0
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_TIME_KEY] = float(recovery_seconds)
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = float(recovery_pace)
+        else:
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = 0.0
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_TIME_KEY] = 0.0
             interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = 0.0
         self.intervals.append(interval)
 
@@ -207,11 +227,16 @@ class Workout(object):
             recovery_meters = interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY]
             recovery_pace_minute = interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY]
 
+            #
             # Describe the interval.
+            #
+
             result += "Interval: "
             if num_repeats > 1:
                 result += str(num_repeats)
                 result += " x "
+
+            # Add the interval distance.
             if interval_meters > 1000:
                 if unit_system:
                     result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
@@ -220,9 +245,13 @@ class Workout(object):
                     result += " ("
                     result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, interval_meters, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
                     result += ")"
+
+            # Track intervals are always in meters.
             else:
                 result += str(int(interval_meters))
                 result += " meters"
+
+            # Add the interval pace.
             if interval_pace_minute > 0:
                 result += " at "
                 if unit_system:
@@ -233,7 +262,7 @@ class Workout(object):
                     result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, interval_pace_minute, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)
                     result += ")"
 
-            # Describe the recovery.
+            # Add the recovery distance.
             if recovery_meters > 0:
                 result += " with "
                 if recovery_meters > 1000:
@@ -295,6 +324,7 @@ class Workout(object):
         elif self.type == Keys.WORKOUT_TYPE_POOL_WATER_SWIM:
             result += "Purpose: .\n"
 
+        # Add the intensity score, if it's been computed.
         if self.estimated_intensity_score is not None:
             stress_str = "{:.1f}".format(self.estimated_intensity_score)
             result += "Estimated Intensity Score: "

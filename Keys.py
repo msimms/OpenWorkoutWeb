@@ -99,15 +99,15 @@ PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS = "Number of Runs (Last 4 Weeks)"
 PLAN_INPUT_NUM_RIDES_LAST_FOUR_WEEKS = "Number of Rides (Last 4 Weeks)"
 PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY = "Preferred Long Run Day" # Day of the week on which the user prefers to do their long runs
 
-# Unit systems
+# Unit systems.
 UNITS_METRIC_KEY = "metric"
 UNITS_STANDARD_KEY = "standard"
 
-# Biological genders
+# Biological genders.
 GENDER_MALE_KEY = "male" # Biological male
 GENDER_FEMALE_KEY = "female" # Bilological female
 
-# User settings
+# User settings.
 REQUESTED_SETTING_KEY = "requested setting"
 REQUESTED_SETTINGS_KEY = "requested settings" # For requesting a list of settings (more efficient than requesting settings one by one)
 DEFAULT_PRIVACY_KEY = "default privacy"
@@ -134,12 +134,12 @@ USER_RACES = "races" # List of races the user intends to do
 USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, USER_PREFERRED_UNITS_KEY, USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY, USER_BIRTHDAY_KEY, USER_HEIGHT_KEY, USER_WEIGHT_KEY, USER_GENDER_KEY, USER_RESTING_HEART_RATE_KEY, USER_MAXIMUM_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, USER_SPECIFIED_MAX_HEART_RATE_KEY, BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_TYPE_KEY, PLAN_INPUT_EXPERIENCE_LEVEL_KEY, PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, USER_CAN_UPLOAD_PHOTOS_KEY, USER_PLAN_LAST_GENERATED_TIME, USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED, USER_RACES ]
 USER_SETTINGS_LAST_UPDATED_KEY = "last updated" # Time when the user settings where last updated
 
-# Personal records
+# Personal records.
 RECORDS_USER_ID = "user_id"
 RECORD_NAME_KEY = "record_name"
 PERSONAL_RECORDS_KEY = "records"
 
-# Workout training intensity distribution
+# Workout training intensity distribution.
 TRAINING_PHILOSOPHY_POLARIZED = "polarized"
 TRAINING_PHILOSOPHY_PYRAMIDAL = "pyramidal"
 TRAINING_PHILOSOPHY_THRESHOLD = "threshold"
@@ -150,7 +150,7 @@ TID_THRESHOLD = [55, 55, 20]
 TID_POLARIZED = [85, 10, 25]
 TID_PYRAMIDAL = [75, 25, 10]
 
-# Workout plans
+# Workout plans.
 WORKOUT_PLAN_USER_ID_KEY = "user_id"
 WORKOUT_PLAN_CALENDAR_ID_KEY = "calendar id"
 WORKOUT_LIST_KEY = "workouts"
@@ -166,7 +166,7 @@ WORKOUT_SCHEDULED_TIME_KEY = "scheduled time"
 WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY = "last scheduled workout time"
 WORKOUT_ESTIMATED_INTENSITY_KEY = "estimated intensity score"
 
-# Workout types
+# Workout types.
 WORKOUT_TYPE_REST = "Rest"
 WORKOUT_TYPE_EVENT = "Event"
 WORKOUT_TYPE_SPEED_RUN = "Speed Session" # A run with speed intervals
@@ -186,14 +186,16 @@ WORKOUT_TYPE_SWEET_SPOT_RIDE = "Sweet Spot Ride" # A bike ride with intervals ju
 WORKOUT_TYPE_OPEN_WATER_SWIM = "Open Water Swimming"
 WORKOUT_TYPE_POOL_WATER_SWIM = "Pool Swimming"
 
-# Interval workouts
+# Interval workouts.
 INTERVAL_WORKOUT_REPEAT_KEY = "Repeat"
 INTERVAL_WORKOUT_DISTANCE_KEY = "Distance"
+INTERVAL_WORKOUT_TIME_KEY = "Time"
 INTERVAL_WORKOUT_PACE_KEY = "Pace"
 INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY = "Recovery Distance"
+INTERVAL_WORKOUT_RECOVERY_TIME_KEY = "Recovery Time"
 INTERVAL_WORKOUT_RECOVERY_PACE_KEY = "Recovery Pace"
 
-# Keys associated with uploading data
+# Keys associated with uploading data.
 UPLOADED_FILE_NAME_KEY = "uploaded_file_name"
 UPLOADED_FILE_DATA_KEY = "uploaded_file_data"
 UPLOADED_FILE1_DATA_KEY = "uploaded_file1_data"
