@@ -48,8 +48,8 @@ class Workout(object):
 
     def __init__(self, user_id):
         self.type = ""
-        self.user_id = user_id
-        self.sport_type = ""
+        self.user_id = user_id # Unique identifier for the user
+        self.sport_type = "" # Sport (activity) type string
         self.scheduled_time = None # The time at which this workout is to be performed
         self.warmup = {} # The warmup interval
         self.cooldown = {} # The cooldown interval
@@ -344,6 +344,14 @@ class Workout(object):
         """Creates a ICS-formatted data string that describes the workout."""
         ics_writer = IcsWriter.IcsWriter()
         return ics_writer.create_event(self.workout_id, self.scheduled_time, self.scheduled_time, self.type, self.export_to_text(unit_system))
+
+    def total_workout_distance_meters(self):
+        """Returns the total workout distance, in meters."""
+        total_meters = 0.0
+        for interval in self.intervals:
+            total_meters = total_meters + interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY]
+            total_meters = total_meters + interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY]
+        return total_meters
 
     def calculate_interval_duration(self, interval_meters, interval_pace_meters_per_minute):
         """Utility function for calculating the number of seconds for an interval."""

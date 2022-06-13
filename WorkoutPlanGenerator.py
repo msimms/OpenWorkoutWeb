@@ -161,7 +161,7 @@ class WorkoutPlanGenerator(object):
         if running_bests is not None and Keys.LONGEST_DISTANCE in running_bests:
             longest_run_in_four_weeks = running_bests[Keys.LONGEST_DISTANCE][0]
 
-        # Get some data from prior four weeks.
+        # Get some data from the prior four weeks.
         cycling_best_summary, running_best_summary, cycling_week_summary, running_week_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 1), now - (DataMgr.ONE_WEEK * 0))
         longest_runs_by_week[0] = self.optional_fetch_from_dict_with_array(running_best_summary, Keys.LONGEST_DISTANCE)
         longest_rides_by_week[0] = self.optional_fetch_from_dict_with_array(cycling_best_summary, Keys.LONGEST_DISTANCE)
@@ -220,7 +220,6 @@ class WorkoutPlanGenerator(object):
             inputs[Keys.EASY_RUN_PACE] = None
         else:
             inputs = running_paces
-        inputs[Keys.PLAN_INPUT_LONGEST_RUN_IN_FOUR_WEEKS_KEY] = longest_run_in_four_weeks
         inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY] = longest_runs_by_week[0]
         inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY] = longest_runs_by_week[1]
         inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY] = longest_runs_by_week[2]
@@ -294,7 +293,6 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.FUNCTIONAL_THRESHOLD_PACE])
         model_inputs.append(inputs[Keys.LONG_RUN_PACE])
         model_inputs.append(inputs[Keys.EASY_RUN_PACE])
-        model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RUN_IN_FOUR_WEEKS_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY])

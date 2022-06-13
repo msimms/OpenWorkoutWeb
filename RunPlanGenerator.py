@@ -393,7 +393,6 @@ class RunPlanGenerator(object):
         tempo_run_pace = inputs[Keys.TEMPO_RUN_PACE]
         long_run_pace = inputs[Keys.LONG_RUN_PACE]
         easy_run_pace = inputs[Keys.EASY_RUN_PACE]
-        longest_run_in_four_weeks = inputs[Keys.PLAN_INPUT_LONGEST_RUN_IN_FOUR_WEEKS_KEY]
         longest_run_week_1 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY]
         longest_run_week_2 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY]
         longest_run_week_3 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY]
@@ -406,8 +405,11 @@ class RunPlanGenerator(object):
         num_runs = inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS]
         exp_level = inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY]
 
+        # Longest run in four weeks.
+        longest_run_in_four_weeks = max([longest_run_week_1, longest_run_week_2, longest_run_week_3, longest_run_week_4])
+
         # Handle situation in which the user hasn't run in four weeks.
-        if not RunPlanGenerator.valid_float(longest_run_in_four_weeks):
+        if not RunPlanGenerator.valid_float(longest_run_in_four_weeks) or longest_run_in_four_weeks < 1.0:
             workouts.append(self.gen_free_run(easy_run_pace))
             workouts.append(self.gen_free_run(easy_run_pace))
             return workouts
@@ -443,8 +445,8 @@ class RunPlanGenerator(object):
         # Is it time for an easy week?
         easy_week = False
         if not in_taper:
-            if total_intensity_week_1 and total_intensity_week_2 and total_intensity_week_3:
-                if total_intensity_week_1 >= total_intensity_week_2 and total_intensity_week_2 >= total_intensity_week_3:
+            if total_intensity_week_1 and total_intensity_week_2 and total_intensity_week_3 and total_intensity_week_4:
+                if total_intensity_week_1 >= total_intensity_week_2 and total_intensity_week_2 >= total_intensity_week_3 and total_intensity_week_3 >= total_intensity_week_4:
                     easy_week = True
 
         # Compute the longest run needed to accomplish the goal.
