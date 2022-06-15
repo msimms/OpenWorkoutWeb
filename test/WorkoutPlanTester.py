@@ -112,6 +112,8 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
     scheduler = WorkoutScheduler.WorkoutScheduler(None)
 
     now = time.time()
+    all_run_distances = [] # For computing run distance averages
+    all_bike_distances = [] # For computing bike distance averages
     longest_runs_by_week = [0.0] * 4 # Longest run for each of the recent four weeks
     longest_rides_by_week = [0.0] * 4 # Longest bike rides for each of the recent four weeks
     run_intensity_by_week = [0.0] * 4 # Total training intensity for each of the recent four weeks
@@ -124,6 +126,16 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
     input_values = [0.0] * len(input_names)
     inputs = dict(zip(input_names, input_values))
 
+    # These inputs don't change from week to week.
+    inputs[Keys.PLAN_INPUT_AGE_YEARS_KEY] = age_years
+    inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY] = experience_level
+    inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
+    inputs[Keys.PLAN_INPUT_GOAL_KEY] = goal
+    inputs[Keys.GOAL_TYPE_KEY] = goal_type
+
+    # Adds the goal distances to the inputs.
+    inputs = WorkoutPlanGenerator.WorkoutPlanGenerator.calculate_goal_distances(inputs)
+
     week_num = 1
     done = False
 
@@ -133,6 +145,7 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
         print("Week " + str(week_num))
         print("-" * 40)
 
+        # Update the inputs that change from week to week.
         inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY] = longest_runs_by_week[0]
         inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY] = longest_runs_by_week[1]
         inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY] = longest_runs_by_week[2]
@@ -145,12 +158,15 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
         inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_2_KEY] = run_intensity_by_week[1] + cycling_intensity_by_week[1]
         inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_3_KEY] = run_intensity_by_week[2] + cycling_intensity_by_week[2]
         inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_4_KEY] = run_intensity_by_week[3] + cycling_intensity_by_week[3]
-        inputs[Keys.PLAN_INPUT_AGE_YEARS_KEY] = age_years
-        inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY] = experience_level
-        inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
-        inputs[Keys.PLAN_INPUT_GOAL_KEY] = goal
-        inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
+        if all_run_distances:
+            inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = sum(all_run_distances) / len(all_run_distances)
+        else:
+            inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = 0.0
+        if all_bike_distances:
+            inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = sum(all_bike_distances) / len(all_bike_distances)
+        else:
+            inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = 0.0
 
         print("Input:")
         print(inputs)
@@ -166,19 +182,19 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
         longest_runs_by_week[3] = longest_runs_by_week[2]
         longest_runs_by_week[2] = longest_runs_by_week[1]
         longest_runs_by_week[1] = longest_runs_by_week[0]
-        longest_runs_by_week[0] = []
+        longest_runs_by_week[0] = 0.0
         longest_rides_by_week[3] = longest_rides_by_week[2]
         longest_rides_by_week[2] = longest_rides_by_week[1]
         longest_rides_by_week[1] = longest_rides_by_week[0]
-        longest_rides_by_week[0] = []
+        longest_rides_by_week[0] = 0.0
         run_intensity_by_week[3] = run_intensity_by_week[2]
         run_intensity_by_week[2] = run_intensity_by_week[1]
         run_intensity_by_week[1] = run_intensity_by_week[0]
-        run_intensity_by_week[0] = []
+        run_intensity_by_week[0] = 0.0
         cycling_intensity_by_week[3] = cycling_intensity_by_week[2]
         cycling_intensity_by_week[2] = cycling_intensity_by_week[1]
         cycling_intensity_by_week[1] = cycling_intensity_by_week[0]
-        cycling_intensity_by_week[0] = []
+        cycling_intensity_by_week[0] = 0.0
         for workout in workouts:
             workout_distance = workout.total_workout_distance_meters()
             if workout.sport_type in Keys.RUNNING_ACTIVITIES:
@@ -190,7 +206,7 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
 
         week_num = week_num + 1
         weeks_until_goal = weeks_until_goal - 1
-        done = weeks_until_goal == 0
+        done = weeks_until_goal == 0 or len(workouts) == 0
 
 def main():
     """Starts the tests."""
@@ -222,9 +238,9 @@ def main():
         print("-" * 40)
         print("Tests using algorithmic inputs.")
         print("-" * 40)
-        goal = Keys.GOAL_5K_RUN_KEY
-        weeks_until_goal = 3
-        run_algorithmic_unit_tests(config, column_names, 40.0, 5, 5, goal, weeks_until_goal, Keys.GOAL_TYPE_COMPLETION)
+        run_algorithmic_unit_tests(config, column_names, 40.0, 5, 5, Keys.GOAL_FITNESS_KEY, 3, Keys.GOAL_TYPE_COMPLETION)
+        run_algorithmic_unit_tests(config, column_names, 40.0, 5, 5, Keys.GOAL_5K_RUN_KEY, 3, Keys.GOAL_TYPE_COMPLETION)
+        run_algorithmic_unit_tests(config, column_names, 40.0, 5, 5, Keys.GOAL_HALF_MARATHON_RUN_KEY, 3, Keys.GOAL_TYPE_COMPLETION)
     except Exception as e:
         print("Test aborted!\n")
         print(e)

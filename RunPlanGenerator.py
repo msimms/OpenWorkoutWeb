@@ -36,8 +36,63 @@ class RunPlanGenerator(object):
 
         self.clear_intensity_distribution()
 
+    def max_long_run_distance(self, goal_distance):
+        """If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles."""
+        """The equation was derived by playing with trendlines in a spreadsheet."""
+        return ((-0.002 * goal_distance) * (-0.002 * goal_distance)) + (0.7 * goal_distance) + 4.4
+
+    def max_attainable_distance(self, base_distance, num_weeks):
+        """Assume the athlete can improve by 10%/week in maximum distance."""
+        weekly_rate = 0.1
+        return base_distance + ((base_distance * (1.0 + (weekly_rate / 52.0))**(52.0 * num_weeks)) - base_distance)
+
+    def is_in_taper(self, weeks_until_goal, goal):
+        """Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less."""
+        in_taper = False
+        if weeks_until_goal is not None:
+            if weeks_until_goal <= 2 and goal == Keys.GOAL_MARATHON_RUN_KEY:
+                in_taper = True
+            if weeks_until_goal <= 1 and goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
+                in_taper = True
+        return in_taper
+
     def is_workout_plan_possible(self, inputs):
         """Returns TRUE if we can actually generate a plan with the given contraints."""
+
+        # Inputs.
+        goal_distance = inputs[Keys.GOAL_RUN_DISTANCE_KEY]
+        goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
+        weeks_until_goal = inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY]
+        longest_run_week_1 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY]
+        longest_run_week_2 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY]
+        longest_run_week_3 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY]
+        longest_run_week_4 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_4_KEY]
+        longest_run_in_four_weeks = max([longest_run_week_1, longest_run_week_2, longest_run_week_3, longest_run_week_4])
+
+        # The user does not have a race goal.
+        if goal == Keys.GOAL_FITNESS_KEY:
+            return True
+
+        # The user can already do the distance.
+        distance_to_goal = goal_distance - longest_run_in_four_weeks
+        if distance_to_goal < 0.0:
+            return True
+
+        # Too late. The user should be in the taper.
+        should_be_in_taper = self.is_in_taper(weeks_until_goal, goal)
+        if should_be_in_taper:
+            return False
+
+        # Can we get to the target distance, or close to it, in the time remaining.
+        max_attainable_distance = self.max_attainable_distance(longest_run_in_four_weeks, weeks_until_goal)
+        if max_attainable_distance < 0.1: # Sanity check
+            return False
+        if goal == Keys.GOAL_5K_RUN_KEY or goal == Keys.GOAL_10K_RUN_KEY or goal == Keys.GOAL_15K_RUN_KEY or goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
+            return max_attainable_distance >= goal_distance * 0.9
+        if goal == Keys.GOAL_MARATHON_RUN_KEY:
+            return max_attainable_distance >= goal_distance * 0.75
+        if goal == Keys.GOAL_50K_RUN_KEY or goal == Keys.GOAL_50_MILE_RUN_KEY:
+            return max_attainable_distance >= goal_distance * 0.6
         return True
 
     @staticmethod
@@ -425,8 +480,8 @@ class RunPlanGenerator(object):
             raise Exception("No run pace data.")
 
         # If the long run has been increasing for the last three weeks then give the person a break.
-        if longest_run_week_1 and longest_run_week_2 and longest_run_week_3:
-            if longest_run_week_1 >= longest_run_week_2 and longest_run_week_2 >= longest_run_week_3:
+        if longest_run_week_1 and longest_run_week_2 and longest_run_week_3 and longest_run_week_4:
+            if longest_run_week_1 >= longest_run_week_2 and longest_run_week_2 >= longest_run_week_3 and longest_run_week_3 >= longest_run_week_4:
                 longest_run_in_four_weeks *= 0.75
 
         # Cutoff paces.
@@ -434,13 +489,7 @@ class RunPlanGenerator(object):
         self.cutoff_pace_2 = speed_run_pace
 
         # Are we in a taper?
-        # Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less
-        in_taper = False
-        if weeks_until_goal is not None:
-            if weeks_until_goal <= 2 and goal == Keys.GOAL_MARATHON_RUN_KEY:
-                in_taper = True
-            if weeks_until_goal <= 1 and goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
-                in_taper = True
+        in_taper = self.is_in_taper(weeks_until_goal, goal)
 
         # Is it time for an easy week?
         easy_week = False
@@ -455,7 +504,7 @@ class RunPlanGenerator(object):
         if in_taper:
             max_long_run_distance = self.max_taper_distance(goal_distance)
         else:
-            max_long_run_distance = ((-0.002 * goal_distance) *  (-0.002 * goal_distance)) + (0.7 * goal_distance) + 4.4
+            max_long_run_distance = self.max_long_run_distance(goal_distance)
 
         # Handle situation in which the user is already meeting or exceeding the goal distance.
         if longest_run_in_four_weeks >= max_long_run_distance:
