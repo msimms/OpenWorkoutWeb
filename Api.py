@@ -789,15 +789,19 @@ class Api(object):
             for activity in activities:
                 activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
                 activity_name = Keys.UNNAMED_ACTIVITY_TITLE
+                activity_tags = []
+
                 if Keys.ACTIVITY_TYPE_KEY in activity:
                     activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
                 if Keys.ACTIVITY_NAME_KEY in activity:
                     activity_name = activity[Keys.ACTIVITY_NAME_KEY]
+                if Keys.ACTIVITY_TAGS_KEY in activity:
+                    activity_tags = activity[Keys.ACTIVITY_TAGS_KEY]
 
                 if Keys.ACTIVITY_START_TIME_KEY in activity and Keys.ACTIVITY_ID_KEY in activity:
                     url = self.root_url + "/activity/" + activity[Keys.ACTIVITY_ID_KEY]
-                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time': int(activity[Keys.ACTIVITY_START_TIME_KEY])}
-                matched_activities.append(temp_activity)
+                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time': int(activity[Keys.ACTIVITY_START_TIME_KEY]), 'tags': activity_tags}
+                    matched_activities.append(temp_activity)
 
         json_result = json.dumps(matched_activities, ensure_ascii=False)
         return True, json_result

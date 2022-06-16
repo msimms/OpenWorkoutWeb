@@ -55,6 +55,15 @@
         {
             activity_obj['start'] = unix_time_to_iso_time(activity_obj['time']);
         }
+
+        // Certain activity tags get special colors.
+        if ('tags' in activity_obj)
+        {
+            if (activity_obj['tags'].includes('Race'))
+                activity_obj['backgroundColor'] = "FireBrick";
+            if (activity_obj['tags'].includes('Commute'))
+                activity_obj['backgroundColor'] = "Grey";
+        }
         return activity_obj;
     }
 
