@@ -448,11 +448,11 @@ class RunPlanGenerator(object):
         tempo_run_pace = inputs[Keys.TEMPO_RUN_PACE]
         long_run_pace = inputs[Keys.LONG_RUN_PACE]
         easy_run_pace = inputs[Keys.EASY_RUN_PACE]
-        longest_run_week_1 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY]
+        longest_run_week_1 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY] # Most recent week
         longest_run_week_2 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY]
         longest_run_week_3 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY]
         longest_run_week_4 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_4_KEY]
-        total_intensity_week_1 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_1_KEY]
+        total_intensity_week_1 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_1_KEY] # Most recent week
         total_intensity_week_2 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_2_KEY]
         total_intensity_week_3 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_3_KEY]
         total_intensity_week_4 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_4_KEY]
@@ -548,7 +548,8 @@ class RunPlanGenerator(object):
             workouts.append(tempo_run_workout)
 
             # The user cares about speed as well as completing the distance. Also note that we should add strides to one of the other workouts.
-            if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower():
+            # We shouldn't schedule any structured speed workouts unless the user is running at least 30km/week.
+            if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower() and longest_run_week_1 >= 30000:
 
                 # Decide which workout we're going to do.
                 workout_probability = random.uniform(0, 100)
