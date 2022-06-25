@@ -43,6 +43,7 @@ class RunPlanGenerator(object):
 
     def max_attainable_distance(self, base_distance, num_weeks):
         """Assume the athlete can improve by 10%/week in maximum distance."""
+        """The calculation is basically the same as for compound interest."""
         weekly_rate = 0.1
         return base_distance + ((base_distance * (1.0 + (weekly_rate / 52.0))**(52.0 * num_weeks)) - base_distance)
 
@@ -84,16 +85,11 @@ class RunPlanGenerator(object):
             return False
 
         # Can we get to the target distance, or close to it, in the time remaining.
+        max_distance_needed = self.max_long_run_distance(goal_distance)
         max_attainable_distance = self.max_attainable_distance(longest_run_in_four_weeks, weeks_until_goal)
         if max_attainable_distance < 0.1: # Sanity check
             return False
-        if goal == Keys.GOAL_5K_RUN_KEY or goal == Keys.GOAL_10K_RUN_KEY or goal == Keys.GOAL_15K_RUN_KEY or goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
-            return max_attainable_distance >= goal_distance * 0.9
-        if goal == Keys.GOAL_MARATHON_RUN_KEY:
-            return max_attainable_distance >= goal_distance * 0.75
-        if goal == Keys.GOAL_50K_RUN_KEY or goal == Keys.GOAL_50_MILE_RUN_KEY:
-            return max_attainable_distance >= goal_distance * 0.6
-        return True
+        return max_attainable_distance >= max_distance_needed
 
     @staticmethod
     def valid_float(value):
@@ -504,7 +500,10 @@ class RunPlanGenerator(object):
         if in_taper:
             max_long_run_distance = self.max_taper_distance(goal_distance)
         else:
-            max_long_run_distance = self.max_long_run_distance(goal_distance)
+            max_distance_needed = self.max_long_run_distance(goal_distance)
+            max_attainable_distance = self.max_attainable_distance(longest_run_in_four_weeks, weeks_until_goal)
+            stretch_factor = max_attainable_distance / max_distance_needed # Gives us an idea as to how much the user is ahead of schedule.
+            max_long_run_distance = self.max_long_run_distance(goal_distance / stretch_factor)
 
         # Handle situation in which the user is already meeting or exceeding the goal distance.
         if longest_run_in_four_weeks >= max_long_run_distance:
