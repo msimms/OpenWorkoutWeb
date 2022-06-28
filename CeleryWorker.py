@@ -62,7 +62,7 @@ def check_for_unanalyzed_activities():
             else:
                 print("The activity owner could not be determined.")
         else:
-            print("The activity could no be loaded.")
+            print("The activity could not be loaded.")
     else:
         print("None found")
 
