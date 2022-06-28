@@ -28,12 +28,18 @@ import re
 from unidecode import unidecode
 
 hex = "[a-fA-F0-9]"
+hex_str = re.compile(r"(0x)?[a-fA-F0-9]+")
 uuid = re.compile(hex + "{8}-" + hex + "{4}-" + hex + "{4}-" + hex + "{4}-" + hex + "{12}")
 alphanums = re.compile(r"[\w-]*$")
 alphanums_and_symbols = re.compile(r"[\w_ \(\)%'@#^$&*!,/.+-=]*$")
 emoji = re.compile(r"(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])")
 email_addr = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+def is_complete_regex_match(expr, test_str):
+    """Returns True if the complete string matches the regular expression."""
+    match_obj = re.match(expr, test_str)
+    return match_obj and match_obj.span()[0] == 0 and match_obj.span()[1] == len(test_str)
 
 def is_alphanumeric(test_str):
     """Returns True if the string contains only alphanumeric characters. Otherwise, False."""
@@ -94,7 +100,7 @@ def is_float(test_str):
 def is_hex_str(test_str):
     """Returns True if the string appears to be a valid hexidecimal string."""
     try:
-        return True
+        return is_complete_regex_match(hex_str, test_str)
     except ValueError:
         pass
     return False
