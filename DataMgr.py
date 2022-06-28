@@ -35,6 +35,7 @@ import BmiCalculator
 import FtpCalculator
 import HeartRateCalculator
 import Importer
+import InputChecker
 import Keys
 import MapSearch
 import MergeTool
@@ -104,6 +105,8 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity object.")
         if activity_user_id is None:
             raise Exception("No activity user ID.")
+        if not InputChecker.is_uuid(activity_user_id):
+            raise Exception("Invalid activity user ID.")
         if self.analysis_scheduler is None:
             raise Exception("No analysis scheduler.")
 
