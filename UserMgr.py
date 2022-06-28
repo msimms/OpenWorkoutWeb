@@ -244,7 +244,7 @@ class UserMgr(object):
             return activity[Keys.ACTIVITY_USER_ID_KEY]
         if Keys.ACTIVITY_DEVICE_STR_KEY in activity:
             user_rec = self.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
-            return user_rec[Keys.DATABASE_ID_KEY]
+            return str(user_rec[Keys.DATABASE_ID_KEY])
         return None
 
     def request_to_be_friends(self, user_id, target_id):
