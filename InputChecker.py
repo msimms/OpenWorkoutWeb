@@ -38,16 +38,20 @@ days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturda
 
 def is_complete_regex_match(expr, test_str):
     """Returns True if the complete string matches the regular expression."""
-    match_obj = re.match(expr, test_str)
-    return match_obj and match_obj.span()[0] == 0 and match_obj.span()[1] == len(test_str)
+    try:
+        match_obj = re.match(expr, test_str)
+        return match_obj and match_obj.span()[0] == 0 and match_obj.span()[1] == len(test_str)
+    except:
+        pass
+    return False
 
 def is_alphanumeric(test_str):
     """Returns True if the string contains only alphanumeric characters. Otherwise, False."""
-    return re.match(alphanums, test_str) is not None
+    return is_complete_regex_match(alphanums, test_str)
 
 def is_email_address(test_str):
     """Returns True if the string is *mostly* RFC 5322 complaint."""
-    return re.match(email_addr, test_str) is not None
+    return is_complete_regex_match(email_addr, test_str)
 
 def is_timestamp(test_str):
     """Returns True if the string appears to be a valid timestamp."""
@@ -63,12 +67,7 @@ def is_day_of_week(test_str):
 
 def is_uuid(test_str):
     """Returns True if the string appears to be a valid UUID."""
-    try:
-        if re.match(uuid, test_str) is not None:
-            return True
-    except:
-        pass
-    return False
+    return is_complete_regex_match(uuid, test_str)
 
 def is_integer(test_str):
     """Returns True if the string appears to be a valid integer."""
@@ -101,7 +100,7 @@ def is_hex_str(test_str):
     """Returns True if the string appears to be a valid hexidecimal string."""
     try:
         return is_complete_regex_match(hex_str, test_str)
-    except ValueError:
+    except:
         pass
     return False
 
