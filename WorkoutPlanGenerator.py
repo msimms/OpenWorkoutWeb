@@ -73,6 +73,22 @@ class WorkoutPlanGenerator(object):
             inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 50000.0
         elif goal_lower == Keys.GOAL_50_MILE_RUN_KEY.lower():
             inputs[Keys.GOAL_RUN_DISTANCE_KEY] = Units.METERS_PER_50_MILE
+        elif goal_lower == Keys.GOAL_SPRINT_TRIATHLON_KEY:
+            inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 500.0
+            inputs[Keys.GOAL_BIKE_DISTANCE_KEY] = 20000.0
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 5000.0
+        elif goal_lower == Keys.GOAL_OLYMPIC_TRIATHLON_KEY:
+            inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 1500.0
+            inputs[Keys.GOAL_BIKE_DISTANCE_KEY] = 40000.0
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 10000.0
+        elif goal_lower == Keys.GOAL_HALF_IRON_DISTANCE_TRIATHLON_KEY:
+            inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 1.2 * Units.METERS_PER_MILE
+            inputs[Keys.GOAL_BIKE_DISTANCE_KEY] = 56.0 * Units.METERS_PER_MILE
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = Units.METERS_PER_HALF_MARATHON
+        elif goal_lower == Keys.GOAL_IRON_DISTANCE_TRIATHLON_KEY:
+            inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 2.4 * Units.METERS_PER_MILE
+            inputs[Keys.GOAL_BIKE_DISTANCE_KEY] = 112.0 * Units.METERS_PER_MILE
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = Units.METERS_PER_MARATHON
 
         return inputs
 

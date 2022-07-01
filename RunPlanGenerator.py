@@ -41,11 +41,16 @@ class RunPlanGenerator(object):
         """The equation was derived by playing with trendlines in a spreadsheet."""
         return ((-0.002 * goal_distance) * (-0.002 * goal_distance)) + (0.7 * goal_distance) + 4.4
 
-    def max_attainable_distance(self, base_distance, num_weeks):
+    def max_attainable_distance(self, base_distance_meters, num_weeks):
         """Assume the athlete can improve by 10%/week in maximum distance."""
-        """The calculation is basically the same as for compound interest."""
+
+        # To keep the calculation from going out of range, scale the input from meters to kms.
+        base_distance_kms = base_distance_meters / 1000.0
+
+        # The calculation is basically the same as for compound interest.
+        # Be sure to scale back up to meters.
         weekly_rate = 0.1
-        return base_distance + ((base_distance * (1.0 + (weekly_rate / 52.0))**(52.0 * num_weeks)) - base_distance)
+        return (base_distance_kms + ((base_distance_kms * (1.0 + (weekly_rate / 52.0))**(52.0 * num_weeks)) - base_distance_kms)) * 1000.0
 
     def is_in_taper(self, weeks_until_goal, goal):
         """Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less."""
@@ -424,6 +429,14 @@ class RunPlanGenerator(object):
             return Units.METERS_PER_HALF_MARATHON
         if race_distance == Keys.GOAL_50_MILE_RUN_KEY:
             return Units.METERS_PER_HALF_MARATHON
+        if race_distance == Keys.GOAL_SPRINT_TRIATHLON_KEY:
+            return 5000
+        if race_distance == Keys.GOAL_OLYMPIC_TRIATHLON_KEY:
+            return 10000
+        if race_distance == Keys.GOAL_HALF_IRON_DISTANCE_TRIATHLON_KEY:
+            return 0.75 * Units.METERS_PER_HALF_MARATHON
+        if race_distance == Keys.GOAL_IRON_DISTANCE_TRIATHLON_KEY:
+            return Units.METERS_PER_HALF_MARATHON
         return Units.METERS_PER_HALF_MARATHON
 
     def gen_workouts_for_next_week(self, inputs):
@@ -467,6 +480,7 @@ class RunPlanGenerator(object):
         
         # Handle situation in which the user hasn't run *much* in the last four weeks.
         if num_runs is None or num_runs < 4:
+            workouts.append(self.gen_free_run(easy_run_pace))
             workouts.append(self.gen_free_run(easy_run_pace))
             workouts.append(self.gen_free_run(easy_run_pace))
             return workouts
