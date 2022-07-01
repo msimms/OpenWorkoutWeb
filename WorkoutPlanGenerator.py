@@ -115,9 +115,9 @@ class WorkoutPlanGenerator(object):
 
         now = time.time()
         weeks_until_goal = None # Number of weeks until the goal, or None if not applicable
-        longest_run_in_four_weeks = 0.0 # Longest run in the last four weeks
         longest_runs_by_week = [0.0] * 4 # Longest run for each of the recent four weeks
         longest_rides_by_week = [0.0] * 4 # Longest bike rides for each of the recent four weeks
+        longest_swims_by_week = [0.0] * 4 # Longest swims for each of the recent four weeks
         run_intensity_by_week = [0.0] * 4 # Total training intensity for each of the recent four weeks
         cycling_intensity_by_week = [0.0] * 4 # Total training intensity for each of the recent four weeks
         running_paces = {}
@@ -173,29 +173,29 @@ class WorkoutPlanGenerator(object):
         # Look through the user's four week records.
         _, running_bests, cycling_summary, running_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 4), now)
 
-        # Find the longest run in the last four weeks.
-        if running_bests is not None and Keys.LONGEST_DISTANCE in running_bests:
-            longest_run_in_four_weeks = running_bests[Keys.LONGEST_DISTANCE][0]
-
         # Get some data from the prior four weeks.
         cycling_best_summary, running_best_summary, cycling_week_summary, running_week_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 1), now - (DataMgr.ONE_WEEK * 0))
         longest_runs_by_week[0] = self.optional_fetch_from_dict_with_array(running_best_summary, Keys.LONGEST_DISTANCE)
         longest_rides_by_week[0] = self.optional_fetch_from_dict_with_array(cycling_best_summary, Keys.LONGEST_DISTANCE)
+        #longest_swims_by_week[0] = self.optional_fetch_from_dict_with_array(swimming_best_summary, Keys.LONGEST_DISTANCE)
         run_intensity_by_week[0] = self.optional_fetch_from_dict(running_week_summary, Keys.TOTAL_INTENSITY_SCORE)
         cycling_intensity_by_week[0] = self.optional_fetch_from_dict(cycling_week_summary, Keys.TOTAL_INTENSITY_SCORE)
         cycling_best_summary, running_best_summary, cycling_week_summary, running_week_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 2), now - (DataMgr.ONE_WEEK * 1))
         longest_runs_by_week[1] = self.optional_fetch_from_dict_with_array(running_best_summary, Keys.LONGEST_DISTANCE)
         longest_rides_by_week[1] = self.optional_fetch_from_dict_with_array(cycling_best_summary, Keys.LONGEST_DISTANCE)
+        #longest_swims_by_week[1] = self.optional_fetch_from_dict_with_array(swimming_best_summary, Keys.LONGEST_DISTANCE)
         run_intensity_by_week[1] = self.optional_fetch_from_dict(running_week_summary, Keys.TOTAL_INTENSITY_SCORE)
         cycling_intensity_by_week[1] = self.optional_fetch_from_dict(cycling_week_summary, Keys.TOTAL_INTENSITY_SCORE)
         cycling_best_summary, running_best_summary, cycling_week_summary, running_week_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 3), now - (DataMgr.ONE_WEEK * 2))
         longest_runs_by_week[2] = self.optional_fetch_from_dict_with_array(running_best_summary, Keys.LONGEST_DISTANCE)
         longest_rides_by_week[2] = self.optional_fetch_from_dict_with_array(cycling_best_summary, Keys.LONGEST_DISTANCE)
+        #longest_swims_by_week[2] = self.optional_fetch_from_dict_with_array(swimming_best_summary, Keys.LONGEST_DISTANCE)
         run_intensity_by_week[2] = self.optional_fetch_from_dict(running_week_summary, Keys.TOTAL_INTENSITY_SCORE)
         cycling_intensity_by_week[2] = self.optional_fetch_from_dict(cycling_week_summary, Keys.TOTAL_INTENSITY_SCORE)
         cycling_best_summary, running_best_summary, cycling_week_summary, running_week_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 4), now - (DataMgr.ONE_WEEK * 3))
         longest_runs_by_week[3] = self.optional_fetch_from_dict_with_array(running_best_summary, Keys.LONGEST_DISTANCE)
         longest_rides_by_week[3] = self.optional_fetch_from_dict_with_array(cycling_best_summary, Keys.LONGEST_DISTANCE)
+        #longest_swims_by_week[3] = self.optional_fetch_from_dict_with_array(swimming_best_summary, Keys.LONGEST_DISTANCE)
         run_intensity_by_week[3] = self.optional_fetch_from_dict(running_week_summary, Keys.TOTAL_INTENSITY_SCORE)
         cycling_intensity_by_week[3] = self.optional_fetch_from_dict(cycling_week_summary, Keys.TOTAL_INTENSITY_SCORE)
 
@@ -244,10 +244,14 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_2_KEY] = longest_rides_by_week[1]
         inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_3_KEY] = longest_rides_by_week[2]
         inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_4_KEY] = longest_rides_by_week[3]
-        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_1_KEY] = run_intensity_by_week[0] + cycling_intensity_by_week[0]
-        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_2_KEY] = run_intensity_by_week[1] + cycling_intensity_by_week[1]
-        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_3_KEY] = run_intensity_by_week[2] + cycling_intensity_by_week[2]
-        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_4_KEY] = run_intensity_by_week[3] + cycling_intensity_by_week[3]
+        inputs[Keys.PLAN_INPUT_LONGEST_SWIM_WEEK_1_KEY] = longest_swims_by_week[0]
+        inputs[Keys.PLAN_INPUT_LONGEST_SWIM_WEEK_2_KEY] = longest_swims_by_week[1]
+        inputs[Keys.PLAN_INPUT_LONGEST_SWIM_WEEK_3_KEY] = longest_swims_by_week[2]
+        inputs[Keys.PLAN_INPUT_LONGEST_SWIM_WEEK_4_KEY] = longest_swims_by_week[3]
+        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_1_KEY] = run_intensity_by_week[0] + cycling_intensity_by_week[0] + longest_swims_by_week[0]
+        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_2_KEY] = run_intensity_by_week[1] + cycling_intensity_by_week[1] + longest_swims_by_week[1]
+        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_3_KEY] = run_intensity_by_week[2] + cycling_intensity_by_week[2] + longest_swims_by_week[2]
+        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_4_KEY] = run_intensity_by_week[3] + cycling_intensity_by_week[3] + longest_swims_by_week[3]
         inputs[Keys.PLAN_INPUT_AGE_YEARS_KEY] = age_years
         inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY] = experience_level
         inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
