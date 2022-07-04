@@ -116,8 +116,10 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
     all_bike_distances = [] # For computing bike distance averages
     longest_runs_by_week = [0.0] * 4 # Longest run for each of the recent four weeks
     longest_rides_by_week = [0.0] * 4 # Longest bike rides for each of the recent four weeks
+    longest_swims_by_week = [0.0] * 4 # Longest swims for each of the recent four weeks
     run_intensity_by_week = [0.0] * 4 # Total training intensity for each of the recent four weeks
     cycling_intensity_by_week = [0.0] * 4 # Total training intensity for each of the recent four weeks
+    swim_intensity_by_week = [0.0] * 4 # Total training intensity for each of the recent four weeks
     running_paces = {}
 
     today = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0).date()
@@ -154,10 +156,14 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
         inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_2_KEY] = longest_rides_by_week[1]
         inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_3_KEY] = longest_rides_by_week[2]
         inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_4_KEY] = longest_rides_by_week[3]
-        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_1_KEY] = run_intensity_by_week[0] + cycling_intensity_by_week[0]
-        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_2_KEY] = run_intensity_by_week[1] + cycling_intensity_by_week[1]
-        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_3_KEY] = run_intensity_by_week[2] + cycling_intensity_by_week[2]
-        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_4_KEY] = run_intensity_by_week[3] + cycling_intensity_by_week[3]
+        inputs[Keys.PLAN_INPUT_LONGEST_SWIM_WEEK_1_KEY] = longest_swims_by_week[0]
+        inputs[Keys.PLAN_INPUT_LONGEST_SWIM_WEEK_2_KEY] = longest_swims_by_week[1]
+        inputs[Keys.PLAN_INPUT_LONGEST_SWIM_WEEK_3_KEY] = longest_swims_by_week[2]
+        inputs[Keys.PLAN_INPUT_LONGEST_SWIM_WEEK_4_KEY] = longest_swims_by_week[3]
+        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_1_KEY] = run_intensity_by_week[0] + cycling_intensity_by_week[0] + swim_intensity_by_week[0]
+        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_2_KEY] = run_intensity_by_week[1] + cycling_intensity_by_week[1] + swim_intensity_by_week[1]
+        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_3_KEY] = run_intensity_by_week[2] + cycling_intensity_by_week[2] + swim_intensity_by_week[2]
+        inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_4_KEY] = run_intensity_by_week[3] + cycling_intensity_by_week[3] + swim_intensity_by_week[3]
         inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
         if all_run_distances:
             inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = sum(all_run_distances) / len(all_run_distances)
@@ -195,6 +201,10 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
         cycling_intensity_by_week[2] = cycling_intensity_by_week[1]
         cycling_intensity_by_week[1] = cycling_intensity_by_week[0]
         cycling_intensity_by_week[0] = 0.0
+        swim_intensity_by_week[3] = swim_intensity_by_week[2]
+        swim_intensity_by_week[2] = swim_intensity_by_week[1]
+        swim_intensity_by_week[1] = swim_intensity_by_week[0]
+        swim_intensity_by_week[0] = 0.0
         for workout in workouts:
             workout_distance = workout.total_workout_distance_meters()
             if workout.sport_type in Keys.RUNNING_ACTIVITIES:
@@ -203,6 +213,9 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
             if workout.sport_type in Keys.CYCLING_ACTIVITIES:
                 if longest_rides_by_week or workout_distance > max(longest_rides_by_week[0]):
                     longest_rides_by_week[0] = workout_distance
+            if workout.sport_type in Keys.SWIMMING_ACTIVITIES:
+                if longest_swims_by_week or workout_distance > max(longest_swims_by_week[0]):
+                    longest_swims_by_week[0] = workout_distance
 
         week_num = week_num + 1
         weeks_until_goal = weeks_until_goal - 1

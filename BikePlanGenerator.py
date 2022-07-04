@@ -2,6 +2,7 @@
 """Generates a bike plan for the specifiied user."""
 
 import Keys
+import WorkoutFactory
 
 class BikePlanGenerator(object):
     """Class for generating a bike plan for the specifiied user."""
@@ -23,6 +24,42 @@ class BikePlanGenerator(object):
     def is_workout_plan_possible(self, inputs):
         """Returns TRUE if we can actually generate a plan with the given contraints."""
         return True
+
+    def gen_interval_ride(self):
+        """Utility function for creating an interval workout."""
+
+        # Create the workout object.
+        workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_INTERVAL_RIDE, self.user_id)
+        workout.sport_type = Keys.TYPE_CYCLING_KEY
+
+        return workout
+
+    def gen_tempo_ride(self):
+        """Utility function for creating a tempo ride."""
+
+        # Create the workout object.
+        workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TEMPO_RIDE, self.user_id)
+        workout.sport_type = Keys.TYPE_CYCLING_KEY
+
+        return workout
+
+    def gen_easy_ride(self):
+        """Utility function for creating an easy ride."""
+
+        # Create the workout object.
+        workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RIDE, self.user_id)
+        workout.sport_type = Keys.TYPE_CYCLING_KEY
+
+        return workout
+
+    def gen_sweet_spot_ride(self):
+        """Utility function for creating a sweet spot ride."""
+
+        # Create the workout object.
+        workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SWEET_SPOT_RIDE, self.user_id)
+        workout.sport_type = Keys.TYPE_CYCLING_KEY
+
+        return workout
 
     def gen_workouts_for_next_week(self, inputs):
         """Generates the workouts for the next week, but doesn't schedule them."""
