@@ -2193,8 +2193,9 @@ class Api(object):
         else:
             num_seconds = None
 
+        now = datetime.datetime.utcnow()
         unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_PREFERRED_UNITS_KEY)
-        cycling_bests, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(self.user_id, num_seconds)
+        cycling_bests, running_bests, _, _ = self.data_mgr.retrieve_bests_for_activity_type(self.user_id, now - num_seconds, now)
 
         for item in cycling_bests:
             seconds = cycling_bests[item][0]

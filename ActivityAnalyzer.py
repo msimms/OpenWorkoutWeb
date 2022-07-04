@@ -210,7 +210,7 @@ class ActivityAnalyzer(object):
 
                         # Compute training paces.
                         print("* (Re)computing the training paces...")
-                        _, running_bests, _, _ = self.data_mgr.retrieve_recent_bests(activity_user_id, DataMgr.SIX_MONTHS)
+                        _, running_bests, _, _ = self.data_mgr.retrieve_bests_for_activity_type(activity_user_id, now - DataMgr.SIX_MONTHS, now)
                         run_paces = self.data_mgr.compute_run_training_paces(activity_user_id, running_bests)
 
                         # We need to know the user's threshold pace to compute the intensity score.
