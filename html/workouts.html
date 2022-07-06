@@ -322,13 +322,6 @@
                 else if (value == "50 Mile Run")
                     element.selectedIndex = 7;
             }
-            else if (key == "goal_date")
-            {
-                let element = document.getElementById(key);
-                let n = new Date(value * 1000);
-
-                element.placeholder=n.toLocaleDateString();
-            }
             else if (key == "goal type")
             {
                 let element = document.getElementById("goal_type");
@@ -431,8 +424,8 @@
     // Request personal records from the server.
     function get_personal_records()
     {
-        let six_months = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0);
-        let api_url = "${root_url}/api/1.0/list_personal_records?seconds=" + six_months;
+        let four_weeks = (7.0 * 24.0 * 60.0 * 60.0);
+        let api_url = "${root_url}/api/1.0/list_personal_records?seconds=" + four_weeks;
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_personal_records, dataType: "json" });
     }
 
@@ -440,7 +433,7 @@
     // Request user settings from the server.
     function get_user_settings()
     {
-        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal,goal_date,goal%20type,preferred%20long%20run%20day,Experience%20Level,Structured%20Training%20Comfort%20Level";
+        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal,goal%20type,preferred%20long%20run%20day,Experience%20Level,Structured%20Training%20Comfort%20Level";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
@@ -647,9 +640,9 @@ ${nav}
 
         <hr>
 
-        <h2>Six Month Bests</h2>
+        <h2>Four Week Bests</h2>
         <p>
-            Workouts are calculated using paces computed from the last six months of activity.
+            Workouts are calculated using paces computed from the last four weeks of activity.
         </p>
         <p>
             <h3>Cycling</h3>

@@ -165,7 +165,7 @@ class WorkoutPlanGenerator(object):
         #
 
         # Look through the user's four week records.
-        _, running_bests, cycling_summary, running_summary, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 4), now)
+        _, running_bests, cycling_summary, running_summary, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - DataMgr.FOUR_WEEKS, now)
 
         # Estimate running paces from the user's four week records.
         if running_bests is not None:

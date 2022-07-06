@@ -1577,40 +1577,6 @@ class DataMgr(Importer.ActivityWriter):
         swimming_summary = summarizer.get_summary_dictionary(Keys.TYPE_POOL_SWIMMING_KEY)
         return cycling_bests, running_bests, swimming_bests, cycling_summary, running_summary, swimming_summary
 
-    def retrieve_bests_for_activity_type(self, user_id, activity_type, key):
-        """Return a sorted list of all records for the given activity type and key."""
-        def compare(a, b):
-            if a[0] > b[0]:
-                return 1
-            elif a[0] == b[0]:
-                return 0
-            else:
-                return -1
-
-        if self.database is None:
-            raise Exception("No database.")
-        if user_id is None:
-            raise Exception("Bad parameter.")
-        if activity_type is None:
-            raise Exception("Bad parameter.")
-        if key is None:
-            raise Exception("Bad parameter.")
-
-        bests = []
-
-        # Load cached summary data from all previous activities.
-        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, None)
-        for activity_id in all_activity_bests:
-            activity_bests = all_activity_bests[activity_id]
-            if (Keys.ACTIVITY_TYPE_KEY in activity_bests) and (activity_bests[Keys.ACTIVITY_TYPE_KEY] == activity_type) and (key in activity_bests):
-                record = []
-                record.append(activity_bests[key])
-                record.append(activity_id)
-                bests.append(record)
-
-        bests.sort(compare)
-        return bests
-
     def analyze_unanalyzed_activities(self, user_id, start_time, end_time):
         """Looks through the user's activities (within the given timeframe) and schedules any unanalyzed ones for analysis."""
         if self.database is None:

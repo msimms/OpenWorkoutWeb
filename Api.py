@@ -2188,14 +2188,14 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
+        now = time.time()
         if Keys.SECONDS in values:
-            num_seconds = int(values[Keys.SECONDS])
+            cutoff_time_lower = now - int(values[Keys.SECONDS])
         else:
-            num_seconds = None
+            cutoff_time_lower = None
 
-        now = datetime.datetime.utcnow()
         unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_PREFERRED_UNITS_KEY)
-        cycling_bests, running_bests, _, _ = self.data_mgr.retrieve_bests_for_activity_type(self.user_id, now - num_seconds, now)
+        cycling_bests, running_bests, _, _, _, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(self.user_id, cutoff_time_lower, now)
 
         for item in cycling_bests:
             seconds = cycling_bests[item][0]
