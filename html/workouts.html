@@ -50,63 +50,6 @@
         }
     }
 
-    /// @function set_goal
-    // Handler for when the user changes their goal.
-    function set_goal()
-    {
-        let the_url = "${root_url}/api/1.0/update_settings";
-        let goal = document.getElementById("goal").value;
-        let dict = [];
-        let result_text = {};
-
-        dict.push({["goal"] : goal});
-        if (send_post_request(the_url, dict, result_text))
-        {
-            alert("Goal updated!");
-            generate_workout_plan();
-        }
-        else
-        {
-            alert("An error occurred!");
-        }
-    }
-
-    /// @function set_goal_date
-    // Handler for when the user changes their goal date.
-    function set_goal_date()
-    {
-        let the_url = "${root_url}/api/1.0/update_settings";
-        let goal_date_obj = document.getElementById("goal_date");
-        let goal_date = 0;
-        let dict = [];
-        let result_text = {};
-
-        if (goal_date_obj.value == "")
-        {
-            if (goal_date_obj.placeholder == "")
-            {
-                alert("A goal date was not specified.");
-                return;
-            }
-            goal_date = Date.parse(goal_date_obj.placeholder) / 1000;
-        }
-        else
-        {
-            goal_date = Date.parse(goal_date_obj.value) / 1000;
-        }
-
-        dict.push({["goal_date"] : goal_date});
-        if (send_post_request(the_url, dict, result_text))
-        {
-            alert("Goal date updated!");
-            generate_workout_plan();
-        }
-        else
-        {
-            alert("An error occurred!");
-        }
-    }
-
     /// @function set_goal_type
     // Handler for when the user changes their goal type.
     function set_goal_type()
