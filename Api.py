@@ -36,6 +36,7 @@ import Units
 import TrainingPaceCalculator
 
 from urllib.parse import unquote_plus
+from distutils.util import strtobool
 
 class Api(object):
     """Class for managing API messages."""
@@ -1693,6 +1694,13 @@ class Api(object):
             if not (level >= 1 and level <= 10):
                 raise ApiException.ApiMalformedRequestException("Invalid level.")
             result = self.user_mgr.update_user_setting(self.user_id, Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, level, update_time)
+
+        # Desire to have the workout plan generator run even if there are no races on the calendar.
+        if Keys.GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY in values:
+            if not InputChecker.is_boolean(values[Keys.GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY]):
+                raise ApiException.ApiMalformedRequestException("Invalid value.")
+            value = strtobool(values[Keys.GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY])
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY, value, update_time)
 
         return result, ""
 

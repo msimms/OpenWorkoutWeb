@@ -29,6 +29,7 @@ from unidecode import unidecode
 
 hex = "[a-fA-F0-9]"
 hex_str = re.compile(r"(0x)?[a-fA-F0-9]+")
+boolean = re.compile(r"(True|False|TRUE|FALSE|Yes|No|YES|NO|1|0)")
 uuid = re.compile(hex + "{8}-" + hex + "{4}-" + hex + "{4}-" + hex + "{4}-" + hex + "{12}")
 alphanums = re.compile(r"[\w-]*$")
 alphanums_and_symbols = re.compile(r"[\w_ \(\)%'@#^$&*!,/.+-=]*$")
@@ -64,6 +65,10 @@ def is_day_of_week(test_str):
         if day.lower() == test_str_lower:
             return True
     return False
+
+def is_boolean(test_str):
+    """Returns True if the string appears to represent a boolean."""
+    return is_complete_regex_match(boolean, test_str)
 
 def is_uuid(test_str):
     """Returns True if the string appears to be a valid UUID."""

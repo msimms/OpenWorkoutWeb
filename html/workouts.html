@@ -113,6 +113,28 @@
         }
     }
 
+    /// @function set_always_gen_workouts
+    // Handler for when the user changes their preference to always have the workout plan generator running,
+    // even if they don't have a race on the calendar.
+    function set_always_gen_workouts()
+    {
+        let the_url = "${root_url}/api/1.0/update_settings";
+        let level = document.getElementById("always_gen_workouts").value;
+        let dict = [];
+        let result_text = {};
+
+        dict.push({["Gen Workouts When Race Cal Is Empty"] : level});
+        if (send_post_request(the_url, dict, result_text))
+        {
+            alert("Setting updated!");
+            generate_workout_plan();
+        }
+        else
+        {
+            alert("An error occurred!");
+        }
+    }
+
     /// @function generate_workout_plan
     // Ask the server to start workout plan generation.
     function generate_workout_plan()
@@ -303,6 +325,14 @@
                 let element = document.getElementById("structured_training_comfort_level");
                 element.value = value;
             }
+            else if (key == "Gen Workouts When Race Cal Is Empty")
+            {
+                let element = document.getElementById("always_gen_workouts");
+                if (value == 1)
+                    element.selectedIndex = 0;
+                else
+                    element.selectedIndex = 1;
+            }
         }
     }
 
@@ -376,7 +406,7 @@
     // Request user settings from the server.
     function get_user_settings()
     {
-        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal,goal%20type,preferred%20long%20run%20day,Experience%20Level,Structured%20Training%20Comfort%20Level";
+        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal,goal%20type,preferred%20long%20run%20day,Experience%20Level,Structured%20Training%20Comfort%20Level,Gen%20Workouts%20When%20Race%20Cal%20Is%20Empty";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
@@ -559,6 +589,13 @@ ${nav}
         </p>
         <p>
             Comfort Level With Structured Training: <br><input type="range" min="1" max="10" value="5" class="slider" id="structured_training_comfort_level" style="height:10px" onchange="set_structured_training_comfort_level()"><br>
+        </p>
+        <p>
+            Generate Workouts Even When the Race Calendar Is Empty:<br>
+            <select name="always_gen_workouts" id="always_gen_workouts" class="right" onchange="set_always_gen_workouts()">
+                <option value="True">Yes</option>
+                <option value="False">No</option>
+            </select><br>
         </p>
 
         <hr>

@@ -966,7 +966,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         # Defaults.
-        goal = Keys.GOAL_FITNESS_KEY
+        goal = None
         goal_date = None
         goal_importance = None
 

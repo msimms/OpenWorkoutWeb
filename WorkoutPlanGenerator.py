@@ -126,7 +126,11 @@ class WorkoutPlanGenerator(object):
         # Fetch the details of the user's goal.
         goal, goal_date = self.data_mgr.retrieve_user_goal(user_id)
         if goal is None:
-            raise Exception("A goal has not been defined.")
+            gen_plan_anyway = self.user_mgr.retrieve_user_setting(user_id, Keys.GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY)
+            if gen_plan_anyway:
+                goal = Keys.GOAL_FITNESS_KEY
+            else:
+                raise Exception("A goal has not been defined.")
 
         # Compute the time remaining until the goal.
         if goal is not Keys.GOAL_FITNESS_KEY:
@@ -165,7 +169,7 @@ class WorkoutPlanGenerator(object):
         #
 
         # Look through the user's four week records.
-        _, running_bests, cycling_summary, running_summary, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - DataMgr.FOUR_WEEKS, now)
+        _, running_bests, _, cycling_summary, running_summary, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - DataMgr.FOUR_WEEKS, now)
 
         # Estimate running paces from the user's four week records.
         if running_bests is not None:

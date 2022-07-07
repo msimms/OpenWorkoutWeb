@@ -244,7 +244,8 @@ class UserMgr(object):
             return activity[Keys.ACTIVITY_USER_ID_KEY]
         if Keys.ACTIVITY_DEVICE_STR_KEY in activity:
             user_rec = self.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
-            return str(user_rec[Keys.DATABASE_ID_KEY])
+            if user_rec is not None:
+                return str(user_rec[Keys.DATABASE_ID_KEY])
         return None
 
     def request_to_be_friends(self, user_id, target_id):
@@ -388,6 +389,8 @@ class UserMgr(object):
             return 5
         if key == Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY:
             return "sunday"
+        if key == Keys.GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY:
+            return True
         if key == Keys.USER_CAN_UPLOAD_PHOTOS_KEY:
             return False
         if key == Keys.USER_PLAN_LAST_GENERATED_TIME:

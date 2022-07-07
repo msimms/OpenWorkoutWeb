@@ -79,6 +79,7 @@ GOAL_BIKE_DISTANCE_KEY = "Goal Bike Distance"
 GOAL_RUN_DISTANCE_KEY = "Goal Run Distance"
 
 # User settings that are exclusive to the workout plan generator.
+PLAN_INPUT_GOAL_KEY = "Goal"
 PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY = "Longest Run Week 1" # Most recent week
 PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY = "Longest Run Week 2" # Second most recent week
 PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY = "Longest Run Week 3" # Third most recent week
@@ -111,7 +112,7 @@ UNITS_STANDARD_KEY = "standard"
 
 # Biological genders.
 GENDER_MALE_KEY = "male" # Biological male
-GENDER_FEMALE_KEY = "female" # Bilological female
+GENDER_FEMALE_KEY = "female" # Biological female
 
 # User settings.
 REQUESTED_SETTING_KEY = "requested setting"
@@ -137,7 +138,8 @@ USER_CAN_UPLOAD_PHOTOS_KEY = "can upload photos" # User is allowed to upload pho
 USER_PLAN_LAST_GENERATED_TIME = "workout plan last generated" # Time of when a workout plan was last generated
 USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED = "activity summary cache last pruned" # Time at which we last cleaned up the activity summary cache
 USER_RACES = "races" # List of races the user intends to do
-USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, USER_PREFERRED_UNITS_KEY, USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY, USER_BIRTHDAY_KEY, USER_HEIGHT_KEY, USER_WEIGHT_KEY, USER_GENDER_KEY, USER_RESTING_HEART_RATE_KEY, USER_MAXIMUM_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, USER_SPECIFIED_MAX_HEART_RATE_KEY, BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_TYPE_KEY, PLAN_INPUT_EXPERIENCE_LEVEL_KEY, PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, USER_CAN_UPLOAD_PHOTOS_KEY, USER_PLAN_LAST_GENERATED_TIME, USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED, USER_RACES ]
+GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY = "Gen Workouts When Race Cal Is Empty"
+USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, USER_PREFERRED_UNITS_KEY, USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY, USER_BIRTHDAY_KEY, USER_HEIGHT_KEY, USER_WEIGHT_KEY, USER_GENDER_KEY, USER_RESTING_HEART_RATE_KEY, USER_MAXIMUM_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, USER_SPECIFIED_MAX_HEART_RATE_KEY, BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_TYPE_KEY, PLAN_INPUT_EXPERIENCE_LEVEL_KEY, PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, USER_CAN_UPLOAD_PHOTOS_KEY, USER_PLAN_LAST_GENERATED_TIME, USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED, USER_RACES, GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY ]
 USER_SETTINGS_LAST_UPDATED_KEY = "last updated" # Time when the user settings where last updated
 
 # Personal records.
@@ -316,7 +318,7 @@ AVG_CADENCE = "Average Cadence" # Average cadence (rpm or spm) held during the a
 STEPS_PER_MINUTE = "Steps Per Minute" # Cadence for foot based activity
 AVG_STEPS_PER_MINUTE = "Average Steps Per Minute" # Average cadence for foot based activity
 NORMALIZED_POWER = "Normalized Power"
-THRESHOLD_POWER = "Threshold Power"
+THRESHOLD_POWER = "Threshold Power" # Functional Threshold Power (FTP)
 VARIABILITY_INDEX = "Variability Index"
 LONGEST_DISTANCE = "Longest Distance" # Longest distance, when summarizing activities
 TOTAL_DISTANCE = "Total Distance" # Distance for an activity

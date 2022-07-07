@@ -321,8 +321,8 @@ class Workout(object):
             result += "Purpose: Sweet spot rides are hard enough to improve fitness while being easy enough to do frequently.\n"
         elif self.type == Keys.WORKOUT_TYPE_OPEN_WATER_SWIM:
             result += "Purpose: Open water swims get you used to race day conditions.\n"
-        elif self.type == Keys.WORKOUT_TYPE_POOL_WATER_SWIM:
-            result += "Purpose: .\n"
+        elif self.type == Keys.WORKOUT_TYPE_POOL_SWIM:
+            result += "Purpose: Most training is done in the swimming pool.\n"
 
         # Add the intensity score, if it's been computed.
         if self.estimated_intensity_score is not None:
