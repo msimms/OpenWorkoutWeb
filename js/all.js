@@ -37,8 +37,12 @@ function set_background_style_for_error(root_url, background_id, error_code)
     let section = document.getElementById(background_id);
     switch (error_code)
     {
+    case 403:
+        var img_str = 'url("' + root_url + '/images/dead_end.jpg")';
+        section.style.backgroundImage = img_str;
+        break;
     case 404:
-        let img_str = 'url("' + root_url + '/images/road_closed.jpg")';
+        var img_str = 'url("' + root_url + '/images/road_closed.jpg")';
         section.style.backgroundImage = img_str;
         break;
     default:
