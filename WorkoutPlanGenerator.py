@@ -314,8 +314,6 @@ class WorkoutPlanGenerator(object):
         run_workouts = run_planner.gen_workouts_for_next_week(inputs)
         workouts.extend(run_workouts)
 
-        print(workouts)
-
         return workouts
 
     def generate_workouts_using_model(self, user_id, inputs, model):
