@@ -72,10 +72,13 @@ class WorkoutScheduler(object):
                 possible_days = self.list_schedulable_days(scheduled_week)
 
                 # Pick one of the days from the candidate list.
+                # If all the days are booked, then pick a random day.
                 if len(possible_days) > 0:
                     day_index = possible_days[int(len(possible_days) / 2)]
-                    workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
-                    scheduled_week[day_index] = workout
+                else:
+                    day_index = random.randint(0,6)
+                workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
+                scheduled_week[day_index] = workout
 
         return scheduled_workouts, scheduled_week
 
@@ -94,10 +97,13 @@ class WorkoutScheduler(object):
                 possible_days = self.list_schedulable_days(scheduled_week)
 
                 # Pick one of the days from the candidate list.
+                # If all the days are booked, then pick a random day.
                 if len(possible_days) > 0:
                     day_index = random.choice(possible_days)
-                    workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
-                    scheduled_week[day_index] = workout
+                else:
+                    day_index = random.randint(0,6)
+                workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
+                scheduled_week[day_index] = workout
 
         return scheduled_workouts, scheduled_week
 
