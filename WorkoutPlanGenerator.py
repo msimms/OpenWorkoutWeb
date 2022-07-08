@@ -58,6 +58,8 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 0.0
 
         if goal_lower == Keys.GOAL_FITNESS_KEY.lower():
+            inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 500.0
+            inputs[Keys.GOAL_BIKE_DISTANCE_KEY] = 20000.0
             inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 5000.0
         elif goal_lower == Keys.GOAL_5K_RUN_KEY.lower():
             inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 5000.0
@@ -311,6 +313,8 @@ class WorkoutPlanGenerator(object):
             raise Exception("The run distance goal is not feasible in the time alloted.")
         run_workouts = run_planner.gen_workouts_for_next_week(inputs)
         workouts.extend(run_workouts)
+
+        print(workouts)
 
         return workouts
 

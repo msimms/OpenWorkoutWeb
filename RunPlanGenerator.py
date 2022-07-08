@@ -512,7 +512,7 @@ class RunPlanGenerator(object):
         # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.
         # The non-taper equation was derived by playing with trendlines in a spreadsheet.
         if goal == Keys.GOAL_FITNESS_KEY:
-            max_long_run_distance = 6000
+            max_long_run_distance = self.max_long_run_distance(goal_distance)
         elif in_taper:
             max_long_run_distance = self.max_taper_distance(goal_distance)
         else:
