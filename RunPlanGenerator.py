@@ -601,9 +601,12 @@ class RunPlanGenerator(object):
                     valid_total_intensity = total_intensity > total_intensity_week_1
 
             # How far are these workouts from the ideal intensity distribution?
-            if valid_total_intensity:
+            if best_intensity_distribution_score is None:
+                best_intensity_distribution_score = intensity_distribution_score
+                best_workouts = workouts
+            elif valid_total_intensity:
                 intensity_distribution_score = self.check_intensity_distribution()
-                if best_intensity_distribution_score is None or intensity_distribution_score < best_intensity_distribution_score:
+                if intensity_distribution_score < best_intensity_distribution_score:
                     best_intensity_distribution_score = intensity_distribution_score
                     best_workouts = workouts
 
