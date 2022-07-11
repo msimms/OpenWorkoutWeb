@@ -193,6 +193,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         if interval_distance_meters < 1000:
             interval_distance_meters = 1000
 
+        # Warmup and cooldown duration.
         warmup_duration = 10 * 60 # Ten minute warmup
         cooldown_duration = 10 * 60 # Ten minute cooldown
 
@@ -226,6 +227,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         if interval_distance_meters < 1000:
             interval_distance_meters = 1000
 
+        # Warmup and cooldown duration.
         warmup_duration = 10 * 60 # Ten minute warmup
         cooldown_duration = 10 * 60 # Ten minute cooldown
 
@@ -253,7 +255,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_RUN, self.user_id)
         workout.sport_type = Keys.TYPE_RUNNING_KEY
         workout.add_warmup(warmup_duration)
-        #workout.add_distance_interval(4, interval_distance, threshold_run_pace, rest_interval_distance, easy_run_pace)
+        workout.add_time_interval(4, 4 * 60, threshold_run_pace, 3 * 60, easy_run_pace)
         workout.add_cooldown(cooldown_duration)
 
         # Tally up the easy and hard distance so we can keep the weekly plan in check.
@@ -270,6 +272,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         MAX_REPS_INDEX = 1
         REP_DISTANCE_INDEX = 2
 
+        # Warmup and cooldown duration.
         warmup_duration = 10 * 60 # Ten minute warmup
         cooldown_duration = 10 * 60 # Ten minute cooldown
 

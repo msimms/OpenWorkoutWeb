@@ -54,22 +54,37 @@ class SwimPlanGenerator(PlanGenerator.PlanGenerator):
         has_swimming_pool_access = inputs[Keys.USER_HAS_SWIMMING_POOL_ACCESS]
         has_open_water_swim_access = inputs[Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS]
 
-        # Add workouts:
-
         # If the user has access to a pool then include one technique swim each week.
         if has_swimming_pool_access:
             workouts.append(self.gen_technique_swim())
         elif has_open_water_swim_access:
             workouts.append(self.gen_aerobic_swim())
 
-        # Need to do more if we're training for a triathlon.
-        if goal == Keys.GOAL_SPRINT_TRIATHLON_KEY:
+        # Add the remaining inputs.
+        if goal == Keys.GOAL_FITNESS_KEY:
+            workouts.append(self.gen_aerobic_swim())
+        elif goal == Keys.GOAL_5K_RUN_KEY:
+            pass
+        elif goal == Keys.GOAL_10K_RUN_KEY:
+            pass
+        elif goal == Keys.GOAL_15K_RUN_KEY:
+            pass
+        elif goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
+            pass
+        elif goal == Keys.GOAL_MARATHON_RUN_KEY:
+            pass
+        elif goal == Keys.GOAL_50K_RUN_KEY:
+            pass
+        elif goal == Keys.GOAL_50_MILE_RUN_KEY:
+            pass
+        elif goal == Keys.GOAL_SPRINT_TRIATHLON_KEY:
             workouts.append(self.gen_aerobic_swim())
         elif goal == Keys.GOAL_OLYMPIC_TRIATHLON_KEY:
             workouts.append(self.gen_aerobic_swim())
         elif goal == Keys.GOAL_HALF_IRON_DISTANCE_TRIATHLON_KEY:
             workouts.append(self.gen_aerobic_swim())
         elif goal == Keys.GOAL_IRON_DISTANCE_TRIATHLON_KEY:
+            workouts.append(self.gen_aerobic_swim())
             workouts.append(self.gen_aerobic_swim())
 
         return workouts

@@ -42,12 +42,29 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         return workout
 
-    def gen_interval_ride(self):
+    def gen_interval_ride(self, goal_distance):
         """Utility function for creating an interval workout."""
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_INTERVAL_RIDE, self.user_id)
         workout.sport_type = Keys.TYPE_CYCLING_KEY
+
+        # Warmup
+    
+        # Tabata Intervals
+        # 10x30 seconds hard / 20 seconds easy
+
+        # V02 Max Intervals
+
+        # 8x2 minutes hard / 2 min easy
+        # 6x3 minutes hard / 2-3 min easy
+        # 5x4 minutes hard / 2-3 min easy
+
+        # Longer intervals for sustained power
+
+        # 4x8 minutes hard / 2-4 min easy
+
+        # Cooldown
 
         return workout
 
@@ -97,13 +114,32 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         if goal == Keys.GOAL_FITNESS_KEY:
             workouts.append(self.gen_easy_ride())
+            workouts.append(self.gen_interval_ride(goal_distance))
+        elif goal == Keys.GOAL_5K_RUN_KEY:
+            workouts.append(self.gen_easy_ride())
+        elif goal == Keys.GOAL_10K_RUN_KEY:
+            workouts.append(self.gen_easy_ride())
+        elif goal == Keys.GOAL_15K_RUN_KEY:
+            workouts.append(self.gen_easy_ride())
+        elif goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
+            workouts.append(self.gen_easy_ride())
+        elif goal == Keys.GOAL_MARATHON_RUN_KEY:
+            workouts.append(self.gen_easy_ride())
+        elif goal == Keys.GOAL_50K_RUN_KEY:
+            workouts.append(self.gen_easy_ride())
+        elif goal == Keys.GOAL_50_MILE_RUN_KEY:
+            workouts.append(self.gen_easy_ride())
         elif goal == Keys.GOAL_SPRINT_TRIATHLON_KEY:
             workouts.append(self.gen_easy_ride())
+            workouts.append(self.gen_interval_ride(goal_distance))
         elif goal == Keys.GOAL_OLYMPIC_TRIATHLON_KEY:
             workouts.append(self.gen_easy_ride())
+            workouts.append(self.gen_interval_ride(goal_distance))
         elif goal == Keys.GOAL_HALF_IRON_DISTANCE_TRIATHLON_KEY:
             workouts.append(self.gen_easy_ride())
+            workouts.append(self.gen_interval_ride(goal_distance))
         elif goal == Keys.GOAL_IRON_DISTANCE_TRIATHLON_KEY:
             workouts.append(self.gen_easy_ride())
+            workouts.append(self.gen_interval_ride(goal_distance))
 
         return workouts
