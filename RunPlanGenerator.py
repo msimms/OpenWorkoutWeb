@@ -48,6 +48,10 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         # To keep the calculation from going out of range, scale the input from meters to kms.
         base_distance_kms = base_distance_meters / 1000.0
 
+        # Assume the athlete can run at least two kilometers.
+        if base_distance_kms < 2.0:
+            base_distance_kms = 2.0
+
         # The calculation is basically the same as for compound interest.
         # Be sure to scale back up to meters.
         weekly_rate = 0.1

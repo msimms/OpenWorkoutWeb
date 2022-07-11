@@ -55,7 +55,9 @@ class SwimPlanGenerator(PlanGenerator.PlanGenerator):
         has_open_water_swim_access = inputs[Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS]
 
         # If the user has access to a pool then include one technique swim each week.
-        if has_swimming_pool_access:
+        if not (has_swimming_pool_access or has_open_water_swim_access):
+            return workouts
+        elif has_swimming_pool_access:
             workouts.append(self.gen_technique_swim())
         elif has_open_water_swim_access:
             workouts.append(self.gen_aerobic_swim())

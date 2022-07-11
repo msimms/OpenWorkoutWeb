@@ -30,8 +30,8 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         if goal_distance < 0.1:
             return True
 
-        has_bicyce = inputs[Keys.USER_HAS_BICYCLE]
-        return has_bicyce
+        has_bicycle = inputs[Keys.USER_HAS_BICYCLE]
+        return has_bicycle
 
     def gen_hill_ride(self):
         """Utility function for creating a hill workout."""
@@ -108,6 +108,11 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         goal_type = inputs[Keys.GOAL_TYPE_KEY]
         weeks_until_goal = inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY]
         avg_bike_distance = inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS]
+        has_bicycle = inputs[Keys.USER_HAS_BICYCLE]
+
+        # The user doesn't have a bicycle, so return.
+        if not has_bicycle:
+            return workouts
 
         # Add critical workouts:
         # Long ride, culminating in (maybe) an overdistance ride.
