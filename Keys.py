@@ -110,9 +110,9 @@ PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY = "Preferred Long Run Day" # Day of the we
 UNITS_METRIC_KEY = "metric"
 UNITS_STANDARD_KEY = "standard"
 
-# Biological genders.
-GENDER_MALE_KEY = "male" # Biological male
-GENDER_FEMALE_KEY = "female" # Biological female
+# Biological sexes.
+BIOLOGICAL_MALE_KEY = "male" # Biological male
+BIOLOGICAL_FEMALE_KEY = "female" # Biological female
 
 # User settings.
 REQUESTED_SETTING_KEY = "requested setting"
@@ -126,7 +126,7 @@ USER_HEIGHT_KEY = "height" # User's height (weight)
 DEFAULT_HEIGHT_KEY = 1.8 # Default height (meters)
 USER_WEIGHT_KEY = "weight" # User's weight (kilograms)
 DEFAULT_WEIGHT_KEY = 70.0 # Default weight (kilograms)
-USER_GENDER_KEY = "gender" # The gender to use when computing calorie burn
+USER_BIOLOGICAL_SEX_KEY = "biological sex" # The sex to use when computing calorie burn
 USER_RESTING_HEART_RATE_KEY = "resting heart rate" # Resting heart rate, in bpm
 USER_MAXIMUM_HEART_RATE_KEY = "max heart rate" # Maximum heart rate, in bpm, specified by the user
 ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate" # Maximum heart rate, in bpm, computed from activities
@@ -134,12 +134,20 @@ ESTIMATED_MAX_HEART_RATE_LIST_KEY = "estimated max heart rate list" # List of al
 USER_SPECIFIED_MAX_HEART_RATE_KEY = "user specified max heart rate" # Maximum heart rate, in bpm, given by the user
 BEST_CYCLING_20_MINUTE_POWER_LIST_KEY = "best 20 minute power list" # List of the best cycling 20 minute power values from each activity
 ESTIMATED_CYCLING_FTP_KEY = "estimated ftp" # Estimated FTP, in watts
+GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY = "gen workouts when race cal is empty" # If True we'll still run the workout plan generator even when the race calendar is empty
 USER_CAN_UPLOAD_PHOTOS_KEY = "can upload photos" # User is allowed to upload photos
+USER_HAS_SWIMMING_POOL_ACCESS = "has swimming pool access" # Indicates whether or not the user has access to a swimming pool
+USER_HAS_OPEN_WATER_SWIM_ACCESS = "has open water swim access" # Indicates whether or not the user can do open water swims
+USER_HAS_BICYCLE = "has bicycle" # Indicates whether or not the user has access to a bicycle (or bike trainer)
 USER_PLAN_LAST_GENERATED_TIME = "workout plan last generated" # Time of when a workout plan was last generated
 USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED = "activity summary cache last pruned" # Time at which we last cleaned up the activity summary cache
 USER_RACES = "races" # List of races the user intends to do
-GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY = "Gen Workouts When Race Cal Is Empty"
-USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, USER_PREFERRED_UNITS_KEY, USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY, USER_BIRTHDAY_KEY, USER_HEIGHT_KEY, USER_WEIGHT_KEY, USER_GENDER_KEY, USER_RESTING_HEART_RATE_KEY, USER_MAXIMUM_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, USER_SPECIFIED_MAX_HEART_RATE_KEY, BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_TYPE_KEY, PLAN_INPUT_EXPERIENCE_LEVEL_KEY, PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, USER_CAN_UPLOAD_PHOTOS_KEY, USER_PLAN_LAST_GENERATED_TIME, USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED, USER_RACES, GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY ]
+USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, USER_PREFERRED_UNITS_KEY, USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY, USER_BIRTHDAY_KEY, USER_HEIGHT_KEY, USER_WEIGHT_KEY, \
+    USER_BIOLOGICAL_SEX_KEY, USER_RESTING_HEART_RATE_KEY, USER_MAXIMUM_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, \
+    USER_SPECIFIED_MAX_HEART_RATE_KEY, BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_TYPE_KEY, PLAN_INPUT_EXPERIENCE_LEVEL_KEY, \
+    PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY, USER_CAN_UPLOAD_PHOTOS_KEY, \
+    USER_HAS_SWIMMING_POOL_ACCESS, USER_HAS_OPEN_WATER_SWIM_ACCESS, USER_HAS_BICYCLE, USER_PLAN_LAST_GENERATED_TIME, USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED, \
+    USER_RACES ]
 USER_SETTINGS_LAST_UPDATED_KEY = "last updated" # Time when the user settings where last updated
 
 # Personal records.
@@ -187,6 +195,7 @@ WORKOUT_TYPE_HILL_REPEATS = "Hill Repeats" # 4-10 repeats, depending on skill le
 WORKOUT_TYPE_PROGRESSION_RUN = "Progression Run" # A run with increasing pace
 WORKOUT_TYPE_FARTLEK_RUN = "Fartlek Session" # A run in which the user can vary the pace at will
 WORKOUT_TYPE_MIDDLE_DISTANCE_RUN = "Middle Distance Run" # 2 hour run for advanced distance runners
+WORKOUT_TYPE_HILL_RIDE = "Hill Ride" # Hill workout on the bike
 WORKOUT_TYPE_SPEED_INTERVAL_RIDE = "Speed Interval Ride" # A bike ride with speed intervals
 WORKOUT_TYPE_TEMPO_RIDE = "Tempo Ride" # A bike ride at tempo pace/power
 WORKOUT_TYPE_EASY_RIDE = "Easy Ride" # A bike ride at an easy pace/power

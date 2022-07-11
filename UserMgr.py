@@ -365,8 +365,8 @@ class UserMgr(object):
             return Keys.DEFAULT_HEIGHT_KEY
         if key == Keys.USER_WEIGHT_KEY:
             return Keys.DEFAULT_WEIGHT_KEY
-        if key == Keys.USER_GENDER_KEY:
-            return Keys.GENDER_MALE_KEY
+        if key == Keys.USER_BIOLOGICAL_SEX_KEY:
+            return Keys.BIOLOGICAL_MALE_KEY
         if key == Keys.USER_RESTING_HEART_RATE_KEY:
             return 0
         if key == Keys.USER_MAXIMUM_HEART_RATE_KEY:
@@ -392,6 +392,12 @@ class UserMgr(object):
         if key == Keys.GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY:
             return True
         if key == Keys.USER_CAN_UPLOAD_PHOTOS_KEY:
+            return False
+        if key == Keys.USER_HAS_SWIMMING_POOL_ACCESS:
+            return False
+        if key == Keys.USER_HAS_SWIMMING_POOL_ACCESS:
+            return False
+        if key == Keys.USER_HAS_BICYCLE:
             return False
         if key == Keys.USER_PLAN_LAST_GENERATED_TIME:
             return datetime.datetime.fromtimestamp(0)

@@ -218,18 +218,18 @@
             alert("An error occurred!");
     }
 
-    /// @function update_gender
-    // Button handler for when the user updates their gender.
-    function update_gender()
+    /// @function update_biological_sex
+    // Button handler for when the user updates their biological sex.
+    function update_biological_sex()
     {
         let the_url = "${root_url}/api/1.0/update_profile";
-        let gender = document.getElementById("gender").value;
+        let biological_sex = document.getElementById("biological_sex").value;
         let dict = [];
         let result_text = {};
 
-        dict.push({["gender"] : gender});
+        dict.push({["biological sex"] : biological_sex});
         if (send_post_request(the_url, dict, result_text))
-            alert("Gender updated!");
+            alert("Biological Sex updated!");
         else
             alert("An error occurred!");
     }
@@ -434,7 +434,7 @@
                     let n = new Date(value * 1000);
                     element.placeholder = n.toLocaleDateString();
                 }
-                else if (key == "gender")
+                else if (key == "biological sex")
                 {
                     if (value == "male")
                         element.selectedIndex = 0;
@@ -577,7 +577,7 @@
     /// @function get_user_settings
     function get_user_settings()
     {
-        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=preferred%20units,height,weight,birthday,gender,resting%20heart%20rate,max%20heart%20rate,estimated%20max%20heart%20rate";
+        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=preferred%20units,height,weight,birthday,biological%20sex,resting%20heart%20rate,max%20heart%20rate,estimated%20max%20heart%20rate";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
@@ -656,13 +656,13 @@ ${nav}
             <button type="modern_button" onclick="update_weight()">Update</button>
         <hr>
 
-        <!-- Gender -->
-        <h2>Gender</h2>
-            <select id="gender" >
+        <!-- Biological Sex -->
+        <h2>Biological Sex</h2>
+            <select id="biological_sex" >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
             </select><br>
-            <button type="modern_button" onclick="update_gender()">Update</button>
+            <button type="modern_button" onclick="update_biological_sex()">Update</button>
         <hr>
 
         <!-- Resting Heart Rate -->

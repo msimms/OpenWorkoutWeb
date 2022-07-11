@@ -1702,6 +1702,27 @@ class Api(object):
             value = strtobool(values[Keys.GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY])
             result = self.user_mgr.update_user_setting(self.user_id, Keys.GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY, value, update_time)
 
+        # Does the user have access to a swimming pool?
+        if Keys.USER_HAS_SWIMMING_POOL_ACCESS in values:
+            if not InputChecker.is_boolean(values[Keys.USER_HAS_SWIMMING_POOL_ACCESS]):
+                raise ApiException.ApiMalformedRequestException("Invalid value.")
+            value = strtobool(values[Keys.USER_HAS_SWIMMING_POOL_ACCESS])
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_HAS_SWIMMING_POOL_ACCESS, value, update_time)
+
+        # Does the user have access to an open water swim venue?
+        if Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS in values:
+            if not InputChecker.is_boolean(values[Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS]):
+                raise ApiException.ApiMalformedRequestException("Invalid value.")
+            value = strtobool(values[Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS])
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS, value, update_time)
+
+        # Does the user have access to a bicycle?
+        if Keys.USER_HAS_BICYCLE in values:
+            if not InputChecker.is_boolean(values[Keys.USER_HAS_BICYCLE]):
+                raise ApiException.ApiMalformedRequestException("Invalid value.")
+            value = strtobool(values[Keys.USER_HAS_BICYCLE])
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_HAS_BICYCLE, value, update_time)
+
         return result, ""
 
     def handle_update_profile(self, values):
@@ -1738,12 +1759,12 @@ class Api(object):
                 raise ApiException.ApiMalformedRequestException("Invalid weight.")
             result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_WEIGHT_KEY, weight, update_time)
 
-        # Gender.
-        if Keys.USER_GENDER_KEY in values:
-            gender = values[Keys.USER_GENDER_KEY].lower()
-            if not (gender == Keys.GENDER_MALE_KEY or gender == Keys.GENDER_FEMALE_KEY):
-                raise ApiException.ApiMalformedRequestException("Invalid gender value.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_GENDER_KEY, gender, update_time)
+        # Biological Sex.
+        if Keys.USER_BIOLOGICAL_SEX_KEY in values:
+            biological_sex = values[Keys.USER_BIOLOGICAL_SEX_KEY].lower()
+            if not (biological_sex == Keys.BIOLOGICAL_MALE_KEY or biological_sex == Keys.BIOLOGICAL_FEMALE_KEY):
+                raise ApiException.ApiMalformedRequestException("Invalid biological sex value.")
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_BIOLOGICAL_SEX_KEY, biological_sex, update_time)
 
         # Resting Heart Rate.
         if Keys.USER_RESTING_HEART_RATE_KEY in values:

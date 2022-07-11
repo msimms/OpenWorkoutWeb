@@ -2,9 +2,10 @@
 """Generates a bike plan for the specifiied user."""
 
 import Keys
+import PlanGenerator
 import WorkoutFactory
 
-class BikePlanGenerator(object):
+class BikePlanGenerator(PlanGenerator.PlanGenerator):
     """Class for generating a bike plan for the specifiied user."""
 
     def __init__(self, user_id, training_philosophy):
@@ -23,7 +24,23 @@ class BikePlanGenerator(object):
 
     def is_workout_plan_possible(self, inputs):
         """Returns TRUE if we can actually generate a plan with the given contraints."""
-        return True
+
+        # If we're not planning to do any cycling then of course it's possible.
+        goal_distance = inputs[Keys.GOAL_BIKE_DISTANCE_KEY]
+        if goal_distance < 0.1:
+            return True
+
+        has_bicyce = inputs[Keys.USER_HAS_BICYCLE]
+        return has_bicyce
+
+    def gen_hill_ride(self):
+        """Utility function for creating a hill workout."""
+
+        # Create the workout object.
+        workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_HILL_RIDE, self.user_id)
+        workout.sport_type = Keys.TYPE_CYCLING_KEY
+
+        return workout
 
     def gen_interval_ride(self):
         """Utility function for creating an interval workout."""
@@ -40,6 +57,8 @@ class BikePlanGenerator(object):
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TEMPO_RIDE, self.user_id)
         workout.sport_type = Keys.TYPE_CYCLING_KEY
+
+        # 3 min at goal race pace with 3 minutes recovery.
 
         return workout
 
@@ -67,7 +86,7 @@ class BikePlanGenerator(object):
         workouts = []
 
         # Extract the necessary inputs.
-        goal_distance = inputs[Keys.GOAL_RUN_DISTANCE_KEY]
+        goal_distance = inputs[Keys.GOAL_BIKE_DISTANCE_KEY]
         goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
         goal_type = inputs[Keys.GOAL_TYPE_KEY]
         weeks_until_goal = inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY]
@@ -76,5 +95,15 @@ class BikePlanGenerator(object):
         # Add critical workouts:
         # Long ride, culminating in (maybe) an overdistance ride.
 
+        if goal == Keys.GOAL_FITNESS_KEY:
+            workouts.append(self.gen_easy_ride())
+        elif goal == Keys.GOAL_SPRINT_TRIATHLON_KEY:
+            workouts.append(self.gen_easy_ride())
+        elif goal == Keys.GOAL_OLYMPIC_TRIATHLON_KEY:
+            workouts.append(self.gen_easy_ride())
+        elif goal == Keys.GOAL_HALF_IRON_DISTANCE_TRIATHLON_KEY:
+            workouts.append(self.gen_easy_ride())
+        elif goal == Keys.GOAL_IRON_DISTANCE_TRIATHLON_KEY:
+            workouts.append(self.gen_easy_ride())
 
         return workouts

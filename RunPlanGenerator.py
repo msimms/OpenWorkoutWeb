@@ -7,10 +7,11 @@ import random
 from scipy.stats import norm
 
 import Keys
+import PlanGenerator
 import Units
 import WorkoutFactory
 
-class RunPlanGenerator(object):
+class RunPlanGenerator(PlanGenerator.PlanGenerator):
     """Class for generating a run plan for the specifiied user."""
 
     def __init__(self, user_id, training_philosophy):
@@ -52,16 +53,6 @@ class RunPlanGenerator(object):
         weekly_rate = 0.1
         return (base_distance_kms + ((base_distance_kms * (1.0 + (weekly_rate / 52.0))**(52.0 * num_weeks)) - base_distance_kms)) * 1000.0
 
-    def is_in_taper(self, weeks_until_goal, goal):
-        """Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less."""
-        in_taper = False
-        if weeks_until_goal is not None:
-            if weeks_until_goal <= 2 and goal == Keys.GOAL_MARATHON_RUN_KEY:
-                in_taper = True
-            if weeks_until_goal <= 1 and goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
-                in_taper = True
-        return in_taper
-
     def is_workout_plan_possible(self, inputs):
         """Returns TRUE if we can actually generate a plan with the given contraints."""
 
@@ -95,10 +86,6 @@ class RunPlanGenerator(object):
         if max_attainable_distance < 0.1: # Sanity check
             return False
         return max_attainable_distance >= max_distance_needed
-
-    @staticmethod
-    def valid_float(value):
-        return type(value) == float and value > 0.1
 
     @staticmethod
     def find_nearest(array, value):
@@ -473,7 +460,7 @@ class RunPlanGenerator(object):
         longest_run_in_four_weeks = max([longest_run_week_1, longest_run_week_2, longest_run_week_3, longest_run_week_4])
 
         # Handle situation in which the user hasn't run in four weeks.
-        if not RunPlanGenerator.valid_float(longest_run_in_four_weeks) or longest_run_in_four_weeks < 1.0:
+        if not PlanGenerator.PlanGenerator.valid_float(longest_run_in_four_weeks) or longest_run_in_four_weeks < 1.0:
             workouts.append(self.gen_free_run(easy_run_pace))
             workouts.append(self.gen_free_run(easy_run_pace))
             return workouts
@@ -486,7 +473,11 @@ class RunPlanGenerator(object):
             return workouts
 
         # No pace data?
-        if not (RunPlanGenerator.valid_float(short_interval_run_pace) and RunPlanGenerator.valid_float(speed_run_pace) and RunPlanGenerator.valid_float(tempo_run_pace) and RunPlanGenerator.valid_float(long_run_pace) and RunPlanGenerator.valid_float(easy_run_pace)):
+        if not (PlanGenerator.PlanGenerator.valid_float(short_interval_run_pace) and \
+            PlanGenerator.PlanGenerator.valid_float(speed_run_pace) and \
+            PlanGenerator.PlanGenerator.valid_float(tempo_run_pace) and \
+            PlanGenerator.PlanGenerator.valid_float(long_run_pace) and \
+            PlanGenerator.PlanGenerator.valid_float(easy_run_pace)):
             raise Exception("No run pace data.")
 
         # If the long run has been increasing for the last three weeks then give the person a break.

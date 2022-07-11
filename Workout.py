@@ -311,6 +311,8 @@ class Workout(object):
             result += "Purpose: Progression runs teach you to run fast on tired legs.\n"
         elif self.type == Keys.WORKOUT_TYPE_FARTLEK_RUN:
             result += "Purpose: Fartlek sessions combine speed and endurance without the formal structure of a traditional interval workout.\n"
+        elif self.type == Keys.WORKOUT_TYPE_HILL_RIDE:
+            result += "Purpose: Hill workouts build the strength needed to tackle hills in a race. This can be done on the indoor trainer or replaced with low gear work if hills are not available.\n"
         elif self.type == Keys.WORKOUT_TYPE_SPEED_INTERVAL_RIDE:
             result += "Purpose: Speed interval sessions get you used to riding at faster paces.\n"
         elif self.type == Keys.WORKOUT_TYPE_TEMPO_RIDE:

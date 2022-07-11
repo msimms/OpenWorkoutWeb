@@ -71,6 +71,88 @@
         }
     }
 
+    /// @function set_always_gen_workouts
+    // Handler for when the user changes their preference to always have the workout plan generator running,
+    // even if they don't have a race on the calendar.
+    function set_always_gen_workouts()
+    {
+        let the_url = "${root_url}/api/1.0/update_settings";
+        let level = document.getElementById("always_gen_workouts").value;
+        let dict = [];
+        let result_text = {};
+
+        dict.push({["gen workouts when race cal is empty"] : level});
+        if (send_post_request(the_url, dict, result_text))
+        {
+            alert("Setting updated!");
+            generate_workout_plan();
+        }
+        else
+        {
+            alert("An error occurred!");
+        }
+    }
+
+    /// @function set_has_swimming_pool_access
+    function set_has_swimming_pool_access()
+    {
+        let the_url = "${root_url}/api/1.0/update_settings";
+        let value = document.getElementById("has_swimming_pool_access").value;
+        let dict = [];
+        let result_text = {};
+
+        dict.push({["has swimming pool access"] : value});
+        if (send_post_request(the_url, dict, result_text))
+        {
+            alert("Setting updated!");
+            generate_workout_plan();
+        }
+        else
+        {
+            alert("An error occurred!");
+        }
+    }
+
+    /// @function set_has_open_water_swim_access
+    function set_has_open_water_swim_access()
+    {
+        let the_url = "${root_url}/api/1.0/update_settings";
+        let value = document.getElementById("has_open_water_swim_access").value;
+        let dict = [];
+        let result_text = {};
+
+        dict.push({["has open water swim access"] : value});
+        if (send_post_request(the_url, dict, result_text))
+        {
+            alert("Setting updated!");
+            generate_workout_plan();
+        }
+        else
+        {
+            alert("An error occurred!");
+        }
+    }
+
+    /// @function set_has_bicycle
+    function set_has_bicycle()
+    {
+        let the_url = "${root_url}/api/1.0/update_settings";
+        let value = document.getElementById("has_bicycle").value;
+        let dict = [];
+        let result_text = {};
+
+        dict.push({["has bicycle"] : value});
+        if (send_post_request(the_url, dict, result_text))
+        {
+            alert("Setting updated!");
+            generate_workout_plan();
+        }
+        else
+        {
+            alert("An error occurred!");
+        }
+    }
+
     /// @function set_exp_level
     // Handler for when the user changes their experience level.
     function set_exp_level()
@@ -105,28 +187,6 @@
         if (send_post_request(the_url, dict, result_text))
         {
             alert("Comfort level updated!");
-            generate_workout_plan();
-        }
-        else
-        {
-            alert("An error occurred!");
-        }
-    }
-
-    /// @function set_always_gen_workouts
-    // Handler for when the user changes their preference to always have the workout plan generator running,
-    // even if they don't have a race on the calendar.
-    function set_always_gen_workouts()
-    {
-        let the_url = "${root_url}/api/1.0/update_settings";
-        let level = document.getElementById("always_gen_workouts").value;
-        let dict = [];
-        let result_text = {};
-
-        dict.push({["Gen Workouts When Race Cal Is Empty"] : level});
-        if (send_post_request(the_url, dict, result_text))
-        {
-            alert("Setting updated!");
             generate_workout_plan();
         }
         else
@@ -325,9 +385,33 @@
                 let element = document.getElementById("structured_training_comfort_level");
                 element.value = value;
             }
-            else if (key == "Gen Workouts When Race Cal Is Empty")
+            else if (key == "gen workouts when race cal is empty")
             {
                 let element = document.getElementById("always_gen_workouts");
+                if (value == 1)
+                    element.selectedIndex = 0;
+                else
+                    element.selectedIndex = 1;
+            }
+            else if (key == "has swimming pool access")
+            {
+                let element = document.getElementById("has_swimming_pool_access");
+                if (value == 1)
+                    element.selectedIndex = 0;
+                else
+                    element.selectedIndex = 1;
+            }
+            else if (key == "has open water swim access")
+            {
+                let element = document.getElementById("has_open_water_swim_access");
+                if (value == 1)
+                    element.selectedIndex = 0;
+                else
+                    element.selectedIndex = 1;
+            }
+            else if (key == "has bicycle")
+            {
+                let element = document.getElementById("has_bicycle");
                 if (value == 1)
                     element.selectedIndex = 0;
                 else
@@ -406,7 +490,7 @@
     // Request user settings from the server.
     function get_user_settings()
     {
-        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal,goal%20type,preferred%20long%20run%20day,Experience%20Level,Structured%20Training%20Comfort%20Level,Gen%20Workouts%20When%20Race%20Cal%20Is%20Empty";
+        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal,goal%20type,preferred%20long%20run%20day,Experience%20Level,Structured%20Training%20Comfort%20Level,Gen%20Workouts%20When%20Race%20Cal%20Is%20Empty,has%20swimming%20pool%20access,has%20open%20water%20swim%20access,has%20bicycle";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
@@ -585,17 +669,38 @@ ${nav}
             </select><br>
         </p>
         <p>
-            Experience Level: <br><input type="range" min="1" max="10" value="5" class="slider" id="exp_level" style="height:10px" onchange="set_exp_level()"><br>
-        </p>
-        <p>
-            Comfort Level With Structured Training: <br><input type="range" min="1" max="10" value="5" class="slider" id="structured_training_comfort_level" style="height:10px" onchange="set_structured_training_comfort_level()"><br>
-        </p>
-        <p>
             Generate Workouts Even When the Race Calendar Is Empty:<br>
             <select name="always_gen_workouts" id="always_gen_workouts" class="right" onchange="set_always_gen_workouts()">
                 <option value="True">Yes</option>
                 <option value="False">No</option>
             </select><br>
+        </p>
+        <p>
+            Do you have access to a swimming pool?:<br>
+            <select name="has_swimming_pool_access" id="has_swimming_pool_access" class="right" onchange="set_has_swimming_pool_access()">
+                <option value="True">Yes</option>
+                <option value="False">No</option>
+            </select><br>
+        </p>
+        <p>
+            Do you have access to an open water swim location?:<br>
+            <select name="has_open_water_swim_access" id="has_open_water_swim_access" class="right" onchange="set_has_open_water_swim_access()">
+                <option value="True">Yes</option>
+                <option value="False">No</option>
+            </select><br>
+        </p>
+        <p>
+            Do you have a bicycle or access to an indoor bike trainer?:<br>
+            <select name="has_bicycle" id="has_bicycle" class="right" onchange="set_has_bicycle()">
+                <option value="True">Yes</option>
+                <option value="False">No</option>
+            </select><br>
+        </p>
+        <p>
+            Experience Level: <br><input type="range" min="1" max="10" value="5" class="slider" id="exp_level" style="height:10px" onchange="set_exp_level()"><br>
+        </p>
+        <p>
+            Comfort Level With Structured Training: <br><input type="range" min="1" max="10" value="5" class="slider" id="structured_training_comfort_level" style="height:10px" onchange="set_structured_training_comfort_level()"><br>
         </p>
 
         <hr>

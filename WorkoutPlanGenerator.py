@@ -53,13 +53,20 @@ class WorkoutPlanGenerator(object):
         goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
         goal_lower = goal.lower()
 
+        # Initialize
         inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 0.0
         inputs[Keys.GOAL_BIKE_DISTANCE_KEY] = 0.0
         inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 0.0
 
+        # Distances for each event. For general fitness, set goals similar to a sprint tri, depending on available resources.
         if goal_lower == Keys.GOAL_FITNESS_KEY.lower():
-            inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 500.0
-            inputs[Keys.GOAL_BIKE_DISTANCE_KEY] = 20000.0
+            has_swimming_pool_access = inputs[Keys.USER_HAS_SWIMMING_POOL_ACCESS]
+            has_bicycle = inputs[Keys.USER_HAS_BICYCLE]
+
+            if has_swimming_pool_access:
+                inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 500.0
+            if has_bicycle:
+                inputs[Keys.GOAL_BIKE_DISTANCE_KEY] = 20000.0
             inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 5000.0
         elif goal_lower == Keys.GOAL_5K_RUN_KEY.lower():
             inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 5000.0
@@ -277,6 +284,9 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS] = num_runs
         inputs[Keys.PLAN_INPUT_NUM_RIDES_LAST_FOUR_WEEKS] = num_rides
         inputs[Keys.THRESHOLD_POWER] = threshold_power
+        inputs[Keys.USER_HAS_SWIMMING_POOL_ACCESS] = self.user_mgr.retrieve_user_setting(user_id, Keys.USER_HAS_SWIMMING_POOL_ACCESS)
+        inputs[Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS] = self.user_mgr.retrieve_user_setting(user_id, Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS)
+        inputs[Keys.USER_HAS_BICYCLE] = self.user_mgr.retrieve_user_setting(user_id, Keys.USER_HAS_BICYCLE)
 
         # Adds the goal distances to the inputs.
         inputs = WorkoutPlanGenerator.calculate_goal_distances(inputs)
@@ -350,6 +360,9 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.PLAN_INPUT_NUM_RIDES_LAST_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.THRESHOLD_POWER])
+        model_inputs.append(inputs[Keys.USER_HAS_SWIMMING_POOL_ACCESS])
+        model_inputs.append(inputs[Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS])
+        model_inputs.append(inputs[Keys.USER_HAS_BICYCLE])
 
         workouts = []
         return workouts
