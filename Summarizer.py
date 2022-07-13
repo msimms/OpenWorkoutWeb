@@ -201,8 +201,17 @@ class Summarizer(object):
             else:
                 summary_record_set[Keys.TOTAL_ACTIVITIES] = 1
 
+        # Update the distance and activity totals.
+        elif summary_data_key == Keys.APP_DURATION_KEY:
+
+            # Update total duration.
+            if Keys.APP_DURATION_KEY in summary_record_set:
+                summary_record_set[Keys.TOTAL_DURATION] = summary_record_set[Keys.TOTAL_DURATION] + summary_data_value
+            else:
+                summary_record_set[Keys.TOTAL_DURATION] = summary_data_value
+
         # Update the intensity score summary.
-        if summary_data_key == Keys.INTENSITY_SCORE:
+        elif summary_data_key == Keys.INTENSITY_SCORE:
 
             if Keys.TOTAL_INTENSITY_SCORE in summary_record_set:
                 summary_record_set[Keys.TOTAL_INTENSITY_SCORE] = summary_record_set[Keys.TOTAL_INTENSITY_SCORE] + summary_data_value

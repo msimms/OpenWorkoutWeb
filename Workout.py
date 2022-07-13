@@ -161,6 +161,23 @@ class Workout(object):
             interval[Keys.INTERVAL_WORKOUT_RECOVERY_PACE_KEY] = 0.0
         self.intervals.append(interval)
 
+    def add_time_and_power_interval(self, repeat, interval_seconds, interval_power, recovery_seconds, recovery_power):
+        """Appends an interval to the workout. The interval is expressed in terms of time."""
+        interval = {}
+        interval[Keys.INTERVAL_WORKOUT_REPEAT_KEY] = int(repeat)
+        interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY] = 0.0
+        interval[Keys.INTERVAL_WORKOUT_TIME_KEY] = float(interval_seconds)
+        interval[Keys.INTERVAL_WORKOUT_POWER_KEY] = float(interval_power)
+        if repeat > 1:
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = 0.0
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_TIME_KEY] = float(recovery_seconds)
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_POWER_KEY] = float(recovery_power)
+        else:
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = 0.0
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_TIME_KEY] = 0.0
+            interval[Keys.INTERVAL_WORKOUT_RECOVERY_POWER_KEY] = 0.0
+        self.intervals.append(interval)
+
     def export_to_zwo(self, name):
         """Creates a ZWO-formatted file that describes the workout."""
         writer = ZwoWriter.ZwoWriter()

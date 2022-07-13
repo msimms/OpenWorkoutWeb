@@ -111,7 +111,6 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
     generator = WorkoutPlanGenerator.WorkoutPlanGenerator(config, None)
     scheduler = WorkoutScheduler.WorkoutScheduler(None)
 
-    now = time.time()
     all_run_distances = [] # For computing run distance averages
     all_bike_distances = [] # For computing bike distance averages
     longest_runs_by_week = [0.0] * 4 # Longest run for each of the recent four weeks

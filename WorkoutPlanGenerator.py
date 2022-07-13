@@ -178,7 +178,7 @@ class WorkoutPlanGenerator(object):
         #
 
         # Look through the user's four week records.
-        _, running_bests, _, cycling_summary, running_summary, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - DataMgr.FOUR_WEEKS, now)
+        _, running_bests, _, cycling_summary_4_week, running_summary_4_week, swimming_summary_4_week = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - DataMgr.FOUR_WEEKS, now)
 
         # Estimate running paces from the user's four week records.
         if running_bests is not None:
@@ -188,6 +188,7 @@ class WorkoutPlanGenerator(object):
         # Get some data from the prior four weeks.
         #
 
+        # Most recent week.
         cycling_best_summary, running_best_summary, swimming_best_summary, cycling_week_summary, running_week_summary, swimming_week_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 1), now - (DataMgr.ONE_WEEK * 0))
         longest_runs_by_week[0] = self.optional_fetch_from_dict_with_array(running_best_summary, Keys.LONGEST_DISTANCE)
         longest_rides_by_week[0] = self.optional_fetch_from_dict_with_array(cycling_best_summary, Keys.LONGEST_DISTANCE)
@@ -196,6 +197,7 @@ class WorkoutPlanGenerator(object):
         cycling_intensity_by_week[0] = self.optional_fetch_from_dict(cycling_week_summary, Keys.TOTAL_INTENSITY_SCORE)
         swim_intensity_by_week[0] = self.optional_fetch_from_dict(swimming_week_summary, Keys.TOTAL_INTENSITY_SCORE)
 
+        # Two weeks ago.
         cycling_best_summary, running_best_summary, swimming_best_summary, cycling_week_summary, running_week_summary, swimming_week_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 2), now - (DataMgr.ONE_WEEK * 1))
         longest_runs_by_week[1] = self.optional_fetch_from_dict_with_array(running_best_summary, Keys.LONGEST_DISTANCE)
         longest_rides_by_week[1] = self.optional_fetch_from_dict_with_array(cycling_best_summary, Keys.LONGEST_DISTANCE)
@@ -204,6 +206,7 @@ class WorkoutPlanGenerator(object):
         cycling_intensity_by_week[1] = self.optional_fetch_from_dict(cycling_week_summary, Keys.TOTAL_INTENSITY_SCORE)
         swim_intensity_by_week[1] = self.optional_fetch_from_dict(swimming_week_summary, Keys.TOTAL_INTENSITY_SCORE)
 
+        # Three weeks ago.
         cycling_best_summary, running_best_summary, swimming_best_summary, cycling_week_summary, running_week_summary, swimming_week_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 3), now - (DataMgr.ONE_WEEK * 2))
         longest_runs_by_week[2] = self.optional_fetch_from_dict_with_array(running_best_summary, Keys.LONGEST_DISTANCE)
         longest_rides_by_week[2] = self.optional_fetch_from_dict_with_array(cycling_best_summary, Keys.LONGEST_DISTANCE)
@@ -212,6 +215,7 @@ class WorkoutPlanGenerator(object):
         cycling_intensity_by_week[2] = self.optional_fetch_from_dict(cycling_week_summary, Keys.TOTAL_INTENSITY_SCORE)
         swim_intensity_by_week[2] = self.optional_fetch_from_dict(swimming_week_summary, Keys.TOTAL_INTENSITY_SCORE)
 
+        # Four weeks ago.
         cycling_best_summary, running_best_summary, swimming_best_summary, cycling_week_summary, running_week_summary, swimming_week_summary = self.data_mgr.retrieve_bounded_activity_bests_for_user(user_id, now - (DataMgr.ONE_WEEK * 4), now - (DataMgr.ONE_WEEK * 3))
         longest_runs_by_week[3] = self.optional_fetch_from_dict_with_array(running_best_summary, Keys.LONGEST_DISTANCE)
         longest_rides_by_week[3] = self.optional_fetch_from_dict_with_array(cycling_best_summary, Keys.LONGEST_DISTANCE)
@@ -221,18 +225,26 @@ class WorkoutPlanGenerator(object):
         swim_intensity_by_week[3] = self.optional_fetch_from_dict(swimming_week_summary, Keys.TOTAL_INTENSITY_SCORE)
 
         # Compute average running and cycling distances.
-        avg_cycling_distance = 0.0
         avg_running_distance = 0.0
-        num_rides = 0.0
+        avg_cycling_distance = 0.0
+        avg_cycling_duration = 0.0
+        avg_swimming_distance = 0.0
         num_runs = 0.0
-        if Keys.TOTAL_ACTIVITIES in cycling_summary and Keys.TOTAL_DISTANCE in cycling_summary:
-            if cycling_summary[Keys.TOTAL_ACTIVITIES] > 0:
-                num_rides = cycling_summary[Keys.TOTAL_ACTIVITIES]
-                avg_cycling_distance = cycling_summary[Keys.TOTAL_DISTANCE] / num_rides
-        if Keys.TOTAL_ACTIVITIES in running_summary and Keys.TOTAL_DISTANCE in running_summary:
-            if running_summary[Keys.TOTAL_ACTIVITIES] > 0:
-                num_runs = running_summary[Keys.TOTAL_ACTIVITIES]
-                avg_running_distance = running_summary[Keys.TOTAL_DISTANCE] / num_runs
+        num_rides = 0.0
+        num_swims = 0.0
+        if Keys.TOTAL_ACTIVITIES in running_summary_4_week and Keys.TOTAL_DISTANCE in running_summary_4_week:
+            if running_summary_4_week[Keys.TOTAL_ACTIVITIES] > 0:
+                num_runs = running_summary_4_week[Keys.TOTAL_ACTIVITIES]
+                avg_running_distance = running_summary_4_week[Keys.TOTAL_DISTANCE] / num_runs
+        if Keys.TOTAL_ACTIVITIES in cycling_summary_4_week and Keys.TOTAL_DISTANCE in cycling_summary_4_week and Keys.TOTAL_DURATION in cycling_summary_4_week:
+            if cycling_summary_4_week[Keys.TOTAL_ACTIVITIES] > 0:
+                num_rides = cycling_summary_4_week[Keys.TOTAL_ACTIVITIES]
+                avg_cycling_distance = cycling_summary_4_week[Keys.TOTAL_DISTANCE] / num_rides
+                avg_cycling_duration = cycling_summary_4_week[Keys.TOTAL_DURATION] / num_rides
+        if Keys.TOTAL_ACTIVITIES in swimming_summary_4_week and Keys.TOTAL_DISTANCE in swimming_summary_4_week:
+            if swimming_summary_4_week[Keys.TOTAL_ACTIVITIES] > 0:
+                num_swims = swimming_summary_4_week[Keys.TOTAL_ACTIVITIES]
+                avg_swimming_distance = swimming_summary_4_week[Keys.TOTAL_DISTANCE] / num_swims
 
         #
         # Need information about the user.
@@ -250,6 +262,7 @@ class WorkoutPlanGenerator(object):
         # Store all the inputs in a dictionary.
         inputs = {}
         if len(running_paces) == 0:
+            inputs[Keys.SHORT_INTERVAL_RUN_PACE] = None
             inputs[Keys.SPEED_RUN_PACE] = None
             inputs[Keys.TEMPO_RUN_PACE] = None
             inputs[Keys.FUNCTIONAL_THRESHOLD_PACE] = None
@@ -281,8 +294,11 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
         inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = avg_running_distance
         inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = avg_cycling_distance
+        inputs[Keys.PLAN_INPUT_AVG_CYCLING_DURATION_IN_FOUR_WEEKS] = avg_cycling_duration
+        inputs[Keys.PLAN_INPUT_AVG_SWIMMING_DISTANCE_IN_FOUR_WEEKS] = avg_swimming_distance
         inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS] = num_runs
         inputs[Keys.PLAN_INPUT_NUM_RIDES_LAST_FOUR_WEEKS] = num_rides
+        inputs[Keys.PLAN_INPUT_NUM_SWIMS_LAST_FOUR_WEEKS] = num_swims
         inputs[Keys.THRESHOLD_POWER] = threshold_power
         inputs[Keys.USER_HAS_SWIMMING_POOL_ACCESS] = self.user_mgr.retrieve_user_setting(user_id, Keys.USER_HAS_SWIMMING_POOL_ACCESS)
         inputs[Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS] = self.user_mgr.retrieve_user_setting(user_id, Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS)
@@ -357,6 +373,7 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_AVG_CYCLING_DURATION_IN_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.PLAN_INPUT_NUM_RIDES_LAST_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.THRESHOLD_POWER])

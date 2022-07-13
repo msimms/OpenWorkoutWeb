@@ -102,8 +102,11 @@ PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY = "Structured Training Comfort 
 PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY = "Weeks Until Goal"
 PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS = "Average Running Distance (Last 4 Weeks)"
 PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS = "Average Cycling Distance (Last 4 Weeks)"
+PLAN_INPUT_AVG_CYCLING_DURATION_IN_FOUR_WEEKS = "Average Cycling Duration (Last 4 Weeks)"
+PLAN_INPUT_AVG_SWIMMING_DISTANCE_IN_FOUR_WEEKS = "Average Swimming Distance (Last 4 Weeks)"
 PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS = "Number of Runs (Last 4 Weeks)"
 PLAN_INPUT_NUM_RIDES_LAST_FOUR_WEEKS = "Number of Rides (Last 4 Weeks)"
+PLAN_INPUT_NUM_SWIMS_LAST_FOUR_WEEKS = "Number of Swims (Last 4 Weeks)"
 PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY = "Preferred Long Run Day" # Day of the week on which the user prefers to do their long runs
 
 # Unit systems.
@@ -210,9 +213,11 @@ INTERVAL_WORKOUT_REPEAT_KEY = "Repeat"
 INTERVAL_WORKOUT_DISTANCE_KEY = "Distance"
 INTERVAL_WORKOUT_TIME_KEY = "Time"
 INTERVAL_WORKOUT_PACE_KEY = "Pace"
+INTERVAL_WORKOUT_POWER_KEY = "Power"
 INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY = "Recovery Distance"
 INTERVAL_WORKOUT_RECOVERY_TIME_KEY = "Recovery Time"
 INTERVAL_WORKOUT_RECOVERY_PACE_KEY = "Recovery Pace"
+INTERVAL_WORKOUT_RECOVERY_POWER_KEY = "Recovery Power"
 
 # Keys associated with uploading data.
 UPLOADED_FILE_NAME_KEY = "uploaded_file_name"
@@ -331,6 +336,7 @@ THRESHOLD_POWER = "Threshold Power" # Functional Threshold Power (FTP)
 VARIABILITY_INDEX = "Variability Index"
 LONGEST_DISTANCE = "Longest Distance" # Longest distance, when summarizing activities
 TOTAL_DISTANCE = "Total Distance" # Distance for an activity
+TOTAL_DURATION = "Total Duration" # Number of seconds for the activity/activities
 TOTAL_ACTIVITIES = "Total Activities" # Number of activities logged over the specified time
 INTENSITY_SCORE = "Intensity Score" # Intensity score, represents the intensity of the workout
 ESTIMATED_INTENSITY_SCORE = "Estimated Intensity Score" # Estimated intensity score, for activities that don't have power data

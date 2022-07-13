@@ -268,7 +268,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         return workout
 
-    def gen_speed_run(self, short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance):
+    def gen_interval_session(self, short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance):
         """Utility function for creating a speed/interval workout."""
 
         # Constants.
@@ -362,7 +362,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         return workout
 
-    def gen_free_run(self, easy_run_pace):
+    def gen_free_run(self):
         """Utility function for creating a free run workout."""
 
         # Roll the dice to figure out the distance.
@@ -373,9 +373,6 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_FREE_RUN, self.user_id)
         workout.sport_type = Keys.TYPE_RUNNING_KEY
         workout.add_distance_interval(1, interval_distance_meters, 0, 0, 0)
-
-        # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        self.update_intensity_distribution(interval_distance_meters * easy_run_pace, interval_distance_meters)
 
         return workout
 
@@ -468,15 +465,15 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Handle situation in which the user hasn't run in four weeks.
         if not PlanGenerator.PlanGenerator.valid_float(longest_run_in_four_weeks) or longest_run_in_four_weeks < 1.0:
-            workouts.append(self.gen_free_run(easy_run_pace))
-            workouts.append(self.gen_free_run(easy_run_pace))
+            workouts.append(self.gen_free_run())
+            workouts.append(self.gen_free_run())
             return workouts
         
         # Handle situation in which the user hasn't run *much* in the last four weeks.
         if num_runs is None or num_runs < 4:
-            workouts.append(self.gen_free_run(easy_run_pace))
-            workouts.append(self.gen_free_run(easy_run_pace))
-            workouts.append(self.gen_free_run(easy_run_pace))
+            workouts.append(self.gen_free_run())
+            workouts.append(self.gen_free_run())
+            workouts.append(self.gen_free_run())
             return workouts
 
         # No pace data?
@@ -570,7 +567,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
                 if workout_probability < 50:
 
                     # Add an interval/speed session.
-                    interval_workout = self.gen_speed_run(short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance)
+                    interval_workout = self.gen_interval_session(short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance)
                     workouts.append(interval_workout)
 
                 else:
