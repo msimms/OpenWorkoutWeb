@@ -46,7 +46,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         return workout
 
-    def gen_interval_session(self, goal_distance, threshold_power):
+    def gen_interval_session(self, goal_distance):
         """Utility function for creating an interval workout."""
 
         # Warmup and cooldown duration.
@@ -78,11 +78,27 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         if total_densities < 1.0:
             densities[center_index] += (1.0 - total_densities)
 
+        # If the goal is less than a 10K then favor the shorter interval workouts. If greater than a 1/2 marathon, favor the longer.
+        if goal_distance < 40000:
+            mod_densities = np.append(densities[1:len(densities)], densities[0])
+        else:
+            mod_densities = densities
+
+        # Select the workout.
+        selected_interval_workout_index = np.random.choice(x, p=mod_densities)
+        selected_interval_workout = possible_workouts[selected_interval_workout_index]
+
+        # Fetch the details for this workout.
+        interval_reps = selected_interval_workout[0]
+        interval_seconds = selected_interval_workout[1]
+        interval_power = selected_interval_workout[2]
+        rest_seconds = interval_seconds / 2
+
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_INTERVAL_RIDE, self.user_id)
         workout.sport_type = Keys.TYPE_CYCLING_KEY
         workout.add_warmup(warmup_duration)
-        #workout.add_time_and_power_interval(num_intervals, interval_distance_meters, threshold_power, 0, 0)
+        workout.add_time_and_power_interval(interval_reps, interval_seconds, interval_power, rest_seconds, 0.4)
         workout.add_cooldown(cooldown_duration)
 
         return workout
@@ -139,7 +155,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         if goal == Keys.GOAL_FITNESS_KEY:
             workouts.append(self.gen_easy_aerobic_ride())
-            workouts.append(self.gen_interval_session(goal_distance, threshold_power))
+            workouts.append(self.gen_interval_session(goal_distance))
         elif goal == Keys.GOAL_5K_RUN_KEY:
             workouts.append(self.gen_easy_aerobic_ride())
         elif goal == Keys.GOAL_10K_RUN_KEY:
@@ -156,15 +172,15 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
             workouts.append(self.gen_easy_aerobic_ride())
         elif goal == Keys.GOAL_SPRINT_TRIATHLON_KEY:
             workouts.append(self.gen_easy_aerobic_ride())
-            workouts.append(self.gen_interval_session(goal_distance, threshold_power))
+            workouts.append(self.gen_interval_session(goal_distance))
         elif goal == Keys.GOAL_OLYMPIC_TRIATHLON_KEY:
             workouts.append(self.gen_easy_aerobic_ride())
-            workouts.append(self.gen_interval_session(goal_distance, threshold_power))
+            workouts.append(self.gen_interval_session(goal_distance))
         elif goal == Keys.GOAL_HALF_IRON_DISTANCE_TRIATHLON_KEY:
             workouts.append(self.gen_easy_aerobic_ride())
-            workouts.append(self.gen_interval_session(goal_distance, threshold_power))
+            workouts.append(self.gen_interval_session(goal_distance))
         elif goal == Keys.GOAL_IRON_DISTANCE_TRIATHLON_KEY:
             workouts.append(self.gen_easy_aerobic_ride())
-            workouts.append(self.gen_interval_session(goal_distance, threshold_power))
+            workouts.append(self.gen_interval_session(goal_distance))
 
         return workouts
