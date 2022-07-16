@@ -72,6 +72,7 @@ function get_graph_color(key)
 }
 
 /// @function draw_simple_graph
+/// A simple line graph with x data, a title, and a color.
 function draw_simple_graph(data, title, color)
 {
     if (data.length <= 1)
@@ -226,7 +227,9 @@ function draw_simple_graph(data, title, color)
 }
 
 /// @function draw_graph
-/// If existing_graph is provided, a new line will be appended to that graph.
+/// A slightly more complicated line graph than with draw_simple_graph.
+/// Graph is filled under the line.
+/// graph_start_time_ms and graph_end_time_ms allow new graph data to be appended.
 function draw_graph(graph_start_time_ms, graph_end_time_ms, data, title, units, color)
 {
     if (data.length <= 1)
