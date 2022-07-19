@@ -133,14 +133,17 @@
                 current_x += 1;
                 graph_data.push(new_point);
 
-                // Recovery
-                y = next_y(recovery_pace, recovery_power * 100.0);
-                new_point = create_point(current_x, y);
-                current_x = next_x(current_x, recovery_distance, recovery_pace, recovery_duration) - 1;
-                graph_data.push(new_point);
-                new_point = create_point(current_x, y);
-                current_x += 1;
-                graph_data.push(new_point);
+                // Recovery (last interval doesn't get a recovery)
+                if (j < num_repeats - 1)
+                {
+                    y = next_y(recovery_pace, recovery_power * 100.0);
+                    new_point = create_point(current_x, y);
+                    current_x = next_x(current_x, recovery_distance, recovery_pace, recovery_duration) - 1;
+                    graph_data.push(new_point);
+                    new_point = create_point(current_x, y);
+                    current_x += 1;
+                    graph_data.push(new_point);
+                }
             }
         }
 
