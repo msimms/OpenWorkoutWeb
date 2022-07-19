@@ -84,10 +84,10 @@
     }
 
     /// @function next_x
-    function next_x(current_x, distance, duration)
+    function next_x(current_x, distance, pace, duration)
     {
-        if (distance > 0)
-            current_x += distance;
+        if (distance > 0 && pace > 0)
+            current_x += (distance / pace) * 60;
         else
             current_x += duration;
         return current_x
@@ -115,7 +115,7 @@
             let num_repeats = interval["repeat"];
             let distance = interval["distance"]; // meters
             let duration = interval["duration"]; // seconds
-            let pace = interval["pace"];
+            let pace = interval["pace"]; // meters per minute
             let power = interval["power"]; // % of threshold power
             let recovery_distance = interval["recovery distance"]; // meters
             let recovery_duration = interval["recovery duration"]; // seconds
@@ -127,7 +127,7 @@
                 // Main
                 let y = next_y(pace, power);
                 new_point = create_point(current_x, y);
-                current_x += next_x(current_x, distance, duration) - 1;
+                current_x += next_x(current_x, distance, pace, duration) - 1;
                 graph_data.push(new_point);
                 new_point = create_point(current_x, y);
                 current_x += 1;
@@ -136,7 +136,7 @@
                 // Recovery
                 y = next_y(recovery_pace, recovery_power * 100.0);
                 new_point = create_point(current_x, y);
-                current_x += next_x(current_x, recovery_distance, recovery_duration) - 1;
+                current_x += next_x(current_x, recovery_distance, recovery_pace, recovery_duration) - 1;
                 graph_data.push(new_point);
                 new_point = create_point(current_x, y);
                 current_x += 1;
