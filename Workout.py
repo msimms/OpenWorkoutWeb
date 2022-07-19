@@ -278,6 +278,8 @@ class Workout(object):
             #
 
             result += "Interval: "
+
+            # Only print the multiplier if there's more than one interval.
             if num_repeats > 1:
                 result += str(num_repeats)
                 result += " x "

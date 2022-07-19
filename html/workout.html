@@ -127,7 +127,7 @@
                 // Main
                 let y = next_y(pace, power);
                 new_point = create_point(current_x, y);
-                current_x += next_x(distance, duration) - 1;
+                current_x += next_x(current_x, distance, duration) - 1;
                 graph_data.push(new_point);
                 new_point = create_point(current_x, y);
                 current_x += 1;
@@ -136,7 +136,7 @@
                 // Recovery
                 y = next_y(recovery_pace, recovery_power * 100.0);
                 new_point = create_point(current_x, y);
-                current_x += next_x(recovery_distance, recovery_duration) - 1;
+                current_x += next_x(current_x, recovery_distance, recovery_duration) - 1;
                 graph_data.push(new_point);
                 new_point = create_point(current_x, y);
                 current_x += 1;
