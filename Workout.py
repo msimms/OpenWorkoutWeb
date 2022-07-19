@@ -237,8 +237,8 @@ class Workout(object):
         # Add the warmup (if applicable).
         if self.warmup is not None and ZwoTags.ZWO_ATTR_NAME_DURATION in self.warmup:
             result += "Warmup: "
-            result += str(self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION])
-            result += " seconds.\n"
+            result += Units.convert_seconds_to_mins_or_secs(self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION])
+            result += ".\n"
 
         # Add each interval.
         for interval in self.intervals:
@@ -299,8 +299,8 @@ class Workout(object):
 
             # Add the interval duration.
             elif interval_duration > 0:
-                result += str(int(interval_duration))
-                result += " seconds "
+                result += Units.convert_seconds_to_mins_or_secs(int(interval_duration))
+                result += " "
 
             # Add the interval pace.
             if interval_pace > 0:
@@ -345,8 +345,8 @@ class Workout(object):
             # Add the recovery duration.
             elif recovery_duration > 0:
                 result += " with "
-                result += str(int(recovery_duration))
-                result += " seconds recovery "
+                result += Units.convert_seconds_to_mins_or_secs(int(recovery_duration))
+                result += " recovery "
 
             # Add the recovery power.
             if recovery_power > 0:
@@ -359,8 +359,8 @@ class Workout(object):
         # Add the cooldown (if applicable).
         if self.cooldown is not None and ZwoTags.ZWO_ATTR_NAME_DURATION in self.cooldown:
             result += "Cooldown: "
-            result += str(self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION])
-            result += " seconds.\n"
+            result += Units.convert_seconds_to_mins_or_secs(self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION])
+            result += ".\n"
 
         # Add an string that describes how this workout fits into the big picture.
         if self.type == Keys.WORKOUT_TYPE_SPEED_RUN:

@@ -275,7 +275,21 @@ def convert_seconds_to_mins_secs(seconds_in):
     seconds = temp_seconds % 60
     minutes = temp_seconds / 60
     minutes = minutes % 60
-    out_str = "{:0>2d}:{:0>2d}".format(minutes, seconds)
+    out_str = "{:0>2d}:{:0>2d}".format(int(minutes), int(seconds))
+    return out_str
+
+def convert_seconds_to_mins_or_secs(seconds_in):
+    """Converts seconds to either the number of minutes, or seconds, whichever looks best, i.e. 120 sec becomes 2 minutes, but 39 stays as 39 seconds."""
+    temp_seconds = int(seconds_in)
+    seconds = int(temp_seconds % 60)
+    minutes = temp_seconds / 60
+    minutes = int(minutes % 60)
+    if minutes > 1 and seconds == 0:
+        out_str = "{:d} minutes".format(minutes)
+    elif minutes == 1 and seconds == 0:
+        out_str = "{:d} minute".format(minutes)
+    else:
+        out_str = "{:d} seconds".format(seconds)
     return out_str
 
 def convert_minutes_to_mins_secs(minutes_in):
