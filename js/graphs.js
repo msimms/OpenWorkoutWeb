@@ -56,6 +56,8 @@ function get_graph_color(key)
         return "Crimson";
     if (key == "Altitude")
         return "ForestGreen";
+    if (key == "Elevation")
+        return "PeachPuff";
     if (key == "Temperature")
         return "FireBrick";
     if (key == "x")
@@ -68,6 +70,8 @@ function get_graph_color(key)
         return "LightSteelBlue";
     if (key == "Threat Count")
         return "FireBrick";
+    if (key == "Intervals")
+        return "Silver";
     return "Gray";
 }
 
@@ -290,7 +294,7 @@ function draw_graph(graph_start_time_ms, graph_end_time_ms, data, title, units, 
         let coordinates = d3.mouse(this);
         let x = coordinates[0];
 
-        if (x < data.length)
+        if (x < data.length && units.length > 0)
         {
             tooltip
                 .html("<b>" + data[x].value.toFixed(2) + " " + units + "</b>")
@@ -331,15 +335,15 @@ function draw_graph(graph_start_time_ms, graph_end_time_ms, data, title, units, 
         .tickSizeOuter(0)
         .tickFormat('')
         .ticks(10);
+    svg.append('g')
+        .attr('class', 'x axis-grid')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(x_axis_grid);
     let y_axis_grid = d3.axisLeft(y_scale)
         .tickSize(-width)
         .tickSizeOuter(0)
         .tickFormat('')
         .ticks(10);
-    svg.append('g')
-        .attr('class', 'x axis-grid')
-        .attr('transform', 'translate(0,' + height + ')')
-        .call(x_axis_grid);
     svg.append('g')
         .attr('class', 'y axis-grid')
         .call(y_axis_grid);
@@ -362,14 +366,17 @@ function draw_graph(graph_start_time_ms, graph_end_time_ms, data, title, units, 
     });
 
     // Add the title.
-    svg.append("text")
-        .attr("class", "axis")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 0 - (margin.left))
-        .attr("x", 0 - (height / 2))
-        .attr("dy", "1em")
-        .style("text-anchor", "middle")
-        .text(title);
+    if (title.length > 0)
+    {
+        svg.append("text")
+            .attr("class", "axis")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 0 - (margin.left))
+            .attr("x", 0 - (height / 2))
+            .attr("dy", "1em")
+            .style("text-anchor", "middle")
+            .text(title);
+    }
 
     // Add a clipPath: everything out of this area won't be drawn.
     let clip = svg.append("defs").append("svg:clipPath")
@@ -414,9 +421,12 @@ function draw_graph(graph_start_time_ms, graph_end_time_ms, data, title, units, 
     }
 
     // Add the y axis.
-    let y_axis = svg.append("g")
-        .attr("class", "axis")
-        .call(d3.axisLeft(y_scale));
+    if (units.length > 0)
+    {
+        let y_axis = svg.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(y_scale));
+    }
 
     // Create the line.
     let line = svg.append('g')
@@ -558,7 +568,7 @@ function draw_intervals_graph(start_time_ms, end_time_ms, interval_data)
             interval_graph.push(graph_node);
         }
 
-        draw_graph(start_time_ms, end_time_ms, interval_graph, "Intervals", "", "Gray");
+        draw_graph(start_time_ms, end_time_ms, interval_graph, "Intervals", "", get_graph_color("Intervals"));
     }
 }
 

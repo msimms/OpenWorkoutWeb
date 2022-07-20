@@ -246,7 +246,7 @@ ${nav}
         draw_split_times_chart();
 
         // Draw the elevation graph.
-        draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", "PeachPuff");
+        draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", get_graph_color("Elevation"));
 
         // Now that we have the track, request the metadata so we can display an info box.
         $.ajax({ type: 'GET', url: root_url + "/api/1.0/activity_metadata?activity_id=" + activity_id, cache: false, success: update_metadata, dataType: "text" });

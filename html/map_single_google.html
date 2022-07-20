@@ -270,7 +270,7 @@ ${nav}
         draw_split_times_chart();
 
         // Draw the elevation graph.
-        draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", "PeachPuff");
+        draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", get_graph_color("Elevation"));
 
         // Draw all the other graphs.
         draw_sensor_and_interval_graphs();
