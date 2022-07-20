@@ -544,8 +544,8 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             # Keep track of the number of easy miles/kms and the number of hard miles/kms we're expecting the user to run so we can balance the two.
             self.clear_intensity_distribution()
 
-            # Add a long run.
-            if not in_taper:
+            # Add a long run. No need for a long run if the goal is general fitness.
+            if not in_taper and goal != Keys.GOAL_FITNESS_KEY:
                 long_run_workout = self.gen_long_run(long_run_pace, longest_run_in_four_weeks, min_run_distance, max_long_run_distance)
                 workouts.append(long_run_workout)
 
