@@ -103,6 +103,12 @@
         let current_x = scheduled_time;
         let graph_data = [];
 
+        // Sanity check - nothing worth displaying.
+        if (intervals.length < 1)
+        {
+            return;
+        }
+
         // Add the warmup.
         let new_point = create_point(current_x, next_y(warmup.pace, warmup.PowerHigh));
         current_x += warmup.Duration;
