@@ -103,32 +103,52 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         return workout
 
+    def gen_easy_aerobic_ride(self, goal_distance, longest_ride_in_four_weeks, avg_bike_duration):
+        """Utility function for creating an easy ride, basically an aerobic or base mileage ride."""
+        """Aerobic rides are typically around 55-75% FTP."""
+
+        # Create the workout object.
+        workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RIDE, self.user_id)
+        workout.sport_type = Keys.TYPE_CYCLING_KEY
+        workout.add_time_and_power_interval(1, avg_bike_duration, 0.6, 0, 0)
+
+        return workout
+
     def gen_tempo_ride(self):
         """Utility function for creating a tempo ride."""
+        """Tempo rides are typically around 75-85% FTP."""
+
+        # Warmup and cooldown duration.
+        warmup_duration = 10 * 60 # Ten minute warmup
+        cooldown_duration = 10 * 60 # Ten minute cooldown
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TEMPO_RIDE, self.user_id)
         workout.sport_type = Keys.TYPE_CYCLING_KEY
+        workout.add_warmup(warmup_duration)
+        num_interval_seconds = random.randint(2, 4) * 5 * 60
+        workout.add_time_and_power_interval(random.randint(2, 4), num_interval_seconds, 0.8, num_interval_seconds / 2, 0.4)
+        workout.add_cooldown(cooldown_duration)
 
         # 3 min at goal race pace with 3 minutes recovery.
 
         return workout
 
-    def gen_easy_aerobic_ride(self):
-        """Utility function for creating an easy ride."""
-
-        # Create the workout object.
-        workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RIDE, self.user_id)
-        workout.sport_type = Keys.TYPE_CYCLING_KEY
-
-        return workout
-
     def gen_sweet_spot_ride(self):
         """Utility function for creating a sweet spot ride."""
+        """Sweet spot rides are typically around 85-95% FTP."""
+
+        # Warmup and cooldown duration.
+        warmup_duration = 10 * 60 # Ten minute warmup
+        cooldown_duration = 10 * 60 # Ten minute cooldown
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SWEET_SPOT_RIDE, self.user_id)
         workout.sport_type = Keys.TYPE_CYCLING_KEY
+        workout.add_warmup(warmup_duration)
+        num_interval_seconds = random.randint(2, 4) * 5 * 60
+        workout.add_time_and_power_interval(random.randint(2, 4), num_interval_seconds, 0.9, num_interval_seconds / 2, 0.4)
+        workout.add_cooldown(cooldown_duration)
 
         return workout
 
@@ -142,45 +162,58 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
         goal_type = inputs[Keys.GOAL_TYPE_KEY]
         weeks_until_goal = inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY]
-        avg_bike_distance = inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS]
+        longest_ride_week_1 = inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_1_KEY] # Most recent week
+        longest_ride_week_2 = inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_2_KEY]
+        longest_ride_week_3 = inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_3_KEY]
+        longest_ride_week_4 = inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_4_KEY]
+        avg_bike_duration = inputs[Keys.PLAN_INPUT_AVG_CYCLING_DURATION_IN_FOUR_WEEKS]
         has_bicycle = inputs[Keys.USER_HAS_BICYCLE]
-        threshold_power = inputs[Keys.THRESHOLD_POWER]
 
         # The user doesn't have a bicycle, so return.
         if not has_bicycle:
             return workouts
 
+        # Longest ride in four weeks.
+        longest_ride_in_four_weeks = max([longest_ride_week_1, longest_ride_week_2, longest_ride_week_3, longest_ride_week_4])
+
+        # Are we in a taper?
+        in_taper = self.is_in_taper(weeks_until_goal, goal)
+
         # Add critical workouts:
         # Long ride, culminating in (maybe) an overdistance ride.
 
+        # General fitness
         if goal == Keys.GOAL_FITNESS_KEY:
-            workouts.append(self.gen_easy_aerobic_ride())
+            workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
             workouts.append(self.gen_interval_session(goal_distance))
-        elif goal == Keys.GOAL_5K_RUN_KEY:
-            workouts.append(self.gen_easy_aerobic_ride())
-        elif goal == Keys.GOAL_10K_RUN_KEY:
-            workouts.append(self.gen_easy_aerobic_ride())
-        elif goal == Keys.GOAL_15K_RUN_KEY:
-            workouts.append(self.gen_easy_aerobic_ride())
-        elif goal == Keys.GOAL_HALF_MARATHON_RUN_KEY:
-            workouts.append(self.gen_easy_aerobic_ride())
-        elif goal == Keys.GOAL_MARATHON_RUN_KEY:
-            workouts.append(self.gen_easy_aerobic_ride())
-        elif goal == Keys.GOAL_50K_RUN_KEY:
-            workouts.append(self.gen_easy_aerobic_ride())
-        elif goal == Keys.GOAL_50_MILE_RUN_KEY:
-            workouts.append(self.gen_easy_aerobic_ride())
-        elif goal == Keys.GOAL_SPRINT_TRIATHLON_KEY:
-            workouts.append(self.gen_easy_aerobic_ride())
-            workouts.append(self.gen_interval_session(goal_distance))
-        elif goal == Keys.GOAL_OLYMPIC_TRIATHLON_KEY:
-            workouts.append(self.gen_easy_aerobic_ride())
-            workouts.append(self.gen_interval_session(goal_distance))
-        elif goal == Keys.GOAL_HALF_IRON_DISTANCE_TRIATHLON_KEY:
-            workouts.append(self.gen_easy_aerobic_ride())
-            workouts.append(self.gen_interval_session(goal_distance))
-        elif goal == Keys.GOAL_IRON_DISTANCE_TRIATHLON_KEY:
-            workouts.append(self.gen_easy_aerobic_ride())
-            workouts.append(self.gen_interval_session(goal_distance))
+
+        # Cross training to support medium distance running
+        elif goal == Keys.GOAL_5K_RUN_KEY or goal == Keys.GOAL_10K_RUN_KEY or goal == Keys.GOAL_15K_RUN_KEY:
+            workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
+            workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
+
+        # Cross training to support long distance running
+        elif goal == Keys.GOAL_HALF_MARATHON_RUN_KEY or goal == Keys.GOAL_MARATHON_RUN_KEY:
+            workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
+
+        # Cross training to support ultra distance running
+        elif goal == Keys.GOAL_50K_RUN_KEY or goal == Keys.GOAL_50_MILE_RUN_KEY:
+            workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
+
+        # Short distance triathlons
+        elif goal == Keys.GOAL_SPRINT_TRIATHLON_KEY or goal == Keys.GOAL_OLYMPIC_TRIATHLON_KEY:
+            workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
+            if in_taper or goal_type == Keys.GOAL_TYPE_COMPLETION:
+                workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
+            else:
+                workouts.append(self.gen_interval_session(goal_distance))
+
+        # Long distance triathlons
+        elif goal == Keys.GOAL_HALF_IRON_DISTANCE_TRIATHLON_KEY or goal == Keys.GOAL_IRON_DISTANCE_TRIATHLON_KEY:
+            workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
+            if in_taper or goal_type == Keys.GOAL_TYPE_COMPLETION:
+                workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
+            else:
+                workouts.append(self.gen_interval_session(goal_distance))
 
         return workouts
