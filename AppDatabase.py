@@ -351,6 +351,13 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return user_list
 
+    def retrieve_random_user(self):
+        """Returns a random user id and name from the database."""
+        random_user = self.users_collection.aggregate([{ "$sample": { "size": 1 } }])
+        for user in random_user:
+            return str(user[Keys.DATABASE_ID_KEY]), user[Keys.USERNAME_KEY]
+        return None, None
+
     #
     # Device management methods
     #

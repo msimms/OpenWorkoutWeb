@@ -2146,11 +2146,7 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        username = self.user_mgr.get_logged_in_user()
-        _, _, user_realname = self.user_mgr.retrieve_user(username)
-
-        user_activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None, None)
-        heat_map = self.data_mgr.compute_location_heat_map(user_activities)
+        heat_map = self.user_mgr.retrieve_user_setting(self.user_id, Keys.ACTIVITY_HEAT_MAP)
         return True, json.dumps(heat_map)
 
     def handle_get_activity_hash_from_id(self, values):

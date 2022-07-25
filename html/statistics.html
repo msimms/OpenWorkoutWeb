@@ -144,9 +144,11 @@
         for (let location_description in heat_map)
         {
             let location_array = location_description.split(',');
+
             if (location_array.length > 0)
             {
                 let country = location_array[location_array.length - 1].trim();
+
                 if (countries.indexOf(country) == -1)
                 {
                     countries.push(country);
@@ -156,6 +158,7 @@
                     if (country == "United States")
                     {
                         let state = location_array[location_array.length - 2].trim();
+
                         if (us_states.indexOf(state) == -1)
                         {
                             us_states.push(state);
@@ -164,6 +167,7 @@
                     else if (country == "Canada")
                     {
                         let province = location_array[location_array.length - 2].trim();
+
                         if (canadian_provinces.indexOf(province) == -1)
                         {
                             canadian_provinces.push(province);

@@ -40,6 +40,29 @@ celery_worker = celery.Celery(Keys.CELERY_PROJECT_NAME, include=['ActivityAnalyz
 celery_worker.config_from_object('CeleryConfig')
 
 @celery_worker.task()
+def regenerate_heat_maps():
+    print("Regenerating heat maps.")
+
+    analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
+    config = Config.Config()
+    data_mgr = DataMgr.DataMgr(config=config, root_url="", analysis_scheduler=analysis_scheduler, import_scheduler=None, workout_plan_gen_scheduler=None)
+    user_mgr = UserMgr.UserMgr(config=config, session_mgr=None)
+
+    # Select a random user.
+    user_id, user_realname = user_mgr.retrieve_random_user()
+    if user_id is not None and user_realname is not None:
+
+        # Generate a list of all their activities.
+        user_activities = data_mgr.retrieve_user_activity_list(user_id, user_realname, None, None, None)
+
+        # Classify the activities by location.
+        heat_map = data_mgr.compute_location_heat_map(user_activities)
+
+        # Cache the results.
+        now = datetime.datetime.utcnow()
+        user_mgr.update_user_setting(user_id, Keys.ACTIVITY_HEAT_MAP, heat_map, now)
+
+@celery_worker.task()
 def check_for_unanalyzed_activities():
     """Check for activities that need to be analyzed. Do one, if any are found."""
     print("Looking for unanalyzed activities.")
@@ -102,4 +125,5 @@ def setup_periodic_tasks(**kwargs):
     print("Registering periodic tasks.")
     celery_worker.add_periodic_task(700.0, prune_deferred_tasks_list.s(), name='Removes completed tasks from the deferred tasks list.')
     celery_worker.add_periodic_task(600.0, check_for_ungenerated_workout_plans.s(), name='Check for workout plans that need to be re-generated.')
-    celery_worker.add_periodic_task(500.0, check_for_unanalyzed_activities.s(), name='Check for activities that need to be analyzed. Do one, if any are found.')
+    celery_worker.add_periodic_task(900.0, check_for_unanalyzed_activities.s(), name='Check for activities that need to be analyzed. Do one, if any are found.')
+    celery_worker.add_periodic_task(1000.0, regenerate_heat_maps.s(), name='.')

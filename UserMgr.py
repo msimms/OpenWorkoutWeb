@@ -149,6 +149,12 @@ class UserMgr(object):
             raise Exception("Bad parameter.")
         return self.database.retrieve_matched_users(name)
 
+    def retrieve_random_user(self):
+        """Returns a random user id and name from the database."""
+        if self.database is None:
+            raise Exception("No database.")
+        return self.database.retrieve_random_user()
+
     def update_user_email(self, user_id, email, realname):
         """Updates a user's database entry."""
         if self.database is None:
