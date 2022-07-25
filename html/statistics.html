@@ -129,9 +129,9 @@
         let map_store = {world:null, us:null, canada:null}; 
 
         $.when(
-            $.get("${root_url}/data/world.geo.json", function(world) { map_store.world = world; }),
-            $.get("${root_url}/data/us_states.geo.json", function(us) { map_store.us = us; }),
-            $.get("${root_url}/data/canada.geo.json", function(canada) { map_store.canada = canada; }),
+            $.get("${root_url}/data/world.geo.json", function(world) { map_store.world = JSON.parse(world); }),
+            $.get("${root_url}/data/us_states.geo.json", function(us) { map_store.us = JSON.parse(us); }),
+            $.get("${root_url}/data/canada.geo.json", function(canada) { map_store.canada = JSON.parse(canada); }),
         ).then(function() {
             draw_world_map(map_store.world);
             draw_us_canada_map(map_store.us, map_store.canada);
