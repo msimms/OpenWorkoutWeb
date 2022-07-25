@@ -1,4 +1,3 @@
-broker_url = 'amqp://mike:spam123@127.0.0.1:5672/mike_vhost'
 result_backend = 'mongodb'
 task_serializer = 'json'
 result_serializer = 'json'
