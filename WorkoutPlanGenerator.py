@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import pandas
+import random
 import sys
 import time
 import traceback
@@ -339,6 +340,14 @@ class WorkoutPlanGenerator(object):
             raise Exception("The run distance goal is not feasible in the time alloted.")
         run_workouts = run_planner.gen_workouts_for_next_week(inputs)
         workouts.extend(run_workouts)
+
+        # If the user's goal is only general fitness then make sure we don't have more
+        # than seven workouts as they don't need to be doing doubles. In that case,
+        # randomly select and remove workouts until we get down to a manageable amount.
+        if Keys.PLAN_INPUT_GOAL_KEY in inputs and inputs[Keys.PLAN_INPUT_GOAL_KEY] == Keys.GOAL_FITNESS_KEY:
+            while len(workouts) > 7:
+                index = int(random.uniform(0, len(workouts)))
+                del workouts[index]
 
         return workouts
 
