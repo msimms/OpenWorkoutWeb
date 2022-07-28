@@ -401,7 +401,7 @@ class UserMgr(object):
             return False
         if key == Keys.USER_HAS_SWIMMING_POOL_ACCESS:
             return False
-        if key == Keys.USER_HAS_SWIMMING_POOL_ACCESS:
+        if key == Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS:
             return False
         if key == Keys.USER_HAS_BICYCLE:
             return False
