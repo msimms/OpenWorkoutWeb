@@ -11,6 +11,10 @@ import PlanGenerator
 import Units
 import WorkoutFactory
 
+INTENSITY_ZONE_INDEX_LOW = 0
+INTENSITY_ZONE_INDEX_MED = 1
+INTENSITY_ZONE_INDEX_HIGH = 2
+
 class RunPlanGenerator(PlanGenerator.PlanGenerator):
     """Class for generating a run plan for the specifiied user."""
 
@@ -114,49 +118,17 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
     def clear_intensity_distribution(self):
         """Resets all intensity distribution tracking variables."""
 
-        # Distribution of distance spent in each intensity zone.
+        # Distribution of the number of workouts in each intensity zone.
         # 0 index is least intense.
-        self.intensity_distribution_meters = []
-        self.intensity_distribution_meters.append(0.0)
-        self.intensity_distribution_meters.append(0.0)
-        self.intensity_distribution_meters.append(0.0)
-
-        # Distribution of time spent in each intensity zone.
-        # 0 index is least intense.
-        self.intensity_distribution_seconds = []
-        self.intensity_distribution_seconds.append(0)
-        self.intensity_distribution_seconds.append(0)
-        self.intensity_distribution_seconds.append(0)
-
-    def update_intensity_distribution(self, seconds, meters):
-        """Updates the variables used to track intensity distribution."""
-        """Intensity distribution is calculated by tracking the time and distance at easy pace, L1 pace, and L2 pace."""
-
-         # Distance not specified.
-        if meters < 0.01:
-            pace = 0.0
-        else:
-            pace = seconds / meters
-
-        # Above L2 pace.
-        if pace > self.cutoff_pace_2:
-            self.intensity_distribution_seconds[2] += seconds
-            self.intensity_distribution_meters[2] += meters
-
-        # Above L1 pace.
-        elif pace > self.cutoff_pace_1:
-            self.intensity_distribution_seconds[1] += seconds
-            self.intensity_distribution_meters[1] += meters
-
-        # Easy pace.
-        else:
-            self.intensity_distribution_seconds[0] += seconds
-            self.intensity_distribution_meters[0] += meters
+        self.intensity_distribution_workouts = []
+        self.intensity_distribution_workouts.append(0)
+        self.intensity_distribution_workouts.append(0)
+        self.intensity_distribution_workouts.append(0)
 
     def check_intensity_distribution(self):
-        """How far are these workouts from the ideal intensity distribution?"""
-        total_meters = sum(self.intensity_distribution_meters)
-        intensity_distribution_percent = [(x / total_meters) * 100.0 for x in self.intensity_distribution_meters]
+        """How far is this workout plan from the ideal intensity distribution?"""
+        total_workouts = sum(self.intensity_distribution_workouts)
+        intensity_distribution_percent = [(x / total_workouts) * 100.0 for x in self.intensity_distribution_workouts]
         intensity_distribution_score = sum([abs(x - y) for x, y in zip(intensity_distribution_percent, self.training_zone_distribution)])
         return intensity_distribution_score
 
@@ -178,8 +150,8 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         workout.sport_type = Keys.TYPE_RUNNING_KEY
         workout.add_distance_interval(1, interval_distance_meters, pace, 0, 0)
 
-        # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        self.update_intensity_distribution(interval_distance_meters * pace, interval_distance_meters)
+        # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
+        self.intensity_distribution_workouts[INTENSITY_ZONE_INDEX_LOW] += 1
 
         return workout
 
@@ -208,13 +180,8 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         workout.add_distance_interval(num_intervals, interval_distance_meters, tempo_run_pace, 0, 0)
         workout.add_cooldown(cooldown_duration)
 
-        # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        total_rest_meters = ((num_intervals - 1) * interval_distance_meters)
-        total_hard_meters = (num_intervals * interval_distance_meters)
-        self.update_intensity_distribution(total_rest_meters * easy_run_pace, total_rest_meters)
-        self.update_intensity_distribution(total_hard_meters * tempo_run_pace, total_hard_meters)
-        self.update_intensity_distribution(warmup_duration, easy_run_pace)
-        self.update_intensity_distribution(cooldown_duration, easy_run_pace)
+        # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
+        self.intensity_distribution_workouts[INTENSITY_ZONE_INDEX_MED] += 1
 
         return workout
 
@@ -242,10 +209,8 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         workout.add_distance_interval(1, interval_distance_meters, threshold_run_pace, 0, 0)
         workout.add_cooldown(cooldown_duration)
 
-        # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        self.update_intensity_distribution(interval_distance_meters * threshold_run_pace, interval_distance_meters)
-        self.update_intensity_distribution(warmup_duration, easy_run_pace)
-        self.update_intensity_distribution(cooldown_duration, easy_run_pace)
+        # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
+        self.intensity_distribution_workouts[INTENSITY_ZONE_INDEX_HIGH] += 1
 
         return workout
 
@@ -262,9 +227,8 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         workout.add_time_interval(4, 4 * 60, threshold_run_pace, 3 * 60, easy_run_pace)
         workout.add_cooldown(cooldown_duration)
 
-        # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        self.update_intensity_distribution(warmup_duration, easy_run_pace)
-        self.update_intensity_distribution(cooldown_duration, easy_run_pace)
+        # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
+        self.intensity_distribution_workouts[INTENSITY_ZONE_INDEX_HIGH] += 1
 
         return workout
 
@@ -331,13 +295,8 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         workout.add_distance_interval(selected_reps, interval_distance, interval_pace, rest_interval_distance, easy_run_pace)
         workout.add_cooldown(cooldown_duration)
 
-        # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        total_rest_meters = ((selected_reps - 1) * rest_interval_distance)
-        total_hard_meters = (selected_reps * interval_distance)
-        self.update_intensity_distribution(total_rest_meters * easy_run_pace, total_rest_meters)
-        self.update_intensity_distribution(total_hard_meters * interval_pace, total_hard_meters)
-        self.update_intensity_distribution(warmup_duration, 0.0)
-        self.update_intensity_distribution(cooldown_duration, 0.0)
+        # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
+        self.intensity_distribution_workouts[INTENSITY_ZONE_INDEX_HIGH] += 1
 
         return workout
 
@@ -357,8 +316,8 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         workout.sport_type = Keys.TYPE_RUNNING_KEY
         workout.add_distance_interval(1, interval_distance_meters, long_run_pace, 0, 0)
 
-        # Tally up the easy and hard distance so we can keep the weekly plan in check.
-        self.update_intensity_distribution(interval_distance_meters * long_run_pace, interval_distance_meters)
+        # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
+        self.intensity_distribution_workouts[INTENSITY_ZONE_INDEX_LOW] += 1
 
         return workout
 
@@ -374,19 +333,25 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         workout.sport_type = Keys.TYPE_RUNNING_KEY
         workout.add_distance_interval(1, interval_distance_meters, 0, 0, 0)
 
+        # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
+        self.intensity_distribution_workouts[INTENSITY_ZONE_INDEX_LOW] += 1
+
         return workout
 
     def gen_hill_repeats(self):
         """Utility function for creating a hill session."""
 
         # Roll the dice to figure out the distance.
-        run_distance = random.uniform(3000, 7000)
+        run_distance = random.uniform(3000, 10000)
         interval_distance_meters = round(run_distance, -3)
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_HILL_REPEATS, self.user_id)
         workout.sport_type = Keys.TYPE_RUNNING_KEY
         workout.add_distance_interval(1, interval_distance_meters, 0, 0, 0)
+
+        # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
+        self.intensity_distribution_workouts[INTENSITY_ZONE_INDEX_MED] += 1
 
         return workout
 
@@ -401,6 +366,9 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_FARTLEK_RUN, self.user_id)
         workout.sport_type = Keys.TYPE_RUNNING_KEY
         workout.add_distance_interval(1, interval_distance_meters, 0, 0, 0)
+
+        # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
+        self.intensity_distribution_workouts[INTENSITY_ZONE_INDEX_HIGH] += 1
 
         return workout
 
@@ -564,17 +532,23 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
                 # Decide which workout we're going to do.
                 workout_probability = random.uniform(0, 100)
 
+                # Add an interval/speed session.
                 if workout_probability < 50:
+                    workout = self.gen_interval_session(short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance)
 
-                    # Add an interval/speed session.
-                    interval_workout = self.gen_interval_session(short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance)
-                    workouts.append(interval_workout)
+                # Add a fartlek session.
+                elif workout_probability >= 50 and workout_probability < 60:
+                    workout = self.gen_fartlek_run()
 
+                # Add a hill workout session.
+                elif workout_probability >= 60 and workout_probability < 70:
+                    workout = self.gen_hill_repeats()
+
+                # Add a threshold session.
                 else:
+                    workout = self.gen_threshold_run(functional_threshold_pace, easy_run_pace, goal_distance)
 
-                    # Add a threshold session.
-                    interval_workout = self.gen_threshold_run(functional_threshold_pace, easy_run_pace, goal_distance)
-                    workouts.append(interval_workout)
+                workouts.append(workout)
 
             # Add an easy run.
             easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
