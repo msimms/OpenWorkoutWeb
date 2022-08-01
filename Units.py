@@ -299,6 +299,22 @@ def convert_minutes_to_mins_secs(minutes_in):
     out_str = "{:0>2d}:{:0>2d}".format(minutes, seconds)
     return out_str
 
+def convert_meters_to_printable(unit_system, meters):
+    """Takes a value in meters and, for short distances, returns meters and for longer distance returns in the preferred units, with a label."""
+    out_str = ""
+    if meters > 1000:
+        if unit_system:
+            out_str += convert_to_string_in_specified_unit_system(unit_system, meters, UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+        else:
+            out_str += convert_to_string_in_specified_unit_system(Keys.UNITS_METRIC_KEY, meters, UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+            out_str += " ("
+            out_str += convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, meters, UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
+            out_str += ")"
+    elif meters > 0:
+        result += str(int(meters))
+        result += " meters"
+    return out_str
+
 def get_heart_rate_units_str():
     """Returns the units in which heart rate is displayed."""
     return "bpm"

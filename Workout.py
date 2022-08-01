@@ -285,19 +285,8 @@ class Workout(object):
                 result += " x "
 
             # Add the interval distance.
-            if interval_distance > 1000:
-                if unit_system:
-                    result += Units.convert_to_string_in_specified_unit_system(unit_system, interval_distance, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
-                else:
-                    result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_METRIC_KEY, interval_distance, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
-                    result += " ("
-                    result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, interval_distance, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
-                    result += ")"
-
-            # Track intervals are always in meters.
-            elif interval_distance > 0:
-                result += str(int(interval_distance))
-                result += " meters"
+            if interval_distance > 0:
+                result += Units.convert_meters_to_printable(unit_system, interval_distance)
 
             # Add the interval duration.
             elif interval_duration > 0:
@@ -324,17 +313,7 @@ class Workout(object):
             # Add the recovery distance.
             if recovery_distance > 0:
                 result += " with "
-                if recovery_distance > 1000:
-                    if unit_system:
-                        result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_distance, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
-                    else:
-                        result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_METRIC_KEY, recovery_distance, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
-                        result += " ("
-                        result += Units.convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, recovery_distance, Units.UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
-                        result += ")"
-                else:
-                    result += str(int(recovery_distance))
-                    result += " meters"
+                result += Units.convert_meters_to_printable(unit_system, recovery_distance)
                 result += " recovery at "
                 if unit_system:
                     result += Units.convert_to_string_in_specified_unit_system(unit_system, recovery_pace, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, Keys.INTERVAL_WORKOUT_PACE_KEY)

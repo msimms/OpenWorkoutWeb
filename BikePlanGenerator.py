@@ -107,10 +107,14 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         """Utility function for creating an easy ride, basically an aerobic or base mileage ride."""
         """Aerobic rides are typically around 55-75% FTP."""
 
+        # Sanity check
+        if avg_bike_duration < 1800:
+            avg_bike_duration = 1800
+
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RIDE, self.user_id)
         workout.sport_type = Keys.TYPE_CYCLING_KEY
-        workout.add_time_and_power_interval(1, avg_bike_duration, 0.6, 0, 0)
+        workout.add_time_and_power_interval(1, avg_bike_duration, 60.0, 0, 0)
 
         return workout
 
@@ -127,7 +131,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         workout.sport_type = Keys.TYPE_CYCLING_KEY
         workout.add_warmup(warmup_duration)
         num_interval_seconds = random.randint(2, 4) * 5 * 60
-        workout.add_time_and_power_interval(random.randint(2, 4), num_interval_seconds, 0.8, num_interval_seconds / 2, 0.4)
+        workout.add_time_and_power_interval(random.randint(2, 4), num_interval_seconds, 80.0, num_interval_seconds / 2, 0.4)
         workout.add_cooldown(cooldown_duration)
 
         # 3 min at goal race pace with 3 minutes recovery.
@@ -147,7 +151,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         workout.sport_type = Keys.TYPE_CYCLING_KEY
         workout.add_warmup(warmup_duration)
         num_interval_seconds = random.randint(2, 4) * 5 * 60
-        workout.add_time_and_power_interval(random.randint(2, 4), num_interval_seconds, 0.9, num_interval_seconds / 2, 0.4)
+        workout.add_time_and_power_interval(random.randint(2, 4), num_interval_seconds, 90.0, num_interval_seconds / 2, 0.4)
         workout.add_cooldown(cooldown_duration)
 
         return workout
