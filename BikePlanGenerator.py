@@ -26,6 +26,10 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         else:
             self.training_philosophy = Keys.TID_POLARIZED
 
+    @staticmethod
+    def round_distance(number, nearest):
+        return nearest * round(number / nearest)
+
     def is_workout_plan_possible(self, inputs):
         """Returns TRUE if we can actually generate a plan with the given contraints."""
 
@@ -111,10 +115,14 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         if avg_bike_duration < 1800:
             avg_bike_duration = 1800
 
+		# Select the power (% of FTP). Round to the nearest 5 watts.
+        interval_power = random.randint(55, 75)
+        interval_power = BikePlanGenerator.round_distance(interval_power, 5)
+
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RIDE, self.user_id)
         workout.sport_type = Keys.TYPE_CYCLING_KEY
-        workout.add_time_and_power_interval(1, avg_bike_duration, 60.0, 0, 0)
+        workout.add_time_and_power_interval(1, avg_bike_duration, interval_power, 0, 0)
 
         return workout
 
@@ -126,12 +134,16 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         warmup_duration = 10 * 60 # Ten minute warmup
         cooldown_duration = 10 * 60 # Ten minute cooldown
 
+		# Select the power (% of FTP). Round to the nearest 5 watts.
+        interval_power = random.randint(75, 85)
+        interval_power = BikePlanGenerator.round_distance(interval_power, 5)
+
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TEMPO_RIDE, self.user_id)
         workout.sport_type = Keys.TYPE_CYCLING_KEY
         workout.add_warmup(warmup_duration)
         num_interval_seconds = random.randint(2, 4) * 5 * 60
-        workout.add_time_and_power_interval(random.randint(2, 4), num_interval_seconds, 80.0, num_interval_seconds / 2, 0.4)
+        workout.add_time_and_power_interval(random.randint(2, 4), num_interval_seconds, interval_power, num_interval_seconds / 2, 0.4)
         workout.add_cooldown(cooldown_duration)
 
         # 3 min at goal race pace with 3 minutes recovery.
@@ -146,12 +158,16 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         warmup_duration = 10 * 60 # Ten minute warmup
         cooldown_duration = 10 * 60 # Ten minute cooldown
 
+		# Select the power (% of FTP). Round to the nearest 5 watts.
+        interval_power = random.randint(85, 95)
+        interval_power = BikePlanGenerator.round_distance(interval_power, 5)
+
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SWEET_SPOT_RIDE, self.user_id)
         workout.sport_type = Keys.TYPE_CYCLING_KEY
         workout.add_warmup(warmup_duration)
         num_interval_seconds = random.randint(2, 4) * 5 * 60
-        workout.add_time_and_power_interval(random.randint(2, 4), num_interval_seconds, 90.0, num_interval_seconds / 2, 0.4)
+        workout.add_time_and_power_interval(random.randint(2, 4), num_interval_seconds, interval_power, num_interval_seconds / 2, 0.4)
         workout.add_cooldown(cooldown_duration)
 
         return workout

@@ -134,6 +134,7 @@ class Workout(object):
         interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY] = float(interval_distance)
         interval[Keys.INTERVAL_WORKOUT_DURATION_KEY] = 0.0
         interval[Keys.INTERVAL_WORKOUT_PACE_KEY] = float(interval_pace)
+        interval[Keys.INTERVAL_WORKOUT_POWER_KEY] = 0.0
         if repeat > 1:
             interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = float(recovery_distance)
             interval[Keys.INTERVAL_WORKOUT_RECOVERY_DURATION_KEY] = 0.0
@@ -153,6 +154,7 @@ class Workout(object):
         interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY] = 0.0
         interval[Keys.INTERVAL_WORKOUT_DURATION_KEY] = float(interval_seconds)
         interval[Keys.INTERVAL_WORKOUT_PACE_KEY] = float(interval_pace)
+        interval[Keys.INTERVAL_WORKOUT_POWER_KEY] = 0.0
         if repeat > 1:
             interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY] = 0.0
             interval[Keys.INTERVAL_WORKOUT_RECOVERY_DURATION_KEY] = float(recovery_seconds)
