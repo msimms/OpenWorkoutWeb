@@ -28,7 +28,20 @@ Why develop a workout tracker when there are so many closed-source options avail
 
 [Full bug and feature tracking](https://github.com/msimms/OpenWorkoutWeb/issues).
 
-## Installation
+## Creating a Docker Image
+
+**Step 1**. Clone the source code:
+```
+git clone https://github.com/msimms/OpenWorkoutWeb
+```
+
+**Step 2**. Install the python dependencies:
+```
+cd OpenWorkoutWeb
+docker build -t openworkout -f docker/Dockerfile .
+```
+
+## Manual Installation
 
 **Step 1**. Clone the source code:
 ```
@@ -75,6 +88,7 @@ sudo rabbitmqctl add_user openworkout <password>
 sudo rabbitmqctl add_vhost openworkout_vhost
 sudo rabbitmqctl set_user_tags openworkout openworkout_tag
 sudo rabbitmqctl set_permissions -p openworkout_vhost openworkout ".*" ".*" ".*"
+sudo rabbitmqctl delete_user guest
 sudo service rabbitmq-server start
 ```
 

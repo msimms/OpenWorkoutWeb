@@ -1,20 +1,25 @@
 # Base images.
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 RUN apt-get update && apt-get install -y sudo
+
+# Install python3.
+RUN apt -y install python3
+RUN apt -y install python3-pip
 
 # Make the service available on port 8080 within the Docker internal network.
 EXPOSE 8080
 
-# Copy the application into the image.
+# Make a directory for the app.
 RUN mkdir -p /OpenWorkoutWeb
 WORKDIR /OpenWorkoutWeb
 
-# Install all of the python packages that we need.
-RUN apt-get install -y python python-setuptools python-pip
-RUN pip install -r requirements.txt
-
-# Copy the rest of our application.
+# Copy the app into the image.
 COPY . .
+RUN ls -la /OpenWorkoutWeb/*
+RUN ls -la /*
+
+# Install the python packages that we need.
+RUN pip3 install -r /OpenWorkoutWeb/requirements.txt
 
 # Run the application.
-CMD python2 start_flask.py --config openworkout.config
+CMD python3 start_cherrypy_wsgi.py --config openworkout.config
