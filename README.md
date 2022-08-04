@@ -35,7 +35,7 @@ Why develop a workout tracker when there are so many closed-source options avail
 git clone https://github.com/msimms/OpenWorkoutWeb
 ```
 
-**Step 2**. Install the python dependencies:
+**Step 2**. Build the docker image:
 ```
 cd OpenWorkoutWeb
 docker build -t openworkout -f docker/Dockerfile .
