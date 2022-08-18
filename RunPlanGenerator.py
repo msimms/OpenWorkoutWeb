@@ -136,10 +136,10 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         """Utility function for creating an easy run of some random distance between min and max."""
 
         # An easy run needs to be at least a couple of kilometers.
-        if min_run_distance < 2000:
-            min_run_distance = 2000
-        if max_run_distance < 2000:
-            max_run_distance = 2000
+        if min_run_distance < 3000:
+            min_run_distance = 3000
+        if max_run_distance < 3000:
+            max_run_distance = 3000
 
         # Roll the dice to figure out the distance.
         run_distance = random.uniform(min_run_distance, max_run_distance)
@@ -177,7 +177,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TEMPO_RUN, self.user_id)
         workout.sport_type = Keys.TYPE_RUNNING_KEY
         workout.add_warmup(warmup_duration)
-        workout.add_distance_interval(num_intervals, interval_distance_meters, tempo_run_pace, 0, 0)
+        workout.add_distance_interval(num_intervals, interval_distance_meters, tempo_run_pace, 0, easy_run_pace)
         workout.add_cooldown(cooldown_duration)
 
         # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
