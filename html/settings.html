@@ -239,32 +239,26 @@ ${nav}
     <div>
         <!-- Settings -->
         <h2>Settings</h2>
-        <p>
-            Default Activity Privacy<br>
-            <select id="privacy_options">
-                <option value="Public">Public</option>
-                <option value="Private">Private</option>
-            </select>
-        </p>
-        <p>
-            Preferred Units<br>
-            <select id="units">
-                <option value="Metric">Metric</option>
-                <option value="Standard">Standard</option>
-            </select>
-        </p>
-        <p>
-            Week Starts On<br>
-            <select id="week_start">
-                <option value="Sunday">Sunday</option>
-                <option value="Monday">Monday</option>
-                <option value="Tuesday">Tuesday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Thursday">Thursday</option>
-                <option value="Friday">Friday</option>
-                <option value="Saturday">Saturday</option>
-            </select>
-        </p>
+        <h3>Default Activity Privacy<h3>
+        <select id="privacy_options">
+            <option value="Public">Public</option>
+            <option value="Private">Private</option>
+        </select>
+        <h3>Preferred Units<h3>
+        <select id="units">
+            <option value="Metric">Metric</option>
+            <option value="Standard">Standard</option>
+        </select>
+        <h3>Week Starts On<h3>
+        <select id="week_start">
+            <option value="Sunday">Sunday</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+        </select><br>
         <button type="modern_button" onclick="update_settings()">Update</button>
         <hr>
 
@@ -275,26 +269,28 @@ ${nav}
 
         <!-- Email -->
         <h2>Email</h2>
-        <p>New Email Address:</p><p><input type="text" id="new_email"><br></p>
-        <button type="modern_button" onclick="update_email()">Update</button>
-        <p><b>Note:</b> Your email address is only used for login authentication.</p>
+        <h3>New Email Address:</h3><input type="text" id="new_email"><br>
+        <button type="modern_button" onclick="update_email()">Update</button><br>
+        <br>
+        <b>Note:</b> Your email address is only used for login authentication.
         <hr>
 
         <!-- Password -->
         <h2>Password</h2>
-        <p>Current Password:</p><p><input type="password" id="current_password"><br></p>
-        <p>New Password:</p><p><input type="password" id="new_password1"><br></p>
-        <p>Confirm Password:</p><p><input type="password" id="new_password2"><br></p>
+        <h3>Current Password:</h3><input type="password" id="current_password"><br>
+        <h3>New Password:</h3><input type="password" id="new_password1"><br>
+        <h3>Confirm Password:</h3><input type="password" id="new_password2"><br>
         <button type="modern_button" onclick="update_password()">Update</button>
         <hr>
 
         <!-- Delete -->
         <h2>Delete</h2>
-        <p>Password:</p><p><input type="password" id="password"><br></p>
+        <h3>Password:</h3><input type="password" id="password"><br>
         <button type="modern_button" onclick="delete_gear()" style="color:red">Delete My Gear</button><br>
         <button type="modern_button" onclick="delete_activities()" style="color:red">Delete My Activities</button><br>
         <button type="modern_button" onclick="delete_user()" style="color:red">Delete My Account and All My Data</button><br>
-        <p><b>Note:</b> This cannot be undone.</p>
+        <br>
+        <b>Note:</b> This cannot be undone.
     </div>
 </section>
 

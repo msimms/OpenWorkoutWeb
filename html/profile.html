@@ -640,54 +640,53 @@ ${nav}
     <div>
         <!-- Birthday -->
         <h2>Birthday</h2>
-            <input type="text" name="birthday" id="birthday"><br>
-            <button type="modern_button" onclick="update_birthday()">Update</button>
+        <input type="text" name="birthday" id="birthday"><br>
+        <button type="modern_button" onclick="update_birthday()">Update</button>
         <hr>
 
         <!-- Height -->
         <h2>Height</h2>
-            <input type="text" id="height" value="Not set"></input>  <label id="height_units"></label><br>
-            <button type="modern_button" onclick="update_height()">Update</button>
+        <input type="text" id="height" value="Not set"></input>  <label id="height_units"></label><br>
+        <button type="modern_button" onclick="update_height()">Update</button>
         <hr>
 
         <!-- Weight -->
         <h2>Weight</h2>
-            <input type="text" id="weight" value="Not set"></input>  <label id="weight_units"></label><br>
-            <button type="modern_button" onclick="update_weight()">Update</button>
+        <input type="text" id="weight" value="Not set"></input>  <label id="weight_units"></label><br>
+        <button type="modern_button" onclick="update_weight()">Update</button>
         <hr>
 
         <!-- Biological Sex -->
         <h2>Biological Sex</h2>
-            <select id="biological_sex" >
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-            </select><br>
-            <button type="modern_button" onclick="update_biological_sex()">Update</button>
+        <select id="biological_sex" >
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select><br>
+        <button type="modern_button" onclick="update_biological_sex()">Update</button>
         <hr>
 
         <!-- Resting Heart Rate -->
         <h2>Resting Heart Rate</h2>
-            <input type="text" id="resting heart rate" value="Not set"></input>  <label>bpm</label><br>
-            <button type="modern_button" onclick="update_resting_hr()">Update</button>
+        <input type="text" id="resting heart rate" value="Not set"></input>  <label>bpm</label><br>
+        <button type="modern_button" onclick="update_resting_hr()">Update</button>
         <hr>
 
         <!-- Maximum Heart Rate -->
         <h2>Maximum Heart Rate</h2>
-            <input type="text" id="max heart rate" value="Not set"></input>  <label>bpm</label><br>
-            <button type="modern_button" onclick="update_maximum_hr()">Update</button>
+        <input type="text" id="max heart rate" value="Not set"></input>  <label>bpm</label><br>
+        <button type="modern_button" onclick="update_maximum_hr()">Update</button>
         <hr>
 
         <!-- Estimated Maximum Heart Rate -->
         <h2>Estimated Maximum Heart Rate</h2>
-            <input style="border:0" type="text" value="Not calculated" id="estimated max heart rate" readonly>  </input><label>bpm</label>
+        <input style="border:0" type="text" value="Not calculated" id="estimated max heart rate" readonly>  </input><label>bpm</label>
         <hr>
 
         <!-- BMI -->
         <h2>BMI</h2>
-            <p>
-                Your Body Mass Index is your weight relative to your height.
-            </p>
-            <input style="border:0" type="text" id="bmi" readonly></input>
+        <input style="border:0" type="text" id="bmi" readonly></input><br>
+        <br>
+        <b>Note:</b> Your Body Mass Index is your weight relative to your height.
         <hr>
 
         <!-- VO2 Max -->
@@ -697,39 +696,36 @@ ${nav}
 
         <!-- Heart Rate Zones -->
         <h2>Heart Rate Zones</h2>
-            <p>
-                Heart rate zones are based on estimated maximum heart rate.
-            </p>
-            <table id="hr_zones">
-            </table>
+        <table id="hr_zones">
+        </table>
+        <br>
+        <b>Note:</b> Heart rate zones are based on estimated maximum heart rate.
         <hr>
 
         <!-- FTP -->
         <h2>Estimated Functional Threshold Power (FTP)</h2>
-            <p>
-                Functional Threshold Power is the amount of power that you can exert over one hour at maximum effort. It is estimated from recent activity.
-            </p>
-            <input style="border:0" type="text" id="ftp" readonly></input>
-            <p id="ftp_error"></p>
+        <input style="border:0" type="text" id="ftp" readonly></input><br>
+        <p id="ftp_error"></p>
+        <br>
+        <b>Note:</b> Functional Threshold Power is the amount of power that you can exert over one hour at maximum effort. It is estimated from recent activity.
         <hr>
 
         <!-- Power Training Zones -->
         <h2>Power Training Zones</h2>
-            <p>
-                Power zones are based on estimated FTP.
-            </p>
-            <table id="power_zones">
-            </table>
+        <table id="power_zones">
+        </table>
+        <br>
+        <b>Note:</b> Power zones are based on estimated FTP.
         <hr>
 
         <!-- Personal Records -->
         <h2>Personal Records</h2>
-            <h3>Cycling</h3>
-                <table id="Cycling">
-                </table>
-            <h3>Running</h3>
-                <table id="Running">
-                </table>
+        <h3>Cycling</h3>
+            <table id="Cycling">
+            </table>
+        <h3>Running</h3>
+            <table id="Running">
+            </table>
         <hr>
 
         <!-- Default Gear -->
