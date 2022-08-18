@@ -227,18 +227,17 @@ ${nav}
 
 <section class="block">
 
-    <div style="width: 80%">
+    <div>
         <h2>Search for a user</h2>
-        <p>User Email or Name:</p><p><input type="text" id="searchname" onkeypress="search_text_click_press(event)"><br></p>
+        <input type="text" id="searchname" onkeypress="search_text_click_press(event)"><br>
+        <br>
+        <b>Note:</b> Enter the user's name of email address.<br>
         <button type="button" onclick="search()">Search</button>
-    </div>
+        <hr>
 
-    <div class="friends_list" style="width: 80%">
         <table id="search_results" >
         </table>
-    </div>
 
-    <div class="friends_list" style="width: 80%">
         <h2>My Friends</h2>
         <table id="Friends">
         </table>
