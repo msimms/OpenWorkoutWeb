@@ -30,7 +30,7 @@ class VO2MaxCalculator(object):
         super(VO2MaxCalculator, self).__init__()
 
     @staticmethod
-    def estimate_vo2max_from_heart_rate(max_hr, resting_hr):
+    def estimate_vo2max_from_heart_rate(resting_hr, max_hr):
         if max_hr == None:
             return 0.0
         if resting_hr == None:
