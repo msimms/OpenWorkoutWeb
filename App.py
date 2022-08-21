@@ -298,7 +298,7 @@ class App(object):
         edit_str  = "<td><button type=\"button\" onclick=\"return edit_activity()\" style=\"color:black\">Edit</button></td><tr>\n"
         edit_str += "<td><button type=\"button\" onclick=\"return add_photos()\" style=\"color:black\">Add Photos</button></td><tr>\n"
         edit_str += "<td><button type=\"button\" onclick=\"return trim_activity()\" style=\"color:black\">Trim</button></td><tr>\n"
-        edit_str = "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\">Delete</button></td><tr>\n"
+        edit_str += "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\">Delete</button></td><tr>\n"
         return edit_str
 
     @staticmethod

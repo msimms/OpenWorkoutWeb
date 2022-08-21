@@ -48,10 +48,10 @@ class Exporter(object):
             if current_reading is None:
                 current_reading = next(sensor_iter)
             else:
-                sensor_time = float(current_reading.keys()[0])
+                sensor_time = float(list(current_reading.keys())[0])
                 while sensor_time < time_ms:
                     current_reading = next(sensor_iter)
-                    sensor_time = float(current_reading.keys()[0])
+                    sensor_time = float(list(current_reading.keys())[0])
         except StopIteration:
             return None
         return current_reading
@@ -172,9 +172,9 @@ class Exporter(object):
                     writer.start_trackpoint_extensions()
 
                     if nearest_cadence is not None:
-                        writer.store_cadence_rpm(nearest_cadence.values()[0])
+                        writer.store_cadence_rpm(list(nearest_cadence.values())[0])
                     if nearest_hr is not None:
-                        writer.store_heart_rate_bpm(nearest_hr.values()[0])
+                        writer.store_heart_rate_bpm(list(nearest_hr.values())[0])
 
                     writer.end_trackpoint_extensions()
                     writer.end_extensions()
@@ -282,9 +282,9 @@ class Exporter(object):
                         writer.store_distance_meters(meters_traveled)
 
                     if nearest_cadence is not None:
-                        writer.store_cadence_rpm(nearest_cadence.values()[0])
+                        writer.store_cadence_rpm(list(nearest_cadence.values())[0])
                     if nearest_hr is not None:
-                        writer.store_heart_rate_bpm(nearest_hr.values()[0])
+                        writer.store_heart_rate_bpm(list(nearest_hr.values())[0])
 
                     if nearest_temp is not None or nearest_power is not None:
                         writer.start_trackpoint_extensions()

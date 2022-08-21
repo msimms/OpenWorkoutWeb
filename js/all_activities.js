@@ -62,7 +62,7 @@ function export_activity()
 
     dict.push({["activity_id"] : activity_id});
     dict.push({["export_format"] : format});
-    if (send_get_request(the_url, dict, result_text))
+    if (send_post_request(the_url, dict, result_text))
         create_local_file(result_text.value, activity_id + "." + format, "text/plain;charset=utf-8");
     else
         alert(result_text.value);
@@ -177,12 +177,3 @@ function create_tags(tags)
     if (!send_post_request(the_url, dict, result_text))
         alert(result_text.value);
 }
-
-jQuery(document).ready(function()
-{
-    jQuery(".chosen").data("placeholder", "Specify tags...").chosen();
-
-    jQuery('#tags').on('change', function(e) {
-        create_tags(jQuery("#tags").val());
-    });
-});
