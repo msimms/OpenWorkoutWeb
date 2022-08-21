@@ -297,6 +297,8 @@ class App(object):
         """Helper function for building the edit string that appears on the activity details screens."""
         edit_str  = "<td><button type=\"button\" onclick=\"return edit_activity()\" style=\"color:black\">Edit</button></td><tr>\n"
         edit_str += "<td><button type=\"button\" onclick=\"return add_photos()\" style=\"color:black\">Add Photos</button></td><tr>\n"
+        edit_str += "<td><button type=\"button\" onclick=\"return trim_activity()\" style=\"color:black\">Trim</button></td><tr>\n"
+        edit_str = "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\">Delete</button></td><tr>\n"
         return edit_str
 
     @staticmethod
@@ -304,17 +306,6 @@ class App(object):
         """Helper function for building the delete string that appears on the activity details screens."""
         delete_str = "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\">Delete</button></td><tr>\n"
         return delete_str
-
-    @staticmethod
-    def get_time_value_from_list_item(item, py_version):
-        """Utility function because this logic appears in too many places."""
-        if py_version < 3:
-            time = int(float(item.keys()[0]))
-            value = float(item.values()[0])
-        else:
-            time = int(float(list(item.keys())[0]))
-            value = float(list(item.values())[0])
-        return time, value
 
     def render_page_for_unmapped_activity(self, user_realname, activity_id, activity, activity_user_id, logged_in_username, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific un-mapped activity."""
@@ -397,11 +388,6 @@ class App(object):
         if belongs_to_current_user:
             edit_title_str = "<h3>Edit</h3>"
             edit_str = App.render_edit_controls()
-
-        # Render the delete control.
-        delete_str = ""
-        if belongs_to_current_user:
-            delete_str = App.render_delete_control()
 
         # Build the page title.
         if is_live:
@@ -628,11 +614,6 @@ class App(object):
         if belongs_to_current_user:
             edit_title_str = "<h3>Edit</h3>"
             edit_str = App.render_edit_controls()
-
-        # Render the delete control.
-        delete_str = ""
-        if belongs_to_current_user:
-            delete_str = App.render_delete_control()
 
         # Build the page title.
         if is_live:
