@@ -10,5 +10,5 @@ class RunningRacePredictor(object):
         super(RunningRacePredictor, self).__init__()
 
     def calc_from_vo2max(self, vo2max):
-        """Give the athlete's VO2Max, returns the estimated race completion times as a dictionary."""
+        """Given the athlete's VO2Max, returns the estimated race completion times as a dictionary."""
         speed = 98.0581 * math.sqrt(vo2max + 84.4509) - 876.24
