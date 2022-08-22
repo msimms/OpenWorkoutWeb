@@ -282,7 +282,8 @@ class App(object):
         """Helper function for building the exports string that appears on the activity details screens."""
         if not (has_location_data or has_accel_data):
             return ""
-        exports_str = "<td><select id=\"format\" >\n"
+        exports_str  = "<h3>Export</h3>\n"
+        exports_str += "<td><select id=\"format\" >\n"
         if has_location_data:
             exports_str += "\t<option value=\"tcx\" selected>TCX</option>\n"
             exports_str += "\t<option value=\"gpx\">GPX</option>\n"
@@ -295,9 +296,9 @@ class App(object):
     @staticmethod
     def render_edit_controls():
         """Helper function for building the edit string that appears on the activity details screens."""
-        edit_str  = "<td><button type=\"button\" onclick=\"return edit_activity()\" style=\"color:black\">Edit</button></td><tr>\n"
-        edit_str += "<td><button type=\"button\" onclick=\"return add_photos()\" style=\"color:black\">Add Photos</button></td><tr>\n"
-        edit_str += "<td><button type=\"button\" onclick=\"return trim_activity()\" style=\"color:black\">Trim</button></td><tr>\n"
+        edit_str  = "<td><button type=\"button\" onclick=\"return edit_activity()\" style=\"color:black\">Edit Name, Description, and Type...</button></td><tr>\n"
+        edit_str += "<td><button type=\"button\" onclick=\"return add_photos()\" style=\"color:black\">Add Photos...</button></td><tr>\n"
+        edit_str += "<td><button type=\"button\" onclick=\"return trim_activity()\" style=\"color:black\">Trim...</button></td><tr>\n"
         edit_str += "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\">Delete</button></td><tr>\n"
         return edit_str
 
@@ -897,7 +898,6 @@ class App(object):
         # Sanity check the activity ID.
         if not InputChecker.is_uuid(activity_id):
             return self.render_error("Invalid activity ID")
-        print("here1")
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -905,7 +905,6 @@ class App(object):
             raise RedirectException(LOGIN_URL)
 
         # Get the details of the logged in user.
-        print(username)
         user_id, _, user_realname = self.user_mgr.retrieve_user(username)
         if user_id is None:
             self.log_error('Unknown user ID')
