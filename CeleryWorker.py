@@ -104,6 +104,7 @@ def check_for_ungenerated_workout_plans():
 
     # These users don't have any pending workouts.
     user_ids = data_mgr.retrieve_users_without_scheduled_workouts()
+    print("Found " + str(len(user_ids)) + " user(s) without scheduled workouts.")
     for user_id in user_ids:
 
         # Make sure we're not thrashing by only allowing workout generation once per day per user.
