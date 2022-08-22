@@ -291,7 +291,7 @@ class Exporter(object):
                         if nearest_temp is not None:
                             pass
                         if nearest_power is not None:
-                            writer.store_power_in_watts(nearest_power.values()[0])
+                            writer.store_power_in_watts(list(nearest_power.values())[0])
                         writer.end_trackpoint_extensions()
 
                     writer.end_trackpoint()
