@@ -679,6 +679,25 @@ class DataMgr(Importer.ActivityWriter):
 
         return result
 
+    def trim_activity(self, activity, trim_from, num_seconds):
+        if self.database is None:
+            raise Exception("No database.")
+        if activity is None:
+            raise Exception("Bad parameter.")
+        if trim_from is None:
+            raise Exception("Bad parameter.")
+        if num_seconds is None:
+            raise Exception("Bad parameter.")
+
+        if trim_from == Keys.TRIM_FROM_BEGINNING_VALUE:
+            if Keys.ACTIVITY_START_TIME_KEY in activity:
+                start_time_ms = activity[Keys.ACTIVITY_START_TIME_KEY]
+                trim_before_ms = start_time_ms + (num_seconds * 1000)
+        if trim_from == Keys.TRIM_FROM_END_VALUE:
+            end_time_ms = self.compute_activity_end_time(activity)
+            trim_after_ms = end_time_ms - (num_seconds * 1000)
+        pass
+
     def activity_exists(self, activity_id):
         """Determines whether or not there is a document corresonding to the activity ID."""
         if self.database is None:

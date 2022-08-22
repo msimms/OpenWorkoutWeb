@@ -1251,6 +1251,8 @@ class Api(object):
 
     def handle_trim_activity(self, values):
         """Called when an API message request to trim an activity is received."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
 
         # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
@@ -1267,11 +1269,22 @@ class Api(object):
         trim_from = values[Keys.TRIM_FROM_KEY]
         if trim_from != Keys.TRIM_FROM_BEGINNING_VALUE and trim_from != Keys.TRIM_FROM_END_VALUE:
             raise ApiException.ApiMalformedRequestException("Invalid value.")
-        service_date = values[Keys.TRIM_SECONDS_KEY]
-        if not InputChecker.is_unsigned_integer(service_date):
+        num_seconds = values[Keys.TRIM_SECONDS_KEY]
+        if not InputChecker.is_unsigned_integer(num_seconds):
             raise ApiException.ApiMalformedRequestException("Invalid number of seconds.")
 
-        pass
+        # Get the activity from the database.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not activity:
+            raise ApiException.ApiMalformedRequestException("Activity not found.")
+
+        # Get the ID of the user that owns the activity and make sure it's the current user.
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
+
+        if not self.data_mgr.trim_activity(activity, trim_from, num_seconds):
+            raise ApiException.ApiMalformedRequestException("Request failed.")
+        return True, ""
 
     def handle_export_activity(self, values):
         """Called when an API message request to export an activity is received."""
@@ -2534,8 +2547,6 @@ class Api(object):
             return self.handle_list_races(values)
         elif request == 'list_pace_plans':
             return self.handle_list_pace_plans(values)
-        elif request == 'trim_activity':
-            return self.handle_trim_activity(values)
         elif request == 'export_activity':
             return self.handle_export_activity(values)
         elif request == 'export_workout':
@@ -2628,6 +2639,8 @@ class Api(object):
             return self.handle_confirm_friend_request(values)
         elif request == 'unfriend':
             return self.handle_unfriend_request(values)
+        elif request == 'trim_activity':
+            return self.handle_trim_activity(values)
         elif request == 'export_activity':
             return self.handle_export_activity(values)
         elif request == 'claim_device':
