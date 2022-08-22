@@ -382,6 +382,23 @@ def edit_activity(env, start_response):
     return handle_error_500(start_response)
 
 @do_auth_check
+def trim_activity(env, start_response):
+    """Renders the trim page for an activity."""
+    global g_front_end
+
+    try:
+        activity_id = env['PATH_INFO']
+        activity_id = activity_id[1:]
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.trim_activity(activity_id))
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
+    except:
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
+    return handle_error_500(start_response)
+
+@do_auth_check
 def add_photos(env, start_response):
     """Renders the add photos page for an activity."""
     global g_front_end
@@ -893,6 +910,7 @@ def main():
         cherrypy.tree.graft(live_user, "/live_user")
         cherrypy.tree.graft(activity, "/activity")
         cherrypy.tree.graft(edit_activity, "/edit_activity")
+        cherrypy.tree.graft(trim_activity, "/trim_activity")
         cherrypy.tree.graft(add_photos, "/add_photos")
         cherrypy.tree.graft(device, "/device")
         cherrypy.tree.graft(my_activities, "/my_activities")

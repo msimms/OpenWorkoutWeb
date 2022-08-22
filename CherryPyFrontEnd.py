@@ -140,6 +140,10 @@ class CherryPyFrontEnd(object):
         """Renders the details page for an activity."""
         try:
             return self.backend.activity(activity_id)
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -151,6 +155,10 @@ class CherryPyFrontEnd(object):
         """Renders the edit page for an activity."""
         try:
             return self.backend.edit_activity(activity_id)
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -158,10 +166,29 @@ class CherryPyFrontEnd(object):
         return self.error()
 
     @cherrypy.expose
+    def trim_activity(self, activity_id):
+        """Renders the trim page for an activity."""
+        try:
+            return self.backend.trim_activity(activity_id)
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.trim_activity.__name__)
+        return self.error()
+
+    @cherrypy.expose
     def add_photos(self, activity_id):
         """Renders the add photos page for an activity."""
         try:
             return self.backend.add_photos(activity_id)
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

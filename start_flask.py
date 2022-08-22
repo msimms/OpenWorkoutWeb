@@ -176,6 +176,18 @@ def edit_activity(activity_id):
         g_app.log_error('Unhandled exception in ' + edit_activity.__name__)
     return error()
 
+@g_flask_app.route('/trim_activity/<activity_id>')
+@login_requred
+def trim_activity(activity_id):
+    """Renders the trim page for an activity."""
+    try:
+        return g_app.trim_activity(activity_id)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + trim_activity.__name__)
+    return error()
+
 @g_flask_app.route('/add_photos/<activity_id>')
 @login_requred
 def add_photos(activity_id):

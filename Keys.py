@@ -345,6 +345,12 @@ TOTAL_INTENSITY_SCORE = "Total Intensity Score" # Sum of the intensity scores fo
 MILE_SPLITS = "Mile Splits" # List of mile splits
 KM_SPLITS = "KM Splits" # List of kilometer splits
 
+# Options when trimming activities
+TRIM_FROM_KEY = "Trim From"
+TRIM_FROM_BEGINNING_VALUE = "Beginning"
+TRIM_FROM_END_VALUE = "End"
+TRIM_SECONDS_KEY = "Seconds"
+
 # Keys used for race time prediction.
 ESTIMATED_5K_KEY = "Estimated 5K"
 ESTIMATED_10K_KEY = "Estimated 10K"

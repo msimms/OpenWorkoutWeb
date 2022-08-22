@@ -1249,6 +1249,30 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Request failed.")
         return True, ""
 
+    def handle_trim_activity(self, values):
+        """Called when an API message request to trim an activity is received."""
+
+        # Required parameters.
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Missing activity ID parameter.")
+        if Keys.TRIM_FROM_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Missing parameter.")
+        if Keys.TRIM_SECONDS_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Missing parameter.")
+
+        # Decode and validate the required parameters.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+        trim_from = values[Keys.TRIM_FROM_KEY]
+        if trim_from != Keys.TRIM_FROM_BEGINNING_VALUE and trim_from != Keys.TRIM_FROM_END_VALUE:
+            raise ApiException.ApiMalformedRequestException("Invalid value.")
+        service_date = values[Keys.TRIM_SECONDS_KEY]
+        if not InputChecker.is_unsigned_integer(service_date):
+            raise ApiException.ApiMalformedRequestException("Invalid number of seconds.")
+
+        pass
+
     def handle_export_activity(self, values):
         """Called when an API message request to export an activity is received."""
 
@@ -2510,6 +2534,8 @@ class Api(object):
             return self.handle_list_races(values)
         elif request == 'list_pace_plans':
             return self.handle_list_pace_plans(values)
+        elif request == 'trim_activity':
+            return self.handle_trim_activity(values)
         elif request == 'export_activity':
             return self.handle_export_activity(values)
         elif request == 'export_workout':

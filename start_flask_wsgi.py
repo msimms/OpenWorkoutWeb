@@ -108,6 +108,21 @@ def edit_activity(env, start_response):
         g_app.log_error('Unhandled exception in ' + edit_activity.__name__)
     return error(env, start_response)
 
+def trim_activity(env, start_response):
+    """Renders the trim page for an activity."""
+    try:
+        content = g_app.trim_activity().encode('utf-8')
+        start_response('200 OK', [('Content-Type', 'text/html')])
+        return [content]
+    except App.RedirectException as e:
+        start_response('302 Found', [('Location', e.url)])
+        return []
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + trim_activity.__name__)
+    return error(env, start_response)
+
 def add_photos(env, start_response):
     """Renders the add photos page for an activity."""
     try:

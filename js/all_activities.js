@@ -82,6 +82,13 @@ function add_photos()
     window.location.replace(the_url);
 }
 
+/// @function trim_activity
+function trim_activity()
+{
+    let the_url = root_url + "/trim_activity/" + activity_id;
+    window.location.replace(the_url);
+}
+
 /// @function delete_activity
 function delete_activity()
 {
