@@ -23,7 +23,7 @@
 // SOFTWARE.
 
 /// @function refresh_analysis
-function refresh_analysis()
+function common_refresh_analysis(root_url)
 {
     let the_url = root_url + "/api/1.0/refresh_analysis";
     let dict = [];
@@ -37,7 +37,7 @@ function refresh_analysis()
 }
 
 /// @function create_comment
-function create_comment()
+function common_create_comment(root_url)
 {
     let the_url = root_url + "/api/1.0/create_comment";
     let comment = document.getElementById("comment").value;
@@ -53,7 +53,7 @@ function create_comment()
 }
 
 /// @function export_activity
-function export_activity()
+function common_export_activity(root_url)
 {
     let the_url = root_url + "/api/1.0/export_activity";
     let format = document.getElementById("format").value;
@@ -69,28 +69,28 @@ function export_activity()
 }
 
 /// @function edit_activity
-function edit_activity()
+function common_edit_activity(root_url)
 {
     let the_url = root_url + "/edit_activity/" + activity_id;
     window.location.replace(the_url);
 }
 
 /// @function add_photos
-function add_photos()
+function common_add_photos(root_url)
 {
     let the_url = root_url + "/add_photos/" + activity_id;
     window.location.replace(the_url);
 }
 
 /// @function trim_activity
-function trim_activity()
+function common_trim_activity(root_url)
 {
     let the_url = root_url + "/trim_activity/" + activity_id;
     window.location.replace(the_url);
 }
 
 /// @function delete_activity
-function delete_activity()
+function common_delete_activity(root_url)
 {
     if (confirm('Are you sure you want to do this?'))
     {
@@ -107,7 +107,7 @@ function delete_activity()
 }
 
 /// @function delete_photo
-function delete_photo(photo_id)
+function common_delete_photo(root_url, photo_id)
 {
     if (confirm('Are you sure you want to delete the above photo?'))
     {
@@ -124,55 +124,15 @@ function delete_photo(photo_id)
     }
 }
 
-/// @function process_photos_list
-var process_photos_list = function(photos_list)
-{
-    let photo_ids = photos_list["photo ids"]
-
-    if (photo_ids == null)
-        return;
-
-    if (photo_ids.length > 0)
-    {
-        let photo_table = document.getElementById("photos");
-        let div = document.getElementById('photos_div');
-
-        div.style = "display: inline-block;";
-
-        for (let i = 0; i < photo_ids.length; ++i)
-        {
-            let photo_url = root_url + "/photos/${userId}/" + photo_ids[i];
-            let imgTd = document.createElement("td");
-            let img = document.createElement("img");
-            let deleteTd = document.createElement("td");
-            let deleteBtn = document.createElement("button");
-
-            img.setAttribute("src", photo_url);
-            img.setAttribute("width", 1024);
-            imgTd.appendChild(img);
-
-            deleteBtn.innerHTML = "Delete";
-            deleteBtn.setAttribute("style", "color:red;margin:0px");
-            deleteBtn.setAttribute("onclick", "return delete_photo(\"" + photo_ids[i] + "\")");
-            deleteTd.appendChild(deleteBtn);
-
-            photo_table.appendChild(imgTd);
-            photo_table.appendChild(document.createElement("tr"));
-            photo_table.appendChild(deleteTd);
-            photo_table.appendChild(document.createElement("tr"));
-        }
-    }
-}
-
 /// @function list_photos
-function list_photos()
+function common_list_photos(root_url)
 {
     let api_url = root_url + "/api/1.0/list_activity_photos?activity_id=" + activity_id;
     $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photos_list, dataType: "json" });
 }
 
 /// @function create_tags
-function create_tags(tags)
+function common_create_tags(root_url, tags)
 {
     let the_url = root_url + "/api/1.0/create_tags_on_activity";
     let dict = [];
