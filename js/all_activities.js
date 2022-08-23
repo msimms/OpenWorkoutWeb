@@ -92,7 +92,7 @@ function common_trim_activity(root_url)
 /// @function delete_activity
 function common_delete_activity(root_url)
 {
-    if (confirm('Are you sure you want to do this?'))
+    if (confirm('Are you sure you want to do this? This cannot be undone.'))
     {
         let the_url = root_url + "/api/1.0/delete_activity";
         let dict = [];

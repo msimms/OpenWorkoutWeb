@@ -77,6 +77,7 @@ class App(object):
     """Class containing the URL handlers."""
 
     def __init__(self, user_mgr, data_mgr, root_dir, root_url, google_maps_key, enable_profiling, debug):
+        """Constructor"""
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
         self.root_dir = root_dir

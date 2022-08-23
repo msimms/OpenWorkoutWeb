@@ -689,14 +689,55 @@ class DataMgr(Importer.ActivityWriter):
         if num_seconds is None:
             raise Exception("Bad parameter.")
 
+        trim_before_ms = 0
+        trim_after_ms = self.compute_activity_end_time(activity)
+
         if trim_from == Keys.TRIM_FROM_BEGINNING_VALUE:
             if Keys.ACTIVITY_START_TIME_KEY in activity:
-                start_time_ms = activity[Keys.ACTIVITY_START_TIME_KEY]
-                trim_before_ms = start_time_ms + (num_seconds * 1000)
+                trim_before_ms = activity[Keys.ACTIVITY_START_TIME_KEY] * 1000
+                trim_before_ms = trim_before_ms + (num_seconds * 1000)
         if trim_from == Keys.TRIM_FROM_END_VALUE:
-            end_time_ms = self.compute_activity_end_time(activity)
-            trim_after_ms = end_time_ms - (num_seconds * 1000)
-        pass
+            trim_after_ms = trim_after_ms - (num_seconds * 1000)
+
+        # Trim the location data.
+        if Keys.APP_LOCATIONS_KEY in activity:
+            old_locations = activity[Keys.APP_LOCATIONS_KEY]
+            new_locations = []
+            for location in old_locations:
+                ts = location[Keys.LOCATION_TIME_KEY]
+                if ts >= trim_before_ms and ts <= trim_after_ms:
+                    new_locations.append(location)
+            activity[Keys.APP_LOCATIONS_KEY] = new_locations
+
+        # Trim the sensor data.
+        for sensor_type in Keys.SENSOR_KEYS:
+            if sensor_type in activity:
+                old_sensor_data = activity[sensor_type]
+                new_sensor_data = []
+
+                sensor_iter = iter(old_sensor_data)
+                sensor_reading = next(sensor_iter)
+                sensor_time = float(list(sensor_reading.keys())[0])
+
+                # Skip over everything before the start time.
+                while sensor_time < trim_before_ms:
+                    sensor_reading = next(sensor_iter)
+                    sensor_time = float(list(sensor_reading.keys())[0])
+
+                # Copy everything up the end time.
+                while sensor_time < trim_after_ms:
+                    sensor_reading = next(sensor_iter)
+                    sensor_time = float(list(sensor_reading.keys())[0])
+                    sensor_value = list(sensor_reading.values())[0]
+                    new_sensor_data.append({str(sensor_time): sensor_value})
+
+                activity[sensor_type] = new_sensor_data
+
+        # Delete the old activity.
+
+        # Write the new, updated activity.
+
+        return True
 
     def activity_exists(self, activity_id):
         """Determines whether or not there is a document corresonding to the activity ID."""
