@@ -52,8 +52,14 @@ function get_graph_color(key)
         return "Navy";
     if (key == "Cadence")
         return "Tan";
+    if (key == "Power Zone Distribution")
+        return "DarkGreen";
+    if (key == "Power")
+        return "ForestGreen";
     if (key == "Heart Rate")
         return "Crimson";
+    if (key == "Heart Rate Zone Distribution")
+        return "DarkRed";
     if (key == "Altitude")
         return "ForestGreen";
     if (key == "Elevation")
@@ -569,6 +575,42 @@ function draw_intervals_graph(start_time_ms, end_time_ms, interval_data)
         }
 
         draw_graph(start_time_ms, end_time_ms, interval_graph, "Intervals", "", get_graph_color("Intervals"));
+    }
+}
+
+/// @function draw_speed_graph
+function draw_speed_graph(start_time_ms, end_time_ms, data)
+{
+    let unit_system = "${unit_system}";
+    let speed_units = ""
+    let pace_units = ""
+
+    if (unit_system == "metric")
+    {
+        speed_units = "kph";
+        pace_units = "mins/km";
+    }
+    else
+    {
+        speed_units = "mph";
+        pace_units = "mins/mile";
+    }
+
+    if (is_foot_based_activity)
+    {
+        let speed_data = convert_speed_graph_to_display_units(unit_system, data);
+        let pace_data = convert_speed_graph_to_pace_graph(unit_system, data);
+        let gap_data = compute_grade_adjusted_pace(gradient_curve, pace_data);
+
+        draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, get_graph_color(key));
+        draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, get_graph_color(key));
+        draw_graph(loc_start_time_ms, loc_end_time_ms, gap_data, "Grade Adjusted Pace", pace_units, get_graph_color(key));
+    }
+    else
+    {
+        let speed_data = convert_speed_graph_to_display_units(unit_system, data);
+
+        draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, get_graph_color(key));
     }
 }
 

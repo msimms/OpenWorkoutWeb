@@ -44,6 +44,7 @@ ${nav}
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script type="text/javascript" src="${root_url}/js/graphs.js"></script>
 <script type="text/javascript" src="${root_url}/js/coordinates.js"></script>
+<script type="text/javascript" src="${root_url}/js/heart_rate.js"></script>
 <script type="text/javascript" src="${root_url}/js/power.js"></script>
 <script type="text/javascript" src="${root_url}/google_maps"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -344,128 +345,31 @@ ${summary}
         }
     }
 
-    /// @function draw_speed_graph
-    function draw_speed_graph(start_time_ms, end_time_ms, data)
+    /// @function retrieve_summary_data
+    function retrieve_summary_data()
     {
-        let unit_system = "${unit_system}";
-        let speed_units = ""
-        let pace_units = ""
-
-        if (unit_system == "metric")
-        {
-            speed_units = "kph";
-            pace_units = "mins/km";
-        }
-        else
-        {
-            speed_units = "mph";
-            pace_units = "mins/mile";
-        }
-
-        if (is_foot_based_activity)
-        {
-            let speed_data = convert_speed_graph_to_display_units(unit_system, data);
-            let pace_data = convert_speed_graph_to_pace_graph(unit_system, data);
-            let gap_data = compute_grade_adjusted_pace(gradient_curve, pace_data);
-
-            draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, get_graph_color(key));
-            draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, get_graph_color(key));
-            draw_graph(loc_start_time_ms, loc_end_time_ms, gap_data, "Grade Adjusted Pace", pace_units, get_graph_color(key));
-        }
-        else
-        {
-            let speed_data = convert_speed_graph_to_display_units(unit_system, data);
-
-            draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, get_graph_color(key));
-        }
+        let api_url = root_url + "/api/1.0/activity_summarydata?activity_id=" + activity_id + "&summary_items=intervals";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
     }
 
-    /// @function process_sensordata
+    /// @function process_sensordata - callback for when sensor data is returned
     var process_sensordata = function(sensordata)
     {
-        for (key in sensordata)
-        {
-            let old_data = sensordata[key];
-            let new_data = old_data.map(function(e) { 
-                let new_e = {};
+        common_process_sensordata(sensordata, is_foot_based_activity, start_time_ms, ${max_hr}, ${ftp});
+        retrieve_summary_data();
+    }
 
-                for (let item in e)
-                {
-                    new_e["date"] = new Date(Number(item));
-                    new_e["value"] = e[item];
-                }
-                return new_e;
-            });
-
-            if (new_data.length > 1 && start_time_ms == 0)
-            {
-                start_time_ms = new_data[0].date;
-                end_time_ms = new_data[new_data.length-1].date;
-            }
-
-            if (key == "Current Speed")
-            {
-                draw_speed_graph(start_time_ms, end_time_ms, new_data);
-            }
-            else if (key == "Heart Rate")
-            {
-                draw_graph(start_time_ms, end_time_ms, new_data, key, "BPM", get_graph_color(key));
-            }
-            else if (key == "Cadence")
-            {
-                draw_graph(start_time_ms, end_time_ms, new_data, key, "RPM", get_graph_color(key));
-            }
-            else if (key == "Power")
-            {
-                let power_zones = compute_power_zone_distribution(${ftp}, new_data);
-
-                if (!is_foot_based_activity)
-                {
-                    if (power_zones.length > 0 && Math.max.apply(Math, power_zones) > 0)
-                    {
-                        draw_bar_chart(power_zones, "Power Zone Distribution", "ForestGreen");
-                    }
-                }
-                draw_graph(start_time_ms, end_time_ms, new_data, key, "Watts", get_graph_color(key));
-            }
-            else if (key == "Temperature")
-            {
-                draw_graph(start_time_ms, end_time_ms, new_data, key, "Temperature", get_graph_color(key));
-            }
-            else if (key == "Threat Count")
-            {
-                draw_graph(start_time_ms, end_time_ms, new_data, key, "Threat Count", get_graph_color(key));
-            }
-            else if (key == "accelerometer")
-            {
-                let accel_data = sensordata[key];
-                let x_data = [];
-                let y_data = [];
-                let z_data = [];
-
-                accel_data.forEach((item, index) => {
-                    let time = item["time"];
-
-                    x_data.push({ date: new Date(time), value:item["x"] });
-                    y_data.push({ date: new Date(time), value:item["y"] });
-                    z_data.push({ date: new Date(time), value:item["z"] });
-                });
-
-                draw_simple_graph(x_data, "x", get_graph_color("x"));
-                draw_simple_graph(y_data, "y", get_graph_color("y"));
-                draw_simple_graph(z_data, "z", get_graph_color("z"));
-            }
-        }
+    /// @function retrieve_sensor_data
+    function retrieve_sensor_data()
+    {
+        let api_url = root_url + "/api/1.0/activity_sensordata?activity_id=" + activity_id + "&sensors=Current%20Speed,Heart%20Rate,Cadence,Power,Temperature,Threat%20Count,accelerometer";
+        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
     }
 
     /// @function draw_sensor_and_interval_graphs
     function draw_sensor_and_interval_graphs()
     {
-        let api_url = root_url + "/api/1.0/activity_sensordata?activity_id=" + activity_id + "&sensors=Current%20Speed,Heart%20Rate,Cadence,Power,Temperature,Threat%20Count,accelerometer";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
-
-        //let api_url = root_url + "/api/1.0/activity_summarydata?activity_id=" + activity_id + "&summary_items=intervals";
-        //$.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
+        retrieve_sensor_data();
     }
 </script>
 

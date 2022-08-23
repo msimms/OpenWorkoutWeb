@@ -144,3 +144,114 @@ function common_create_tags(root_url, tags)
     if (!send_post_request(the_url, dict, result_text))
         alert(result_text.value);
 }
+
+/// @function common_process_sensordata
+function common_process_sensordata(sensordata, is_foot_based_activity, start_time_ms, max_hr, ftp)
+{
+    for (key in sensordata)
+    {
+        let old_data = sensordata[key];
+        let new_data = old_data.map(function(e) { 
+            let new_e = {};
+
+            for (let item in e)
+            {
+                new_e["date"] = new Date(Number(item));
+                new_e["value"] = e[item];
+            }
+            return new_e;
+        });
+
+        if (new_data.length > 1 && start_time_ms == 0)
+        {
+            start_time_ms = new_data[0].date;
+            end_time_ms = new_data[new_data.length-1].date;
+        }
+
+        if (key == "Current Speed")
+        {
+            draw_speed_graph(start_time_ms, end_time_ms, new_data);
+        }
+        else if (key == "Heart Rate")
+        {
+            let hr_zones = compute_heart_rate_zone_distribution(max_hr, new_data);
+
+            if (hr_zones.length > 0 && Math.max.apply(Math, hr_zones) > 0)
+            {
+                graph_name = "Heart Rate Zone Distribution"
+                draw_bar_chart(hr_zones, "Heart Rate Zone Distribution", get_graph_color(graph_name));
+            }
+            draw_graph(start_time_ms, end_time_ms, new_data, key, "BPM", get_graph_color(key));
+        }
+        else if (key == "Cadence")
+        {
+            draw_graph(start_time_ms, end_time_ms, new_data, key, "RPM", get_graph_color(key));
+        }
+        else if (key == "Power")
+        {
+            let power_zones = compute_power_zone_distribution(ftp, new_data);
+
+            if (!is_foot_based_activity)
+            {
+                if (power_zones.length > 0 && Math.max.apply(Math, power_zones) > 0)
+                {
+                    graph_name = "Power Zone Distribution"
+                    draw_bar_chart(power_zones, "Power Zone Distribution", get_graph_color(graph_name));
+                }
+            }
+            draw_graph(start_time_ms, end_time_ms, new_data, key, "Watts", get_graph_color(key));
+        }
+        else if (key == "Temperature")
+        {
+            draw_graph(start_time_ms, end_time_ms, new_data, key, "Temperature", get_graph_color(key));
+        }
+        else if (key == "Threat Count")
+        {
+            draw_graph(start_time_ms, end_time_ms, new_data, key, "Threat Count", get_graph_color(key));
+        }
+        else if (key == "Events")
+        {
+            let events = sensordata[key];
+            let total_strokes = [];
+            let total_timer_time = [];
+
+            events.forEach((item, index) => {
+                let time = item["timestamp"] * 1000;
+
+                if ("event" in item && item["event"] == "length")
+                {
+                    if ("total_strokes" in item && item["total_strokes"] != null)
+                    {
+                        total_strokes.push(item["total_strokes"]);
+                    }
+                    if ("total_timer_time" in item && item["total_timer_time"] != null)
+                    {
+                        total_timer_time.push({ date: new Date(time), value:item["total_timer_time"] });
+                    }
+                }
+            });
+
+            draw_bar_chart(total_strokes, "Total Strokes", "LightSteelBlue");
+            draw_graph(0, 0, total_timer_time, "Lap Time", "Lap Time", get_graph_color("Lap Time"));
+        }
+        else if (key == "accelerometer")
+        {
+            let accel_data = sensordata[key];
+            let x_data = [];
+            let y_data = [];
+            let z_data = [];
+
+            accel_data.forEach((item, index) => {
+                let time = item["time"];
+
+                x_data.push({ date: new Date(time), value:item["x"] });
+                y_data.push({ date: new Date(time), value:item["y"] });
+                z_data.push({ date: new Date(time), value:item["z"] });
+            });
+
+            draw_simple_graph(x_data, "x", get_graph_color("x"));
+            draw_simple_graph(y_data, "y", get_graph_color("y"));
+            draw_simple_graph(z_data, "z", get_graph_color("z"));
+        }
+    }
+}

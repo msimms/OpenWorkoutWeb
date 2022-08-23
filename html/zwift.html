@@ -58,6 +58,7 @@ ${nav}
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
 <script type="text/javascript" src="${root_url}/js/graphs.js"></script>
 <script type="text/javascript" src="${root_url}/js/coordinates.js"></script>
+<script type="text/javascript" src="${root_url}/js/heart_rate.js"></script>
 <script type="text/javascript" src="${root_url}/js/power.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
@@ -287,85 +288,10 @@ ${summary}
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
     }
 
-    /// @function process_sensordata
+    /// @function process_sensordata - callback for when sensor data is returned
     var process_sensordata = function(sensordata)
     {
-        for (key in sensordata)
-        {
-            let old_data = sensordata[key];
-            let new_data = old_data.map(function(e) { 
-                let new_e = {};
-
-                for (let item in e)
-                {
-                    new_e["date"] = new Date(Number(item));
-                    new_e["value"] = e[item];
-                }
-                return new_e;
-            });
-
-            if (new_data.length > 1 && start_time_ms == 0)
-            {
-                start_time_ms = new_data[0].date;
-                end_time_ms = new_data[new_data.length-1].date;
-            }
-
-            if (key == "Current Speed")
-            {
-                let is_metric = ("${unit_system}" == "metric");
-                let speed_units = ""
-                let pace_units = ""
-
-                if (is_metric)
-                {
-                    speed_units = "kph";
-                    pace_units = "mins/km";
-                }
-                else
-                {
-                    speed_units = "mph";
-                    pace_units = "mins/mile";
-                }
-
-                if (${is_foot_based_activity})
-                {
-                    let speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
-                    let pace_data = convert_speed_graph_to_pace_graph("${unit_system}", new_data);
-
-                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, get_graph_color(key));
-                    draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, get_graph_color(key));
-                }
-                else
-                {
-                    let speed_data = convert_speed_graph_to_display_units("${unit_system}", new_data);
-
-                    draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, get_graph_color(key));
-                }
-            }
-            else if (key == "Heart Rate")
-            {
-                draw_graph(start_time_ms, end_time_ms, new_data, key, "BPM", get_graph_color(key));
-            }
-            else if (key == "Cadence")
-            {
-                draw_graph(start_time_ms, end_time_ms, new_data, key, "RPM", get_graph_color(key));
-            }
-            else if (key == "Power")
-            {
-                let power_zones = compute_power_zone_distribution(${ftp}, new_data);
-
-                if (!${is_foot_based_activity})
-                {
-                    if (power_zones.length > 0 && Math.max.apply(Math, power_zones) > 0)
-                    {
-                        draw_bar_chart(power_zones, "Power Zone Distribution", "ForestGreen");
-                    }
-                }
-                draw_graph(start_time_ms, end_time_ms, new_data, key, "Watts", get_graph_color(key));
-            }
-        }
-
-        retrieve_summary_data();
+        common_process_sensordata(sensordata, is_foot_based_activity, start_time_ms, ${max_hr}, ${ftp});
     }
 
     /// @function retrieve_sensor_data

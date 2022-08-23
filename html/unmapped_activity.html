@@ -56,6 +56,7 @@ ${nav}
 <div id="charts"/>
 
 <script type="text/javascript" src="${root_url}/js/graphs.js"></script>
+<script type="text/javascript" src="${root_url}/js/heart_rate.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
@@ -63,72 +64,12 @@ ${nav}
 
     let activity_id = "${activityId}";
     let root_url = "${root_url}";
+    let start_time_ms = 0;
 
+    /// @function process_sensordata - callback for when sensor data is returned
     var process_sensordata = function(sensordata)
     {
-        for (key in sensordata)
-        {
-            if (key == "accelerometer")
-            {
-                let accel_data = sensordata[key];
-                let x_data = [];
-                let y_data = [];
-                let z_data = [];
-
-                accel_data.forEach((item, index) => {
-                    let time = item["time"];
-
-                    x_data.push({ date: new Date(time), value:item["x"] });
-                    y_data.push({ date: new Date(time), value:item["y"] });
-                    z_data.push({ date: new Date(time), value:item["z"] });
-                });
-
-                draw_simple_graph(x_data, "x", get_graph_color("x"));
-                draw_simple_graph(y_data, "y", get_graph_color("y"));
-                draw_simple_graph(z_data, "z", get_graph_color("z"));
-            }
-            else if (key == "Events")
-            {
-                let events = sensordata[key];
-                let total_strokes = [];
-                let total_timer_time = [];
-
-                events.forEach((item, index) => {
-                    let time = item["timestamp"] * 1000;
-
-                    if ("event" in item && item["event"] == "length")
-                    {
-                        if ("total_strokes" in item && item["total_strokes"] != null)
-                        {
-                            total_strokes.push(item["total_strokes"]);
-                        }
-                        if ("total_timer_time" in item && item["total_timer_time"] != null)
-                        {
-                            total_timer_time.push({ date: new Date(time), value:item["total_timer_time"] });
-                        }
-                    }
-                });
-
-                draw_bar_chart(total_strokes, "Total Strokes", "LightSteelBlue");
-                draw_graph(0, 0, total_timer_time, "Lap Time", "Lap Time", get_graph_color("Lap Time"));
-            }
-            else
-            {
-                let old_data = sensordata[key];
-                let new_data = old_data.map(function(e) { 
-                    let new_e = {};
-
-                    for (let item in e)
-                    {
-                        new_e["date"] = new Date(Number(item));
-                        new_e["value"] = e[item];
-                    }
-                    return new_e;
-                });
-
-                draw_graph(0, 0, new_data, key, "BPM", get_graph_color(key));
-            }
-        }
+        common_process_sensordata(sensordata, false, start_time_ms, ${max_hr}, 0.0);
     }
 
     /// @function retrieve_sensor_data
