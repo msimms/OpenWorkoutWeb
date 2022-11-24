@@ -2292,7 +2292,7 @@ class MongoDatabase(Database.Database):
     # Gear management methods
     #
 
-    def create_gear(self, user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
+    def create_gear(self, user_id, gear_id, gear_type, gear_name, description, add_time, retire_time, last_updated_time):
         """Create method for gear."""
         if user_id is None:
             self.log_error(MongoDatabase.create_gear.__name__ + ": Unexpected empty object: user_id")
@@ -2330,9 +2330,10 @@ class MongoDatabase(Database.Database):
                 new_gear[Keys.GEAR_ID_KEY] = str(gear_id)
                 new_gear[Keys.GEAR_TYPE_KEY] = gear_type
                 new_gear[Keys.GEAR_NAME_KEY] = gear_name
-                new_gear[Keys.GEAR_DESCRIPTION_KEY] = gear_description
-                new_gear[Keys.GEAR_ADD_TIME_KEY] = int(gear_add_time)
-                new_gear[Keys.GEAR_RETIRE_TIME_KEY] = int(gear_retire_time)
+                new_gear[Keys.GEAR_DESCRIPTION_KEY] = description
+                new_gear[Keys.GEAR_ADD_TIME_KEY] = int(add_time)
+                new_gear[Keys.GEAR_RETIRE_TIME_KEY] = int(retire_time)
+                new_gear[Keys.GEAR_LAST_UPDATED_TIME_KEY] = int(last_updated_time)
                 gear_list.append(new_gear)
                 user[Keys.GEAR_KEY] = gear_list
                 update_collection(self.users_collection, user)
@@ -2504,10 +2505,10 @@ class MongoDatabase(Database.Database):
                             service_rec[Keys.SERVICE_RECORD_DESCRIPTION_KEY] = record_description
 
                             service_history = []
-                            if Keys.GEAR_SERVICE_HISTORY in gear:
-                                service_history = gear[Keys.GEAR_SERVICE_HISTORY]
+                            if Keys.GEAR_SERVICE_HISTORY_KEY in gear:
+                                service_history = gear[Keys.GEAR_SERVICE_HISTORY_KEY]
                             service_history.append(service_rec)
-                            gear[Keys.GEAR_SERVICE_HISTORY] = service_history
+                            gear[Keys.GEAR_SERVICE_HISTORY_KEY] = service_history
 
                             update_collection(self.users_collection, user)
                             return True
@@ -2544,16 +2545,16 @@ class MongoDatabase(Database.Database):
                     # Find the gear.
                     for gear in gear_list:
                         if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
-                            if Keys.GEAR_SERVICE_HISTORY in gear:
+                            if Keys.GEAR_SERVICE_HISTORY_KEY in gear:
 
-                                service_history = gear[Keys.GEAR_SERVICE_HISTORY]
+                                service_history = gear[Keys.GEAR_SERVICE_HISTORY_KEY]
                                 record_index = 0
 
                                 for service_record in service_history:
                                     if Keys.SERVICE_RECORD_ID_KEY in service_record and service_record[Keys.SERVICE_RECORD_ID_KEY] == service_record_id:
 
                                         service_history.pop(record_index)
-                                        gear[Keys.GEAR_SERVICE_HISTORY] = service_history
+                                        gear[Keys.GEAR_SERVICE_HISTORY_KEY] = service_history
 
                                         update_collection(self.users_collection, user)
                                         return True

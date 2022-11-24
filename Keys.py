@@ -382,7 +382,8 @@ GEAR_DESCRIPTION_KEY = "description"
 GEAR_ADD_TIME_KEY = "add_time"
 GEAR_RETIRE_TIME_KEY = "retire_time"
 GEAR_INITIAL_DISTANCE_KEY = "initial_distance"
-GEAR_SERVICE_HISTORY = "service_history"
+GEAR_SERVICE_HISTORY_KEY = "service_history"
+GEAR_LAST_UPDATED_TIME_KEY = "last_updated_time"
 
 # Service record keys.
 SERVICE_RECORD_ID_KEY = "service_id"
@@ -398,7 +399,7 @@ PACE_PLAN_TARGET_DISTANCE_KEY = "target distance" # Target distance (in kms)
 PACE_PLAN_DISPLAY_UNITS_PACE_KEY = "display units pace" # Units in which the user prefers to view the pace
 PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY = "display units distance" # Units in which the user prefers to view the distance
 PACE_PLAN_SPLITS_KEY = "splits" # Desired splits, in +/- seconds (i.e., zero is even splits)
-PACE_PLAN_LAST_UPDATED_KEY = "last updated" # Last updated timestamp
+PACE_PLAN_LAST_UPDATED_KEY = "last updated time" # Last updated timestamp
 
 # Activity types.
 TYPE_UNSPECIFIED_ACTIVITY_KEY = "Unknown"

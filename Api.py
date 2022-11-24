@@ -1485,19 +1485,27 @@ class Api(object):
         gear_description = values[Keys.GEAR_DESCRIPTION_KEY]
         if not InputChecker.is_valid_decoded_str(gear_description):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        gear_add_time = values[Keys.GEAR_ADD_TIME_KEY]
-        if not InputChecker.is_unsigned_integer(gear_add_time):
+        add_time = values[Keys.GEAR_ADD_TIME_KEY]
+        if not InputChecker.is_unsigned_integer(add_time):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         # Retired date is optional.
         if Keys.GEAR_RETIRE_TIME_KEY in values and values[Keys.GEAR_RETIRE_TIME_KEY] is not None:
-            gear_retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
-            if not InputChecker.is_unsigned_integer(gear_retire_time):
+            retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
+            if not InputChecker.is_unsigned_integer(retire_time):
                 raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         else:
-            gear_retire_time = 0
+            retire_time = 0
 
-        result = self.data_mgr.create_gear(self.user_id, gear_type, gear_name, gear_description, int(gear_add_time), int(gear_retire_time))
+        # If the last updated time is not provided then set it to the current time.
+        if Keys.GEAR_LAST_UPDATED_TIME_KEY in values and values[Keys.GEAR_LAST_UPDATED_TIME_KEY] is not None:
+            last_updated_time = values[Keys.GEAR_LAST_UPDATED_TIME_KEY]
+            if not InputChecker.is_unsigned_integer(last_updated_time):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        else:
+            last_updated_time = 0
+
+        result = self.data_mgr.create_gear(self.user_id, gear_type, gear_name, gear_description, int(add_time), int(retire_time), int(last_updated_time))
         return result, ""
 
     def handle_list_gear(self, values):

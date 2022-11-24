@@ -1287,7 +1287,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.delete_pace_plan(user_id, plan_id)
 
-    def create_gear(self, user_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
+    def create_gear(self, user_id, gear_type, gear_name, description, add_time, retire_time, last_updated_time):
         """Create method for gear."""
         if self.database is None:
             raise Exception("No database.")
@@ -1297,11 +1297,9 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if gear_name is None:
             raise Exception("Bad parameter.")
-        if gear_description is None:
-            raise Exception("Bad parameter.")
 
         gear_id = uuid.uuid4()
-        return self.database.create_gear(user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+        return self.database.create_gear(user_id, gear_id, gear_type, gear_name, description, add_time, retire_time, last_updated_time)
 
     def retrieve_gear(self, user_id):
         """Retrieve method for the gear with the specified ID."""
