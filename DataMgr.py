@@ -1326,7 +1326,7 @@ class DataMgr(Importer.ActivityWriter):
                     final_gear_list.append(gear)
         return final_gear_list
 
-    def update_gear(self, user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
+    def update_gear(self, user_id, gear_id, gear_type, gear_name, description, add_time, retire_time, updated_time):
         """Retrieve method for the gear with the specified ID."""
         if self.database is None:
             raise Exception("No database.")
@@ -1334,7 +1334,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if gear_id is None:
             raise Exception("Bad parameter.")
-        return self.database.update_gear(user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time)
+        return self.database.update_gear(user_id, gear_id, gear_type, gear_name, description, add_time, retire_time, updated_time)
 
     def delete_gear(self, user_id, gear_id):
         """Delete method for the gear with the specified ID."""

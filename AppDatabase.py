@@ -2362,7 +2362,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return []
 
-    def update_gear(self, user_id, gear_id, gear_type, gear_name, gear_description, gear_add_time, gear_retire_time):
+    def update_gear(self, user_id, gear_id, gear_type, gear_name, description, add_time, retire_time, updated_time):
         """Retrieve method for the gear with the specified ID."""
         if user_id is None:
             self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: user_id")
@@ -2390,12 +2390,14 @@ class MongoDatabase(Database.Database):
                                 gear[Keys.GEAR_TYPE_KEY] = gear_type
                             if gear_name is not None:
                                 gear[Keys.GEAR_NAME_KEY] = gear_name
-                            if gear_description is not None:
-                                gear[Keys.GEAR_DESCRIPTION_KEY] = gear_description
-                            if gear_add_time is not None:
-                                gear[Keys.GEAR_ADD_TIME_KEY] = int(gear_add_time)
-                            if gear_retire_time is not None:
-                                gear[Keys.GEAR_RETIRE_TIME_KEY] = int(gear_retire_time)
+                            if description is not None:
+                                gear[Keys.GEAR_DESCRIPTION_KEY] = description
+                            if add_time is not None:
+                                gear[Keys.GEAR_ADD_TIME_KEY] = int(add_time)
+                            if retire_time is not None:
+                                gear[Keys.GEAR_RETIRE_TIME_KEY] = int(retire_time)
+                            if updated_time is not None:
+                                gear[Keys.GEAR_LAST_UPDATED_TIME_KEY] = int(updated_time)
                             gear_list.pop(gear_index)
                             gear_list.append(gear)
                             user[Keys.GEAR_KEY] = gear_list
