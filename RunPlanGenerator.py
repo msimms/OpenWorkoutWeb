@@ -372,6 +372,19 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         return workout
 
+    def gen_goal_workout(self, goal_distance_meters):
+        """Utility function for creating the goal workout/race."""
+
+        # Create the workout object.
+        workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EVENT, self.user_id)
+        workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.add_distance_interval(1, goal_distance_meters, 0, 0, 0)
+
+        # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
+        self.intensity_distribution_workouts[INTENSITY_ZONE_INDEX_HIGH] += 1
+
+        return workout
+
     def max_taper_distance(self, race_distance):
         """Returns the maximum distance for a single run during the taper."""
         if race_distance == Keys.GOAL_5K_RUN_KEY:
@@ -511,6 +524,11 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
             # Keep track of the number of easy miles/kms and the number of hard miles/kms we're expecting the user to run so we can balance the two.
             self.clear_intensity_distribution()
+
+            # Is this the goal week? If so, add that event.
+            if weeks_until_goal == int(0) and PlanGenerator.PlanGenerator.valid_float(goal_distance):
+                goal_workout = self.gen_goal_workout(goal_distance)
+                workouts.append(goal_workout)
 
             # Add a long run. No need for a long run if the goal is general fitness.
             if not in_taper and goal != Keys.GOAL_FITNESS_KEY:
