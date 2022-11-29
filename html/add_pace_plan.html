@@ -33,13 +33,25 @@ ${nav}
 </section>
 
 <section class="block">
-    <h2>Pace Plans</h2>
-    <p>
-        <table id="pace_plans">
-        </table>
-        <p id="description">
-        </p> 
-    </p>
+    <!-- Name -->
+    <h2>Name</h2>
+    <input type="text" name="pace_plan_name" id="pace_plan_name" value=""><br>
+
+    <!-- Description -->
+    <h2>Description</h2>
+    <textarea id="description" rows="5" cols="50"></textarea><br>
+
+    <!-- Distance -->
+    <h2>Distance</h2>
+    <input type="text" id="distance" value="Not set"></input>  <label>units</label><br>
+
+    <!-- Target Time -->
+    <h2>Target Time (hh:mm:ss)</h2>
+    <input type="text" id="target_time" value="Not set"></input><br>
+
+    <!-- Splits -->
+    <h2>Splits</h2>
+    <input type="text" id="splits" value="Not set"></input>  <label>seconds</label><br>
 </section>
 
 <section class="block">
