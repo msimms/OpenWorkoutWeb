@@ -400,6 +400,22 @@ class CherryPyFrontEnd(object):
 
     @cherrypy.expose
     @require()
+    def add_pace_plan(self):
+        """Renders the add pace plan page."""
+        try:
+            return self.backend.add_pace_plan()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.add_pace_plan.__name__)
+        return self.error()
+
+    @cherrypy.expose
+    @require()
     def pace_plans(self):
         """Renders the pace plans page."""
         try:

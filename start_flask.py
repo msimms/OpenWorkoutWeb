@@ -379,6 +379,20 @@ def import_activity():
         g_app.log_error('Unhandled exception in ' + import_activity.__name__)
     return error()
 
+@g_flask_app.route('/add_pace_plan')
+@login_requred
+def add_pace_plan():
+    """Renders the pace plans page."""
+    try:
+        return g_app.add_pace_plan()
+    except App.RedirectException as e:
+        return flask.redirect(e.url, code=302)
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + add_pace_plan.__name__)
+    return error()
+
 @g_flask_app.route('/pace_plans')
 @login_requred
 def pace_plans():

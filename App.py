@@ -1075,6 +1075,11 @@ class App(object):
         return self.render_simple_page('import.html', **kwargs)
 
     @Perf.statistics
+    def add_pace_plan(self):
+        """Renders the pace plans page."""
+        return self.render_simple_page('add_pace_plan.html')
+
+    @Perf.statistics
     def pace_plans(self):
         """Renders the pace plans page."""
         return self.render_simple_page('pace_plans.html')

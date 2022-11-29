@@ -622,6 +622,21 @@ def import_activity(env, start_response):
     return handle_error_500(start_response)
 
 @do_auth_check
+def add_pace_plan(env, start_response):
+    """Renders the add pace plan page."""
+    global g_front_end
+
+    try:
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.add_pace_plan())
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
+    except:
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
+    return handle_error_500(start_response)
+
+@do_auth_check
 def pace_plans(env, start_response):
     """Renders the pace plans page."""
     global g_front_end
@@ -925,6 +940,7 @@ def main():
         cherrypy.tree.graft(device_list, "/device_list")
         cherrypy.tree.graft(manual_entry, "/manual_entry")
         cherrypy.tree.graft(import_activity, "/import_activity")
+        cherrypy.tree.graft(add_pace_plan, "/add_pace_plan")
         cherrypy.tree.graft(pace_plans, "/pace_plans")
         cherrypy.tree.graft(task_status, "/task_status")
         cherrypy.tree.graft(profile, "/profile")

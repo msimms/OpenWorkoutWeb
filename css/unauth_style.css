@@ -28,9 +28,8 @@ a:active {color: #FF00CC}
 
 .errorbackground {
 	margin: 0px 0px 0px 0px;
-	padding: 250px 250px 250px 250px;
+	padding: 30% 30% 30% 30%;
 	width: auto;
-	height: 1080px;
 	background-size: cover;
 }
 
