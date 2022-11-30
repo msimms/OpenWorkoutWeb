@@ -2571,7 +2571,7 @@ class MongoDatabase(Database.Database):
     # Pace plan management methods
     #
 
-    def create_pace_plan(self, user_id, plan_id, plan_name, target_pace_min_km, target_distance_kms, display_units_pace, display_units_distance, splits, last_updated_time):
+    def create_pace_plan(self, user_id, plan_id, plan_name, plan_description, target_distance, target_distance_units, target_splits, target_splits_units, last_updated_time):
         """Create method for a pace plan associated with the specified user."""
         if user_id is None:
             self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: user_id")
@@ -2582,20 +2582,17 @@ class MongoDatabase(Database.Database):
         if plan_name is None:
             self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: plan_name")
             return False
-        if target_pace_min_km is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_pace_min_km")
+        if target_distance is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_distance")
             return False
-        if target_distance_kms is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_distance_kms")
+        if target_distance_units is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_distance_units")
             return False
-        if display_units_pace is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: display_units_pace")
+        if target_splits is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_splits")
             return False
-        if display_units_distance is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: display_units_distance")
-            return False
-        if splits is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: splits")
+        if target_splits_units is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_splits_units")
             return False
         if last_updated_time is None:
             self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: last_updated_time")
@@ -2623,11 +2620,11 @@ class MongoDatabase(Database.Database):
                 new_pace_plan = {}
                 new_pace_plan[Keys.PACE_PLAN_ID_KEY] = str(plan_id)
                 new_pace_plan[Keys.PACE_PLAN_NAME_KEY] = plan_name
-                new_pace_plan[Keys.PACE_PLAN_TARGET_PACE_KEY] = float(target_pace_min_km)
-                new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance_kms)
-                new_pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY] = int(float(display_units_pace))
-                new_pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY] = int(float(display_units_distance))
-                new_pace_plan[Keys.PACE_PLAN_SPLITS_KEY] = int(float(splits))
+                new_pace_plan[Keys.PACE_PLAN_DESCRIPTION_KEY] = plan_description
+                new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance)
+                new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY] = int(target_distance_units)
+                new_pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_KEY] = int(float(target_splits))
+                new_pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY] = int(target_splits_units)
                 new_pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
                 pace_plan_list.append(new_pace_plan)
                 user[Keys.PACE_PLANS_KEY] = pace_plan_list
@@ -2662,7 +2659,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return []
 
-    def update_pace_plan(self, user_id, plan_id, plan_name, target_pace_min_km, target_distance_kms, display_units_pace, display_units_distance, splits, last_updated_time):
+    def update_pace_plan(self, user_id, plan_id, plan_name, plan_description, target_distance, target_distance_units, target_splits, target_splits_units, last_updated_time):
         """Update method for a pace plan associated with the specified user."""
         if user_id is None:
             self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: user_id")
@@ -2673,20 +2670,20 @@ class MongoDatabase(Database.Database):
         if plan_name is None:
             self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: plan_name")
             return False
-        if target_pace_min_km is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_pace_min_km")
+        if plan_description is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: plan_description")
             return False
-        if target_distance_kms is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_pace_min_km")
+        if target_distance is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_distance")
             return False
-        if display_units_pace is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: display_units_pace")
+        if target_distance_units is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_distance_units")
             return False
-        if display_units_distance is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: display_units_distance")
+        if target_splits is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_splits")
             return False
-        if splits is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: splits")
+        if target_splits_units is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_splits_units")
             return False
         if last_updated_time is None:
             self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: last_updated_time")
@@ -2708,11 +2705,11 @@ class MongoDatabase(Database.Database):
                     for pace_plan in pace_plan_list:
                         if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(plan_id):
                             pace_plan[Keys.PACE_PLAN_NAME_KEY] = plan_name
-                            pace_plan[Keys.PACE_PLAN_TARGET_PACE_KEY] = float(target_pace_min_km)
-                            pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance_kms)
-                            pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY] = int(float(display_units_pace))
-                            pace_plan[Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY] = int(float(display_units_distance))
-                            pace_plan[Keys.PACE_PLAN_SPLITS_KEY] = int(float(splits))
+                            pace_plan[Keys.PACE_PLAN_DESCRIPTION_KEY] = plan_description
+                            pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance)
+                            pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY] = int(target_distance_units)
+                            pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_KEY] = int(float(target_splits))
+                            pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY] = int(target_splits_units)
                             pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
                             pace_plan_list.pop(pace_plan_index)
                             pace_plan_list.append(pace_plan)

@@ -2100,15 +2100,15 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.PACE_PLAN_NAME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.PACE_PLAN_TARGET_PACE_KEY not in values:
+        if Keys.PACE_PLAN_DESCRIPTION_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.PACE_PLAN_TARGET_DISTANCE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY not in values:
+        if Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY not in values:
+        if Keys.PACE_PLAN_TARGET_SPLITS_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.PACE_PLAN_SPLITS_KEY not in values:
+        if Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.PACE_PLAN_LAST_UPDATED_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -2120,26 +2120,26 @@ class Api(object):
         plan_name = unquote_plus(values[Keys.PACE_PLAN_NAME_KEY])
         if not InputChecker.is_valid_decoded_str(plan_name):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        target_pace = unquote_plus(values[Keys.PACE_PLAN_TARGET_PACE_KEY])
-        if not InputChecker.is_float(target_pace):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        plan_description = unquote_plus(values[Keys.PACE_PLAN_DESCRIPTION_KEY])
+        if not InputChecker.is_valid_decoded_str(plan_description):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")            
         target_distance = unquote_plus(values[Keys.PACE_PLAN_TARGET_DISTANCE_KEY])
         if not InputChecker.is_float(target_distance):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        target_pace_units = unquote_plus(values[Keys.PACE_PLAN_DISPLAY_UNITS_PACE_KEY])
-        if not InputChecker.is_float(target_pace_units):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        target_distance_units = unquote_plus(values[Keys.PACE_PLAN_DISPLAY_UNITS_DISTANCE_KEY])
+        target_distance_units = unquote_plus(values[Keys.PACE_PLAN_TARGET_DISTANCE_KEY])
         if not InputChecker.is_float(target_distance_units):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        splits = unquote_plus(values[Keys.PACE_PLAN_SPLITS_KEY])
-        if not InputChecker.is_float(splits):
+        target_splits = unquote_plus(values[Keys.PACE_PLAN_TARGET_SPLITS_KEY])
+        if not InputChecker.is_float(target_splits):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        target_splits_units = unquote_plus(values[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY])
+        if not InputChecker.is_float(target_splits_units):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         last_updated_time = unquote_plus(values[Keys.PACE_PLAN_LAST_UPDATED_KEY])
         if not InputChecker.is_unsigned_integer(last_updated_time):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        result = self.data_mgr.create_pace_plan(self.user_id, plan_id, plan_name, target_pace, target_distance, target_pace_units, target_distance_units, splits, last_updated_time)
+        result = self.data_mgr.create_pace_plan(self.user_id, plan_id, plan_name, plan_description, target_distance, target_distance_units, target_splits, target_splits_units, last_updated_time)
         return result, ""
 
     def handle_delete_pace_plan(self, values):
