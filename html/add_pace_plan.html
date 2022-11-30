@@ -26,6 +26,127 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script type="text/javascript">
+    /// @function parse_HHMMSS
+    // Parses the string for a time value in the format of HH:MM:SS where MM and SS ranges from 0 to 59.
+    function parse_HHMMSS(str)
+    {
+		let listItems = str.split(":");
+		let reversedList = listItems.reverse();
+		let numItems = reversedList.length;
+
+        if (numItems == 0)
+        {
+            return false;
+        }
+        if (numItems >= 3)
+        {
+            let tempHours = parseInt(reversedList[2]);
+
+            if (!isNaN(tempHours))
+            {
+                if (tempHours < 0)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        if (numItems >= 2)
+        {
+            let tempMinutes = parseInt(reversedList[1]);
+
+            if (!isNaN(tempMinutes))
+            {
+                if (tempMinutes < 0 || tempMinutes > 59)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        if (numItems >= 1)
+        {
+            let tempSeconds = parseInt(reversedList[0]);
+
+            if (!isNaN(tempSeconds))
+            {
+                if (tempSeconds < 0 || tempSeconds > 59)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /// @function save_pace_plan
+    // Button handler for when the user saves the pace plan.
+    function save_pace_plan()
+    {
+        let the_url = "${root_url}/api/1.0/create_pace_plan";
+        let name = document.getElementById("pace_plan_name").value;
+        let description = document.getElementById("description").value;
+        let target_time = document.getElementById("target_time").value;
+        let distance = parseFloat(document.getElementById("distance").value);
+        let distance_units = document.getElementById("distance_units").innerHTML;
+        let splits = parseFloat(document.getElementById("splits").value);
+        let dict = [];
+        let result_text = {};
+
+        // Validate the name.
+        if (name.length == 0)
+        {
+            alert("The name cannot be empty!");
+            return;
+        }
+
+        // Validate the distance.
+        if (isNaN(distance))
+        {
+            alert("The distance must be a number!");
+            return;
+        }
+        else if (distance <= 0.0)
+        {
+            alert("The distance cannot be negative!");
+            return;
+        }
+    
+        // Validate the target time.
+        if (!parse_HHMMSS(target_time))
+        {
+            alert("The target time should be in the form of HH:HH:SS!");
+            return;
+        }
+
+        // Validate the splits.
+        if (isNaN(splits))
+        {
+            alert("The splits must be a number!");
+            return;
+        }
+    
+        dict.push({["name"] : name});
+        dict.push({["description"] : description});
+        dict.push({["distance"] : distance});
+        dict.push({["distance units"] : distance_units});
+        dict.push({["target time"] : target_time});
+        dict.push({["splits"] : splits});
+        if (send_post_request(the_url, dict, result_text))
+            window.location.replace('${root_url}/pace_plans');
+        else
+            alert("An error occurred!");
+    }
 </script>
 
 <section class="nav">
@@ -43,21 +164,25 @@ ${nav}
 
     <!-- Distance -->
     <h2>Distance</h2>
-    <input type="text" id="distance" value="Not set"></input>  <label>units</label><br>
+    <input type="text" id="distance" value="10"></input>  
+    <select id="distance_units">
+        <option value="Kilometers">Kilometers</option>
+        <option value="Miles">Miles</option>
+    </select><br>
 
     <!-- Target Time -->
     <h2>Target Time (hh:mm:ss)</h2>
-    <input type="text" id="target_time" value="Not set"></input><br>
+    <input type="text" id="target_time" value="01:00:00"></input><br>
 
     <!-- Splits -->
     <h2>Splits</h2>
-    <input type="text" id="splits" value="Not set"></input>  <label>seconds</label><br>
+    <input type="text" id="splits" value="0"></input>  <label>seconds</label><br>
 </section>
 
 <section class="block">
     <!-- Save Button -->
     <hr>
-    <button type="button" onclick="window.location.replace('${root_url}/save_pace_plan')">Save</button><br>
+    <button type="button" onclick="save_pace_plan()">Save</button><br>
 </section>
 
 </body>
