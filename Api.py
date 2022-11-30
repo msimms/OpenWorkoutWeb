@@ -2231,8 +2231,6 @@ class Api(object):
         # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
-        if Keys.ACTIVITY_HASH_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Activity hash not specified.")
 
         # Activity ID from user.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
@@ -2240,9 +2238,11 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         # Activity hash from user.
-        activity_hash = values[Keys.ACTIVITY_HASH_KEY]
-        if not InputChecker.is_hex_str(activity_hash):
-            raise ApiException.ApiMalformedRequestException("Invalid activity hash.")
+        activity_hash = None
+        if Keys.ACTIVITY_HASH_KEY in values:
+            activity_hash = values[Keys.ACTIVITY_HASH_KEY]
+            if not InputChecker.is_hex_str(activity_hash):
+                raise ApiException.ApiMalformedRequestException("Invalid activity hash.")
 
         # Anything in the database?
         exists = self.data_mgr.activity_exists(activity_id)
@@ -2253,11 +2253,14 @@ class Api(object):
             return True, json.dumps( { Keys.CODE_KEY: 1, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash not computed
 
         # Hash from database.
-        if Keys.ACTIVITY_HASH_KEY not in summary_data:
-            return True, json.dumps( { Keys.CODE_KEY: 1, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash not computed
-        hash_from_db = summary_data[Keys.ACTIVITY_HASH_KEY]
-        if hash_from_db != activity_hash:
-            return True, json.dumps( { Keys.CODE_KEY: 2, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, has does not match
+        if activity_hash is not None:
+            if Keys.ACTIVITY_HASH_KEY not in summary_data:
+                return True, json.dumps( { Keys.CODE_KEY: 1, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash not computed
+            hash_from_db = summary_data[Keys.ACTIVITY_HASH_KEY]
+            if hash_from_db != activity_hash:
+                return True, json.dumps( { Keys.CODE_KEY: 2, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, has does not match
+        else:
+            return True, json.dumps( { Keys.CODE_KEY: 4, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash not provided
 
         return True, json.dumps( { Keys.CODE_KEY: 3, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash matches as well
 
