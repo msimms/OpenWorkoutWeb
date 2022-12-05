@@ -377,7 +377,7 @@ class Api(object):
         # Get the activity from the database.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if activity is None:
-            raise ApiException.ApiMalformedRequestException("Invalid activity.")
+            raise ApiException.ApiMalformedRequestException("Activity not found.")
 
         # Determine if the requesting user can view the activity.
         if not self.activity_can_be_viewed(activity):
@@ -1003,7 +1003,7 @@ class Api(object):
         if Keys.UPLOADED_FILE_DATA_KEY not in values:
             raise ApiException.ApiMalformedRequestException("File data not specified.")
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -1045,7 +1045,7 @@ class Api(object):
 
         # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
         # Validate the activity ID.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
@@ -1066,9 +1066,9 @@ class Api(object):
 
         # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
         if Keys.ACTIVITY_PHOTO_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Photo ID not specified.")
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -1102,7 +1102,7 @@ class Api(object):
 
         # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
         # Validate the activity ID.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
@@ -1115,7 +1115,7 @@ class Api(object):
         while tag_name in values:
             tag = unquote_plus(values[tag_name])
             if not InputChecker.is_valid_decoded_str(tag):
-                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+                raise ApiException.ApiMalformedRequestException("Invalid tag.")
             if len(tag) > 0:
                 tags.append(tag)
             tag_index = tag_index + 1
@@ -1136,7 +1136,7 @@ class Api(object):
 
         # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
         # Validate the activity ID.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
@@ -1152,7 +1152,7 @@ class Api(object):
 
         # Required parameters.
         if 'searchname' not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Search name not specified.")
 
         search_name = unquote_plus(values['searchname'])
         search_name_len = len(search_name)
@@ -1190,7 +1190,7 @@ class Api(object):
 
         # Required parameters.
         if Keys.TARGET_EMAIL_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Email address not specified.")
 
         # Decode and validate the required parameters.
         target_email = unquote_plus(values[Keys.TARGET_EMAIL_KEY])
@@ -1212,7 +1212,7 @@ class Api(object):
 
         # Required parameters.
         if Keys.TARGET_EMAIL_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Email address not specified.")
 
         # Decode and validate the required parameters.
         target_email = unquote_plus(values[Keys.TARGET_EMAIL_KEY])
@@ -1234,7 +1234,7 @@ class Api(object):
 
         # Required parameters.
         if Keys.TARGET_EMAIL_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Email address not specified.")
 
         # Decode and validate the required parameters.
         target_email = unquote_plus(values[Keys.TARGET_EMAIL_KEY])
@@ -1258,9 +1258,9 @@ class Api(object):
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Missing activity ID parameter.")
         if Keys.TRIM_FROM_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Missing parameter.")
+            raise ApiException.ApiMalformedRequestException("Trim from timestamp not specified.")
         if Keys.TRIM_SECONDS_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Missing parameter.")
+            raise ApiException.ApiMalformedRequestException("Trim seconds not specified.")
 
         # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
@@ -1291,9 +1291,9 @@ class Api(object):
 
         # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Missing activity ID parameter.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
         if Keys.ACTIVITY_EXPORT_FORMAT_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Missing format parameter.")
+            raise ApiException.ApiMalformedRequestException("Export format not specified.")
 
         # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
@@ -1301,7 +1301,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
         export_format = values[Keys.ACTIVITY_EXPORT_FORMAT_KEY]
         if not export_format in ['csv', 'gpx', 'tcx']:
-            raise ApiException.ApiMalformedRequestException("Invalid format.")
+            raise ApiException.ApiMalformedRequestException("Invalid export format.")
 
         activity = self.data_mgr.retrieve_activity(activity_id)
         if not self.activity_can_be_viewed(activity):
@@ -1351,7 +1351,7 @@ class Api(object):
 
         # Required parameters.
         if 'device_id' not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Device ID not specified.")
 
         result = self.user_mgr.create_user_device_for_user_id(self.user_id, values['device_id'])
         return result, ""
@@ -1363,9 +1363,9 @@ class Api(object):
 
         # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
         if Keys.ACTIVITY_TAG_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Tag not specified.")
 
         # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
@@ -1373,9 +1373,9 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
         tag = values[Keys.ACTIVITY_TAG_KEY]
         if not InputChecker.is_valid_decoded_str(tag):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid tag.")
         if len(tag) == 0:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Empty tag.")
 
         result = self.data_mgr.create_activity_tag(activity_id, tag)
         return result, ""
@@ -1387,9 +1387,9 @@ class Api(object):
 
         # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
         if Keys.ACTIVITY_TAG_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Tag not specified.")
 
         # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
@@ -1397,7 +1397,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
         tag = values[Keys.ACTIVITY_TAG_KEY]
         if not InputChecker.is_valid_decoded_str(tag):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid tag.")
 
         result = self.data_mgr.delete_tag(activity_id, tag)
         return result, ""
@@ -1409,7 +1409,7 @@ class Api(object):
 
         # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
         # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
@@ -1427,9 +1427,9 @@ class Api(object):
 
         # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
         if Keys.ACTIVITY_COMMENT_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Comment not specified.")
 
         # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
@@ -1437,7 +1437,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
         comment = values[Keys.ACTIVITY_COMMENT_KEY]
         if not InputChecker.is_valid_decoded_str(comment):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid comment.")
 
         result = self.data_mgr.create_activity_comment(activity_id, self.user_id, comment)
         return result, ""
@@ -1449,7 +1449,7 @@ class Api(object):
 
         # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
         # Decode and validate the required parameters.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
@@ -1467,33 +1467,33 @@ class Api(object):
 
         # Required parameters.
         if Keys.GEAR_TYPE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Gear type not specified.")
         if Keys.GEAR_NAME_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Gear name not specified.")
         if Keys.GEAR_DESCRIPTION_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Gear description not specified.")
         if Keys.GEAR_ADD_TIME_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Gear added time not specified.")
 
         # Decode and validate the required parameters.
         gear_type = values[Keys.GEAR_TYPE_KEY]
         if not InputChecker.is_valid_decoded_str(gear_type):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid gear type.")
         gear_name = values[Keys.GEAR_NAME_KEY]
         if not InputChecker.is_valid_decoded_str(gear_name):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid gear name.")
         gear_description = values[Keys.GEAR_DESCRIPTION_KEY]
         if not InputChecker.is_valid_decoded_str(gear_description):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid gear description.")
         add_time = values[Keys.GEAR_ADD_TIME_KEY]
         if not InputChecker.is_unsigned_integer(add_time):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid gear added time.")
 
         # Retired date is optional.
         if Keys.GEAR_RETIRE_TIME_KEY in values and values[Keys.GEAR_RETIRE_TIME_KEY] is not None:
             retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
             if not InputChecker.is_unsigned_integer(retire_time):
-                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+                raise ApiException.ApiMalformedRequestException("Invalid gear retired time.")
         else:
             retire_time = 0
 
@@ -1501,7 +1501,7 @@ class Api(object):
         if Keys.GEAR_LAST_UPDATED_TIME_KEY in values and values[Keys.GEAR_LAST_UPDATED_TIME_KEY] is not None:
             last_updated_time = values[Keys.GEAR_LAST_UPDATED_TIME_KEY]
             if not InputChecker.is_unsigned_integer(last_updated_time):
-                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+                raise ApiException.ApiMalformedRequestException("Invalid last updated time.")
         else:
             last_updated_time = 0
 
@@ -1529,6 +1529,11 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
+        # Required parameters.
+        if Keys.GEAR_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Gear ID not specified.")
+
+        # Decode and validate the required parameters.
         gear_id = values[Keys.GEAR_ID_KEY]
         if not InputChecker.is_uuid(gear_id):
             raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
@@ -1536,35 +1541,35 @@ class Api(object):
         if Keys.GEAR_TYPE_KEY in values:
             gear_type = values[Keys.GEAR_TYPE_KEY]
             if not InputChecker.is_valid_decoded_str(gear_type):
-                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+                raise ApiException.ApiMalformedRequestException("Invalid gear type.")
         else:
             gear_type = None
 
         if Keys.GEAR_NAME_KEY in values:
             gear_name = values[Keys.GEAR_NAME_KEY]
             if not InputChecker.is_valid_decoded_str(gear_name):
-                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+                raise ApiException.ApiMalformedRequestException("Invalid gear name.")
         else:
             gear_name = None
 
         if Keys.GEAR_DESCRIPTION_KEY in values:
             gear_description = values[Keys.GEAR_DESCRIPTION_KEY]
             if not InputChecker.is_valid_decoded_str(gear_description):
-                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+                raise ApiException.ApiMalformedRequestException("Invalid gear description.")
         else:
             gear_description = None
 
         if Keys.GEAR_ADD_TIME_KEY in values:
             add_time = values[Keys.GEAR_ADD_TIME_KEY]
             if not InputChecker.is_unsigned_integer(add_time):
-                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+                raise ApiException.ApiMalformedRequestException("Invalid gear added time.")
         else:
             add_time = None
 
         if Keys.GEAR_RETIRE_TIME_KEY in values:
             retire_time = values[Keys.GEAR_RETIRE_TIME_KEY]
             if not InputChecker.is_unsigned_integer(retire_time):
-                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+                raise ApiException.ApiMalformedRequestException("Invalid gear retired time.")
         else:
             retire_time = None
 
@@ -1572,7 +1577,7 @@ class Api(object):
         if Keys.GEAR_LAST_UPDATED_TIME_KEY in values and values[Keys.GEAR_LAST_UPDATED_TIME_KEY] is not None:
             last_updated_time = values[Keys.GEAR_LAST_UPDATED_TIME_KEY]
             if not InputChecker.is_unsigned_integer(last_updated_time):
-                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+                raise ApiException.ApiMalformedRequestException("Invalid last updated time.")
         else:
             last_updated_time = 0
 
@@ -1586,9 +1591,9 @@ class Api(object):
 
         # Required parameters.
         if Keys.ACTIVITY_TYPE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Activity type not specified.")
         if Keys.GEAR_NAME_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Gear name not specified.")
 
         # Decode and validate the required parameters.
         activity_type = values[Keys.ACTIVITY_TYPE_KEY]
@@ -1608,7 +1613,7 @@ class Api(object):
 
         # Required parameters.
         if Keys.GEAR_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Gear ID not specified.")
 
         # Do we have a valid gear ID?
         gear_id = values[Keys.GEAR_ID_KEY]
@@ -1625,7 +1630,7 @@ class Api(object):
 
         # Required parameters.
         if Keys.GEAR_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Gear ID not specified.")
 
         # Do we have a valid gear ID?
         gear_id = values[Keys.GEAR_ID_KEY]
@@ -1642,9 +1647,9 @@ class Api(object):
 
         # Required parameters.
         if Keys.SERVICE_RECORD_DATE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Record date not specified.")
         if Keys.SERVICE_RECORD_DESCRIPTION_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Record description not specified.")
 
         # Decode and validate the required parameters.
         gear_id = values[Keys.GEAR_ID_KEY]
@@ -1655,7 +1660,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid service date.")
         description = values[Keys.SERVICE_RECORD_DESCRIPTION_KEY]
         if not InputChecker.is_valid_decoded_str(description):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid description.")
 
         result = self.data_mgr.create_service_record(self.user_id, gear_id, service_date, description)
         return result, ""
@@ -1667,7 +1672,7 @@ class Api(object):
 
         # Required parameters.
         if Keys.SERVICE_RECORD_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Record ID not specified.")
 
         # Do we have a valid gear ID?
         gear_id = values[Keys.GEAR_ID_KEY]
@@ -1912,7 +1917,7 @@ class Api(object):
 
         # Required parameters.
         if Keys.API_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("A key was not specified.")
+            raise ApiException.ApiMalformedRequestException("An API key was not specified.")
 
         api_key = values[Keys.API_KEY]
         result = self.data_mgr.delete_api_key(self.user_id, api_key)
@@ -1946,6 +1951,8 @@ class Api(object):
     def handle_create_workout(self, values):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
         if Keys.WORKOUT_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Workout ID not specified.")
 
@@ -2033,13 +2040,13 @@ class Api(object):
 
         # Required parameters.
         if Keys.RACE_NAME_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Race name not specified.")
         if Keys.RACE_DATE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Race date not specified.")
         if Keys.RACE_DISTANCE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Race distance not specified.")
         if Keys.RACE_IMPORTANCE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Race importance not specified.")
 
         race_name = values[Keys.RACE_NAME_KEY]
         race_date = values[Keys.RACE_DATE_KEY]
@@ -2064,12 +2071,12 @@ class Api(object):
 
         # Required parameters.
         if Keys.RACE_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Race ID not specified.")
 
         # Validate.
         race_id = values[Keys.RACE_ID_KEY]
         if not InputChecker.is_uuid(race_id):
-            raise ApiException.ApiMalformedRequestException("Invalid race ID: " + str(race_id) + ".")
+            raise ApiException.ApiMalformedRequestException("Invalid race ID.")
 
         deleted = self.data_mgr.delete_race(self.user_id, race_id)
         return deleted, ""
@@ -2096,51 +2103,68 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
 
         # Required parameters.
-        if Keys.PACE_PLAN_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
         if Keys.PACE_PLAN_NAME_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Pace plan name not specified.")
         if Keys.PACE_PLAN_DESCRIPTION_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Pace plan description not specified.")
         if Keys.PACE_PLAN_TARGET_DISTANCE_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Pace plan target distance not specified.")
         if Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Pace plan target distance units not specified.")
+        if Keys.PACE_PLAN_TARGET_TIME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Pace plan target time not specified.")
         if Keys.PACE_PLAN_TARGET_SPLITS_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Pace plan target splits not specified.")
         if Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        if Keys.PACE_PLAN_LAST_UPDATED_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Pace plan target splits units not specified.")
 
         # Decode and validate the required parameters.
-        plan_id = unquote_plus(values[Keys.PACE_PLAN_ID_KEY])
-        if not InputChecker.is_uuid(plan_id):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        plan_name = unquote_plus(values[Keys.PACE_PLAN_NAME_KEY])
+        plan_name = values[Keys.PACE_PLAN_NAME_KEY]
         if not InputChecker.is_valid_decoded_str(plan_name):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        plan_description = unquote_plus(values[Keys.PACE_PLAN_DESCRIPTION_KEY])
+            raise ApiException.ApiMalformedRequestException("Invalid pace plan name.")
+        plan_description = values[Keys.PACE_PLAN_DESCRIPTION_KEY]
         if not InputChecker.is_valid_decoded_str(plan_description):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")            
-        target_distance = unquote_plus(values[Keys.PACE_PLAN_TARGET_DISTANCE_KEY])
+            raise ApiException.ApiMalformedRequestException("Invalid pace plan description.")
+        target_distance = values[Keys.PACE_PLAN_TARGET_DISTANCE_KEY]
         if not InputChecker.is_float(target_distance):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        target_distance_units = unquote_plus(values[Keys.PACE_PLAN_TARGET_DISTANCE_KEY])
-        if not InputChecker.is_float(target_distance_units):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        target_splits = unquote_plus(values[Keys.PACE_PLAN_TARGET_SPLITS_KEY])
+            raise ApiException.ApiMalformedRequestException("Invalid pace plan target distance.")
+        target_distance_units = values[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY]
+        if not InputChecker.is_valid_decoded_str(target_distance_units):
+            raise ApiException.ApiMalformedRequestException("Invalid pace plan target distance units.")
+        target_time = values[Keys.PACE_PLAN_TARGET_TIME_KEY]
+        target_time_valid, _, _, _ = InputChecker.parse_HHMMSS(target_time)
+        if not target_time_valid:
+            raise ApiException.ApiMalformedRequestException("Invalid pace plan target time.")
+        target_splits = values[Keys.PACE_PLAN_TARGET_SPLITS_KEY]
         if not InputChecker.is_float(target_splits):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        target_splits_units = unquote_plus(values[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY])
-        if not InputChecker.is_float(target_splits_units):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        last_updated_time = unquote_plus(values[Keys.PACE_PLAN_LAST_UPDATED_KEY])
-        if not InputChecker.is_unsigned_integer(last_updated_time):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid pace plan target splits.")
+        target_splits_units = values[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY]
+        if not InputChecker.is_valid_decoded_str(target_splits_units):
+            raise ApiException.ApiMalformedRequestException("Invalid pace plan target splits units.")
+        if Keys.PACE_PLAN_LAST_UPDATED_KEY not in values:
+            last_updated_time = time.time()
+        else:
+            last_updated_time = values[Keys.PACE_PLAN_LAST_UPDATED_KEY]
+            if not InputChecker.is_unsigned_integer(last_updated_time):
+                raise ApiException.ApiMalformedRequestException("Invalid last updated time.")
 
-        result = self.data_mgr.create_pace_plan(self.user_id, plan_id, plan_name, plan_description, target_distance, target_distance_units, target_splits, target_splits_units, last_updated_time)
+        # Convert units strs.
+        if target_distance_units == Keys.UNITS_METRIC_KEY:
+            target_distance_units = Keys.UNITS_METRIC_KEY
+        else:
+            target_distance_units = Keys.UNITS_STANDARD_KEY
+        if target_splits_units == Keys.UNITS_METRIC_KEY:
+            target_splits_units = Keys.UNITS_METRIC_KEY
+        else:
+            target_splits_units = Keys.UNITS_STANDARD_KEY
+
+        result = self.data_mgr.create_pace_plan(self.user_id, plan_name, plan_description, target_distance, target_distance_units, target_time, target_splits, target_splits_units, last_updated_time)
         return result, ""
+
+    def handle_update_pace_plan(self, values):
+        """Called when the user is modifying a pace plan, typically from the mobile app."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
 
     def handle_delete_pace_plan(self, values):
         """Called when the user wants to delete a pace plan."""
@@ -2149,12 +2173,12 @@ class Api(object):
 
         # Required parameters.
         if Keys.PACE_PLAN_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Pace plan ID not specified.")
 
         # Decode and validate the required parameters.
         plan_id = values[Keys.PACE_PLAN_ID_KEY]
         if not InputChecker.is_uuid(plan_id):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            raise ApiException.ApiMalformedRequestException("Invalid pace plan ID.")
 
         result = self.data_mgr.delete_pace_plan(self.user_id, plan_id)
         return result, ""
@@ -2169,7 +2193,7 @@ class Api(object):
         return True, json_result
 
     def handle_get_workout_ical_url(self, values):
-        """Called when the user wants a link to the ical url for their planned workouts."""
+        """Called when the user wants a link to the iCal URL for their planned workouts."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -2203,7 +2227,7 @@ class Api(object):
         return True, json.dumps(heat_map)
 
     def handle_get_activity_hash_from_id(self, values):
-        """Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities."""
+        """Given the activity hash, returns the activity ID, or an error if not found. Only looks at the logged in user's activities."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -2690,6 +2714,8 @@ class Api(object):
             return self.handle_delete_race(values)
         elif request == 'create_pace_plan':
             return self.handle_create_pace_plan(values)        
+        elif request == 'update_pace_plan':
+            return self.handle_update_pace_plan(values)        
         elif request == 'delete_pace_plan':
             return self.handle_delete_pace_plan(values)        
         elif request == 'update_settings':

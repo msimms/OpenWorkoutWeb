@@ -149,21 +149,21 @@ def parse_HHMMSS(str):
     seconds = 0
     try:
         list_items = str.split(":")
-        reversed_list = list_items.reversed()
-        num_items = len(reversed_list)
+        list_items.reverse()
+        num_items = len(list_items)
 
         if num_items == 0:
             return False, None, None, None
         if num_items >= 3:
-            hours = int(reversed_list[2])
+            hours = int(list_items[2])
             if hours < 0:
                 return False, None, None, None
         if num_items >= 2:
-            minutes = int(reversed_list[1])
+            minutes = int(list_items[1])
             if minutes < 0 or minutes >= 60:
                 return False, None, None, None
         if num_items >= 1:
-            seconds = int(reversed_list[0])
+            seconds = int(list_items[0])
             if seconds < 0 or seconds >= 60:
                 return False, None, None, None
     except:

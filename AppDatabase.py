@@ -2571,7 +2571,7 @@ class MongoDatabase(Database.Database):
     # Pace plan management methods
     #
 
-    def create_pace_plan(self, user_id, plan_id, plan_name, plan_description, target_distance, target_distance_units, target_splits, target_splits_units, last_updated_time):
+    def create_pace_plan(self, user_id, plan_id, plan_name, plan_description, target_distance, target_distance_units, target_time, target_splits, target_splits_units, last_updated_time):
         """Create method for a pace plan associated with the specified user."""
         if user_id is None:
             self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: user_id")
@@ -2587,6 +2587,9 @@ class MongoDatabase(Database.Database):
             return False
         if target_distance_units is None:
             self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_distance_units")
+            return False
+        if target_time is None:
+            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_time")
             return False
         if target_splits is None:
             self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_splits")
@@ -2622,9 +2625,10 @@ class MongoDatabase(Database.Database):
                 new_pace_plan[Keys.PACE_PLAN_NAME_KEY] = plan_name
                 new_pace_plan[Keys.PACE_PLAN_DESCRIPTION_KEY] = plan_description
                 new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance)
-                new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY] = int(target_distance_units)
+                new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY] = target_distance_units
+                new_pace_plan[Keys.PACE_PLAN_TARGET_TIME_KEY] = target_time
                 new_pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_KEY] = int(float(target_splits))
-                new_pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY] = int(target_splits_units)
+                new_pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY] = target_splits_units
                 new_pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
                 pace_plan_list.append(new_pace_plan)
                 user[Keys.PACE_PLANS_KEY] = pace_plan_list
@@ -2659,7 +2663,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return []
 
-    def update_pace_plan(self, user_id, plan_id, plan_name, plan_description, target_distance, target_distance_units, target_splits, target_splits_units, last_updated_time):
+    def update_pace_plan(self, user_id, plan_id, plan_name, plan_description, target_distance, target_distance_units, target_time, target_splits, target_splits_units, last_updated_time):
         """Update method for a pace plan associated with the specified user."""
         if user_id is None:
             self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: user_id")
@@ -2678,6 +2682,9 @@ class MongoDatabase(Database.Database):
             return False
         if target_distance_units is None:
             self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_distance_units")
+            return False
+        if target_time is None:
+            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_time")
             return False
         if target_splits is None:
             self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_splits")
@@ -2708,6 +2715,7 @@ class MongoDatabase(Database.Database):
                             pace_plan[Keys.PACE_PLAN_DESCRIPTION_KEY] = plan_description
                             pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance)
                             pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY] = int(target_distance_units)
+                            pace_plan[Keys.PACE_PLAN_TARGET_TIME_KEY] = target_time
                             pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_KEY] = int(float(target_splits))
                             pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY] = int(target_splits_units)
                             pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)

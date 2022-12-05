@@ -96,10 +96,11 @@
         let the_url = "${root_url}/api/1.0/create_pace_plan";
         let name = document.getElementById("pace_plan_name").value;
         let description = document.getElementById("description").value;
-        let target_time = document.getElementById("target_time").value;
         let distance = parseFloat(document.getElementById("distance").value);
-        let distance_units = document.getElementById("distance_units").innerHTML;
+        let distance_units = document.getElementById("distance_units").value;
+        let target_time = document.getElementById("target_time").value;
         let splits = parseFloat(document.getElementById("splits").value);
+        let splits_units = document.getElementById("splits_units").value;
         let dict = [];
         let result_text = {};
 
@@ -138,10 +139,11 @@
     
         dict.push({["name"] : name});
         dict.push({["description"] : description});
-        dict.push({["distance"] : distance});
-        dict.push({["distance units"] : distance_units});
+        dict.push({["target distance"] : distance});
+        dict.push({["target distance units"] : distance_units});
         dict.push({["target time"] : target_time});
-        dict.push({["splits"] : splits});
+        dict.push({["target splits"] : splits});
+        dict.push({["target splits units"] : splits_units});
         if (send_post_request(the_url, dict, result_text))
             window.location.replace('${root_url}/pace_plans');
         else
@@ -176,7 +178,11 @@ ${nav}
 
     <!-- Splits -->
     <h2>Splits</h2>
-    <input type="text" id="splits" value="0"></input>  <label>seconds</label><br>
+    <input type="text" id="splits" value="0"></input>  
+    <select id="splits_units">
+        <option value="Kilometers">Seconds Per Kilometer</option>
+        <option value="Miles">Seconds Per Mile</option>
+    </select><br>
 </section>
 
 <section class="block">
