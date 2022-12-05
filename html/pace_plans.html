@@ -52,43 +52,55 @@
 
     /// @function append_to_pace_plans_table
     // Handler for when the server returns the user's pace plan list.
-    function append_to_pace_plans_table(table, id, name, target_pace, target_distance, display_units_pace, display_units_distance, splits, last_updated)
+    function append_to_pace_plans_table(table, id, name, description, target_distance, target_distance_units, target_time, target_splits, target_splits_units, last_updated_time)
     {
         let new_row = table.insertRow();
-        let cell = new_row.insertCell();
 
+        // Name
+        let cell = new_row.insertCell();
         cell.appendChild(document.createTextNode(name));
 
-        let new_target_pace_str = "";
-        if (display_units_pace == 1)
+        // Description
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(description));
+
+        // Target distance.
+        let target_distance_str = target_distance.toFixed(2).toString();
+        if (target_distance_units == "standard")
         {
-            target_pace = target_pace * 1.60934
-            new_target_pace_str = target_pace.toFixed(2).toString() + " minutes/mile";
+            target_distance_str += " mile(s)";
         }
         else
         {
-            new_target_pace_str = target_pace.toFixed(2).toString() + " minutes/km";
+            target_distance_str += " km(s)";
         }
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(target_distance_str));
 
-        let new_target_distance_str = "";
-        if (display_units_distance == 1)
+        // Target time
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(target_time));
+
+        // Splits.
+        let splits_str = target_splits.toFixed(2).toString();
+        if (target_splits == 0)
         {
-            target_distance = target_distance * 0.621371192;
-            new_target_distance_str = target_distance.toFixed(2).toString() + " mile(s)";
+            splits_str = "Even splits";
+        }
+        else if (target_splits_units == "standard")
+        {
+            splits_str += " seconds/mile";
         }
         else
         {
-            new_target_distance_str = target_distance.toFixed(2).toString() + " km(s)";
+            splits_str += " seconds/km";
         }
-
         cell = new_row.insertCell();
-        cell.appendChild(document.createTextNode(new_target_pace_str));
+        cell.appendChild(document.createTextNode(splits_str));
 
+        // Last updated.
         cell = new_row.insertCell();
-        cell.appendChild(document.createTextNode(new_target_distance_str));
-
-        cell = new_row.insertCell();
-        cell.appendChild(document.createTextNode(unix_time_to_local_date_string(last_updated)));
+        cell.appendChild(document.createTextNode(unix_time_to_local_date_string(last_updated_time)));
 
         // Add a delete button.
         let btn = document.createElement('button');
@@ -116,7 +128,7 @@
 
             for (let record of records)
             {
-                append_to_pace_plans_table(table, record.id, record.name, record["target pace"], record["target distance"], record["display units pace"], record["display units distance"], record.splits, record["last updated"]);
+                append_to_pace_plans_table(table, record.id, record.name, record.description, record["target distance"], record["target distance units"], record["target time"], record["target splits"], record["target splits units"], record["last updated time"])
             }
         }
     }
@@ -146,8 +158,6 @@ ${nav}
     <p>
         <table id="pace_plans">
         </table>
-        <p id="description">
-        </p> 
     </p>
 </section>
 
