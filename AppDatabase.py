@@ -2714,10 +2714,10 @@ class MongoDatabase(Database.Database):
                             pace_plan[Keys.PACE_PLAN_NAME_KEY] = plan_name
                             pace_plan[Keys.PACE_PLAN_DESCRIPTION_KEY] = plan_description
                             pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance)
-                            pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY] = int(target_distance_units)
+                            pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY] = target_distance_units
                             pace_plan[Keys.PACE_PLAN_TARGET_TIME_KEY] = target_time
                             pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_KEY] = int(float(target_splits))
-                            pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY] = int(target_splits_units)
+                            pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY] = target_splits_units
                             pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
                             pace_plan_list.pop(pace_plan_index)
                             pace_plan_list.append(pace_plan)
