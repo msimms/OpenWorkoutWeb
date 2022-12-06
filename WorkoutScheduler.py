@@ -110,8 +110,17 @@ class WorkoutScheduler(object):
     def schedule_workouts(self, workouts, start_time):
         """Organizes the workouts into a schedule for the next week. Implements a very basic constraint solving algorithm."""
 
+        # Shuffle the deck.
+        random.shuffle(workouts)
+
         # This will server as our calendar for next week.
         week = [None] * 7
+
+        # Are there any events this week?
+        for workout in workouts:
+            if workout.type == Keys.WORKOUT_TYPE_EVENT:
+                day_index = int(workout.scheduled_time - start_time / 7)
+                week[day_index] = workout
 
         # Find the long run and put it on the preferred day.
         if self.user_id is not None:

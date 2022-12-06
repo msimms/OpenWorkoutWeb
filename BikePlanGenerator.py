@@ -172,12 +172,13 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         return workout
 
-    def gen_goal_workout(self, goal_distance_meters):
+    def gen_goal_workout(self, goal_distance_meters, goal_date):
         """Utility function for creating the goal workout/race."""
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EVENT, self.user_id)
         workout.sport_type = Keys.TYPE_CYCLING_KEY
+        workout.scheduled_time = goal_date
         workout.add_distance_interval(1, goal_distance_meters, 0, 0, 0)
 
         return workout
@@ -191,6 +192,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         goal_distance = inputs[Keys.GOAL_BIKE_DISTANCE_KEY]
         goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
         goal_type = inputs[Keys.GOAL_TYPE_KEY]
+        goal_date = inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY]
         weeks_until_goal = inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY]
         longest_ride_week_1 = inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_1_KEY] # Most recent week
         longest_ride_week_2 = inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_2_KEY]
@@ -221,8 +223,8 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         else:
 
             # Is this the goal week? If so, add that event.
-            if weeks_until_goal == int(0) and PlanGenerator.PlanGenerator.valid_float(goal_distance):
-                goal_workout = self.gen_goal_workout(goal_distance)
+            if goal != Keys.GOAL_FITNESS_KEY and weeks_until_goal < 1.0 and PlanGenerator.PlanGenerator.valid_float(goal_distance):
+                goal_workout = self.gen_goal_workout(goal_distance, goal_date)
                 workouts.append(goal_workout)
 
             # Cross training to support medium distance running

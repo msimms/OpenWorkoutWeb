@@ -80,6 +80,7 @@ GOAL_RUN_DISTANCE_KEY = "Goal Run Distance"
 
 # User settings that are exclusive to the workout plan generator.
 PLAN_INPUT_GOAL_KEY = "Goal"
+PLAN_INPUT_GOAL_DATE_KEY = "Goal Date" # Goal date in Unix time
 PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY = "Longest Run Week 1" # Most recent week
 PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY = "Longest Run Week 2" # Second most recent week
 PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY = "Longest Run Week 3" # Third most recent week

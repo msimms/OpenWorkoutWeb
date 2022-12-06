@@ -291,6 +291,7 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY] = experience_level
         inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
         inputs[Keys.PLAN_INPUT_GOAL_KEY] = goal
+        inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY] = goal_date
         inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
         inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = avg_running_distance

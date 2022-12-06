@@ -372,12 +372,13 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         return workout
 
-    def gen_goal_workout(self, goal_distance_meters):
+    def gen_goal_workout(self, goal_distance_meters, goal_date):
         """Utility function for creating the goal workout/race."""
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EVENT, self.user_id)
         workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.scheduled_time = goal_date
         workout.add_distance_interval(1, goal_distance_meters, 0, 0, 0)
 
         # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
@@ -422,6 +423,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         goal_distance = inputs[Keys.GOAL_RUN_DISTANCE_KEY]
         goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
         goal_type = inputs[Keys.GOAL_TYPE_KEY]
+        goal_date = inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY]
         weeks_until_goal = inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY]
         short_interval_run_pace = inputs[Keys.SHORT_INTERVAL_RUN_PACE]
         functional_threshold_pace = inputs[Keys.FUNCTIONAL_THRESHOLD_PACE]
@@ -526,8 +528,8 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             self.clear_intensity_distribution()
 
             # Is this the goal week? If so, add that event.
-            if weeks_until_goal == int(0) and PlanGenerator.PlanGenerator.valid_float(goal_distance):
-                goal_workout = self.gen_goal_workout(goal_distance)
+            if goal != Keys.GOAL_FITNESS_KEY and weeks_until_goal < 1.0 and PlanGenerator.PlanGenerator.valid_float(goal_distance):
+                goal_workout = self.gen_goal_workout(goal_distance, goal_date)
                 workouts.append(goal_workout)
 
             # Add a long run. No need for a long run if the goal is general fitness.
