@@ -465,7 +465,14 @@ START_TIME_KEY = "start_time"
 END_TIME_KEY = "end_time"
 START_DATE_KEY = "start"
 END_DATE_KEY = "end"
-CODE_KEY = "code"
+CODE_KEY = "code" # Used for sync, values are specified below
+
+# Activity match codes used for sync.
+ACTIVITY_MATCH_CODE_NO_ACTIVITY = 0 # Activity does not exist
+ACTIVITY_MATCH_CODE_HASH_NOT_COMPUTED = 1  # Activity exists, hash not computed
+ACTIVITY_MATCH_CODE_HASH_DOES_NOT_MATCH = 2 # Activity exists, has does not match
+ACTIVITY_MATCH_CODE_HASH_MATCHES = 3 # Activity exists, hash matches as well
+ACTIVITY_MATCH_CODE_HASH_NOT_PROVIDED = 4  # Activity exists, hash not provided
 
 SENSOR_KEYS = [ APP_CADENCE_KEY, APP_HEART_RATE_KEY, APP_TEMP_KEY, APP_POWER_KEY ]
 TIME_KEYS = [ BEST_1K, BEST_MILE, BEST_5K, BEST_10K, BEST_15K, BEST_HALF_MARATHON, BEST_MARATHON, BEST_METRIC_CENTURY, BEST_CENTURY ]

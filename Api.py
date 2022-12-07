@@ -2271,22 +2271,22 @@ class Api(object):
         # Anything in the database?
         exists = self.data_mgr.activity_exists(activity_id)
         if not exists:
-            return True, json.dumps( { Keys.CODE_KEY: 0, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity does not exist
+            return True, json.dumps( { Keys.CODE_KEY: Keys.ACTIVITY_MATCH_CODE_NO_ACTIVITY, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity does not exist
         summary_data = self.data_mgr.retrieve_activity_summary(activity_id)
         if summary_data is None:
-            return True, json.dumps( { Keys.CODE_KEY: 1, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash not computed
+            return True, json.dumps( { Keys.CODE_KEY: Keys.ACTIVITY_MATCH_CODE_HASH_NOT_COMPUTED, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash not computed
 
         # Hash from database.
         if activity_hash is not None:
             if Keys.ACTIVITY_HASH_KEY not in summary_data:
-                return True, json.dumps( { Keys.CODE_KEY: 1, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash not computed
+                return True, json.dumps( { Keys.CODE_KEY: Keys.ACTIVITY_MATCH_CODE_HASH_NOT_COMPUTED, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash not computed
             hash_from_db = summary_data[Keys.ACTIVITY_HASH_KEY]
             if hash_from_db != activity_hash:
-                return True, json.dumps( { Keys.CODE_KEY: 2, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, has does not match
+                return True, json.dumps( { Keys.CODE_KEY: Keys.ACTIVITY_MATCH_CODE_HASH_DOES_NOT_MATCH, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, has does not match
         else:
-            return True, json.dumps( { Keys.CODE_KEY: 4, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash not provided
+            return True, json.dumps( { Keys.CODE_KEY: Keys.ACTIVITY_MATCH_CODE_HASH_NOT_PROVIDED, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash not provided
 
-        return True, json.dumps( { Keys.CODE_KEY: 3, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash matches as well
+        return True, json.dumps( { Keys.CODE_KEY: Keys.ACTIVITY_MATCH_CODE_HASH_MATCHES, Keys.ACTIVITY_ID_KEY: activity_id } ) # Activity exists, hash matches as well
 
     def handle_list_personal_records(self, values):
         """Returns the user's personal records. Result is a JSON string."""
