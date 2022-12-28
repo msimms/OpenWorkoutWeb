@@ -1579,7 +1579,7 @@ class Api(object):
             if not InputChecker.is_unsigned_integer(last_updated_time):
                 raise ApiException.ApiMalformedRequestException("Invalid last updated time.")
         else:
-            last_updated_time = 0
+            last_updated_time = time.time()
 
         result = self.data_mgr.update_gear(self.user_id, gear_id, gear_type, gear_name, gear_description, add_time, retire_time, last_updated_time)
         return result, ""
@@ -1637,7 +1637,8 @@ class Api(object):
         if not InputChecker.is_uuid(gear_id):
             raise ApiException.ApiMalformedRequestException("Invalid gear ID.")
 
-        result = self.data_mgr.update_gear(self.user_id, gear_id, None, None, None, None, time.time())
+        now = time.time()
+        result = self.data_mgr.update_gear(self.user_id, gear_id, None, None, None, None, now, now)
         return result, ""
 
     def handle_create_service_record(self, values):
