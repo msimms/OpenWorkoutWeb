@@ -311,8 +311,8 @@ def convert_meters_to_printable(unit_system, meters):
             out_str += convert_to_string_in_specified_unit_system(Keys.UNITS_STANDARD_KEY, meters, UNITS_DISTANCE_METERS, None, Keys.TOTAL_DISTANCE)
             out_str += ")"
     elif meters > 0:
-        result += str(int(meters))
-        result += " meters"
+        out_str += str(int(meters))
+        out_str += " meters"
     return out_str
 
 def get_heart_rate_units_str():
