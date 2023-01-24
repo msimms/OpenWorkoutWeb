@@ -381,8 +381,6 @@ class UserMgr(object):
             return 0
         if key == Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY:
             return {}
-        if key == Keys.USER_SPECIFIED_MAX_HEART_RATE_KEY:
-            return 0
         if key == Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY:
             return {}
         if key == Keys.ESTIMATED_CYCLING_FTP_KEY:

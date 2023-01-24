@@ -131,11 +131,10 @@ DEFAULT_HEIGHT_KEY = 1.8 # Default height (meters)
 USER_WEIGHT_KEY = "weight" # User's weight (kilograms)
 DEFAULT_WEIGHT_KEY = 70.0 # Default weight (kilograms)
 USER_BIOLOGICAL_SEX_KEY = "biological sex" # The sex to use when computing calorie burn
-USER_RESTING_HEART_RATE_KEY = "resting heart rate" # Resting heart rate, in bpm
+USER_RESTING_HEART_RATE_KEY = "resting heart rate" # Resting heart rate, in bpm, specified by the user
 USER_MAXIMUM_HEART_RATE_KEY = "max heart rate" # Maximum heart rate, in bpm, specified by the user
 ESTIMATED_MAX_HEART_RATE_KEY = "estimated max heart rate" # Maximum heart rate, in bpm, computed from activities
 ESTIMATED_MAX_HEART_RATE_LIST_KEY = "estimated max heart rate list" # List of all maximum heart rates, in bpm, computed from activities
-USER_SPECIFIED_MAX_HEART_RATE_KEY = "user specified max heart rate" # Maximum heart rate, in bpm, given by the user
 BEST_CYCLING_20_MINUTE_POWER_LIST_KEY = "best 20 minute power list" # List of the best cycling 20 minute power values from each activity
 ESTIMATED_CYCLING_FTP_KEY = "estimated ftp" # Estimated FTP, in watts
 GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY = "gen workouts when race cal is empty" # If True we'll still run the workout plan generator even when the race calendar is empty
@@ -149,10 +148,9 @@ USER_RACES = "races" # List of races the user intends to do
 ACTIVITY_HEAT_MAP = "heat map" # Dictionary mapping an activity location (i.e., Florida) to a count
 USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, USER_PREFERRED_UNITS_KEY, USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY, USER_BIRTHDAY_KEY, USER_HEIGHT_KEY, USER_WEIGHT_KEY, \
     USER_BIOLOGICAL_SEX_KEY, USER_RESTING_HEART_RATE_KEY, USER_MAXIMUM_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, \
-    USER_SPECIFIED_MAX_HEART_RATE_KEY, BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_TYPE_KEY, PLAN_INPUT_EXPERIENCE_LEVEL_KEY, \
-    PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY, USER_CAN_UPLOAD_PHOTOS_KEY, \
-    USER_HAS_SWIMMING_POOL_ACCESS, USER_HAS_OPEN_WATER_SWIM_ACCESS, USER_HAS_BICYCLE, USER_PLAN_LAST_GENERATED_TIME, USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED, \
-    USER_RACES, ACTIVITY_HEAT_MAP ]
+    BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_TYPE_KEY, PLAN_INPUT_EXPERIENCE_LEVEL_KEY, PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, \
+    PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY, USER_CAN_UPLOAD_PHOTOS_KEY, USER_HAS_SWIMMING_POOL_ACCESS, \
+    USER_HAS_OPEN_WATER_SWIM_ACCESS, USER_HAS_BICYCLE, USER_PLAN_LAST_GENERATED_TIME, USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED, USER_RACES, ACTIVITY_HEAT_MAP ]
 USER_SETTINGS_LAST_UPDATED_KEY = "last updated" # Time when the user settings where last updated
 
 # Personal records.
