@@ -81,28 +81,6 @@ function serialize_to_url_params(dict)
 }
 
 /// @function Sends an HTTP GET request and waits for the response.
-function send_get_request(url, result_text)
-{
-    let result = false;
-
-    let xml_http = new XMLHttpRequest();
-    let content_type = "application/json; charset=utf-8";
-
-    xml_http.open("GET", url, false);
-    xml_http.setRequestHeader('Content-Type', content_type);
-    xml_http.onreadystatechange = function()
-    {
-        if (xml_http.readyState == XMLHttpRequest.DONE)
-        {
-            result_text.value = xml_http.responseText;
-        }
-        result = (xml_http.status == 200);
-    }
-    xml_http.send();
-    return result;
-}
-
-/// @function Sends an HTTP GET request and waits for the response.
 function send_get_request_async(url, callback)
 {
     let xml_http = new XMLHttpRequest();
