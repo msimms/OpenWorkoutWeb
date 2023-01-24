@@ -300,6 +300,8 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No key.")
         if value is None:
             raise Exception("No value.")
+        if create_list is None:
+            raise Exception("Missing parameter.")
         return self.database.create_or_update_activity_metadata(activity_id, date_time, key, value, create_list)
 
     def create_activity_metadata_list(self, activity_id, key, values):
