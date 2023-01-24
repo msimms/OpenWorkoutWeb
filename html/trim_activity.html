@@ -29,7 +29,6 @@
         {
             let the_url = "${root_url}/api/1.0/trim_activity";
             let dict = [];
-            let result_text = {};
             let quick_trim_selection = document.getElementById("quick_trim_options").value;
             let trim_from = "End";
             let trim_amount = 1;
@@ -52,10 +51,11 @@
             dict.push({"activity_id" : "${activity_id}"});
             dict.push({"Trim From" : trim_from});
             dict.push({"Seconds" : trim_amount});
-            if (send_post_request(the_url, dict, result_text))
-                alert("Trim complete.");
-            else
-                alert(result_text.value);
+
+            send_post_request_async(the_url, dict, function(status, response) {
+                if (status != 200)
+                    alert(response)
+            } );
         }
     }
 </script>

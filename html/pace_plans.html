@@ -35,18 +35,15 @@
         {
             let the_url = "${root_url}/api/1.0/delete_pace_plan";
             let dict = [];
-            let result_text = {};
 
             dict.push({["id"] : id});
 
-            if (send_post_request(the_url, dict, result_text))
-            {
-                window.location.replace("${root_url}/pace_plans");
-            }
-            else
-            {
-                alert(result_text.value);
-            }
+            send_post_request_async(the_url, dict, function(status, response) {
+                if (status == 200)
+                    window.location.reload();
+                else
+                    alert(response)
+            } );
         }
     }
 

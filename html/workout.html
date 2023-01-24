@@ -54,15 +54,15 @@
         let the_url = "${root_url}/api/1.0/update_workout";
         let scheduled_time = document.getElementById("scheduled_time").value;
         let dict = [];
-        let result_text = {};
         let timestamp = Date.parse(scheduled_time) / 1000;
 
         dict.push({["workout_id"] : "${workout_id}"});
         dict.push({["scheduled time"] : timestamp});
-        if (send_post_request(the_url, dict, result_text))
-            alert("Scheduled workout time updated!");
-        else
-            alert("An error occurred!");
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function create_point

@@ -32,11 +32,11 @@
         dict.push({["username"] : username});
         dict.push({["password"] : password});
 
-        send_post_request_async(the_url, dict, function(s, m) {
-            if (s == 200)
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
             {
-                if (m.length > 0) {
-                    let obj_list = JSON.parse(m);
+                if (response.length > 0) {
+                    let obj_list = JSON.parse(response);
                     document.cookie = "session_cookie=" + obj_list.cookie + "; ";
                 }
                 window.location.replace("${root_url}/all_activities");

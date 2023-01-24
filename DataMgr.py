@@ -1120,7 +1120,13 @@ class DataMgr(Importer.ActivityWriter):
 
     def rebuild_user_personal_records(self, user_id):
         """Called when we need to rebuild the personal records cache after deleting an activity, for example."""
-        pass
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        # TODO
+        return True
 
     def retrieve_unanalyzed_activity_list(self, limit):
         if self.database is None:

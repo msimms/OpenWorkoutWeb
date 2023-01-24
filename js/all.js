@@ -121,29 +121,6 @@ function send_get_request_async(url, callback)
 }
 
 /// @function Sends an HTTP POST request and waits for the response.
-function send_post_request(url, params, result_text)
-{
-    let result = false;
-
-    let xml_http = new XMLHttpRequest();
-    let content_type = "application/json; charset=utf-8";
-
-    xml_http.open("POST", url, false);
-    xml_http.setRequestHeader('Content-Type', content_type);
-    xml_http.onreadystatechange = function()
-    {
-        if (xml_http.readyState == XMLHttpRequest.DONE)
-        {
-            result_text.value = xml_http.responseText;
-        }
-        result = (xml_http.status == 200);
-    }
-    json_data = JSON.stringify(params);
-    xml_http.send(json_data);
-    return result;
-}
-
-/// @function Sends an HTTP POST request and waits for the response.
 function send_post_request_async(url, params, callback)
 {
     let xml_http = new XMLHttpRequest();

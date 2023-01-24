@@ -34,7 +34,6 @@
         let the_url = "${root_url}/api/1.0/add_activity";
         let dict = [];
         let sets = [];
-        let result_text = {};
         let inner_div = document.getElementById("manual_entry_div");
         let start_date = document.getElementById("start_date").value;
         let start_time = document.getElementById("start_time").value;
@@ -59,10 +58,10 @@
         dict.push({["time"] : activity_start});
         dict.push({["activity_type"] : activity_type});
 
-        if (!send_post_request(the_url, dict, result_text))
-        {
-            alert(result_text.value);
-        }
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function show_manual_entry_options
@@ -333,23 +332,24 @@ ${nav}
                 {
                     let the_url = "${root_url}/api/1.0/upload_activity_file";
                     let dict = [];
-                    let result_text = {};
                     let encoded_data = btoa(reader.result);
 
                     dict.push({["uploaded_file_name"] : file_obj.name});
                     dict.push({["uploaded_file_data"] : encoded_data});
 
-                    if (send_post_request(the_url, dict, result_text))
-                    {
-                        update_file_status(file_obj.name, "Uploaded (Queued For Processing)", null);
-                        monitor_file_status(file_obj.name, result_text.value);
-                        resolve();
-                    }
-                    else
-                    {
-                        alert(result_text.value);
-                        reject();
-                    }
+                    send_post_request_async(the_url, dict, function(status, response) {
+                        if (status == 200)
+                        {
+                            update_file_status(file_obj.name, "Uploaded (Queued For Processing)", null);
+                            monitor_file_status(file_obj.name, response);
+                            resolve();
+                        }
+                        else
+                        {
+                            alert(response);
+                            reject();
+                        }
+                    } );
                 }
                 reader.readAsBinaryString(file_obj);
             });
@@ -435,14 +435,16 @@ ${nav}
                 {
                     let the_url = "${root_url}/api/1.0/add_activity";
                     let dict = [];
-                    let result_text = {};
                     let activity_type = document.getElementById("activity_type_select").value;
 
                     dict.push({["Sets"] : JSON.stringify(sets)});
                     dict.push({["time"] : activity_start});
                     dict.push({["activity_type"] : activity_type});
 
-                    send_post_request(the_url, dict, result_text);
+                    send_post_request_async(the_url, dict, function(status, response) {
+                        if (status != 200)
+                            alert(response)
+                    } );
                 }
             }
         }

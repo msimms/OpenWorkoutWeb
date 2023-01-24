@@ -89,22 +89,23 @@ ${nav}
                 {
                     let the_url = "${root_url}/api/1.0/upload_activity_photo";
                     let dict = [];
-                    let result_text = {};
                     let encoded_data = btoa(reader.result);
 
                     dict.push({["uploaded_file_data"] : encoded_data});
                     dict.push({["activity_id"] : "${activity_id}"});
 
-                    if (send_post_request(the_url, dict, result_text))
-                    {
-                        update_file_status(file_obj.name, "Uploading....");
-                        resolve();
-                    }
-                    else
-                    {
-                        alert(result_text.value);
-                        reject();
-                    }
+                    send_post_request_async(the_url, dict, function(status, response) {
+                        if (status == 200)
+                        {
+                            update_file_status(file_obj.name, "Uploading....");
+                            resolve();
+                        }
+                        else
+                        {
+                            alert(result_text.value);
+                            reject();
+                        }
+                    } );
                 }
                 reader.readAsBinaryString(file_obj);
             });

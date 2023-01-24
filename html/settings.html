@@ -32,15 +32,15 @@
         let units = document.getElementById("units").value;
         let week_start = document.getElementById("week_start").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["default privacy"] : privacy});
         dict.push({["preferred units"] : units});
         dict.push({["preferred first day of week"] : week_start});
-        if (send_post_request(the_url, dict, result_text))
-            alert("Settings updated!");
-        else
-            alert("An error occurred!");
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function update_email
@@ -50,13 +50,13 @@
         let the_url = "${root_url}/api/1.0/update_email";
         let new_email = document.getElementById("new_email").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["email"] : new_email});
-        if (send_post_request(the_url, dict, result_text))
-            alert("Email updated!");
-        else
-            alert("An error occurred!");
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function update_password
@@ -68,15 +68,15 @@
         let new_pword1 = document.getElementById("new_password1").value;
         let new_pword2 = document.getElementById("new_password2").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["old_password"] : current_pword});
         dict.push({["new_password1"] : new_pword1});
         dict.push({["new_password2"] : new_pword2});
-        if (send_post_request(the_url, dict, result_text))
-            alert("Password updated!");
-        else
-            alert("An error occurred!");
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function manage_api_keys
@@ -98,13 +98,15 @@
             if (pword.length > 0)
             {
                 let dict = [];
-                let result_text = {};
 
                 dict.push({["password"] : pword});
-                if (send_post_request(the_url, dict, result_text))
-                    window.location.replace("${root_url}");
-                else
-                    alert("An error occurred!");
+
+                send_post_request_async(the_url, dict, function(status, response) {
+                    if (status == 200)
+                        window.location.replace("${root_url}");
+                    else
+                        alert(response)
+                } );
             }
             else
             {
@@ -125,13 +127,15 @@
             if (pword.length > 0)
             {
                 let dict = [];
-                let result_text = {};
 
                 dict.push({["password"] : pword});
-                if (send_post_request(the_url, dict, result_text))
-                    window.location.replace("${root_url}");
-                else
-                    alert("An error occurred!");
+
+                send_post_request_async(the_url, dict, function(status, response) {
+                    if (status == 200)
+                        window.location.replace("${root_url}");
+                    else
+                        alert(response)
+                } );
             }
             else
             {
@@ -152,13 +156,15 @@
             if (pword.length > 0)
             {
                 let dict = [];
-                let result_text = {};
 
                 dict.push({["password"] : pword});
-                if (send_post_request(the_url, dict, result_text))
-                    window.location.replace("${root_url}");
-                else
-                    alert("An error occurred!");
+
+                send_post_request_async(the_url, dict, function(status, response) {
+                    if (status == 200)
+                        window.location.replace("${root_url}");
+                    else
+                        alert(response)
+                } );
             }
             else
             {

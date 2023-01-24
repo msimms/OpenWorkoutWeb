@@ -30,17 +30,16 @@
         let password1 = document.getElementById("password1").value;
         let password2 = document.getElementById("password2").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["username"] : username});
         dict.push({["realname"] : realname});
         dict.push({["password1"] : password1});
         dict.push({["password2"] : password2});
 
-        send_post_request_async(the_url, dict, function(s, m) {
-            if (s == 200)
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
             {
-                let obj_list = JSON.parse(m);
+                let obj_list = JSON.parse(response);
                 document.cookie = "session_cookie=" + obj_list.cookie + "; ";
                 window.location.replace("${root_url}/all_activities");
             }

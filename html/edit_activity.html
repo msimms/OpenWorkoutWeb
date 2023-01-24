@@ -30,17 +30,18 @@
         let activity_type = document.getElementById("activity_type").value;
         let description = document.getElementById("description").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["activity_id"] : "${activity_id}"});
         dict.push({["name"] : activity_name});
         dict.push({["activity_type"] : activity_type});
         dict.push({["description"] : description});
 
-        if (send_post_request(the_url, dict, result_text))
-            window.location.replace("${root_url}/activity/${activity_id}");
-        else
-            alert("An error occurred!");
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                window.location.replace('${root_url}/activity/${activity_id}');
+            else
+                alert(response)
+        } );
     }
 
     /// @function process_activity_type_list

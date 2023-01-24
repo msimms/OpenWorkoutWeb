@@ -36,18 +36,13 @@
         let the_url = "${root_url}/api/1.0/update_settings";
         let preferred_long_run_day = document.getElementById("preferred_long_run_day").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["Preferred Long Run Day"] : preferred_long_run_day});
-        if (send_post_request(the_url, dict, result_text))
-        {
-            alert("Preferred long run day updated!");
-            generate_workout_plan();
-        }
-        else
-        {
-            alert("An error occurred!");
-        }
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function set_goal_type
@@ -57,18 +52,13 @@
         let the_url = "${root_url}/api/1.0/update_settings";
         let goal_type = document.getElementById("goal_type").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["goal type"] : goal_type});
-        if (send_post_request(the_url, dict, result_text))
-        {
-            alert("Goal type updated!");
-            generate_workout_plan();
-        }
-        else
-        {
-            alert("An error occurred!");
-        }
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function set_always_gen_workouts
@@ -79,18 +69,13 @@
         let the_url = "${root_url}/api/1.0/update_settings";
         let level = document.getElementById("always_gen_workouts").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["gen workouts when race cal is empty"] : level});
-        if (send_post_request(the_url, dict, result_text))
-        {
-            alert("Setting updated!");
-            generate_workout_plan();
-        }
-        else
-        {
-            alert("An error occurred!");
-        }
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function set_has_swimming_pool_access
@@ -99,18 +84,15 @@
         let the_url = "${root_url}/api/1.0/update_settings";
         let value = document.getElementById("has_swimming_pool_access").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["has swimming pool access"] : value});
-        if (send_post_request(the_url, dict, result_text))
-        {
-            alert("Setting updated!");
-            generate_workout_plan();
-        }
-        else
-        {
-            alert("An error occurred!");
-        }
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                generate_workout_plan();
+            else
+                alert(response)
+        } );
     }
 
     /// @function set_has_open_water_swim_access
@@ -119,18 +101,15 @@
         let the_url = "${root_url}/api/1.0/update_settings";
         let value = document.getElementById("has_open_water_swim_access").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["has open water swim access"] : value});
-        if (send_post_request(the_url, dict, result_text))
-        {
-            alert("Setting updated!");
-            generate_workout_plan();
-        }
-        else
-        {
-            alert("An error occurred!");
-        }
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                generate_workout_plan();
+            else
+                alert(response)
+        } );
     }
 
     /// @function set_has_bicycle
@@ -139,18 +118,15 @@
         let the_url = "${root_url}/api/1.0/update_settings";
         let value = document.getElementById("has_bicycle").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["has bicycle"] : value});
-        if (send_post_request(the_url, dict, result_text))
-        {
-            alert("Setting updated!");
-            generate_workout_plan();
-        }
-        else
-        {
-            alert("An error occurred!");
-        }
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                generate_workout_plan();
+            else
+                alert(response)
+        } );
     }
 
     /// @function set_exp_level
@@ -160,18 +136,15 @@
         let the_url = "${root_url}/api/1.0/update_settings";
         let level = document.getElementById("exp_level").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["Experience Level"] : level});
-        if (send_post_request(the_url, dict, result_text))
-        {
-            alert("Experience level updated!");
-            generate_workout_plan();
-        }
-        else
-        {
-            alert("An error occurred!");
-        }
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                generate_workout_plan();
+            else
+                alert(response)
+        } );
     }
 
     /// @function set_structured_training_comfort_level
@@ -181,18 +154,15 @@
         let the_url = "${root_url}/api/1.0/update_settings";
         let level = document.getElementById("structured_training_comfort_level").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["Structured Training Comfort Level"] : level});
-        if (send_post_request(the_url, dict, result_text))
-        {
-            alert("Comfort level updated!");
-            generate_workout_plan();
-        }
-        else
-        {
-            alert("An error occurred!");
-        }
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                generate_workout_plan();
+            else
+                alert(response)
+        } );
     }
 
     /// @function generate_workout_plan
@@ -201,12 +171,13 @@
     {
         let the_url = "${root_url}/api/1.0/generate_workout_plan";
         let dict = [];
-        let result_text = {};
 
-        if (send_post_request(the_url, dict, result_text))
-            alert("The workout plan is being generated and will be viewable on the My Activities page when complete.");
-        else
-            alert(result_text.value);
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                alert("The workout plan is being generated and will be viewable on the My Activities page when complete.");
+            else
+                alert(response)
+        } );
     }
 
     $(function()
@@ -539,7 +510,6 @@
         let race_date_obj = document.getElementById("race_date");
         let race_date = 0;
         let dict = [];
-        let result_text = {};
 
         if (race_date_obj.value == "")
         {
@@ -560,14 +530,12 @@
         dict.push({["Race Distance"] : race_distance});
         dict.push({["Race Importance"] : race_importance});
 
-        if (send_post_request(the_url, dict, result_text))
-        {
-            window.location.replace("${root_url}/workouts");
-        }
-        else
-        {
-            alert("An error occurred!");
-        }
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                window.location.reload();
+            else
+                alert(response)
+        } );
     }
 
     /// @function delete_race
@@ -575,18 +543,15 @@
     {
         let the_url = "${root_url}/api/1.0/delete_race";
         let dict = [];
-        let result_text = {};
 
         dict.push({["Race ID"] : race_id});
 
-        if (send_post_request(the_url, dict, result_text))
-        {
-            window.location.replace("${root_url}/workouts");
-        }
-        else
-        {
-            alert("An error occurred!");
-        }
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                window.location.reload();
+            else
+                alert(response)
+        } );
     }
 
     $(document).ready(function()

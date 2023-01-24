@@ -27,7 +27,6 @@ function create_gear(root_url, gear_type)
 {
     let the_url = root_url + "/api/1.0/create_gear";
     let dict = [];
-    let result_text = {};
     let add_time_obj = document.getElementById("date_added");
     let add_time = Date.parse(add_time_obj.value);
     let retired_time_obj = document.getElementById("date_retired");
@@ -46,14 +45,12 @@ function create_gear(root_url, gear_type)
     dict.push({["name"] : name});
     dict.push({["description"] : description});
 
-    if (send_post_request(the_url, dict, result_text))
-    {
-        window.location.replace(root_url + "/gear");
-    }
-    else
-    {
-        alert(result_text.value);
-    }
+    send_post_request_async(the_url, dict, function(status, response) {
+        if (status == 200)
+            window.location.reload();
+        else
+            alert(response)
+    } );
 }
 
 /// @function update_gear
@@ -61,7 +58,6 @@ function update_gear(root_url, gear_type)
 {
     let the_url = root_url + "/api/1.0/update_gear";
     let dict = [];
-    let result_text = {};
     let add_time_obj = document.getElementById("date_added");
     let add_time = Date.parse(add_time_obj.value);
     let retired_time_obj = document.getElementById("date_retired");
@@ -80,14 +76,12 @@ function update_gear(root_url, gear_type)
     dict.push({["name"] : name});
     dict.push({["description"] : description});
 
-    if (send_post_request(the_url, dict, result_text))
-    {
-        window.location.replace(root_url + "/gear");
-    }
-    else
-    {
-        alert(result_text.value);
-    }
+    send_post_request_async(the_url, dict, function(status, response) {
+        if (status == 200)
+            window.location.reload();
+        else
+            alert(response)
+    } );
 }
 
 /// @function delete_gear
@@ -97,18 +91,15 @@ function delete_gear(root_url, gear_id)
     {
         let the_url = root_url + "/api/1.0/delete_gear";
         let dict = [];
-        let result_text = {};
 
         dict.push({["gear_id"] : gear_id});
 
-        if (send_post_request(the_url, dict, result_text))
-        {
-            window.location.replace(root_url + "/gear");
-        }
-        else
-        {
-            alert(result_text.value);
-        }
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                window.location.reload();
+            else
+                alert(response)
+        } );
     }
 }
 
@@ -119,18 +110,15 @@ function retire_gear(root_url, gear_id)
     {
         let the_url = root_url + "/api/1.0/retire_gear";
         let dict = [];
-        let result_text = {};
 
         dict.push({["gear_id"] : gear_id});
 
-        if (send_post_request(the_url, dict, result_text))
-        {
-            window.location.replace(root_url + "/gear");
-        }
-        else
-        {
-            alert(result_text.value);
-        }
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                window.location.reload();
+            else
+                alert(response)
+        } );
     }
 }
 
@@ -139,13 +127,12 @@ function set_gear_default(root_url, activity_type, gear_name)
 {
     let the_url = root_url + "/api/1.0/update_gear_defaults";
     let dict = [];
-    let result_text = {};
 
     dict.push({["activity_type"] : activity_type});
     dict.push({["name"] : gear_name});
 
-    if (!send_post_request(the_url, dict, result_text))
-    {
-        alert(result_text.value);
-    }
+    send_post_request_async(the_url, dict, function(status, response) {
+        if (status != 200)
+            alert(response)
+    } );
 }

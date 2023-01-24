@@ -47,10 +47,10 @@
         dict.push({["gear_id"] : "${gear_id}"});
         dict.push({["name"] : gear_name_title});
 
-        if (!send_post_request(the_url, dict, result_text))
-        {
-            alert(result_text.value);
-        }
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function create_service_record
@@ -58,7 +58,6 @@
     {
         let the_url = "${root_url}/api/1.0/create_service_record";
         let dict = [];
-        let result_text = {};
         let inner_div = document.getElementById("new_gear_div");
         let service_time_obj = new Date(document.getElementById("start_date").value);
         let service_time = service_time_obj.getTime() / 1000;
@@ -68,14 +67,12 @@
         dict.push({["date"] : service_time});
         dict.push({["description"] : description});
 
-        if (send_post_request(the_url, dict, result_text))
-        {
-            window.location.replace("${root_url}/service_history/${gear_id}");
-        }
-        else
-        {
-            alert(result_text.value);
-        }
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                window.location.replace("${root_url}/service_history/${gear_id}");
+            else
+                alert(response)
+        } );
     }
 
     /// @function get_new_service_record_info
@@ -140,19 +137,16 @@
         {
             let the_url = "${root_url}/api/1.0/delete_service_record";
             let dict = [];
-            let result_text = {};
 
             dict.push({["gear_id"] : "${gear_id}"});
             dict.push({["service_id"] : service_id});
 
-            if (send_post_request(the_url, dict, result_text))
-            {
-                window.location.replace("${root_url}/service_history/${gear_id}");
-            }
-            else
-            {
-                alert(result_text.value);
-            }
+            send_post_request_async(the_url, dict, function(status, response) {
+                if (status == 200)
+                    window.location.replace("${root_url}/service_history/${gear_id}");
+                else
+                    alert(response)
+            } );
         }
     }
 

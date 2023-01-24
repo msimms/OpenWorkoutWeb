@@ -32,7 +32,6 @@
     {
         let the_url = "${root_url}/api/1.0/update_gear_defaults";
         let dict = [];
-        let result_text = {};
         let inner_div = document.getElementById("new_gear_default_div");
         let activity_type = document.getElementById("activity_type").value;
         let gear = document.getElementById("gear").value;
@@ -40,14 +39,12 @@
         dict.push({["activity_type"] : activity_type});
         dict.push({["name"] : gear});
 
-        if (send_post_request(the_url, dict, result_text))
-        {
-            window.location.replace("${root_url}/profile");
-        }
-        else
-        {
-            alert(result_text.value);
-        }
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                window.location.reload();
+            else
+                alert(response)
+        } );
     }
 
     /// @function process_activity_type_list
@@ -162,14 +159,14 @@
         let the_url = "${root_url}/api/1.0/update_profile";
         let birthday = document.getElementById("birthday").value;
         let dict = [];
-        let result_text = {};
         let timestamp = Date.parse(birthday) / 1000;
 
         dict.push({["birthday"] : timestamp});
-        if (send_post_request(the_url, dict, result_text))
-            alert("Birthday updated!");
-        else
-            alert("An error occurred!");
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function update_height
@@ -180,7 +177,6 @@
         let height = parseFloat(document.getElementById("height").value);
         let height_units = document.getElementById("height_units").innerHTML;
         let dict = [];
-        let result_text = {};
 
         // Convert to metric.
         if (height_units == "inches")
@@ -189,10 +185,11 @@
         }
 
         dict.push({["height"] : height});
-        if (send_post_request(the_url, dict, result_text))
-            alert("Height updated!");
-        else
-            alert("An error occurred!");
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function update_weight
@@ -203,7 +200,6 @@
         let weight = parseFloat(document.getElementById("weight").value);
         let weight_units = document.getElementById("weight_units").innerHTML;
         let dict = [];
-        let result_text = {};
 
         // Convert to metric.
         if (weight_units == "pounds")
@@ -212,10 +208,11 @@
         }
 
         dict.push({["weight"] : weight});
-        if (send_post_request(the_url, dict, result_text))
-            alert("Weight updated!");
-        else
-            alert("An error occurred!");
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function update_biological_sex
@@ -225,13 +222,13 @@
         let the_url = "${root_url}/api/1.0/update_profile";
         let biological_sex = document.getElementById("biological_sex").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["biological sex"] : biological_sex});
-        if (send_post_request(the_url, dict, result_text))
-            alert("Biological Sex updated!");
-        else
-            alert("An error occurred!");
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function update_resting_hr
@@ -241,13 +238,13 @@
         let the_url = "${root_url}/api/1.0/update_profile";
         let resting_hr = document.getElementById("resting heart rate").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["resting heart rate"] : resting_hr});
-        if (send_post_request(the_url, dict, result_text))
-            alert("Resting heart rate updated!");
-        else
-            alert("An error occurred!");
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function update_maximum_hr
@@ -257,13 +254,13 @@
         let the_url = "${root_url}/api/1.0/update_profile";
         let max_hr = document.getElementById("max heart rate").value;
         let dict = [];
-        let result_text = {};
 
         dict.push({["max heart rate"] : max_hr});
-        if (send_post_request(the_url, dict, result_text))
-            alert("Maximum heart rate updated!");
-        else
-            alert("An error occurred!");
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response)
+        } );
     }
 
     /// @function append_to_pr_table

@@ -30,18 +30,15 @@
         {
             let the_url = "${root_url}/api/1.0/delete_api_key";
             let dict = [];
-            let result_text = {};
 
             dict.push({["key"] : key});
 
-            if (send_post_request(the_url, dict, result_text))
-            {
-                window.location.replace("${root_url}/api_keys");
-            }
-            else
-            {
-                alert(result_text.value);
-            }
+            send_post_request_async(the_url, dict, function(status, response) {
+                if (status == 200)
+                    window.location.reload();
+                else
+                    alert(response)
+            } );
         }
     }
 
@@ -51,16 +48,13 @@
     {
         let the_url = "${root_url}/api/1.0/generate_api_key";
         let dict = [];
-        let result_text = {};
 
-        if (send_post_request(the_url, dict, result_text))
-        {
-            window.location.replace("${root_url}/api_keys");
-        }
-        else
-        {
-            alert(result_text.value);
-        }
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                window.location.reload();
+            else
+                alert(response)
+        } );
     }
 
     // Handler for when we receive the list of API keys from the server.
