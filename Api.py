@@ -1697,7 +1697,10 @@ class Api(object):
 
         # Is there a timestamp associated with this update? If not, use the current time.
         if Keys.TIMESTAMP_KEY in values:
-            update_time = datetime.datetime.fromtimestamp(values[Keys.TIMESTAMP_KEY])
+            ts = values[Keys.TIMESTAMP_KEY]
+            if not InputChecker.is_unsigned_integer(ts):
+                raise ApiException.ApiMalformedRequestException("Invalid timestamp.")
+            update_time = datetime.datetime.fromtimestamp(int(ts))
         else:
             update_time = datetime.datetime.utcnow()
 
@@ -1793,7 +1796,10 @@ class Api(object):
 
         # Is there a timestamp associated with this update? If not, use the current time.
         if Keys.TIMESTAMP_KEY in values:
-            update_time = datetime.datetime.fromtimestamp(values[Keys.TIMESTAMP_KEY])
+            ts = values[Keys.TIMESTAMP_KEY]
+            if not InputChecker.is_unsigned_integer(ts):
+                raise ApiException.ApiMalformedRequestException("Invalid timestamp.")
+            update_time = datetime.datetime.fromtimestamp(int(ts))
         else:
             update_time = datetime.datetime.utcnow()
 
