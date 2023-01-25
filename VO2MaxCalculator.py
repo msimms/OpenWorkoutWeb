@@ -54,3 +54,11 @@ class VO2MaxCalculator(object):
         if vo2max > 100.0:
             raise Exception("Invalid VO2Max.")
         return vo2max
+
+    @staticmethod
+    def estimate_vo2max_from_race_distance_in_meters_and_heart_rate(race_distance_meters, race_time_minutes, load_hr, resting_hr, max_hr):
+        return (race_distance_meters / race_time_minutes * 0.2) / ((load_hr - resting_hr) / (max_hr - resting_hr)) + 3.5
+
+    @staticmethod
+    def estimate_vo2max_using_cooper_test():
+        raise Exception("Unimplemented function.")
