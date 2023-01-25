@@ -36,6 +36,7 @@ class HeartRateCalculator(object):
 
     def estimate_max_hr(self, age_in_years):
         """To be called after adding data with 'add_activity_data', estimates the user's maximum heart rate."""
+        """Uses actual data when available, falls back to a basic estimation."""
         if len(self.rates) > 0:
             return sum(self.rates) / len(self.rates)
         return 207.0 - (0.7 * age_in_years) # Source: Gellish, 2007
@@ -50,7 +51,7 @@ class HeartRateCalculator(object):
         zones.append(max_hr)
         return zones
 
-    def add_activity_data(self, activity_type, start_time, summary_data):
+    def add_activity_data(self, start_time, summary_data):
         """Looks for data that will help us determine the user's maximum heart rate."""
 
         # Not interested in activities older than six months.

@@ -226,4 +226,4 @@ class Summarizer(object):
         for key in summary_data:
             self.add_activity_datum(activity_id, activity_type, start_time, key, summary_data[key])
         self.ftp_calc.add_activity_data(activity_type, start_time, summary_data)
-        self.hr_calc.add_activity_data(activity_type, start_time, summary_data)
+        self.hr_calc.add_activity_data(start_time, summary_data)
