@@ -39,18 +39,29 @@ class AnalysisScheduler(object):
         logger = logging.getLogger()
         logger.error(log_str)
 
-    def add_activity_to_queue(self, activity):
+    def add_activity_to_analysis_queue(self, activity):
         """Adds the activity ID to the list of activities to be analyzed."""
         """Returns [celery task id, our task id]."""
         from bson.json_util import dumps
         from ActivityAnalyzer import analyze_activity
 
-        import Keys
-
         try:
             activity_str = dumps(activity)
             internal_task_id = uuid.uuid4()
             analysis_task = analyze_activity.delay(activity_str, internal_task_id)
+            return analysis_task.task_id, internal_task_id
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return None, None
+
+    def add_personal_record_analysis_to_queue(self, user_id):
+        """Adds the user ID to the list of users to have their personal records updated."""
+        from ActivityAnalyzer import analyze_personal_records
+
+        try:
+            internal_task_id = uuid.uuid4()
+            analysis_task = analyze_personal_records.delay(user_id, internal_task_id)
             return analysis_task.task_id, internal_task_id
         except:
             self.log_error(traceback.format_exc())

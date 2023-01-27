@@ -111,7 +111,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No analysis scheduler.")
 
         activity[Keys.ACTIVITY_USER_ID_KEY] = activity_user_id
-        task_id, internal_task_id = self.analysis_scheduler.add_activity_to_queue(activity)
+        task_id, internal_task_id = self.analysis_scheduler.add_activity_to_analysis_queue(activity)
         if [task_id, internal_task_id].count(None) == 0:
             self.create_deferred_task(activity_user_id, Keys.ANALYSIS_TASK_KEY, task_id, internal_task_id, None)
 
@@ -1120,12 +1120,12 @@ class DataMgr(Importer.ActivityWriter):
 
     def rebuild_user_personal_records(self, user_id):
         """Called when we need to rebuild the personal records cache after deleting an activity, for example."""
-        if self.database is None:
-            raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
 
-        # TODO
+        task_id, internal_task_id = self.analysis_scheduler.add_personal_record_analysis_to_queue(user_id)
+        if [task_id, internal_task_id].count(None) == 0:
+            self.create_deferred_task(user_id, Keys.ANALYSIS_TASK_KEY, task_id, internal_task_id, None)
         return True
 
     def retrieve_unanalyzed_activity_list(self, limit):

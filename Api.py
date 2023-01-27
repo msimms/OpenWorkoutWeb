@@ -2155,6 +2155,13 @@ class Api(object):
             if not InputChecker.is_unsigned_integer(last_updated_time):
                 raise ApiException.ApiMalformedRequestException("Invalid last updated time.")
 
+        # Optional params. If an ID is provided, we'll assume we're updating a plan. Otherwise, we're creating a new one.
+        plan_id = None
+        if Keys.PACE_PLAN_ID_KEY in values:
+            plan_id = values[Keys.PACE_PLAN_ID_KEY]
+            if not InputChecker.is_uuid(plan_id):
+                raise ApiException.ApiMalformedRequestException("Invalid pace plan ID.")
+
         # Convert units strs.
         if target_distance_units == Keys.UNITS_METRIC_KEY:
             target_distance_units = Keys.UNITS_METRIC_KEY
@@ -2165,13 +2172,11 @@ class Api(object):
         else:
             target_splits_units = Keys.UNITS_STANDARD_KEY
 
-        result = self.data_mgr.create_pace_plan(self.user_id, plan_name, plan_description, target_distance, target_distance_units, target_time, target_splits, target_splits_units, last_updated_time)
+        if plan_id is None:
+            result = self.data_mgr.create_pace_plan(self.user_id, plan_name, plan_description, target_distance, target_distance_units, target_time, target_splits, target_splits_units, last_updated_time)
+        else:
+            result = self.data_mgr.update_pace_plan(self.user_id, plan_id, plan_name, plan_description, target_distance, target_distance_units, target_time, target_splits, target_splits_units, last_updated_time)
         return result, ""
-
-    def handle_update_pace_plan(self, values):
-        """Called when the user is modifying a pace plan, typically from the mobile app."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
 
     def handle_delete_pace_plan(self, values):
         """Called when the user wants to delete a pace plan."""
@@ -2721,8 +2726,6 @@ class Api(object):
             return self.handle_delete_race(values)
         elif request == 'create_pace_plan':
             return self.handle_create_pace_plan(values)        
-        elif request == 'update_pace_plan':
-            return self.handle_update_pace_plan(values)        
         elif request == 'delete_pace_plan':
             return self.handle_delete_pace_plan(values)        
         elif request == 'update_settings':

@@ -266,6 +266,12 @@ def analyze_activity(activity_str, internal_task_id):
     analyzer.perform_analysis()
     print("Activity analysis finished")
 
+@celery_worker.task(ignore_result=True)
+def analyze_personal_records(user_str):
+    print("Starting personal record analysis...")
+    user_obj = json.loads(user_str)
+    print("Personal record analysis finished")
+
 def main():
     """Entry point for an analysis worker."""
     pass
