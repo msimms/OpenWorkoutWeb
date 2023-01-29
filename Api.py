@@ -2510,27 +2510,50 @@ class Api(object):
         if not InputChecker.is_float(ftp):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        zones = self.data_mgr.retrieve_power_training_zones(float(ftp))
+        zones = self.data_mgr.compute_power_training_zones(float(ftp))
         return True, json.dumps(zones)
 
     def handle_list_hr_zones(self, values):
         """Returns heart rate zones corresponding to the specified resting heart rate value."""
 
         # Required parameters.
-        if Keys.ESTIMATED_MAX_HEART_RATE_KEY not in values:
+        if Keys.ESTIMATED_MAX_HEART_RATE_KEY not in values and Keys.USER_MAXIMUM_HEART_RATE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Maximum heart rate not specified.")
 
-        # Decode and validate the required parameters.
-        max_hr = values[Keys.ESTIMATED_MAX_HEART_RATE_KEY]
-        if not InputChecker.is_float(max_hr):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        max_hr = None
+        resting_hr = None
+        age_in_years = None
+
+        print(values)
+
+        # Decode and validate the parameters.
+        if Keys.ESTIMATED_MAX_HEART_RATE_KEY in values:
+            max_hr = values[Keys.ESTIMATED_MAX_HEART_RATE_KEY]
+            if not InputChecker.is_float(max_hr):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            max_hr = float(max_hr)
+        if Keys.USER_MAXIMUM_HEART_RATE_KEY in values: # User specified max HR value takes precedence over estimated max HR
+            max_hr = values[Keys.USER_MAXIMUM_HEART_RATE_KEY]
+            if not InputChecker.is_float(max_hr):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            max_hr = float(max_hr)
+        if Keys.USER_RESTING_HEART_RATE_KEY in values:
+            resting_hr = values[Keys.USER_RESTING_HEART_RATE_KEY]
+            if not InputChecker.is_float(max_hr):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            resting_hr = float(resting_hr)
+        if Keys.USER_AGE_IN_YEARS in values:
+            age_in_years = values[Keys.USER_AGE_IN_YEARS]
+            if not InputChecker.is_float(max_hr):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            age_in_years = float(age_in_years)
 
         # Convert to float and sanity check.
         max_hr = float(max_hr)
         if max_hr < 1.0:
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
-        zones = self.data_mgr.retrieve_heart_rate_zones(max_hr)
+        zones = self.data_mgr.compute_heart_rate_zones(max_hr, resting_hr, age_in_years)
         return True, json.dumps(zones)
 
     def handle_list_api_keys(self):

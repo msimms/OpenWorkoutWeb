@@ -153,6 +153,9 @@ USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, USER_PREFERRED_UNITS_KEY, USER_PREFERRED_
     USER_HAS_OPEN_WATER_SWIM_ACCESS, USER_HAS_BICYCLE, USER_PLAN_LAST_GENERATED_TIME, USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED, USER_RACES, ACTIVITY_HEAT_MAP ]
 USER_SETTINGS_LAST_UPDATED_KEY = "last updated" # Time when the user settings where last updated
 
+# API only keys.
+USER_AGE_IN_YEARS = "age in years" # Some API functions request the user's age in years
+
 # Personal records.
 RECORDS_USER_ID = "user_id"
 RECORD_NAME_KEY = "record_name"

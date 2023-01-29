@@ -27,6 +27,11 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
+    var resting_hr = 0
+    var max_hr = 0
+    var estimated_max_hr = 0
+    var birthday = 0
+
     /// @function update_gear_defaults
     function update_gear_defaults(target)
     {
@@ -374,6 +379,7 @@
         let units = "metric";
         let height_units_obj = document.getElementById("height_units");
         let weight_units_obj = document.getElementById("weight_units");
+        let refresh_hr_zones = false;
 
         // We need to know the unit system first.
         for (let record of records)
@@ -428,7 +434,8 @@
                 }
                 else if (key == "birthday")
                 {
-                    let n = new Date(value * 1000);
+                    birthday = value * 1000;
+                    let n = new Date(birthday);
                     element.placeholder = n.toLocaleDateString();
                 }
                 else if (key == "biological sex")
@@ -443,6 +450,8 @@
                     if (!isNaN(value) && value > 1.0)
                     {
                         element.value = value.toFixed(1);
+                        resting_hr = value;
+                        refresh_hr_zones = true;
                     }
                 }
                 else if (key == "max heart rate")
@@ -450,6 +459,8 @@
                     if (!isNaN(value) && value > 1.0)
                     {
                         element.value = value.toFixed(1);
+                        max_hr = value;
+                        refresh_hr_zones = true;
                     }
                 }
                 else if (key == "estimated max heart rate")
@@ -457,10 +468,16 @@
                     if (!isNaN(value) && value > 1.0)
                     {
                         element.value = value.toFixed(1);
-                        get_hr_zones(value);
+                        estimated_max_hr = value;
+                        refresh_hr_zones = true;
                     }
                 }
             }
+        }
+
+        if (refresh_hr_zones)
+        {
+            get_hr_zones();
         }
     }
 
@@ -502,6 +519,7 @@
     var process_hr_zones = function(zones)
     {
         let zones_elem = document.getElementById("hr_zones");
+        zones_elem.innerHTML = "";
 
         if (zones && zones.length > 0)
         {
@@ -600,9 +618,11 @@
     }
 
     // Request the user's heart rate zones.
-    function get_hr_zones(max_hr)
+    function get_hr_zones()
     {
-        let api_url = "${root_url}/api/1.0/list_hr_zones?estimated%20max%20heart%20rate=" + max_hr;
+        let now = Date.now();
+        let age_in_years = (now - birthday) / (365.25 * 24 * 60 * 60 * 1000);
+        let api_url = "${root_url}/api/1.0/list_hr_zones?estimated%20max%20heart%20rate=" + estimated_max_hr + ";max%20heart%20rate=" + max_hr + ";resting%20heart%20rate=" + resting_hr + ";age%20in%20years=" + age_in_years;
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_hr_zones, error: process_hr_zones_error, dataType: "json" });
     }
 
@@ -696,7 +716,7 @@ ${nav}
         <table id="hr_zones">
         </table>
         <br>
-        <b>Note:</b> Heart rate zones are based on estimated maximum heart rate.
+        <b>Note:</b> Heart rate zones are based on maximum heart rate, resting heart rate, and age.
         <hr>
 
         <!-- FTP -->

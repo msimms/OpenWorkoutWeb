@@ -39,16 +39,40 @@ class HeartRateCalculator(object):
         """Uses actual data when available, falls back to a basic estimation."""
         if len(self.rates) > 0:
             return sum(self.rates) / len(self.rates)
-        return 207.0 - (0.7 * age_in_years) # Source: Gellish, 2007
 
-    def training_zones(self, max_hr):
+        # Use the Oakland nonlinear formula to estimate based on age.
+        return 192.0 - (0.007 * (age_in_years * age_in_years))
+
+    def training_zones(self, max_hr, resting_hr, age_in_years):
         """Returns the heart rate training zones as a function of estimated maximum heart rate."""
+
         zones = []
-        zones.append(max_hr * 0.60)
-        zones.append(max_hr * 0.70)
-        zones.append(max_hr * 0.80)
-        zones.append(max_hr * 0.90)
-        zones.append(max_hr)
+
+        # If given resting and max heart rates, use the Karvonen formula for determining zones based on hr reserve.
+        if resting_hr is not None and resting_hr > 1.0 and max_hr is not None and max_hr > 1.0:
+            zones.append(((max_hr - resting_hr) * .60) + resting_hr)
+            zones.append(((max_hr - resting_hr) * .70) + resting_hr)
+            zones.append(((max_hr - resting_hr) * .80) + resting_hr)
+            zones.append(((max_hr - resting_hr) * .90) + resting_hr)
+            zones.append(max_hr)
+
+        # Maximum heart rate, but no resting heart rate.
+        elif max_hr > 1.0:
+            zones.append(max_hr * 0.60)
+            zones.append(max_hr * 0.70)
+            zones.append(max_hr * 0.80)
+            zones.append(max_hr * 0.90)
+            zones.append(max_hr)
+
+        # No heart rate information, estimate it based on age and then generate the zones.
+        else:
+            max_hr = self.estimate_max_hr(age_in_years)
+            zones.append(max_hr * 0.60)
+            zones.append(max_hr * 0.70)
+            zones.append(max_hr * 0.80)
+            zones.append(max_hr * 0.90)
+            zones.append(max_hr)
+
         return zones
 
     def add_activity_data(self, start_time, summary_data):
