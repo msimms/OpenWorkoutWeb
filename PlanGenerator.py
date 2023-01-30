@@ -21,6 +21,8 @@ class PlanGenerator(object):
         """Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less."""
         in_taper = False
         if weeks_until_goal is not None:
+            if weeks_until_goal <= 2 and (goal == Keys.GOAL_50K_RUN_KEY or goal == Keys.GOAL_50_MILE_RUN_KEY):
+                in_taper = True
             if weeks_until_goal <= 2 and (goal == Keys.GOAL_MARATHON_RUN_KEY or goal == Keys.GOAL_IRON_DISTANCE_TRIATHLON_KEY):
                 in_taper = True
             if weeks_until_goal <= 1 and (goal == Keys.GOAL_HALF_MARATHON_RUN_KEY or goal == Keys.GOAL_HALF_IRON_DISTANCE_TRIATHLON_KEY):

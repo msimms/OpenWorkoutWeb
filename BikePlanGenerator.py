@@ -50,6 +50,15 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         return workout
 
+    def gen_cadence_drills(self):
+        """Utility function for creating a workout emphasizing cadence."""
+
+        # Create the workout object.
+        workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_BIKE_CADENCE_DRILLS, self.user_id)
+        workout.sport_type = Keys.TYPE_CYCLING_KEY
+
+        return workout
+
     def gen_interval_session(self, goal_distance):
         """Utility function for creating an interval workout."""
 
@@ -233,11 +242,11 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
                 workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
 
             # Cross training to support long distance running
-            elif goal == Keys.GOAL_HALF_MARATHON_RUN_KEY or goal == Keys.GOAL_MARATHON_RUN_KEY:
+            elif (goal == Keys.GOAL_HALF_MARATHON_RUN_KEY or goal == Keys.GOAL_MARATHON_RUN_KEY) and not in_taper:
                 workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
 
             # Cross training to support ultra distance running
-            elif goal == Keys.GOAL_50K_RUN_KEY or goal == Keys.GOAL_50_MILE_RUN_KEY:
+            elif (goal == Keys.GOAL_50K_RUN_KEY or goal == Keys.GOAL_50_MILE_RUN_KEY) and not in_taper:
                 workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
 
             # Short distance triathlons

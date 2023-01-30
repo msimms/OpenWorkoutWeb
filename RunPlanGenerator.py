@@ -304,11 +304,14 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         """Utility function for creating a long run workout."""
 
         # Long run should be 10% longer than the previous long run, within the bounds provided by min and max.
+        # No matter what, it should be at least 5K.
         long_run_distance = longest_run_in_four_weeks * 1.1
         if long_run_distance > max_run_distance:
             long_run_distance = max_run_distance
         if long_run_distance < min_run_distance:
             long_run_distance = min_run_distance
+        if long_run_distance < 5000:
+            long_run_distance = 5000
         interval_distance_meters = RunPlanGenerator.round_distance(long_run_distance)
 
         # Create the workout object.

@@ -202,6 +202,7 @@ WORKOUT_TYPE_PROGRESSION_RUN = "Progression Run" # A run with increasing pace
 WORKOUT_TYPE_FARTLEK_RUN = "Fartlek Session" # A run in which the user can vary the pace at will
 WORKOUT_TYPE_MIDDLE_DISTANCE_RUN = "Middle Distance Run" # 2 hour run for advanced distance runners
 WORKOUT_TYPE_HILL_RIDE = "Hill Ride" # Hill workout on the bike
+WORKOUT_TYPE_BIKE_CADENCE_DRILLS = "Cadence Drills" # Cadence drills on the bike
 WORKOUT_TYPE_SPEED_INTERVAL_RIDE = "Speed Interval Ride" # A bike ride with speed intervals
 WORKOUT_TYPE_TEMPO_RIDE = "Tempo Ride" # A bike ride at tempo pace/power
 WORKOUT_TYPE_EASY_RIDE = "Easy Ride" # A bike ride at an easy pace/power
