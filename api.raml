@@ -268,6 +268,15 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
+/delete_sensor_data:
+    description: Deletes the specified set of sensor data (power, cadence, heart rate, etc.) from an activity.
+    get:
+    post:
+        responses:
+            200: Empty string
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
 /list_matched_users:
     description: Lists user's whose usernames match the search criteria. Results are limited to the first 100 users.
     get:
@@ -351,24 +360,6 @@ version: v1
     post:
 /claim_device:
     description: Associates the device specified by the unique identifier with the logged in user's account.
-    get:
-    post:
-        responses:
-            200: Empty string
-            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
-            403: Failed authentication. The user is not logged in.
-            500: An internal exception was thrown.
-/create_tag:
-    description: Creates a tag for the specified activity.
-    get:
-    post:
-        responses:
-            200: Empty string
-            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
-            403: Failed authentication. The user is not logged in.
-            500: An internal exception was thrown.
-/delete_tag:
-    description: Deletes a tag from the specified activity.
     get:
     post:
         responses:

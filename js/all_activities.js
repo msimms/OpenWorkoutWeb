@@ -158,7 +158,7 @@ function common_create_tags(root_url, tags)
 }
 
 /// @function common_process_sensordata
-function common_process_sensordata(sensordata, is_foot_based_activity, start_time_ms, max_hr, ftp)
+function common_process_sensordata(root_url, activity_id, sensordata, is_foot_based_activity, start_time_ms, max_hr, ftp)
 {
     for (key in sensordata)
     {
@@ -193,11 +193,11 @@ function common_process_sensordata(sensordata, is_foot_based_activity, start_tim
                 graph_name = "Heart Rate Zone Distribution"
                 draw_bar_chart(hr_zones, "Heart Rate Zone Distribution", get_graph_color(graph_name));
             }
-            draw_graph(start_time_ms, end_time_ms, new_data, key, "BPM", get_graph_color(key));
+            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "BPM", get_graph_color(key), true);
         }
         else if (key == "Cadence")
         {
-            draw_graph(start_time_ms, end_time_ms, new_data, key, "RPM", get_graph_color(key));
+            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "RPM", get_graph_color(key), true);
         }
         else if (key == "Power")
         {
@@ -211,15 +211,15 @@ function common_process_sensordata(sensordata, is_foot_based_activity, start_tim
                     draw_bar_chart(power_zones, "Power Zone Distribution", get_graph_color(graph_name));
                 }
             }
-            draw_graph(start_time_ms, end_time_ms, new_data, key, "Watts", get_graph_color(key));
+            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "Watts", get_graph_color(key), true);
         }
         else if (key == "Temperature")
         {
-            draw_graph(start_time_ms, end_time_ms, new_data, key, "Temperature", get_graph_color(key));
+            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "Temperature", get_graph_color(key), true);
         }
         else if (key == "Threat Count")
         {
-            draw_graph(start_time_ms, end_time_ms, new_data, key, "Threat Count", get_graph_color(key));
+            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "Threat Count", get_graph_color(key), true);
         }
         else if (key == "Events")
         {
@@ -244,7 +244,7 @@ function common_process_sensordata(sensordata, is_foot_based_activity, start_tim
             });
 
             draw_bar_chart(total_strokes, "Total Strokes", "LightSteelBlue");
-            draw_graph(0, 0, total_timer_time, "Lap Time", "Lap Time", get_graph_color("Lap Time"));
+            draw_graph(root_url, activity_id, 0, 0, total_timer_time, "Lap Time", "Lap Time", get_graph_color("Lap Time"), false);
         }
         else if (key == "accelerometer")
         {
@@ -265,5 +265,24 @@ function common_process_sensordata(sensordata, is_foot_based_activity, start_tim
             draw_simple_graph(y_data, "y", get_graph_color("y"));
             draw_simple_graph(z_data, "z", get_graph_color("z"));
         }
+    }
+}
+
+function common_delete_sensor_data(root_url, activity_id, sensor_name)
+{
+    if (confirm('Are you sure you want to do delete this sensor data? It cannot be undone.'))
+    {
+        let the_url = root_url + "/api/1.0/delete_sensor_data";
+        let dict = [];
+
+        dict.push({["activity_id"] : activity_id});
+        dict.push({["sensor_name"] : sensor_name});
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status == 200)
+                window.location.reload();
+            else
+                alert(response)
+        } );
     }
 }

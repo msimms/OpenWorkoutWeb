@@ -1466,31 +1466,33 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_activity_sensor_readings(self, sensor_type, activity_id):
-        """Returns all the sensor data for the specified sensor for the given activity."""
-        if sensor_type is None:
-            self.log_error(MongoDatabase.retrieve_activity_sensor_readings.__name__ + ": Unexpected empty object: sensor_type")
-            return None
+    def delete_activity_sensor_readings(self, sensor_type, activity_id):
+        """Create method for several pieces of sensor data, such as a heart rate or power meter reading."""
         if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_activity_sensor_readings.__name__ + ": Unexpected empty object: activity_id")
-            return None
+            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: activity_id")
+            return False
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.retrieve_activity_sensor_readings.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return None
+            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Invalid object: activity_id " + str(activity_id))
+            return False
+        if sensor_type is None:
+            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: sensor_type")
+            return False
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
 
-            # If the activity was found and if it has data for the specified sensor type.
-            if activity is not None and sensor_type in activity:
-                sensor_data = activity[sensor_type]
-                sensor_data.sort(key=retrieve_time_from_time_value_pair)
-                return sensor_data
+            # If the activity was found.
+            if activity is not None:
+
+                # Save the changes.
+                activity[sensor_type] = []
+                update_activities_collection(self, activity)
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return False
 
     def create_activity_event(self, activity_id, event):
         """Inherited from ActivityWriter. 'events' is an array of dictionaries in which each dictionary describes an event."""

@@ -271,7 +271,7 @@ ${nav}
         draw_split_times_chart();
 
         // Draw the elevation graph.
-        draw_graph(loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", get_graph_color("Elevation"));
+        draw_graph(root_url, activity_id, loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", get_graph_color("Elevation"), false);
 
         // Draw all the other graphs.
         draw_sensor_and_interval_graphs();
@@ -355,7 +355,7 @@ ${summary}
     /// @function process_sensordata - callback for when sensor data is returned
     var process_sensordata = function(sensordata)
     {
-        common_process_sensordata(sensordata, is_foot_based_activity, start_time_ms, ${max_hr}, ${ftp});
+        common_process_sensordata(root_url, activity_id, sensordata, is_foot_based_activity, start_time_ms, ${max_hr}, ${ftp});
         retrieve_summary_data();
     }
 
@@ -395,23 +395,23 @@ ${summary}
             for (let i = 0; i < photo_ids.length; ++i)
             {
                 let photo_url = root_url + "/photos/${userId}/" + photo_ids[i];
-                let imgTd = document.createElement("td");
+                let img_td = document.createElement("td");
                 let img = document.createElement("img");
-                let deleteTd = document.createElement("td");
-                let deleteBtn = document.createElement("button");
+                let delete_td = document.createElement("td");
+                let delete_btn = document.createElement("button");
 
                 img.setAttribute("src", photo_url);
                 img.setAttribute("width", 1024);
-                imgTd.appendChild(img);
+                img_td.appendChild(img);
 
-                deleteBtn.innerHTML = "Delete";
-                deleteBtn.setAttribute("style", "color:red;margin:0px");
-                deleteBtn.setAttribute("onclick", "return delete_photo(\"" + photo_ids[i] + "\")");
-                deleteTd.appendChild(deleteBtn);
+                delete_btn.innerHTML = "Delete";
+                delete_btn.setAttribute("style", "color:red;margin:0px");
+                delete_btn.setAttribute("onclick", "return delete_photo(\"" + photo_ids[i] + "\")");
+                delete_td.appendChild(delete_btn);
 
-                photo_table.appendChild(imgTd);
+                photo_table.appendChild(img_td);
                 photo_table.appendChild(document.createElement("tr"));
-                photo_table.appendChild(deleteTd);
+                photo_table.appendChild(delete_td);
                 photo_table.appendChild(document.createElement("tr"));
             }
         }

@@ -240,7 +240,7 @@ function draw_simple_graph(data, title, color)
 /// A slightly more complicated line graph than with draw_simple_graph.
 /// Graph is filled under the line.
 /// graph_start_time_ms and graph_end_time_ms allow new graph data to be appended.
-function draw_graph(graph_start_time_ms, graph_end_time_ms, data, title, units, color)
+function draw_graph(root_url, activity_id, graph_start_time_ms, graph_end_time_ms, data, title, units, color, deleteable)
 {
     if (data.length <= 1)
     {
@@ -457,6 +457,26 @@ function draw_graph(graph_start_time_ms, graph_end_time_ms, data, title, units, 
         .attr("class", "brush")
         .call(brush);
 
+    if (deleteable)
+    {
+        // Create a div for the delete button.
+        let div_name = "delete_" + title
+        d3.select("#charts")
+            .append("div")
+                .attr("class", div_name)
+
+        // Create the delete button.
+        let delete_btn = document.createElement("button");
+        delete_btn.innerHTML = "Delete";
+        delete_btn.setAttribute("style", "color:red;margin:0px");
+        let click_action = "return common_delete_sensor_data(\"" + root_url + "\",\"" + activity_id + "\",\"" + title + "\")";
+        delete_btn.setAttribute("onclick", click_action);
+
+        // Append it to the newly created div.
+        let delete_div = document.getElementsByClassName(div_name)[0];
+        delete_div.appendChild(delete_btn);
+    }
+
     return svg;
 }
 
@@ -574,7 +594,7 @@ function draw_intervals_graph(start_time_ms, end_time_ms, interval_data)
             interval_graph.push(graph_node);
         }
 
-        draw_graph(start_time_ms, end_time_ms, interval_graph, "Intervals", "", get_graph_color("Intervals"));
+        draw_graph(root_url, activity_id, start_time_ms, end_time_ms, interval_graph, "Intervals", "", get_graph_color("Intervals"), false);
     }
 }
 
@@ -602,15 +622,15 @@ function draw_speed_graph(start_time_ms, end_time_ms, data)
         let pace_data = convert_speed_graph_to_pace_graph(unit_system, data);
         let gap_data = compute_grade_adjusted_pace(gradient_curve, pace_data);
 
-        draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, get_graph_color(key));
-        draw_graph(start_time_ms, end_time_ms, pace_data, "Pace", pace_units, get_graph_color(key));
-        draw_graph(loc_start_time_ms, loc_end_time_ms, gap_data, "Grade Adjusted Pace", pace_units, get_graph_color(key));
+        draw_graph(root_url, activity_id, start_time_ms, end_time_ms, speed_data, "Speed", speed_units, get_graph_color(key), false);
+        draw_graph(root_url, activity_id, start_time_ms, end_time_ms, pace_data, "Pace", pace_units, get_graph_color(key), false);
+        draw_graph(root_url, activity_id, loc_start_time_ms, loc_end_time_ms, gap_data, "Grade Adjusted Pace", pace_units, get_graph_color(key), false);
     }
     else
     {
         let speed_data = convert_speed_graph_to_display_units(unit_system, data);
 
-        draw_graph(start_time_ms, end_time_ms, speed_data, "Speed", speed_units, get_graph_color(key));
+        draw_graph(root_url, activity_id, start_time_ms, end_time_ms, speed_data, "Speed", speed_units, get_graph_color(key), false);
     }
 }
 

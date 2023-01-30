@@ -779,7 +779,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         return self.database.retrieve_activity_locations(activity_id)
 
-    def retrieve_activity_sensor_readings(self, key, activity_id):
+    def delete_activity_sensor_readings(self, key, activity_id):
         """Returns all the sensor data for the specified sensor for the given activity."""
         if self.database is None:
             raise Exception("No database.")
@@ -787,7 +787,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if activity_id is None or len(activity_id) == 0:
             raise Exception("Bad parameter.")
-        return self.database.retrieve_activity_sensor_readings(key, activity_id)
+        return self.database.delete_activity_sensor_readings(key, activity_id)
 
     def retrieve_most_recent_activity_id_for_device(self, device_str):
         """Returns the most recent activity id for the specified device."""
@@ -896,16 +896,6 @@ class DataMgr(Importer.ActivityWriter):
                     if gear[Keys.GEAR_RETIRE_TIME_KEY] == 0:
                         tags.append(gear[Keys.GEAR_NAME_KEY])
         return tags
-
-    def create_activity_tag(self, activity_id, tag):
-        """Returns the most recent 'num' locations for the specified device and activity."""
-        if self.database is None:
-            raise Exception("No database.")
-        if activity_id is None or len(activity_id) == 0:
-            raise Exception("Bad parameter.")
-        if tag is None or len(tag) == 0:
-            raise Exception("Bad parameter.")
-        return self.database.create_tag(activity_id, tag)
 
     def retrieve_activity_tags(self, activity_id):
         """Returns the most recent 'num' locations for the specified device and activity."""

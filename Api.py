@@ -1137,13 +1137,43 @@ class Api(object):
         # Required parameters.
         if Keys.ACTIVITY_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+        if Keys.ACTIVITY_TAG_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Tag not specified.")
 
         # Validate the activity ID.
         activity_id = values[Keys.ACTIVITY_ID_KEY]
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
-        return True, ""
+        # Validate the tag.
+        tag = values[Keys.ACTIVITY_TAG_KEY]
+        if not InputChecker.is_valid_decoded_str(tag):
+            raise ApiException.ApiMalformedRequestException("Invalid tag.")
+
+        result = self.data_mgr.delete_tag(activity_id, tag)
+        return result, ""
+
+    def handle_delete_sensor_data(self, values):
+        """Called when an API message to remove sensor data from an activity."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+        if Keys.SENSOR_NAME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+
+        # Validate the activity ID.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+        sensor_name = values[Keys.SENSOR_NAME_KEY]
+        if not InputChecker.is_valid_decoded_str(sensor_name):
+            raise ApiException.ApiMalformedRequestException("Invalid sensor name.")
+
+        result = self.data_mgr.delete_activity_sensor_readings(sensor_name, activity_id)
+        return result, ""
 
     def handle_list_matched_users(self, values):
         """Called when an API message to list users is received. Result is a JSON string."""
@@ -1354,52 +1384,6 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Device ID not specified.")
 
         result = self.user_mgr.create_user_device_for_user_id(self.user_id, values['device_id'])
-        return result, ""
-
-    def handle_create_tag(self, values):
-        """Called when an API message create a tag is received."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-
-        # Required parameters.
-        if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
-        if Keys.ACTIVITY_TAG_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Tag not specified.")
-
-        # Decode and validate the required parameters.
-        activity_id = values[Keys.ACTIVITY_ID_KEY]
-        if not InputChecker.is_uuid(activity_id):
-            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
-        tag = values[Keys.ACTIVITY_TAG_KEY]
-        if not InputChecker.is_valid_decoded_str(tag):
-            raise ApiException.ApiMalformedRequestException("Invalid tag.")
-        if len(tag) == 0:
-            raise ApiException.ApiMalformedRequestException("Empty tag.")
-
-        result = self.data_mgr.create_activity_tag(activity_id, tag)
-        return result, ""
-
-    def handle_delete_tag(self, values):
-        """Called when an API message delete a tag is received."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-
-        # Required parameters.
-        if Keys.ACTIVITY_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
-        if Keys.ACTIVITY_TAG_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Tag not specified.")
-
-        # Decode and validate the required parameters.
-        activity_id = values[Keys.ACTIVITY_ID_KEY]
-        if not InputChecker.is_uuid(activity_id):
-            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
-        tag = values[Keys.ACTIVITY_TAG_KEY]
-        if not InputChecker.is_valid_decoded_str(tag):
-            raise ApiException.ApiMalformedRequestException("Invalid tag.")
-
-        result = self.data_mgr.delete_tag(activity_id, tag)
         return result, ""
 
     def handle_list_tags(self, values):
@@ -2709,6 +2693,8 @@ class Api(object):
             return self.handle_create_tags_on_activity(values)
         elif request == 'delete_tag_from_activity':
             return self.handle_delete_tag_from_activity(values)
+        elif request == 'delete_sensor_data':
+            return self.handle_delete_sensor_data(values)
         elif request == 'list_matched_users':
             return self.handle_list_matched_users(values)
         elif request == 'request_to_be_friends':
@@ -2723,10 +2709,6 @@ class Api(object):
             return self.handle_export_activity(values)
         elif request == 'claim_device':
             return self.handle_claim_device(values)
-        elif request == 'create_tag':
-            return self.handle_create_tag(values)
-        elif request == 'delete_tag':
-            return self.handle_delete_tag(values)
         elif request == 'create_comment':
             return self.handle_create_comment(values)
         elif request == 'create_gear':
