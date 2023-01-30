@@ -409,6 +409,8 @@
         // Add the race info.
         cell.appendChild(document.createTextNode(unix_time_to_local_date_string(race["Race Date"])));
         cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(race["Race Importance"]));
+        cell = new_row.insertCell();
         cell.appendChild(document.createTextNode(race["Race Name"]));
         cell = new_row.insertCell();
         cell.appendChild(document.createTextNode(race["Race Distance"]));
