@@ -467,7 +467,7 @@ function draw_graph(root_url, activity_id, graph_start_time_ms, graph_end_time_m
 
         // Create the delete button.
         let delete_btn = document.createElement("button");
-        delete_btn.innerHTML = "Delete";
+        delete_btn.innerHTML = "Delete " + title + " Data";
         delete_btn.setAttribute("style", "color:red;margin:0px");
         let click_action = "return common_delete_sensor_data(\"" + root_url + "\",\"" + activity_id + "\",\"" + title + "\")";
         delete_btn.setAttribute("onclick", click_action);
