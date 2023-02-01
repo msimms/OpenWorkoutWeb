@@ -283,8 +283,7 @@ class App(object):
         """Helper function for building the exports string that appears on the activity details screens."""
         if not (has_location_data or has_accel_data):
             return ""
-        exports_str  = "<h3>Export</h3>\n"
-        exports_str += "<td><select id=\"format\" >\n"
+        exports_str = "<td><select id=\"format\" >\n"
         if has_location_data:
             exports_str += "\t<option value=\"tcx\" selected>TCX</option>\n"
             exports_str += "\t<option value=\"gpx\">GPX</option>\n"
@@ -293,21 +292,6 @@ class App(object):
         exports_str += "</select>\n</td><tr>\n"
         exports_str += "<td><button type=\"button\" onclick=\"return export_activity()\">Export</button></td><tr>\n"
         return exports_str
-
-    @staticmethod
-    def render_edit_controls():
-        """Helper function for building the edit string that appears on the activity details screens."""
-        edit_str  = "<td><button type=\"button\" onclick=\"return edit_activity()\" style=\"color:black\">Edit Name, Description, and Type...</button></td><tr>\n"
-        edit_str += "<td><button type=\"button\" onclick=\"return add_photos()\" style=\"color:black\">Add Photos...</button></td><tr>\n"
-        edit_str += "<td><button type=\"button\" onclick=\"return trim_activity()\" style=\"color:black\">Trim...</button></td><tr>\n"
-        edit_str += "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\">Delete</button></td><tr>\n"
-        return edit_str
-
-    @staticmethod
-    def render_delete_control():
-        """Helper function for building the delete string that appears on the activity details screens."""
-        delete_str = "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\">Delete</button></td><tr>\n"
-        return delete_str
 
     def render_page_for_unmapped_activity(self, user_realname, activity_id, activity, activity_user_id, activity_user_max_hr, logged_in_username, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific un-mapped activity."""
@@ -361,12 +345,6 @@ class App(object):
         # Close the summary list.
         summary += "</ul>\n"
 
-        # Controls are only allowed if the user viewing the activity owns it.
-        if belongs_to_current_user:
-            details_controls_str = "<td><button type=\"button\" onclick=\"return refresh_analysis()\">Refresh Analysis</button></td><tr>\n"
-        else:
-            details_controls_str = ""
-
         # Get the description.
         description_str = self.render_description_for_page(activity)
 
@@ -376,20 +354,16 @@ class App(object):
         # List the comments.
         comments_str = self.render_comments(activity, logged_in)
 
+        # Somethings will only be shown if the activity belongs to the logged in user.
+        if belongs_to_current_user:
+            visibility_str = ""
+        else:
+            visibility_str = "display:none;"
+
         # List the export options.
-        exports_title_str = ""
         exports_str = ""
         if logged_in:
             exports_str = App.render_export_control(False, Keys.APP_ACCELEROMETER_KEY in activity)
-            if len(exports_title_str) > 0:
-                exports_title_str = "<h3>Export</h3>"
-
-        # List the edit controls.
-        edit_title_str = ""
-        edit_str = ""
-        if belongs_to_current_user:
-            edit_title_str = "<h3>Edit</h3>"
-            edit_str = App.render_edit_controls()
 
         # Build the page title.
         if is_live:
@@ -398,7 +372,7 @@ class App(object):
             page_title = "Activity"
 
         my_template = Template(filename=self.unmapped_activity_html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, description=description_str, details=details, details_controls=details_controls_str, summary=summary, activityId=activity_id, userId=activity_user_id, max_hr=activity_user_max_hr, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str)
+        return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, description=description_str, details=details, summary=summary, activityId=activity_id, userId=activity_user_id, max_hr=activity_user_max_hr, tags=tags_str, comments=comments_str, exports=exports_str, visibility=visibility_str)
 
     def render_description_for_page(self, activity):
         """Helper function for processing the activity description and formatting it for display."""
@@ -504,7 +478,7 @@ class App(object):
         """Helper function for rendering an error page when attempting to view an activity with bad data."""
         delete_str = ""
         if belongs_to_current_user is not None:
-            delete_str = App.render_delete_control()
+            delete_str = "<td><button type=\"button\" onclick=\"return delete_activity()\" style=\"color:red\">Delete</button></td><tr>\n"
 
         my_template = Template(filename=self.error_activity_html_file, module_directory=self.tempmod_dir)
         return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, error="There is no data for the specified activity.", activityId=activity_id, delete=delete_str)
@@ -590,12 +564,6 @@ class App(object):
                 details_str += summary_data[Keys.ACTIVITY_HASH_KEY]
                 details_str += "</td><tr>\n"
 
-        # Controls are only allowed if the user viewing the activity owns it.
-        if belongs_to_current_user:
-            details_controls_str = "<td><button type=\"button\" onclick=\"return refresh_analysis()\">Refresh Analysis</button></td><tr>\n"
-        else:
-            details_controls_str = ""
-
         # List the tags.
         tags_str = self.render_tags(activity, activity_user_id, belongs_to_current_user)
 
@@ -603,19 +571,15 @@ class App(object):
         comments_str = self.render_comments(activity, logged_in)
 
         # List the export options.
-        exports_title_str = ""
         exports_str = ""
         if logged_in:
             exports_str = App.render_export_control(True, Keys.APP_ACCELEROMETER_KEY in activity)
-            if len(exports_title_str) > 0:
-                exports_title_str = "<h3>Export</h3>"
 
-        # List the edit controls.
-        edit_title_str = ""
-        edit_str = ""
+        # Somethings will only be shown if the activity belongs to the logged in user.
         if belongs_to_current_user:
-            edit_title_str = "<h3>Edit</h3>"
-            edit_str = App.render_edit_controls()
+            visibility_str = ""
+        else:
+            visibility_str = "display:none;"
 
         # Build the page title.
         if is_live:
@@ -643,19 +607,19 @@ class App(object):
         # If a google maps key was provided then use google maps, otherwise use open street map.
         if is_in_watopia and os.path.isfile(self.zwift_watopia_map_file) > 0:
             my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, max_hr=activity_user_max_hr, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, map_file_name=ZWIFT_WATOPIA_MAP_FILE_NAME)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, max_hr=activity_user_max_hr, description=description_str, details=details_str, tags=tags_str, comments=comments_str, exports=exports_str, visibility=visibility_str, map_file_name=ZWIFT_WATOPIA_MAP_FILE_NAME)
         elif is_in_crit_city and os.path.isfile(self.zwift_crit_city_map_file) > 0:
             my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, max_hr=activity_user_max_hr, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, map_file_name=ZWIFT_CRIT_CITY_MAP_FILE_NAME)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, max_hr=activity_user_max_hr, description=description_str, details=details_str, tags=tags_str, comments=comments_str, exports=exports_str, visibility=visibility_str, map_file_name=ZWIFT_CRIT_CITY_MAP_FILE_NAME)
         elif is_in_makuri_islands and os.path.isfile(self.zwift_makuri_islands_map_file) > 0:
             my_template = Template(filename=self.zwift_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, max_hr=activity_user_max_hr, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str, map_file_name=ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, max_hr=activity_user_max_hr, description=description_str, details=details_str, tags=tags_str, comments=comments_str, exports=exports_str, visibility=visibility_str, map_file_name=ZWIFT_MAKURI_ISLANDS_MAP_FILE_NAME)
         elif self.google_maps_key:
             my_template = Template(filename=self.map_single_google_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, max_hr=activity_user_max_hr, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, max_hr=activity_user_max_hr, description=description_str, details=details_str, tags=tags_str, comments=comments_str, exports=exports_str, visibility=visibility_str)
         else:
             my_template = Template(filename=self.map_single_osm_html_file, module_directory=self.tempmod_dir)
-            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, max_hr=activity_user_max_hr, description=description_str, details=details_str, details_controls=details_controls_str, tags=tags_str, comments=comments_str, exports_title=exports_title_str, exports=exports_str, edit_title=edit_title_str, edit=edit_str)
+            return my_template.render(nav=self.create_navbar(logged_in), product=PRODUCT_NAME, root_url=self.root_url, name=user_realname, pagetitle=page_title, unit_system=unit_system, is_foot_based_activity=is_foot_based_activity_str, summary=summary, activityId=activity_id, userId=activity_user_id, ftp=ftp, max_hr=activity_user_max_hr, description=description_str, details=details_str, tags=tags_str, comments=comments_str, exports=exports_str, visibility=visibility_str)
 
     def render_page_for_activity(self, activity, user_realname, activity_user_id, activity_user_max_hr, logged_in_user_id, belongs_to_current_user, is_live):
         """Helper function for rendering the page corresonding to a specific activity."""

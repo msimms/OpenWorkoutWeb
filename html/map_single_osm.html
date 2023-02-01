@@ -373,7 +373,8 @@ ${summary}
     /// @function process_sensordata - callback for when sensor data is returned
     var process_sensordata = function(sensordata)
     {
-        common_process_sensordata(root_url, activity_id, sensordata, is_foot_based_activity, start_time_ms, ${max_hr}, ${ftp});
+        let deletable = "${visibility}".length == 0;
+        common_process_sensordata(root_url, activity_id, sensordata, is_foot_based_activity, start_time_ms, ${max_hr}, ${ftp}, deletable);
         retrieve_summary_data();
     }
 
@@ -524,12 +525,6 @@ ${details}
 </section>
 
 <section class="activity_control">
-<table>
-${details_controls}
-</table>
-</section>
-
-<section class="activity_control">
 <h3>Tags and Gear</h3>
 <select name="tags" id="tags" class="chosen" multiple="true" style="width:100%;" data-placeholder="Specify tags and gear...">
 ${tags}
@@ -551,17 +546,21 @@ ${comments}
 </table>
 </section>
 
-<section class="activity_control">
-${exports_title}
+<section class="activity_control" style="${visibility}">
+<h3>Export</h3>
 <table>
 ${exports}
 </table>
 </section>
 
-<section class="activity_control">
-${edit_title}
+<section class="activity_control" style="${visibility}">
+<h3>Edit</h3>
 <table>
-${edit}
+<td><button type="button" onclick="return edit_activity()" style="color:black">Edit Name, Description, and Type...</button></td><tr>
+<td><button type="button" onclick="return add_photos()" style="color:black">Add Photos...</button></td><tr>
+<td><button type="button" onclick="return trim_activity()" style="color:black">Trim...</button></td><tr>
+<td><button type="button" onclick="return refresh_analysis()" style="color:black">Refresh Analysis</button></td><tr>
+<td><button type="button" onclick="return delete_activity()" style="color:red">Delete</button></td><tr>
 </table>
 </section>
 

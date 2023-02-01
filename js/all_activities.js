@@ -158,7 +158,7 @@ function common_create_tags(root_url, tags)
 }
 
 /// @function common_process_sensordata
-function common_process_sensordata(root_url, activity_id, sensordata, is_foot_based_activity, start_time_ms, max_hr, ftp)
+function common_process_sensordata(root_url, activity_id, sensordata, is_foot_based_activity, start_time_ms, max_hr, ftp, deletable)
 {
     for (key in sensordata)
     {
@@ -193,11 +193,11 @@ function common_process_sensordata(root_url, activity_id, sensordata, is_foot_ba
                 graph_name = "Heart Rate Zone Distribution"
                 draw_bar_chart(hr_zones, "Heart Rate Zone Distribution", get_graph_color(graph_name));
             }
-            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "BPM", get_graph_color(key), true);
+            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "BPM", get_graph_color(key), deletable);
         }
         else if (key == "Cadence")
         {
-            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "RPM", get_graph_color(key), true);
+            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "RPM", get_graph_color(key), deletable);
         }
         else if (key == "Power")
         {
@@ -211,15 +211,15 @@ function common_process_sensordata(root_url, activity_id, sensordata, is_foot_ba
                     draw_bar_chart(power_zones, "Power Zone Distribution", get_graph_color(graph_name));
                 }
             }
-            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "Watts", get_graph_color(key), true);
+            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "Watts", get_graph_color(key), deletable);
         }
         else if (key == "Temperature")
         {
-            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "Temperature", get_graph_color(key), true);
+            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "Temperature", get_graph_color(key), deletable);
         }
         else if (key == "Threat Count")
         {
-            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "Threat Count", get_graph_color(key), true);
+            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "Threat Count", get_graph_color(key), deletable);
         }
         else if (key == "Events")
         {
