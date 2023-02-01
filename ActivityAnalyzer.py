@@ -29,7 +29,7 @@ class ActivityAnalyzer(object):
         self.summary_data = {}
         self.speed_graph = None
         root_dir = os.path.dirname(os.path.abspath(__file__))
-        self.data_mgr = DataMgr.DataMgr(config=Config.Config(), root_url="file://" + root_dir, analysis_scheduler=None, import_scheduler=None, workout_plan_gen_scheduler=None)
+        self.data_mgr = DataMgr.DataMgr(config=Config.Config(), root_url="file://" + root_dir, analysis_scheduler=None, import_scheduler=None)
         self.user_mgr = UserMgr.UserMgr(config=Config.Config(), session_mgr=None)
         self.last_yield = time.time()
         super(ActivityAnalyzer, self).__init__()
@@ -269,7 +269,9 @@ def analyze_activity(activity_str, internal_task_id):
 @celery_worker.task(ignore_result=True)
 def analyze_personal_records(user_str):
     print("Starting personal record analysis...")
-    user_obj = json.loads(user_str)
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    data_mgr = DataMgr.DataMgr(config=Config.Config(), root_url="file://" + root_dir, analysis_scheduler=None, import_scheduler=None)
+    data_mgr.refresh_personal_records_cache(user_str)
     print("Personal record analysis finished")
 
 def main():

@@ -55,7 +55,7 @@ class AnalysisScheduler(object):
             self.log_error(sys.exc_info()[0])
         return None, None
 
-    def add_personal_record_analysis_to_queue(self, user_id):
+    def add_personal_records_analysis_to_queue(self, user_id):
         """Adds the user ID to the list of users to have their personal records updated."""
         from ActivityAnalyzer import analyze_personal_records
 
@@ -67,3 +67,31 @@ class AnalysisScheduler(object):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return None, None
+
+    def add_user_to_workout_plan_queue(self, user_id, data_mgr):
+        """Adds the user to the list of workout plans to be generated."""
+        from bson.json_util import dumps
+        from WorkoutPlanGenerator import generate_workout_plan_for_user
+
+        import Keys
+
+        user_obj = {}
+        user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
+
+        internal_task_id = uuid.uuid4()
+        plan_task = generate_workout_plan_for_user.delay(dumps(user_obj), internal_task_id)
+        data_mgr.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, plan_task.task_id, internal_task_id, None)
+
+    def add_inputs_to_workout_plan_queue(self, user_id, inputs, data_mgr):
+        """Adds the input data set to the list of workout plans to be generated."""
+        from bson.json_util import dumps
+        from WorkoutPlanGenerator import generate_workout_plan_from_inputs
+
+        import Keys
+
+        user_obj = {}
+        user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
+
+        internal_task_id = uuid.uuid4()
+        plan_task = generate_workout_plan_from_inputs.delay(dumps(user_obj), internal_task_id)
+        data_mgr.create_deferred_task(user_id, Keys.WORKOUT_PLAN_TASK_KEY, plan_task.task_id, internal_task_id, None)

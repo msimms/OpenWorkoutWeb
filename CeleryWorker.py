@@ -34,7 +34,6 @@ import DataMgr
 import Keys
 import UserMgr
 import Units
-import WorkoutPlanGeneratorScheduler
 
 celery_worker = celery.Celery(Keys.CELERY_PROJECT_NAME, include=['ActivityAnalyzer', 'ImportWorker', 'WorkoutPlanGenerator'])
 celery_worker.config_from_object('CeleryConfig')
@@ -97,9 +96,9 @@ def check_for_ungenerated_workout_plans():
     print("Looking for user with ungenerated workout plans.")
 
     now = datetime.datetime.utcnow()
-    workout_plan_gen_scheduler = WorkoutPlanGeneratorScheduler.WorkoutPlanGeneratorScheduler()
+    analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
     config = Config.Config()
-    data_mgr = DataMgr.DataMgr(config=config, root_url="", analysis_scheduler=None, import_scheduler=None, workout_plan_gen_scheduler=workout_plan_gen_scheduler)
+    data_mgr = DataMgr.DataMgr(config=config, root_url="", analysis_scheduler=analysis_scheduler, import_scheduler=None)
     user_mgr = UserMgr.UserMgr(config=config, session_mgr=None)
 
     # These users don't have any pending workouts.

@@ -63,14 +63,13 @@ def get_activities_sort_key(item):
 class DataMgr(Importer.ActivityWriter):
     """Data store abstraction"""
 
-    def __init__(self, *, config, root_url, analysis_scheduler, import_scheduler, workout_plan_gen_scheduler):
+    def __init__(self, *, config, root_url, analysis_scheduler, import_scheduler):
         """Constructor"""
         assert config is not None
         self.config = config
         self.root_url = root_url
         self.analysis_scheduler = analysis_scheduler
         self.import_scheduler = import_scheduler
-        self.workout_plan_gen_scheduler = workout_plan_gen_scheduler
         self.database = AppDatabase.MongoDatabase()
         self.database.connect(config)
         self.map_search = None
@@ -84,7 +83,6 @@ class DataMgr(Importer.ActivityWriter):
         """Destructor"""
         self.analysis_scheduler = None
         self.import_scheduler = None
-        self.workout_plan_gen_scheduler = None
         self.database = None
 
     def total_users_count(self):
@@ -1040,6 +1038,41 @@ class DataMgr(Importer.ActivityWriter):
 
         return goal, goal_date
 
+    def refresh_personal_records_cache(self, user_id):
+        """Update method for a user's personal records. Caches the bests from the given activity and updates"""
+        """the personal record cache, if appropriate."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        # This object will keep track of the personal records.
+        summarizer = Summarizer.Summarizer()
+
+        # Load existing activity bests into the summarizer.
+        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, None)
+
+        # Cleanup the activity summary, removing any items that are no longer valid, or not.
+        old_activity_bests = {}
+        for old_activity_id in all_activity_bests:
+            if self.activity_exists(old_activity_id):
+
+                # Activity still exists, add its data to the summary.
+                old_activity_bests = all_activity_bests[old_activity_id]
+                old_activity_type = old_activity_bests[Keys.ACTIVITY_TYPE_KEY]
+                old_activity_time = old_activity_bests[Keys.ACTIVITY_START_TIME_KEY]
+                summarizer.add_activity_data(old_activity_id, old_activity_type, old_activity_time, old_activity_bests)
+            else:
+
+                # Activity no longer exists, remove it's summary from the database.
+                self.database.delete_activity_best_for_user(user_id, old_activity_id)
+
+        # Create or update the personal records cache.
+        if len(old_activity_bests) > 0:
+            self.database.update_user_personal_records(user_id, summarizer.bests)
+        else:
+            self.database.create_user_personal_records(user_id, summarizer.bests)
+        
     def update_activity_bests_and_personal_records_cache(self, user_id, activity_id, activity_type, activity_time, activity_bests, prune_activity_summary_cache):
         """Update method for a user's personal records. Caches the bests from the given activity and updates"""
         """the personal record cache, if appropriate."""
@@ -1086,13 +1119,12 @@ class DataMgr(Importer.ActivityWriter):
                 old_activity_type = old_activity_bests[Keys.ACTIVITY_TYPE_KEY]
                 old_activity_time = old_activity_bests[Keys.ACTIVITY_START_TIME_KEY]
                 summarizer.add_activity_data(old_activity_id, old_activity_type, old_activity_time, old_activity_bests)
-        do_update = len(old_activity_bests) > 0
 
         # Add data from the new activity.
         summarizer.add_activity_data(activity_id, activity_type, activity_time, activity_bests)
 
         # Create or update the personal records cache.
-        if do_update:
+        if len(old_activity_bests) > 0:
             self.database.update_user_personal_records(user_id, summarizer.bests)
         else:
             self.database.create_user_personal_records(user_id, summarizer.bests)
@@ -1110,6 +1142,7 @@ class DataMgr(Importer.ActivityWriter):
 
     def rebuild_user_personal_records(self, user_id):
         """Called when we need to rebuild the personal records cache after deleting an activity, for example."""
+        """This is computationally expensive, so it is offloaded to an analysis client."""
         if user_id is None:
             raise Exception("Bad parameter.")
 
@@ -1407,21 +1440,21 @@ class DataMgr(Importer.ActivityWriter):
 
     def generate_workout_plan_for_user(self, user_id):
         """Generates/updates a workout plan for the user with the specified ID."""
-        if self.workout_plan_gen_scheduler is None:
-            raise Exception("No workout scheduler.")
+        if self.analysis_scheduler is None:
+            raise Exception("No scheduler.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        self.workout_plan_gen_scheduler.add_user_to_queue(user_id, self)
+        self.analysis_scheduler.add_user_to_workout_plan_queue(user_id, self)
 
     def generate_workout_plan_from_inputs(self, user_id, inputs):
         """Generates a workout plan from the specified inputs."""
-        if self.workout_plan_gen_scheduler is None:
-            raise Exception("No workout scheduler.")
+        if self.analysis_scheduler is None:
+            raise Exception("No scheduler.")
         if user_id is None:
             raise Exception("Bad parameter.")
         if inputs is None:
             raise Exception("Bad parameter.")
-        self.workout_plan_gen_scheduler.add_inputs_to_queue(user_id, inputs, self)
+        self.analysis_scheduler.add_inputs_to_workout_plan_queue(user_id, inputs, self)
 
     def generate_api_key_for_user(self, user_id):
         """Generates a new API key for the specified user."""
