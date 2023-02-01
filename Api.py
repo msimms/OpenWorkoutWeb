@@ -1172,6 +1172,11 @@ class Api(object):
         if not InputChecker.is_valid_decoded_str(sensor_name):
             raise ApiException.ApiMalformedRequestException("Invalid sensor name.")
 
+        # Get the ID of the user that owns the activity and make sure it's the current user.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
+
         result = self.data_mgr.delete_activity_sensor_readings(sensor_name, activity_id)
         return result, ""
 
