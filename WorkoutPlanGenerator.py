@@ -37,7 +37,7 @@ class WorkoutPlanGenerator(object):
 
     def __init__(self, config, user_obj):
         self.user_obj = user_obj
-        self.data_mgr = DataMgr.DataMgr(config=config, root_url="", analysis_scheduler=AnalysisScheduler.AnalysisScheduler(), import_scheduler=None, workout_plan_gen_scheduler=None)
+        self.data_mgr = DataMgr.DataMgr(config=config, root_url="", analysis_scheduler=AnalysisScheduler.AnalysisScheduler(), import_scheduler=None)
         self.user_mgr = UserMgr.UserMgr(config=config, session_mgr=None)
         super(WorkoutPlanGenerator, self).__init__()
 

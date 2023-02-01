@@ -44,7 +44,7 @@ def regenerate_heat_maps():
 
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
     config = Config.Config()
-    data_mgr = DataMgr.DataMgr(config=config, root_url="", analysis_scheduler=analysis_scheduler, import_scheduler=None, workout_plan_gen_scheduler=None)
+    data_mgr = DataMgr.DataMgr(config=config, root_url="", analysis_scheduler=analysis_scheduler, import_scheduler=None)
     user_mgr = UserMgr.UserMgr(config=config, session_mgr=None)
 
     # Select a random user.
@@ -68,7 +68,7 @@ def check_for_unanalyzed_activities():
 
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
     config = Config.Config()
-    data_mgr = DataMgr.DataMgr(config=config, root_url="", analysis_scheduler=analysis_scheduler, import_scheduler=None, workout_plan_gen_scheduler=None)
+    data_mgr = DataMgr.DataMgr(config=config, root_url="", analysis_scheduler=analysis_scheduler, import_scheduler=None)
     user_mgr = UserMgr.UserMgr(config=config, session_mgr=None)
 
     # We need a randomly selected activity that is missing the summary section.
@@ -117,7 +117,7 @@ def check_for_ungenerated_workout_plans():
 def prune_deferred_tasks_list():
     """Checks for users that need their workout plan regenerated."""
     print("Pruning the deferred tasks list.")
-    data_mgr = DataMgr.DataMgr(config=Config.Config(), root_url="", analysis_scheduler=None, import_scheduler=None, workout_plan_gen_scheduler=None)
+    data_mgr = DataMgr.DataMgr(config=Config.Config(), root_url="", analysis_scheduler=None, import_scheduler=None)
     data_mgr.prune_deferred_tasks_list()
 
 @celery_worker.on_after_configure.connect
