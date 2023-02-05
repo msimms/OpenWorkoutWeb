@@ -531,7 +531,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             self.clear_intensity_distribution()
 
             # Is this the goal week? If so, add that event.
-            if goal != Keys.GOAL_FITNESS_KEY and weeks_until_goal < 1.0 and PlanGenerator.PlanGenerator.valid_float(goal_distance):
+            if self.is_goal_week(goal, weeks_until_goal, goal_distance):
                 goal_workout = self.gen_goal_workout(goal_distance, goal_date)
                 workouts.append(goal_workout)
 

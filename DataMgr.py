@@ -49,6 +49,7 @@ SIX_MONTHS = ((365.25 / 2.0) * 24.0 * 60.0 * 60.0)
 ONE_YEAR = (365.25 * 24.0 * 60.0 * 60.0)
 ONE_WEEK = (7.0 * 24.0 * 60.0 * 60.0)
 FOUR_WEEKS = (28.0 * 24.0 * 60.0 * 60.0)
+EIGHT_WEEKS = (56.0 * 24.0 * 60.0 * 60.0)
 
 g_api_key_rate_lock = threading.Lock()
 g_api_key_rates = {}
@@ -1009,14 +1010,14 @@ class DataMgr(Importer.ActivityWriter):
         return []
 
     def retrieve_user_goal(self, user_id):
-        """Retrieves the user's current goal."""
+        """Retrieves the goal distance and date that is used to suggest workouts."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
 
         # Defaults.
-        goal = None
+        goal_distance = None
         goal_date = None
         goal_importance = None
 
@@ -1027,16 +1028,24 @@ class DataMgr(Importer.ActivityWriter):
         if user_races is not None:
             for race in user_races:
 
-                # Best goal not found or race is newer and equal or higher priority.
+                # Only races that haven't happened yet.
                 race_date = race[Keys.RACE_DATE_KEY]
-                race_importance = race[Keys.RACE_IMPORTANCE_KEY]
                 if race_date > now:
-                    if goal_date is None or (race_date < goal_date and race_importance <= goal_importance):
-                        goal = race[Keys.RACE_DISTANCE_KEY]
+
+                    # Best goal not yet found, or the race is closer and equal or higher priority than the current best goal.
+                    race_importance = race[Keys.RACE_IMPORTANCE_KEY]
+                    if (goal_date is None) or (race_date < goal_date and race_importance <= goal_importance):
+                        goal_distance = race[Keys.RACE_DISTANCE_KEY]
                         goal_date = race[Keys.RACE_DATE_KEY]
                         goal_importance = race[Keys.RACE_IMPORTANCE_KEY]
 
-        return goal, goal_date
+                    # This race is after the current best goal, but is longer.
+                    if (race_date > goal_date) and (race_date <= goal_date + EIGHT_WEEKS) and (race_distance > goal_distance):
+                        goal_distance = race[Keys.RACE_DISTANCE_KEY]
+                        goal_date = race[Keys.RACE_DATE_KEY]
+                        goal_importance = race[Keys.RACE_IMPORTANCE_KEY]
+
+        return goal_distance, goal_date
 
     def refresh_personal_records_cache(self, user_id):
         """Update method for a user's personal records. Caches the bests from the given activity and updates"""

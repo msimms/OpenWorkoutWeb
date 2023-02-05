@@ -77,7 +77,7 @@ class SwimPlanGenerator(PlanGenerator.PlanGenerator):
             return workouts
 
         # Is this the goal week? If so, add that event.
-        if goal != Keys.GOAL_FITNESS_KEY and weeks_until_goal < 1.0 and PlanGenerator.PlanGenerator.valid_float(goal_distance):
+        if self.is_goal_week(goal, weeks_until_goal, goal_distance):
             goal_workout = self.gen_goal_workout(goal_distance, goal_date)
             workouts.append(goal_workout)
 
@@ -90,7 +90,7 @@ class SwimPlanGenerator(PlanGenerator.PlanGenerator):
         # Are we in a taper?
         in_taper = self.is_in_taper(weeks_until_goal, goal)
 
-        # Add the remaining inputs.
+        # Add the remaining workouts.
         if goal == Keys.GOAL_FITNESS_KEY:
             workouts.append(self.gen_aerobic_swim(has_swimming_pool_access))
         elif goal == Keys.GOAL_5K_RUN_KEY:

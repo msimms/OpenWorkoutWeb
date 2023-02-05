@@ -52,6 +52,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
     def gen_cadence_drills(self):
         """Utility function for creating a workout emphasizing cadence."""
+        """Note: Haven't implemented this, because it only seems to have beneft if the cyclist is not doing strenght work."""
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_BIKE_CADENCE_DRILLS, self.user_id)
@@ -232,7 +233,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         else:
 
             # Is this the goal week? If so, add that event.
-            if goal != Keys.GOAL_FITNESS_KEY and weeks_until_goal < 1.0 and PlanGenerator.PlanGenerator.valid_float(goal_distance):
+            if self.is_goal_week(goal, weeks_until_goal, goal_distance):
                 goal_workout = self.gen_goal_workout(goal_distance, goal_date)
                 workouts.append(goal_workout)
 

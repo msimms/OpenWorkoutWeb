@@ -17,6 +17,9 @@ class PlanGenerator(object):
         """Returns TRUE if we can actually generate a plan with the given contraints."""
         return True
 
+    def is_goal_week(self, goal, weeks_until_goal, goal_distance):
+        return goal != Keys.GOAL_FITNESS_KEY and weeks_until_goal < 1.0 and PlanGenerator.PlanGenerator.valid_float(goal_distance)
+
     def is_in_taper(self, weeks_until_goal, goal):
         """Taper: 2 weeks for a marathon or more, 1 week for a half marathon or less."""
         in_taper = False
