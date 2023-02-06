@@ -267,7 +267,7 @@ def analyze_activity(activity_str, internal_task_id):
     print("Activity analysis finished")
 
 @celery_worker.task(ignore_result=True)
-def analyze_personal_records(user_str):
+def analyze_personal_records(user_str, internal_task_id):
     print("Starting personal record analysis...")
     root_dir = os.path.dirname(os.path.abspath(__file__))
     data_mgr = DataMgr.DataMgr(config=Config.Config(), root_url="file://" + root_dir, analysis_scheduler=None, import_scheduler=None)
