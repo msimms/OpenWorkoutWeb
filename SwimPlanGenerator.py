@@ -58,8 +58,10 @@ class SwimPlanGenerator(PlanGenerator.PlanGenerator):
 
         return workout
 
-    def gen_workouts_for_next_week(self, inputs):
+    def gen_workouts_for_next_week(self, inputs, easy_week):
         """Generates the workouts for the next week, but doesn't schedule them."""
+        """easy_week indicates whether or not this is the end of a training block."""
+        """in_taper indicates whether or not we're in the pre-event taper."""
 
         workouts = []
 
@@ -86,9 +88,6 @@ class SwimPlanGenerator(PlanGenerator.PlanGenerator):
             workouts.append(self.gen_technique_swim(has_swimming_pool_access))
         elif has_open_water_swim_access:
             workouts.append(self.gen_aerobic_swim(has_swimming_pool_access))
-
-        # Are we in a taper?
-        in_taper = self.is_in_taper(weeks_until_goal, goal)
 
         # Add the remaining workouts.
         if goal == Keys.GOAL_FITNESS_KEY:

@@ -1861,7 +1861,7 @@ class Api(object):
         return result, ""
 
     def handle_refresh_analysis(self, values):
-        """Called when the user wants to recalculate the summary data."""
+        """Called when the user wants to recalculate the activity summary data."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -1880,6 +1880,14 @@ class Api(object):
 
         activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
         self.data_mgr.analyze_activity(activity, activity_user_id)
+        return True, ""
+
+    def handle_refresh_personal_records(self, values):
+        """Called when the user wants to recalculate the summary data."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        self.data_mgr.refresh_personal_records_cache(self.user_id)
         return True, ""
 
     def handle_generate_workout_plan_for_user(self):
@@ -2746,6 +2754,8 @@ class Api(object):
             return self.handle_update_visibility(values)
         elif request == 'refresh_analysis':
             return self.handle_refresh_analysis(values)
+        elif request == 'refresh_personal_records':
+            return self.handle_refresh_personal_records(values)
         elif request == 'generate_workout_plan':
             return self.handle_generate_workout_plan_for_user()
         elif request == 'generate_workout_plan_from_inputs':

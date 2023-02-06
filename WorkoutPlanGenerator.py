@@ -317,29 +317,45 @@ class WorkoutPlanGenerator(object):
 
         workouts = []
 
+        # Extract the necessary inputs.
+        total_intensity_week_1 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_1_KEY] # Most recent week
+        total_intensity_week_2 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_2_KEY]
+        total_intensity_week_3 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_3_KEY]
+        total_intensity_week_4 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_4_KEY]
+
         # The training philosophy indicates how much time we intended
         # to spend in each training zone.
         training_philosophy = Keys.TRAINING_PHILOSOPHY_POLARIZED
+
+        # Is it time for an easy week? After four weeks of building we should include an easy week to mark the end of a block.
+        easy_week = False
+        if not in_taper:
+            if total_intensity_week_1 and total_intensity_week_2 and total_intensity_week_3 and total_intensity_week_4:
+                if total_intensity_week_1 >= total_intensity_week_2 and total_intensity_week_2 >= total_intensity_week_3 and total_intensity_week_3 >= total_intensity_week_4:
+                    easy_week = True
+
+        # Are we in the pre-event taper?
+        in_taper = self.is_in_taper(weeks_until_goal, goal)
 
         # Generate the swim workouts.
         swim_planner = SwimPlanGenerator.SwimPlanGenerator(user_id)
         if not swim_planner.is_workout_plan_possible(inputs):
             raise Exception("The swim distance goal is not feasible in the time alloted.")
-        swim_workouts = swim_planner.gen_workouts_for_next_week(inputs)
+        swim_workouts = swim_planner.gen_workouts_for_next_week(inputs, easy_week, in_taper)
         workouts.extend(swim_workouts)
 
         # Generate the bike workouts.
         bike_planner = BikePlanGenerator.BikePlanGenerator(user_id, training_philosophy)
         if not bike_planner.is_workout_plan_possible(inputs):
             raise Exception("The bike distance goal is not feasible in the time alloted.")
-        bike_workouts = bike_planner.gen_workouts_for_next_week(inputs)
+        bike_workouts = bike_planner.gen_workouts_for_next_week(inputs, easy_week, in_taper)
         workouts.extend(bike_workouts)
 
         # Generate the run workouts.
         run_planner = RunPlanGenerator.RunPlanGenerator(user_id, training_philosophy)
         if not run_planner.is_workout_plan_possible(inputs):
             raise Exception("The run distance goal is not feasible in the time alloted.")
-        run_workouts = run_planner.gen_workouts_for_next_week(inputs)
+        run_workouts = run_planner.gen_workouts_for_next_week(inputs, easy_week, in_taper)
         workouts.extend(run_workouts)
 
         # If the user's goal is only general fitness then make sure we don't have more

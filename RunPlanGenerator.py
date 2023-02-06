@@ -415,8 +415,10 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             return Units.METERS_PER_HALF_MARATHON
         return Units.METERS_PER_HALF_MARATHON
 
-    def gen_workouts_for_next_week(self, inputs):
+    def gen_workouts_for_next_week(self, inputs, easy_week):
         """Generates the workouts for the next week, but doesn't schedule them."""
+        """easy_week indicates whether or not this is the end of a training block."""
+        """in_taper indicates whether or not we're in the pre-event taper."""
 
         workouts = []
 
@@ -439,9 +441,6 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         longest_run_week_3 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY]
         longest_run_week_4 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_4_KEY]
         total_intensity_week_1 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_1_KEY] # Most recent week
-        total_intensity_week_2 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_2_KEY]
-        total_intensity_week_3 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_3_KEY]
-        total_intensity_week_4 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_4_KEY]
         avg_run_distance = inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
         num_runs = inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS]
         exp_level = inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY]
@@ -478,16 +477,6 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         # Cutoff paces.
         self.cutoff_pace_1 = tempo_run_pace
         self.cutoff_pace_2 = speed_run_pace
-
-        # Are we in a taper?
-        in_taper = self.is_in_taper(weeks_until_goal, goal)
-
-        # Is it time for an easy week?
-        easy_week = False
-        if not in_taper:
-            if total_intensity_week_1 and total_intensity_week_2 and total_intensity_week_3 and total_intensity_week_4:
-                if total_intensity_week_1 >= total_intensity_week_2 and total_intensity_week_2 >= total_intensity_week_3 and total_intensity_week_3 >= total_intensity_week_4:
-                    easy_week = True
 
         # Compute the longest run needed to accomplish the goal.
         # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.

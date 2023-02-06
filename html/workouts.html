@@ -166,7 +166,7 @@
     }
 
     /// @function generate_workout_plan
-    // Ask the server to start workout plan generation.
+    // Asks the server to start workout plan generation.
     function generate_workout_plan()
     {
         let the_url = "${root_url}/api/1.0/generate_workout_plan";
@@ -176,6 +176,19 @@
             if (status == 200)
                 alert("The workout plan is being generated and will be viewable on the My Activities page when complete.");
             else
+                alert(response)
+        } );
+    }
+
+    /// @function refresh_personal_records
+    // Asks the server to rebuild the user's list of personal records.
+    function refresh_personal_records()
+    {
+        let the_url = "${root_url}/api/1.0/refresh_personal_records";
+        let dict = [];
+
+        send_post_request_async(the_url, dict, function(status, response) {
+            if (status != 200)
                 alert(response)
         } );
     }
@@ -397,6 +410,7 @@
     {
         let paragraph = "These workouts are also available by via iCal by subscribing to your iCal workouts calendar: " + url_str;
         let element = document.getElementById("calendar_url");
+
         element.innerHTML = paragraph;
     }
 
@@ -669,6 +683,7 @@ ${nav}
         <p>
             Comfort Level With Structured Training: <br><input type="range" min="1" max="10" value="5" class="slider" id="structured_training_comfort_level" style="height:10px" onchange="set_structured_training_comfort_level()"><br>
         </p>
+        <button type="button" onclick="generate_workout_plan()">Regenerate the Workout Plan</button>
 
         <hr>
 
@@ -705,6 +720,7 @@ ${nav}
             <table id="Running">
             </table>
         </p>
+        <button type="button" onclick="refresh_personal_records()">Refresh Personal Records</button>
     </div>
 </section>
 
