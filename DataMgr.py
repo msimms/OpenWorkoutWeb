@@ -133,7 +133,7 @@ class DataMgr(Importer.ActivityWriter):
 
         task_id, internal_task_id = self.analysis_scheduler.add_personal_records_analysis_to_queue(user_id)
         if [task_id, internal_task_id].count(None) == 0:
-            self.create_deferred_task(activity_user_id, Keys.ANALYSIS_TASK_KEY, task_id, internal_task_id, None)
+            self.create_deferred_task(user_id, Keys.ANALYSIS_TASK_KEY, task_id, internal_task_id, None)
 
     def compute_activity_end_time(self, activity):
         """Examines the activity and computes the time at which the activity ended."""
