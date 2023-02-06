@@ -304,7 +304,7 @@ class App(object):
         if Keys.ACTIVITY_SUMMARY_KEY in activity:
             summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
             if summary_data is None or len(summary_data) == 0:
-                self.data_mgr.analyze_activity(activity, activity_user_id)
+                self.data_mgr.schedule_activity_analysis(activity, activity_user_id)
 
         # Find the sets data.
         sets = None
@@ -514,7 +514,7 @@ class App(object):
             summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
             if not is_live:
                 if summary_data is None or len(summary_data) == 0:
-                    self.data_mgr.analyze_activity(activity, activity_user_id)
+                    self.data_mgr.schedule_activity_analysis(activity, activity_user_id)
 
         # Start with the activity type.
         summary = "\t<li>" + activity_type + "</li>\n"

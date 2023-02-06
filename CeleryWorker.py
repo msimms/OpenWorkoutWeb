@@ -82,7 +82,7 @@ def check_for_unanalyzed_activities():
             activity_user_id = user_mgr.retrieve_user_from_activity(complete_activity_data)
             if activity_user_id:
                 print("Analyzing....")
-                data_mgr.analyze_activity(complete_activity_data, activity_user_id)
+                data_mgr.schedule_activity_analysis(complete_activity_data, activity_user_id)
             else:
                 print("The activity owner could not be determined.")
         else:

@@ -98,7 +98,7 @@ class DataMgr(Importer.ActivityWriter):
         """Generates a new activity ID."""
         return str(uuid.uuid4())
 
-    def analyze_activity(self, activity, activity_user_id):
+    def schedule_activity_analysis(self, activity, activity_user_id):
         """Schedules the specified activity for analysis."""
         if activity is None:
             raise Exception("No activity object.")
@@ -122,7 +122,18 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity user ID.")
 
         complete_activity_data = self.retrieve_activity(activity_id)
-        self.analyze_activity(complete_activity_data, activity_user_id)
+        self.schedule_activity_analysis(complete_activity_data, activity_user_id)
+
+    def schedule_personal_records_refresh(self, user_id):
+        """Schedules the specified activity for analysis."""
+        if user_id is None:
+            raise Exception("No user ID.")
+        if self.analysis_scheduler is None:
+            raise Exception("No analysis scheduler.")
+
+        task_id, internal_task_id = self.analysis_scheduler.add_personal_records_analysis_to_queue(user_id)
+        if [task_id, internal_task_id].count(None) == 0:
+            self.create_deferred_task(activity_user_id, Keys.ANALYSIS_TASK_KEY, task_id, internal_task_id, None)
 
     def compute_activity_end_time(self, activity):
         """Examines the activity and computes the time at which the activity ended."""

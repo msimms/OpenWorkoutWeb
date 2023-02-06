@@ -188,7 +188,9 @@
         let dict = [];
 
         send_post_request_async(the_url, dict, function(status, response) {
-            if (status != 200)
+            if (status == 200)
+                window.location.reload();
+            else
                 alert(response)
         } );
     }

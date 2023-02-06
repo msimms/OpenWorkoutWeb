@@ -106,7 +106,7 @@ class WorkoutPlanGenerator(object):
     def update_summary_data_cb(context, activity, user_id):
         """Callback function for update_summary_data."""
         if Keys.ACTIVITY_SUMMARY_KEY not in activity:
-            context.data_mgr.analyze_activity(activity, user_id)
+            context.data_mgr.schedule_activity_analysis(activity, user_id)
 
     def optional_fetch_from_dict(self, dict, key):
         """Utility function for calculate_inputs."""

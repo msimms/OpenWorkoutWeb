@@ -1879,7 +1879,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Invalid activity.")
 
         activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
-        self.data_mgr.analyze_activity(activity, activity_user_id)
+        self.data_mgr.schedule_activity_analysis(activity, activity_user_id)
         return True, ""
 
     def handle_refresh_personal_records(self, values):
@@ -1887,7 +1887,7 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        self.data_mgr.refresh_personal_records_cache(self.user_id)
+        self.data_mgr.schedule_personal_records_refresh(self.user_id)
         return True, ""
 
     def handle_generate_workout_plan_for_user(self):
