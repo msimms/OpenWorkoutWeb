@@ -415,7 +415,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             return Units.METERS_PER_HALF_MARATHON
         return Units.METERS_PER_HALF_MARATHON
 
-    def gen_workouts_for_next_week(self, inputs, easy_week):
+    def gen_workouts_for_next_week(self, inputs, easy_week, in_taper):
         """Generates the workouts for the next week, but doesn't schedule them."""
         """easy_week indicates whether or not this is the end of a training block."""
         """in_taper indicates whether or not we're in the pre-event taper."""

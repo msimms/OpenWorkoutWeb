@@ -67,13 +67,22 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         warmup_duration = 10 * 60 # Ten minute warmup
         cooldown_duration = 10 * 60 # Ten minute cooldown
 
+        # Ronnestad Intervals
+        # 3x (13x (30 seconds hard / 15 seconds easy))
+
+        # 30:30s
+        # 30 seconds hard / 30 seconds easy
+
+        # 40:20s
+        # 40 seconds hard / 20 seconds easy
+
         # Tabata Intervals
-        # 10x30 seconds hard / 20 seconds easy
+        # 10x (30 seconds hard / 20 seconds easy)
 
         # V02 Max Intervals
-        # 8x2 minutes hard / 2 min easy
-        # 6x3 minutes hard / 2-3 min easy
-        # 5x4 minutes hard / 2-3 min easy
+        # 8x (2 minutes hard / 2 min easy)
+        # 6x (3 minutes hard / 2-3 min easy)
+        # 5x (4 minutes hard / 2-3 min easy)
 
         # Longer intervals for sustained power
         # 4x8 minutes hard / 2-4 min easy
@@ -193,7 +202,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         return workout
 
-    def gen_workouts_for_next_week(self, inputs, easy_week):
+    def gen_workouts_for_next_week(self, inputs, easy_week, in_taper):
         """Generates the workouts for the next week, but doesn't schedule them."""
         """easy_week indicates whether or not this is the end of a training block."""
         """in_taper indicates whether or not we're in the pre-event taper."""
