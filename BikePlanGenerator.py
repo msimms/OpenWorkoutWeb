@@ -62,22 +62,32 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
     def gen_interval_session(self, goal_distance):
         """Utility function for creating an interval workout."""
+        MIN_SETS_INDEX = 0
+        MAX_SETS_INDEX = 1
+        NUM_REPS_INDEX = 2
+        SECONDS_HARD_INDEX = 3
+        SECONDS_EASY_INDEX = 4
+        PERCENTAGE_FTP_INDEX = 5
 
         # Warmup and cooldown duration.
         warmup_duration = 10 * 60 # Ten minute warmup
         cooldown_duration = 10 * 60 # Ten minute cooldown
 
+        # Notes:
+        # 3-4 minute rests between blocks
+        # 2-4 blocks, based on experience
+
         # Ronnestad Intervals
         # 3x (13x (30 seconds hard / 15 seconds easy))
 
         # 30:30s
-        # 30 seconds hard / 30 seconds easy
+        # 2-4x (30 seconds hard / 30 seconds easy)
 
         # 40:20s
-        # 40 seconds hard / 20 seconds easy
+        # 2-4x (40 seconds hard / 20 seconds easy)
 
         # Tabata Intervals
-        # 10x (30 seconds hard / 20 seconds easy)
+        # 2-4x (10x (30 seconds hard / 20 seconds easy))
 
         # V02 Max Intervals
         # 8x (2 minutes hard / 2 min easy)
@@ -87,8 +97,16 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         # Longer intervals for sustained power
         # 4x8 minutes hard / 2-4 min easy
 
-    	# Build a collection of possible bike interval sessions, sorted by target time. Order is { num reps, seconds hard, percentage of threshold power }.
-        possible_workouts = [ [ 10, 30, 170 ], [ 8, 120, 140 ], [ 6, 180, 130 ], [ 5, 240, 120 ], [ 4, 480, 120 ] ]
+    	# Build a collection of possible bike interval sessions, sorted by target time.
+        # Order is { min sets, max sets, num reps, seconds hard, seconds easy, percentage of threshold power }.
+        possible_workouts = [ [ 1, 3, 13, 30, 15, 170 ],
+                              [ 2, 4, 1, 30, 30, 170 ],
+                              [ 2, 4, 1, 40, 20, 170 ],
+                              [ 2, 4, 10, 30, 20, 170 ],
+                              [ 1, 1, 8, 120, 120, 140 ],
+                              [ 1, 1, 6, 180, 150, 130 ],
+                              [ 1, 1, 5, 240, 150, 120 ],
+                              [ 1, 1, 4, 480, 180, 120 ] ]
 
         # Build a probability density function for selecting the workout. Longer goals should tend towards longer intervals and so on.
         num_possible_workouts = len(possible_workouts)
@@ -112,16 +130,22 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         selected_interval_workout = possible_workouts[selected_interval_workout_index]
 
         # Fetch the details for this workout.
-        interval_reps = selected_interval_workout[0]
-        interval_seconds = selected_interval_workout[1]
-        interval_power = selected_interval_workout[2]
-        rest_seconds = interval_seconds / 2
+        min_sets = selected_interval_workout[MIN_SETS_INDEX]
+        max_sets = selected_interval_workout[MAX_SETS_INDEX]
+        num_sets = random.randint(min_sets, max_sets)
+        num_reps = selected_interval_workout[NUM_REPS_INDEX]
+        interval_seconds = selected_interval_workout[SECONDS_HARD_INDEX]
+        interval_rest = selected_interval_workout[SECONDS_EASY_INDEX]
+        interval_power = selected_interval_workout[PERCENTAGE_FTP_INDEX]
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_INTERVAL_RIDE, self.user_id)
         workout.sport_type = Keys.TYPE_CYCLING_KEY
         workout.add_warmup(warmup_duration)
-        workout.add_time_and_power_interval(interval_reps, interval_seconds, interval_power, rest_seconds, 0.4)
+        for i in range(0, num_sets):
+            workout.add_time_and_power_interval(num_reps, interval_seconds, interval_power, interval_rest, 0.4)
+            if i < num_sets - 1:
+                workout.add_time_and_power_interval(1, 120, 0.4, 0, 0)
         workout.add_cooldown(cooldown_duration)
 
         return workout
