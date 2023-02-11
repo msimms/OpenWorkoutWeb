@@ -32,6 +32,14 @@ class PlanGenerator(object):
                 in_taper = True
         return in_taper
 
+    def is_time_for_an_easy_week(self, total_intensity_week_1, total_intensity_week_2, total_intensity_week_3, total_intensity_week_4):
+        """Is it time for an easy week? After four weeks of building we should include an easy week to mark the end of a block."""
+        easy_week = False
+        if total_intensity_week_1 and total_intensity_week_2 and total_intensity_week_3 and total_intensity_week_4:
+            if total_intensity_week_1 >= total_intensity_week_2 and total_intensity_week_2 >= total_intensity_week_3 and total_intensity_week_3 >= total_intensity_week_4:
+                easy_week = True
+        return easy_week
+
     def gen_workouts_for_next_week(self, inputs):
         """Generates the workouts for the next week, but doesn't schedule them."""
         return []

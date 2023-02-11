@@ -322,17 +322,15 @@ class WorkoutPlanGenerator(object):
         total_intensity_week_2 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_2_KEY]
         total_intensity_week_3 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_3_KEY]
         total_intensity_week_4 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_4_KEY]
+        goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
+        weeks_until_goal = inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY]
 
         # The training philosophy indicates how much time we intended
         # to spend in each training zone.
         training_philosophy = Keys.TRAINING_PHILOSOPHY_POLARIZED
 
         # Is it time for an easy week? After four weeks of building we should include an easy week to mark the end of a block.
-        easy_week = False
-        if not in_taper:
-            if total_intensity_week_1 and total_intensity_week_2 and total_intensity_week_3 and total_intensity_week_4:
-                if total_intensity_week_1 >= total_intensity_week_2 and total_intensity_week_2 >= total_intensity_week_3 and total_intensity_week_3 >= total_intensity_week_4:
-                    easy_week = True
+        easy_week = self.is_time_for_an_easy_week(total_intensity_week_1, total_intensity_week_2, total_intensity_week_3, total_intensity_week_4)
 
         # Are we in the pre-event taper?
         in_taper = self.is_in_taper(weeks_until_goal, goal)
