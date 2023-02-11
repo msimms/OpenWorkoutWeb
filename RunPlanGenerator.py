@@ -538,25 +538,27 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             workouts.append(tempo_run_workout)
 
             # The user cares about speed as well as completing the distance. Also note that we should add strides to one of the other workouts.
-            # We shouldn't schedule any structured speed workouts unless the user is running at least 30km/week.
-            if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower() and longest_run_week_1 >= 30000:
+            # We shouldn't schedule any structured speed workouts unless the user is running ~30km/week.
+            if goal_type.lower() == Keys.GOAL_TYPE_SPEED.lower() and avg_run_distance >= 30000:
 
                 # Decide which workout we're going to do.
                 workout_probability = random.uniform(0, 100)
 
-                # Add an interval/speed session.
-                if workout_probability < 50:
+                # Various types of interval/speed sessions.
+                if workout_probability < 10:
+                    workout = self.gen_norwegian_intervals(functional_threshold_pace, easy_run_pace)
+                elif workout_probability < 50:
                     workout = self.gen_interval_session(short_interval_run_pace, speed_run_pace, easy_run_pace, goal_distance)
 
-                # Add a fartlek session.
-                elif workout_probability >= 50 and workout_probability < 60:
+                # A fartlek session.
+                elif workout_probability < 60:
                     workout = self.gen_fartlek_run()
 
-                # Add a hill workout session.
-                elif workout_probability >= 60 and workout_probability < 70:
+                # A hill workout session.
+                elif workout_probability < 70:
                     workout = self.gen_hill_repeats()
 
-                # Add a threshold session.
+                # A threshold session.
                 else:
                     workout = self.gen_threshold_run(functional_threshold_pace, easy_run_pace, goal_distance)
 
