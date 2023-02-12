@@ -84,7 +84,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             return True
 
         # Too late. The user should be in the taper.
-        should_be_in_taper = self.is_in_taper(weeks_until_goal, goal)
+        should_be_in_taper = PlanGenerator.PlanGenerator.is_in_taper(weeks_until_goal, goal)
         if should_be_in_taper:
             return False
 
@@ -450,6 +450,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Handle situation in which the user hasn't run in four weeks.
         if not PlanGenerator.PlanGenerator.valid_float(longest_run_in_four_weeks) or longest_run_in_four_weeks < 1.0:
+            workouts.append(self.gen_free_run())
             workouts.append(self.gen_free_run())
             workouts.append(self.gen_free_run())
             return workouts

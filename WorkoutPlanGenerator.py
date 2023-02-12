@@ -21,6 +21,7 @@ import DataMgr
 import UserMgr
 import Keys
 import Units
+import PlanGenerator
 import RunPlanGenerator
 import SwimPlanGenerator
 import WorkoutScheduler
@@ -330,10 +331,10 @@ class WorkoutPlanGenerator(object):
         training_philosophy = Keys.TRAINING_PHILOSOPHY_POLARIZED
 
         # Is it time for an easy week? After four weeks of building we should include an easy week to mark the end of a block.
-        easy_week = self.is_time_for_an_easy_week(total_intensity_week_1, total_intensity_week_2, total_intensity_week_3, total_intensity_week_4)
+        easy_week = PlanGenerator.PlanGenerator.is_time_for_an_easy_week(total_intensity_week_1, total_intensity_week_2, total_intensity_week_3, total_intensity_week_4)
 
         # Are we in the pre-event taper?
-        in_taper = self.is_in_taper(weeks_until_goal, goal)
+        in_taper = PlanGenerator.PlanGenerator.is_in_taper(weeks_until_goal, goal)
 
         # Generate the swim workouts.
         swim_planner = SwimPlanGenerator.SwimPlanGenerator(user_id)
