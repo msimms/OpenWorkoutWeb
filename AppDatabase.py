@@ -41,23 +41,26 @@ import Workout
 def insert_into_collection(collection, doc):
     """Handles differences in document insertion between pymongo 3 and 4."""
     if int(pymongo.__version__[0]) < 4:
-        collection.insert(doc)
+        result = collection.insert(doc)
     else:
-        collection.insert_one(doc)
+        result = collection.insert_one(doc)
+    return result is not None and result.inserted_id is not None 
 
 def update_collection(collection, doc):
     """Handles differences in document updates between pymongo 3 and 4."""
     if int(pymongo.__version__[0]) < 4:
         collection.save(doc)
+        return True
     else:
         query = { Keys.DATABASE_ID_KEY: doc[Keys.DATABASE_ID_KEY] }
-        new_values = { "$set": doc }
-        collection.update_one(query, new_values)
+        new_values = { "$set" : doc }
+        result = collection.update_one(query, new_values)
+        return result.matched_count > 0 
 
 def update_activities_collection(self, activity):
     """Handles differences in document updates between pymongo 3 and 4 with activities collection-specific logic."""
     activity[Keys.ACTIVITY_LAST_UPDATED_KEY] = time.time()
-    update_collection(self.activities_collection, activity)
+    return update_collection(self.activities_collection, activity)
 
 def retrieve_time_from_location(location):
     """Used with the sort function."""
@@ -180,8 +183,7 @@ class MongoDatabase(Database.Database):
 
         try:
             post = { Keys.USERNAME_KEY: username, Keys.REALNAME_KEY: realname, Keys.HASH_KEY: passhash, Keys.DEVICES_KEY: [], Keys.FRIENDS_KEY: [], Keys.DEFAULT_PRIVACY_KEY: Keys.ACTIVITY_VISIBILITY_PUBLIC }
-            insert_into_collection(self.users_collection, post)
-            return True
+            return insert_into_collection(self.users_collection, post)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -298,8 +300,7 @@ class MongoDatabase(Database.Database):
                 user[Keys.REALNAME_KEY] = realname
                 if passhash is not None:
                     user[Keys.HASH_KEY] = passhash
-                update_collection(self.users_collection, user)
-                return True
+                return update_collection(self.users_collection, user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -385,7 +386,7 @@ class MongoDatabase(Database.Database):
             if device_str not in devices:
                 devices.append(device_str)
                 user[Keys.DEVICES_KEY] = devices
-                update_collection(self.users_collection, user)
+                return update_collection(self.users_collection, user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -467,8 +468,7 @@ class MongoDatabase(Database.Database):
                 if user_id not in pending_friends_list:
                     pending_friends_list.append(user_id)
                     user[Keys.FRIEND_REQUESTS_KEY] = pending_friends_list
-                    update_collection(self.users_collection, user)
-                    return True
+                    return update_collection(self.users_collection, user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -537,8 +537,7 @@ class MongoDatabase(Database.Database):
                 if target_id in pending_friends_list:
                     pending_friends_list.remove(target_id)
                     user[Keys.FRIEND_REQUESTS_KEY] = pending_friends_list
-                    update_collection(self.users_collection, user)
-                    return True
+                    return update_collection(self.users_collection, user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -692,8 +691,7 @@ class MongoDatabase(Database.Database):
                 # Update.
                 user[Keys.USER_SETTINGS_LAST_UPDATED_KEY][key] = update_time
                 user[key] = value
-                update_collection(self.users_collection, user)
-                return True
+                return update_collection(self.users_collection, user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -768,8 +766,7 @@ class MongoDatabase(Database.Database):
             # If the collection was found.
             if user_records is None:
                 post = { Keys.RECORDS_USER_ID: user_id_str, Keys.PERSONAL_RECORDS_KEY: records }
-                insert_into_collection(self.records_collection, post)
-                return True
+                return insert_into_collection(self.records_collection, post)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -792,8 +789,7 @@ class MongoDatabase(Database.Database):
             # If the collection was found.
             if user_records is not None:
                 user_records[Keys.PERSONAL_RECORDS_KEY] = records
-                update_collection(self.records_collection, user_records)
-                return True
+                return update_collection(self.records_collection, user_records)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -848,28 +844,28 @@ class MongoDatabase(Database.Database):
                 bests[Keys.ACTIVITY_TYPE_KEY] = activity_type
                 bests[Keys.ACTIVITY_START_TIME_KEY] = activity_time
                 user_records[activity_id] = bests
-                update_collection(self.records_collection, user_records)
-                return True
+                return update_collection(self.records_collection, user_records)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_recent_activity_bests_for_user(self, user_id, cutoff_time):
-        """Retrieve method for a user's activity records. Only activities more recent than the specified cutoff time will be returned."""
+    def retrieve_activity_bests_for_user(self, user_id):
+        """Retrieve method for a user's activity records."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_recent_activity_bests_for_user.__name__ + ": Unexpected empty object: user_id")
+            self.log_error(MongoDatabase.retrieve_activity_bests_for_user.__name__ + ": Unexpected empty object: user_id")
             return {}
 
         try:
             user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
             if user_records is not None:
                 bests = {}
+
+                # Each record is named using the activity ID of the corresponding activity.
                 for activity_id in user_records:
                     if InputChecker.is_uuid(activity_id):
                         activity_bests = user_records[activity_id]
-                        if (cutoff_time is None) or (activity_bests[Keys.ACTIVITY_START_TIME_KEY] > cutoff_time):
-                            bests[activity_id] = activity_bests
+                        bests[activity_id] = activity_bests
                 return bests
         except:
             self.log_error(traceback.format_exc())
@@ -892,12 +888,15 @@ class MongoDatabase(Database.Database):
             user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
             if user_records is not None:
                 bests = {}
+
+                # Each record is named using the activity ID of the corresponding activity.
                 for activity_id in user_records:
                     if InputChecker.is_uuid(activity_id):
                         activity_bests = user_records[activity_id]
-                        activity_time = activity_bests[Keys.ACTIVITY_START_TIME_KEY]
-                        if activity_time >= cutoff_time_lower and activity_time < cutoff_time_higher:
-                            bests[activity_id] = activity_bests
+                        if Keys.ACTIVITY_START_TIME_KEY in activity_bests:
+                            activity_time = activity_bests[Keys.ACTIVITY_START_TIME_KEY]
+                            if activity_time >= cutoff_time_lower and activity_time < cutoff_time_higher:
+                                bests[activity_id] = activity_bests
                 return bests
         except:
             self.log_error(traceback.format_exc())
@@ -919,9 +918,9 @@ class MongoDatabase(Database.Database):
         try:
             user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
             if user_records is not None:
-                user_records.pop(activity_id, None)
-                update_collection(self.records_collection, user_records)
-                return True
+                user_records[activity_id] = {}
+                #user_records.pop(activity_id)
+                return update_collection(self.records_collection, user_records)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1105,8 +1104,7 @@ class MongoDatabase(Database.Database):
 
             # Create the activity.
             post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_NAME_KEY: activty_name, Keys.ACTIVITY_START_TIME_KEY: date_time, Keys.ACTIVITY_DEVICE_STR_KEY: device_str, Keys.ACTIVITY_VISIBILITY_KEY: "public", Keys.ACTIVITY_LOCATIONS_KEY: [] }
-            insert_into_collection(self.activities_collection, post)
-            return True
+            return insert_into_collection(self.activities_collection, post)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2062,8 +2060,7 @@ class MongoDatabase(Database.Database):
                 # Update and save the document.
                 workouts_doc[Keys.WORKOUT_LIST_KEY] = workouts_list
                 workouts_doc[Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY] = last_scheduled_workout
-                update_collection(self.workouts_collection, workouts_doc)
-                return True
+                return update_collection(self.workouts_collection, workouts_doc)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2195,8 +2192,7 @@ class MongoDatabase(Database.Database):
 
                 # Update and save the document.
                 workouts_doc[Keys.WORKOUT_LIST_KEY] = [ workout_obj.to_dict() for workout_obj in workout_objs ]
-                update_collection(self.workouts_collection, workouts_doc)
-                return True
+                return update_collection(self.workouts_collection, workouts_doc)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2283,8 +2279,7 @@ class MongoDatabase(Database.Database):
                 gear_defaults_list.append(gear)
 
                 user[Keys.GEAR_DEFAULTS_KEY] = gear_defaults_list
-                update_collection(self.users_collection, user)
-                return True
+                return update_collection(self.users_collection, user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2338,8 +2333,7 @@ class MongoDatabase(Database.Database):
                 new_gear[Keys.GEAR_LAST_UPDATED_TIME_KEY] = int(last_updated_time)
                 gear_list.append(new_gear)
                 user[Keys.GEAR_KEY] = gear_list
-                update_collection(self.users_collection, user)
-                return True
+                return update_collection(self.users_collection, user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2403,8 +2397,7 @@ class MongoDatabase(Database.Database):
                             gear_list.pop(gear_index)
                             gear_list.append(gear)
                             user[Keys.GEAR_KEY] = gear_list
-                            update_collection(self.users_collection, user)
-                            return True
+                            return update_collection(self.users_collection, user)
                         gear_index = gear_index + 1
         except:
             self.log_error(traceback.format_exc())
@@ -2437,8 +2430,7 @@ class MongoDatabase(Database.Database):
                         if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
                             gear_list.pop(gear_index)
                             user[Keys.GEAR_KEY] = gear_list
-                            update_collection(self.users_collection, user)
-                            return True
+                            return update_collection(self.users_collection, user)
                         gear_index = gear_index + 1
         except:
             self.log_error(traceback.format_exc())
@@ -2514,8 +2506,7 @@ class MongoDatabase(Database.Database):
                             service_history.append(service_rec)
                             gear[Keys.GEAR_SERVICE_HISTORY_KEY] = service_history
 
-                            update_collection(self.users_collection, user)
-                            return True
+                            return update_collection(self.users_collection, user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2560,8 +2551,7 @@ class MongoDatabase(Database.Database):
                                         service_history.pop(record_index)
                                         gear[Keys.GEAR_SERVICE_HISTORY_KEY] = service_history
 
-                                        update_collection(self.users_collection, user)
-                                        return True
+                                        return update_collection(self.users_collection, user)
 
                                     record_index = record_index + 1
         except:
@@ -2634,8 +2624,7 @@ class MongoDatabase(Database.Database):
                 new_pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
                 pace_plan_list.append(new_pace_plan)
                 user[Keys.PACE_PLANS_KEY] = pace_plan_list
-                update_collection(self.users_collection, user)
-                return True
+                return update_collection(self.users_collection, user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2724,8 +2713,7 @@ class MongoDatabase(Database.Database):
                             pace_plan_list.pop(pace_plan_index)
                             pace_plan_list.append(pace_plan)
                             user[Keys.PACE_PLANS_KEY] = pace_plan_list
-                            update_collection(self.users_collection, user)
-                            return True
+                            return update_collection(self.users_collection, user)
                         pace_plan_index = pace_plan_index + 1
         except:
             self.log_error(traceback.format_exc())
@@ -2758,8 +2746,7 @@ class MongoDatabase(Database.Database):
                         if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(pace_plan_id):
                             pace_plan_list.pop(pace_plan_index)
                             user[Keys.PACE_PLANS_KEY] = pace_plan_list
-                            update_collection(self.users_collection, user)
-                            return True
+                            return update_collection(self.users_collection, user)
                         pace_plan_index = pace_plan_index + 1
         except:
             self.log_error(traceback.format_exc())
@@ -2822,8 +2809,7 @@ class MongoDatabase(Database.Database):
                 user_tasks[Keys.TASKS_KEY] = deferred_tasks
 
                 # Update the database.
-                update_collection(self.tasks_collection, user_tasks)
-                return True
+                return update_collection(self.tasks_collection, user_tasks)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2881,8 +2867,7 @@ class MongoDatabase(Database.Database):
                         break
 
                 # Update the database.
-                update_collection(self.tasks_collection, user_tasks)
-                return True
+                return update_collection(self.tasks_collection, user_tasks)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2926,8 +2911,7 @@ class MongoDatabase(Database.Database):
 
         try:
             post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.UPLOADED_FILE_DATA_KEY: bytes(file_data) }
-            insert_into_collection(self.uploads_collection, post)
-            return True
+            return insert_into_collection(self.uploads_collection, post)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2977,8 +2961,7 @@ class MongoDatabase(Database.Database):
                 key_dict = { Keys.API_KEY: str(key), Keys.API_KEY_RATE: int(rate) }
                 key_list.append(key_dict)
                 user[Keys.API_KEYS] = key_list
-                update_collection(self.users_collection, user)
-                return True
+                return update_collection(self.users_collection, user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -3030,8 +3013,7 @@ class MongoDatabase(Database.Database):
                         key_list.remove(item)
                         break
                 user[Keys.API_KEYS] = key_list
-                update_collection(self.users_collection, user)
-                return True
+                return update_collection(self.users_collection, user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -3055,8 +3037,7 @@ class MongoDatabase(Database.Database):
 
         try:
             post = { Keys.SESSION_TOKEN_KEY: token, Keys.SESSION_USER_KEY: user, Keys.SESSION_EXPIRY_KEY: expiry }
-            insert_into_collection(self.sessions_collection, post)
-            return True
+            return insert_into_collection(self.sessions_collection, post)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

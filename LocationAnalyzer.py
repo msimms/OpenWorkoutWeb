@@ -309,7 +309,7 @@ class LocationAnalyzer(SensorAnalyzer.SensorAnalyzer):
                         steepest_slope = 0
                         distortions = []
                         for k in range(1, max_k):
-                            kmeans_model = KMeans(n_clusters=k).fit(X)
+                            kmeans_model = KMeans(n_clusters=k, n_init=10).fit(X)
                             distances = cdist(X, kmeans_model.cluster_centers_, 'euclidean')
                             distances_sum = sum(np.min(distances, axis = 1))
                             distortion = distances_sum / X.shape[0]

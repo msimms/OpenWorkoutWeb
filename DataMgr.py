@@ -1051,7 +1051,7 @@ class DataMgr(Importer.ActivityWriter):
                         goal_importance = race[Keys.RACE_IMPORTANCE_KEY]
 
                     # This race is after the current best goal, but is longer.
-                    if (race_date > goal_date) and (race_date <= goal_date + EIGHT_WEEKS) and (race_distance > goal_distance):
+                    if (race_date > goal_date) and (race_date <= goal_date + EIGHT_WEEKS) and (goal_distance > goal_distance):
                         goal_distance = race[Keys.RACE_DISTANCE_KEY]
                         goal_date = race[Keys.RACE_DATE_KEY]
                         goal_importance = race[Keys.RACE_IMPORTANCE_KEY]
@@ -1070,9 +1070,9 @@ class DataMgr(Importer.ActivityWriter):
         summarizer = Summarizer.Summarizer()
 
         # Load existing activity bests into the summarizer.
-        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, None)
+        all_activity_bests = self.database.retrieve_activity_bests_for_user(user_id)
 
-        # Cleanup the activity summary, removing any items that are no longer valid, or not.
+        # Cleanup the activity summary, removing any items that are no longer valid.
         old_activity_bests = {}
         for old_activity_id in all_activity_bests:
             if self.activity_exists(old_activity_id):
@@ -1087,12 +1087,16 @@ class DataMgr(Importer.ActivityWriter):
                 # Activity no longer exists, remove it's summary from the database.
                 self.database.delete_activity_best_for_user(user_id, old_activity_id)
 
+        # Look for activities that haven't been analyzed at all.
+        now = time.time()
+        _ = self.analyze_unanalyzed_activities(user_id, now - SIX_MONTHS, now)
+
         # Create or update the personal records cache.
         if len(old_activity_bests) > 0:
-            self.database.update_user_personal_records(user_id, summarizer.bests)
+            return self.database.update_user_personal_records(user_id, summarizer.bests)
         else:
-            self.database.create_user_personal_records(user_id, summarizer.bests)
-        
+            return self.database.create_user_personal_records(user_id, summarizer.bests)
+
     def update_activity_bests_and_personal_records_cache(self, user_id, activity_id, activity_type, activity_time, activity_bests, prune_activity_summary_cache):
         """Update method for a user's personal records. Caches the bests from the given activity and updates"""
         """the personal record cache, if appropriate."""
@@ -1114,9 +1118,9 @@ class DataMgr(Importer.ActivityWriter):
         summarizer = Summarizer.Summarizer()
 
         # Load existing activity bests into the summarizer.
-        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, None)
+        all_activity_bests = self.database.retrieve_activity_bests_for_user(user_id)
 
-        # Cleanup the activity summary, removing any items that are no longer valid, or not.
+        # Cleanup the activity summary, removing any items that are no longer valid.
         old_activity_bests = {}
         if prune_activity_summary_cache:
             for old_activity_id in all_activity_bests:
@@ -1136,12 +1140,17 @@ class DataMgr(Importer.ActivityWriter):
 
                 # Add this activity's data to the summary.
                 old_activity_bests = all_activity_bests[old_activity_id]
-                old_activity_type = old_activity_bests[Keys.ACTIVITY_TYPE_KEY]
-                old_activity_time = old_activity_bests[Keys.ACTIVITY_START_TIME_KEY]
-                summarizer.add_activity_data(old_activity_id, old_activity_type, old_activity_time, old_activity_bests)
+                if len(old_activity_bests) > 0:
+                    old_activity_type = old_activity_bests[Keys.ACTIVITY_TYPE_KEY]
+                    old_activity_time = old_activity_bests[Keys.ACTIVITY_START_TIME_KEY]
+                    summarizer.add_activity_data(old_activity_id, old_activity_type, old_activity_time, old_activity_bests)
 
         # Add data from the new activity.
         summarizer.add_activity_data(activity_id, activity_type, activity_time, activity_bests)
+
+        # Look for activities that haven't been analyzed at all.
+        now = time.time()
+        _ = self.analyze_unanalyzed_activities(user_id, now - SIX_MONTHS, now)
 
         # Create or update the personal records cache.
         if len(old_activity_bests) > 0:
@@ -1663,6 +1672,10 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
+        if cutoff_time_lower is None:
+            raise Exception("Bad parameter.")
+        if cutoff_time_higher is None:
+            raise Exception("Bad parameter.")
 
         summarizer = Summarizer.Summarizer()
 
@@ -1695,14 +1708,13 @@ class DataMgr(Importer.ActivityWriter):
         num_unanalyzed = 0
 
         all_activities = self.retrieve_user_activity_list(user_id, None, start_time, end_time, None)
-        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, end_time)
+        all_activity_bests = self.database.retrieve_bounded_activity_bests_for_user(user_id, start_time, end_time)
 
         for activity in all_activities:
-            activity_id = activity[Keys.ACTIVITY_ID_KEY]
-
-            if Keys.ACTIVITY_START_TIME_KEY in activity:
+            if Keys.ACTIVITY_START_TIME_KEY in activity and Keys.ACTIVITY_ID_KEY in activity:
+                activity_id = activity[Keys.ACTIVITY_ID_KEY]
                 activity_time = activity[Keys.ACTIVITY_START_TIME_KEY]
-                if activity_time > end_time and activity_id not in all_activity_bests:
+                if activity_time > start_time and activity_time <= end_time and activity_id not in all_activity_bests:
                     num_unanalyzed = num_unanalyzed + 1
                     self.analyze_activity_by_id(activity_id, user_id)
 
@@ -1724,7 +1736,7 @@ class DataMgr(Importer.ActivityWriter):
         bests = []
 
         # Load cached summary data from all previous activities.
-        all_activity_bests = self.database.retrieve_recent_activity_bests_for_user(user_id, None)
+        all_activity_bests = self.database.retrieve_activity_bests_for_user(user_id)
         if all_activity_bests is not None:
             best_value = None
     

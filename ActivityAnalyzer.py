@@ -11,6 +11,7 @@ import sys
 import time
 import traceback
 import ActivityHasher
+import AnalysisScheduler
 import Config
 import DataMgr
 import IntensityCalculator
@@ -29,8 +30,10 @@ class ActivityAnalyzer(object):
         self.summary_data = {}
         self.speed_graph = None
         root_dir = os.path.dirname(os.path.abspath(__file__))
-        self.data_mgr = DataMgr.DataMgr(config=Config.Config(), root_url="file://" + root_dir, analysis_scheduler=None, import_scheduler=None)
-        self.user_mgr = UserMgr.UserMgr(config=Config.Config(), session_mgr=None)
+        analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
+        config = Config.Config()
+        self.data_mgr = DataMgr.DataMgr(config=config, root_url="file://" + root_dir, analysis_scheduler=analysis_scheduler, import_scheduler=None)
+        self.user_mgr = UserMgr.UserMgr(config=config, session_mgr=None)
         self.last_yield = time.time()
         super(ActivityAnalyzer, self).__init__()
 
@@ -270,7 +273,9 @@ def analyze_activity(activity_str, internal_task_id):
 def analyze_personal_records(user_str, internal_task_id):
     print("Starting personal record analysis...")
     root_dir = os.path.dirname(os.path.abspath(__file__))
-    data_mgr = DataMgr.DataMgr(config=Config.Config(), root_url="file://" + root_dir, analysis_scheduler=None, import_scheduler=None)
+    analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
+    config = Config.Config()
+    data_mgr = DataMgr.DataMgr(config=config, root_url="file://" + root_dir, analysis_scheduler=analysis_scheduler, import_scheduler=None)
     data_mgr.refresh_personal_records_cache(user_str)
     print("Personal record analysis finished")
 

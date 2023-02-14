@@ -2303,10 +2303,11 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
 
         now = time.time()
+        cutoff_time_lower = 0
         if Keys.SECONDS in values:
+            if not InputChecker.is_integer(values[Keys.SECONDS]):
+                raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
             cutoff_time_lower = now - int(values[Keys.SECONDS])
-        else:
-            cutoff_time_lower = 0
 
         unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_PREFERRED_UNITS_KEY)
         cycling_bests, running_bests, _, _, _, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(self.user_id, cutoff_time_lower, now)
