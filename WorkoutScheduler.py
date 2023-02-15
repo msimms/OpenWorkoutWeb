@@ -7,7 +7,9 @@ import inspect
 import os
 import random
 import sys
+import time
 import Config
+import Event
 import InputChecker
 import Keys
 import UserMgr
@@ -118,8 +120,8 @@ class WorkoutScheduler(object):
 
         # Are there any events this week?
         for workout in workouts:
-            if workout.type == Keys.WORKOUT_TYPE_EVENT:
-                day_index = int(workout.scheduled_time - start_time / 7)
+            if type(workout) == Event.Event:
+                day_index = (workout.scheduled_time.timetuple().tm_wday + 1) % 7
                 week[day_index] = workout
 
         # Find the long run and put it on the preferred day.

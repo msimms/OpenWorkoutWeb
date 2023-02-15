@@ -37,5 +37,5 @@ def create(workout_type, user_id):
         workout = Rest.Rest(user_id)
     else:
         workout = Workout.Workout(user_id)
-        workout.type = workout_type
+    workout.type = workout_type
     return workout

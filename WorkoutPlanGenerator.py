@@ -152,8 +152,8 @@ class WorkoutPlanGenerator(object):
             if goal_date <= now:
                 raise Exception("The goal date should be in the future.")
 
-            # Convert the goal time into weeks.
-            weeks_until_goal = (goal_date - now) / (7 * 24 * 60 * 60)
+            # Convert the goal time into weeks. Round down to the whole week because the schedule is for next week.
+            weeks_until_goal = int((goal_date - now) / (7 * 24 * 60 * 60))
 
         # Is the user interested in just completion, or do they care about performance (i.e. pace/speed)?
         goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)

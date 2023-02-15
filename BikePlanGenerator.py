@@ -1,6 +1,7 @@
 # Copyright 2019 Michael J Simms
 """Generates a bike plan for the specifiied user."""
 
+import datetime
 import numpy as np
 import random
 from scipy.stats import norm
@@ -221,7 +222,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EVENT, self.user_id)
         workout.sport_type = Keys.TYPE_CYCLING_KEY
-        workout.scheduled_time = goal_date
+        workout.scheduled_time = datetime.datetime.fromtimestamp(goal_date)
         workout.add_distance_interval(1, goal_distance_meters, 0, 0, 0)
 
         return workout

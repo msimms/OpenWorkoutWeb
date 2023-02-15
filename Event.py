@@ -29,4 +29,4 @@ class Event(Workout.Workout):
     """Class that describes a goal event."""
 
     def __init__(self, user_id):
-        Event.Event.__init__(self, user_id)
+        Workout.Workout.__init__(self, user_id)

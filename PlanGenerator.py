@@ -18,7 +18,7 @@ class PlanGenerator(object):
         return True
 
     def is_goal_week(self, goal, weeks_until_goal, goal_distance):
-        return goal != Keys.GOAL_FITNESS_KEY and weeks_until_goal < 1.0 and PlanGenerator.PlanGenerator.valid_float(goal_distance)
+        return goal != Keys.GOAL_FITNESS_KEY and weeks_until_goal <= 1.0 and PlanGenerator.valid_float(goal_distance)
 
     @staticmethod
     def is_in_taper(weeks_until_goal, goal):

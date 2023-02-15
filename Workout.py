@@ -346,7 +346,9 @@ class Workout(object):
             result += ".\n"
 
         # Add an string that describes how this workout fits into the big picture.
-        if self.type == Keys.WORKOUT_TYPE_SPEED_RUN:
+        if self.type == Keys.WORKOUT_TYPE_EVENT:
+            result += "Goal Event!\n"
+        elif self.type == Keys.WORKOUT_TYPE_SPEED_RUN:
             result += "Purpose: Speed sessions get you used to running at faster paces.\n"
         elif self.type == Keys.WORKOUT_TYPE_THRESHOLD_RUN:
             result += "Purpose: Tempo runs build a combination of speed and endurance. They should be performed at a pace you can hold for roughly one hour.\n"
