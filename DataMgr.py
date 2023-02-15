@@ -1148,10 +1148,6 @@ class DataMgr(Importer.ActivityWriter):
         # Add data from the new activity.
         summarizer.add_activity_data(activity_id, activity_type, activity_time, activity_bests)
 
-        # Look for activities that haven't been analyzed at all.
-        now = time.time()
-        _ = self.analyze_unanalyzed_activities(user_id, now - SIX_MONTHS, now)
-
         # Create or update the personal records cache.
         if len(old_activity_bests) > 0:
             self.database.update_user_personal_records(user_id, summarizer.bests)
