@@ -120,7 +120,7 @@ class WorkoutScheduler(object):
 
         # Are there any events this week?
         for workout in workouts:
-            if type(workout) == Event.Event:
+            if workout.type == Keys.WORKOUT_TYPE_EVENT:
                 day_index = (workout.scheduled_time.timetuple().tm_wday + 1) % 7
                 week[day_index] = workout
 
@@ -142,7 +142,10 @@ class WorkoutScheduler(object):
                         except:
                             day_index = InputChecker.days_of_week[-1] # Default to the last day, Sunday.
                         workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
-                        week[day_index] = workout
+
+                        # Make sure there isn't something else already on that date (such as an event).
+                        if week[day_index] == None:
+                            week[day_index] = workout
                         break
 
         # Assign workouts to days. Keep track of the one with the best score.
