@@ -425,10 +425,10 @@ class WorkoutPlanGenerator(object):
         scheduler = WorkoutScheduler.WorkoutScheduler(user_id)
         return scheduler.schedule_workouts(workouts, start_time)
 
-    def store_plan(self, user_id, workouts):
+    def store_plan(self, user_id, scheduled_workouts):
         """Saves the user's workouts to the database."""
-        for workout_obj in workouts:
-            result = self.data_mgr.create_workout(user_id, workout_obj)
+        for scheduled_workout in scheduled_workouts:
+            result = self.data_mgr.create_workout(user_id, scheduled_workout)
             if not result:
                 print("Failed to save a workout to the database.")
 
@@ -464,10 +464,10 @@ class WorkoutPlanGenerator(object):
                 workouts = self.generate_workouts_using_model(user_id, inputs, model)
 
             # Organize the workouts into a schedule.
-            workouts = self.organize_schedule(user_id, workouts)
+            scheduled_workouts = self.organize_schedule(user_id, workouts)
 
             # Save to the database.
-            self.store_plan(user_id, workouts)
+            self.store_plan(user_id, scheduled_workouts)
         except:
             self.log_error("Exception when generating a workout plan.")
             self.log_error(traceback.format_exc())

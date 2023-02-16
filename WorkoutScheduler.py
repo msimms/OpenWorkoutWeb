@@ -7,9 +7,7 @@ import inspect
 import os
 import random
 import sys
-import time
 import Config
-import Event
 import InputChecker
 import Keys
 import UserMgr
@@ -37,9 +35,9 @@ class WorkoutScheduler(object):
         daily_stress_scores = [0.0] * 7
         index = 0
         for day in week:
-            if day is not None:
-                if day.estimated_intensity_score is not None:
-                    daily_stress_scores[index] = day.estimated_intensity_score
+            for workout in day:
+                if workout.estimated_intensity_score is not None:
+                    daily_stress_scores[index] = workout.estimated_intensity_score
             index = index + 1
 
         smoothed_scores = signals.smooth(daily_stress_scores, 2)
@@ -54,7 +52,7 @@ class WorkoutScheduler(object):
         # Walk the weeks list and find a list of possible days on which to do the workout.
         day_index = 0
         for day in week:
-            if day is None:
+            if len(day) == 0:
                 possible_days.append(day_index)
             day_index = day_index + 1
         return possible_days
@@ -80,7 +78,7 @@ class WorkoutScheduler(object):
                 else:
                     day_index = random.randint(0,6)
                 workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
-                scheduled_week[day_index] = workout
+                scheduled_week[day_index].append(workout)
 
         return scheduled_workouts, scheduled_week
 
@@ -105,7 +103,7 @@ class WorkoutScheduler(object):
                 else:
                     day_index = random.randint(0,6)
                 workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
-                scheduled_week[day_index] = workout
+                scheduled_week[day_index].append(workout)
 
         return scheduled_workouts, scheduled_week
 
@@ -115,14 +113,14 @@ class WorkoutScheduler(object):
         # Shuffle the deck.
         random.shuffle(workouts)
 
-        # This will server as our calendar for next week.
-        week = [None] * 7
+        # This will serve as our calendar for next week.
+        week = [[] for _ in range(7)]
 
         # Are there any events this week?
         for workout in workouts:
             if workout.type == Keys.WORKOUT_TYPE_EVENT:
                 day_index = (workout.scheduled_time.timetuple().tm_wday + 1) % 7
-                week[day_index] = workout
+                week[day_index].append(workout)
 
         # Find the long run and put it on the preferred day.
         if self.user_id is not None:
@@ -141,11 +139,11 @@ class WorkoutScheduler(object):
                             day_index = [x.lower() for x in InputChecker.days_of_week].index(preferred_long_run_day)
                         except:
                             day_index = InputChecker.days_of_week[-1] # Default to the last day, Sunday.
-                        workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
 
                         # Make sure there isn't something else already on that date (such as an event).
-                        if week[day_index] == None:
-                            week[day_index] = workout
+                        if len(week[day_index]) == 0:
+                            workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
+                            week[day_index].append(workout)
                         break
 
         # Assign workouts to days. Keep track of the one with the best score.
@@ -155,7 +153,7 @@ class WorkoutScheduler(object):
 
         # Try and best the first arrangement, by randomly re-arranging the schedule
         # and seeing if we can get a better score.
-        for i in range(1, 10):
+        for _ in range(1, 10):
             new_schedule, new_week = self.random_scheduler(workouts, week, start_time)
             new_schedule_score = self.score_schedule(new_week)
             if new_schedule_score < best_schedule_score:
