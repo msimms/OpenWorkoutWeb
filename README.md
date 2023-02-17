@@ -396,6 +396,10 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 * Bug fixes.
 * More work on workout plan generation.
 
+### 0.56
+* Bug fixes.
+* More work on workout plan generation and scheduling.
+
 ## Tech
 This software uses several other source projects to work properly:
 
@@ -409,9 +413,6 @@ This software uses several other source projects to work properly:
 * [python-fitparse](https://github.com/dtcooper/python-fitparse) - A library for parsing .FIT files.
 
 The app is written in a combination of Python, HTML, and JavaScript.
-
-## Social
-Twitter: [@OpenWorkoutApp](https://twitter.com/OpenWorkoutApp)
 
 ## License
 Currently proprietary (though many of the source files are under the MIT license). However I am considering moving the remainder of the source code to either an MIT or MPL license.
