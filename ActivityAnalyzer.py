@@ -208,6 +208,7 @@ class ActivityAnalyzer(object):
                     distance_entry = location_analyzer.distance_buf[-1]
                     workout_duration_secs = end_time_secs - start_time_secs
                     avg_workout_pace_meters_per_sec =  distance_entry[1] / workout_duration_secs
+                    self.summary_data[Keys.APP_DURATION_KEY] = workout_duration_secs
 
                     # Running activity.
                     if activity_type in Keys.RUNNING_ACTIVITIES:

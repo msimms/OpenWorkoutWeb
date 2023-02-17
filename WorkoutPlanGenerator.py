@@ -234,19 +234,23 @@ class WorkoutPlanGenerator(object):
         num_runs = 0.0
         num_rides = 0.0
         num_swims = 0.0
-        if Keys.TOTAL_ACTIVITIES in running_summary_4_week and Keys.TOTAL_DISTANCE in running_summary_4_week:
+        if Keys.TOTAL_ACTIVITIES in running_summary_4_week:
             if running_summary_4_week[Keys.TOTAL_ACTIVITIES] > 0:
                 num_runs = running_summary_4_week[Keys.TOTAL_ACTIVITIES]
-                avg_running_distance = running_summary_4_week[Keys.TOTAL_DISTANCE] / num_runs
-        if Keys.TOTAL_ACTIVITIES in cycling_summary_4_week and Keys.TOTAL_DISTANCE in cycling_summary_4_week and Keys.TOTAL_DURATION in cycling_summary_4_week:
+                if Keys.TOTAL_DISTANCE in running_summary_4_week:
+                    avg_running_distance = running_summary_4_week[Keys.TOTAL_DISTANCE] / num_runs
+        if Keys.TOTAL_ACTIVITIES in cycling_summary_4_week:
             if cycling_summary_4_week[Keys.TOTAL_ACTIVITIES] > 0:
                 num_rides = cycling_summary_4_week[Keys.TOTAL_ACTIVITIES]
-                avg_cycling_distance = cycling_summary_4_week[Keys.TOTAL_DISTANCE] / num_rides
-                avg_cycling_duration = cycling_summary_4_week[Keys.TOTAL_DURATION] / num_rides
-        if Keys.TOTAL_ACTIVITIES in swimming_summary_4_week and Keys.TOTAL_DISTANCE in swimming_summary_4_week:
+                if Keys.TOTAL_DISTANCE in cycling_summary_4_week:
+                    avg_cycling_distance = cycling_summary_4_week[Keys.TOTAL_DISTANCE] / num_rides
+                if Keys.TOTAL_DURATION in cycling_summary_4_week:
+                    avg_cycling_duration = cycling_summary_4_week[Keys.TOTAL_DURATION] / num_rides
+        if Keys.TOTAL_ACTIVITIES in swimming_summary_4_week:
             if swimming_summary_4_week[Keys.TOTAL_ACTIVITIES] > 0:
                 num_swims = swimming_summary_4_week[Keys.TOTAL_ACTIVITIES]
-                avg_swimming_distance = swimming_summary_4_week[Keys.TOTAL_DISTANCE] / num_swims
+                if Keys.TOTAL_DISTANCE in swimming_summary_4_week:
+                    avg_swimming_distance = swimming_summary_4_week[Keys.TOTAL_DISTANCE] / num_swims
 
         #
         # Need information about the user.
