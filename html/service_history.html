@@ -54,7 +54,7 @@
     }
 
     /// @function create_service_record
-    function create_service_record(target)
+    function create_service_record()
     {
         let the_url = "${root_url}/api/1.0/create_service_record";
         let dict = [];
@@ -73,6 +73,12 @@
             else
                 alert(response)
         } );
+    }
+
+    /// @function cancel_service_record_creation
+    function cancel_service_record_creation()
+    {
+        window.location.replace("${root_url}/service_history/${gear_id}");
     }
 
     /// @function get_new_service_record_info
@@ -119,13 +125,26 @@
         let save_btn = document.createElement('button');
         save_btn.appendChild(document.createTextNode('Save'));
         save_btn.title = "Save";
-        save_btn.addEventListener('click', function() { create_service_record(this); });
+        save_btn.addEventListener('click', function() { create_service_record(); });
 
         // Add the save button to the screen.
         outer_div.appendChild(save_btn);
 
         // Add a line break.
-        outer_div.appendChild(document.createElement("hr"));
+        outer_div.appendChild(document.createElement("br"));
+
+        // Create a cancel button.
+        let cancel_btn = document.createElement('button');
+        cancel_btn.appendChild(document.createTextNode('Cancel'));
+        cancel_btn.title = "Cancel";
+        cancel_btn.addEventListener('click', function() { cancel_service_record_creation(); });
+
+        // Add the cancel button to the screen.
+        outer_div.appendChild(cancel_btn);
+
+        // Hide the add button, since it is redundant now.
+        let add_btn = document.getElementById("add_service_record_btn");
+        add_btn.style = "display: none;";
 
         return false;
     }
@@ -264,7 +283,7 @@ ${nav}
     </p>
     <div class="block" id="new_service_record_block" style="width: 95%">
     </div>
-    <button type="button" onclick="get_new_service_record_info()">Add Service Record</button>
+    <button type="button" id="add_service_record_btn" onclick="get_new_service_record_info()">Add Service Record</button>
 
 </section>
 
