@@ -33,10 +33,19 @@ class TrainingPaceCalculator(object):
         super(TrainingPaceCalculator, self).__init__()
 
     def convert_vo2max_to_speed(self, vo2):
-    	return 29.54 + 5.000663 * vo2 - 0.007546 * vo2 * vo2
+        return 29.54 + 5.000663 * vo2 - 0.007546 * vo2 * vo2
 
     def calc_from_vo2max(self, vo2max):
         """Give the athlete's VO2Max, returns the suggested long run, easy run, tempo run, and speed run paces."""
+
+        # Percentage of VO2 Max; from the USATF Coaches Education Program’s
+        # 800 meters 120-136%
+        # 1500 meters 110-112%
+        # 3000 meter 100-102%
+        # 5000 meters 97-100%
+        # 10000 meters 88-92%
+        # Half Marathon 85-88%%
+        # Marathon 82-85%
 
         # Training paces are computed as a percentage of VO2Max.
         long_run_pace = vo2max * 0.6
