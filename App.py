@@ -41,6 +41,7 @@ except ImportError:
 
 import Keys
 import Api
+import Config
 import Dirs
 import IcalServer
 import InputChecker
@@ -76,8 +77,9 @@ class RedirectException(Exception):
 class App(object):
     """Class containing the URL handlers."""
 
-    def __init__(self, user_mgr, data_mgr, root_dir, root_url, google_maps_key, enable_profiling, debug):
+    def __init__(self, config, user_mgr, data_mgr, root_dir, root_url, google_maps_key, enable_profiling, debug):
         """Constructor"""
+        self.config = config
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
         self.root_dir = root_dir
@@ -1077,7 +1079,7 @@ class App(object):
     @Perf.statistics
     def api(self, user_id, verb, method, params):
         """Handles an API request."""
-        api = Api.Api(self.user_mgr, self.data_mgr, user_id, self.root_url)
+        api = Api.Api(self.config, self.user_mgr, self.data_mgr, user_id, self.root_url)
         handled, response = api.handle_api_1_0_request(verb, method, params)
         return handled, response
 
@@ -1104,6 +1106,11 @@ class App(object):
     @Perf.statistics
     def create_login(self):
         """Renders the create login page."""
+        # Make sure this is allowed.
+        # Creating a new login can be disabled for security reasons, testing, etc.
+        if self.config.is_create_login_disabled():
+            return self.render_error("Login creation is currently disabled.")
+
         create_login_html_file = os.path.join(self.root_dir, Dirs.HTML_DIR, 'create_login.html')
         my_template = Template(filename=create_login_html_file, module_directory=self.tempmod_dir)
         return my_template.render(product=PRODUCT_NAME, root_url=self.root_url)

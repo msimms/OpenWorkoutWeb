@@ -68,6 +68,9 @@ class Config(object):
     def is_profiling_enabled(self):
         return self.get_bool('General', 'Profile')
 
+    def is_create_login_disabled(self):
+        return self.get_bool('General', 'Disable Login Creation')
+
     def is_https_enabled(self):
         return self.get_bool('Crypto', 'HTTPS')
 

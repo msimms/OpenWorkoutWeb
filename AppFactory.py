@@ -51,7 +51,7 @@ def create_cherrypy(config, root_dir, session_mgr):
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
     import_scheduler = ImportScheduler.ImportScheduler()
     data_mgr = DataMgr.DataMgr(config=config, root_url=root_url, analysis_scheduler=analysis_scheduler, import_scheduler=import_scheduler)
-    backend = App.App(user_mgr, data_mgr, root_dir, root_url, googlemaps_key, profiling_enabled, debug_enabled)
+    backend = App.App(config, user_mgr, data_mgr, root_dir, root_url, googlemaps_key, profiling_enabled, debug_enabled)
 
     # Configure the error logger.
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
@@ -166,7 +166,7 @@ def create_flask(config, root_dir):
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
     import_scheduler = ImportScheduler.ImportScheduler()
     data_mgr = DataMgr.DataMgr(config=config, root_url=root_url, analysis_scheduler=analysis_scheduler, import_scheduler=import_scheduler)
-    backend = App.App(user_mgr, data_mgr, root_dir, root_url, googlemaps_key, profiling_enabled, debug_enabled)
+    backend = App.App(config, user_mgr, data_mgr, root_dir, root_url, googlemaps_key, profiling_enabled, debug_enabled)
 
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 

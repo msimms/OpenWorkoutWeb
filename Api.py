@@ -29,6 +29,7 @@ import json
 import logging
 import time
 import ApiException
+import Config
 import Exporter
 import InputChecker
 import Keys
@@ -41,8 +42,9 @@ from distutils.util import strtobool
 class Api(object):
     """Class for managing API messages."""
 
-    def __init__(self, user_mgr, data_mgr, user_id, root_url):
+    def __init__(self, config, user_mgr, data_mgr, user_id, root_url):
         super(Api, self).__init__()
+        self.config = config
         self.user_mgr = user_mgr
         self.data_mgr = data_mgr
         self.user_id = user_id
@@ -520,6 +522,11 @@ class Api(object):
         """Called when an API message to create an account is received."""
         if self.user_id is not None:
             raise Exception("Already logged in.")
+
+        # Make sure this is allowed.
+        # Creating a new login can be disabled for security reasons, testing, etc.
+        if self.config.is_create_login_disabled():
+            raise ApiException.ApiAuthenticationException("Creating a new login is currently disabled.")
 
         # Required parameters.
         if Keys.USERNAME_KEY not in values:
