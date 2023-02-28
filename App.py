@@ -769,9 +769,12 @@ class App(object):
         # Look up the user.
         user = self.user_mgr.retrieve_user_details(user_str)
 
+        # Make sure the user has registered devies.
+        if not Keys.DEVICES_KEY in user:
+            return self.render_no_live_data_error(user_str)
+
         # Find the user's most recent activity.
-        user_id = str(user[Keys.DATABASE_ID_KEY])
-        user_devices = self.user_mgr.retrieve_user_devices(user_id)
+        user_devices = user[Keys.DEVICES_KEY]
         activity = self.data_mgr.retrieve_most_recent_activity_for_user(user_devices)
         if activity is None:
             return self.render_no_live_data_error(user_str)
