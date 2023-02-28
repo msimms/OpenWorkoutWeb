@@ -102,9 +102,7 @@ class MongoDatabase(Database.Database):
 
             # Database. Try the old name, if not found then create or open it with the new name.
             db_names = self.conn.list_database_names()
-            if 'straendb' in db_names:
-                self.database = self.conn['straendb']
-            else:
+            if 'openworkoutdb' in db_names:
                 self.database = self.conn['openworkoutdb']
             if self.database is None:
                 raise DatabaseException.DatabaseException("Could not connect to MongoDB.")
