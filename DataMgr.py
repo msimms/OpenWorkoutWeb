@@ -561,13 +561,14 @@ class DataMgr(Importer.ActivityWriter):
 
         # List activities recorded on devices registered to the user.
         devices = self.database.retrieve_user_devices(user_id)
-        devices = list(set(devices)) # De-duplicate
-        device_activities = self.database.retrieve_devices_activity_list(devices, start_time, end_time, False)
-        if device_activities is not None:
-            for device_activity in device_activities:
-                device_activity[Keys.REALNAME_KEY] = user_realname
-                self.update_activity_start_time(device_activity)
-            activities.extend(device_activities)
+        if devices is not None:
+            devices = list(set(devices)) # De-duplicate
+            device_activities = self.database.retrieve_devices_activity_list(devices, start_time, end_time, False)
+            if device_activities is not None:
+                for device_activity in device_activities:
+                    device_activity[Keys.REALNAME_KEY] = user_realname
+                    self.update_activity_start_time(device_activity)
+                activities.extend(device_activities)
 
         # List activities with no device that are associated with the user.
         user_activities = self.database.retrieve_user_activity_list(user_id, start_time, end_time, False)
