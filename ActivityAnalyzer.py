@@ -90,7 +90,7 @@ class ActivityAnalyzer(object):
             start_time_secs = self.data_mgr.update_activity_start_time(self.activity)
 
             # We'll use this to compute the end time.
-            end_time_ms = 0
+            most_recent_end_time_ms = 0
 
             # Hash the activity.
             print("Hashing the activity...")
@@ -124,6 +124,10 @@ class ActivityAnalyzer(object):
                     # Update the analyzer.
                     location_analyzer.append_location(end_time_ms, latitude, longitude, altitude, horizontal_accuracy, vertical_accuracy)
                     location_analyzer.update_speeds()
+
+                    # Is this the most recent location?
+                    if end_time_ms > most_recent_end_time_ms:
+                        most_recent_end_time_ms = end_time_ms
 
                     self.should_yield()
                 self.summary_data.update(location_analyzer.analyze())
@@ -196,8 +200,8 @@ class ActivityAnalyzer(object):
                 # Was a stress score calculated (i.e., did the activity have power data from which stress could be computed)?
                 # If not, estimate a stress score.
                 print("Update the end time...")
-                end_time_secs = end_time_ms / 1000
-                if end_time_ms > 0:
+                end_time_secs = most_recent_end_time_ms / 1000
+                if end_time_secs > 0:
                     self.data_mgr.update_activity_end_time(self.activity, end_time_secs)
 
                 # If activity duration and distance have been calculated.
