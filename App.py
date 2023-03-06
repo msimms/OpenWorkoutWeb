@@ -803,6 +803,8 @@ class App(object):
 
         # Determine who owns the device, and hence the activity.
         activity_user_id, _, activity_user_realname = self.user_mgr.get_activity_user(activity)
+        if activity_user_id is None:
+            return self.render_error("The activity owner cannot be determined.")
         belongs_to_current_user = str(activity_user_id) == str(logged_in_user_id)
         if activity_user_realname is None:
             activity_user_realname = ""
