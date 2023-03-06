@@ -93,7 +93,7 @@ def check_for_unanalyzed_activities():
 @celery_worker.task()
 def check_for_ungenerated_workout_plans():
     """Checks for users that need their workout plan regenerated. Generates workout plans for each of those users."""
-    print("Looking for user with ungenerated workout plans.")
+    print("Looking for users with ungenerated workout plans.")
 
     now = datetime.datetime.utcnow()
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
