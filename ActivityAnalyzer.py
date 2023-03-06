@@ -89,15 +89,11 @@ class ActivityAnalyzer(object):
             print("Computing the start time...")
             start_time_secs = self.data_mgr.update_activity_start_time(self.activity)
 
-            # We'll use this to compute the end time.
-            most_recent_end_time_ms = 0
-
             # Hash the activity.
             print("Hashing the activity...")
             hasher = ActivityHasher.ActivityHasher(self.activity)
             hash_str = hasher.hash()
             self.summary_data[Keys.ACTIVITY_HASH_KEY] = hash_str
-            self.should_yield()
 
             # Do the location analysis.
             print("Performing location analysis...")
@@ -108,7 +104,7 @@ class ActivityAnalyzer(object):
                 for location in locations:
 
                     # Required elements.
-                    end_time_ms = location[Keys.LOCATION_TIME_KEY]
+                    time_ms = location[Keys.LOCATION_TIME_KEY]
                     latitude = location[Keys.LOCATION_LAT_KEY]
                     longitude = location[Keys.LOCATION_LON_KEY]
                     altitude = location[Keys.LOCATION_ALT_KEY]
@@ -122,15 +118,11 @@ class ActivityAnalyzer(object):
                         vertical_accuracy = location[Keys.LOCATION_VERTICAL_ACCURACY_KEY]
 
                     # Update the analyzer.
-                    location_analyzer.append_location(end_time_ms, latitude, longitude, altitude, horizontal_accuracy, vertical_accuracy)
+                    location_analyzer.append_location(time_ms, latitude, longitude, altitude, horizontal_accuracy, vertical_accuracy)
                     location_analyzer.update_speeds()
 
-                    # Is this the most recent location?
-                    if end_time_ms > most_recent_end_time_ms:
-                        most_recent_end_time_ms = end_time_ms
-
-                    self.should_yield()
                 self.summary_data.update(location_analyzer.analyze())
+
             self.should_yield()
 
             # Do the sensor analysis.
@@ -167,7 +159,7 @@ class ActivityAnalyzer(object):
                         self.log_error("Exception when analyzing activity " + sensor_type + " data.")
                         self.log_error(traceback.format_exc())
                         self.log_error(sys.exc_info()[0])
-                    self.should_yield()
+
             self.should_yield()
 
             # The following require us to have an activity ID.
@@ -189,20 +181,18 @@ class ActivityAnalyzer(object):
                     print("Storing the distance calculations...")
                     if not self.data_mgr.create_activity_metadata_list(activity_id, Keys.APP_DISTANCES_KEY, location_analyzer.distance_buf):
                         self.log_error("Error returned when saving activity speed graph.")                    
-                self.should_yield()
 
                 # Where was this activity performed?
                 print("Computing the location description...")
                 location_description = self.data_mgr.get_location_description(activity_id)
                 self.summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY] = location_description
-                self.should_yield()
 
                 # Was a stress score calculated (i.e., did the activity have power data from which stress could be computed)?
                 # If not, estimate a stress score.
                 print("Update the end time...")
-                end_time_secs = most_recent_end_time_ms / 1000
-                if end_time_secs > 0:
-                    self.data_mgr.update_activity_end_time(self.activity, end_time_secs)
+                end_time_ms = self.data_mgr.compute_activity_end_time_ms(self.activity)
+                end_time_secs = end_time_ms / 1000
+                self.data_mgr.update_activity_end_time_secs(self.activity, end_time_secs)
 
                 # If activity duration and distance have been calculated.
                 print("Computing the intensity score and training paces...")
@@ -240,7 +230,6 @@ class ActivityAnalyzer(object):
                     self.log_error("Error returned when saving activity summary data: " + str(self.summary_data))
             else:
                 self.log_error("Activity ID not provided. Cannot create activity summary.")
-            self.should_yield()
 
             # Update personal bests.
             if Keys.ACTIVITY_START_TIME_KEY in self.activity:

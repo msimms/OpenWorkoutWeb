@@ -135,7 +135,7 @@ class DataMgr(Importer.ActivityWriter):
         if [task_id, internal_task_id].count(None) == 0:
             self.create_deferred_task(user_id, Keys.ANALYSIS_TASK_KEY, task_id, internal_task_id, None)
 
-    def compute_activity_end_time(self, activity):
+    def compute_activity_end_time_ms(self, activity):
         """Examines the activity and computes the time at which the activity ended."""
         end_time_ms = None
 
@@ -155,13 +155,15 @@ class DataMgr(Importer.ActivityWriter):
 
         return end_time_ms
 
-    def update_activity_end_time(self, activity, end_time_sec):
+    def update_activity_end_time_secs(self, activity, end_time_sec):
         """Utility function for updating the activity's end time in the database."""
         if self.database is None:
             raise Exception("No database.")
         if activity is None:
             raise Exception("No activity object.")
-        return self.database.create_or_update_activity_metadata(activity[Keys.ACTIVITY_ID_KEY], int(end_time_sec * 1000), Keys.ACTIVITY_END_TIME_KEY, int(end_time_sec), False)
+        if end_time_sec is None:
+            raise Exception("End time not provided.")
+        return self.database.create_or_update_activity_metadata(activity[Keys.ACTIVITY_ID_KEY], None, Keys.ACTIVITY_END_TIME_KEY, int(end_time_sec), False)
 
     def compute_and_store_activity_end_time(self, activity):
         """Examines the activity and computes the time at which the activity ended, storing it so we don't have to do this again."""
@@ -171,7 +173,7 @@ class DataMgr(Importer.ActivityWriter):
         end_time_sec = None
 
         # Compute from the activity's raw data.
-        end_time_ms = self.compute_activity_end_time(activity)
+        end_time_ms = self.compute_activity_end_time_ms(activity)
         if end_time_ms is not None:
             end_time_sec = end_time_ms / 1000
 
@@ -181,7 +183,7 @@ class DataMgr(Importer.ActivityWriter):
 
         # Store the end time, so we don't have to go through this again.
         if end_time_sec is not None:
-            self.update_activity_end_time(activity, end_time_sec)
+            self.update_activity_end_time_secs(activity, end_time_sec)
 
         return end_time_sec
 
@@ -704,7 +706,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         trim_before_ms = 0
-        trim_after_ms = self.compute_activity_end_time(activity)
+        trim_after_ms = self.compute_activity_end_time_ms(activity)
 
         if trim_from == Keys.TRIM_FROM_BEGINNING_VALUE:
             if Keys.ACTIVITY_START_TIME_KEY in activity:
@@ -1081,9 +1083,10 @@ class DataMgr(Importer.ActivityWriter):
 
                 # Activity still exists, add its data to the summary.
                 old_activity_bests = all_activity_bests[old_activity_id]
-                old_activity_type = old_activity_bests[Keys.ACTIVITY_TYPE_KEY]
-                old_activity_time = old_activity_bests[Keys.ACTIVITY_START_TIME_KEY]
-                summarizer.add_activity_data(old_activity_id, old_activity_type, old_activity_time, old_activity_bests)
+                if Keys.ACTIVITY_TYPE_KEY in old_activity_bests and Keys.ACTIVITY_START_TIME_KEY in old_activity_bests:
+                    old_activity_type = old_activity_bests[Keys.ACTIVITY_TYPE_KEY]
+                    old_activity_time = old_activity_bests[Keys.ACTIVITY_START_TIME_KEY]
+                    summarizer.add_activity_data(old_activity_id, old_activity_type, old_activity_time, old_activity_bests)
             else:
 
                 # Activity no longer exists, remove it's summary from the database.
