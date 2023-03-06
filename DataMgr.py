@@ -1133,9 +1133,10 @@ class DataMgr(Importer.ActivityWriter):
 
                     # Activity still exists, add its data to the summary.
                     old_activity_bests = all_activity_bests[old_activity_id]
-                    old_activity_type = old_activity_bests[Keys.ACTIVITY_TYPE_KEY]
-                    old_activity_time = old_activity_bests[Keys.ACTIVITY_START_TIME_KEY]
-                    summarizer.add_activity_data(old_activity_id, old_activity_type, old_activity_time, old_activity_bests)
+                    if Keys.ACTIVITY_TYPE_KEY in old_activity_bests and Keys.ACTIVITY_START_TIME_KEY in old_activity_bests:
+                        old_activity_type = old_activity_bests[Keys.ACTIVITY_TYPE_KEY]
+                        old_activity_time = old_activity_bests[Keys.ACTIVITY_START_TIME_KEY]
+                        summarizer.add_activity_data(old_activity_id, old_activity_type, old_activity_time, old_activity_bests)
                 else:
 
                     # Activity no longer exists, remove it's summary from the database.
