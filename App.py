@@ -301,18 +301,17 @@ class App(object):
         # Is the user logged in?
         logged_in = logged_in_username is not None
 
-        # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
-        summary_data = None
+        # Retrieve cached summary data. It is possible that the summary data has not yet been computed.
         if Keys.ACTIVITY_SUMMARY_KEY in activity:
             summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
-            if summary_data is None or len(summary_data) == 0:
-                self.data_mgr.schedule_activity_analysis(activity, activity_user_id)
+        else:
+            summary_data = {}
 
         # Find the sets data.
         sets = None
         if Keys.APP_SETS_KEY in activity:
             sets = activity[Keys.APP_SETS_KEY]
-        elif summary_data is not None and Keys.APP_SETS_KEY in summary_data:
+        elif Keys.APP_SETS_KEY in summary_data:
             sets = summary_data[Keys.APP_SETS_KEY]
 
         # Build the details view.
@@ -510,19 +509,17 @@ class App(object):
         if is_foot_based_activity:
             is_foot_based_activity_str = "true"
 
-        # Retrieve cached summary data. If summary data has not been computed, then add this activity to the queue and move on without it.
-        summary_data = None
+        # Retrieve cached summary data. It is possible that the summary data has not yet been computed.
         if Keys.ACTIVITY_SUMMARY_KEY in activity:
             summary_data = activity[Keys.ACTIVITY_SUMMARY_KEY]
-            if not is_live:
-                if summary_data is None or len(summary_data) == 0:
-                    self.data_mgr.schedule_activity_analysis(activity, activity_user_id)
+        else:
+            summary_data = {}
 
         # Start with the activity type.
         summary = "\t<li>" + activity_type + "</li>\n"
 
         # Add the location description.
-        if summary_data is not None and Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
+        if Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY in summary_data:
             location_description = summary_data[Keys.ACTIVITY_LOCATION_DESCRIPTION_KEY]
             if len(location_description) > 0:
                 summary += "\t<li>" + App.render_array_reversed(location_description) + "</li>\n"
@@ -538,33 +535,31 @@ class App(object):
         details_str = ""
         excluded_keys = Keys.UNSUMMARIZABLE_KEYS
         excluded_keys.append(Keys.LONGEST_DISTANCE)
-        if summary_data is not None:
-            for key in sorted(summary_data):
-                if is_foot_based_activity and key == Keys.BEST_SPEED:
-                    details_str += "<td><b>" + Keys.BEST_PACE + "</b></td><td>"
-                    value = summary_data[key]
-                    details_str += Units.convert_to_string_in_specified_unit_system(unit_system, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE)
-                    details_str += "</td><tr>\n"
-                elif key == Keys.ACTIVITY_INTERVALS_KEY:
-                    details_str += "<td><b>Intervals</b><td>"
-                    details_str += App.render_intervals_str(summary_data[key])
-                    details_str += "</td><tr>\n"
-                elif key not in excluded_keys:
-                    details_str += "<td><b>"
-                    details_str += key
-                    details_str += "</b></td><td>"
-                    value = summary_data[key]
-                    details_str += Units.convert_to_string_in_specified_unit_system(unit_system, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
-                    details_str += "</td><tr>\n"
+        for key in sorted(summary_data):
+            if is_foot_based_activity and key == Keys.BEST_SPEED:
+                details_str += "<td><b>" + Keys.BEST_PACE + "</b></td><td>"
+                value = summary_data[key]
+                details_str += Units.convert_to_string_in_specified_unit_system(unit_system, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, Keys.BEST_PACE)
+                details_str += "</td><tr>\n"
+            elif key == Keys.ACTIVITY_INTERVALS_KEY:
+                details_str += "<td><b>Intervals</b><td>"
+                details_str += App.render_intervals_str(summary_data[key])
+                details_str += "</td><tr>\n"
+            elif key not in excluded_keys:
+                details_str += "<td><b>"
+                details_str += key
+                details_str += "</b></td><td>"
+                value = summary_data[key]
+                details_str += Units.convert_to_string_in_specified_unit_system(unit_system, value, Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_SECONDS, key)
+                details_str += "</td><tr>\n"
         if len(details_str) == 0:
             details_str = "<td><b>No data</b></td><tr>\n"
 
         # Append the hash (for debugging purposes).
-        if self.debug:
-            if summary_data is not None and Keys.ACTIVITY_HASH_KEY in summary_data:
-                details_str += "<td><b>Activity Hash</b></td><td>"
-                details_str += summary_data[Keys.ACTIVITY_HASH_KEY]
-                details_str += "</td><tr>\n"
+        if self.debug and Keys.ACTIVITY_HASH_KEY in summary_data:
+            details_str += "<td><b>Activity Hash</b></td><td>"
+            details_str += summary_data[Keys.ACTIVITY_HASH_KEY]
+            details_str += "</td><tr>\n"
 
         # List the tags.
         tags_str = self.render_tags(activity, activity_user_id, belongs_to_current_user)
