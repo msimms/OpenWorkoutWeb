@@ -840,7 +840,7 @@ class Api(object):
         if not deleted:
             raise Exception("An error occurred. Nothing was deleted.")
 
-        return True, ""
+        return deleted, ""
 
     def handle_add_time_and_distance_activity(self, values):
         """Called when an API message to add a new activity based on time and distance is received."""
