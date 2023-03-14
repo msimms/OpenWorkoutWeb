@@ -1782,10 +1782,8 @@ class MongoDatabase(Database.Database):
 
             # If the activity was found.
             if activity is not None and Keys.ACTIVITY_SUMMARY_KEY in activity:
-
-                # Currently left out for performance reasons.
-                #activity[Keys.ACTIVITY_SUMMARY_KEY] = {}
-                #update_activities_collection(self, activity)
+                activity[Keys.ACTIVITY_SUMMARY_KEY] = {}
+                update_activities_collection(self, activity)
                 return True
         except:
             self.log_error(traceback.format_exc())
