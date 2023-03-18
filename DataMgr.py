@@ -728,10 +728,10 @@ class DataMgr(Importer.ActivityWriter):
         # Trim the sensor data.
         for sensor_type in Keys.SENSOR_KEYS:
             if sensor_type in activity:
-                old_sensor_data = activity[sensor_type]
-                new_sensor_data = []
-
                 try:
+                    old_sensor_data = activity[sensor_type]
+                    new_sensor_data = []
+
                     sensor_iter = iter(old_sensor_data)
                     sensor_reading = next(sensor_iter)
                     sensor_time = float(list(sensor_reading.keys())[0])

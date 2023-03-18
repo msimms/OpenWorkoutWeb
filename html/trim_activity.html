@@ -53,7 +53,9 @@
             dict.push({"Seconds" : trim_amount});
 
             send_post_request_async(the_url, dict, function(status, response) {
-                if (status != 200)
+                if (status == 200)
+                    window.location.replace('${root_url}/activity/${activity_id}');
+                else
                     alert(response)
             } );
         }
