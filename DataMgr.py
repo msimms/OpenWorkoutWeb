@@ -731,21 +731,24 @@ class DataMgr(Importer.ActivityWriter):
                 old_sensor_data = activity[sensor_type]
                 new_sensor_data = []
 
-                sensor_iter = iter(old_sensor_data)
-                sensor_reading = next(sensor_iter)
-                sensor_time = float(list(sensor_reading.keys())[0])
-
-                # Skip over everything before the start time.
-                while sensor_time < trim_before_ms:
+                try:
+                    sensor_iter = iter(old_sensor_data)
                     sensor_reading = next(sensor_iter)
                     sensor_time = float(list(sensor_reading.keys())[0])
 
-                # Copy everything up the end time.
-                while sensor_time < trim_after_ms:
-                    sensor_reading = next(sensor_iter)
-                    sensor_time = float(list(sensor_reading.keys())[0])
-                    sensor_value = list(sensor_reading.values())[0]
-                    new_sensor_data.append({str(sensor_time): sensor_value})
+                    # Skip over everything before the start time.
+                    while sensor_time < trim_before_ms:
+                        sensor_reading = next(sensor_iter)
+                        sensor_time = float(list(sensor_reading.keys())[0])
+
+                    # Copy everything up the end time.
+                    while sensor_time < trim_after_ms:
+                        sensor_reading = next(sensor_iter)
+                        sensor_time = float(list(sensor_reading.keys())[0])
+                        sensor_value = list(sensor_reading.values())[0]
+                        new_sensor_data.append({str(sensor_time): sensor_value})
+                except StopIteration:
+                    pass
 
                 activity[sensor_type] = new_sensor_data
 
