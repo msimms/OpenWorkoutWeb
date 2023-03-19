@@ -775,7 +775,7 @@ class Api(object):
             if InputChecker.is_unsigned_integer(end_time):
                 end_time = int(end_time)
             else:
-                raise ApiException.ApiMalformedRequestException("Invalid end time.")
+                raise ApiException.ApiMalformedRequestException("Invalid ending time.")
 
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_user()
@@ -2020,7 +2020,7 @@ class Api(object):
             if InputChecker.is_unsigned_integer(end_time):
                 end_time = int(end_time)
             else:
-                raise ApiException.ApiMalformedRequestException("Invalid end time.")
+                raise ApiException.ApiMalformedRequestException("Invalid ending time.")
 
         # Get the workouts that belong to the logged in user.
         workouts = self.data_mgr.retrieve_planned_workouts_for_user(self.user_id, start_time, end_time)
@@ -2437,7 +2437,7 @@ class Api(object):
         if not InputChecker.is_unsigned_integer(values[Keys.START_TIME_KEY]):
             raise ApiException.ApiMalformedRequestException("Invalid start time.")
         if not InputChecker.is_unsigned_integer(values[Keys.END_TIME_KEY]):
-            raise ApiException.ApiMalformedRequestException("Invalid end time.")
+            raise ApiException.ApiMalformedRequestException("Invalid ending time.")
         start_time = int(values[Keys.START_TIME_KEY])
         end_time = int(values[Keys.END_TIME_KEY])
 

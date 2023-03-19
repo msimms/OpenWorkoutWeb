@@ -189,7 +189,7 @@ class ActivityAnalyzer(object):
 
                 # Was a stress score calculated (i.e., did the activity have power data from which stress could be computed)?
                 # If not, estimate a stress score.
-                print("Update the end time...")
+                print("Update the ending time...")
                 end_time_ms = self.data_mgr.compute_activity_end_time_ms(self.activity)
                 end_time_secs = end_time_ms / 1000
                 self.data_mgr.update_activity_end_time_secs(self.activity, end_time_secs)
