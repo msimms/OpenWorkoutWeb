@@ -1078,7 +1078,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None
 
-    def create_activity(self, activity_id, activty_name, date_time, device_str):
+    def create_activity(self, activity_id, activity_name, date_time, device_str):
         """Create method for an activity."""
         if activity_id is None:
             self.log_error(MongoDatabase.create_activity.__name__ + ": Unexpected empty object: activity_id")
@@ -1086,8 +1086,8 @@ class MongoDatabase(Database.Database):
         if not InputChecker.is_uuid(activity_id):
             self.log_error(MongoDatabase.create_activity.__name__ + ": Invalid object: activity_id " + str(activity_id))
             return False
-        if activty_name is None:
-            self.log_error(MongoDatabase.create_activity.__name__ + ": Unexpected empty object: activty_name")
+        if activity_name is None:
+            self.log_error(MongoDatabase.create_activity.__name__ + ": Unexpected empty object: activity_name")
             return False
         if date_time is None:
             self.log_error(MongoDatabase.create_activity.__name__ + ": Unexpected empty object: date_time")
@@ -1098,11 +1098,25 @@ class MongoDatabase(Database.Database):
 
         try:
             # Make sure the activity name is a string.
-            activty_name = str(activty_name)
+            activity_name = str(activity_name)
 
             # Create the activity.
-            post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_NAME_KEY: activty_name, Keys.ACTIVITY_START_TIME_KEY: date_time, Keys.ACTIVITY_DEVICE_STR_KEY: device_str, Keys.ACTIVITY_VISIBILITY_KEY: "public", Keys.ACTIVITY_LOCATIONS_KEY: [] }
+            post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.ACTIVITY_NAME_KEY: activity_name, Keys.ACTIVITY_START_TIME_KEY: date_time, Keys.ACTIVITY_DEVICE_STR_KEY: device_str, Keys.ACTIVITY_VISIBILITY_KEY: "public", Keys.ACTIVITY_LOCATIONS_KEY: [] }
             return insert_into_collection(self.activities_collection, post)
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def recreate_activity(self, activity):
+        """Create method for an activity."""
+        if activity is None:
+            self.log_error(MongoDatabase.recreate_activity.__name__ + ": Unexpected empty object: activity")
+            return False
+
+        try:
+            activity.pop(Keys.DATABASE_ID_KEY)
+            return insert_into_collection(self.activities_collection, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])

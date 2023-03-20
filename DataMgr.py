@@ -156,7 +156,7 @@ class DataMgr(Importer.ActivityWriter):
         return end_time_ms
 
     def update_activity_end_time_secs(self, activity, end_time_sec):
-        """Utility function for updating the activity's end time in the database."""
+        """Utility function for updating the activity's ending time in the database."""
         if self.database is None:
             raise Exception("No database.")
         if activity is None:
@@ -181,14 +181,14 @@ class DataMgr(Importer.ActivityWriter):
         if end_time_sec is None:
             end_time_sec = activity[Keys.ACTIVITY_START_TIME_KEY]
 
-        # Store the end time, so we don't have to go through this again.
+        # Store the ending time, so we don't have to go through this again.
         if end_time_sec is not None:
             self.update_activity_end_time_secs(activity, end_time_sec)
 
         return end_time_sec
 
     def get_activity_start_and_end_times(self, activity):
-        """Retrieves the start time and end time, computing the end time, if necessary."""
+        """Retrieves the start time and end time, computing the ending time, if necessary."""
         if activity is None:
             raise Exception("No activity object.")
 
@@ -705,9 +705,13 @@ class DataMgr(Importer.ActivityWriter):
         if num_seconds is None:
             raise Exception("Bad parameter.")
 
+        # Make sure the ending time has been computed, compute it if it has not.
         trim_before_ms = 0
         trim_after_ms = self.compute_activity_end_time_ms(activity)
+        if trim_after_ms is None:
+            raise Exception("Cannot compute the ending time for the activity.")
 
+        # Compute the new activity start and ending time.
         if trim_from == Keys.TRIM_FROM_BEGINNING_VALUE:
             if Keys.ACTIVITY_START_TIME_KEY in activity:
                 trim_before_ms = activity[Keys.ACTIVITY_START_TIME_KEY] * 1000
@@ -741,7 +745,7 @@ class DataMgr(Importer.ActivityWriter):
                         sensor_reading = next(sensor_iter)
                         sensor_time = float(list(sensor_reading.keys())[0])
 
-                    # Copy everything up the end time.
+                    # Copy everything up the ending time.
                     while sensor_time < trim_after_ms:
                         sensor_reading = next(sensor_iter)
                         sensor_time = float(list(sensor_reading.keys())[0])
@@ -752,9 +756,8 @@ class DataMgr(Importer.ActivityWriter):
 
                 activity[sensor_type] = new_sensor_data
 
-        # Delete the old activity.
-
         # Write the new, updated activity.
+        self.database.recreate_activity(activity)
 
         return True
 
