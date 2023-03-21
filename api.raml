@@ -4,13 +4,19 @@ title: OpenWorkout
 baseUri: http://openworkout.cloud/api/{version}
 mediaType: application/json
 version: v1
+types:
+    UUID:
+        type: string
+        pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
+    export_format_type:
+        type: string
+        pattern: ['csv'|'gpx'|'tcx']
 /update_status:
     description: Used by the mobile application to update it's status.
-    get:
-        queryParameters:
-            DeviceId:
-            ActivityId:
     post:
+        queryParameters:
+            DeviceId: UUID
+            ActivityId: UUID
         responses:
             200: Empty string
             500: An internal exception was thrown.
@@ -18,52 +24,47 @@ version: v1
     description: Returns the activity track as a collection of JSON objects.
     get:
         queryParameters:
-            activity_id:
-            num_points:
+            activity_id: UUID
+            num_points: number
         responses:
-            200:
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             401: Failed authentication. The session token was expired, invalid, or not provided.
             500: An internal exception was thrown.
-    post:
 /activity_metadata:
     description: Returns the activity metadata as a collection of JSON objects.
     get:
         queryParameters:
-            activity_id:
+            activity_id: UUID
         responses:
-            200:
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             500: An internal exception was thrown.
-    post:
 /activity_sensordata:
     description: Returns the activity sensordata as a collection of JSON objects. Sensor names are specified as a comma-separated list.
     get:
         queryParameters:
-            activity_id:
-            sensors:
+            activity_id: UUID
+            sensors: List
         responses:
-            200:
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             500: An internal exception was thrown.
-    post:
 /activity_summarydata:
     description: Returns data computed from the activity. Summmary items are specified as a comma-separated list.
     get:
         queryParameters:
-            activity_id:
-            summary_items:
+            activity_id: UUID
+            summary_items: List
         responses:
-            200:
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             500: An internal exception was thrown.
-    post:
 /update_activity_metadata:
     description:
-    get:
     post:
         queryParameters:
-            activity_id:
+            activity_id: UUID
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -71,26 +72,24 @@ version: v1
             500: An internal exception was thrown.
 /login:
     description: Authenticates a username and password.
-    get:
     post:
         queryParameters:
-            username:
-            password:
+            username: string
+            password: string
         responses:
-            200:
+            200: application/json
             401: Failed authentication. The username and password were invalid, or not provided.
             500: An internal exception was thrown.
 /create_login:
     description: Creates a new account.
-    get:
     post:
         queryParameters:
-            username:
-            realname:
-            password1:
-            password2:
+            username: string
+            realname: string
+            password1: string
+            password2: string
         responses:
-            200:
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             401: Failed authentication. The username and password were not provided or did not meet security requirements.
             500: An internal exception was thrown.
@@ -98,37 +97,33 @@ version: v1
     description: Determines if the current user has a valid session token.
     get:
         responses:
-            200: Empty string
+            200: string
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /logout:
     description: Terminates the current user's session.
-    get:
     post:
         responses:
-            200: Empty string
+            200: string
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /update_email:
     description: Updates the user's email address.
-    get:
     post:
         queryParameters:
-            email:
+            email: string
         responses:
-            200:
+            200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /update_password:
     description: Updates the user's password.
-    get:
     post:
         queryParameters:
-            old_password:
-            new_password1:
-            new_password2:
+            old_password: string
+            new_password1: string
+            new_password2: string
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -136,10 +131,9 @@ version: v1
             500: An internal exception was thrown.
 /delete_users_gear:
     description: Removes the current user's gear (all of it).
-    get:
     post:
         queryParameters:
-            password:
+            password: string
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -147,10 +141,9 @@ version: v1
             500: An internal exception was thrown.
 /delete_users_activities:
     description: Removes the current user's activity data (all of it).
-    get:
-        queryParameters:
-            password:
     post:
+        queryParameters:
+            password: string
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -158,10 +151,9 @@ version: v1
             500: An internal exception was thrown.
 /delete_user:
     description: Removes the current user and all associated data.
-    get:
-        queryParameters:
-            password:
     post:
+        queryParameters:
+            password: string
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -171,43 +163,38 @@ version: v1
     description: Returns a list of JSON objects describing all of the devices claimed by the logged in user.
     get:
         responses:
-            200:
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /list_all_activities:
     description: Returns a list of JSON objects describing all of the user's activities and the activities of the user's friends.
     get:
         responses:
-            200:
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /list_my_activities:
     description: Returns a list of JSON objects describing all of the user's activities.
     get:
         responses:
-            200:
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /delete_activity:
     description: Removes the specified activity.
-    get:
     post:
         queryParameters:
-            activity_id:
+            activity_id: Unique identifier (UUID) for the activity.
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-/add_activity: Creates a new activity from user-provided data.
-    description:
-    get:
+/add_activity:
+    description: Used when manually creating an activity, such as when logging strength training activities.
     post:
         responses:
             200:
@@ -216,16 +203,14 @@ version: v1
             500: An internal exception was thrown.
 /upload_activity_file:
     description: Creates a new activity from data contained with the appended file.
-    get:
     post:
         responses:
-            200: Empty string
+            200: UUID
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /upload_activity_photo:
     description: Uploads a photo and associates it with an activity.
-    get:
     post:
         responses:
             200: Empty string
@@ -236,14 +221,12 @@ version: v1
     description: Lists all photos associated with an activity.
     get:
         responses:
-            200: Empty string
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /delete_activity_photo:
     description: Deletes a photo and removes it from an activity.
-    get:
     post:
         responses:
             200: Empty string
@@ -252,7 +235,6 @@ version: v1
             500: An internal exception was thrown.
 /create_tags_on_activity:
     description: Sets the tags on an activity. Tags are provided in a dictionary {"tag0", "foo"|, {"tag1", "bar"), etc.
-    get:
     post:
         responses:
             200: Empty string
@@ -261,7 +243,6 @@ version: v1
             500: An internal exception was thrown.
 /delete_tag_from_activity:
     description: Deletes a tag from an activity.
-    get:
     post:
         responses:
             200: Empty string
@@ -270,7 +251,6 @@ version: v1
             500: An internal exception was thrown.
 /delete_sensor_data:
     description: Deletes the specified set of sensor data (power, cadence, heart rate, etc.) from an activity.
-    get:
     post:
         responses:
             200: Empty string
@@ -279,34 +259,30 @@ version: v1
             500: An internal exception was thrown.
 /list_matched_users:
     description: Lists user's whose usernames match the search criteria. Results are limited to the first 100 users.
-    get:
     post:
         responses:
-            200:
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /list_pending_friends:
     description: Lists the users who are requesting friendship with the logged in user.
-    get:
     post:
         responses:
-            200: JSON formatted list of pending friends.
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /list_friends:
     description: Lists the users who are friends with the logged in user.
-    get:
     post:
         responses:
-            200: JSON formatted list of friends.
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /request_to_be_friends:
     description: Sends a request to friend another user.
-    get:
     post:
         responses:
             200: Empty string
@@ -315,7 +291,6 @@ version: v1
             500: An internal exception was thrown.
 /confirm_request_to_be_friends:
     description: Takes a user to the pending friends list and adds them to the actual friends list.
-    get:
     post:
         responses:
             200: Empty string
@@ -324,7 +299,6 @@ version: v1
             500: An internal exception was thrown.
 /unfriend:
     description: Removes a user from the list of users that are friends with the logged in user.
-    get:
     post:
         responses:
             200: Empty string
@@ -332,20 +306,25 @@ version: v1
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /trim_activity:
-    description: .
-    get:
+    description: 
     post:
 /export_activity:
     description: Returns the activity in the specified format.
     get:
+        queryParameters:
+            activity_id: UUID
+            export_format: export_format_type
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
     post:
+        queryParameters:
+            activity_id: UUID
+            export_format: export_format_type
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
@@ -353,14 +332,12 @@ version: v1
     description: Returns the workout in the specified format.
     get:
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /claim_device:
     description: Associates the device specified by the unique identifier with the logged in user's account.
-    get:
     post:
         responses:
             200: Empty string
@@ -371,14 +348,12 @@ version: v1
     description: Lists the tags for the specified activity.
     get:
         responses:
-            200:
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /create_comment:
     description: Adds a comment to the specified activity.
-    get:
     post:
         responses:
             200: Empty string
@@ -389,17 +364,15 @@ version: v1
     description: Lists comments for the specified activity.
     get:
         responses:
-            200:
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /create_gear:
     description: Creates a new gear record for the current user, such as a new bike or pair of shoes.
-    get:
     post:
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
@@ -407,104 +380,92 @@ version: v1
     description: Lists gear associated with the current user.
     get:
         responses:
-            200: A JSON formatted string.
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /list_gear_defaults:
     description: Lists the gear that is, by default, associated with each activity type.
     get:
         responses:
-            200: A JSON formatted string.
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /update_gear:
     description: Updates the gear name or description.
-    get:
     post:
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /update_gear_defaults:
     description: Updates the gear a user wants to associate with an activity type, by default, is received.
-    get:
     post:
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /delete_gear:
     description: Delete's the specified gear record and all associated service records.
-    get:
     post:
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /retire_gear:
     description: Marks the specified gear as retired.
-    get:
     post:
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /create_service_record:
     description: Appends service information for a piece of gear (intended for tracking bicycle service data).
-    get:
     post:
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /delete_service_record:
     description: Deletes service informatio for a piece of gear.
-    get:
     post:
         responses:
-            200:
+            200: OK
             401:
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /update_settings:
     description:
-    get:
     post:
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /update_profile:
     description:
-    get:
     post:
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /update_visibility:
     description: Updates activity visibility.
-    get:
     post:
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /refresh_analysis:
     description: Schedules the specified activity for (re)analysis.
-    get:
     post:
         responses:
             200: Empty string
@@ -513,7 +474,6 @@ version: v1
             500: An internal exception was thrown.
 /refresh_personal_records:
     description: Refreshes the cache of personal records in the event it may have become corrupted by deleting activities, or changing activity types.
-    get:
     post:
         responses:
             200: Empty string
@@ -522,7 +482,6 @@ version: v1
             500: An internal exception was thrown.
 /generate_workout_plan:
     description: Schedules workout plan generation. Will generate workouts for the week.
-    get:
     post:
         responses:
             200: Empty string
@@ -533,23 +492,20 @@ version: v1
     description: Lists planned/scheduled workouts.
     get:
         responses:
-            200: A JSON-formatted description of all scheduled workouts for the current user.
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /list_interval_workouts:
     description: Lists interval workouts.
     get:
         responses:
-            200: A JSON-formatted description of all interval workouts associated with the current user.
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /create_race:
     description: Adds a race to the calendar.
-    get:
     post:
         responses:
             200: Empty string
@@ -558,7 +514,6 @@ version: v1
             500: An internal exception was thrown.
 /create_pace_plan:
     description: Creates a pace plan.
-    get:
     post:
         responses:
             200: Empty string
@@ -569,14 +524,12 @@ version: v1
     description: Lists pace plans.
     get:
         responses:
-            200: A JSON-formatted description of all scheduled pace plans associated with the current user.
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /delete_pace_plan:
     description: Deletes the specified pace plan.
-    get:
     post:
         responses:
             200: Empty string
@@ -590,16 +543,14 @@ version: v1
             200: A URL string.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /get_location_description:
     description: Returns the political location that corresponds to an activity.
     get:
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /get_location_summary:
     description: Returns the summary of all political locations in which activities have occurred. Result is a JSON string.
     get:
@@ -608,70 +559,62 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /activity_hash_from_id:
     description: Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities.
     get:
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /has_activity:
     description: Given the activity ID has hash, returns whether or not the activity exists in the database for the logged in user.
     get:
         responses:
-            200:
+            200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /list_personal_records:
     description: Returns the user's personal records. Result is a JSON string.
     get:
         responses:
-            200: A JSON formatted string.
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /get_running_paces:
     description: Returns the user's estimated running paces. Result is a JSON string.
     get:
         responses:
-            200: A JSON formatted string.
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /get_distance_for_tag:
     description: Returns the amount of distance logged to activities with the given tag. Result is a JSON string.
     get:
         responses:
-            200: A JSON formatted string.
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /get_task_statuses:
     description: Returns a description of all deferred tasks for the logged in user. Result is a JSON string.
     get:
         responses:
-            200: A JSON formatted string.
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /get_record_progression:
     description: Returns an ordered list containing the time and activity ID of the user's record progression for the specified record and activity type, i.e. best running 5K. Result is a JSON string.
     get:
         responses:
-            200: A JSON formatted string.
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /get_user_setting:
     description: Returns the value associated with the specified user setting.
     get:
@@ -680,7 +623,6 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /get_user_settings:
     description: Returns a JSON list of values associated with the specified user settings. Input is a comma-separated list.
     get:
@@ -689,7 +631,6 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /estimate_vo2_max:
     description: Returns the user's estimated VO2 Max.
     get:
@@ -698,7 +639,6 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /estimate_vo2_ftp:
     description: Returns the user's estimated FTP.
     get:
@@ -707,7 +647,6 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /estimate_vo2_bmi:
     description: Returns the user's estimated BMI.
     get:
@@ -716,7 +655,6 @@ version: v1
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /list_power_zones:
     description: 
     get:
@@ -724,20 +662,18 @@ version: v1
             200: The value associated with the requested setting.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             500: An internal exception was thrown.
-    post:
 /list_hr_zones:
     description: 
     get:
         queryParameters:
+            max heart rate:
             estimated max heart rate:
         responses:
             200: The value associated with the requested setting.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             500: An internal exception was thrown.
-    post:
 /generate_api_key:
     description: Generates a new API key for the logged in user.
-    get:
     post:
         responses:
             200: Empty string
@@ -746,7 +682,6 @@ version: v1
             500: An internal exception was thrown.
 /delete_api_key:
     description: Deletes the specified API key.
-    get:
     post:
         responses:
             200: Empty string
@@ -757,15 +692,20 @@ version: v1
     description: Returns the API keys associated witht he logged in user.
     get:
         responses:
-            200: A JSON formatted string.
+            200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
 /list_activity_types:
     description: Returns the list of all activity types the software understands.
     get:
         responses:
-            200: The value associated with the requested setting.
+            200: application/json
             500: An internal exception was thrown.
-    post:
+/list_unsynched_activities:
+    description: Returns any changes since the last time the device was synched.
+    get:
+        queryParameters:
+            timestamp: number
+        responsses:
+            200: application/json

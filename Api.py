@@ -2529,8 +2529,6 @@ class Api(object):
         resting_hr = None
         age_in_years = None
 
-        print(values)
-
         # Decode and validate the parameters.
         if Keys.ESTIMATED_MAX_HEART_RATE_KEY in values:
             max_hr = values[Keys.ESTIMATED_MAX_HEART_RATE_KEY]
@@ -2574,7 +2572,7 @@ class Api(object):
         return True, json.dumps(self.data_mgr.retrieve_activity_types())
 
     def handle_list_unsynched_activities(self, values):
-        """Returns any changes since the last time the device synched."""
+        """Returns any changes since the last time the device was synched."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
