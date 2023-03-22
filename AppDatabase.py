@@ -1115,8 +1115,10 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            activity.pop(Keys.DATABASE_ID_KEY)
-            return insert_into_collection(self.activities_collection, activity)
+            deleted_result = self.activities_collection.delete_one({ Keys.ACTIVITY_ID_KEY: activity[Keys.ACTIVITY_ID_KEY] })
+            if deleted_result is not None:
+                activity.pop(Keys.DATABASE_ID_KEY)
+                return insert_into_collection(self.activities_collection, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
