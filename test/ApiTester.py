@@ -34,14 +34,14 @@ from urllib.parse import urljoin
 
 ERROR_LOG = 'error.log'
 
-def create_api_url(site_url):
-    """Utility function for creating the API URL from the website's URL."""
-    return urljoin(site_url, "/api/1.0/")
-
 def print_test_title(title):
     """Utility function for print a string followed by a line of equal lenth."""
     print(title)
     print('-' * len(title))
+
+def create_api_url(site_url):
+    """Utility function for creating the API URL from the website's URL."""
+    return urljoin(site_url, "/api/1.0/")
 
 def send_get_request(url, payload, cookies):
     """Utility function for sending an HTTP GET and returning the status code and response text."""

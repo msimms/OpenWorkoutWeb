@@ -10,7 +10,7 @@ types:
         pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
     export_format_type:
         type: string
-        pattern: ['csv'|'gpx'|'tcx']
+        pattern: ('csv'|'gpx'|'tcx')
 /update_status:
     description: Used by the mobile application to update it's status.
     post:
