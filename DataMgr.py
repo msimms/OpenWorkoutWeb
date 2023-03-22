@@ -759,6 +759,9 @@ class DataMgr(Importer.ActivityWriter):
         # Write the new, updated activity.
         self.database.recreate_activity(activity)
 
+        # Activity will need to be reanalyzed.
+        self.database.delete_activity_summary(activity[Keys.ACTIVITY_ID_KEY])
+
         return True
 
     def activity_exists(self, activity_id):
