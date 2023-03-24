@@ -10,6 +10,8 @@ import yaml
 from urllib.parse import urljoin
 
 ERROR_LOG = 'error.log'
+GET_VERB = 'get'
+POST_VERB = 'post'
 
 class DataGenerator(object):
     def random_hex(self, strlen):
@@ -39,13 +41,21 @@ class DataGenerator(object):
             return False
         return True
 
-class Response(object):
+class ApiCall(object):
+    url = ""
+    params = {}
     code = 0
-    text = ""
+    response = ""
     cookies = {}
 
+    def __repr__(self):
+        return "ApiCall()"
+
+    def __str__(self):
+        return "[URL: " + self.url + ", Response: " + str(self.code) + "]"
+
 class ApiFuzzer(object):
-    interesting_responses = []
+    api_calls = []
 
     def create_api_url(self, site_url):
         """Utility function for creating the API URL from the website's URL."""
@@ -57,6 +67,7 @@ class ApiFuzzer(object):
         response = s.get(url, params=payload, headers={'X-Requested-With':'XMLHttpRequest'}, cookies=cookies)
 
         print(f"URL: {url}")
+        print(f"Parameters: " + str(payload))
         print(f"Response code: {response.status_code}")
         print(f"Response text: {response.text}")
         return response.status_code, response.text
@@ -67,6 +78,7 @@ class ApiFuzzer(object):
         response = s.post(url, data=json.dumps(payload), headers={'X-Requested-With':'XMLHttpRequest'}, cookies=cookies)
 
         print(f"URL: {url}")
+        print(f"Parameters: " + str(payload))
         print(f"Response code: {response.status_code}")
         print(f"Response text: {response.text}")
         return response.status_code, response.text, s.cookies
@@ -89,11 +101,15 @@ class ApiFuzzer(object):
         if endpoint_description is not None and 'queryParameters' in endpoint_description:
             params = endpoint_description['queryParameters']
             for param_name in params:
-                
+
+                # Type of the parameter. Check it up here, in case we have to modify the param name later.
+                param_type = params[param_name]
+
                 # Is the parameter optional. If so, it'll end with a ?.
                 if param_name[-1] == '?':
                     if DataGenerator().random_bool():
                         continue
+                    param_name = param_name[:-1]
 
                 # Special case credentials to increase our chances of actually getting somewhere.
                 if param_name.lower() == 'username' and username is not None:
@@ -103,30 +119,33 @@ class ApiFuzzer(object):
                 elif param_name.lower() == 'realname' and realname is not None:
                     fuzzed_params[param_name] = realname
                 else:
-                    param_type = params[param_name]
                     fuzzed_params[param_name] = self.fuzz_param(param_type)
 
         return fuzzed_params
 
-    def fuzz_api_endpoint(self, endpoint_url, username, password, realname, endpoint_description, cookies):
+    def fuzz_api_endpoint(self, endpoint_url, username, password, realname, endpoint_description):
         """Executes a single API test."""
-        response = Response()
-        if 'get' in endpoint_description:
-            fuzzed_params = self.fuzz_api_params(username, password, realname, endpoint_description['get'])
-            print("Parameters: " + str(fuzzed_params))
-            response.code, response.text = self.send_get_request(endpoint_url, fuzzed_params, cookies)
-            response.cookies = cookies
-        if 'post' in endpoint_description:
-            fuzzed_params = self.fuzz_api_params(username, password, realname, endpoint_description['post'])
-            print("Parameters: " + str(fuzzed_params))
-            response.code, response.text, response.cookies = self.send_post_request(endpoint_url, fuzzed_params, cookies)
-        if response.code == 200:
-            self.interesting_responses.append(response)
-        return cookies
+        api_call = ApiCall()
+
+        # Loop through the interesting responses.
+        for prev_call in self.api_calls:
+            api_call.cookies = prev_call.cookies
+
+        # Make the API call, using the verb specified in the documentation.
+        api_call.url = endpoint_url
+        if GET_VERB in endpoint_description:
+            api_call.params = self.fuzz_api_params(username, password, realname, endpoint_description[GET_VERB])
+            api_call.code, api_call.text = self.send_get_request(api_call.url, api_call.params, api_call.cookies)
+        if POST_VERB in endpoint_description:
+            api_call.params = self.fuzz_api_params(username, password, realname, endpoint_description[POST_VERB])
+            api_call.code, api_call.text, api_call.cookies = self.send_post_request(api_call.url, api_call.params, api_call.cookies)
+
+        # Anything other than error code 40X is interesting.
+        if int(api_call.code / 100) != 4:
+            self.api_calls.append(api_call)
 
     def fuzz_api_endpoints(self, url, username, password, realname, api_endpoints, api_description, num_test_cases):
-        """Executes a all the API test."""
-        cookies = {}
+        """Executes all the API test."""
         api_url = self.create_api_url(url)
         for test_num in range(0, num_test_cases - 1):
             endpoint_index = random.randrange(len(api_endpoints) - 1)
@@ -134,7 +153,7 @@ class ApiFuzzer(object):
             endpoint_url = api_url + endpoint_name
 
             print("Test " + str(test_num + 1))
-            cookies = self.fuzz_api_endpoint(endpoint_url, username, password, realname, api_description[endpoint_name], cookies)
+            self.fuzz_api_endpoint(endpoint_url, username, password, realname, api_description[endpoint_name])
 
     def fuzz_api(self, url, username, password, realname, num_test_cases):
         """Primary method for executing the API tests. Parse the RAML file and then calls fuzz_api_endpoints to run the tests."""
@@ -150,8 +169,20 @@ class ApiFuzzer(object):
             if item[0] == '/':
                 api_endpoints.append(item)
 
-        # Make N number of fuzzed API calls.    
+        # Make N number of fuzzed API calls.
+        s = "Starting tests..."
+        print("=" * len(s)) 
+        print(s)
+        print("=" * len(s)) 
         self.fuzz_api_endpoints(url, username, password, realname, api_endpoints, api_description, num_test_cases)
+
+        # Print the results.
+        s = "Report:"
+        print("=" * len(s)) 
+        print(s)
+        print("=" * len(s)) 
+        for api_call in self.api_calls:
+            print(api_call)
 
 def main():
     """Entry point when run from the command line."""
