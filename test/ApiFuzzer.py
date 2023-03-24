@@ -11,7 +11,41 @@ from urllib.parse import urljoin
 
 ERROR_LOG = 'error.log'
 
+class DataGenerator(object):
+    def random_hex(self, strlen):
+        choices = random.choices(['a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], k=strlen)
+        return ''.join(str(x) for x in choices)
+
+    def random_str(self, strlen):
+        return ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase, k=strlen))
+
+    def random_uuid(self):
+        uuid_str  = self.random_hex(8)
+        uuid_str += '-'
+        uuid_str += self.random_hex(4)
+        uuid_str += '-'
+        uuid_str += self.random_hex(4)
+        uuid_str += '-'
+        uuid_str += self.random_hex(4)
+        uuid_str += '-'
+        uuid_str += self.random_hex(12)
+        return uuid_str
+
+    def random_number(self):
+        return random.randrange(1000)
+
+    def random_bool(self):
+        if random.randrange(2) == 0:
+            return False
+        return True
+
+class Response(object):
+    code = 0
+    text = ""
+    cookies = {}
+
 class ApiFuzzer(object):
+    interesting_responses = []
 
     def create_api_url(self, site_url):
         """Utility function for creating the API URL from the website's URL."""
@@ -37,38 +71,16 @@ class ApiFuzzer(object):
         print(f"Response text: {response.text}")
         return response.status_code, response.text, s.cookies
 
-    def random_hex(self, strlen):
-        choices = random.choices(['a', 'b', 'c', 'd', 'e', 'f', 'A', 'B', 'C', 'D', 'E', 'F', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'], k=strlen)
-        return ''.join(str(x) for x in choices)
-
-    def random_str(self, strlen):
-        return ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase, k=strlen))
-
-    def random_uuid(self):
-        uuid_str  = self.random_hex(8)
-        uuid_str += '-'
-        uuid_str += self.random_hex(4)
-        uuid_str += '-'
-        uuid_str += self.random_hex(4)
-        uuid_str += '-'
-        uuid_str += self.random_hex(4)
-        uuid_str += '-'
-        uuid_str += self.random_hex(12)
-        return uuid_str
-
-    def random_number(self):
-        return random.randrange(1000)
-
     def fuzz_param(self, param_type):
         """Returns a fuzzed value for a parameter of the specified type."""
         if param_type is None:
             return
         if param_type.lower() == 'string':
-            return self.random_str(self.random_number())
+            return DataGenerator().random_str(DataGenerator().random_number())
         if param_type.lower() == 'uuid':
-            return self.random_uuid()
+            return DataGenerator().random_uuid()
         if param_type.lower() == 'number':
-            return self.random_number()
+            return DataGenerator().random_number()
         return ""
 
     def fuzz_api_params(self, username, password, realname, endpoint_description):
@@ -77,13 +89,18 @@ class ApiFuzzer(object):
         if endpoint_description is not None and 'queryParameters' in endpoint_description:
             params = endpoint_description['queryParameters']
             for param_name in params:
+                
+                # Is the parameter optional. If so, it'll end with a ?.
+                if param_name[-1] == '?':
+                    if DataGenerator().random_bool():
+                        continue
 
                 # Special case credentials to increase our chances of actually getting somewhere.
-                if param_name == 'username' and username is not None:
+                if param_name.lower() == 'username' and username is not None:
                     fuzzed_params[param_name] = username
-                if param_name == 'password' and password is not None:
+                elif param_name.lower() == 'password' and password is not None:
                     fuzzed_params[param_name] = password
-                if param_name == 'realname' and realname is not None:
+                elif param_name.lower() == 'realname' and realname is not None:
                     fuzzed_params[param_name] = realname
                 else:
                     param_type = params[param_name]
@@ -93,14 +110,19 @@ class ApiFuzzer(object):
 
     def fuzz_api_endpoint(self, endpoint_url, username, password, realname, endpoint_description, cookies):
         """Executes a single API test."""
+        response = Response()
         if 'get' in endpoint_description:
             fuzzed_params = self.fuzz_api_params(username, password, realname, endpoint_description['get'])
-            print(fuzzed_params)
-            self.send_get_request(endpoint_url, fuzzed_params, cookies)
+            print("Parameters: " + str(fuzzed_params))
+            response.code, response.text = self.send_get_request(endpoint_url, fuzzed_params, cookies)
+            response.cookies = cookies
         if 'post' in endpoint_description:
             fuzzed_params = self.fuzz_api_params(username, password, realname, endpoint_description['post'])
-            print(fuzzed_params)
-            self.send_post_request(endpoint_url, fuzzed_params, cookies)
+            print("Parameters: " + str(fuzzed_params))
+            response.code, response.text, response.cookies = self.send_post_request(endpoint_url, fuzzed_params, cookies)
+        if response.code == 200:
+            self.interesting_responses.append(response)
+        return cookies
 
     def fuzz_api_endpoints(self, url, username, password, realname, api_endpoints, api_description, num_test_cases):
         """Executes a all the API test."""
@@ -112,7 +134,7 @@ class ApiFuzzer(object):
             endpoint_url = api_url + endpoint_name
 
             print("Test " + str(test_num + 1))
-            self.fuzz_api_endpoint(endpoint_url, username, password, realname, api_description[endpoint_name], cookies)
+            cookies = self.fuzz_api_endpoint(endpoint_url, username, password, realname, api_description[endpoint_name], cookies)
 
     def fuzz_api(self, url, username, password, realname, num_test_cases):
         """Primary method for executing the API tests. Parse the RAML file and then calls fuzz_api_endpoints to run the tests."""

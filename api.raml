@@ -444,6 +444,9 @@ types:
 /update_gear_defaults:
     description: Updates the gear a user wants to associate with an activity type, by default, is received.
     post:
+        queryParameters:
+            activity_type: string
+            gear_id: UUID
         responses:
             200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -452,6 +455,8 @@ types:
 /delete_gear:
     description: Delete's the specified gear record and all associated service records.
     post:
+        queryParameters:
+            gear_id: UUID
         responses:
             200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -460,6 +465,8 @@ types:
 /retire_gear:
     description: Marks the specified gear as retired.
     post:
+        queryParameters:
+            gear_id: UUID
         responses:
             200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
