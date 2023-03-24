@@ -170,6 +170,11 @@ types:
 /list_all_activities:
     description: Returns a list of JSON objects describing all of the user's activities and the activities of the user's friends.
     get:
+        queryParameters:
+            start?: string
+            end?: string
+            start_time?: number
+            end_time?: number
         responses:
             200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -178,6 +183,11 @@ types:
 /list_my_activities:
     description: Returns a list of JSON objects describing all of the user's activities.
     get:
+        queryParameters:
+            start?: string
+            end?: string
+            start_time?: number
+            end_time?: number
         responses:
             200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -196,6 +206,11 @@ types:
 /add_activity:
     description: Used when manually creating an activity, such as when logging strength training activities.
     post:
+        queryParameters:
+            Distance: number
+            Duration: number
+            time: number
+            activity_type: string
         responses:
             200:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -212,6 +227,8 @@ types:
 /upload_activity_photo:
     description: Uploads a photo and associates it with an activity.
     post:
+        queryParameters:
+            activity_id: UUID
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -220,6 +237,8 @@ types:
 /list_activity_photos:
     description: Lists all photos associated with an activity.
     get:
+        queryParameters:
+            activity_id: UUID
         responses:
             200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -228,6 +247,9 @@ types:
 /delete_activity_photo:
     description: Deletes a photo and removes it from an activity.
     post:
+        queryParameters:
+            activity_id: UUID
+            photo_id: UUID
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -236,6 +258,8 @@ types:
 /create_tags_on_activity:
     description: Sets the tags on an activity. Tags are provided in a dictionary {"tag0", "foo"|, {"tag1", "bar"), etc.
     post:
+        queryParameters:
+            activity_id: UUID
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -244,6 +268,8 @@ types:
 /delete_tag_from_activity:
     description: Deletes a tag from an activity.
     post:
+        queryParameters:
+            activity_id: UUID
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -267,7 +293,7 @@ types:
             500: An internal exception was thrown.
 /list_pending_friends:
     description: Lists the users who are requesting friendship with the logged in user.
-    post:
+    get:
         responses:
             200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -275,7 +301,7 @@ types:
             500: An internal exception was thrown.
 /list_friends:
     description: Lists the users who are friends with the logged in user.
-    post:
+    get:
         responses:
             200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -308,6 +334,13 @@ types:
 /trim_activity:
     description: 
     post:
+        queryParameters:
+            activity_id: UUID
+        responses:
+            200: OK
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
 /export_activity:
     description: Returns the activity in the specified format.
     get:
@@ -331,6 +364,8 @@ types:
 /export_workout:
     description: Returns the workout in the specified format.
     get:
+        queryParameters:
+            workout_id: UUID
         responses:
             200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -347,6 +382,8 @@ types:
 /list_tags:
     description: Lists the tags for the specified activity.
     get:
+        queryParameters:
+            activity_id: UUID
         responses:
             200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -355,6 +392,8 @@ types:
 /create_comment:
     description: Adds a comment to the specified activity.
     post:
+        queryParameters:
+            activity_id: UUID
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -363,6 +402,8 @@ types:
 /list_comments:
     description: Lists comments for the specified activity.
     get:
+        queryParameters:
+            activity_id: UUID
         responses:
             200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -531,6 +572,8 @@ types:
 /delete_pace_plan:
     description: Deletes the specified pace plan.
     post:
+        queryParameters:
+            id: UUID
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -546,6 +589,8 @@ types:
 /get_location_description:
     description: Returns the political location that corresponds to an activity.
     get:
+        queryParameters:
+            activity_id: UUID
         responses:
             200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -594,6 +639,8 @@ types:
 /get_distance_for_tag:
     description: Returns the amount of distance logged to activities with the given tag. Result is a JSON string.
     get:
+        queryParameters:
+            tag: string
         responses:
             200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -610,6 +657,9 @@ types:
 /get_record_progression:
     description: Returns an ordered list containing the time and activity ID of the user's record progression for the specified record and activity type, i.e. best running 5K. Result is a JSON string.
     get:
+        queryParameters:
+            activity_type: string
+            record_name: string
         responses:
             200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -618,6 +668,8 @@ types:
 /get_user_setting:
     description: Returns the value associated with the specified user setting.
     get:
+        queryParameters:
+            requested setting: List
         responses:
             200: The value associated with the requested setting.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -626,6 +678,8 @@ types:
 /get_user_settings:
     description: Returns a JSON list of values associated with the specified user settings. Input is a comma-separated list.
     get:
+        queryParameters:
+            requested settings: List
         responses:
             200: The value associated with the requested setting.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -639,15 +693,15 @@ types:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-/estimate_vo2_ftp:
-    description: Returns the user's estimated FTP.
+/estimate_vo2_max:
+    description: Returns the user's estimated VO2 max.
     get:
         responses:
             200: The value associated with the requested setting.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-/estimate_vo2_bmi:
+/estimate_bmi:
     description: Returns the user's estimated BMI.
     get:
         responses:
@@ -658,6 +712,8 @@ types:
 /list_power_zones:
     description: 
     get:
+        queryParameters:
+            estimated ftp: number
         responses:
             200: The value associated with the requested setting.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -666,8 +722,8 @@ types:
     description: 
     get:
         queryParameters:
-            max heart rate:
-            estimated max heart rate:
+            max heart rate: number
+            estimated max heart rate: number
         responses:
             200: The value associated with the requested setting.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -676,13 +732,15 @@ types:
     description: Generates a new API key for the logged in user.
     post:
         responses:
-            200: Empty string
+            200: UUID
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
 /delete_api_key:
     description: Deletes the specified API key.
     post:
+        queryParameters:
+            key: UUID
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.

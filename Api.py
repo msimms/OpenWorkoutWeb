@@ -1392,10 +1392,10 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
 
         # Required parameters.
-        if 'device_id' not in values:
+        if Keys.DEVICE_ID_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Device ID not specified.")
 
-        result = self.user_mgr.create_user_device_for_user_id(self.user_id, values['device_id'])
+        result = self.user_mgr.create_user_device_for_user_id(self.user_id, values[Keys.DEVICE_ID_KEY])
         return result, ""
 
     def handle_list_tags(self, values):
@@ -2364,6 +2364,7 @@ class Api(object):
         if Keys.ACTIVITY_TAG_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Tag not specified.")
 
+        # Validate the parameters.
         tag = values[Keys.ACTIVITY_TAG_KEY]
         if not InputChecker.is_valid_decoded_str(tag):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")

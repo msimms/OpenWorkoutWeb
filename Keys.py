@@ -458,6 +458,7 @@ TASK_STATUS_ERROR = "Error"
 LOCAL_FILE_NAME = "local file name"
 
 # Only used by the API.
+DEVICE_ID_KEY = "device_id"
 SENSOR_LIST_KEY = "sensors"
 SENSOR_NAME_KEY = "sensor_name"
 SUMMARY_ITEMS_LIST_KEY = "summary_items"

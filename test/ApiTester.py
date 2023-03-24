@@ -186,6 +186,8 @@ def run_unit_tests(url, username, password, realname):
     run_logout_test(api_url, cookies)
 
 def main():
+    """Entry point when run from the command line."""
+
     # Setup the logger.
     logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
