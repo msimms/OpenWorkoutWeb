@@ -171,8 +171,8 @@ types:
     description: Returns a list of JSON objects describing all of the user's activities and the activities of the user's friends.
     get:
         queryParameters:
-            start?: string
-            end?: string
+            start?: date-only
+            end?: date-only
             start_time?: number
             end_time?: number
         responses:
@@ -184,8 +184,8 @@ types:
     description: Returns a list of JSON objects describing all of the user's activities.
     get:
         queryParameters:
-            start?: string
-            end?: string
+            start?: date-only
+            end?: date-only
             start_time?: number
             end_time?: number
         responses:
@@ -197,7 +197,7 @@ types:
     description: Removes the specified activity.
     post:
         queryParameters:
-            activity_id: Unique identifier (UUID) for the activity.
+            activity_id: UUID
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -614,6 +614,8 @@ types:
 /activity_hash_from_id:
     description: Given the activity hash, return sthe activity ID, or an error if not found. Only looks at the logged in user's activities.
     get:
+        queryParameters:
+            activity_id: UUID
         responses:
             200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -622,6 +624,8 @@ types:
 /has_activity:
     description: Given the activity ID has hash, returns whether or not the activity exists in the database for the logged in user.
     get:
+        queryParameters:
+            activity_id: UUID
         responses:
             200: OK
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.

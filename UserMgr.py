@@ -492,6 +492,8 @@ class UserMgr(object):
 
     def get_activity_user(self, activity):
         """Returns the user record that corresponds with the given activity."""
+        if activity is None:
+            return None, None, None
         if Keys.ACTIVITY_USER_ID_KEY in activity:
             username, realname = self.retrieve_user_from_id(activity[Keys.ACTIVITY_USER_ID_KEY])
             return activity[Keys.ACTIVITY_USER_ID_KEY], username, realname

@@ -3019,13 +3019,17 @@ class MongoDatabase(Database.Database):
                 # Make sure we're dealing with a string.
                 key_str = str(key)
 
+                # Search the key list and remove the specified key.
+                found = False
                 key_list = user[Keys.API_KEYS]
                 for item in key_list:
                     if item[Keys.API_KEY] == key_str:
                         key_list.remove(item)
+                        found = True
                         break
-                user[Keys.API_KEYS] = key_list
-                return update_collection(self.users_collection, user)
+                if found:
+                    user[Keys.API_KEYS] = key_list
+                    return update_collection(self.users_collection, user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
