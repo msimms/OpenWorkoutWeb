@@ -23,6 +23,8 @@
 # SOFTWARE.
 """Estimates VO2Max."""
 
+import math
+
 class VO2MaxCalculator(object):
     """Estimates VO2Max"""
 
@@ -38,19 +40,22 @@ class VO2MaxCalculator(object):
         if resting_hr == 0:
             return 0.0
 
-        return 15.3 * (max_hr / resting_hr)
+        vo2max = max_hr / resting_hr * 15.4
+        return vo2max
 
     @staticmethod
-    def estimate_vo2max_from_race_distance_in_meters(race_distance_meters, race_time_minutes):
+    def estimate_vo2max_from_race_distance_in_meters(race_distance_meters, race_time_secs):
+        """Daniels and Gilbert VO2 Max formula"""
         if race_distance_meters == None:
             return 0.0
-        if race_time_minutes == None:
+        if race_time_secs == None:
             return 0.0
-        if race_time_minutes == 0:
+        if race_time_secs == 0:
             return 0.0
 
-        speed = race_distance_meters / race_time_minutes
-        vo2max = -4.60 + 0.182258 * speed + 0.000104 * speed * speed
+        t = race_time_secs / 60
+        v = race_distance_meters / t
+        vo2max = (-4.60 + 0.182258 * v + 0.000104 * math.pow(v, 2.0)) / (0.8 + 0.1894393 * math.pow(math.e, -0.012778 * t) + 0.2989558 * math.pow(math.e, -0.1932605 * t))
         if vo2max > 100.0:
             raise Exception("Invalid VO2Max.")
         return vo2max

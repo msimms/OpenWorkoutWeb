@@ -2346,7 +2346,7 @@ class Api(object):
 
         calc = TrainingPaceCalculator.TrainingPaceCalculator()
         unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_PREFERRED_UNITS_KEY)
-        run_paces = calc.calc_from_race_distance_in_meters(5000, float(values[Keys.BEST_5K]) / 60)
+        run_paces = calc.calc_from_race_distance_in_meters(5000, float(values[Keys.BEST_5K]))
         converted_paces = {}
         for run_pace in run_paces:
             converted_paces[run_pace] = Units.convert_to_string_in_specified_unit_system(unit_system, run_paces[run_pace], Units.UNITS_DISTANCE_METERS, Units.UNITS_TIME_MINUTES, run_pace)

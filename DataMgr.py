@@ -1788,9 +1788,8 @@ class DataMgr(Importer.ActivityWriter):
         run_paces = {}
         if Keys.BEST_5K in running_bests:
             best_time_secs = running_bests[Keys.BEST_5K]
-            best_time_mins = best_time_secs[0] / 60
             calc = TrainingPaceCalculator.TrainingPaceCalculator()
-            run_paces = calc.calc_from_race_distance_in_meters(5000, best_time_mins)
+            run_paces = calc.calc_from_race_distance_in_meters(5000, best_time_secs[0])
         return run_paces
 
     def compute_power_zone_distribution(self, ftp, powers):

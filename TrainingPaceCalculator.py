@@ -78,8 +78,17 @@ class TrainingPaceCalculator(object):
         vo2max = vo2maxCalc.estimate_vo2max_from_heart_rate(max_hr, resting_hr)
         return self.calc_from_vo2max(vo2max)
 
-    def calc_from_race_distance_in_meters(self, race_distance_meters, race_time_minutes):
+    def calc_from_race_distance_in_meters(self, race_distance_meters, race_time_secs):
         """Give the an athlete's recent race result, returns the suggested long run, easy run, tempo run, and speed run paces."""
         vo2maxCalc = VO2MaxCalculator.VO2MaxCalculator()
-        vo2max = vo2maxCalc.estimate_vo2max_from_race_distance_in_meters(race_distance_meters, race_time_minutes)
+        vo2max = vo2maxCalc.estimate_vo2max_from_race_distance_in_meters(race_distance_meters, race_time_secs)
         return self.calc_from_vo2max(vo2max)
+
+def main():
+    """Entry point when testing from the command line."""
+    calc = TrainingPaceCalculator()
+    print(calc.calc_from_race_distance_in_meters(5000, 18*60))
+    print(calc.calc_from_hr(188, 49))
+
+if __name__ == "__main__":
+    main()
