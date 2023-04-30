@@ -4,6 +4,7 @@ import logging
 import numpy as np
 import os
 import random
+import randregex
 import re
 import requests
 import sys
@@ -51,7 +52,7 @@ class DataGenerator(object):
         return str(hour) + ":" + str(min) + ":" + str(sec)
 
     def random_regex(self, pattern):
-        rndstr = ''.join([random.choice(re.findall('[a-z\d]', pattern)) for _ in range(len(pattern))])
+        rndstr = randregex.gen(pattern)
         return rndstr
 
     def random_bool(self):
@@ -197,7 +198,7 @@ class ApiFuzzer(object):
             print("Test " + str(test_num + 1))
             self.fuzz_api_endpoint(endpoint_url, substitutions, api_description[endpoint_name])
 
-    def fuzz_api(self, url, substitutions, num_test_cases):
+    def fuzz_api(self, url, substitutions, ignored_funcs, num_test_cases):
         """Primary method for executing the API tests. Parse the RAML file and then calls fuzz_api_endpoints to run the tests."""
 
         # Read and parse the RAML file.
@@ -218,7 +219,9 @@ class ApiFuzzer(object):
         api_endpoints = []
         for item in api_description:
             if item[0] == '/':
-                api_endpoints.append(item)
+                # Don't use any endpoints that we're supposed to ignore.
+                if not item[1:] in ignored_funcs:
+                    api_endpoints.append(item)
 
         # Make N number of fuzzed API calls.
         s = "Starting tests..."
@@ -243,9 +246,10 @@ def main():
 
     # Parse command line options.
     parser = argparse.ArgumentParser()
-    parser.add_argument("--url", default="https://127.0.0.1", help="The root address of the website", required=False)
+    parser.add_argument("--url", default="https://127.0.0.1", help="The root address of the website.", required=False)
     parser.add_argument("--substitutions", default="", help="A comma separated list of key=value pairs. Parameters with a key name will be substituted, ex: username=foo@bar.com", required=False)
-    parser.add_argument("--num-test-cases", default=100, help="The number of test cases to run", required=False)
+    parser.add_argument("--ignore", default="", help="A comma separated list of API functions to not use.", required=False)
+    parser.add_argument("--num-test-cases", default=100, help="The number of test cases to run.", required=False)
 
     try:
         args = parser.parse_args()
@@ -264,11 +268,14 @@ def main():
         pair = sub.split('=')
         substitutions[pair[0]] = pair[1]
 
+    # Parse the ignore list.
+    ignored_funcs = args.ignore.split(',')
+
     # Do the tests.
     try:
         fuzzer = ApiFuzzer()
         url = fuzzer.create_api_url(args.url)
-        fuzzer.fuzz_api(url, substitutions, args.num_test_cases)
+        fuzzer.fuzz_api(url, substitutions, ignored_funcs, args.num_test_cases)
     except Exception as e:
         print("Test aborted!\n")
         print(e)
