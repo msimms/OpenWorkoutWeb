@@ -1271,7 +1271,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No database.")
         if user_id is None:
             raise Exception("Bad parameter.")
-        pass
+        return []
 
     def create_pace_plan(self, user_id, plan_name, plan_description, target_distance, target_distance_units, target_time, target_splits, target_splits_units, last_updated_time):
         """Create method for a pace plan."""
