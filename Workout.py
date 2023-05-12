@@ -355,7 +355,7 @@ class Workout(object):
         elif self.type == Keys.WORKOUT_TYPE_TEMPO_RUN:
             result += "Purpose: Tempo runs build a combination of speed and endurance. They should be performed at a pace slightly slower than your pace for a 5K race.\n"
         elif self.type == Keys.WORKOUT_TYPE_EASY_RUN:
-            result += "Purpose: Easy runs build aerobic capacity while keeping the wear and tear on the body to a minimum.\n"
+            result += "Purpose: Easy runs build aerobic capacity while keeping the wear and tear on the body to a minimum. Pacing should be slow enough to stay at or near Heart Rate Zone 2, i.e. conversational pace.\n"
         elif self.type == Keys.WORKOUT_TYPE_LONG_RUN:
             result += "Purpose: Long runs build and develop endurance.\n"
         elif self.type == Keys.WORKOUT_TYPE_FREE_RUN:
@@ -366,6 +366,8 @@ class Workout(object):
             result += "Purpose: Progression runs teach you to run fast on tired legs.\n"
         elif self.type == Keys.WORKOUT_TYPE_FARTLEK_RUN:
             result += "Purpose: Fartlek sessions combine speed and endurance without the formal structure of a traditional interval workout.\n"
+        elif self.type == Keys.WORKOUT_TYPE_MIDDLE_DISTANCE_RUN:
+            result += ""
         elif self.type == Keys.WORKOUT_TYPE_HILL_RIDE:
             result += "Purpose: Hill workouts build the strength needed to tackle hills in a race. This can be done on the indoor trainer or replaced with low gear work if hills are not available.\n"
         elif self.type == Keys.WORKOUT_TYPE_SPEED_INTERVAL_RIDE:
@@ -380,6 +382,8 @@ class Workout(object):
             result += "Purpose: Open water swims get you used to race day conditions.\n"
         elif self.type == Keys.WORKOUT_TYPE_POOL_SWIM:
             result += "Purpose: Most training is done in the swimming pool.\n"
+        elif self.type == Keys.WORKOUT_TYPE_TECHNIQUE_SWIM:
+            result += "Purpose: Develop proper swimming technique.\n"
 
         # Add the intensity score, if it's been computed.
         if self.estimated_intensity_score is not None:
