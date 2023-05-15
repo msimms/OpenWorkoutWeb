@@ -416,11 +416,32 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             return Units.METERS_PER_HALF_MARATHON
         return Units.METERS_PER_HALF_MARATHON
 
-    def gen_workouts_for_next_week(self, inputs, easy_week, in_taper):
-        """Generates the workouts for the next week, but doesn't schedule them."""
-        """easy_week indicates whether or not this is the end of a training block."""
-        """in_taper indicates whether or not we're in the pre-event taper."""
+    def gen_workouts_for_next_week_fitness_goal(self, inputs):
+        workouts = []
 
+        # Extract the necessary inputs.
+        easy_run_pace = inputs[Keys.EASY_RUN_PACE]
+        longest_run_week_1 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY] # Most recent week
+        longest_run_week_2 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY]
+        longest_run_week_3 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY]
+        longest_run_week_4 = inputs[Keys.PLAN_INPUT_LONGEST_RUN_WEEK_4_KEY]
+
+        # Longest run in four weeks.
+        longest_run_in_four_weeks = max([longest_run_week_1, longest_run_week_2, longest_run_week_3, longest_run_week_4])
+
+        # Handle situation in which the user hasn't run in four weeks.
+        if not PlanGenerator.PlanGenerator.valid_float(longest_run_in_four_weeks) or longest_run_in_four_weeks < 1.0:
+            workouts.append(self.gen_free_run())
+            workouts.append(self.gen_free_run())
+            workouts.append(self.gen_free_run())
+            return workouts
+        
+        workouts.append(self.gen_easy_run(easy_run_pace, 3000, 5000))
+        workouts.append(self.gen_easy_run(easy_run_pace, 3000, 5000))
+        workouts.append(self.gen_easy_run(easy_run_pace, 3000, 8000))
+        return workouts
+
+    def gen_workouts_for_next_week_event_goal(self, inputs, easy_week, in_taper):
         workouts = []
 
         # 3 Critical runs: Speed session, tempo or threshold run, and long run
@@ -456,13 +477,6 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             workouts.append(self.gen_free_run())
             return workouts
         
-        # Handle situation in which the user hasn't run *much* in the last four weeks.
-        if num_runs is None or num_runs < 4:
-            workouts.append(self.gen_free_run())
-            workouts.append(self.gen_free_run())
-            workouts.append(self.gen_free_run())
-            return workouts
-
         # No pace data?
         if not (PlanGenerator.PlanGenerator.valid_float(short_interval_run_pace) and \
             PlanGenerator.PlanGenerator.valid_float(speed_run_pace) and \
@@ -470,6 +484,13 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             PlanGenerator.PlanGenerator.valid_float(long_run_pace) and \
             PlanGenerator.PlanGenerator.valid_float(easy_run_pace)):
             raise Exception("No run pace data.")
+
+        # Handle situation in which the user hasn't run *much* in the last four weeks.
+        if num_runs is None or num_runs < 4:
+            workouts.append(self.gen_easy_run(easy_run_pace, 3000, 5000))
+            workouts.append(self.gen_easy_run(easy_run_pace, 3000, 5000))
+            workouts.append(self.gen_easy_run(easy_run_pace, 3000, 8000))
+            return workouts
 
         # If the long run has been increasing for the last three weeks then give the person a break.
         if longest_run_week_1 and longest_run_week_2 and longest_run_week_3 and longest_run_week_4:
@@ -483,9 +504,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         # Compute the longest run needed to accomplish the goal.
         # If the goal distance is a marathon then the longest run should be somewhere between 18 and 22 miles.
         # The non-taper equation was derived by playing with trendlines in a spreadsheet.
-        if goal == Keys.GOAL_FITNESS_KEY:
-            max_long_run_distance = self.max_long_run_distance(goal_distance)
-        elif in_taper:
+        if in_taper:
             max_long_run_distance = self.max_taper_distance(goal_distance)
         else:
             max_distance_needed = self.max_long_run_distance(goal_distance)
@@ -527,7 +546,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
                 workouts.append(goal_workout)
 
             # Add a long run. No need for a long run if the goal is general fitness.
-            if not in_taper and goal != Keys.GOAL_FITNESS_KEY:
+            if not in_taper:
                 long_run_workout = self.gen_long_run(long_run_pace, longest_run_in_four_weeks, min_run_distance, max_long_run_distance)
                 workouts.append(long_run_workout)
 
@@ -604,3 +623,15 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
                 done = True
 
         return best_workouts
+
+    def gen_workouts_for_next_week(self, inputs, easy_week, in_taper):
+        """Generates the workouts for the next week, but doesn't schedule them."""
+        """easy_week indicates whether or not this is the end of a training block."""
+        """in_taper indicates whether or not we're in the pre-event taper."""
+
+        goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
+
+        # Special case the fitness goal because it's so much simpler.
+        if goal == Keys.GOAL_FITNESS_KEY:
+            return self.gen_workouts_for_next_week_fitness_goal(self, inputs)
+        return self.gen_workouts_for_next_week_event_goal(self, inputs, easy_week, in_taper)

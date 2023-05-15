@@ -1228,7 +1228,7 @@ class DataMgr(Importer.ActivityWriter):
         return self.database.retrieve_planned_workouts_by_calendar_id(calendar_id)
 
     def update_planned_workout(self, user_id, updated_workout_obj):
-        """Create method for a workout."""
+        """Update method for a workout."""
         if self.database is None:
             raise Exception("No database.")
         if user_id is None:
@@ -1240,6 +1240,14 @@ class DataMgr(Importer.ActivityWriter):
         new_workout_objs = [ workout_obj for workout_obj in workout_objs if workout_obj.workout_id != updated_workout_obj.workout_id ]
         new_workout_objs.append(updated_workout_obj)
         return self.database.update_planned_workouts_for_user(user_id, new_workout_objs)
+
+    def delete_planned_workouts_for_user(self, user_id):
+        """Delete method for a workout."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.delete_planned_workouts_for_user(user_id)
 
     def delete_workouts_for_date_range(self, user_id, start_time, end_time):
         """Delete method for all workouts pertaining for the specified user within the given date range."""

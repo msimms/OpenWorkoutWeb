@@ -35,6 +35,7 @@ import InputChecker
 import Keys
 import Units
 import TrainingPaceCalculator
+import Workout
 
 from urllib.parse import unquote_plus
 from distutils.util import strtobool
@@ -1795,7 +1796,7 @@ class Api(object):
             ts = values[Keys.TIMESTAMP_KEY]
             if not InputChecker.is_unsigned_integer(ts):
                 raise ApiException.ApiMalformedRequestException("Invalid timestamp.")
-            update_time = datetime.datetime.fromtimestamp(int(ts))
+            update_time = datetime.datetime.fromtimestamp(int(ts) / 1000)
         else:
             update_time = datetime.datetime.utcnow()
 
@@ -1959,22 +1960,7 @@ class Api(object):
         merged_data = self.data_mgr.merge_activities(self.user_id, uploaded_file1_data, uploaded_file2_data)
         return True, merged_data
 
-    def handle_create_workout(self, values):
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-
-        # Required parameters.
-        if Keys.WORKOUT_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Workout ID not specified.")
-
-        # Do we have a valid workout ID?
-        workout_id = values[Keys.WORKOUT_ID_KEY]
-        if not InputChecker.is_uuid(workout_id):
-            raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
-
-        return True, ""
-
-    def handle_update_workout(self, values):
+    def handle_update_planned_workout(self, values):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -1995,6 +1981,23 @@ class Api(object):
         workout_obj.from_dict(values)
         result = self.data_mgr.update_planned_workout(self.user_id, workout_obj)
 
+        return result, ""
+
+    def handle_create_planned_workouts(self, values):
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        if Keys.WORKOUT_LIST_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Workout ID not specified.")
+
+        # Delete the existing workouts.
+        result = self.data_mgr.delete_planned_workouts_for_user(self.user_id)
+
+        workouts_obj = json.loads(values[Keys.WORKOUT_LIST_KEY])
+        for workout_dict in workouts_obj:
+            workout_obj = Workout.Workout(self.user_id)
+            workout_obj.from_dict(workout_dict)
+            self.data_mgr.create_workout(self.user_id, workout_obj)
         return result, ""
 
     def handle_list_planned_workouts(self, values):
@@ -2034,6 +2037,13 @@ class Api(object):
                 matched_workouts.append(workout_dict)
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
+
+    def handle_delete_planned_workouts(self, values):
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        result = self.data_mgr.delete_planned_workouts_for_user(self.user_id)
+        return result, ""
 
     def handle_list_interval_workouts(self, values):
         """Called when the user wants wants a list of their interval workouts. Result is a JSON string."""
@@ -2075,6 +2085,22 @@ class Api(object):
         created = self.data_mgr.create_race(self.user_id, race_name, race_date, race_distance, race_importance)
         return created, ""
 
+    def handle_list_races(self, values):
+        """Called when the user wants to list all of the races on their calendar."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        races = self.data_mgr.list_races(self.user_id)
+        for race in races:
+
+            # Stringify the UUID since UUID isn't JSON serializable.
+            if Keys.RACE_ID_KEY in race:
+                race_id = race[Keys.RACE_ID_KEY]
+                race[Keys.RACE_ID_KEY] = str(race_id)
+
+        json_result = json.dumps(races)
+        return True, json_result
+
     def handle_delete_race(self, values):
         """Called when the user wants to delete a race from their calendar."""
         if self.user_id is None:
@@ -2091,22 +2117,6 @@ class Api(object):
 
         deleted = self.data_mgr.delete_race(self.user_id, race_id)
         return deleted, ""
-
-    def handle_list_races(self, values):
-        """Called when the user wants to list all of the races on their calendar."""
-        if self.user_id is None:
-            raise ApiException.ApiNotLoggedInException()
-
-        races = self.data_mgr.list_races(self.user_id)
-        for race in races:
-
-            # Stringify the UUID since UUID isn't JSON serializable.
-            if Keys.RACE_ID_KEY in race:
-                race_id = race[Keys.RACE_ID_KEY]
-                race[Keys.RACE_ID_KEY] = str(race_id)
-
-        json_result = json.dumps(races)
-        return True, json_result
 
     def handle_create_pace_plan(self, values):
         """Called when the user is uploading a pace plan, typically from the mobile app."""
@@ -2749,10 +2759,16 @@ class Api(object):
             return self.handle_create_race(values)
         elif request == 'delete_race':
             return self.handle_delete_race(values)
+        elif request == 'update_planned_workout':
+            return self.handle_update_planned_workout(values)
+        elif request == 'create_planned_workouts':
+            return self.handle_create_planned_workouts(values)
+        elif request == 'delete_planned_workouts':
+            return self.handle_delete_planned_workouts(values)
         elif request == 'create_pace_plan':
-            return self.handle_create_pace_plan(values)        
+            return self.handle_create_pace_plan(values)
         elif request == 'delete_pace_plan':
-            return self.handle_delete_pace_plan(values)        
+            return self.handle_delete_pace_plan(values)
         elif request == 'update_settings':
             return self.handle_update_settings(values)
         elif request == 'update_profile':
@@ -2773,10 +2789,6 @@ class Api(object):
             return self.handle_delete_api_key(values)
         elif request == 'merge_activities':
             return self.handle_merge_activities(values)
-        elif request == 'create_workout':
-            return self.handle_create_workout(values)
-        elif request == 'update_workout':
-            return self.handle_update_workout(values)
         return False, ""
 
     def handle_api_1_0_request(self, verb, request, values):

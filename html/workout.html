@@ -51,7 +51,7 @@
     // Shows the date picker and submits a change to the workout date.
     function change_scheduled_time()
     {
-        let the_url = "${root_url}/api/1.0/update_workout";
+        let the_url = "${root_url}/api/1.0/update_planned_workout";
         let scheduled_time = document.getElementById("scheduled_time").value;
         let dict = [];
         let timestamp = Date.parse(scheduled_time) / 1000;
