@@ -180,7 +180,7 @@ class ActivityAnalyzer(object):
 
                     print("Storing the distance calculations...")
                     if not self.data_mgr.create_activity_metadata_list(activity_id, Keys.APP_DISTANCES_KEY, location_analyzer.distance_buf):
-                        self.log_error("Error returned when saving activity speed graph.")                    
+                        self.log_error("Error returned when saving activity speed graph.")
 
                 # Where was this activity performed?
                 print("Computing the location description...")
@@ -191,6 +191,8 @@ class ActivityAnalyzer(object):
                 # If not, estimate a stress score.
                 print("Update the ending time...")
                 end_time_ms = self.data_mgr.compute_activity_end_time_ms(self.activity)
+                if end_time_ms is None:
+                    self.log_error("Unable to determine the end time for activity id " + str(activity_id) + ".")
                 end_time_secs = end_time_ms / 1000
                 self.data_mgr.update_activity_end_time_secs(self.activity, end_time_secs)
 
