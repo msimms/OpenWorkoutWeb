@@ -434,15 +434,16 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             workouts.append(self.gen_free_run())
             workouts.append(self.gen_free_run())
             workouts.append(self.gen_free_run())
-            return workouts
-        
-        workouts.append(self.gen_easy_run(easy_run_pace, 3000, 5000))
-        workouts.append(self.gen_easy_run(easy_run_pace, 3000, 5000))
-        workouts.append(self.gen_easy_run(easy_run_pace, 3000, 8000))
+        else:
+            workouts.append(self.gen_easy_run(easy_run_pace, 3000, 5000))
+            workouts.append(self.gen_easy_run(easy_run_pace, 3000, 5000))
+            workouts.append(self.gen_easy_run(easy_run_pace, 3000, 8000))
         return workouts
 
     def gen_workouts_for_next_week_event_goal(self, inputs, easy_week, in_taper):
         workouts = []
+        best_workouts = []
+        best_intensity_distribution_score = None
 
         # 3 Critical runs: Speed session, tempo or threshold run, and long run
 
@@ -530,8 +531,6 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             min_run_distance = max_easy_run_distance
 
         iter_count = 0
-        best_intensity_distribution_score = None
-        best_workouts = []
         done = False
         while not done:
 
@@ -589,9 +588,9 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
             workouts.append(easy_run_workout)
 
-            # Calculate the total intensity for each workout.
+            # Calculate the total intensity and the intensity for each workout.
             total_intensity = 0.0
-            for workout in best_workouts:
+            for workout in workouts:
                 workout.calculate_estimated_intensity_score(functional_threshold_pace)
                 total_intensity = total_intensity + workout.estimated_intensity_score
 

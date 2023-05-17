@@ -116,7 +116,7 @@ class WorkoutScheduler(object):
         # This will serve as our calendar for next week.
         week = [[] for _ in range(7)]
 
-        # Are there any events this week?
+        # Are there any events this week? If so, add them to the schedule first.
         for workout in workouts:
             if workout.type == Keys.WORKOUT_TYPE_EVENT:
                 day_index = (workout.scheduled_time.timetuple().tm_wday + 1) % 7
