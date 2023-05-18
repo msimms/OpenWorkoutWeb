@@ -122,10 +122,10 @@ class WorkoutScheduler(object):
                 day_index = (workout.scheduled_time.timetuple().tm_wday + 1) % 7
                 week[day_index].append(workout)
 
-        # Find the long run and put it on the preferred day.
+        # When does the user want to do their long run?
+        # Long runs should be the next priority after events.
         if self.user_id is not None:
 
-            # When does the user want to do long runs?
             preferred_long_run_day = self.user_mgr.retrieve_user_setting(self.user_id, Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY)
             if preferred_long_run_day is not None:
 
@@ -148,8 +148,8 @@ class WorkoutScheduler(object):
 
         # Assign workouts to days. Keep track of the one with the best score.
         # Start with a simple deterministic algorithm and then try to beat it.
-        best_schedule, best_week = self.deterministic_scheduler(workouts, week, start_time)
-        best_schedule_score = self.score_schedule(best_week)
+        best_schedule, new_week = self.deterministic_scheduler(workouts, week, start_time)
+        best_schedule_score = self.score_schedule(new_week)
 
         # Try and best the first arrangement, by randomly re-arranging the schedule
         # and seeing if we can get a better score.
@@ -158,7 +158,6 @@ class WorkoutScheduler(object):
             new_schedule_score = self.score_schedule(new_week)
             if new_schedule_score < best_schedule_score:
                 best_schedule = new_schedule
-                best_week = new_week
                 best_schedule_score = new_schedule_score
 
         return best_schedule
