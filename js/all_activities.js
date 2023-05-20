@@ -78,21 +78,21 @@ function common_export_activity(root_url)
 function common_edit_activity(root_url)
 {
     let the_url = root_url + "/edit_activity/" + activity_id;
-    window.location.replace(the_url);
+    window.location.assign(the_url);
 }
 
 /// @function common_add_photos
 function common_add_photos(root_url)
 {
     let the_url = root_url + "/add_photos/" + activity_id;
-    window.location.replace(the_url);
+    window.location.assign(the_url);
 }
 
 /// @function common_trim_activity
 function common_trim_activity(root_url)
 {
     let the_url = root_url + "/trim_activity/" + activity_id;
-    window.location.replace(the_url);
+    window.location.assign(the_url);
 }
 
 /// @function common_delete_activity
