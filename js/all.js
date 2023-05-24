@@ -117,6 +117,24 @@ function send_post_request_async(url, params, callback)
     xml_http.send(json_data);
 }
 
+/// @function Sends an HTTP DELETE request and waits for the response.
+function send_delete_request_async(url, callback)
+{
+    let xml_http = new XMLHttpRequest();
+    let content_type = "application/json; charset=utf-8";
+
+    xml_http.open("DELETE", url, false);
+    xml_http.setRequestHeader('Content-Type', content_type);
+    xml_http.onreadystatechange = function()
+    {
+        if (xml_http.readyState == XMLHttpRequest.DONE)
+        {
+            callback(xml_http.status, xml_http.responseText);
+        }
+    }
+    xml_http.send();
+}
+
 /// @function create_local_file
 function create_local_file(data, filename, type)
 {

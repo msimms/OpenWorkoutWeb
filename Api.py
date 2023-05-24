@@ -2785,10 +2785,14 @@ class Api(object):
             return self.handle_generate_workout_plan_from_inputs(values)
         elif request == 'generate_api_key':
             return self.handle_generate_api_key(values)
-        elif request == 'delete_api_key':
-            return self.handle_delete_api_key(values)
         elif request == 'merge_activities':
             return self.handle_merge_activities(values)
+        return False, ""
+
+    def handle_api_1_0_delete_request(self, request, values):
+        """Called to parse a version 1.0 API DELETE request."""
+        if request == 'delete_api_key':
+            return self.handle_delete_api_key(values)
         return False, ""
 
     def handle_api_1_0_request(self, verb, request, values):
@@ -2801,6 +2805,8 @@ class Api(object):
 
         if verb == 'GET':
             return self.handle_api_1_0_get_request(request, values)
+        elif verb == 'DELETE':
+            return self.handle_api_1_0_delete_request(request, values)
         elif verb == 'POST':
             # Flatten the array of dictionaries into a single dictionary.
             if isinstance(values, list):

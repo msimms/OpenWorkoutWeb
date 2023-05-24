@@ -651,7 +651,7 @@ class CherryPyFrontEnd(object):
             verb = cherrypy.request.method
 
             # The API params.
-            if verb == "GET":
+            if verb == "GET" or verb == "DELETE":
                 params = kw
             else:
                 content_len = int(cherrypy.request.headers['Content-Length'])

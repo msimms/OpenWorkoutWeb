@@ -28,12 +28,9 @@
     {
         if (confirm('Are you sure you want to do this?'))
         {
-            let the_url = "${root_url}/api/1.0/delete_api_key";
-            let dict = [];
+            let the_url = "${root_url}/api/1.0/delete_api_key?key=" + key;
 
-            dict.push({["key"] : key});
-
-            send_post_request_async(the_url, dict, function(status, response) {
+            send_delete_request_async(the_url, function(status, response) {
                 if (status == 200)
                     window.location.reload();
                 else
