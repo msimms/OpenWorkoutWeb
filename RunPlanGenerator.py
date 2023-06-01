@@ -632,5 +632,5 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Special case the fitness goal because it's so much simpler.
         if goal == Keys.GOAL_FITNESS_KEY:
-            return self.gen_workouts_for_next_week_fitness_goal(self, inputs)
-        return self.gen_workouts_for_next_week_event_goal(self, inputs, easy_week, in_taper)
+            return self.gen_workouts_for_next_week_fitness_goal(inputs)
+        return self.gen_workouts_for_next_week_event_goal(inputs, easy_week, in_taper)
