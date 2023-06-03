@@ -139,6 +139,7 @@ BEST_CYCLING_20_MINUTE_POWER_LIST_KEY = "best 20 minute power list" # List of th
 ESTIMATED_CYCLING_FTP_KEY = "estimated ftp" # Estimated FTP, in watts
 GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY = "gen workouts when race cal is empty" # If True we'll still run the workout plan generator even when the race calendar is empty
 USER_CAN_UPLOAD_PHOTOS_KEY = "can upload photos" # User is allowed to upload photos
+USER_IS_ADMIN_KEY = "is admin" # User is allowed to administer the site
 USER_HAS_SWIMMING_POOL_ACCESS = "has swimming pool access" # Indicates whether or not the user has access to a swimming pool
 USER_HAS_OPEN_WATER_SWIM_ACCESS = "has open water swim access" # Indicates whether or not the user can do open water swims
 USER_HAS_BICYCLE = "has bicycle" # Indicates whether or not the user has access to a bicycle (or bike trainer)

@@ -1148,4 +1148,21 @@ class App(object):
     @Perf.statistics
     def admin(self):
         """Renders the admin page."""
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_user()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, _ = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Is the user an admin?
+        is_admin = self.user_mgr.retrieve_user_setting(user_id, Keys.USER_IS_ADMIN_KEY)
+        if not is_admin:
+            raise RedirectException(LOGIN_URL)
+
         return self.render_simple_page('admin.html')

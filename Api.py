@@ -2599,15 +2599,27 @@ class Api(object):
         activity_ids = self.data_mgr.list_unsynched_activities(self.user_id, int(last_synched_time))
         return True, json.dumps(activity_ids)
 
-    def list_users_without_devices(self):
+    def handle_list_users_without_devices(self):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Is the user an admin?
+        is_admin = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_IS_ADMIN_KEY)
+        if not is_admin:
+            raise ApiException.ApiAuthenticationException("User is not an admin.")
+
         self.data_mgr.list_users_without_devices(self.user_id)
         return True, ""
 
-    def delete_orphaned_activities(self):
+    def handle_delete_orphaned_activities(self):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
+
+        # Is the user an admin?
+        is_admin = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_IS_ADMIN_KEY)
+        if not is_admin:
+            raise ApiException.ApiAuthenticationException("User is not an admin.")
+
         self.data_mgr.delete_orphaned_activities(self.user_id)
         return True, ""
 
@@ -2697,6 +2709,8 @@ class Api(object):
             return self.handle_list_activity_types()
         elif request == 'list_unsynched_activities':
             return self.handle_list_unsynched_activities(values)
+        elif request == 'list_users_without_devices':
+            return self.handle_list_users_without_devices(values)
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):
@@ -2805,6 +2819,8 @@ class Api(object):
         """Called to parse a version 1.0 API DELETE request."""
         if request == 'delete_api_key':
             return self.handle_delete_api_key(values)
+        elif request == 'delete_orphaned_activities':
+            return self.handle_delete_orphaned_activities(values)
         return False, ""
 
     def handle_api_1_0_request(self, verb, request, values):

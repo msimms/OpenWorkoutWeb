@@ -397,6 +397,8 @@ class UserMgr(object):
             return True
         if key == Keys.USER_CAN_UPLOAD_PHOTOS_KEY:
             return False
+        if key == Keys.USER_IS_ADMIN_KEY:
+            return False
         if key == Keys.USER_HAS_SWIMMING_POOL_ACCESS:
             return False
         if key == Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS:
@@ -407,7 +409,7 @@ class UserMgr(object):
             return datetime.datetime.fromtimestamp(0)
         if key == Keys.USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED:
             return datetime.datetime.fromtimestamp(0)
-        return ""
+        raise Exception("Unknown user setting.")
 
     def retrieve_user_setting(self, user_id, key):
         """Retrieve method for user preferences."""
