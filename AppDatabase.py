@@ -3055,6 +3055,42 @@ class MongoDatabase(Database.Database):
         return False
 
     #
+    # Admin methods
+    #
+
+    def delete_orphaned_activities(self, known_user_ids, known_device_ids):
+        if known_user_ids is None:
+            self.log_error(MongoDatabase.delete_orphaned_activities.__name__ + ": Unexpected empty object: known_user_ids")
+            return False
+        if known_device_ids is None:
+            self.log_error(MongoDatabase.delete_orphaned_activities.__name__ + ": Unexpected empty object: known_device_ids")
+            return False
+
+        try:
+            # Things we don't need.
+            exclude_keys = self.list_excluded_activity_keys()
+
+            # Get an iterator to the activities.
+            activities_cursor = self.activities_collection.find({}, exclude_keys)
+
+            # Iterate over the results, triggering the callback for each.
+            if activities_cursor is not None:
+                try:
+                    while activities_cursor.alive:
+                        activity = activities_cursor.next()
+                        if Keys.ACTIVITY_USER_ID_KEY in activity:
+                            pass
+                        if Keys.ACTIVITY_DEVICE_STR_KEY in activity:
+                            pass
+                except StopIteration:
+                    pass
+            return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    #
     # Session token management methods
     #
 

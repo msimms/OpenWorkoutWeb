@@ -573,6 +573,22 @@ class CherryPyFrontEnd(object):
             self.log_error('Unhandled exception in ' + CherryPyFrontEnd.api_keys.__name__)
         return self.error()
 
+    @cherrypy.expose
+    @require()
+    def admin(self):
+        """Renders the admin page."""
+        try:
+            return self.backend.admin()
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.admin.__name__)
+        return self.error()
+
     def api_internal(self, verb, path, params, cookie):
         """Common code for handling API calls."""
 

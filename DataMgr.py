@@ -1557,6 +1557,23 @@ class DataMgr(Importer.ActivityWriter):
 
         return self.database.list_activities_with_last_updated_times_before(user_id, last_sync_date)
 
+    def list_users_without_devices(self, user_id):
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        pass
+    
+    def delete_orphaned_activities(self, user_id):
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+
+        known_user_ids = []
+        known_device_ids = []
+        return self.database.delete_orphaned_activities(user_id, known_user_ids, known_device_ids)
+
     def merge_activities(self, user_id, uploaded_file1_data, uploaded_file2_data):
         """Takes two recordings of the same activity and merges them into one."""
         if user_id is None:

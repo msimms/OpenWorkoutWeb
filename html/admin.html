@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+
+<title>${product} - ${name} - Admin</title>
+
+<link rel="stylesheet" href="${root_url}/css/normalize.css">
+<link rel="stylesheet" href="${root_url}/css/site.css">
+
+<meta charset="UTF-8">
+<meta name="description" content="Administrative functions">
+
+</head>
+
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+
+<body>
+
+<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+<script type="text/javascript">
+
+    /// @function delete_users_without_devices
+    function list_users_without_devices(key)
+    {
+        let the_url = "${root_url}/api/1.0/list_users_without_devices";
+
+        send_get_request_async(the_url, function(status, response) {
+            if (status == 200)
+                window.location.reload();
+            else
+                alert(response)
+        } );
+    }
+
+    /// @function delete_orphaned_activities
+    function delete_orphaned_activities(key)
+    {
+        if (confirm('Are you sure you want to do this?'))
+        {
+            let the_url = "${root_url}/api/1.0/delete_orphaned_activities";
+
+            send_delete_request_async(the_url, function(status, response) {
+                if (status == 200)
+                    window.location.reload();
+                else
+                    alert(response)
+            } );
+        }
+    }
+
+</script>
+
+<section class="nav">
+${nav}
+</section>
+
+<section class="block">
+    <div>
+        <div>
+            <table class="user_list" id="Users">
+            </table>
+        </div>
+        <button type="button" onclick="list_users_without_devices()">List Users Without Devices</button><br>
+        <button type="button" onclick="delete_orphaned_activities()">Delete Orphaned Activities</button>
+    </div>
+</section>
+
+</body>
+</html>

@@ -466,6 +466,21 @@ def api_keys(env, start_response):
         g_app.log_error('Unhandled exception in ' + api_keys.__name__)
     return error(env, start_response)
 
+def admin(env, start_response):
+    """Renders the admin page."""
+    try:
+        content = g_app.admin().encode('utf-8')
+        start_response('200 OK', [('Content-Type', 'text/html')])
+        return [content]
+    except App.RedirectException as e:
+        start_response('302 Found', [('Location', e.url)])
+        return []
+    except:
+        g_app.log_error(traceback.format_exc())
+        g_app.log_error(sys.exc_info()[0])
+        g_app.log_error('Unhandled exception in ' + admin.__name__)
+    return error(env, start_response)
+
 def api(env, start_response):
     """Endpoint for API calls."""
     start_response('200 OK', [('Content-Type', 'text/html')])

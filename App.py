@@ -1144,3 +1144,8 @@ class App(object):
     def api_keys(self):
         """Renders the api key management page."""
         return self.render_simple_page('api_keys.html')
+
+    @Perf.statistics
+    def admin(self):
+        """Renders the admin page."""
+        return self.render_simple_page('admin.html')

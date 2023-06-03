@@ -793,6 +793,21 @@ def api_keys(env, start_response):
         log_error(sys.exc_info()[0])
     return handle_error_500(start_response)
 
+@do_auth_check
+def admin(env, start_response):
+    """Renders the admin page."""
+    global g_front_end
+
+    try:
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.admin())
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
+    except:
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
+    return handle_error_500(start_response)
+
 def api(env, start_response):
     """Endpoint for API calls."""
     global g_front_end
@@ -952,6 +967,7 @@ def main():
         cherrypy.tree.graft(status, "/status")
         cherrypy.tree.graft(ical, "/ical")
         cherrypy.tree.graft(api_keys, "/api_keys")
+        cherrypy.tree.graft(admin, "/admin")
         cherrypy.tree.graft(api, "/api")
         cherrypy.tree.graft(google_maps, "/google_maps")
         cherrypy.tree.graft(index, "/")

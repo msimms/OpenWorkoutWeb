@@ -524,6 +524,17 @@ def api_keys():
         result = g_app.error()
     return result
 
+@g_flask_app.route('/admin')
+@login_requred
+def admin():
+    """Renders the admin page."""
+    result = ""
+    try:
+        result = g_app.admin()
+    except:
+        result = g_app.error()
+    return result
+
 @g_flask_app.route('/api/<version>/<method>', methods = ['GET','POST'])
 def api(version, method):
     """Endpoint for API calls."""

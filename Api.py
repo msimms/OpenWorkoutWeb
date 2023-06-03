@@ -2599,6 +2599,18 @@ class Api(object):
         activity_ids = self.data_mgr.list_unsynched_activities(self.user_id, int(last_synched_time))
         return True, json.dumps(activity_ids)
 
+    def list_users_without_devices(self):
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        self.data_mgr.list_users_without_devices(self.user_id)
+        return True, ""
+
+    def delete_orphaned_activities(self):
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+        self.data_mgr.delete_orphaned_activities(self.user_id)
+        return True, ""
+
     def handle_api_1_0_get_request(self, request, values):
         """Called to parse a version 1.0 API GET request."""
         if request == 'activity_track':
