@@ -491,21 +491,3 @@ class UserMgr(object):
         if user_id is None:
             raise Exception("Bad parameter.")
         return self.database.retrieve_api_keys(user_id)
-
-    def get_activity_user(self, activity):
-        """Returns the user record that corresponds with the given activity."""
-        if activity is None:
-            return None, None, None
-        if Keys.ACTIVITY_USER_ID_KEY in activity:
-            username, realname = self.retrieve_user_from_id(activity[Keys.ACTIVITY_USER_ID_KEY])
-            return activity[Keys.ACTIVITY_USER_ID_KEY], username, realname
-        if Keys.ACTIVITY_DEVICE_STR_KEY in activity and len(activity[Keys.ACTIVITY_DEVICE_STR_KEY]) > 0:
-            user = self.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
-            if user is not None:
-                return str(user[Keys.DATABASE_ID_KEY]), user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
-        return None, None, None
-
-    def get_activity_id_user(self, activity_id):
-        """Returns the user record that corresponds with the given activity id."""
-        activity = self.database.retrieve_activity_small(activity_id)
-        return self.get_activity_user(activity)

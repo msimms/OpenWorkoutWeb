@@ -797,7 +797,7 @@ class App(object):
             return self.render_error("The requested activity does not exist.")
 
         # Determine who owns the device, and hence the activity.
-        activity_user_id, _, activity_user_realname = self.user_mgr.get_activity_user(activity)
+        activity_user_id, _, activity_user_realname = self.data_mgr.get_activity_user(activity)
         if activity_user_id is None:
             return self.render_error("The activity owner cannot be determined.")
         belongs_to_current_user = str(activity_user_id) == str(logged_in_user_id)
@@ -839,7 +839,7 @@ class App(object):
             return self.render_error("The requested activity does not exist.")
 
         # Determine who owns the device, and hence the activity.
-        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
+        activity_user_id, _, _ = self.data_mgr.get_activity_user(activity)
         belongs_to_current_user = str(activity_user_id) == str(user_id)
         if not belongs_to_current_user:
             return self.render_error("The logged in user does not own the requested activity.")

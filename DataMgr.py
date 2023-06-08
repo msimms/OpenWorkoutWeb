@@ -1033,6 +1033,24 @@ class DataMgr(Importer.ActivityWriter):
             return activity[Keys.ACTIVITY_COMMENTS_KEY]
         return []
 
+    def get_activity_user(self, activity):
+        """Returns the user record that corresponds with the given activity."""
+        if activity is None:
+            return None, None, None
+        if Keys.ACTIVITY_USER_ID_KEY in activity:
+            username, realname = self.database.retrieve_user_from_id(activity[Keys.ACTIVITY_USER_ID_KEY])
+            return activity[Keys.ACTIVITY_USER_ID_KEY], username, realname
+        if Keys.ACTIVITY_DEVICE_STR_KEY in activity and len(activity[Keys.ACTIVITY_DEVICE_STR_KEY]) > 0:
+            user = self.database.retrieve_user_from_device(activity[Keys.ACTIVITY_DEVICE_STR_KEY])
+            if user is not None:
+                return str(user[Keys.DATABASE_ID_KEY]), user[Keys.USERNAME_KEY], user[Keys.REALNAME_KEY]
+        return None, None, None
+
+    def get_activity_id_from_user(self, activity_id):
+        """Returns the user record that corresponds with the given activity id."""
+        activity = self.database.retrieve_activity_small(activity_id)
+        return self.get_activity_user(activity)
+
     def retrieve_user_goal(self, user_id):
         """Retrieves the goal distance and date that is used to suggest workouts."""
         if self.database is None:
@@ -1557,22 +1575,23 @@ class DataMgr(Importer.ActivityWriter):
 
         return self.database.list_activities_with_last_updated_times_before(user_id, last_sync_date)
 
-    def list_users_without_devices(self, user_id):
+    def list_users_without_devices(self):
         if self.database is None:
             raise Exception("No database.")
-        if user_id is None:
-            raise Exception("Bad parameter.")
-        pass
-    
-    def delete_orphaned_activities(self, user_id):
-        if self.database is None:
-            raise Exception("No database.")
-        if user_id is None:
-            raise Exception("Bad parameter.")
 
-        known_user_ids = []
-        known_device_ids = []
-        return self.database.delete_orphaned_activities(user_id, known_user_ids, known_device_ids)
+        result = []
+        if not self.database.enumerate_all_users(lambda u : result.append(u[Keys.USERNAME_KEY]) if len(u[Keys.DEVICES_KEY]) == 0 else u):
+            raise Exception("Could not enumerate users.")
+        return result
+    
+    def delete_orphaned_activities(self):
+        if self.database is None:
+            raise Exception("No database.")
+
+        result = []
+        if not self.database.enumerate_all_activities(lambda a : result.append(a[Keys.ACTIVITY_ID_KEY]) if self.get_activity_user(a) is None else a):
+            raise Exception("Could not enumerate activities.")
+        return result
 
     def merge_activities(self, user_id, uploaded_file1_data, uploaded_file2_data):
         """Takes two recordings of the same activity and merges them into one."""

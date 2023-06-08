@@ -60,7 +60,7 @@ class Api(object):
         """Returns True if the specified activity belongs to the logged in user."""
         if self.user_id is None:
             return False
-        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
+        activity_user_id, _, _ = self.data_mgr.get_activity_user(activity)
         belongs_to_current_user = str(activity_user_id) == str(self.user_id)
         return belongs_to_current_user
 
@@ -68,7 +68,7 @@ class Api(object):
         """Determine if the requesting user can view the activity."""
         if self.user_id is None:
             return self.data_mgr.is_activity_public(activity)
-        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
+        activity_user_id, _, _ = self.data_mgr.get_activity_user(activity)
         belongs_to_current_user = belongs_to_current_user = str(activity_user_id) == str(self.user_id)
         return self.data_mgr.is_activity_public(activity) or belongs_to_current_user
 
@@ -76,7 +76,7 @@ class Api(object):
         """Determine if the requesting user can view the activity."""
         if self.user_id is None:
             return self.data_mgr.is_activity_id_public(activity_id)
-        activity_user_id, _, _ = self.user_mgr.get_activity_id_user(activity_id)
+        activity_user_id, _, _ = self.data_mgr.get_activity_id_from_user(activity_id)
         belongs_to_current_user = belongs_to_current_user = str(activity_user_id) == str(self.user_id)
         return self.data_mgr.is_activity_id_public(activity_id) or belongs_to_current_user
 
@@ -1886,7 +1886,7 @@ class Api(object):
         if not activity:
             raise ApiException.ApiMalformedRequestException("Invalid activity.")
 
-        activity_user_id, _, _ = self.user_mgr.get_activity_user(activity)
+        activity_user_id, _, _ = self.data_mgr.get_activity_user(activity)
         self.data_mgr.schedule_activity_analysis(activity, activity_user_id)
         return True, ""
 
@@ -2608,8 +2608,8 @@ class Api(object):
         if not is_admin:
             raise ApiException.ApiAuthenticationException("User is not an admin.")
 
-        self.data_mgr.list_users_without_devices(self.user_id)
-        return True, ""
+        result = self.data_mgr.list_users_without_devices()
+        return True, json.dumps(result)
 
     def handle_delete_orphaned_activities(self):
         if self.user_id is None:
@@ -2620,7 +2620,7 @@ class Api(object):
         if not is_admin:
             raise ApiException.ApiAuthenticationException("User is not an admin.")
 
-        self.data_mgr.delete_orphaned_activities(self.user_id)
+        self.data_mgr.delete_orphaned_activities()
         return True, ""
 
     def handle_api_1_0_get_request(self, request, values):
@@ -2710,7 +2710,7 @@ class Api(object):
         elif request == 'list_unsynched_activities':
             return self.handle_list_unsynched_activities(values)
         elif request == 'list_users_without_devices':
-            return self.handle_list_users_without_devices(values)
+            return self.handle_list_users_without_devices()
         return False, ""
 
     def handle_api_1_0_post_request(self, request, values):
@@ -2820,7 +2820,7 @@ class Api(object):
         if request == 'delete_api_key':
             return self.handle_delete_api_key(values)
         elif request == 'delete_orphaned_activities':
-            return self.handle_delete_orphaned_activities(values)
+            return self.handle_delete_orphaned_activities()
         return False, ""
 
     def handle_api_1_0_request(self, verb, request, values):

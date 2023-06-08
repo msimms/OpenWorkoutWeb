@@ -22,17 +22,41 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
+    /// @function append_to_gear_table
+    function append_to_user_table(table, username)
+    {
+        let new_row = table.insertRow();
+        cell = new_row.insertCell();
+        cell.appendChild(document.createTextNode(username));
+
+        let btn = document.createElement("button");
+        let btn_txt = document.createTextNode('Delete');
+
+        btn.appendChild(btn_txt);
+        btn.title = "Delete";
+        btn.style = "color:red";
+        btn.addEventListener('click', function() { delete_gear("${root_url}", gear_id); });
+        cell = new_row.insertCell();
+        cell.appendChild(btn);
+
+        table.style = "display: block;";
+    }
+
+    /// @function process_user_list
+    var process_user_list = function(records)
+    {
+        let users_table = document.getElementById("users");
+
+        for (let record of records)
+        {
+            append_to_user_table(users_table, record);
+        }
+    }
+
     /// @function delete_users_without_devices
     function list_users_without_devices(key)
     {
-        let the_url = "${root_url}/api/1.0/list_users_without_devices";
-
-        send_get_request_async(the_url, function(status, response) {
-            if (status == 200)
-                window.location.reload();
-            else
-                alert(response)
-        } );
+        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_users_without_devices", cache: false, success: process_user_list, dataType: "json" });
     }
 
     /// @function delete_orphaned_activities
@@ -63,6 +87,9 @@ ${nav}
             <table class="user_list" id="Users">
             </table>
         </div>
+        <table id="users" style="display: none;">
+            <td><b>Name</b></td><td><b>Delete</b></td><tr>
+        </table>
         <button type="button" onclick="list_users_without_devices()">List Users Without Devices</button><br>
         <button type="button" onclick="delete_orphaned_activities()">Delete Orphaned Activities</button>
     </div>

@@ -959,6 +959,9 @@ class MongoDatabase(Database.Database):
         if user_id is None:
             self.log_error(MongoDatabase.retrieve_each_user_activity.__name__ + ": Unexpected empty object: user_id")
             return False
+        if callback_func is None:
+            self.log_error(MongoDatabase.retrieve_each_user_activity.__name__ + ": Unexpected empty object: callback_func")
+            return False
 
         try:
             # Things we don't need.
@@ -3058,12 +3061,32 @@ class MongoDatabase(Database.Database):
     # Admin methods
     #
 
-    def delete_orphaned_activities(self, known_user_ids, known_device_ids):
-        if known_user_ids is None:
-            self.log_error(MongoDatabase.delete_orphaned_activities.__name__ + ": Unexpected empty object: known_user_ids")
+    def enumerate_all_users(self, callback_func):
+        if callback_func is None:
+            self.log_error(MongoDatabase.enumerate_all_users.__name__ + ": Unexpected empty object: callback_func")
             return False
-        if known_device_ids is None:
-            self.log_error(MongoDatabase.delete_orphaned_activities.__name__ + ": Unexpected empty object: known_device_ids")
+
+        try:
+            # Get an iterator to the activities.
+            users_cursor = self.users_collection.find({})
+
+            # Iterate over the results, triggering the callback for each.
+            if users_cursor is not None:
+                try:
+                    while users_cursor.alive:
+                        user = users_cursor.next()
+                        callback_func(user)
+                except StopIteration:
+                    pass
+            return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+    
+    def enumerate_all_activities(self, callback_func):
+        if callback_func is None:
+            self.log_error(MongoDatabase.enumerate_all_activities.__name__ + ": Unexpected empty object: callback_func")
             return False
 
         try:
@@ -3078,10 +3101,7 @@ class MongoDatabase(Database.Database):
                 try:
                     while activities_cursor.alive:
                         activity = activities_cursor.next()
-                        if Keys.ACTIVITY_USER_ID_KEY in activity:
-                            pass
-                        if Keys.ACTIVITY_DEVICE_STR_KEY in activity:
-                            pass
+                        callback_func(activity)
                 except StopIteration:
                     pass
             return True
