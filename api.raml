@@ -454,7 +454,7 @@ types:
             500: An internal exception was thrown.
 /delete_gear:
     description: Delete's the specified gear record and all associated service records.
-    post:
+    delete:
         queryParameters:
             gear_id: UUID
         responses:
@@ -482,7 +482,7 @@ types:
             500: An internal exception was thrown.
 /delete_service_record:
     description: Deletes service informatio for a piece of gear.
-    post:
+    delete:
         responses:
             200: OK
             401:
@@ -757,7 +757,7 @@ types:
             500: An internal exception was thrown.
 /delete_api_key:
     description: Deletes the specified API key.
-    post:
+    delete:
         queryParameters:
             key: UUID
         responses:

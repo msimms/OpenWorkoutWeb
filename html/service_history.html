@@ -22,7 +22,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
 
 <script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="${root_url}/js/gear.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
@@ -58,13 +57,12 @@
     {
         let the_url = "${root_url}/api/1.0/create_service_record";
         let dict = [];
-        let inner_div = document.getElementById("new_gear_div");
-        let service_time_obj = new Date(document.getElementById("start_date").value);
-        let service_time = service_time_obj.getTime() / 1000;
-        let description = document.getElementById("Description").value;
+        let service_date_obj = new Date(document.getElementById("service_date").value);
+        let service_date = service_date_obj.getTime() / 1000;
+        let description = document.getElementById("description").value;
 
         dict.push({["gear_id"] : "${gear_id}"});
-        dict.push({["date"] : service_time});
+        dict.push({["date"] : service_date});
         dict.push({["description"] : description});
 
         send_post_request_async(the_url, dict, function(status, response) {
@@ -84,69 +82,13 @@
     /// @function get_new_service_record_info
     function get_new_service_record_info()
     {
-        let outer_div = document.getElementById("new_service_record_block");
-        let inner_div = document.createElement('div');
-        inner_div.id = "new_gear_div";
+        let date_added = document.getElementById("service_date");
+        let n = new Date();
 
-        // Remove existing items, if any.
-        while (outer_div.firstChild)
-        {
-            outer_div.removeChild(outer_div.firstChild);
-        }
+        date_added.placeholder = n.toLocaleDateString();
+        date_added.value = n.toLocaleDateString();
 
-        // Add a line break.
-        outer_div.appendChild(document.createElement("hr"));
-        inner_div.appendChild(document.createElement("br"));
-
-        // Add a label for the date picker.
-        inner_div.appendChild(document.createTextNode("Date "));
-        inner_div.appendChild(document.createElement("br"));
-
-        // Add the date picker.
-        let today = new Date();
-        let start_date = document.createElement('input');
-        start_date.type = "input";
-        start_date.id = "start_date";
-        start_date.className = "pickDate";
-        $(start_date).datepicker( { showButtonPanel: true, defaultDate: today } );
-        $(start_date).datepicker('setDate', today);
-        inner_div.appendChild(start_date);
-
-        // Add a line break.
-        inner_div.appendChild(document.createElement("br"));
-
-        // Add the description.
-        add_text_area_node(inner_div, "Description");
-
-        // Add to the div.
-        outer_div.appendChild(inner_div);
-
-        // Create a save button.
-        let save_btn = document.createElement('button');
-        save_btn.appendChild(document.createTextNode('Save'));
-        save_btn.title = "Save";
-        save_btn.addEventListener('click', function() { create_service_record(); });
-
-        // Add the save button to the screen.
-        outer_div.appendChild(save_btn);
-
-        // Add a line break.
-        outer_div.appendChild(document.createElement("br"));
-
-        // Create a cancel button.
-        let cancel_btn = document.createElement('button');
-        cancel_btn.appendChild(document.createTextNode('Cancel'));
-        cancel_btn.title = "Cancel";
-        cancel_btn.addEventListener('click', function() { cancel_service_record_creation(); });
-
-        // Add the cancel button to the screen.
-        outer_div.appendChild(cancel_btn);
-
-        // Hide the add button, since it is redundant now.
-        let add_btn = document.getElementById("add_service_record_btn");
-        add_btn.style = "display: none;";
-
-        return false;
+        newServiceDialog.showModal();
     }
 
     /// @function delete_service_record
@@ -154,13 +96,9 @@
     {
         if (confirm('Are you sure you want to do this?'))
         {
-            let the_url = "${root_url}/api/1.0/delete_service_record";
-            let dict = [];
+            let the_url = "${root_url}/api/1.0/delete_service_record?gear_id=${gear_id}&service_id=" + service_id;
 
-            dict.push({["gear_id"] : "${gear_id}"});
-            dict.push({["service_id"] : service_id});
-
-            send_post_request_async(the_url, dict, function(status, response) {
+            send_delete_request_async(the_url, function(status, response) {
                 if (status == 200)
                     window.location.replace("${root_url}/service_history/${gear_id}");
                 else
@@ -190,66 +128,80 @@
         cell.appendChild(btn);
     }
 
-    /// @function process_gear_distance
-    var process_gear_distance = function(records)
+    /// @function get_gear_distance
+    function get_gear_distance(gear_name)
     {
-        let gear_distance_elem = document.getElementById("GearDistance");
-        gear_distance_elem.innerText = records[0][gear_name];
-    }
+        let the_url = "${root_url}/api/1.0/get_distance_for_tag?tag=" + gear_name
 
-    // Handler for when the server returns the user's gear list.
-    var process_gear = function(records)
-    {
-        let history_table = document.getElementById("ServiceHistory");
-
-        for (let gear_record of records)
+        send_get_request_async(the_url, function (response_code, response_text)
         {
-            if (gear_record.gear_id == "${gear_id}")
+            if (response_code == 200)
             {
-                // Add the title.
-                let gear_name_title = document.getElementById("GearName");
-                gear_name = gear_record.name
-                gear_name_title.value = gear_name;
+                const records = JSON.parse(response_text);
+                let gear_distance_elem = document.getElementById("GearDistance");
 
-                // Add the description.
-                let gear_desc_title = document.getElementById("GearDescription");
-                if (gear_record.description.length > 0)
-                    gear_desc_title.innerText = gear_record.description;
-                else
-                    gear_desc_title.innerText = "None";
-
-                // Add the added date.
-                gear_desc_title = document.getElementById("GearAdded");
-                gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.add_time);
-
-                // Add the retired date.
-                gear_desc_title = document.getElementById("GearRetired");
-                if (gear_record.retire_time > 0)
-                    gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.retire_time);
-                else
-                    gear_desc_title.innerText = "Not retired";
-
-                // Add the service records.
-                if (gear_record.hasOwnProperty('service_history'))
-                {
-                    let sorted_service_records = gear_record.service_history.sort(service_sort)
-                    for (let service_record of sorted_service_records)
-                    {
-                        append_to_service_history_table(history_table, service_record.date, service_record.description, service_record.service_id);
-                    }
-                }
-
-                // Request the distance calculation for this item.
-                $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_distance_for_tag?tag=" + gear_name, cache: false, success: process_gear_distance, dataType: "json" });
+                gear_distance_elem.innerText = records[0][gear_name];
             }
-        }
+        })
     }
 
     /// @function get_gear
     // List all the gear associated with the current user.
     function get_gear()
     {
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_gear", cache: false, success: process_gear, dataType: "json" });
+        let the_url = "${root_url}/api/1.0/list_gear"
+
+        send_get_request_async(the_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                let history_table = document.getElementById("ServiceHistory");
+
+                for (let gear_record of records)
+                {
+                    if (gear_record.gear_id == "${gear_id}")
+                    {
+                        // Add the title.
+                        let gear_name_title = document.getElementById("GearName");
+                        gear_name = gear_record.name
+                        gear_name_title.value = gear_name;
+
+                        // Add the description.
+                        let gear_desc_title = document.getElementById("GearDescription");
+                        if (gear_record.description.length > 0)
+                            gear_desc_title.innerText = gear_record.description;
+                        else
+                            gear_desc_title.innerText = "None";
+
+                        // Add the added date.
+                        gear_desc_title = document.getElementById("GearAdded");
+                        gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.add_time);
+
+                        // Add the retired date.
+                        gear_desc_title = document.getElementById("GearRetired");
+                        if (gear_record.retire_time > 0)
+                            gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.retire_time);
+                        else
+                            gear_desc_title.innerText = "Not retired";
+
+                        // Add the service records.
+                        if (gear_record.hasOwnProperty('service_history'))
+                        {
+                            let sorted_service_records = gear_record.service_history.sort(service_sort)
+
+                            for (let service_record of sorted_service_records)
+                            {
+                                append_to_service_history_table(history_table, service_record.date, service_record.description, service_record.service_id);
+                            }
+                        }
+
+                        // Request the distance calculation for this item.
+                        get_gear_distance(gear_name);
+                    }
+                }
+            }
+        })
     }
 
     $(document).ready(function()
@@ -265,6 +217,18 @@ ${nav}
 </section>
 
 <section class="block">
+    <dialog id="newServiceDialog">
+        <form action="javascript:void(0);">
+            <div>
+                Date Added:<br><input type="text" name="service_date" id="service_date" style="width:95%"><br>
+                Description:<br><input type="text" name="description" id="description" style="width:95%"><br>
+            </div>
+            <div>
+                <button value="cancel" formmethod="dialog">Cancel</button>
+                <button type="modern_button" onclick="create_service_record()">Save</button>
+            </div>
+        </form>
+    </dialog>
 
     <input type="text" name="GearName" id="GearName" value="" onchange="update_gear_name()"><br>
     <h3>Description</h3>

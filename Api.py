@@ -2773,14 +2773,10 @@ class Api(object):
             return self.handle_update_gear(values)
         elif request == 'update_gear_defaults':
             return self.handle_update_gear_defaults(values)
-        elif request == 'delete_gear':
-            return self.handle_delete_gear(values)
         elif request == 'retire_gear':
             return self.handle_retire_gear(values)
         elif request == 'create_service_record':
             return self.handle_create_service_record(values)
-        elif request == 'delete_service_record':
-            return self.handle_delete_service_record(values)
         elif request == 'create_race':
             return self.handle_create_race(values)
         elif request == 'delete_race':
@@ -2817,7 +2813,11 @@ class Api(object):
 
     def handle_api_1_0_delete_request(self, request, values):
         """Called to parse a version 1.0 API DELETE request."""
-        if request == 'delete_api_key':
+        if request == 'delete_gear':
+            return self.handle_delete_gear(values)
+        elif request == 'delete_service_record':
+            return self.handle_delete_service_record(values)
+        elif request == 'delete_api_key':
             return self.handle_delete_api_key(values)
         elif request == 'delete_orphaned_activities':
             return self.handle_delete_orphaned_activities()
