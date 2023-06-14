@@ -46,12 +46,15 @@ class TrainingPaceCalculator(object):
         # 10000 meters 88-92%
         # Half Marathon 85-88%%
         # Marathon 82-85%
+        # Long Run Pace 60%
+        # Easy Pace 70%
+        # Tempo Pace 88%
 
         # Training paces are computed as a percentage of VO2Max.
         long_run_pace = vo2max * 0.6
         easy_pace = vo2max * 0.7
         tempo_pace = vo2max * 0.88
-        functional_threshold_pace = vo2max * 1.0
+        functional_threshold_pace = vo2max * 0.90
         speed_pace = vo2max * 1.1
         short_interval_pace = vo2max * 1.15
 
