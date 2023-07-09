@@ -535,20 +535,24 @@ def admin():
         result = g_app.error()
     return result
 
-@g_flask_app.route('/api/<version>/<method>', methods = ['GET','POST'])
+@g_flask_app.route('/api/<version>/<method>', methods = ['GET','POST','DELETE'])
 def api(version, method):
     """Endpoint for API calls."""
     response = ""
     code = 200
     try:
         # The the API params.
-        verb = "POST"
         if flask.request.method == 'GET':
             verb = "GET"
             params = flask.request.args
+        elif flask.request.method == 'DELETE':
+            verb = "DELETE"
+            params = flask.request.args
         elif flask.request.data:
+            verb = "POST"
             params = json.loads(flask.request.data)
         else:
+            verb = "GET"
             params = ""
 
         # Get the logged in user, or lookup the user using the API key.
