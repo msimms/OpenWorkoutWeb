@@ -29,7 +29,6 @@ import json
 import logging
 import time
 import ApiException
-import Config
 import Exporter
 import InputChecker
 import Keys
