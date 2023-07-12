@@ -2778,18 +2778,12 @@ class Api(object):
             return self.handle_create_service_record(values)
         elif request == 'create_race':
             return self.handle_create_race(values)
-        elif request == 'delete_race':
-            return self.handle_delete_race(values)
         elif request == 'update_planned_workout':
             return self.handle_update_planned_workout(values)
         elif request == 'create_planned_workouts':
             return self.handle_create_planned_workouts(values)
-        elif request == 'delete_planned_workouts':
-            return self.handle_delete_planned_workouts(values)
         elif request == 'create_pace_plan':
             return self.handle_create_pace_plan(values)
-        elif request == 'delete_pace_plan':
-            return self.handle_delete_pace_plan(values)
         elif request == 'update_settings':
             return self.handle_update_settings(values)
         elif request == 'update_profile':
@@ -2814,6 +2808,12 @@ class Api(object):
         """Called to parse a version 1.0 API DELETE request."""
         if request == 'delete_gear':
             return self.handle_delete_gear(values)
+        elif request == 'delete_race':
+            return self.handle_delete_race(values)
+        elif request == 'delete_planned_workouts':
+            return self.handle_delete_planned_workouts(values)
+        elif request == 'delete_pace_plan':
+            return self.handle_delete_pace_plan(values)
         elif request == 'delete_service_record':
             return self.handle_delete_service_record(values)
         elif request == 'delete_api_key':

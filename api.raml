@@ -488,6 +488,22 @@ types:
             401:
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
+/create_race:
+    description: Creates a race (workout goal) on a user's profile.
+    post:
+        responses:
+            200: OK
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
+/delete_race:
+    description: Removes a race (workout goal) on a user's profile.
+    delete:
+        responses:
+            200: OK
+            401:
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
 /update_settings:
     description:
     post:
@@ -554,7 +570,7 @@ types:
             500: An internal exception was thrown.
 /delete_planned_workouts:
     description: Deletes all of a user's planned/scheduled workouts.
-    post:
+    delete:
         responses:
             200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
@@ -594,7 +610,7 @@ types:
             500: An internal exception was thrown.
 /delete_pace_plan:
     description: Deletes the specified pace plan.
-    post:
+    delete:
         queryParameters:
             id: UUID
         responses:
