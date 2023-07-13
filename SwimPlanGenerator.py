@@ -30,9 +30,9 @@ class SwimPlanGenerator(PlanGenerator.PlanGenerator):
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_POOL_SWIM, self.user_id)
         if has_swimming_pool_access:
-            workout.sport_type = Keys.TYPE_POOL_SWIMMING_KEY
+            workout.activity_type = Keys.TYPE_POOL_SWIMMING_KEY
         else:
-            workout.sport_type = Keys.TYPE_OPEN_WATER_SWIMMING_KEY
+            workout.activity_type = Keys.TYPE_OPEN_WATER_SWIMMING_KEY
 
         return workout
 
@@ -42,9 +42,9 @@ class SwimPlanGenerator(PlanGenerator.PlanGenerator):
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TECHNIQUE_SWIM, self.user_id)
         if has_swimming_pool_access:
-            workout.sport_type = Keys.TYPE_POOL_SWIMMING_KEY
+            workout.activity_type = Keys.TYPE_POOL_SWIMMING_KEY
         else:
-            workout.sport_type = Keys.TYPE_OPEN_WATER_SWIMMING_KEY
+            workout.activity_type = Keys.TYPE_OPEN_WATER_SWIMMING_KEY
 
         return workout
         
@@ -53,7 +53,7 @@ class SwimPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EVENT, self.user_id)
-        workout.sport_type = Keys.TYPE_OPEN_WATER_SWIMMING_KEY
+        workout.activity_type = Keys.TYPE_OPEN_WATER_SWIMMING_KEY
         workout.scheduled_time = datetime.datetime.fromtimestamp(goal_date)
         workout.add_distance_interval(1, goal_distance_meters, 0, 0, 0)
 

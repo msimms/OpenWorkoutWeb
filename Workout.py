@@ -48,22 +48,22 @@ class Workout(object):
 
     def __init__(self, user_id):
         self.type = ""
-        self.user_id = user_id # Unique identifier for the user
-        self.sport_type = "" # Sport (activity) type string
-        self.scheduled_time = None # The time at which this workout is to be performed
-        self.warmup = {} # The warmup interval
-        self.cooldown = {} # The cooldown interval
-        self.intervals = [] # The workout intervals
+        self.user_id = user_id                # Unique identifier for the user
+        self.activity_type = ""               # Sport (activity) type string
+        self.scheduled_time = None            # The time at which this workout is to be performed
+        self.warmup = {}                      # The warmup interval
+        self.cooldown = {}                    # The cooldown interval
+        self.intervals = []                   # The workout intervals
         self.estimated_intensity_score = None # Estimated intensity, the highter, the greater the load on the body
-        self.workout_id = uuid.uuid4() # Unique identifier for the workout
+        self.workout_id = uuid.uuid4()        # Unique identifier for the workout
 
     def __getitem__(self, key):
         if key == Keys.WORKOUT_ID_KEY:
             return self.workout_id
         if key == Keys.WORKOUT_TYPE_KEY:
             return self.type
-        if key == Keys.WORKOUT_SPORT_TYPE_KEY:
-            return self.sport_type
+        if key == Keys.WORKOUT_ACTIVITY_TYPE_KEY:
+            return self.activity_type
         if key == Keys.WORKOUT_WARMUP_KEY:
             return self.warmup
         if key == Keys.WORKOUT_COOLDOWN_KEY:
@@ -82,7 +82,7 @@ class Workout(object):
         output = {}
         output[Keys.WORKOUT_ID_KEY] = str(self.workout_id)
         output[Keys.WORKOUT_TYPE_KEY] = self.type
-        output[Keys.WORKOUT_SPORT_TYPE_KEY] = self.sport_type
+        output[Keys.WORKOUT_ACTIVITY_TYPE_KEY] = self.activity_type
         output[Keys.WORKOUT_WARMUP_KEY] = self.warmup
         output[Keys.WORKOUT_COOLDOWN_KEY] = self.cooldown
         output[Keys.WORKOUT_INTERVALS_KEY] = self.intervals
@@ -98,8 +98,8 @@ class Workout(object):
             self.workout_id = input[Keys.WORKOUT_ID_KEY]
         if Keys.WORKOUT_TYPE_KEY in input:
             self.type = input[Keys.WORKOUT_TYPE_KEY]
-        if Keys.WORKOUT_SPORT_TYPE_KEY in input:
-            self.sport_type = input[Keys.WORKOUT_SPORT_TYPE_KEY]
+        if Keys.WORKOUT_ACTIVITY_TYPE_KEY in input:
+            self.activity_type = input[Keys.WORKOUT_ACTIVITY_TYPE_KEY]
         if Keys.WORKOUT_WARMUP_KEY in input:
             self.warmup = input[Keys.WORKOUT_WARMUP_KEY]
         if Keys.WORKOUT_COOLDOWN_KEY in input:
@@ -191,11 +191,11 @@ class Workout(object):
         writer = ZwoWriter.ZwoWriter()
         writer.create_zwo(name)
         writer.store_description(self.type)
-        writer.store_sport_type(self.sport_type)
+        writer.store_sport_type(self.activity_type)
         writer.start_workout()
 
         # Add the warmup (if applicable).
-        if self.warmup is not None:
+        if self.warmup is not None and len(self.warmup) > 0:
             writer.store_workout_warmup(self.warmup[ZwoTags.ZWO_ATTR_NAME_DURATION], self.warmup[ZwoTags.ZWO_ATTR_NAME_POWERLOW], self.warmup[ZwoTags.ZWO_ATTR_NAME_POWERHIGH], self.warmup[ZwoTags.ZWO_ATTR_NAME_PACE])
 
         # Add each interval.
@@ -218,7 +218,7 @@ class Workout(object):
             writer.store_workout_intervals(interval[Keys.INTERVAL_WORKOUT_REPEAT_KEY], on_duration, recovery_duration, None, 0)
 
         # Add the cooldown (if applicable).
-        if self.cooldown is not None:
+        if self.cooldown is not None and len(self.cooldown) > 0:
             writer.store_workout_cooldown(self.cooldown[ZwoTags.ZWO_ATTR_NAME_DURATION], self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERLOW], self.cooldown[ZwoTags.ZWO_ATTR_NAME_POWERHIGH], self.cooldown[ZwoTags.ZWO_ATTR_NAME_PACE])
 
         writer.end_workout()
@@ -230,10 +230,10 @@ class Workout(object):
     def export_to_text(self, unit_system):
         """Creates a string that describes the workout."""
 
-        result  = "Workout Type: "
-        result += self.type
-        result += "\nSport: "
-        result += self.sport_type
+        result = self.activity_type
+        if len(self.type) > 0:
+            result += "\n"
+            result += self.type
         result += "\n"
 
         # Add the warmup (if applicable).
@@ -367,7 +367,7 @@ class Workout(object):
         elif self.type == Keys.WORKOUT_TYPE_FARTLEK_RUN:
             result += "Purpose: Fartlek sessions combine speed and endurance without the formal structure of a traditional interval workout.\n"
         elif self.type == Keys.WORKOUT_TYPE_MIDDLE_DISTANCE_RUN:
-            result += ""
+            result += "Purpose: Middle distance runs help build stamina."
         elif self.type == Keys.WORKOUT_TYPE_HILL_RIDE:
             result += "Purpose: Hill workouts build the strength needed to tackle hills in a race. This can be done on the indoor trainer or replaced with low gear work if hills are not available.\n"
         elif self.type == Keys.WORKOUT_TYPE_SPEED_INTERVAL_RIDE:

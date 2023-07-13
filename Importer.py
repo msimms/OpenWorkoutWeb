@@ -152,9 +152,9 @@ class Importer(object):
             gpx = gpxpy.parse(gpx_file)
 
             # Figure out the sport type.
-            sport_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
+            activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
             if len(gpx.tracks) > 0:
-                sport_type = Importer.normalize_activity_type(gpx.tracks[0].type, None, file_name)
+                activity_type = Importer.normalize_activity_type(gpx.tracks[0].type, None, file_name)
 
             start_time_unix = 0
             if gpx.time is not None:
@@ -168,7 +168,7 @@ class Importer(object):
                 raise Exception("Duplicate activity.")
 
             # Indicate the start of the activity.
-            device_str, activity_id = self.activity_writer.create_activity(username, user_id, gpx.name, gpx.description, sport_type, start_time_unix, desired_activity_id)
+            device_str, activity_id = self.activity_writer.create_activity(username, user_id, gpx.name, gpx.description, activity_type, start_time_unix, desired_activity_id)
 
             # We'll store the most recent timecode here.
             end_time_unix = 0

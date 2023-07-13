@@ -67,7 +67,7 @@
 
         send_post_request_async(the_url, dict, function(status, response) {
             if (status == 200)
-                window.location.replace("${root_url}/service_history/${gear_id}");
+                window.location.reload();
             else
                 alert(response)
         } );
@@ -76,7 +76,7 @@
     /// @function cancel_service_record_creation
     function cancel_service_record_creation()
     {
-        window.location.replace("${root_url}/service_history/${gear_id}");
+        window.location.reload();
     }
 
     /// @function get_new_service_record_info
@@ -100,7 +100,7 @@
 
             send_delete_request_async(the_url, function(status, response) {
                 if (status == 200)
-                    window.location.replace("${root_url}/service_history/${gear_id}");
+                    window.location.reload();
                 else
                     alert(response)
             } );

@@ -1009,7 +1009,7 @@ class App(object):
 
         # Render from template.
         kwargs = {"gear_id" : gear_id} 
-        return self.render_simple_page('service_history.html', **kwargs)
+        return self.render_simple_page('gear_service_history.html', **kwargs)
 
     @Perf.statistics
     def friends(self):

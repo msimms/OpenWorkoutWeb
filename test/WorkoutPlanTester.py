@@ -31,7 +31,6 @@ import inspect
 import logging
 import os
 import sys
-import time
 
 # Locate and load modules from the main source directory.
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -133,6 +132,7 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
     inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
     inputs[Keys.PLAN_INPUT_GOAL_KEY] = goal
     inputs[Keys.GOAL_TYPE_KEY] = goal_type
+    inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY] = datetime.utcnow() + (weeks_until_goal * 7 * 86400)
 
     # Adds the goal distances to the inputs.
     inputs = WorkoutPlanGenerator.WorkoutPlanGenerator.calculate_goal_distances(inputs)
@@ -206,13 +206,13 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
         swim_intensity_by_week[0] = 0.0
         for workout in workouts:
             workout_distance = workout.total_workout_distance_meters()
-            if workout.sport_type in Keys.RUNNING_ACTIVITIES:
+            if workout.activity_type in Keys.RUNNING_ACTIVITIES:
                 if longest_runs_by_week or workout_distance > max(longest_runs_by_week[0]):
                     longest_runs_by_week[0] = workout_distance
-            if workout.sport_type in Keys.CYCLING_ACTIVITIES:
+            if workout.activity_type in Keys.CYCLING_ACTIVITIES:
                 if longest_rides_by_week or workout_distance > max(longest_rides_by_week[0]):
                     longest_rides_by_week[0] = workout_distance
-            if workout.sport_type in Keys.SWIMMING_ACTIVITIES:
+            if workout.activity_type in Keys.SWIMMING_ACTIVITIES:
                 if longest_swims_by_week or workout_distance > max(longest_swims_by_week[0]):
                     longest_swims_by_week[0] = workout_distance
 

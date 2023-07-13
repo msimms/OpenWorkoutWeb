@@ -148,7 +148,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RUN, self.user_id)
-        workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.activity_type = Keys.TYPE_RUNNING_KEY
         workout.add_distance_interval(1, interval_distance_meters, pace, 0, 0)
 
         # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
@@ -176,7 +176,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TEMPO_RUN, self.user_id)
-        workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.activity_type = Keys.TYPE_RUNNING_KEY
         workout.add_warmup(warmup_duration)
         workout.add_distance_interval(num_intervals, interval_distance_meters, tempo_run_pace, 0, easy_run_pace)
         workout.add_cooldown(cooldown_duration)
@@ -205,7 +205,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_THRESHOLD_RUN, self.user_id)
-        workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.activity_type = Keys.TYPE_RUNNING_KEY
         workout.add_warmup(warmup_duration)
         workout.add_distance_interval(1, interval_distance_meters, threshold_run_pace, 0, 0)
         workout.add_cooldown(cooldown_duration)
@@ -223,7 +223,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_RUN, self.user_id)
-        workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.activity_type = Keys.TYPE_RUNNING_KEY
         workout.add_warmup(warmup_duration)
         workout.add_time_interval(4, 4 * 60, threshold_run_pace, 3 * 60, easy_run_pace)
         workout.add_cooldown(cooldown_duration)
@@ -291,7 +291,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_RUN, self.user_id)
-        workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.activity_type = Keys.TYPE_RUNNING_KEY
         workout.add_warmup(warmup_duration)
         workout.add_distance_interval(selected_reps, interval_distance, interval_pace, rest_interval_distance, easy_run_pace)
         workout.add_cooldown(cooldown_duration)
@@ -317,7 +317,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_LONG_RUN, self.user_id)
-        workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.activity_type = Keys.TYPE_RUNNING_KEY
         workout.add_distance_interval(1, interval_distance_meters, long_run_pace, 0, 0)
 
         # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
@@ -334,7 +334,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_FREE_RUN, self.user_id)
-        workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.activity_type = Keys.TYPE_RUNNING_KEY
         workout.add_distance_interval(1, interval_distance_meters, 0, 0, 0)
 
         # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
@@ -351,7 +351,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_HILL_REPEATS, self.user_id)
-        workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.activity_type = Keys.TYPE_RUNNING_KEY
         workout.add_distance_interval(1, interval_distance_meters, 0, 0, 0)
 
         # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
@@ -368,7 +368,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_FARTLEK_RUN, self.user_id)
-        workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.activity_type = Keys.TYPE_RUNNING_KEY
         workout.add_distance_interval(1, interval_distance_meters, 0, 0, 0)
 
         # Update the tally of easy, medium, and hard workouts so we can keep the weekly plan in check.
@@ -381,7 +381,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EVENT, self.user_id)
-        workout.sport_type = Keys.TYPE_RUNNING_KEY
+        workout.activity_type = Keys.TYPE_RUNNING_KEY
         workout.scheduled_time = datetime.datetime.fromtimestamp(goal_date)
         workout.add_distance_interval(1, goal_distance_meters, 0, 0, 0)
 

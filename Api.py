@@ -1982,6 +1982,24 @@ class Api(object):
 
         return result, ""
 
+    def handle_create_planned_workout(self, values):
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
+        if Keys.WORKOUT_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Workout ID not specified.")
+
+        # Do we have a valid workout ID?
+        workout_id = values[Keys.WORKOUT_ID_KEY]
+        if not InputChecker.is_uuid(workout_id):
+            raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
+
+        workout_obj = Workout.Workout(self.user_id)
+        workout_obj.from_dict(values)
+        self.data_mgr.create_workout(self.user_id, workout_obj)
+        return True, ""
+
     def handle_create_planned_workouts(self, values):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -2780,6 +2798,8 @@ class Api(object):
             return self.handle_create_race(values)
         elif request == 'update_planned_workout':
             return self.handle_update_planned_workout(values)
+        elif request == 'create_planned_workout':
+            return self.handle_create_planned_workout(values)
         elif request == 'create_planned_workouts':
             return self.handle_create_planned_workouts(values)
         elif request == 'create_pace_plan':

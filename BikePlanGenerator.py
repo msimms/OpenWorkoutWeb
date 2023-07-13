@@ -47,7 +47,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_HILL_RIDE, self.user_id)
-        workout.sport_type = Keys.TYPE_CYCLING_KEY
+        workout.activity_type = Keys.TYPE_CYCLING_KEY
 
         return workout
 
@@ -57,7 +57,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_BIKE_CADENCE_DRILLS, self.user_id)
-        workout.sport_type = Keys.TYPE_CYCLING_KEY
+        workout.activity_type = Keys.TYPE_CYCLING_KEY
 
         return workout
 
@@ -141,7 +141,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SPEED_INTERVAL_RIDE, self.user_id)
-        workout.sport_type = Keys.TYPE_CYCLING_KEY
+        workout.activity_type = Keys.TYPE_CYCLING_KEY
         workout.add_warmup(warmup_duration)
         for i in range(0, num_sets):
             workout.add_time_and_power_interval(num_reps, interval_seconds, interval_power, interval_rest, 0.4)
@@ -165,7 +165,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EASY_RIDE, self.user_id)
-        workout.sport_type = Keys.TYPE_CYCLING_KEY
+        workout.activity_type = Keys.TYPE_CYCLING_KEY
         workout.add_time_and_power_interval(1, avg_bike_duration, interval_power, 0, 0)
 
         return workout
@@ -184,7 +184,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_TEMPO_RIDE, self.user_id)
-        workout.sport_type = Keys.TYPE_CYCLING_KEY
+        workout.activity_type = Keys.TYPE_CYCLING_KEY
         workout.add_warmup(warmup_duration)
         num_interval_seconds = random.randint(2, 4) * 5 * 60
         workout.add_time_and_power_interval(random.randint(2, 4), num_interval_seconds, interval_power, num_interval_seconds / 2, 0.4)
@@ -208,7 +208,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_SWEET_SPOT_RIDE, self.user_id)
-        workout.sport_type = Keys.TYPE_CYCLING_KEY
+        workout.activity_type = Keys.TYPE_CYCLING_KEY
         workout.add_warmup(warmup_duration)
         num_interval_seconds = random.randint(2, 4) * 5 * 60
         workout.add_time_and_power_interval(random.randint(2, 4), num_interval_seconds, interval_power, num_interval_seconds / 2, 0.4)
@@ -221,7 +221,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
 
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_EVENT, self.user_id)
-        workout.sport_type = Keys.TYPE_CYCLING_KEY
+        workout.activity_type = Keys.TYPE_CYCLING_KEY
         workout.scheduled_time = datetime.datetime.fromtimestamp(goal_date)
         workout.add_distance_interval(1, goal_distance_meters, 0, 0, 0)
 

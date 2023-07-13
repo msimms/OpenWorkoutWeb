@@ -180,7 +180,17 @@
             if (obj_list == null)
                 return;
 
-            document.getElementById("type").textContent = obj_list.type;
+            // The title
+            let workout_type = obj_list["workout type"]
+            let activity_type = obj_list["activity type"]
+            if (workout_type.length > 0)
+            {
+                document.getElementById("workout_type").textContent = workout_type;
+            }
+            else
+            {
+                document.getElementById("workout_type").textContent = activity_type;
+            }
 
             // Description
             let desc_elem = document.getElementById("description");
@@ -232,7 +242,7 @@ ${nav}
 </section>
 
 <section class="block">
-    <h2 id="type"></h2>
+    <h2 id="workout_type"></h2>
     <p id="description"></p>
     <input type="text" name="scheduled_time" id="scheduled_time"><br>
     <button type="modern_button" onclick="change_scheduled_time()">Update</button>
