@@ -359,57 +359,57 @@ class UserMgr(object):
         if key is None or len(key) == 0:
             raise Exception("Bad parameter.")
 
-        if key == Keys.DEFAULT_PRIVACY_KEY:
+        if key.casefold() == Keys.DEFAULT_PRIVACY_KEY.casefold():
             return Keys.ACTIVITY_VISIBILITY_PUBLIC
-        if key == Keys.USER_PREFERRED_UNITS_KEY:
+        if key.casefold() == Keys.USER_PREFERRED_UNITS_KEY.casefold():
             return Keys.UNITS_STANDARD_KEY
-        if key == Keys.USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY:
+        if key.casefold() == Keys.USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY.casefold():
             return Keys.DAYS_OF_WEEK[0]
-        if key == Keys.USER_BIRTHDAY_KEY:
+        if key.casefold() == Keys.USER_BIRTHDAY_KEY.casefold():
             return Keys.DEFAULT_BIRTHDAY_KEY
-        if key == Keys.USER_HEIGHT_KEY:
+        if key.casefold() == Keys.USER_HEIGHT_KEY.casefold():
             return Keys.DEFAULT_HEIGHT_KEY
-        if key == Keys.USER_WEIGHT_KEY:
+        if key.casefold() == Keys.USER_WEIGHT_KEY.casefold():
             return Keys.DEFAULT_WEIGHT_KEY
-        if key == Keys.USER_BIOLOGICAL_SEX_KEY:
+        if key.casefold() == Keys.USER_BIOLOGICAL_SEX_KEY.casefold():
             return Keys.BIOLOGICAL_MALE_KEY
-        if key == Keys.USER_RESTING_HEART_RATE_KEY:
+        if key.casefold() == Keys.USER_RESTING_HEART_RATE_KEY.casefold():
             return 0
-        if key == Keys.USER_MAXIMUM_HEART_RATE_KEY:
+        if key.casefold() == Keys.USER_MAXIMUM_HEART_RATE_KEY.casefold():
             return 0
-        if key == Keys.ESTIMATED_MAX_HEART_RATE_KEY:
+        if key.casefold() == Keys.ESTIMATED_MAX_HEART_RATE_KEY.casefold():
             return 0
-        if key == Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY:
+        if key.casefold() == Keys.ESTIMATED_MAX_HEART_RATE_LIST_KEY.casefold():
             return {}
-        if key == Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY:
+        if key.casefold() == Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY.casefold():
             return {}
-        if key == Keys.ESTIMATED_CYCLING_FTP_KEY:
+        if key.casefold() == Keys.ESTIMATED_CYCLING_FTP_KEY.casefold():
             return 0
-        if key == Keys.GOAL_TYPE_KEY:
+        if key.casefold() == Keys.GOAL_TYPE_KEY.casefold():
             return Keys.GOAL_TYPE_COMPLETION
-        if key == Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY:
+        if key.casefold() == Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY.casefold():
             return 5
-        if key == Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY:
+        if key.casefold() == Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY.casefold():
             return 5
-        if key == Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY:
+        if key.casefold() == Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY.casefold():
             return "sunday"
-        if key == Keys.GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY:
+        if key.casefold() == Keys.GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY.casefold():
             return True
-        if key == Keys.USER_CAN_UPLOAD_PHOTOS_KEY:
+        if key.casefold() == Keys.USER_CAN_UPLOAD_PHOTOS_KEY.casefold():
             return False
-        if key == Keys.USER_IS_ADMIN_KEY:
+        if key.casefold() == Keys.USER_IS_ADMIN_KEY.casefold():
             return False
-        if key == Keys.USER_HAS_SWIMMING_POOL_ACCESS:
+        if key.casefold() == Keys.USER_HAS_SWIMMING_POOL_ACCESS.casefold():
             return False
-        if key == Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS:
+        if key.casefold() == Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS.casefold():
             return False
-        if key == Keys.USER_HAS_BICYCLE:
+        if key.casefold() == Keys.USER_HAS_BICYCLE.casefold():
             return False
-        if key == Keys.USER_PLAN_LAST_GENERATED_TIME:
+        if key.casefold() == Keys.USER_PLAN_LAST_GENERATED_TIME.casefold():
             return datetime.datetime.fromtimestamp(0)
-        if key == Keys.USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED:
+        if key.casefold() == Keys.USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED.casefold():
             return datetime.datetime.fromtimestamp(0)
-        raise Exception("Unknown user setting.")
+        raise Exception("Unknown user setting: " + str(key))
 
     def retrieve_user_setting(self, user_id, key):
         """Retrieve method for user preferences."""

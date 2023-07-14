@@ -11,16 +11,16 @@
 <meta charset="UTF-8">
 <meta name="description" content="Administrative functions">
 
-</head>
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+</head>
 
 <body>
 
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script type="text/javascript">
+<script src="${root_url}/js/all.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+<script>
 
     /// @function append_to_gear_table
     function append_to_user_table(table, username)
@@ -64,14 +64,14 @@
     {
         if (confirm('Are you sure you want to do this?'))
         {
-            let the_url = "${root_url}/api/1.0/delete_orphaned_activities";
+            let api_url = "${root_url}/api/1.0/delete_orphaned_activities";
 
-            send_delete_request_async(the_url, function(status, response) {
+            send_delete_request_async(api_url, function(status, response) {
                 if (status == 200)
                     window.location.reload();
                 else
                     alert(response)
-            } );
+            });
         }
     }
 
@@ -88,7 +88,12 @@ ${nav}
             </table>
         </div>
         <table id="users" style="display: none;">
-            <td><b>Name</b></td><td><b>Delete</b></td><tr>
+            <tbody>
+                <tr>
+                    <th scope="col"><b>Name</b></th>
+                    <th scope="col"><b>Delete</b></th>
+                </tr>
+            </tbody>
         </table>
         <button type="button" onclick="list_users_without_devices()">List Users Without Devices</button><br>
         <button type="button" onclick="delete_orphaned_activities()">Delete Orphaned Activities</button>

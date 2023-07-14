@@ -5,7 +5,7 @@
 
 <title>${product} - ${name}</title>
 
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script src="${root_url}/js/all.js"></script>
 <link rel="stylesheet" href="${root_url}/css/normalize.css">
 <link rel="stylesheet" href="${root_url}/css/site.css">
 
@@ -13,20 +13,20 @@
 <meta name="description" content="Lists all activities visible to the logged in user">
 <meta name="keywords" content="activity list,calendar view">
 
-</head>
-
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
-
-<body>
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css">
 <link rel="stylesheet" media="print" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.print.min.css">
 
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript">
+</head>
+
+<body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
+<script src="${root_url}/js/all.js"></script>
+<script>
 
     var first_day_of_the_week = 1;
 
@@ -89,9 +89,9 @@
     {
         return new Promise(function(resolve, reject)
         {
-            let the_url = "${root_url}/api/1.0/get_user_setting?requested%20setting=preferred%20first%20day%20of%20week";
+            let api_url = "${root_url}/api/1.0/get_user_setting?requested%20setting=preferred%20first%20day%20of%20week";
 
-            send_get_request_async(the_url, function (response_code, response_text)
+            send_get_request_async(api_url, function (response_code, response_text)
             {
                 if (response_code == 200)
                 {
@@ -169,7 +169,7 @@ ${nav}
 </section>
 
 <section>
-<div id='calendar'></div>
+<div id="calendar"></div>
 </section>
 
 </body>

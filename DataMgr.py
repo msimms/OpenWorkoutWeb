@@ -1591,6 +1591,8 @@ class DataMgr(Importer.ActivityWriter):
         result = []
         if not self.database.enumerate_all_activities(lambda a : result.append(a[Keys.ACTIVITY_ID_KEY]) if self.get_activity_user(a) is None else a):
             raise Exception("Could not enumerate activities.")
+        for activity_id in result:
+            pass
         return result
 
     def merge_activities(self, user_id, uploaded_file1_data, uploaded_file2_data):

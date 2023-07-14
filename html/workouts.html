@@ -8,57 +8,57 @@
 <link rel="stylesheet" href="${root_url}/css/normalize.css">
 <link rel="stylesheet" href="${root_url}/css/site.css">
 
-<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 <meta name="description" content="Allows the user to generate workout plans">
 <meta name="keywords" content="automated workout plan generation">
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 <meta content="utf-8" http-equiv="encoding">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous">
 
 </head>
 
 <body>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
-
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
-<script type="text/javascript">
+<script src="${root_url}/js/all.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
+<script>
 
     /// @function set_preferred_long_run_day
     // Handler for when the user changes their preferred long run day of the week.
     function set_preferred_long_run_day()
     {
-        let the_url = "${root_url}/api/1.0/update_settings";
+        let api_url = "${root_url}/api/1.0/update_settings";
         let preferred_long_run_day = document.getElementById("preferred_long_run_day").value;
         let dict = [];
 
         dict.push({["Preferred Long Run Day"] : preferred_long_run_day});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function set_goal_type
     // Handler for when the user changes their goal type.
     function set_goal_type()
     {
-        let the_url = "${root_url}/api/1.0/update_settings";
+        let api_url = "${root_url}/api/1.0/update_settings";
         let goal_type = document.getElementById("goal_type").value;
         let dict = [];
 
         dict.push({["goal type"] : goal_type});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function set_always_gen_workouts
@@ -66,133 +66,133 @@
     // even if they don't have a race on the calendar.
     function set_always_gen_workouts()
     {
-        let the_url = "${root_url}/api/1.0/update_settings";
+        let api_url = "${root_url}/api/1.0/update_settings";
         let level = document.getElementById("always_gen_workouts").value;
         let dict = [];
 
         dict.push({["gen workouts when race cal is empty"] : level});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function set_has_swimming_pool_access
     function set_has_swimming_pool_access()
     {
-        let the_url = "${root_url}/api/1.0/update_settings";
+        let api_url = "${root_url}/api/1.0/update_settings";
         let value = document.getElementById("has_swimming_pool_access").value;
         let dict = [];
 
         dict.push({["has swimming pool access"] : value});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 generate_workout_plan();
             else
                 alert(response)
-        } );
+        });
     }
 
     /// @function set_has_open_water_swim_access
     function set_has_open_water_swim_access()
     {
-        let the_url = "${root_url}/api/1.0/update_settings";
+        let api_url = "${root_url}/api/1.0/update_settings";
         let value = document.getElementById("has_open_water_swim_access").value;
         let dict = [];
 
         dict.push({["has open water swim access"] : value});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 generate_workout_plan();
             else
                 alert(response)
-        } );
+        });
     }
 
     /// @function set_has_bicycle
     function set_has_bicycle()
     {
-        let the_url = "${root_url}/api/1.0/update_settings";
+        let api_url = "${root_url}/api/1.0/update_settings";
         let value = document.getElementById("has_bicycle").value;
         let dict = [];
 
         dict.push({["has bicycle"] : value});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 generate_workout_plan();
             else
                 alert(response)
-        } );
+        });
     }
 
     /// @function set_exp_level
     // Handler for when the user changes their experience level.
     function set_exp_level()
     {
-        let the_url = "${root_url}/api/1.0/update_settings";
+        let api_url = "${root_url}/api/1.0/update_settings";
         let level = document.getElementById("exp_level").value;
         let dict = [];
 
         dict.push({["Experience Level"] : level});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 generate_workout_plan();
             else
                 alert(response)
-        } );
+        });
     }
 
     /// @function set_structured_training_comfort_level
     // Handler for when the user changes their comfort level with structured training.
     function set_structured_training_comfort_level()
     {
-        let the_url = "${root_url}/api/1.0/update_settings";
+        let api_url = "${root_url}/api/1.0/update_settings";
         let level = document.getElementById("structured_training_comfort_level").value;
         let dict = [];
 
         dict.push({["Structured Training Comfort Level"] : level});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 generate_workout_plan();
             else
                 alert(response)
-        } );
+        });
     }
 
     /// @function generate_workout_plan
     // Asks the server to start workout plan generation.
     function generate_workout_plan()
     {
-        let the_url = "${root_url}/api/1.0/generate_workout_plan";
+        let api_url = "${root_url}/api/1.0/generate_workout_plan";
         let dict = [];
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 alert("The workout plan is being generated and will be viewable on the My Activities page when complete.");
             else
                 alert(response)
-        } );
+        });
     }
 
     /// @function refresh_personal_records
     // Asks the server to rebuild the user's list of personal records.
     function refresh_personal_records()
     {
-        let the_url = "${root_url}/api/1.0/refresh_personal_records";
+        let api_url = "${root_url}/api/1.0/refresh_personal_records";
         let dict = [];
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 window.location.reload();
             else
                 alert(response)
-        } );
+        });
     }
 
     $(function()
@@ -312,28 +312,7 @@
             let key = Object.keys(record)[0];
             let value = record[key];
 
-            if (key == "goal")
-            {
-                let element = document.getElementById(key);
-
-                if (value == "Fitness")
-                    element.selectedIndex = 0;
-                else if (value == "5K Run")
-                    element.selectedIndex = 1;
-                else if (value == "10K Run")
-                    element.selectedIndex = 2;
-                else if (value == "15K Run")
-                    element.selectedIndex = 3;
-                else if (value == "Half Marathon")
-                    element.selectedIndex = 4;
-                else if (value == "Marathon")
-                    element.selectedIndex = 5;
-                else if (value == "50K Run")
-                    element.selectedIndex = 6;
-                else if (value == "50 Mile Run")
-                    element.selectedIndex = 7;
-            }
-            else if (key == "goal type")
+            if (key == "goal type")
             {
                 let element = document.getElementById("goal_type");
 
@@ -479,7 +458,7 @@
     // Request user settings from the server.
     function get_user_settings()
     {
-        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal,goal%20type,preferred%20long%20run%20day,Experience%20Level,Structured%20Training%20Comfort%20Level,Gen%20Workouts%20When%20Race%20Cal%20Is%20Empty,has%20swimming%20pool%20access,has%20open%20water%20swim%20access,has%20bicycle";
+        let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal%20type,preferred%20long%20run%20day,Experience%20Level,Structured%20Training%20Comfort%20Level,Gen%20Workouts%20When%20Race%20Cal%20Is%20Empty,has%20swimming%20pool%20access,has%20open%20water%20swim%20access,has%20bicycle";
         $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
     }
 
@@ -521,7 +500,7 @@
     /// @function create_race
     function create_race()
     {
-        let the_url = "${root_url}/api/1.0/create_race";
+        let api_url = "${root_url}/api/1.0/create_race";
         let race_name = document.getElementById("race_name").value;
         let race_distance = document.getElementById("race_distance").value;
         let race_importance = document.getElementById("race_importance").value;
@@ -548,25 +527,25 @@
         dict.push({["Race Distance"] : race_distance});
         dict.push({["Race Importance"] : race_importance});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 window.location.reload();
             else
                 alert(response)
-        } );
+        });
     }
 
     /// @function delete_race
     function delete_race(race_id)
     {
-        let the_url = "${root_url}/api/1.0/delete_race?Race%20Id=" + race_id;
+        let api_url = "${root_url}/api/1.0/delete_race?Race%20Id=" + race_id;
 
-        send_delete_request_async(the_url, function(status, response) {
+        send_delete_request_async(api_url, function(status, response) {
             if (status == 200)
                 window.location.reload();
             else
                 alert(response)
-        } );
+        });
     }
 
     $(document).ready(function()
@@ -588,43 +567,41 @@ ${nav}
     <div>
 
         <h2>Race Calendar</h2>
-        <p>
-            <table id="Races">
-            </table>
+        <table id="Races">
+        </table>
 
-            <div id="new_race" style="display: none;">
-                <h2>Add a Race</h2>
-                <p>Name<br><input type="text" name="race_name" id="race_name"><br></p>
-                <p>Date<br><input type="text" name="race_date" id="race_date"><br></p>
-                <p>Distance<br>
-                    <select name="race_distance" id="race_distance" class="right">
-                        <option value="5K Run">5K Run</option>
-                        <option value="10K Run">10K Run</option>
-                        <option value="15K Run">15K Run</option>
-                        <option value="Half Marathon">Half Marathon</option>
-                        <option value="Marathon">Marathon</option>
-                        <option value="50K Run">50K Run</option>
-                        <option value="50 Mile Run">50 Mile Run</option>
-                        <option value="Sprint Triathlon">Sprint Triathlon</option>
-                        <option value="Olympic Triathlon">Olympic Triathlon</option>
-                        <option value="Half Iron Distance Triathlon">Half Iron Distance Triathlon</option>
-                        <option value="Iron Distance Triathlon">Iron Distance Triathlon</option>
-                    </select><br>
-                </p>
-                <p>Importance<br>
-                    <select name="race_importance" id="race_importance" class="right">
-                        <option value="A">A</option>
-                        <option value="B">B</option>
-                        <option value="C">C</option>
-                    </select><br>
-                </p>
-                <button type="modern_button" onclick="create_race()">Save</button>
-                <button type="button" onclick="cancel_create_race()">Cancel</button>
-                <hr>
-            </div>
+        <div id="new_race" style="display: none;">
+            <h2>Add a Race</h2>
+            <p>Name<br><input type="text" name="race_name" id="race_name"><br></p>
+            <p>Date<br><input type="text" name="race_date" id="race_date"><br></p>
+            <p>Distance<br>
+                <select name="race_distance" id="race_distance" class="right">
+                    <option value="5K Run">5K Run</option>
+                    <option value="10K Run">10K Run</option>
+                    <option value="15K Run">15K Run</option>
+                    <option value="Half Marathon">Half Marathon</option>
+                    <option value="Marathon">Marathon</option>
+                    <option value="50K Run">50K Run</option>
+                    <option value="50 Mile Run">50 Mile Run</option>
+                    <option value="Sprint Triathlon">Sprint Triathlon</option>
+                    <option value="Olympic Triathlon">Olympic Triathlon</option>
+                    <option value="Half Iron Distance Triathlon">Half Iron Distance Triathlon</option>
+                    <option value="Iron Distance Triathlon">Iron Distance Triathlon</option>
+                </select><br>
+            </p>
+            <p>Importance<br>
+                <select name="race_importance" id="race_importance" class="right">
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                </select><br>
+            </p>
+            <button type="button" onclick="create_race()">Save</button>
+            <button type="button" onclick="cancel_create_race()">Cancel</button>
+            <hr>
+        </div>
 
-            <button type="button" onclick="add_race()">Add Race</button>
-        </p>
+        <button type="button" onclick="add_race()">Add Race</button>
 
         <hr>
 
@@ -690,10 +667,8 @@ ${nav}
         <p>
             Run workouts will reference these paces, calculated from the last four weeks of activity.
         </p>
-        <p>
-            <table id="RunPaces">
-            </table>
-        </p>
+        <table id="RunPaces">
+        </table>
 
         <hr>
 
@@ -710,15 +685,13 @@ ${nav}
         <p>
             Workouts are calculated using paces computed from the last four weeks of activity.
         </p>
-        <p>
-            <h3>Cycling</h3>
-            <table id="Cycling">
-            </table>
+        <h3>Cycling</h3>
+        <table id="Cycling">
+        </table>
 
-            <h3>Running</h3>
-            <table id="Running">
-            </table>
-        </p>
+        <h3>Running</h3>
+        <table id="Running">
+        </table>
         <button type="button" onclick="refresh_personal_records()">Refresh Personal Records</button>
     </div>
 </section>

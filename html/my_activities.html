@@ -5,7 +5,7 @@
 
 <title>${product} - ${name}</title>
 
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
+<script src="${root_url}/js/all.js"></script>
 <link rel="stylesheet" href="${root_url}/css/normalize.css">
 <link rel="stylesheet" href="${root_url}/css/site.css">
 
@@ -13,20 +13,20 @@
 <meta name="description" content="Lists all activities belonging to the logged in user">
 <meta name="keywords" content="activity list,calendar view">
 
-</head>
-
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
-
-<body>
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.css">
 <link rel="stylesheet" media="print" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.print.min.css">
 
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript">
+</head>
+
+<body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.9.0/fullcalendar.min.js"></script>
+<script src="${root_url}/js/all.js"></script>
+<script>
 
     var first_day_of_the_week = 1;
 
@@ -81,9 +81,9 @@
     {
         return new Promise(function(resolve, reject)
         {
-            let the_url = "${root_url}/api/1.0/get_user_setting?requested%20setting=preferred%20first%20day%20of%20week";
+            let api_url = "${root_url}/api/1.0/get_user_setting?requested%20setting=preferred%20first%20day%20of%20week";
 
-            send_get_request_async(the_url, function (response_code, response_text)
+            send_get_request_async(api_url, function (response_code, response_text)
             {
                 if (response_code == 200)
                 {
@@ -111,6 +111,28 @@
         });
     }
 
+    /// @function list_activity_types
+    // Get the list of all possible activity types. Needed to populate the activity type combo box.
+    function list_activity_types()
+    {
+        return new Promise(function(resolve, reject)
+        {
+            let api_url = "${root_url}/api/1.0/list_activity_types";
+
+            send_get_request_async(api_url, function (response_code, response_text)
+            {
+                if (response_code == 200)
+                {
+                    resolve();
+                }
+                else
+                {
+                    reject();
+                }
+            });
+        });
+    }
+
     /// @function show_add_workout_dialog
     function show_add_workout_dialog()
     {
@@ -124,7 +146,7 @@
         let workout_date_obj = new Date(document.getElementById("workout_date").value);
         let workout_date = workout_date_obj.getTime() / 1000;
 
-        let the_url = "${root_url}/api/1.0/create_planned_workout"
+        let api_url = "${root_url}/api/1.0/create_planned_workout"
         let dict = [];
 
         dict.push({["activity type"] : activity_type});
@@ -132,13 +154,13 @@
 
         if (!isNaN(workout_date))
         {
-            send_post_request_async(the_url, dict, function (response_code, response_text)
+            send_post_request_async(api_url, dict, function (response_code, response_text)
             {
                 if (response_code == 200)
                 {
                     window.location.reload();
                 }
-            })
+            });
         }
         else
         {
@@ -153,6 +175,9 @@
 
         let first_day_promise = get_preferred_first_day_of_week();
         promises.push(first_day_promise);
+
+        let activity_types_promise = list_activity_types();
+        promises.push(activity_types_promise);
 
         Promise.allSettled(promises).
             then((results) => draw_calendar());
@@ -216,17 +241,8 @@
         }
     }
 
-    /// @function list_activity_types
-    // Get the list of all possible activity types. Needed to populate the activity type combo box.
-    function list_activity_types()
-    {
-        let api_url = "${root_url}/api/1.0/list_activity_types";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_activity_type_list, dataType: "json" });
-    }
-
     $(document).ready(function()
     {
-        list_activity_types();
         request_all_the_things();
     });
 
@@ -240,17 +256,17 @@ ${nav}
     <dialog id="newWorkoutDialog">
         <form action="javascript:void(0);">
             <div>
-                Date:<br><input type="text" name="workout_date" id="workout_date" style="width:95%"><br>
+                Date:<br><input type="text" name="workout_date" id="workout_date"><br>
                 Type:<br> <select id="activity_type"></select><br>
             </div>
             <div>
                 <button value="cancel" formmethod="dialog">Cancel</button>
-                <button type="modern_button" onclick="create_planned_workout()">Save</button>
+                <button type="submit" onclick="create_planned_workout()">Save</button>
             </div>
         </form>
     </dialog>
 
-    <div id='calendar'></div>
+    <div id="calendar"></div>
 </section>
 
 </body>

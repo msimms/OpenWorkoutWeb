@@ -12,20 +12,20 @@
 <meta name="description" content="Lists all gear belonging to the logged in user">
 <meta name="keywords" content="gear list">
 
-</head>
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous">
+
+</head>
 
 <body>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
-
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
-<script type="text/javascript">
+<script src="${root_url}/js/all.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
+<script>
 
     var gear_name = ""
 
@@ -38,24 +38,24 @@
     /// @function update_gear_name
     function update_gear_name()
     {
-        let the_url = "${root_url}/api/1.0/update_gear";
+        let api_url = "${root_url}/api/1.0/update_gear";
         let dict = [];
         let result_text = {};
-        let gear_name_title = document.getElementById("GearName").value;
+        let gear_name_title = document.getElementById("gear_name").value;
 
         dict.push({["gear_id"] : "${gear_id}"});
         dict.push({["name"] : gear_name_title});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function create_service_record
     function create_service_record()
     {
-        let the_url = "${root_url}/api/1.0/create_service_record";
+        let api_url = "${root_url}/api/1.0/create_service_record";
         let dict = [];
         let service_date_obj = new Date(document.getElementById("service_date").value);
         let service_date = service_date_obj.getTime() / 1000;
@@ -65,12 +65,12 @@
         dict.push({["date"] : service_date});
         dict.push({["description"] : description});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 window.location.reload();
             else
                 alert(response)
-        } );
+        });
     }
 
     /// @function cancel_service_record_creation
@@ -96,14 +96,14 @@
     {
         if (confirm('Are you sure you want to do this?'))
         {
-            let the_url = "${root_url}/api/1.0/delete_service_record?gear_id=${gear_id}&service_id=" + service_id;
+            let api_url = "${root_url}/api/1.0/delete_service_record?gear_id=${gear_id}&service_id=" + service_id;
 
-            send_delete_request_async(the_url, function(status, response) {
+            send_delete_request_async(api_url, function(status, response) {
                 if (status == 200)
                     window.location.reload();
                 else
                     alert(response)
-            } );
+            });
         }
     }
 
@@ -131,55 +131,55 @@
     /// @function get_gear_distance
     function get_gear_distance(gear_name)
     {
-        let the_url = "${root_url}/api/1.0/get_distance_for_tag?tag=" + gear_name
+        let api_url = "${root_url}/api/1.0/get_distance_for_tag?tag=" + gear_name
 
-        send_get_request_async(the_url, function (response_code, response_text)
+        send_get_request_async(api_url, function (response_code, response_text)
         {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
-                let gear_distance_elem = document.getElementById("GearDistance");
+                let gear_distance_elem = document.getElementById("gear_distance");
 
                 gear_distance_elem.innerText = records[0][gear_name];
             }
-        })
+        });
     }
 
     /// @function get_gear
     // List all the gear associated with the current user.
     function get_gear()
     {
-        let the_url = "${root_url}/api/1.0/list_gear"
+        let api_url = "${root_url}/api/1.0/list_gear"
 
-        send_get_request_async(the_url, function (response_code, response_text)
+        send_get_request_async(api_url, function (response_code, response_text)
         {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
-                let history_table = document.getElementById("ServiceHistory");
+                let history_table = document.getElementById("service_history");
 
                 for (let gear_record of records)
                 {
                     if (gear_record.gear_id == "${gear_id}")
                     {
                         // Add the title.
-                        let gear_name_title = document.getElementById("GearName");
+                        let gear_name_title = document.getElementById("gear_name");
                         gear_name = gear_record.name
                         gear_name_title.value = gear_name;
 
                         // Add the description.
-                        let gear_desc_title = document.getElementById("GearDescription");
+                        let gear_desc_title = document.getElementById("gear_description");
                         if (gear_record.description.length > 0)
                             gear_desc_title.innerText = gear_record.description;
                         else
                             gear_desc_title.innerText = "None";
 
                         // Add the added date.
-                        gear_desc_title = document.getElementById("GearAdded");
+                        gear_desc_title = document.getElementById("gear_added");
                         gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.add_time);
 
                         // Add the retired date.
-                        gear_desc_title = document.getElementById("GearRetired");
+                        gear_desc_title = document.getElementById("gear_retired");
                         if (gear_record.retire_time > 0)
                             gear_desc_title.innerText = unix_time_to_local_date_string(gear_record.retire_time);
                         else
@@ -201,7 +201,7 @@
                     }
                 }
             }
-        })
+        });
     }
 
     $(document).ready(function()
@@ -220,32 +220,35 @@ ${nav}
     <dialog id="newServiceDialog">
         <form action="javascript:void(0);">
             <div>
-                Date Serviced:<br><input type="text" name="service_date" id="service_date" style="width:95%"><br>
-                Description:<br><input type="text" name="description" id="description" style="width:95%"><br>
+                Date Serviced:<br><input type="text" name="service_date" id="service_date"><br>
+                Description:<br><input type="text" name="description" id="description"><br>
             </div>
             <div>
-                <button value="cancel" formmethod="dialog">Cancel</button>
-                <button type="modern_button" onclick="create_service_record()">Save</button>
+                <button type="" value="cancel" formmethod="dialog">Cancel</button>
+                <button type="submit" onclick="create_service_record()">Save</button>
             </div>
         </form>
     </dialog>
 
-    <input type="text" name="GearName" id="GearName" value="" onchange="update_gear_name()"><br>
+    <input type="text" name="gear_name" id="gear_name" value="" onchange="update_gear_name()"><br>
     <h3>Description</h3>
-    <p id="GearDescription"></p>
+    <p id="gear_description"></p>
     <h3>Distance</h3>
-    <p id="GearDistance"></p>
+    <p id="gear_distance"></p>
     <h3>Date Added</h3>
-    <p id="GearAdded"></p>
+    <p id="gear_added"></p>
     <h3>Date Retired</h3>
-    <p id="GearRetired"></p>
+    <p id="gear_retired"></p>
     <h3>Service History</h3>
-    <p>
-        <table id="ServiceHistory">
-            <td><b>Date</b></td><td><b>Description</b></td><td></td><tr>
-        </table>
-    </p>
-    <div class="block" id="new_service_record_block" style="width: 95%">
+    <table id="service_history">
+        <tbody>
+            <tr>
+                <th scope="col"><b>Date</b></th>
+                <th scope="col"><b>Description</b></th>
+            </tr>
+        </tbody>
+    </table>
+    <div class="block" id="new_service_record_block">
     </div>
     <button type="button" id="add_service_record_btn" onclick="get_new_service_record_info()">Add Service Record</button>
 

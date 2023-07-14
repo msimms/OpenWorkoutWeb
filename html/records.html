@@ -8,22 +8,22 @@
 <link rel="stylesheet" href="${root_url}/css/normalize.css">
 <link rel="stylesheet" href="${root_url}/css/site.css">
 
-<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 <meta content="utf-8" http-equiv="encoding">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous">
 
 </head>
 
 <body>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous" />
-
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script type="text/javascript">
+<script src="${root_url}/js/all.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+<script>
 
     /// @function append_to_table
     function append_to_table(table, record_time, activity_id)
@@ -43,22 +43,23 @@
         cell.appendChild(a);
     }
 
-    /// @function process_records
-    var process_records = function(records)
-    {
-        let table = document.getElementById("records");
-
-        for (let record_index in records)
-        {
-            append_to_table(table, records[record_index][0], records[record_index][1]);
-        }
-    }
-
     /// @function list_records
     function list_records()
     {
         let api_url = "${root_url}/api/1.0/get_record_progression?activity_type=${activity_type}&record_name=${record_name}";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_records, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                let table = document.getElementById("records");
+
+                for (let record_index in response_text)
+                {
+                    append_to_table(table, records[record_index][0], records[record_index][1]);
+                }
+            }
+        });
     }
 
     $(document).ready(function()
@@ -76,10 +77,8 @@ ${nav}
 <section class="block">
 
     <h2>${record_name}</h2>
-    <p>
-        <table id="records">
-        </table>
-    </p>
+    <table id="records">
+    </table>
 
 </section>
 

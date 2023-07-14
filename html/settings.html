@@ -12,22 +12,22 @@
 <meta name="description" content="User settings">
 <meta name="keywords" content="settings">
 
-</head>
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+</head>
 
 <body>
 
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script type="text/javascript">
+<script src="${root_url}/js/all.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+<script>
 
     /// @function update_settings
     // Button handler for when the user wants to update their preference settings.
     function update_settings()
     {
-        let the_url = "${root_url}/api/1.0/update_settings";
+        let api_url = "${root_url}/api/1.0/update_settings";
         let privacy = document.getElementById("privacy_options").value;
         let units = document.getElementById("units").value;
         let week_start = document.getElementById("week_start").value;
@@ -37,33 +37,33 @@
         dict.push({["preferred units"] : units});
         dict.push({["preferred first day of week"] : week_start});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function update_email
     // Button handler for when the user wants to update their email.
     function update_email()
     {
-        let the_url = "${root_url}/api/1.0/update_email";
+        let api_url = "${root_url}/api/1.0/update_email";
         let new_email = document.getElementById("new_email").value;
         let dict = [];
 
         dict.push({["email"] : new_email});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function update_password
     // Button handler for when the user wants to update their password.
     function update_password()
     {
-        let the_url = "${root_url}/api/1.0/update_password";
+        let api_url = "${root_url}/api/1.0/update_password";
         let current_pword = document.getElementById("current_password").value;
         let new_pword1 = document.getElementById("new_password1").value;
         let new_pword2 = document.getElementById("new_password2").value;
@@ -73,10 +73,10 @@
         dict.push({["new_password1"] : new_pword1});
         dict.push({["new_password2"] : new_pword2});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function manage_api_keys
@@ -92,7 +92,7 @@
     {
         if (confirm('Are you sure you want to do this?'))
         {
-            let the_url = "${root_url}/api/1.0/delete_users_gear";
+            let api_url = "${root_url}/api/1.0/delete_users_gear";
             let pword = document.getElementById("password").value;
 
             if (pword.length > 0)
@@ -101,12 +101,12 @@
 
                 dict.push({["password"] : pword});
 
-                send_post_request_async(the_url, dict, function(status, response) {
+                send_post_request_async(api_url, dict, function(status, response) {
                     if (status == 200)
                         window.location.replace("${root_url}");
                     else
                         alert(response)
-                } );
+                });
             }
             else
             {
@@ -121,7 +121,7 @@
     {
         if (confirm('Are you sure you want to do this?'))
         {
-            let the_url = "${root_url}/api/1.0/delete_users_activities";
+            let api_url = "${root_url}/api/1.0/delete_users_activities";
             let pword = document.getElementById("password").value;
 
             if (pword.length > 0)
@@ -130,12 +130,12 @@
 
                 dict.push({["password"] : pword});
 
-                send_post_request_async(the_url, dict, function(status, response) {
+                send_post_request_async(api_url, dict, function(status, response) {
                     if (status == 200)
                         window.location.replace("${root_url}");
                     else
                         alert(response)
-                } );
+                });
             }
             else
             {
@@ -150,7 +150,7 @@
     {
         if (confirm('Are you sure you want to do this?'))
         {
-            let the_url = "${root_url}/api/1.0/delete_user";
+            let api_url = "${root_url}/api/1.0/delete_user";
             let pword = document.getElementById("password").value;
 
             if (pword.length > 0)
@@ -159,12 +159,12 @@
 
                 dict.push({["password"] : pword});
 
-                send_post_request_async(the_url, dict, function(status, response) {
+                send_post_request_async(api_url, dict, function(status, response) {
                     if (status == 200)
                         window.location.replace("${root_url}");
                     else
                         alert(response)
-                } );
+                });
             }
             else
             {
@@ -245,17 +245,17 @@ ${nav}
     <div>
         <!-- Settings -->
         <h2>Settings</h2>
-        <h3>Default Activity Privacy<h3>
+        <h3>Default Activity Privacy</h3>
         <select id="privacy_options">
             <option value="Public">Public</option>
             <option value="Private">Private</option>
         </select>
-        <h3>Preferred Units<h3>
+        <h3>Preferred Units</h3>
         <select id="units">
             <option value="Metric">Metric</option>
             <option value="Standard">Standard</option>
         </select>
-        <h3>Week Starts On<h3>
+        <h3>Week Starts On</h3>
         <select id="week_start">
             <option value="Sunday">Sunday</option>
             <option value="Monday">Monday</option>
@@ -270,7 +270,7 @@ ${nav}
 
         <!-- API Keys -->
         <h2>API Keys</h2>
-        <button type="modern_button" onclick="manage_api_keys()" style="color:black">Manage API Keys</button><br>
+        <button type="modern_button" onclick="manage_api_keys()">Manage API Keys</button><br>
         <hr>
 
         <!-- Email -->

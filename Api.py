@@ -1811,14 +1811,14 @@ class Api(object):
             height = values[Keys.USER_HEIGHT_KEY]
             if not InputChecker.is_float(height):
                 raise ApiException.ApiMalformedRequestException("Invalid height.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_HEIGHT_KEY, height, update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_HEIGHT_KEY, float(height), update_time)
 
         # Weight.
         if Keys.USER_WEIGHT_KEY in values:
             weight = values[Keys.USER_WEIGHT_KEY]
             if not InputChecker.is_float(weight):
                 raise ApiException.ApiMalformedRequestException("Invalid weight.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_WEIGHT_KEY, weight, update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.USER_WEIGHT_KEY, float(weight), update_time)
 
         # Biological Sex.
         if Keys.USER_BIOLOGICAL_SEX_KEY in values:
@@ -2526,8 +2526,8 @@ class Api(object):
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
-        weight_metric = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_WEIGHT_KEY)
-        height_metric = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_HEIGHT_KEY)
+        weight_metric = float(self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_WEIGHT_KEY))
+        height_metric = float(self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_HEIGHT_KEY))
         bmi = self.data_mgr.estimate_bmi(weight_metric, height_metric)
         return True, json.dumps(bmi)
 

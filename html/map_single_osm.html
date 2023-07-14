@@ -7,16 +7,14 @@
 
 <link rel="stylesheet" type="text/css" href="${root_url}/css/normalize.css">
 <link rel="stylesheet" type="text/css" href="${root_url}/css/site.css">
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css" />
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.css">
 
 <meta charset="UTF-8">
 <meta name="description" content="Activity summary, showing the a map of the activity along with summary statistics">
 <meta name="keywords" content="activity summary">
-<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
-
-</head>
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
 
 <style type="text/css">
     html { height: 100% }
@@ -33,6 +31,8 @@
     }
 </style>
 
+</head>
+
 <body>
 
 <section class="nav">
@@ -41,17 +41,17 @@ ${nav}
 
 <div class="map_canvas" id="map_canvas">
 
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="${root_url}/js/graphs.js"></script>
-<script type="text/javascript" src="${root_url}/js/coordinates.js"></script>
-<script type="text/javascript" src="${root_url}/js/heart_rate.js"></script>
-<script type="text/javascript" src="${root_url}/js/power.js"></script>
-<script type="text/javascript" src="${root_url}/js/OpenStreetMap.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
-<script type="text/javascript">
+<script src="${root_url}/js/all.js"></script>
+<script src="${root_url}/js/graphs.js"></script>
+<script src="${root_url}/js/coordinates.js"></script>
+<script src="${root_url}/js/heart_rate.js"></script>
+<script src="${root_url}/js/power.js"></script>
+<script src="${root_url}/js/OpenStreetMap.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
+<script>
 
     let activity_id = "${activityId}";
     let is_foot_based_activity = ${is_foot_based_activity};
@@ -345,9 +345,10 @@ ${summary}
 </ul>
 </section>
 
-<div id="charts"/>
+<div id="charts">
+</div>
 
-<script type="text/javascript">
+<script>
 
     let start_time_ms = 0;
     let end_time_ms = 0;
@@ -392,9 +393,7 @@ ${summary}
     }
 </script>
 
-</div>
-
-<script type="text/javascript" src="${root_url}/js/all_activities.js"></script>
+<script src="${root_url}/js/all_activities.js"></script>
 <script>
     /// @function process_photos_list
     var process_photos_list = function(photos_list)
@@ -511,57 +510,59 @@ ${summary}
 <hr>
 
 <section class="analysis">
-<h3>Description</h3>
-<table>
-${description}
-</table>
+    <h3>Description</h3>
+    <table>
+    ${description}
+    </table>
 </section>
 
 <section class="analysis">
-<h3>Detailed Analysis</h3>
-<table>
-${details}
-</table>
+    <h3>Detailed Analysis</h3>
+    <table>
+    ${details}
+    </table>
 </section>
 
 <section class="activity_control">
-<h3>Tags and Gear</h3>
-<select name="tags" id="tags" class="chosen" multiple="true" style="width:100%;" data-placeholder="Specify tags and gear...">
-${tags}
-</select>
+    <h3>Tags and Gear</h3>
+    <select name="tags" id="tags" class="chosen" multiple="true" style="width:100%;" data-placeholder="Specify tags and gear...">
+    ${tags}
+    </select>
 </section>
 
 <section class="activity_control">
-<div class="empty" id="photos_div" style="display: none;">
-<h3>Photos</h3>
-<table id="photos">
-</table>
-</div>
+    <div class="empty" id="photos_div" style="display: none;">
+    <h3>Photos</h3>
+    <table id="photos">
+    </table>
+    </div>
 </section>
 
 <section class="activity_control">
-<h3>Comments</h3>
-<table id="comments">
-${comments}
-</table>
+    <h3>Comments</h3>
+    <table id="comments">
+    ${comments}
+    </table>
 </section>
 
 <section class="activity_control" style="${visibility}">
-<h3>Export</h3>
-<table>
-${exports}
-</table>
+    <h3>Export</h3>
+    <table>
+    ${exports}
+    </table>
 </section>
 
 <section class="activity_control" style="${visibility}">
 <h3>Edit</h3>
-<table>
-<td><button type="button" onclick="return edit_activity()" style="color:black">Edit Name, Description, and Type...</button></td><tr>
-<td><button type="button" onclick="return add_photos()" style="color:black">Add Photos...</button></td><tr>
-<td><button type="button" onclick="return trim_activity()" style="color:black">Trim...</button></td><tr>
-<td><button type="button" onclick="return refresh_analysis()" style="color:black">Refresh Analysis</button></td><tr>
-<td><button type="button" onclick="return delete_activity()" style="color:red">Delete</button></td><tr>
-</table>
+    <table>
+        <tbody>
+            <tr><td><button type="button" onclick="return edit_activity()">Edit Name, Description, and Type...</button></td></tr>
+            <tr><td><button type="button" onclick="return add_photos()">Add Photos...</button></td></tr>
+            <tr><td><button type="button" onclick="return trim_activity()">Trim...</button></td></tr>
+            <tr><td><button type="button" onclick="return refresh_analysis()">Refresh Analysis</button></td></tr>
+            <tr><td><button type="button" onclick="return delete_activity()" style="color:red">Delete</button></td></tr>
+        </tbody>
+    </table>
 </section>
 
 </body>

@@ -1,19 +1,19 @@
 // -*- coding: utf-8 -*-
-// 
+//
 // MIT License
-// 
+//
 // Copyright (c) 2022 Mike Simms
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,74 +25,74 @@
 /// @function common_refresh_analysis
 function common_refresh_analysis(root_url)
 {
-    let the_url = root_url + "/api/1.0/refresh_analysis";
+    let api_url = root_url + "/api/1.0/refresh_analysis";
     let dict = [];
 
     dict.push({["activity_id"] : activity_id});
 
-    send_post_request_async(the_url, dict, function(status, response) {
+    send_post_request_async(api_url, dict, function(status, response) {
         if (status == 200)
             window.location.reload();
         else
             alert(response)
-    } );
+    });
 }
 
 /// @function common_create_comment
 function common_create_comment(root_url)
 {
-    let the_url = root_url + "/api/1.0/create_comment";
+    let api_url = root_url + "/api/1.0/create_comment";
     let comment = document.getElementById("comment").value;
     let dict = [];
 
     dict.push({["activity_id"] : activity_id});
     dict.push({["comment"] : comment});
 
-    send_post_request_async(the_url, dict, function(status, response) {
+    send_post_request_async(api_url, dict, function(status, response) {
         if (status == 200)
             window.location.reload();
         else
             alert(response)
-    } );
+    });
 }
 
 /// @function common_export_activity
 function common_export_activity(root_url)
 {
-    let the_url = root_url + "/api/1.0/export_activity";
+    let api_url = root_url + "/api/1.0/export_activity";
     let format = document.getElementById("format").value;
     let dict = [];
 
     dict.push({["activity_id"] : activity_id});
     dict.push({["export_format"] : format});
 
-    send_post_request_async(the_url, dict, function(status, response) {
+    send_post_request_async(api_url, dict, function(status, response) {
         if (status == 200)
             window.location.reload();
         else
             alert(response)
-    } );
+    });
 }
 
 /// @function common_edit_activity
 function common_edit_activity(root_url)
 {
-    let the_url = root_url + "/edit_activity/" + activity_id;
-    window.location.assign(the_url);
+    let api_url = root_url + "/edit_activity/" + activity_id;
+    window.location.assign(api_url);
 }
 
 /// @function common_add_photos
 function common_add_photos(root_url)
 {
-    let the_url = root_url + "/add_photos/" + activity_id;
-    window.location.assign(the_url);
+    let api_url = root_url + "/add_photos/" + activity_id;
+    window.location.assign(api_url);
 }
 
 /// @function common_trim_activity
 function common_trim_activity(root_url)
 {
-    let the_url = root_url + "/trim_activity/" + activity_id;
-    window.location.assign(the_url);
+    let api_url = root_url + "/trim_activity/" + activity_id;
+    window.location.assign(api_url);
 }
 
 /// @function common_delete_activity
@@ -100,17 +100,17 @@ function common_delete_activity(root_url)
 {
     if (confirm('Are you sure you want to do this? This cannot be undone.'))
     {
-        let the_url = root_url + "/api/1.0/delete_activity";
+        let api_url = root_url + "/api/1.0/delete_activity";
         let dict = [];
 
         dict.push({["activity_id"] : activity_id});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 window.location.replace(root_url + "/all_activities/");
             else
                 alert(response)
-        } );
+        });
     }
 }
 
@@ -119,18 +119,18 @@ function common_delete_photo(root_url, photo_id)
 {
     if (confirm('Are you sure you want to delete the above photo?'))
     {
-        let the_url = root_url + "/api/1.0/delete_activity_photo";
+        let api_url = root_url + "/api/1.0/delete_activity_photo";
         let dict = [];
 
         dict.push({["activity_id"] : activity_id});
         dict.push({["photo_id"] : photo_id});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 window.location.reload();
             else
                 alert(response)
-        } );
+        });
     }
 }
 
@@ -144,17 +144,17 @@ function common_list_photos(root_url)
 /// @function common_create_tags
 function common_create_tags(root_url, tags)
 {
-    let the_url = root_url + "/api/1.0/create_tags_on_activity";
+    let api_url = root_url + "/api/1.0/create_tags_on_activity";
     let dict = [];
 
     dict.push({["activity_id"] : activity_id});
     for (let tag in tags)
         dict.push({["tag" + tag] : tags[tag]});
 
-    send_post_request_async(the_url, dict, function(status, response) {
+    send_post_request_async(api_url, dict, function(status, response) {
         if (status != 200)
             alert(response)
-    } );
+    });
 }
 
 /// @function common_process_sensordata
@@ -163,7 +163,7 @@ function common_process_sensordata(root_url, activity_id, sensordata, is_foot_ba
     for (key in sensordata)
     {
         let old_data = sensordata[key];
-        let new_data = old_data.map(function(e) { 
+        let new_data = old_data.map(function(e) {
             let new_e = {};
 
             for (let item in e)
@@ -272,17 +272,17 @@ function common_delete_sensor_data(root_url, activity_id, sensor_name)
 {
     if (confirm('Are you sure you want to do delete this sensor data? It cannot be undone.'))
     {
-        let the_url = root_url + "/api/1.0/delete_sensor_data";
+        let api_url = root_url + "/api/1.0/delete_sensor_data";
         let dict = [];
 
         dict.push({["activity_id"] : activity_id});
         dict.push({["sensor_name"] : sensor_name});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 window.location.reload();
             else
                 alert(response)
-        } );
+        });
     }
 }

@@ -12,28 +12,28 @@
 <meta name="description" content="Lists all devices claimed by the logged in user">
 <meta name="keywords" content="device list">
 
-</head>
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+</head>
 
 <body>
 
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="${root_url}/js/all.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <section class="nav">
 ${nav}
 </section>
 
-<div class="import" style="width: 800px">
+<div class="import">
 
     <!-- Photos -->
     <h2>Photos</h2>
-    <input type="file" id="photo_picker" class="modern_button" style="font-size:12px" accept=".png,.jpg,.jpeg,.gif" name="photo_list" webkitdirectory multiple><br>
+    <input type="file" id="photo_picker" class="modern_button" accept=".png,.jpg,.jpeg,.gif" name="photo_list" webkitdirectory multiple><br>
     <button type="button" class="modern_button" onclick="upload_selected_files()">Upload Photos</button><br>
     <table class="import" id="upload_table" style="display: none;"></table><br>
 
-    <script type="text/javascript">
+    <script>
         let picker = document.getElementById('photo_picker');
         let selected_photo_list = [];
 
@@ -87,14 +87,14 @@ ${nav}
                 };
                 reader.onload = function(e)
                 {
-                    let the_url = "${root_url}/api/1.0/upload_activity_photo";
+                    let api_url = "${root_url}/api/1.0/upload_activity_photo";
                     let dict = [];
                     let encoded_data = btoa(reader.result);
 
                     dict.push({["uploaded_file_data"] : encoded_data});
                     dict.push({["activity_id"] : "${activity_id}"});
 
-                    send_post_request_async(the_url, dict, function(status, response) {
+                    send_post_request_async(api_url, dict, function(status, response) {
                         if (status == 200)
                         {
                             update_file_status(file_obj.name, "Uploading....");
@@ -105,7 +105,7 @@ ${nav}
                             alert(result_text.value);
                             reject();
                         }
-                    } );
+                    });
                 }
                 reader.readAsBinaryString(file_obj);
             });

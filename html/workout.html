@@ -9,25 +9,25 @@
 <link rel="stylesheet" href="${root_url}/css/site.css">
 
 <meta charset="UTF-8">
-<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 <meta name="description" content="Allows the user to view workout specifics">
 <meta name="keywords" content="automated workout plan generation">
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 
-</head>
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous">
+
+</head>
 
 <body>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous" />
-
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="${root_url}/js/graphs.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
-<script type="text/javascript">
+<script src="${root_url}/js/all.js"></script>
+<script src="${root_url}/js/graphs.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
+<script>
 
     /// @function export_workout_to_zwo
     // Request a ZWO file.
@@ -51,7 +51,7 @@
     // Shows the date picker and submits a change to the workout date.
     function change_scheduled_time()
     {
-        let the_url = "${root_url}/api/1.0/update_planned_workout";
+        let api_url = "${root_url}/api/1.0/update_planned_workout";
         let scheduled_time = document.getElementById("scheduled_time").value;
         let dict = [];
         let timestamp = Date.parse(scheduled_time) / 1000;
@@ -59,10 +59,10 @@
         dict.push({["workout_id"] : "${workout_id}"});
         dict.push({["scheduled time"] : timestamp});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function create_point
@@ -171,7 +171,7 @@
     }
 
     // Called when the workout description is returned.
-    var process_workout_description = function(response)
+    function process_workout_description(response)
     {
         // Basic sanity check.
         if (response && response.length >= 3)
@@ -217,8 +217,66 @@
     // Request the URL that allows iCal to subscribe to the workouts calendar.
     function get_workout_description()
     {
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=json", cache: false, success: process_workout_description, dataType: "text" });
+        return new Promise(function(resolve, reject)
+        {
+            let api_url = "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=json";
+
+            send_get_request_async(api_url, function (response_code, response_text)
+            {
+                if (response_code == 200)
+                {
+                    process_workout_description(response_text);
+                    resolve();
+                }
+                else
+                {
+                    reject();
+                }
+            });
+        });
     };
+
+    /// @function process_activity_type_list
+    function process_activity_type_list(activity_type_list)
+    {
+        let activity_type_select = document.getElementById("activity_type_select");
+
+        activity_type_list.sort();
+
+        for (let i = 0; i < activity_type_list.length; i++)
+        {
+            let activity_type = activity_type_list[i];
+            let option = document.createElement("option");
+
+            option.value = activity_type;
+            option.text = activity_type;
+
+            activity_type_select.appendChild(option);
+        }
+    }
+
+    /// @function list_activity_types
+    // Get the list of all possible activity types. Needed to populate the activity type combo box.
+    function list_activity_types()
+    {
+        return new Promise(function(resolve, reject)
+        {
+            let api_url = "${root_url}/api/1.0/list_activity_types";
+
+            send_get_request_async(api_url, function (response_code, response_text)
+            {
+                if (response_code == 200)
+                {
+                    process_activity_type_list(response_text);
+                    resolve();
+                }
+                else
+                {
+                    reject();
+                }
+            });
+        });
+    }
 
     $(function()
     {
@@ -229,10 +287,24 @@
         });
     });
 
+    /// @function request_all_the_things
+    function request_all_the_things()
+    {
+        let promises = [];
+
+        let description_promise = get_workout_description();
+        promises.push(description_promise);
+
+        let activity_types_promise = list_activity_types();
+        promises.push(activity_types_promise);
+
+        Promise.allSettled(promises);
+    }
+
     $(document).ready(function()
     {
         // Things we need when the page is loaded.
-        get_workout_description();
+        request_all_the_things();
     });
 
 </script>

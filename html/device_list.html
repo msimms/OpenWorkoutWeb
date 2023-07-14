@@ -12,16 +12,16 @@
 <meta name="description" content="Lists all devices claimed by the logged in user">
 <meta name="keywords" content="device list">
 
-</head>
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+</head>
 
 <body>
 
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script type="text/javascript">
+<script src="${root_url}/js/all.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+<script>
 
     /// @function append_to_devices_table
     function append_to_devices_table(table, device_id, last_heard_from)
@@ -85,15 +85,16 @@ ${nav}
 
 <section class="block">
 
-    <table>
-        <td colspan="2">This page lists instances of the mobile app that are associated with this account. To associate an instance of the mobile app with your account, log in to your account from the mobile app and enable the Broadcast option. All of this can be found on the Settings page.</td><tr>
-        <td><img src="${root_url}/images/app_settings_screen.png" width="256" margin="20px"></td><td>
-            <div class="device_list">
-                <table id="Devices">
-                </table>
-            </div>
-        </td><tr>
-    </table>
+    <p>This page lists instances of the mobile app that are associated with this account.</p>
+
+    <div class="device_list">
+        <table id="Devices">
+        </table>
+    </div>
+
+    <p>To associate an instance of the mobile app with your account, log in to your account from the mobile app and enable the Broadcast option. All of this can be found on the Settings page.</p>
+
+    <p><img src="${root_url}/images/app_settings_screen.png" width="256" margin="20px" alt="Mobile app screenshot"></p>
 
 </section>
 

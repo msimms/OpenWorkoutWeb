@@ -9,23 +9,23 @@
 <link rel="stylesheet" href="${root_url}/css/site.css">
 
 <meta charset="UTF-8">
-<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 <meta name="description" content="User profile">
 <meta name="keywords" content="profile">
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 
-</head>
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous">
+
+</head>
 
 <body>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous" />
-
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script type="text/javascript">
+<script src="${root_url}/js/all.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+<script>
 
     var resting_hr = 0
     var max_hr = 0
@@ -61,24 +61,24 @@
     // Button handler for when the user updates their birthday.
     function update_birthday()
     {
-        let the_url = "${root_url}/api/1.0/update_profile";
+        let api_url = "${root_url}/api/1.0/update_profile";
         let birthday = document.getElementById("birthday").value;
         let dict = [];
         let timestamp = Date.parse(birthday) / 1000;
 
         dict.push({["birthday"] : timestamp});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function update_height
     // Button handler for when the user updates their height.
     function update_height()
     {
-        let the_url = "${root_url}/api/1.0/update_profile";
+        let api_url = "${root_url}/api/1.0/update_profile";
         let height = parseFloat(document.getElementById("height").value);
         let height_units = document.getElementById("height_units").innerHTML;
         let dict = [];
@@ -91,17 +91,17 @@
 
         dict.push({["height"] : height});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function update_weight
     // Button handler for when the user updates their weight.
     function update_weight()
     {
-        let the_url = "${root_url}/api/1.0/update_profile";
+        let api_url = "${root_url}/api/1.0/update_profile";
         let weight = parseFloat(document.getElementById("weight").value);
         let weight_units = document.getElementById("weight_units").innerHTML;
         let dict = [];
@@ -114,58 +114,58 @@
 
         dict.push({["weight"] : weight});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function update_biological_sex
     // Button handler for when the user updates their biological sex.
     function update_biological_sex()
     {
-        let the_url = "${root_url}/api/1.0/update_profile";
+        let api_url = "${root_url}/api/1.0/update_profile";
         let biological_sex = document.getElementById("biological_sex").value;
         let dict = [];
 
         dict.push({["biological sex"] : biological_sex});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function update_resting_hr
     // Button handler for when the user updates their resting heart rate.
     function update_resting_hr()
     {
-        let the_url = "${root_url}/api/1.0/update_profile";
+        let api_url = "${root_url}/api/1.0/update_profile";
         let resting_hr = document.getElementById("resting heart rate").value;
         let dict = [];
 
         dict.push({["resting heart rate"] : resting_hr});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function update_maximum_hr
     // Button handler for when the user updates their maximum heart rate.
     function update_maximum_hr()
     {
-        let the_url = "${root_url}/api/1.0/update_profile";
+        let api_url = "${root_url}/api/1.0/update_profile";
         let max_hr = document.getElementById("max heart rate").value;
         let dict = [];
 
         dict.push({["max heart rate"] : max_hr});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function append_to_pr_table
@@ -544,13 +544,13 @@ ${nav}
 
         <!-- Height -->
         <h2>Height</h2>
-        <input type="text" id="height" value="Not set"></input>  <label id="height_units"></label><br>
+        <input type="text" id="height" value="Not set">  <label id="height_units"></label><br>
         <button type="modern_button" onclick="update_height()">Update</button>
         <hr>
 
         <!-- Weight -->
         <h2>Weight</h2>
-        <input type="text" id="weight" value="Not set"></input>  <label id="weight_units"></label><br>
+        <input type="text" id="weight" value="Not set">  <label id="weight_units"></label><br>
         <button type="modern_button" onclick="update_weight()">Update</button>
         <hr>
 
@@ -565,31 +565,31 @@ ${nav}
 
         <!-- Resting Heart Rate -->
         <h2>Resting Heart Rate</h2>
-        <input type="text" id="resting heart rate" value="Not set"></input>  <label>bpm</label><br>
+        <input type="text" id="resting heart rate" value="Not set">  <label>bpm</label><br>
         <button type="modern_button" onclick="update_resting_hr()">Update</button>
         <hr>
 
         <!-- Maximum Heart Rate -->
         <h2>Maximum Heart Rate</h2>
-        <input type="text" id="max heart rate" value="Not set"></input>  <label>bpm</label><br>
+        <input type="text" id="max heart rate" value="Not set">  <label>bpm</label><br>
         <button type="modern_button" onclick="update_maximum_hr()">Update</button>
         <hr>
 
         <!-- Estimated Maximum Heart Rate -->
         <h2>Estimated Maximum Heart Rate</h2>
-        <input style="border:0" type="text" value="Not calculated" id="estimated max heart rate" readonly>  </input><label>bpm</label>
+        <input style="border:0" type="text" value="Not calculated" id="estimated max heart rate" readonly>  <label>bpm</label>
         <hr>
 
         <!-- BMI -->
         <h2>BMI</h2>
-        <input style="border:0" type="text" id="bmi" readonly></input><br>
+        <input style="border:0" type="text" id="bmi" readonly><br>
         <br>
         <b>Note:</b> Your Body Mass Index is your weight relative to your height.
         <hr>
 
         <!-- VO2 Max -->
         <h2>VO2 Max</h2>
-            <input style="border:0" type="text" id="vo2_max" readonly></input>
+            <input style="border:0" type="text" id="vo2_max" readonly>
         <hr>
 
         <!-- Heart Rate Zones -->
@@ -602,7 +602,7 @@ ${nav}
 
         <!-- FTP -->
         <h2>Estimated Functional Threshold Power (FTP)</h2>
-        <input style="border:0" type="text" id="ftp" readonly></input><br>
+        <input style="border:0" type="text" id="ftp" readonly><br>
         <p id="ftp_error"></p>
         <br>
         <b>Note:</b> Functional Threshold Power is the amount of power that you can exert over one hour at maximum effort. It is estimated from recent activity.
@@ -619,11 +619,11 @@ ${nav}
         <!-- Personal Records -->
         <h2>Personal Records</h2>
         <h3>Cycling</h3>
-            <table id="Cycling">
-            </table>
+        <table id="Cycling">
+        </table>
         <h3>Running</h3>
-            <table id="Running">
-            </table>
+        <table id="Running">
+        </table>
     </div>
 </section>
 

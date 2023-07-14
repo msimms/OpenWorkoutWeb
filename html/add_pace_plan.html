@@ -8,24 +8,24 @@
 <link rel="stylesheet" href="${root_url}/css/normalize.css">
 <link rel="stylesheet" href="${root_url}/css/site.css">
 
-<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
 <meta name="description" content="Allows the user to create a new pace plan">
 <meta name="keywords" content="Place plan generation">
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 <meta content="utf-8" http-equiv="encoding">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous">
 
 </head>
 
 <body>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous" />
+<script src="${root_url}/js/all.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+<script>
 
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script type="text/javascript">
     /// @function parse_HHMMSS
     // Parses the string for a time value in the format of HH:MM:SS where MM and SS ranges from 0 to 59.
     function parse_HHMMSS(str)
@@ -93,7 +93,7 @@
     // Button handler for when the user saves the pace plan.
     function save_pace_plan()
     {
-        let the_url = "${root_url}/api/1.0/create_pace_plan";
+        let api_url = "${root_url}/api/1.0/create_pace_plan";
         let name = document.getElementById("pace_plan_name").value;
         let description = document.getElementById("description").value;
         let distance = parseFloat(document.getElementById("distance").value);
@@ -144,13 +144,14 @@
         dict.push({["target splits"] : splits});
         dict.push({["target splits units"] : splits_units});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 window.location.replace('${root_url}/pace_plans');
             else
                 alert(response)
-        } );
+        });
     }
+
 </script>
 
 <section class="nav">
@@ -168,7 +169,7 @@ ${nav}
 
     <!-- Distance -->
     <h2>Distance</h2>
-    <input type="text" id="distance" value="10"></input>  
+    <input type="text" id="distance" value="10">
     <select id="distance_units">
         <option value="Kilometers">Kilometers</option>
         <option value="Miles">Miles</option>
@@ -176,11 +177,11 @@ ${nav}
 
     <!-- Target Time -->
     <h2>Target Time (hh:mm:ss)</h2>
-    <input type="text" id="target_time" value="01:00:00"></input><br>
+    <input type="text" id="target_time" value="01:00:00"><br>
 
     <!-- Splits -->
     <h2>Splits</h2>
-    <input type="text" id="splits" value="0"></input>  
+    <input type="text" id="splits" value="0">
     <select id="splits_units">
         <option value="Kilometers">Seconds Per Kilometer</option>
         <option value="Miles">Seconds Per Mile</option>
@@ -189,8 +190,7 @@ ${nav}
 
 <section class="block">
     <!-- Save Button -->
-    <hr>
-    <button type="button" onclick="save_pace_plan()">Save</button><br>
+    <button type="button" onclick="save_pace_plan()">Save Pace Plan</button><br>
 </section>
 
 </body>

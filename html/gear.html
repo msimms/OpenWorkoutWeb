@@ -12,20 +12,20 @@
 <meta name="description" content="Lists all gear belonging to the logged in user">
 <meta name="keywords" content="gear list">
 
-</head>
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous">
+
+</head>
 
 <body>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous" />
-
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
-<script type="text/javascript">
+<script src="${root_url}/js/all.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.js" integrity="sha256-FaYRflg3IJpVUN+JgijEHFUYgsn1wS1xRlcKTIgToIo=" crossorigin="anonymous"></script>
+<script>
 
     let new_gear_type = "shoes";
     let all_gear_records = [];
@@ -45,7 +45,7 @@
     /// @function create_gear
     function create_gear(gear_type)
     {
-        let the_url = "${root_url}/api/1.0/create_gear";
+        let api_url = "${root_url}/api/1.0/create_gear";
         let dict = [];
         let add_time_obj = document.getElementById("date_added");
         let add_time = Date.parse(add_time_obj.value);
@@ -65,7 +65,7 @@
         dict.push({["name"] : name});
         dict.push({["description"] : description});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 window.location.reload();
             else
@@ -76,7 +76,7 @@
     /// @function update_gear
     function update_gear(gear_type)
     {
-        let the_url = "${root_url}/api/1.0/update_gear";
+        let api_url = "${root_url}/api/1.0/update_gear";
         let dict = [];
         let add_time_obj = document.getElementById("date_added");
         let add_time = Date.parse(add_time_obj.value);
@@ -96,7 +96,7 @@
         dict.push({["name"] : name});
         dict.push({["description"] : description});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
                 window.location.reload();
             else
@@ -109,9 +109,9 @@
     {
         if (confirm('Are you sure you want to do this?'))
         {
-            let the_url = "${root_url}/api/1.0/delete_gear?gear_id=" + gear_id;
+            let api_url = "${root_url}/api/1.0/delete_gear?gear_id=" + gear_id;
 
-            send_delete_request_async(the_url, function(status, response) {
+            send_delete_request_async(api_url, function(status, response) {
                 if (status == 200)
                     window.location.reload();
                 else
@@ -125,33 +125,33 @@
     {
         if (confirm('Are you sure you want to do this?'))
         {
-            let the_url = "${root_url}/api/1.0/retire_gear";
+            let api_url = "${root_url}/api/1.0/retire_gear";
             let dict = [];
 
             dict.push({["gear_id"] : gear_id});
 
-            send_post_request_async(the_url, dict, function(status, response) {
+            send_post_request_async(api_url, dict, function(status, response) {
                 if (status == 200)
                     window.location.reload();
                 else
                     alert(response)
-            } );
+            });
         }
     }
 
     /// @function set_gear_default
     function set_gear_default(activity_type, gear_name)
     {
-        let the_url = "${root_url}/api/1.0/update_gear_defaults";
+        let api_url = "${root_url}/api/1.0/update_gear_defaults";
         let dict = [];
 
         dict.push({["activity_type"] : activity_type});
         dict.push({["name"] : gear_name});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function append_to_gear_table
@@ -250,9 +250,9 @@
     /// @function get_gear
     function get_gear()
     {
-        let the_url = "${root_url}/api/1.0/list_gear"
+        let api_url = "${root_url}/api/1.0/list_gear"
 
-        send_get_request_async(the_url, function (response_code, response_text)
+        send_get_request_async(api_url, function (response_code, response_text)
         {
             if (response_code == 200)
             {
@@ -277,15 +277,15 @@
                 // Now that we have all the gear, we can request the defaults.
                 get_gear_defaults();
             }
-        })
+        });
     }
 
     /// @function get_gear_defaults
     function get_gear_defaults()
     {
-        let the_url = "${root_url}/api/1.0/list_gear_defaults"
+        let api_url = "${root_url}/api/1.0/list_gear_defaults"
 
-        send_get_request_async(the_url, function (response_code, response_text)
+        send_get_request_async(api_url, function (response_code, response_text)
         {
             if (response_code == 200)
             {
@@ -297,7 +297,7 @@
                     append_to_defaults_table(record["activity_type"], record["name"]);
                 }
             }
-        })
+        });
     }
 
     /// @function get_new_gear_info
@@ -346,14 +346,14 @@ ${nav}
     <dialog id="newGearDialog">
         <form action="javascript:void(0);">
             <div>
-                Name:<br><input type="text" name="name" id="name" style="width:95%"><br>
-                Description:<br><input type="text" name="description" id="description" style="width:95%"><br>
-                Date Added:<br><input type="text" name="date_added" id="date_added" style="width:95%"><br>
-                Date Retired:<br><input type="text" name="date_retired" id="date_retired" style="width:95%"><br>
+                Name:<br><input type="text" name="name" id="name"><br>
+                Description:<br><input type="text" name="description" id="description"><br>
+                Date Added:<br><input type="text" name="date_added" id="date_added"><br>
+                Date Retired:<br><input type="text" name="date_retired" id="date_retired"><br>
             </div>
             <div>
                 <button value="cancel" formmethod="dialog">Cancel</button>
-                <button type="modern_button" onclick="create_new_gear()">Save</button>
+                <button type="submit" onclick="create_new_gear()">Save</button>
             </div>
         </form>
     </dialog>
@@ -361,7 +361,14 @@ ${nav}
     <div id="existing_gear">
         <h2>Bikes</h2>
         <table id="bikes" style="display: none;">
-            <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
+            <tbody>
+                <tr>
+                    <th scope="col"><b>Name</b></th>
+                    <th scope="col"><b>Description</b></th>
+                    <th scope="col"><b>Date Added</b></th>
+                    <th scope="col"><b>Date Retired</b></th>
+                </tr>
+            </tbody>
         </table>
         <button type="button" onclick="get_new_bike_info()">Add New Bike</button>
 
@@ -369,7 +376,14 @@ ${nav}
 
         <h2>Shoes</h2>
         <table id="shoes" style="display: none;">
-            <td><b>Name</b></td><td><b>Description</b></td><td><b>Date Added</b><td><b>Date Retired</b></td><tr>
+            <tbody>
+                <tr>
+                    <th scope="col"><b>Name</b></th>
+                    <th scope="col"><b>Description</b></th>
+                    <th scope="col"><b>Date Added</b></th>
+                    <th scope="col"><b>Date Retired</b></th>
+                </tr>
+            </tbody>
         </table>
         <button type="button" onclick="get_new_shoes_info()">Add New Shoes</button>
 
@@ -377,7 +391,12 @@ ${nav}
 
         <h2>Defaults</h2>
         <table id="defaults" style="display: none;">
-            <td><b>Sport</b></td><td><b>Default Gear</b></td><tr>
+            <tbody>
+                <tr>
+                    <th scope="col"><b>Sport</b></th>
+                    <th scope="col"><b>Default Gear</b></th>
+                </tr>
+            </tbody>
         </table>
     </div>
 </section>

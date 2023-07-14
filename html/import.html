@@ -12,26 +12,26 @@
 <meta name="description" content="Allows the user to import existing workout files">
 <meta name="keywords" content="import">
 
-</head>
+<link rel="shortcut icon" href="${root_url}/media/favicon.ico">
 
-<link rel="shortcut icon" href="${root_url}/media/favicon.ico" >
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="${root_url}/jquery-timepicker/jquery.timepicker.css">
+
+</head>
 
 <body>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous" />
-<link rel="stylesheet" type="text/css" href="${root_url}/jquery-timepicker/jquery.timepicker.css" />
-
-<script type="text/javascript" src="${root_url}/js/all.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script type="text/javascript" src="${root_url}/jquery-timepicker/jquery.timepicker.js"></script>
-<script type="text/javascript">
+<script src="${root_url}/js/all.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
+<script src="${root_url}/jquery-timepicker/jquery.timepicker.js"></script>
+<script>
 
     /// @function save
     /// Called when the user saves a manual entry.
     function save(target)
     {
-        let the_url = "${root_url}/api/1.0/add_activity";
+        let api_url = "${root_url}/api/1.0/add_activity";
         let dict = [];
         let sets = [];
         let inner_div = document.getElementById("manual_entry_div");
@@ -58,10 +58,10 @@
         dict.push({["time"] : activity_start});
         dict.push({["activity_type"] : activity_type});
 
-        send_post_request_async(the_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
                 alert(response)
-        } );
+        });
     }
 
     /// @function show_manual_entry_options
@@ -147,7 +147,7 @@
 ${nav}
 </section>
 
-<div class="import" style="width: 800px">
+<div class="import">
     <h2>Import File(s)</h2>
 
     <p>Accepted file types are .gpx, .tcx, and .fit formatted files.</p>
@@ -159,7 +159,7 @@ ${nav}
     </select><br>
     <table class="import" id="parsed_csv_table" style="display: none;"></table>
 
-    <script type="text/javascript">
+    <script>
         let DATE_TITLE = "Date";
         let SET_TITLE = "Set ";
 
@@ -330,14 +330,14 @@ ${nav}
                 };
                 reader.onload = function(e)
                 {
-                    let the_url = "${root_url}/api/1.0/upload_activity_file";
+                    let api_url = "${root_url}/api/1.0/upload_activity_file";
                     let dict = [];
                     let encoded_data = btoa(reader.result);
 
                     dict.push({["uploaded_file_name"] : file_obj.name});
                     dict.push({["uploaded_file_data"] : encoded_data});
 
-                    send_post_request_async(the_url, dict, function(status, response) {
+                    send_post_request_async(api_url, dict, function(status, response) {
                         if (status == 200)
                         {
                             update_file_status(file_obj.name, "Uploaded (Queued For Processing)", null);
@@ -349,7 +349,7 @@ ${nav}
                             alert(response);
                             reject();
                         }
-                    } );
+                    });
                 }
                 reader.readAsBinaryString(file_obj);
             });
@@ -433,7 +433,7 @@ ${nav}
                 // If we found data then add it.
                 if (activity_start > 0)
                 {
-                    let the_url = "${root_url}/api/1.0/add_activity";
+                    let api_url = "${root_url}/api/1.0/add_activity";
                     let dict = [];
                     let activity_type = document.getElementById("activity_type_select").value;
 
@@ -441,10 +441,10 @@ ${nav}
                     dict.push({["time"] : activity_start});
                     dict.push({["activity_type"] : activity_type});
 
-                    send_post_request_async(the_url, dict, function(status, response) {
+                    send_post_request_async(api_url, dict, function(status, response) {
                         if (status != 200)
                             alert(response)
-                    } );
+                    });
                 }
             }
         }
@@ -493,7 +493,7 @@ ${nav}
         setInterval(check_for_updates, 5000);
     </script>
 </div>
-    
+
 <div class="block" id="manual_entry_div">
 </div>
 
