@@ -61,8 +61,14 @@
 
         send_post_request_async(api_url, dict, function(status, response) {
             if (status != 200)
-                alert(response)
+                alert(response);
         });
+    }
+
+    /// @function change_activity_type
+    function change_activity_type()
+    {
+        alert("Not Implemented");
     }
 
     /// @function create_point
@@ -90,7 +96,7 @@
             current_x += (distance / pace) * 60;
         else
             current_x += duration;
-        return current_x
+        return current_x;
     }
 
     /// @function draw_workout_graph
@@ -207,11 +213,6 @@
             if (response_code == 200)
             {
                 process_activity_type_list(response_text, selected_activity_type);
-                resolve();
-            }
-            else
-            {
-                reject();
             }
         });
     }
@@ -266,11 +267,6 @@
             if (response_code == 200)
             {
                 process_workout_description(response_text);
-                resolve();
-            }
-            else
-            {
-                reject();
             }
         });
     };
@@ -298,7 +294,7 @@ ${nav}
 
 <section class="block">
     <h2 id="workout_type">Unknown</h2><br>
-    <select id="activity_type"></select><br>
+    <select id="activity_type" onchange="change_activity_type()"></select><br>
     <p id="description"></p>
     <input type="text" name="scheduled_time" id="scheduled_time"><br>
     <button type="button" onclick="change_scheduled_time()">Update</button>
