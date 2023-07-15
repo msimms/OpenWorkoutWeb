@@ -68,7 +68,18 @@
     /// @function change_activity_type
     function change_activity_type()
     {
-        alert("Not Implemented");
+        let api_url = "${root_url}/api/1.0/update_planned_workout";
+        let activity_type = document.getElementById("activity_type").value;
+        let dict = [];
+        let timestamp = Date.parse(scheduled_time) / 1000;
+
+        dict.push({["workout_id"] : "${workout_id}"});
+        dict.push({["activity type"] : activity_type});
+
+        send_post_request_async(api_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response);
+        });
     }
 
     /// @function create_point

@@ -243,6 +243,8 @@ class Workout(object):
             result += ".\n"
 
         # Add each interval.
+        if len(self.intervals) == 0:
+            result += "Steady state, no specified intensity"
         for interval in self.intervals:
 
             num_repeats = 0
