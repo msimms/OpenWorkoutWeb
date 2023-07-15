@@ -170,76 +170,14 @@
         draw_graph("", "", 0, 0, graph_data, "", "", get_graph_color("Intervals"), false);
     }
 
-    // Called when the workout description is returned.
-    function process_workout_description(response)
-    {
-        // Basic sanity check.
-        if (response && response.length >= 3)
-        {
-            let obj_list = JSON.parse(response);
-            if (obj_list == null)
-                return;
-
-            // The title
-            let workout_type = obj_list["workout type"]
-            let activity_type = obj_list["activity type"]
-            if (workout_type.length > 0)
-            {
-                document.getElementById("workout_type").textContent = workout_type;
-            }
-            else
-            {
-                document.getElementById("workout_type").textContent = activity_type;
-            }
-
-            // Description
-            let desc_elem = document.getElementById("description");
-            let description = obj_list["description"];
-            description = "<br>" + description.split("\\n").join("<br>");
-            desc_elem.innerHTML = description;
-
-            // Scheduled time
-            let scheduled_time_elem = document.getElementById("scheduled_time");
-            let scheduled_time = obj_list["scheduled time"];
-            let n = new Date(scheduled_time * 1000);
-            scheduled_time_elem.placeholder = n.toLocaleDateString();
-
-            // Graph
-            draw_workout_graph(obj_list)
-        }
-        else
-        {
-            alert("An invalid response was received!");
-        }
-    };
-
-    /// @function get_workout_description
-    // Request the URL that allows iCal to subscribe to the workouts calendar.
-    function get_workout_description()
-    {
-        return new Promise(function(resolve, reject)
-        {
-            let api_url = "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=json";
-
-            send_get_request_async(api_url, function (response_code, response_text)
-            {
-                if (response_code == 200)
-                {
-                    process_workout_description(response_text);
-                    resolve();
-                }
-                else
-                {
-                    reject();
-                }
-            });
-        });
-    };
-
     /// @function process_activity_type_list
-    function process_activity_type_list(activity_type_list)
+    function process_activity_type_list(response, selected_activity_type)
     {
-        let activity_type_select = document.getElementById("activity_type_select");
+        let activity_type_list = JSON.parse(response);
+        if (activity_type_list == null)
+            return;
+
+        let activity_type_select = document.getElementById("activity_type");
 
         activity_type_list.sort();
 
@@ -251,32 +189,91 @@
             option.value = activity_type;
             option.text = activity_type;
 
+            if (selected_activity_type == activity_type)
+                option.selected = true;
+
             activity_type_select.appendChild(option);
         }
     }
 
     /// @function list_activity_types
     // Get the list of all possible activity types. Needed to populate the activity type combo box.
-    function list_activity_types()
+    function list_activity_types(selected_activity_type)
     {
-        return new Promise(function(resolve, reject)
-        {
-            let api_url = "${root_url}/api/1.0/list_activity_types";
+        let api_url = "${root_url}/api/1.0/list_activity_types";
 
-            send_get_request_async(api_url, function (response_code, response_text)
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
             {
-                if (response_code == 200)
-                {
-                    process_activity_type_list(response_text);
-                    resolve();
-                }
-                else
-                {
-                    reject();
-                }
-            });
+                process_activity_type_list(response_text, selected_activity_type);
+                resolve();
+            }
+            else
+            {
+                reject();
+            }
         });
     }
+
+    // Called when the workout description is returned.
+    function process_workout_description(response)
+    {
+        let obj_list = JSON.parse(response);
+        if (obj_list == null)
+            return;
+
+        // The title
+        let workout_type_obj = document.getElementById("workout_type");
+        let workout_type = obj_list["workout type"]
+        let activity_type = obj_list["activity type"]
+        if (workout_type.length > 0)
+        {
+            workout_type_obj.textContent = workout_type;
+        }
+        else
+        {
+            workout_type_obj.hidden = true;
+        }
+
+        // Description
+        let desc_elem = document.getElementById("description");
+        let description = obj_list["description"];
+        description = "<br>" + description.split("\\n").join("<br>");
+        desc_elem.innerHTML = description;
+
+        // Scheduled time
+        let scheduled_time_elem = document.getElementById("scheduled_time");
+        let scheduled_time = obj_list["scheduled time"];
+        let n = new Date(scheduled_time * 1000);
+        scheduled_time_elem.placeholder = n.toLocaleDateString();
+
+        // Graph
+        draw_workout_graph(obj_list);
+
+        // Activity type combo box.
+        list_activity_types(activity_type);
+    };
+
+    /// @function get_workout_description
+    // Request the URL that allows iCal to subscribe to the workouts calendar.
+    function get_workout_description()
+    {
+        let api_url = "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=json";
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                process_workout_description(response_text);
+                resolve();
+            }
+            else
+            {
+                reject();
+            }
+        });
+    };
 
     $(function()
     {
@@ -287,24 +284,10 @@
         });
     });
 
-    /// @function request_all_the_things
-    function request_all_the_things()
-    {
-        let promises = [];
-
-        let description_promise = get_workout_description();
-        promises.push(description_promise);
-
-        let activity_types_promise = list_activity_types();
-        promises.push(activity_types_promise);
-
-        Promise.allSettled(promises);
-    }
-
     $(document).ready(function()
     {
         // Things we need when the page is loaded.
-        request_all_the_things();
+        get_workout_description();
     });
 
 </script>
@@ -314,18 +297,19 @@ ${nav}
 </section>
 
 <section class="block">
-    <h2 id="workout_type"></h2>
+    <h2 id="workout_type">Unknown</h2><br>
+    <select id="activity_type"></select><br>
     <p id="description"></p>
     <input type="text" name="scheduled_time" id="scheduled_time"><br>
-    <button type="modern_button" onclick="change_scheduled_time()">Update</button>
+    <button type="button" onclick="change_scheduled_time()">Update</button>
 </section>
 
 <div id="charts">
 </div>
 
 <section class="block">
-    <button type="modern_button" onclick="export_workout_to_zwo()">Export to ZWO</button><br>
-    <button type="modern_button" onclick="export_workout_to_ical()">Export to iCal</button>
+    <button type="button" onclick="export_workout_to_zwo()">Export to ZWO</button><br>
+    <button type="button" onclick="export_workout_to_ical()">Export to iCal</button>
 </section>
 
 </body>
