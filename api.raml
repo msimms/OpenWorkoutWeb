@@ -795,6 +795,12 @@ types:
         responses:
             200: application/json
             500: An internal exception was thrown.
+/list_workout_types_for_activity:
+    description: Returns a the list of workout types that that correspond with the given activity type (i.e. running has easy runs, tempo runs, etc.).
+    get:
+        responses:
+            200: application/json
+            500: An internal exception was thrown.
 /list_unsynched_activities:
     description: Returns any changes since the last time the device was synched.
     get:

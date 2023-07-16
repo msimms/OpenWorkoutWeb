@@ -2599,6 +2599,14 @@ class Api(object):
         """Returns the list of all activity types the software understands."""
         return True, json.dumps(self.data_mgr.retrieve_activity_types())
 
+    def handle_list_workout_types_for_activity(self, values):
+        """Returns a the list of workout types that that correspond with the given activity type (i.e. running has easy runs, tempo runs, etc.)."""
+
+        # Required parameters.
+        if Keys.ACTIVITY_TYPE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity type not specified.")
+        return True, json.dumps(self.data_mgr.retrieve_workout_types_for_activity(values[Keys.ACTIVITY_TYPE_KEY]))
+
     def handle_list_unsynched_activities(self, values):
         """Returns any changes since the last time the device was synched."""
         if self.user_id is None:
@@ -2724,6 +2732,8 @@ class Api(object):
             return self.handle_list_api_keys()
         elif request == 'list_activity_types':
             return self.handle_list_activity_types()
+        elif request == 'list_workout_types_for_activity':
+            return self.handle_list_workout_types_for_activity(values)
         elif request == 'list_unsynched_activities':
             return self.handle_list_unsynched_activities(values)
         elif request == 'list_users_without_devices':

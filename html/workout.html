@@ -82,6 +82,23 @@
         });
     }
 
+    /// @function change_workout_type
+    function change_workout_type()
+    {
+        let api_url = "${root_url}/api/1.0/update_planned_workout";
+        let workout_type = document.getElementById("workout_type").value;
+        let dict = [];
+        let timestamp = Date.parse(scheduled_time) / 1000;
+
+        dict.push({["workout_id"] : "${workout_id}"});
+        dict.push({["workout type"] : workout_type});
+
+        send_post_request_async(api_url, dict, function(status, response) {
+            if (status != 200)
+                alert(response);
+        });
+    }
+
     /// @function create_point
     function create_point(current_time, obj)
     {
@@ -193,10 +210,9 @@
         let activity_type_list = JSON.parse(response);
         if (activity_type_list == null)
             return;
-
-        let activity_type_select = document.getElementById("activity_type");
-
         activity_type_list.sort();
+
+        let activity_type_obj = document.getElementById("activity_type");
 
         for (let i = 0; i < activity_type_list.length; i++)
         {
@@ -209,7 +225,53 @@
             if (selected_activity_type == activity_type)
                 option.selected = true;
 
-            activity_type_select.appendChild(option);
+            activity_type_obj.appendChild(option);
+        }
+    }
+
+    /// @function process_workout_type_list
+    function process_workout_type_list(response, selected_workout_type)
+    {
+        let workout_type_list = JSON.parse(response);
+        if (workout_type_list == null)
+            return;
+        workout_type_list.sort();
+
+        let workout_type_obj = document.getElementById("workout_type");
+        if (workout_type_list.length == 0)
+        {
+            workout_type_obj.hidden = true;
+        }
+        else
+        {
+            let selected = false;
+
+            for (let i = 0; i < workout_type_list.length; i++)
+            {
+                let workout_type = workout_type_list[i];
+                let option = document.createElement("option");
+
+                option.value = workout_type;
+                option.text = workout_type;
+
+                if (selected_workout_type == workout_type)
+                {
+                    option.selected = true;
+                    selected = true;
+                }
+
+                workout_type_obj.appendChild(option);
+            }
+
+            if (selected == false)
+            {
+                let option = document.createElement("option");
+
+                option.value = "";
+                option.text = "";
+                option.selected = true;
+                workout_type_obj.appendChild(option);
+            }
         }
     }
 
@@ -228,6 +290,21 @@
         });
     }
 
+    /// @function list_workout_types
+    // Get the list of all possible activity types. Needed to populate the activity type combo box.
+    function list_workout_types(selected_activity_type, selected_workout_type)
+    {
+        let api_url = "${root_url}/api/1.0/list_workout_types_for_activity?activity_type=" + selected_activity_type;
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                process_workout_type_list(response_text, selected_activity_type);
+            }
+        });
+    }
+
     // Called when the workout description is returned.
     function process_workout_description(response)
     {
@@ -237,15 +314,23 @@
 
         // The title
         let workout_type_obj = document.getElementById("workout_type");
+        let activity_type_obj = document.getElementById("activity_type");
         let workout_type = obj_list["workout type"]
         let activity_type = obj_list["activity type"]
-        if (workout_type.length > 0)
+        if (workout_type.length == 0)
         {
-            workout_type_obj.textContent = workout_type;
         }
         else
         {
-            workout_type_obj.hidden = true;
+            workout_type_obj.textContent = workout_type;
+        }
+        if (activity_type.length == 0)
+        {
+            activity_type.hidden = true;
+        }
+        else
+        {
+            activity_type.textContent = activity_type;
         }
 
         // Description
@@ -263,8 +348,9 @@
         // Graph
         draw_workout_graph(obj_list);
 
-        // Activity type combo box.
+        // Populate the activity type and workout type combo boxes.
         list_activity_types(activity_type);
+        list_workout_types(activity_type, workout_type);
     };
 
     /// @function get_workout_description
@@ -304,7 +390,7 @@ ${nav}
 </section>
 
 <section class="block">
-    <h2 id="workout_type">Unknown</h2><br>
+    <select id="workout_type" onchange="change_workout_type()"></select><br>
     <select id="activity_type" onchange="change_activity_type()"></select><br>
     <p id="description"></p>
     <input type="text" name="scheduled_time" id="scheduled_time"><br>

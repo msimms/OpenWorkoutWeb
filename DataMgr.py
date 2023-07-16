@@ -1864,6 +1864,16 @@ class DataMgr(Importer.ActivityWriter):
         all_activity_types.append(Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY)
         return all_activity_types
 
+    def retrieve_workout_types_for_activity(self, activity_type):
+        """Returns a the list of workout types that that correspond with the given activity type (i.e. running has easy runs, tempo runs, etc.)."""
+        if activity_type in Keys.FOOT_BASED_ACTIVITIES:
+            return Keys.RUN_WORKOUTS
+        if activity_type in Keys.CYCLING_ACTIVITIES:
+            return Keys.BIKE_WORKOUTS
+        if activity_type in Keys.SWIMMING_ACTIVITIES:
+            return Keys.SWIM_WORKOUTS
+        return []
+
     def estimate_vo2_max(self, resting_hr, max_hr):
         """Estimates VO2 Max, based on resting and max heart rates."""
         calc = VO2MaxCalculator.VO2MaxCalculator()
