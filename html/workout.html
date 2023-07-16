@@ -390,17 +390,23 @@ ${nav}
 </section>
 
 <section class="block">
-    <select id="workout_type" onchange="change_workout_type()"></select><br>
+    <h3>Scheduled Date</h3>
+    <input type="text" name="scheduled_time" id="scheduled_time" onchange="change_scheduled_time()"><br>
+</section>
+
+<section class="block">
+    <h3>Definition</h3>
     <select id="activity_type" onchange="change_activity_type()"></select><br>
+    <select id="workout_type" onchange="change_workout_type()"></select><br>
+    <h3>Description</h3>
     <p id="description"></p>
-    <input type="text" name="scheduled_time" id="scheduled_time"><br>
-    <button type="button" onclick="change_scheduled_time()">Update</button>
 </section>
 
 <div id="charts">
 </div>
 
 <section class="block">
+    <h3>Export</h3>
     <button type="button" onclick="export_workout_to_zwo()">Export to ZWO</button><br>
     <button type="button" onclick="export_workout_to_ical()">Export to iCal</button>
 </section>
