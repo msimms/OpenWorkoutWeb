@@ -539,7 +539,7 @@ def admin():
 def api(version, method):
     """Endpoint for API calls."""
     response = ""
-    code = 200
+    code = 500
     try:
         # The the API params.
         if flask.request.method == 'GET':
