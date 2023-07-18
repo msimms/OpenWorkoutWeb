@@ -74,10 +74,12 @@ class UserMgr(object):
         if len(password) < MIN_PASSWORD_LEN:
             raise Exception("The password is too short.")
 
+        # Get the exsting password hash for the user.
         _, db_hash1, _ = self.database.retrieve_user(email)
         if db_hash1 is None:
             raise Exception("The user (" + email + ") could not be found.")
 
+        # Validate the provided password against the hash from the database.
         if isinstance(password, str):
             password = password.encode()
         if isinstance(db_hash1, str):
@@ -96,9 +98,13 @@ class UserMgr(object):
             raise Exception("The password is too short.")
         if password1 != password2:
             raise Exception("The passwords do not match.")
-        if self.database.retrieve_user(email) is None:
+        
+        # Make sure this user doesn't already exist.
+        _, db_hash1, _ = self.database.retrieve_user(email)
+        if db_hash1 is not None:
             raise Exception("The user already exists.")
 
+        # Generate the salted hash of the password.
         salt = bcrypt.gensalt()
         computed_hash = bcrypt.hashpw(password1.encode('utf-8'), salt)
         if not self.database.create_user(email, realname, computed_hash):
