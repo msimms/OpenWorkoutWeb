@@ -493,24 +493,28 @@ class Api(object):
             raise ApiException.ApiAuthenticationException("Invalid email address.")
         password = unquote_plus(values[Keys.PASSWORD_KEY])
 
+        # Validate the credentials.
         try:
             if not self.user_mgr.authenticate_user(email, password):
                 raise ApiException.ApiAuthenticationException("Authentication failed.")
         except Exception as e:
             raise ApiException.ApiAuthenticationException(str(e))
 
+        # Make sure the device the user is using is registered to this user.
         if Keys.DEVICE_KEY in values:
             device_str = unquote_plus(values[Keys.DEVICE_KEY])
             result = self.user_mgr.create_user_device(email, device_str)
         else:
             result = True
 
+        # Create session information for this new login.
         cookie, expiry = self.user_mgr.create_new_session(email)
         if not cookie:
             raise ApiException.ApiAuthenticationException("Session cookie not generated.")
         if not expiry:
             raise ApiException.ApiAuthenticationException("Session expiry not generated.")
 
+        # Encode the session info.
         session_data = {}
         session_data[Keys.SESSION_TOKEN_KEY] = cookie
         session_data[Keys.SESSION_EXPIRY_KEY] = expiry
@@ -553,18 +557,21 @@ class Api(object):
         else:
             device_str = ""
 
+        # Add the user to the database, should fail if the user already exists.
         try:
             if not self.user_mgr.create_user(email, realname, password1, password2, device_str):
                 raise Exception("User creation failed.")
         except:
             raise Exception("User creation failed.")
 
+        # The new user should start in a logged-in state, so generate session info.
         cookie, expiry = self.user_mgr.create_new_session(email)
         if not cookie:
             raise ApiException.ApiAuthenticationException("Session cookie not generated.")
         if not expiry:
             raise ApiException.ApiAuthenticationException("Session expiry not generated.")
 
+        # Encode the session info.
         session_data = {}
         session_data[Keys.SESSION_TOKEN_KEY] = cookie
         session_data[Keys.SESSION_EXPIRY_KEY] = expiry
@@ -1239,6 +1246,7 @@ class Api(object):
         if not InputChecker.is_email_address(target_email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
 
+        # Need the user ID of the desired friend.
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise ApiException.ApiMalformedRequestException("Target user does not exist.")
@@ -1261,6 +1269,7 @@ class Api(object):
         if not InputChecker.is_email_address(target_email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
 
+        # Need the user ID of the desired friend.
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise ApiException.ApiMalformedRequestException("Target user does not exist.")
@@ -1283,6 +1292,7 @@ class Api(object):
         if not InputChecker.is_email_address(target_email):
             raise ApiException.ApiMalformedRequestException("Invalid email address.")
 
+        # Need the user ID of the desired person to un-friend.
         target_id, _, _ = self.user_mgr.retrieve_user(target_email)
         if target_id is None:
             raise ApiException.ApiMalformedRequestException("Target user does not exist.")
@@ -1345,10 +1355,12 @@ class Api(object):
         if not export_format in ['csv', 'gpx', 'tcx']:
             raise ApiException.ApiMalformedRequestException("Invalid export format.")
 
+        # Retrieve the activity and make sure it's legal to for the logged in user to have access to it.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if not self.activity_can_be_viewed(activity):
             return self.error("The requested activity is not viewable to this user.")
 
+        # Export it to the desired format.
         exporter = Exporter.Exporter()
         result = exporter.export(activity, None, export_format)
 
