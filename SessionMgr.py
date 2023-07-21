@@ -92,10 +92,16 @@ class CustomSessionMgr(SessionMgr):
 
     def get_logged_in_user_from_cookie(self, session_cookie):
         """Returns the username associated with the specified session cookie."""
-        session_data = self.database.retrieve_session_data(session_cookie)
-        if session_data is not None:
-            user = session_data[0]
-            return user
+        session_user, session_expiry = self.database.retrieve_session_data(session_cookie)
+        if session_user is not None and session_expiry is not None:
+
+            # Is the token still valid.
+            now = time.time()
+            if now < session_expiry:
+                return session_user
+
+            # Token is expired, so delete it.
+            self.database.delete_session_token(session_cookie)
         return None
 
     def create_new_session(self, username):
