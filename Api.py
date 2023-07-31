@@ -435,9 +435,10 @@ class Api(object):
 
         response = {}
 
-        for summary_item in values[Keys.SUMMARY_ITEMS_LIST_KEY].split(','):
-            if summary_item in activity_summary:
-                response[summary_item] = activity_summary[summary_item]
+        if activity_summary is not None:
+            for summary_item in values[Keys.SUMMARY_ITEMS_LIST_KEY].split(','):
+                if summary_item in activity_summary:
+                    response[summary_item] = activity_summary[summary_item]
 
         return True, json.dumps(response)
 
