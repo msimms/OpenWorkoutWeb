@@ -519,7 +519,7 @@ class Api(object):
         session_data = {}
         session_data[Keys.SESSION_TOKEN_KEY] = cookie
         session_data[Keys.SESSION_EXPIRY_KEY] = expiry
-        session_data[Keys.USER_ID_KEY] = str(self.user_id)
+        session_data[Keys.USER_ID_KEY] = str(self.user_mgr.get_logged_in_user_id())
         json_result = json.dumps(session_data, ensure_ascii=False)
 
         return result, json_result
@@ -577,7 +577,7 @@ class Api(object):
         session_data = {}
         session_data[Keys.SESSION_TOKEN_KEY] = cookie
         session_data[Keys.SESSION_EXPIRY_KEY] = expiry
-        session_data[Keys.USER_ID_KEY] = self.user_id
+        session_data[Keys.USER_ID_KEY] = str(self.user_mgr.get_logged_in_user_id())
         json_result = json.dumps(session_data, ensure_ascii=False)
 
         return True, json_result
