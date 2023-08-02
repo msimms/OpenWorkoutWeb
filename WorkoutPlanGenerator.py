@@ -449,7 +449,7 @@ class WorkoutPlanGenerator(object):
         workouts = []
 
         try:
-            user_id = self.user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY]
+            user_id = self.user_obj[Keys.USER_ID_KEY]
 
             # When was the last time a plan was generated?
 

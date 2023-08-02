@@ -28,6 +28,7 @@
 SESSION_KEY = "current_session_key"
 DATABASE_ID_KEY = "_id"
 USERNAME_KEY = "username" # Login name for a user
+USER_ID_KEY = "user_id" # Unique identifier for a user
 PASSWORD_KEY = "password" # User's password
 PASSWORD1_KEY = "password1" # User's password when creating an account
 PASSWORD2_KEY = "password2" # User's confirmation password when creating an account
@@ -156,7 +157,6 @@ USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, USER_PREFERRED_UNITS_KEY, USER_PREFERRED_
 USER_SETTINGS_LAST_UPDATED_KEY = "last updated" # Time when the user settings where last updated
 
 # Personal records.
-RECORDS_USER_ID = "user_id"
 RECORD_NAME_KEY = "record_name"
 PERSONAL_RECORDS_KEY = "records"
 
@@ -172,7 +172,6 @@ TID_POLARIZED = [85, 10, 25]
 TID_PYRAMIDAL = [75, 25, 10]
 
 # Workout plans.
-WORKOUT_PLAN_USER_ID_KEY = "user_id"
 WORKOUT_PLAN_CALENDAR_ID_KEY = "calendar id"
 WORKOUT_LIST_KEY = "workouts"
 WORKOUT_ID_KEY = "workout_id"
@@ -445,7 +444,6 @@ MULTISPORT_ACTIVITIES = [ TYPE_TRIATHLON_KEY, TYPE_DUATHLON_KEY ]
 UNNAMED_ACTIVITY_TITLE = "Unnamed"
 
 # Used to track deferred tasks.
-DEFERRED_TASKS_USER_ID = "user_id"
 TASKS_KEY = "tasks"
 TASK_CELERY_ID_KEY = "celery task id"
 TASK_INTERNAL_ID_KEY = "internal task id"

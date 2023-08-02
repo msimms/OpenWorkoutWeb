@@ -76,7 +76,7 @@ class AnalysisScheduler(object):
         import Keys
 
         user_obj = {}
-        user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
+        user_obj[Keys.USER_ID_KEY] = user_id
 
         internal_task_id = uuid.uuid4()
         plan_task = generate_workout_plan_for_user.delay(dumps(user_obj), internal_task_id)
@@ -90,7 +90,7 @@ class AnalysisScheduler(object):
         import Keys
 
         user_obj = {}
-        user_obj[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
+        user_obj[Keys.USER_ID_KEY] = user_id
 
         internal_task_id = uuid.uuid4()
         plan_task = generate_workout_plan_from_inputs.delay(dumps(user_obj), internal_task_id)

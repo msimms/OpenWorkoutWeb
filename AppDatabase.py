@@ -759,11 +759,11 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user's records collection.
             user_id_str = str(user_id)
-            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id_str })
+            user_records = self.records_collection.find_one({ Keys.USER_ID_KEY: user_id_str })
 
             # If the collection was found.
             if user_records is None:
-                post = { Keys.RECORDS_USER_ID: user_id_str, Keys.PERSONAL_RECORDS_KEY: records }
+                post = { Keys.USER_ID_KEY: user_id_str, Keys.PERSONAL_RECORDS_KEY: records }
                 return insert_into_collection(self.records_collection, post)
         except:
             self.log_error(traceback.format_exc())
@@ -782,7 +782,7 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user's records collection.
             user_id_str = str(user_id)
-            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id_str })
+            user_records = self.records_collection.find_one({ Keys.USER_ID_KEY: user_id_str })
 
             # If the collection was found.
             if user_records is not None:
@@ -802,7 +802,7 @@ class MongoDatabase(Database.Database):
         try:
             # Delete the user's records collection.
             user_id_str = str(user_id)
-            deleted_result = self.records_collection.delete_one({ Keys.RECORDS_USER_ID: user_id_str })
+            deleted_result = self.records_collection.delete_one({ Keys.USER_ID_KEY: user_id_str })
             if deleted_result is not None:
                 return True
         except:
@@ -837,7 +837,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's records collection.
-            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
+            user_records = self.records_collection.find_one({ Keys.USER_ID_KEY: user_id })
             if user_records is not None:
                 bests[Keys.ACTIVITY_TYPE_KEY] = activity_type
                 bests[Keys.ACTIVITY_START_TIME_KEY] = activity_time
@@ -855,7 +855,7 @@ class MongoDatabase(Database.Database):
             return {}
 
         try:
-            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
+            user_records = self.records_collection.find_one({ Keys.USER_ID_KEY: user_id })
             if user_records is not None:
                 bests = {}
 
@@ -883,7 +883,7 @@ class MongoDatabase(Database.Database):
             return {}
 
         try:
-            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
+            user_records = self.records_collection.find_one({ Keys.USER_ID_KEY: user_id })
             if user_records is not None:
                 bests = {}
 
@@ -914,7 +914,7 @@ class MongoDatabase(Database.Database):
             return False
 
         try:
-            user_records = self.records_collection.find_one({ Keys.RECORDS_USER_ID: user_id })
+            user_records = self.records_collection.find_one({ Keys.USER_ID_KEY: user_id })
             if user_records is not None:
                 user_records[activity_id] = {}
                 #user_records.pop(activity_id)
@@ -2041,16 +2041,16 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's workouts document.
-            workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
+            workouts_doc = self.workouts_collection.find_one({ Keys.USER_ID_KEY: user_id })
 
             # If the workouts document was not found then create it.
             if workouts_doc is None:
                 post = {}
-                post[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
+                post[Keys.USER_ID_KEY] = user_id
                 post[Keys.WORKOUT_PLAN_CALENDAR_ID_KEY] = str(uuid.uuid4()) # Create a calendar ID
                 post[Keys.WORKOUT_LIST_KEY] = []
                 insert_into_collection(self.workouts_collection, post)
-                workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
+                workouts_doc = self.workouts_collection.find_one({ Keys.USER_ID_KEY: user_id })
 
             # If the workouts document was found (or created).
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
@@ -2092,7 +2092,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's workouts document.
-            workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
+            workouts_doc = self.workouts_collection.find_one({ Keys.USER_ID_KEY: user_id })
 
             # If the workouts document was found.
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
@@ -2119,7 +2119,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's workouts document.
-            workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
+            workouts_doc = self.workouts_collection.find_one({ Keys.USER_ID_KEY: user_id })
 
             # If the workouts document was found.
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
@@ -2145,7 +2145,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's workouts document.
-            workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
+            workouts_doc = self.workouts_collection.find_one({ Keys.USER_ID_KEY: user_id })
 
             # If the workouts document was found and it has a calendar ID.
             if workouts_doc is not None and Keys.WORKOUT_PLAN_CALENDAR_ID_KEY in workouts_doc:
@@ -2168,12 +2168,12 @@ class MongoDatabase(Database.Database):
             workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_CALENDAR_ID_KEY: calendar_id })
 
             # If the workouts document was found then return the workouts list.
-            if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc and Keys.WORKOUT_PLAN_USER_ID_KEY in workouts_doc:
+            if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc and Keys.USER_ID_KEY in workouts_doc:
                 workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
 
                 # Create an object for each workout in the list.
                 for workout in workouts_list:
-                    workout_obj = Workout.Workout(workouts_doc[Keys.WORKOUT_PLAN_USER_ID_KEY])
+                    workout_obj = Workout.Workout(workouts_doc[Keys.USER_ID_KEY])
                     workout_obj.from_dict(workout)
                     workouts.append(workout_obj)
         except:
@@ -2192,15 +2192,15 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's workouts document.
-            workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
+            workouts_doc = self.workouts_collection.find_one({ Keys.USER_ID_KEY: user_id })
 
             # If the workouts document was not found then create it.
             if workouts_doc is None:
                 post = {}
-                post[Keys.WORKOUT_PLAN_USER_ID_KEY] = user_id
+                post[Keys.USER_ID_KEY] = user_id
                 post[Keys.WORKOUT_LIST_KEY] = []
                 insert_into_collection(self.workouts_collection, post)
-                workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
+                workouts_doc = self.workouts_collection.find_one({ Keys.USER_ID_KEY: user_id })
 
             # If the workouts document was found.
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
@@ -2221,7 +2221,7 @@ class MongoDatabase(Database.Database):
 
         try:
             # Find the user's workouts document.
-            workouts_doc = self.workouts_collection.find_one({ Keys.WORKOUT_PLAN_USER_ID_KEY: user_id })
+            workouts_doc = self.workouts_collection.find_one({ Keys.USER_ID_KEY: user_id })
 
             # If the workouts document was found.
             if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
@@ -2238,8 +2238,8 @@ class MongoDatabase(Database.Database):
             user_ids = []
             workout_docs = self.workouts_collection.find({ Keys.WORKOUT_LAST_SCHEDULED_WORKOUT_TIME_KEY: { "$lt": time.time() } })
             for workout_doc in workout_docs:
-                if Keys.WORKOUT_PLAN_USER_ID_KEY in workout_doc:
-                    user_id = workout_doc[Keys.WORKOUT_PLAN_USER_ID_KEY]
+                if Keys.USER_ID_KEY in workout_doc:
+                    user_id = workout_doc[Keys.USER_ID_KEY]
                     user_ids.append(user_id)
         except:
             self.log_error(traceback.format_exc())
@@ -2814,13 +2814,13 @@ class MongoDatabase(Database.Database):
             user_id_str = str(user_id)
 
             # Find the user's tasks document.
-            user_tasks = self.tasks_collection.find_one({ Keys.DEFERRED_TASKS_USER_ID: user_id_str })
+            user_tasks = self.tasks_collection.find_one({ Keys.USER_ID_KEY: user_id_str })
 
             # If the user's tasks document was not found then create it.
             if user_tasks is None:
-                post = { Keys.DEFERRED_TASKS_USER_ID: user_id }
+                post = { Keys.USER_ID_KEY: user_id }
                 insert_into_collection(self.tasks_collection, post)
-                user_tasks = self.tasks_collection.find_one({ Keys.DEFERRED_TASKS_USER_ID: user_id_str })
+                user_tasks = self.tasks_collection.find_one({ Keys.USER_ID_KEY: user_id_str })
 
             # If the user's tasks document was found.
             if user_tasks is not None:
@@ -2860,7 +2860,7 @@ class MongoDatabase(Database.Database):
             user_id_str = str(user_id)
 
             # Find the user's tasks document.
-            user_tasks = self.tasks_collection.find_one({ Keys.DEFERRED_TASKS_USER_ID: user_id_str })
+            user_tasks = self.tasks_collection.find_one({ Keys.USER_ID_KEY: user_id_str })
 
             # If the user's tasks document was found.
             if user_tasks is not None and Keys.TASKS_KEY in user_tasks:
@@ -2888,7 +2888,7 @@ class MongoDatabase(Database.Database):
             internal_task_id_str = str(internal_task_id)
 
             # Find the user's tasks document.
-            user_tasks = self.tasks_collection.find_one({ Keys.DEFERRED_TASKS_USER_ID: user_id_str })
+            user_tasks = self.tasks_collection.find_one({ Keys.USER_ID_KEY: user_id_str })
 
             # If the user's tasks document was found.
             if user_tasks is not None and Keys.TASKS_KEY in user_tasks:
