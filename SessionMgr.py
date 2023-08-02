@@ -45,11 +45,11 @@ class SessionMgr(object):
         logger = logging.getLogger()
         logger.error(log_str)
 
-    def get_logged_in_user(self):
+    def get_logged_in_username(self):
         """Returns the username associated with the current session."""
         return None
 
-    def get_logged_in_user_from_cookie(self, auth_cookie):
+    def get_logged_in_username_from_cookie(self, auth_cookie):
         """Returns the username associated with the specified authentication cookie."""
         return None
 
@@ -86,11 +86,11 @@ class CustomSessionMgr(SessionMgr):
         self.database = AppDatabase.MongoDatabase()
         self.database.connect(config)
 
-    def get_logged_in_user(self):
+    def get_logged_in_username(self):
         """Returns the username associated with the current session."""
-        return self.get_logged_in_user_from_cookie(self.current_session_cookie)
+        return self.get_logged_in_username_from_cookie(self.current_session_cookie)
 
-    def get_logged_in_user_from_cookie(self, session_cookie):
+    def get_logged_in_username_from_cookie(self, session_cookie):
         """Returns the username associated with the specified session cookie."""
         session_user, session_expiry = self.database.retrieve_session_data(session_cookie)
         if session_user is not None and session_expiry is not None:
@@ -131,7 +131,7 @@ class CherryPySessionMgr(SessionMgr):
     def __init__(self):
         super(SessionMgr, self).__init__()
 
-    def get_logged_in_user(self):
+    def get_logged_in_username(self):
         """Returns the username associated with the current session."""
         try:
             user = cherrypy.session.get(Keys.SESSION_KEY)
@@ -140,7 +140,7 @@ class CherryPySessionMgr(SessionMgr):
             user = None
         return user
 
-    def get_logged_in_user_from_cookie(self, session_cookie):
+    def get_logged_in_username_from_cookie(self, session_cookie):
         """Returns the username associated with the specified session cookie."""
         try:
             user = None
@@ -175,13 +175,13 @@ class FlaskSessionMgr(SessionMgr):
     def __init__(self):
         super(SessionMgr, self).__init__()
 
-    def get_logged_in_user(self):
+    def get_logged_in_username(self):
         """Returns the username associated with the current session."""
         if Keys.SESSION_KEY in flask.session:
             return flask.session[Keys.SESSION_KEY]
         return None
 
-    def get_logged_in_user_from_cookie(self, session_cookie):
+    def get_logged_in_username_from_cookie(self, session_cookie):
         """Returns the username associated with the specified authentication cookie."""
         pass
 

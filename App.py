@@ -164,7 +164,7 @@ class App(object):
         """Renders the application's performance statistics."""
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_user_id()
         if username is None:
             raise RedirectException(LOGIN_URL)
 
@@ -212,7 +212,7 @@ class App(object):
         """Renders a basic page from the specified template. This exists because a lot of pages only need this to be rendered."""
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise RedirectException(LOGIN_URL)
 
@@ -710,7 +710,7 @@ class App(object):
 
         # Get the logged in user (if any).
         logged_in_user_id = None
-        logged_in_username = self.user_mgr.get_logged_in_user()
+        logged_in_username = self.user_mgr.get_logged_in_username()
         if logged_in_username is not None:
             logged_in_user_id, _, _ = self.user_mgr.retrieve_user(logged_in_username)
 
@@ -787,7 +787,7 @@ class App(object):
 
         # Get the logged in user (if any).
         logged_in_user_id = None
-        logged_in_username = self.user_mgr.get_logged_in_user()
+        logged_in_username = self.user_mgr.get_logged_in_username()
         if logged_in_username is not None:
             logged_in_user_id, _, _ = self.user_mgr.retrieve_user(logged_in_username)
 
@@ -823,7 +823,7 @@ class App(object):
             return self.render_error("Invalid activity ID")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise RedirectException(LOGIN_URL)
 
@@ -873,7 +873,7 @@ class App(object):
             return self.render_error("Invalid activity ID")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise RedirectException(LOGIN_URL)
 
@@ -902,7 +902,7 @@ class App(object):
             return self.render_error("Invalid activity ID")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise RedirectException(LOGIN_URL)
 
@@ -923,7 +923,7 @@ class App(object):
 
         # Get the logged in user (if any).
         logged_in_user_id = None
-        logged_in_username = self.user_mgr.get_logged_in_user()
+        logged_in_username = self.user_mgr.get_logged_in_username()
         if logged_in_username is not None:
             logged_in_user_id, _, _ = self.user_mgr.retrieve_user(logged_in_username)
 
@@ -1088,7 +1088,7 @@ class App(object):
         """Renders the login page."""
 
         # If a user is already logged in then go straight to the landing page.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is not None:
             raise RedirectException(DEFAULT_LOGGED_IN_URL)
 
@@ -1120,7 +1120,7 @@ class App(object):
         """Ends the logged in session."""
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise RedirectException(LOGIN_URL)
 
@@ -1150,7 +1150,7 @@ class App(object):
         """Renders the admin page."""
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise RedirectException(LOGIN_URL)
 

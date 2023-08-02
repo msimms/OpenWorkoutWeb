@@ -38,7 +38,7 @@ def login_requred(function_to_protect):
     @functools.wraps(function_to_protect)
     def wrapper(*args, **kwargs):
         global g_app
-        user = g_app.user_mgr.session_mgr.get_logged_in_user()
+        user = g_app.user_mgr.session_mgr.get_logged_in_username()
         if user:
             return function_to_protect(*args, **kwargs)
         return flask.redirect(flask.url_for('login'))
@@ -575,7 +575,7 @@ def api(version, method):
         else:
 
             # API key not provided, check the session key.
-            username = g_app.user_mgr.get_logged_in_user()
+            username = g_app.user_mgr.get_logged_in_username()
             if username is not None:
                 user_id, _, _ = g_app.user_mgr.retrieve_user(username)
 

@@ -53,7 +53,7 @@ def do_auth_check(*args, **kwargs):
                         return
 
         # Check conditions for the logged in user.
-        username = g_front_end.backend.user_mgr.get_logged_in_user()
+        username = g_front_end.backend.user_mgr.get_logged_in_username()
         if username:
             cherrypy.request.login = username
             for condition in conditions:
@@ -623,13 +623,13 @@ class CherryPyFrontEnd(object):
 
         # API key not provided, check the web session cookie.
         if user_id == None:
-            username = self.backend.user_mgr.get_logged_in_user_from_cookie(cookie)
+            username = self.backend.user_mgr.get_logged_in_username_from_cookie(cookie)
             if username is not None:
                 user_id, _, _ = self.backend.user_mgr.retrieve_user(username)
 
         # Web cookie not provided, check the session key.
         if user_id == None:
-            username = self.backend.user_mgr.get_logged_in_user()
+            username = self.backend.user_mgr.get_logged_in_username()
             if username is not None:
                 user_id, _, _ = self.backend.user_mgr.retrieve_user(username)
 

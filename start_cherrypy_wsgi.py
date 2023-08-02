@@ -97,7 +97,7 @@ def do_auth_check(f):
         # Extract the things we need from the request.
         env = args[0]
         _, _, _, cookie = get_verb_path_params_and_cookie(env)
-        if g_session_mgr.get_logged_in_user_from_cookie(cookie) is not None:
+        if g_session_mgr.get_logged_in_username_from_cookie(cookie) is not None:
 
             # User had a valid session token, so set it, do the request, and clear.
             g_session_mgr.set_current_session(cookie)

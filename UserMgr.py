@@ -49,13 +49,21 @@ class UserMgr(object):
         """Destructor"""
         self.database = None
 
-    def get_logged_in_user(self):
+    def get_logged_in_username(self):
         """Returns the username associated with the current session."""
-        return self.session_mgr.get_logged_in_user()
+        return self.session_mgr.get_logged_in_username()
 
-    def get_logged_in_user_from_cookie(self, auth_cookie):
+    def get_logged_in_user_id(self):
+        """Returns the username associated with the current session."""
+        logged_in_user_id = None
+        logged_in_username = self.session_mgr.get_logged_in_username()
+        if logged_in_username is not None:
+            logged_in_user_id, _, _ = self.retrieve_user(logged_in_username)
+        return logged_in_user_id
+
+    def get_logged_in_username_from_cookie(self, auth_cookie):
         """Returns the username associated with the specified authentication cookie."""
-        return self.session_mgr.get_logged_in_user_from_cookie(auth_cookie)
+        return self.session_mgr.get_logged_in_username_from_cookie(auth_cookie)
 
     def create_new_session(self, username):
         """Starts a new session. Returns the session cookie and it's expiry date."""

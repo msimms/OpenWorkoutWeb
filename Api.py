@@ -519,6 +519,7 @@ class Api(object):
         session_data = {}
         session_data[Keys.SESSION_TOKEN_KEY] = cookie
         session_data[Keys.SESSION_EXPIRY_KEY] = expiry
+        session_data[Keys.USER_ID_KEY] = str(self.user_id)
         json_result = json.dumps(session_data, ensure_ascii=False)
 
         return result, json_result
@@ -576,6 +577,7 @@ class Api(object):
         session_data = {}
         session_data[Keys.SESSION_TOKEN_KEY] = cookie
         session_data[Keys.SESSION_EXPIRY_KEY] = expiry
+        session_data[Keys.USER_ID_KEY] = self.user_id
         json_result = json.dumps(session_data, ensure_ascii=False)
 
         return True, json_result
@@ -606,7 +608,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Email not specified.")
 
         # Get the logged in user.
-        current_username = self.user_mgr.get_logged_in_user()
+        current_username = self.user_mgr.get_logged_in_username()
         if current_username is None:
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
@@ -635,7 +637,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("New password confirmation not specified.")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
@@ -666,7 +668,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Password not specified.")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
@@ -689,7 +691,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Password not specified.")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
@@ -716,7 +718,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Password not specified.")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
@@ -738,7 +740,7 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
@@ -786,7 +788,7 @@ class Api(object):
                 raise ApiException.ApiMalformedRequestException("Invalid ending time.")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
@@ -866,7 +868,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Activity type not specified.")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
@@ -901,7 +903,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Activity type not specified.")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
@@ -976,7 +978,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("File data not specified.")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -1021,7 +1023,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -1086,7 +1088,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Photo ID not specified.")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -2440,7 +2442,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Record name not specified.")
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
@@ -2483,7 +2485,7 @@ class Api(object):
         end_time = int(values[Keys.END_TIME_KEY])
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise ApiException.ApiMalformedRequestException("Empty username.")
 
@@ -2869,7 +2871,7 @@ class Api(object):
         """Called to parse a version 1.0 API message."""
         if self.user_id is None:
             if Keys.SESSION_KEY in values:
-                username = self.user_mgr.get_logged_in_user_from_cookie(values[Keys.SESSION_KEY])
+                username = self.user_mgr.get_logged_in_username_from_cookie(values[Keys.SESSION_KEY])
                 if username is not None:
                     self.user_id, _, _ = self.user_mgr.retrieve_user(username)
 
