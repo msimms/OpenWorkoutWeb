@@ -164,7 +164,7 @@ class App(object):
         """Renders the application's performance statistics."""
 
         # Get the logged in user.
-        username = self.user_mgr.get_logged_in_user_id()
+        username = self.user_mgr.get_logged_in_username()
         if username is None:
             raise RedirectException(LOGIN_URL)
 
