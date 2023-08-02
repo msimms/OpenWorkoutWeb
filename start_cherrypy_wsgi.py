@@ -68,7 +68,7 @@ def get_verb_path_params_and_cookie(env):
     if num_path_elems > 0:
 
         # GET requests will have the parameters in the URL.
-        if verb == 'GET':
+        if verb == 'GET' or verb == 'DELETE':
 
             # Split off the params from a GET request.
             method_and_params = path[num_path_elems - 1].split('?')
@@ -82,9 +82,9 @@ def get_verb_path_params_and_cookie(env):
 
         # POST requests will have the parameters in the body.
         elif verb == 'POST':
-            params = env['wsgi.input'].read()
-            if len(params) > 0:
-                params = json.loads(params)
+            temp_params = env['wsgi.input'].read()
+            if len(temp_params) > 0:
+                params = json.loads(temp_params)
 
     return verb, path, params, cookie
 
