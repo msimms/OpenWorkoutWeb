@@ -379,7 +379,7 @@ class App(object):
         """Helper function for processing the activity description and formatting it for display."""
         description = ""
         if Keys.ACTIVITY_DESCRIPTION_KEY in activity:
-            description = activity[Keys.ACTIVITY_DESCRIPTION_KEY]
+            description = activity[Keys.ACTIVITY_DESCRIPTION_KEY].replace('\n', '<br>')
         if len(description) == 0:
             description = "None"
         return description
