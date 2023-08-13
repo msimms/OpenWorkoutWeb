@@ -309,7 +309,8 @@ ACTIVITY_EXPORT_FORMAT_KEY = "export_format"
 ACTIVITY_NUM_POINTS = "num_points" 
 ACTIVITY_LOCATION_DESCRIPTION_KEY = "location_description" # Political description of the activity location (i.e., Florida)
 ACTIVITY_INTERVALS_KEY = "intervals" # Intervals that were computed from the workout
-ACTIVITY_PHOTO_ID_KEY = "photo_id" # Unique identifier for a specific photo
+ACTIVITY_PHOTO_ID_KEY = "photo id" # Unique identifier for a specific photo
+ACTIVITY_PHOTO_IDS_KEY = "photo ids" # Unique identifier for activity photos
 ACTIVITY_PHOTOS_KEY = "photos" # List of all photo IDs
 ACTIVITY_LAST_UPDATED_KEY = "last updated" # Time when the activity was last updated
 

@@ -1071,7 +1071,7 @@ class Api(object):
 
         # List the IDs of each photo attached to this activity.
         result = {}
-        result["photo ids"] = self.data_mgr.list_activity_photos(activity_id)
+        result[Keys.ACTIVITY_PHOTO_IDS_KEY] = self.data_mgr.list_activity_photos(activity_id)
 
         json_result = json.dumps(result, ensure_ascii=False)
         return True, json_result
@@ -2785,8 +2785,6 @@ class Api(object):
             return self.handle_upload_activity_file(values)
         elif request == 'upload_activity_photo':
             return self.handle_upload_activity_photo(values)
-        elif request == 'delete_activity_photo':
-            return self.handle_delete_activity_photo(values)
         elif request == 'create_tags_on_activity':
             return self.handle_create_tags_on_activity(values)
         elif request == 'delete_tag_from_activity':
@@ -2851,7 +2849,9 @@ class Api(object):
 
     def handle_api_1_0_delete_request(self, request, values):
         """Called to parse a version 1.0 API DELETE request."""
-        if request == 'delete_gear':
+        if request == 'delete_activity_photo':
+            return self.handle_delete_activity_photo(values)
+        elif request == 'delete_gear':
             return self.handle_delete_gear(values)
         elif request == 'delete_race':
             return self.handle_delete_race(values)

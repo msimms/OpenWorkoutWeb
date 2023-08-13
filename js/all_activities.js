@@ -119,13 +119,9 @@ function common_delete_photo(root_url, photo_id)
 {
     if (confirm('Are you sure you want to delete the above photo?'))
     {
-        let api_url = root_url + "/api/1.0/delete_activity_photo";
-        let dict = [];
+        let api_url = root_url + "/api/1.0/delete_activity_photo?activity_id=" + activity_id + "&photo%20id=" + photo_id;
 
-        dict.push({["activity_id"] : activity_id});
-        dict.push({["photo_id"] : photo_id});
-
-        send_post_request_async(api_url, dict, function(status, response) {
+        send_delete_request_async(api_url, function(status, response) {
             if (status == 200)
                 window.location.reload();
             else
