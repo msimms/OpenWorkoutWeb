@@ -917,7 +917,6 @@ class MongoDatabase(Database.Database):
             user_records = self.records_collection.find_one({ Keys.USER_ID_KEY: user_id })
             if user_records is not None:
                 user_records[activity_id] = {}
-                #user_records.pop(activity_id)
                 return update_collection(self.records_collection, user_records)
         except:
             self.log_error(traceback.format_exc())
