@@ -269,6 +269,7 @@ APP_LOCATION_ALT_KEY = "Altitude"
 APP_HORIZONTAL_ACCURACY_KEY = "Horizontal Accuracy"
 APP_VERTICAL_ACCURACY_KEY = "Vertical Accuracy"
 APP_ACCELEROMETER_KEY = "accelerometer" # Raw accelerometer list.
+APP_AXIS_TIME = "time"
 APP_AXIS_NAME_X = "x"
 APP_AXIS_NAME_Y = "y"
 APP_AXIS_NAME_Z = "z"

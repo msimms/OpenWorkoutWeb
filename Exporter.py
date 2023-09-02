@@ -56,51 +56,97 @@ class Exporter(object):
             return None
         return current_reading
 
-    def write_or_buffer(self, local_file, row):
-        """Helper function for writing CSV files."""
-        if local_file is not None:
-            local_file.write(row)
-            return ""
-        return row
-
-    def export_time_value_list_to_csv(self, local_file, activity, key):
-        """Takes a list of time/value pairs from the activity and renders the data as CSV."""
-        buf = ""
-        if key in activity:
-            buf = self.write_or_buffer(local_file, key + "\n")
-            readings = activity[key]
-            for reading in readings:
-                ts = next(iter(reading.keys()))
-                buf += self.write_or_buffer(local_file, str(ts) + "," + str(reading[ts]) + "\n")
-        return buf
-
-    def export_accelerometer_data_to_csv(self, local_file, activity):
-        """Formats the accelerometer data as CSV."""
-        buf = ""
-        if Keys.APP_ACCELEROMETER_KEY in activity:
-            buf = self.write_or_buffer(local_file, Keys.APP_ACCELEROMETER_KEY + "\n")
-            readings = activity[Keys.APP_ACCELEROMETER_KEY]
-            for reading in readings:
-                accel_time = reading[Keys.ACCELEROMETER_TIME_KEY]
-                accel_x = reading[Keys.ACCELEROMETER_AXIS_NAME_X]
-                accel_y = reading[Keys.ACCELEROMETER_AXIS_NAME_Y]
-                accel_z = reading[Keys.ACCELEROMETER_AXIS_NAME_Z]
-                row = str(accel_time) + "," + str(accel_x) + "," + str(accel_y) + "," + str(accel_z) + "\n"
-                buf += self.write_or_buffer(local_file, row)
-        return buf
-
     def export_as_csv(self, file_name, activity):
         """Formats the activity data as CSV."""
-        local_file = None
-        if file_name is not None:
-            local_file = open(file_name, 'wt')
+        accel_readings = []
+        locations = []
+        cadence_readings = []
+        hr_readings = []
+        temp_readings = []
+        power_readings = []
 
-        buf  = self.export_time_value_list_to_csv(local_file, activity, Keys.APP_CURRENT_SPEED_KEY)
-        buf += self.export_time_value_list_to_csv(local_file, activity, Keys.APP_CURRENT_PACE_KEY)
-        buf += self.export_time_value_list_to_csv(local_file, activity, Keys.APP_HEART_RATE_KEY)
-        buf += self.export_time_value_list_to_csv(local_file, activity, Keys.APP_POWER_KEY)
-        buf += self.export_time_value_list_to_csv(local_file, activity, Keys.APP_CADENCE_KEY)
-        buf += self.export_accelerometer_data_to_csv(local_file, activity)
+        if Keys.APP_ACCELEROMETER_KEY in activity:
+            accel_readings = activity[Keys.APP_ACCELEROMETER_KEY]
+        if Keys.APP_LOCATIONS_KEY in activity:
+            locations = activity[Keys.APP_LOCATIONS_KEY]
+        if Keys.APP_CADENCE_KEY in activity:
+            cadence_readings = activity[Keys.APP_CADENCE_KEY]
+        if Keys.APP_HEART_RATE_KEY in activity:
+            hr_readings = activity[Keys.APP_HEART_RATE_KEY]
+        if Keys.APP_TEMP_KEY in activity:
+            temp_readings = activity[Keys.APP_TEMP_KEY]
+        if Keys.APP_POWER_KEY in activity:
+            power_readings = activity[Keys.APP_POWER_KEY]
+
+        accel_iter = iter(accel_readings)
+        location_iter = iter(locations)
+        cadence_iter = iter(cadence_readings)
+        hr_iter = iter(hr_readings)
+        temp_iter = iter(temp_readings)
+        power_iter = iter(power_readings)
+
+        nearest_accel = None
+        nearest_loc = None
+        nearest_cadence = None
+        nearest_hr = None
+        nearest_temp = None
+        nearest_power = None
+
+        buf = "time,latitude,longitude,altitude,cadence,hr,temp,power,x,y,z\r\n"
+        done = False
+        while not done:
+            try:
+                # Get the next location.
+                if locations:
+                    nearest_loc = next(location_iter)
+                    current_time = nearest_loc[Keys.LOCATION_TIME_KEY]
+                    nearest_accel = self.nearest_sensor_reading(current_time, nearest_accel, accel_iter)
+                else:
+                    nearest_accel = next(accel_iter)
+                    current_time = nearest_accel[Keys.APP_AXIS_TIME]
+
+                # Get the next sensor readings.
+                nearest_cadence = self.nearest_sensor_reading(current_time, nearest_cadence, cadence_iter)
+                nearest_hr = self.nearest_sensor_reading(current_time, nearest_hr, hr_iter)
+                nearest_temp = self.nearest_sensor_reading(current_time, nearest_temp, temp_iter)
+                nearest_power = self.nearest_sensor_reading(current_time, nearest_power, power_iter)
+
+                # Write the next row.
+                buf += str(current_time)
+                buf += ","
+                if nearest_loc:
+                    buf += str(nearest_loc[Keys.LOCATION_LAT_KEY])
+                    buf += ","
+                    buf += str(nearest_loc[Keys.LOCATION_LON_KEY])
+                    buf += ","
+                    buf += str(nearest_loc[Keys.LOCATION_ALT_KEY])
+                    buf += ","
+                else:
+                    buf += ",,,"
+                if nearest_cadence:
+                    buf += str(nearest_cadence)
+                buf += ","
+                if nearest_hr:
+                    buf += str(nearest_hr)
+                buf += ","
+                if nearest_temp:
+                    buf += str(nearest_temp)
+                buf += ","
+                if nearest_power:
+                    buf += str(nearest_power)
+                buf += ","
+                if nearest_accel:
+                    buf += str(nearest_accel[Keys.APP_AXIS_NAME_X])
+                    buf += ","
+                    buf += str(nearest_accel[Keys.APP_AXIS_NAME_Y])
+                    buf += ","
+                    buf += str(nearest_accel[Keys.APP_AXIS_NAME_Z])
+                    buf += ","
+                else:
+                    buf += ",,,"
+                buf += "\r\n"
+            except StopIteration:
+                done = True
 
         return buf
 
