@@ -2801,8 +2801,6 @@ class Api(object):
             return self.handle_unfriend_request(values)
         elif request == 'trim_activity':
             return self.handle_trim_activity(values)
-        elif request == 'export_activity':
-            return self.handle_export_activity(values)
         elif request == 'claim_device':
             return self.handle_claim_device(values)
         elif request == 'create_comment':

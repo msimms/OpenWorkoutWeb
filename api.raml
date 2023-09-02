@@ -352,15 +352,6 @@ types:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-    post:
-        queryParameters:
-            activity_id: UUID
-            export_format: export_format_type
-        responses:
-            200: OK
-            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
-            403: Failed authentication. The user is not logged in.
-            500: An internal exception was thrown.
 /export_workout:
     description: Returns the workout in the specified format.
     get:

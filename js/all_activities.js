@@ -59,19 +59,11 @@ function common_create_comment(root_url)
 /// @function common_export_activity
 function common_export_activity(root_url)
 {
-    let api_url = root_url + "/api/1.0/export_activity";
-    let format = document.getElementById("format").value;
-    let dict = [];
-
-    dict.push({["activity_id"] : activity_id});
-    dict.push({["export_format"] : format});
-
-    send_post_request_async(api_url, dict, function(status, response) {
-        if (status == 200)
-            window.location.reload();
-        else
-            alert(response)
-    });
+    let api_url = root_url + "/api/1.0/export_activity?activity_id=";
+    api_url += activity_id
+    api_url += "&export_format="
+    api_url += document.getElementById("format").value;
+    window.location.replace(api_url);
 }
 
 /// @function common_edit_activity
