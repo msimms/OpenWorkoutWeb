@@ -99,7 +99,7 @@ class Exporter(object):
                 # Get the next location.
                 if locations:
                     nearest_loc = next(location_iter)
-                    current_time = nearest_loc[Keys.LOCATION_TIME_KEY]
+                    current_time = float(nearest_loc[Keys.LOCATION_TIME_KEY])
                     nearest_accel = self.nearest_sensor_reading(current_time, nearest_accel, accel_iter)
                 else:
                     nearest_accel = next(accel_iter)
