@@ -56,6 +56,19 @@ class Exporter(object):
             return None
         return current_reading
 
+    def nearest_accel_reading(self, time_ms, current_reading, accel_iter):
+        try:
+            if current_reading is None:
+                current_reading = next(accel_iter)
+            else:
+                sensor_time = current_reading[Keys.APP_AXIS_TIME]
+                while sensor_time < time_ms:
+                    current_reading = next(accel_iter)
+                    sensor_time = current_reading[Keys.APP_AXIS_TIME]
+        except StopIteration:
+            return None
+        return current_reading
+
     def export_as_csv(self, file_name, activity):
         """Formats the activity data as CSV."""
         accel_readings = []
@@ -99,8 +112,8 @@ class Exporter(object):
                 # Get the next location.
                 if locations:
                     nearest_loc = next(location_iter)
-                    current_time = float(nearest_loc[Keys.LOCATION_TIME_KEY])
-                    nearest_accel = self.nearest_sensor_reading(current_time, nearest_accel, accel_iter)
+                    current_time = nearest_loc[Keys.LOCATION_TIME_KEY]
+                    nearest_accel = self.nearest_accel_reading(current_time, nearest_accel, accel_iter)
                 else:
                     nearest_accel = next(accel_iter)
                     current_time = nearest_accel[Keys.APP_AXIS_TIME]
