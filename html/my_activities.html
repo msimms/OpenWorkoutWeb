@@ -123,6 +123,8 @@
             {
                 if (response_code == 200)
                 {
+                    let obj = JSON.parse(response_text);
+                    process_activity_type_list(obj);
                     resolve();
                 }
                 else
