@@ -28,6 +28,7 @@ import datetime
 import json
 import logging
 import time
+import uuid
 import ApiException
 import Exporter
 import InputChecker
@@ -877,10 +878,12 @@ class Api(object):
         if not InputChecker.is_unsigned_integer(start_time):
             raise ApiException.ApiMalformedRequestException("Invalid start time.")
 
-        # Add the activity to the database.
+        # Validate the activity type.
         activity_type = values[Keys.ACTIVITY_TYPE_KEY]
-        if not InputChecker.is_valid_decoded_str(activity_type):
+        if not InputChecker.is_valid_activity_type(activity_type):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Add the activity to the database.
         _, activity_id = self.data_mgr.create_activity(username, self.user_id, "", "", activity_type, int(start_time), None)
 
         # Add the activity data to the database.
@@ -934,7 +937,7 @@ class Api(object):
 
         # Validate the activity type.
         activity_type = values[Keys.ACTIVITY_TYPE_KEY]
-        if not InputChecker.is_valid_decoded_str(activity_type):
+        if not InputChecker.is_valid_activity_type(activity_type):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         # Add the activity to the database.
@@ -1606,10 +1609,12 @@ class Api(object):
         if Keys.GEAR_NAME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Gear name not specified.")
 
-        # Decode and validate the required parameters.
+        # Validate the activity type.
         activity_type = values[Keys.ACTIVITY_TYPE_KEY]
-        if not InputChecker.is_valid_decoded_str(activity_type):
+        if not InputChecker.is_valid_activity_type(activity_type):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Validate the gear name.
         gear_name = values[Keys.GEAR_NAME_KEY]
         if not InputChecker.is_valid_decoded_str(gear_name):
             raise ApiException.ApiMalformedRequestException("Invalid parameter.")
@@ -2002,13 +2007,28 @@ class Api(object):
             raise ApiException.ApiNotLoggedInException()
 
         # Required parameters.
+        if Keys.WORKOUT_ACTIVITY_TYPE_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity type not specified.")
+        if Keys.WORKOUT_SCHEDULED_TIME_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Scheduled time not specified.")
+        
+        # Optional parameters.
         if Keys.WORKOUT_ID_KEY not in values:
-            raise ApiException.ApiMalformedRequestException("Workout ID not specified.")
+            workout_id = uuid.uuid4()
+        else:
+            workout_id = values[Keys.WORKOUT_ID_KEY]
+            if not InputChecker.is_uuid(workout_id):
+                raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
 
-        # Do we have a valid workout ID?
-        workout_id = values[Keys.WORKOUT_ID_KEY]
-        if not InputChecker.is_uuid(workout_id):
-            raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
+        # Validate the activity type.
+        activity_type = values[Keys.WORKOUT_ACTIVITY_TYPE_KEY]
+        if not InputChecker.is_valid_activity_type(activity_type):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+        
+        # Validate the scheduled time.
+        scheduled_time = values[Keys.WORKOUT_SCHEDULED_TIME_KEY]
+        if not InputChecker.is_unsigned_integer(scheduled_time):
+            raise ApiException.ApiMalformedRequestException("Invalid scheduled time.")
 
         workout_obj = Workout.Workout(self.user_id)
         workout_obj.from_dict(values)
@@ -2441,6 +2461,16 @@ class Api(object):
         if Keys.RECORD_NAME_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Record name not specified.")
 
+        # Validate the activity type.
+        activity_type = values[Keys.ACTIVITY_TYPE_KEY]
+        if not InputChecker.is_valid_activity_type(activity_type):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
+        # Validate the record name.
+        record_name = values[Keys.RECORD_NAME_KEY]
+        if not InputChecker.is_valid_decoded_str(record_name):
+            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+
         # Get the logged in user.
         username = self.user_mgr.get_logged_in_username()
         if username is None:
@@ -2451,13 +2481,6 @@ class Api(object):
 
         # Get the user activity list, sorted by timestamp.
         user_activities = self.data_mgr.retrieve_user_activity_list(self.user_id, user_realname, None, None, None)
-
-        activity_type = values[Keys.ACTIVITY_TYPE_KEY]
-        if not InputChecker.is_valid_decoded_str(activity_type):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
-        record_name = values[Keys.RECORD_NAME_KEY]
-        if not InputChecker.is_valid_decoded_str(record_name):
-            raise ApiException.ApiMalformedRequestException("Invalid parameter.")
 
         records = self.data_mgr.compute_progression(self.user_id, user_activities, activity_type, record_name)
         unit_system = self.user_mgr.retrieve_user_setting(self.user_id, Keys.USER_PREFERRED_UNITS_KEY)

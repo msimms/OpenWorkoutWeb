@@ -27,6 +27,8 @@ import os
 import re
 from unidecode import unidecode
 
+import Keys
+
 hex = "[a-fA-F0-9]"
 hex_str = re.compile(r"(0x)?[a-fA-F0-9]+")
 boolean = re.compile(r"(True|False|TRUE|FALSE|Yes|No|YES|NO|1|0)")
@@ -141,6 +143,19 @@ def is_valid_location(latitude, longitude, horizontal_accuracy):
 def is_safe_path(path):
     """Sanity checks the path to make sure it doesn't contain any tricks to access higher level directories."""
     return os.path.abspath(path) == path
+
+def is_valid_activity_type(activity_type):
+    if activity_type in Keys.FOOT_BASED_ACTIVITIES:
+        return True
+    if activity_type in Keys.CYCLING_ACTIVITIES:
+        return True
+    if activity_type in Keys.SWIMMING_ACTIVITIES:
+        return True
+    if activity_type in Keys.STRENGTH_ACTIVITIES:
+        return True
+    if activity_type in Keys.MULTISPORT_ACTIVITIES:
+        return True
+    return False
 
 def parse_HHMMSS(str):
     """Parses the string for a time value in the format of HH:MM:SS where MM and SS ranges from 0 to 59."""
