@@ -152,7 +152,7 @@
         }
 
         // Add the main set.
-        for (let i = 0; i < intervals.length; ++i)
+        for (let i = 0; i < intervals.length - 1; ++i)
         {
             let interval = intervals[i];
             let num_repeats = interval["repeat"];
@@ -214,7 +214,7 @@
 
         let activity_type_obj = document.getElementById("activity_type");
 
-        for (let i = 0; i < activity_type_list.length; i++)
+        for (let i = 0; i < activity_type_list.length - 1; i++)
         {
             let activity_type = activity_type_list[i];
             let option = document.createElement("option");
@@ -244,9 +244,7 @@
         }
         else
         {
-            let selected = false;
-
-            for (let i = 0; i < workout_type_list.length; i++)
+            for (let i = 0; i < workout_type_list.length - 1; i++)
             {
                 let workout_type = workout_type_list[i];
                 let option = document.createElement("option");
@@ -257,19 +255,8 @@
                 if (selected_workout_type == workout_type)
                 {
                     option.selected = true;
-                    selected = true;
                 }
 
-                workout_type_obj.appendChild(option);
-            }
-
-            if (selected == false)
-            {
-                let option = document.createElement("option");
-
-                option.value = "";
-                option.text = "";
-                option.selected = true;
                 workout_type_obj.appendChild(option);
             }
         }
