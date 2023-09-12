@@ -301,12 +301,6 @@ button .fa {
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-.block_small input {
-    width: 40%;
-    height: 20px;
-    font-size: 12px;
-}
-
 .block p {
     text-indent: 30px;
 }
@@ -344,6 +338,12 @@ button .fa {
 .block textarea {
     width: 80%;
     max-width: 80%;
+}
+
+.dialog input {
+    width: 98%;
+    height: 30px;
+    font-size: 24px;
 }
 
 .map_canvas {
