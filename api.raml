@@ -559,9 +559,19 @@ types:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
+/delete_planned_workout:
+    description: Deletes a specified planned/scheduled workout.
+    delete:
+        responses:
+            200: application/json
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
 /delete_planned_workouts:
     description: Deletes all of a user's planned/scheduled workouts.
     delete:
+        queryParameters:
+            workout_id: UUID
         responses:
             200: application/json
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.

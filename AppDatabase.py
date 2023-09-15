@@ -2212,6 +2212,30 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def delete_planned_workout_for_user(self, user_id, workout_id):
+        """Update method for a list of workout objects."""
+        if user_id is None:
+            self.log_error(MongoDatabase.update_planned_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
+            return False
+        if workout_id is None:
+            self.log_error(MongoDatabase.update_planned_workouts_for_user.__name__ + ": Unexpected empty object: workout_id")
+            return False
+
+        try:
+            # Find the user's workouts document.
+            workouts_doc = self.workouts_collection.find_one({ Keys.USER_ID_KEY: user_id })
+
+            # If the workouts document was found.
+            if workouts_doc is not None and Keys.WORKOUT_LIST_KEY in workouts_doc:
+                workouts_list = workouts_doc[Keys.WORKOUT_LIST_KEY]
+                new_list = [i for i in workouts_list if not (i[Keys.WORKOUT_ID_KEY] == workout_id)]
+                workouts_doc[Keys.WORKOUT_LIST_KEY] = new_list
+                return update_collection(self.workouts_collection, workouts_doc)
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def delete_planned_workouts_for_user(self, user_id):
         """Update method for a list of workout objects."""
         if user_id is None:

@@ -1259,6 +1259,16 @@ class DataMgr(Importer.ActivityWriter):
         new_workout_objs.append(updated_workout_obj)
         return self.database.update_planned_workouts_for_user(user_id, new_workout_objs)
 
+    def delete_planned_workout_for_user(self, user_id, workout_id):
+        """Delete method for a workout."""
+        if self.database is None:
+            raise Exception("No database.")
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if workout_id is None:
+            raise Exception("Bad parameter.")
+        return self.database.delete_planned_workout_for_user(user_id, workout_id)
+
     def delete_planned_workouts_for_user(self, user_id):
         """Delete method for a workout."""
         if self.database is None:

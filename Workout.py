@@ -77,6 +77,13 @@ class Workout(object):
             return self.estimated_intensity_score
         return None
 
+    def validate_and_fix(self):
+        """Examines the workout description for errors/inconsistencies and fixes them."""
+        if self.activity_type == Keys.TYPE_RUNNING_KEY and len(self.type) == 0:
+            self.type = Keys.WORKOUT_TYPE_FREE_RUN
+        elif self.activity_type == Keys.TYPE_CYCLING_KEY and len(self.type) == 0:
+            self.type = Keys.WORKOUT_TYPE_EASY_RIDE
+
     def to_dict(self):
         """Converts the object representation to a dictionary, only converting what is actually useful, as opposed to __dict__."""
         output = {}
@@ -110,6 +117,9 @@ class Workout(object):
             self.scheduled_time = datetime.datetime.fromtimestamp(input[Keys.WORKOUT_SCHEDULED_TIME_KEY]).date()
         if Keys.WORKOUT_ESTIMATED_INTENSITY_KEY in input:
             self.estimated_intensity_score = input[Keys.WORKOUT_ESTIMATED_INTENSITY_KEY]
+
+        # Take care of any errors in the workout description.
+        self.validate_and_fix()
 
     def add_warmup(self, seconds):
         """Defines the workout warmup."""

@@ -2090,7 +2090,25 @@ class Api(object):
         json_result = json.dumps(matched_workouts, ensure_ascii=False)
         return True, json_result
 
+    def handle_delete_planned_workout(self, values):
+        """Deletes the specified workout from the user's calendar."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
+        if Keys.WORKOUT_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Workout ID not specified.")
+
+        # Do we have a valid workout ID?
+        workout_id = values[Keys.WORKOUT_ID_KEY]
+        if not InputChecker.is_uuid(workout_id):
+            raise ApiException.ApiMalformedRequestException("Invalid workout ID.")
+
+        result = self.data_mgr.delete_planned_workout_for_user(self.user_id, workout_id)
+        return result, ""
+
     def handle_delete_planned_workouts(self, values):
+        """Deletes all of the user's planned workouts."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
 
@@ -2876,6 +2894,8 @@ class Api(object):
             return self.handle_delete_gear(values)
         elif request == 'delete_race':
             return self.handle_delete_race(values)
+        elif request == 'delete_planned_workout':
+            return self.handle_delete_planned_workout(values)
         elif request == 'delete_planned_workouts':
             return self.handle_delete_planned_workouts(values)
         elif request == 'delete_pace_plan':
