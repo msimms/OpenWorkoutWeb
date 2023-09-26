@@ -55,7 +55,7 @@ class IcalServer(object):
                 summary  = workout.export_to_text(None).replace("\n", "\\n")
                 summary += "\\n"
                 summary += self.root_url + "/workout/" + str(workout.workout_id)
-                response += ics_writer.create_event(workout.workout_id, start_time, start_time, workout.type, summary)
+                response += ics_writer.create_event(workout.workout_id, start_time, None, workout.type, summary)
 
         response += "END:VCALENDAR\r\n"
         return True, response
