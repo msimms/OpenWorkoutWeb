@@ -35,10 +35,9 @@ class IcsWriter(object):
         """Returns an ICS-formatted string that represents a single event within a calendar."""
         buffer  = "BEGIN:VEVENT\r\n"
         if stop_time == None:
+            stop_time = start_time + datetime.timedelta(days=1)
             start_ts = start_time.strftime("%Y%m%d")
-            stop_ts = start_ts
-            stop_ts += datetime.timedelta(days=1)
-            stop_ts = start_time.strftime("%Y%m%d")
+            stop_ts = stop_time.strftime("%Y%m%d")
         else:
             start_ts = start_time.strftime("%Y%m%dT%H%M%S")
             stop_ts = stop_time.strftime("%Y%m%dT%H%M%S")
