@@ -23,6 +23,8 @@
 # SOFTWARE.
 """Formats data for writing to an ICS file."""
 
+import datetime
+
 class IcsWriter(object):
     """Formats data for writing to an ICS file."""
 
@@ -32,8 +34,14 @@ class IcsWriter(object):
     def create_event(self, event_id, start_time, stop_time, summary, description):
         """Returns an ICS-formatted string that represents a single event within a calendar."""
         buffer  = "BEGIN:VEVENT\r\n"
-        start_ts = start_time.strftime("%Y%m%dT%H%M%S")
-        stop_ts = stop_time.strftime("%Y%m%dT%H%M%S")
+        if stop_time == None:
+            start_ts = start_time.strftime("%Y%m%d")
+            stop_ts = start_ts
+            stop_ts += datetime.timedelta(days=1)
+            stop_ts = start_time.strftime("%Y%m%d")
+        else:
+            start_ts = start_time.strftime("%Y%m%dT%H%M%S")
+            stop_ts = stop_time.strftime("%Y%m%dT%H%M%S")
         buffer += "DTSTART:" + start_ts + "\r\n"
         buffer += "DTEND:" + stop_ts + "\r\n"
         buffer += "UID:" + str(event_id) + "\r\n"
