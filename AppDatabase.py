@@ -88,7 +88,7 @@ class MongoDatabase(Database.Database):
     workouts_collection = None
     tasks_collectoin = None
     uploads_collection = None
-    sessoins_collection = None
+    sessions_collection = None
 
     def __init__(self):
         Database.Database.__init__(self)
