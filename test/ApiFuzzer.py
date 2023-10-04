@@ -15,6 +15,7 @@ from urllib.parse import urljoin
 ERROR_LOG = 'error.log'
 GET_VERB = 'get'
 POST_VERB = 'post'
+DELETE_VERB = 'delete'
 
 class DataGenerator(object):
     def random_hex(self, strlen):
@@ -114,6 +115,17 @@ class ApiFuzzer(object):
         print(f"Response text: {response.text}")
         return response.status_code, response.text, s.cookies
 
+    def send_delete_request(self, url, payload, cookies):
+        """Utility function for sending an HTTP DELETE and returning the status code and response text."""
+        s = requests.Session()
+        response = s.delete(url, data=json.dumps(payload), headers={'X-Requested-With':'XMLHttpRequest'}, cookies=cookies)
+
+        print(f"URL: {url}")
+        print(f"Parameters: " + str(payload))
+        print(f"Response code: {response.status_code}")
+        print(f"Response text: {response.text}")
+        return response.status_code, response.text, s.cookies
+
     def fuzz_param(self, param_type):
         """Returns a fuzzed value for a parameter of the specified type."""
         if param_type is None:
@@ -181,6 +193,9 @@ class ApiFuzzer(object):
         if POST_VERB in endpoint_description:
             api_call.params = self.fuzz_api_params(substitutions, endpoint_description[POST_VERB])
             api_call.code, api_call.text, api_call.cookies = self.send_post_request(api_call.url, api_call.params, api_call.cookies)
+        if DELETE_VERB in endpoint_description:
+            api_call.params = self.fuzz_api_params(substitutions, endpoint_description[DELETE_VERB])
+            api_call.code, api_call.text, api_call.cookies = self.send_delete_request(api_call.url, api_call.params, api_call.cookies)
 
         # Anything other than error code 40X is interesting.
         if int(api_call.code / 100) != 4:
@@ -189,20 +204,50 @@ class ApiFuzzer(object):
     def fuzz_api_endpoints(self, url, substitutions, api_endpoints, api_description, num_test_cases):
         """Executes all the API test."""
 
+        # Sanity check
+        num_endpoints = len(api_endpoints)
+        if num_endpoints == 0:
+            s = "Aboring as no endpoints were defined!"
+            print("=" * len(s))
+            print(s)
+            print("=" * len(s))
+            return
+
+        # Header.
+        s = "Starting tests..."
+        print("=" * len(s))
+        print(s)
+        print("=" * len(s))
+        s = "Target: " + url
+        print("=" * len(s))
+        print(s)
+        print("=" * len(s))
+
         api_url = self.create_api_url(url)
         for test_num in range(0, num_test_cases - 1):
-            endpoint_index = random.randrange(len(api_endpoints) - 1)
+            if num_endpoints == 1:
+                endpoint_index = 0
+            else:
+                endpoint_index = random.randrange(num_endpoints - 1)
             endpoint_name = api_endpoints[endpoint_index]
             endpoint_url = api_url + endpoint_name
 
             print("Test " + str(test_num + 1))
             self.fuzz_api_endpoint(endpoint_url, substitutions, api_description[endpoint_name])
 
-    def fuzz_api(self, url, substitutions, ignored_funcs, num_test_cases):
-        """Primary method for executing the API tests. Parse the RAML file and then calls fuzz_api_endpoints to run the tests."""
+        # Print the results.
+        s = "Report:"
+        print("=" * len(s))
+        print(s)
+        print("=" * len(s))
+        for api_call in self.api_calls:
+            print(api_call)
+
+    def fuzz_api_from_raml(self, file_name, url, substitutions, ignored_funcs, num_test_cases):
+        """Entry point for executing API tests as described in a RAML file."""
+        """Parse the file and then calls fuzz_api_endpoints to run the tests."""
 
         # Read and parse the RAML file.
-        file_name = os.path.join(os.path.dirname(__file__), '..', 'api.raml')
         stream = open(file_name, 'r')
         api_description = yaml.load(stream, Loader=yaml.Loader)
 
@@ -220,23 +265,35 @@ class ApiFuzzer(object):
         for item in api_description:
             if item[0] == '/':
                 # Don't use any endpoints that we're supposed to ignore.
-                if not item[1:] in ignored_funcs:
+                item_no_slash = item[1:]
+                if not item_no_slash in ignored_funcs:
                     api_endpoints.append(item)
 
         # Make N number of fuzzed API calls.
-        s = "Starting tests..."
-        print("=" * len(s)) 
-        print(s)
-        print("=" * len(s)) 
         self.fuzz_api_endpoints(url, substitutions, api_endpoints, api_description, num_test_cases)
 
-        # Print the results.
-        s = "Report:"
-        print("=" * len(s)) 
-        print(s)
-        print("=" * len(s)) 
-        for api_call in self.api_calls:
-            print(api_call)
+    def fuzz_api_from_openapi(self, file_name, url, substitutions, ignored_funcs, num_test_cases):
+        """Entry point for executing API tests as described in an OpenAPI/Swagger file."""
+        """Parse the file and then calls fuzz_api_endpoints to run the tests."""
+
+        # Read and parse the OpenAPI file. OpenAPI can be in either YAML or JSON formats.
+        stream = open(file_name, 'r')
+        api_description = yaml.load(stream, Loader=yaml.Loader)
+
+        # Extract any type information from the document.
+        if 'components' in api_description:
+            pass
+
+        # Extract the API endpoints.
+        api_endpoints = []
+        if 'paths' in api_description:
+            paths = api_description['paths']
+            for path in paths:
+                if not path in ignored_funcs:
+                    api_endpoints.append(path)
+
+        # Make N number of fuzzed API calls.
+        self.fuzz_api_endpoints(url, substitutions, api_endpoints, api_description, num_test_cases)
 
 def main():
     """Entry point when run from the command line."""
@@ -246,6 +303,7 @@ def main():
 
     # Parse command line options.
     parser = argparse.ArgumentParser()
+    parser.add_argument("--api-description", default="", help="The root address of the website.", required=False)
     parser.add_argument("--url", default="https://127.0.0.1", help="The root address of the website.", required=False)
     parser.add_argument("--substitutions", default="", help="A comma separated list of key=value pairs. Parameters with a key name will be substituted, ex: username=foo@bar.com", required=False)
     parser.add_argument("--ignore", default="", help="A comma separated list of API functions to not use.", required=False)
@@ -261,12 +319,17 @@ def main():
     if args.num_test_cases <= 0:
         print("Invalid number of test cases. Must be greater than zero.")
         sys.exit(1)
+    if len(args.api_description) == 0:
+        api_description_file_name = os.path.join(os.path.dirname(__file__), '..', 'api.raml')
+    else:
+        api_description_file_name = args.api_description
 
     # Parse the substitutions list.
     substitutions = {}
-    for sub in args.substitutions.split(','):
-        pair = sub.split('=')
-        substitutions[pair[0]] = pair[1]
+    if len(args.substitutions) > 0:
+        for sub in args.substitutions.split(','):
+            pair = sub.split('=')
+            substitutions[pair[0]] = pair[1]
 
     # Parse the ignore list.
     ignored_funcs = args.ignore.split(',')
@@ -275,7 +338,11 @@ def main():
     try:
         fuzzer = ApiFuzzer()
         url = fuzzer.create_api_url(args.url)
-        fuzzer.fuzz_api(url, substitutions, ignored_funcs, args.num_test_cases)
+        _, extension = os.path.splitext(api_description_file_name)
+        if extension.lower() == '.raml':
+            fuzzer.fuzz_api_from_raml(api_description_file_name, url, substitutions, ignored_funcs, args.num_test_cases)
+        else:
+            fuzzer.fuzz_api_from_openapi(api_description_file_name, url, substitutions, ignored_funcs, args.num_test_cases)
     except Exception as e:
         print("Test aborted!\n")
         print(e)
