@@ -72,7 +72,15 @@
     function list_activity_types()
     {
         let api_url = "${root_url}/api/1.0/list_activity_types";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_activity_type_list, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_activity_type_list(records);
+            }
+        });
     }
 
     $(document).ready(function()

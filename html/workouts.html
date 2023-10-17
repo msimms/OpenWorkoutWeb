@@ -39,7 +39,8 @@
 
         dict.push({["Preferred Long Run Day"] : preferred_long_run_day});
 
-        send_post_request_async(api_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response)
+        {
             if (status != 200)
                 alert(response)
         });
@@ -55,7 +56,8 @@
 
         dict.push({["goal type"] : goal_type});
 
-        send_post_request_async(api_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response)
+        {
             if (status != 200)
                 alert(response)
         });
@@ -72,7 +74,8 @@
 
         dict.push({["gen workouts when race cal is empty"] : level});
 
-        send_post_request_async(api_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response)
+        {
             if (status != 200)
                 alert(response)
         });
@@ -87,7 +90,8 @@
 
         dict.push({["has swimming pool access"] : value});
 
-        send_post_request_async(api_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response)
+        {
             if (status == 200)
                 generate_workout_plan();
             else
@@ -104,7 +108,8 @@
 
         dict.push({["has open water swim access"] : value});
 
-        send_post_request_async(api_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response)
+        {
             if (status == 200)
                 generate_workout_plan();
             else
@@ -121,7 +126,8 @@
 
         dict.push({["has bicycle"] : value});
 
-        send_post_request_async(api_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response)
+        {
             if (status == 200)
                 generate_workout_plan();
             else
@@ -139,7 +145,8 @@
 
         dict.push({["Experience Level"] : level});
 
-        send_post_request_async(api_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response)
+        {
             if (status == 200)
                 generate_workout_plan();
             else
@@ -157,7 +164,8 @@
 
         dict.push({["Structured Training Comfort Level"] : level});
 
-        send_post_request_async(api_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response)
+        {
             if (status == 200)
                 generate_workout_plan();
             else
@@ -172,7 +180,8 @@
         let api_url = "${root_url}/api/1.0/generate_workout_plan";
         let dict = [];
 
-        send_post_request_async(api_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response)
+        {
             if (status == 200)
                 alert("The workout plan is being generated and will be viewable on the My Activities page when complete.");
             else
@@ -187,7 +196,8 @@
         let api_url = "${root_url}/api/1.0/refresh_personal_records";
         let dict = [];
 
-        send_post_request_async(api_url, dict, function(status, response) {
+        send_post_request_async(api_url, dict, function(status, response)
+        {
             if (status == 200)
                 window.location.reload();
             else
@@ -239,7 +249,15 @@
     function get_run_paces(run_prs)
     {
         let api_url = "${root_url}/api/1.0/get_running_paces?" + serialize_to_url_params(run_prs);
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_run_paces, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_run_paces(records);
+            }
+        });
     }
 
     /// @function append_to_pr_table
@@ -451,7 +469,15 @@
     {
         let four_weeks = (7.0 * 24.0 * 60.0 * 60.0);
         let api_url = "${root_url}/api/1.0/list_personal_records?seconds=" + four_weeks;
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_personal_records, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_personal_records(records);
+            }
+        });
     }
 
     /// @function get_user_settings
@@ -459,7 +485,15 @@
     function get_user_settings()
     {
         let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=goal%20type,preferred%20long%20run%20day,Experience%20Level,Structured%20Training%20Comfort%20Level,Gen%20Workouts%20When%20Race%20Cal%20Is%20Empty,has%20swimming%20pool%20access,has%20open%20water%20swim%20access,has%20bicycle";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_user_settings(records);
+            }
+        });
     }
 
     /// @function get_calendar_url
@@ -467,7 +501,14 @@
     function get_calendar_url()
     {
         let api_url = "${root_url}/api/1.0/get_workout_ical_url";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_calendar_url, dataType: "text" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                process_calendar_url(response_text);
+            }
+        });
     }
 
     /// @function get_race_list
@@ -475,7 +516,15 @@
     function get_race_list()
     {
         let api_url = "${root_url}/api/1.0/list_races";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_race_list, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_race_list(records);
+            }
+        });
     }
 
     /// @function add_race
