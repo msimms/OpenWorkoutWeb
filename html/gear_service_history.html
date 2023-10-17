@@ -56,7 +56,8 @@
     {
         let api_url = "${root_url}/api/1.0/create_service_record";
         let dict = [];
-        let service_date_obj = new Date(document.getElementById("service_date").value);
+        let service_date_elem = document.getElementById("service_date");
+        let service_date_obj = service_date_elem.value.length > 0 ? new Date(service_date_elem.value) : new Date();
         let service_date = service_date_obj.getTime() / 1000;
         let description = document.getElementById("description").value;
 
