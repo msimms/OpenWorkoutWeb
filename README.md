@@ -26,6 +26,10 @@ Why develop a workout tracker when there are so many closed-source options avail
 * Replace Google Maps with Open Street Map.
 * More analytics.
 
+## Software Design Goals
+* Incorporate as few dependencies as possible. Only add dependencies for things that are just too cumbersome or error prone to do otherwise.
+* Small web pages that load quickly. This is related to the previous item regarding dependencies.
+
 [Full bug and feature tracking](https://github.com/msimms/OpenWorkoutWeb/issues).
 
 ## Creating a Docker Image
