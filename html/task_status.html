@@ -23,8 +23,6 @@
 
 <script src="${root_url}/js/all.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
-<script src="${root_url}/jquery-timepicker/jquery.timepicker.js"></script>
 <script>
 
     /// @function append_to_table
@@ -63,7 +61,16 @@
     /// @function get_task_statuses
     function get_task_statuses()
     {
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_task_statuses", cache: false, success: process_task_statuses, dataType: "json" });
+        let api_url = "${root_url}/api/1.0/get_task_statuses";
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_task_statuses(records);
+            }
+        });
     }
 
     $(document).ready(function()

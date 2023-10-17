@@ -20,7 +20,6 @@
 
 <script src="${root_url}/js/all.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha256-KM512VNnjElC30ehFwehXjx1YCHPiQkOPmqnrWtpccM=" crossorigin="anonymous"></script>
 <script>
 
     /// @function append_to_devices_table
@@ -68,7 +67,16 @@
     // Request the list of devices registered to this user.
     function get_device_list()
     {
-		$.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_devices", cache: false, success: process_device_list, dataType: "json" });
+        let api_url = "${root_url}/api/1.0/list_devices";
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_device_list(records);
+            }
+        });
     }
 
     $(document).ready(function()

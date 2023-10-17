@@ -126,7 +126,15 @@ function common_delete_photo(root_url, photo_id)
 function common_list_photos(root_url)
 {
     let api_url = root_url + "/api/1.0/list_activity_photos?activity_id=" + activity_id;
-    $.ajax({ type: 'GET', url: api_url, cache: false, success: process_photos_list, dataType: "json" });
+
+    send_get_request_async(api_url, function (response_code, response_text)
+    {
+        if (response_code == 200)
+        {
+            const records = JSON.parse(response_text);
+            process_photos_list(records);
+        }
+    });
 }
 
 /// @function common_create_tags
@@ -137,9 +145,12 @@ function common_create_tags(root_url, tags)
 
     dict.push({["activity_id"] : activity_id});
     for (let tag in tags)
+    {
         dict.push({["tag" + tag] : tags[tag]});
+    }
 
-    send_post_request_async(api_url, dict, function(status, response) {
+    send_post_request_async(api_url, dict, function(status, response)
+    {
         if (status != 200)
             alert(response)
     });

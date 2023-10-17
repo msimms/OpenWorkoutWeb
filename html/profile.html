@@ -54,7 +54,15 @@
     function list_activity_types()
     {
         let api_url = "${root_url}/api/1.0/list_activity_types";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_activity_type_list, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_activity_type_list(records);
+            }
+        });
     }
 
     /// @function update_birthday
@@ -442,7 +450,14 @@
             ftp_elem.value = ftp.toFixed(1) + " watts";
             ftp_error_elem.hidden = true;
 
-            $.ajax({ type: 'GET', url: api_url, cache: false, success: process_power_zones, dataType: "json" });
+            send_get_request_async(api_url, function (response_code, response_text)
+            {
+                if (response_code == 200)
+                {
+                    const records = JSON.parse(response_text);
+                    process_power_zones(records);
+                }
+            });
         }
         else
         {
@@ -468,35 +483,75 @@
     function get_personal_records()
     {
         let api_url = "${root_url}/api/1.0/list_personal_records";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_personal_records, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_personal_records(records);
+            }
+        });
     }
 
     /// @function get_user_settings
     function get_user_settings()
     {
         let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=preferred%20units,height,weight,birthday,biological%20sex,resting%20heart%20rate,max%20heart%20rate,estimated%20max%20heart%20rate";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_user_settings, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_user_settings(records);
+            }
+        });
     }
 
     // Request the user's VO2Max.
     function get_vo2_max()
     {
         let api_url = "${root_url}/api/1.0/estimate_vo2_max";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_vo2_max, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_vo2_max(records);
+            }
+        });
     }
 
     // Request the user's FTP.
     function get_ftp()
     {
         let api_url = "${root_url}/api/1.0/estimate_ftp";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_ftp, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_ftp(records);
+            }
+        });
     }
 
     // Request the user's BMI.
     function get_bmi()
     {
         let api_url = "${root_url}/api/1.0/estimate_bmi";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_bmi, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_bmi(records);
+            }
+        });
     }
 
     // Request the user's heart rate zones.
@@ -505,7 +560,15 @@
         let now = Date.now();
         let age_in_years = (now - birthday) / (365.25 * 24 * 60 * 60 * 1000);
         let api_url = "${root_url}/api/1.0/list_hr_zones?estimated%20max%20heart%20rate=" + estimated_max_hr + ";max%20heart%20rate=" + max_hr + ";resting%20heart%20rate=" + resting_hr + ";age%20in%20years=" + age_in_years;
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_hr_zones, error: process_hr_zones_error, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_hr_zones(records);
+            }
+        });
     }
 
     $(function()

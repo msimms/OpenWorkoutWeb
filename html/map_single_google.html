@@ -365,7 +365,15 @@ ${summary}
     function retrieve_sensor_data()
     {
         let api_url = root_url + "/api/1.0/activity_sensordata?activity_id=" + activity_id + "&sensors=Current%20Speed,Heart%20Rate,Cadence,Power,Temperature,Threat%20Count,accelerometer";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_sensordata(records);
+            }
+        });
     }
 
     /// @function draw_sensor_and_interval_graphs
