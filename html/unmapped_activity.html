@@ -78,7 +78,15 @@ ${nav}
     function retrieve_sensor_data()
     {
         let api_url = "${root_url}/api/1.0/activity_sensordata?activity_id=${activityId}&sensors=accelerometer,Heart%20Rate,Temperature,Events";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_sensordata, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_sensordata(records);
+            }
+        });
     }
 
     /// @function draw_graphs

@@ -235,7 +235,15 @@ ${nav}
         function list_activity_types()
         {
             let api_url = "${root_url}/api/1.0/list_activity_types";
-            $.ajax({ type: 'GET', url: api_url, cache: false, success: process_activity_type_list, dataType: "json" });
+
+            send_get_request_async(api_url, function (response_code, response_text)
+            {
+                if (response_code == 200)
+                {
+                    const records = JSON.parse(response_text);
+                    process_activity_type_list(records);
+                }
+            });
         }
 
         /// @function parse_csv_file
@@ -487,7 +495,16 @@ ${nav}
         // Pings the cloud service to know the status of files that have been uploaded.
         var check_for_updates = function()
         {
-            $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_task_statuses", cache: false, success: process_task_statuses, dataType: "json" });
+            let api_url = "${root_url}/api/1.0/get_task_statuses";
+
+            send_get_request_async(api_url, function (response_code, response_text)
+            {
+                if (response_code == 200)
+                {
+                    const records = JSON.parse(response_text);
+                    process_task_statuses(records);
+                }
+            });
         }
 
         setInterval(check_for_updates, 5000);
