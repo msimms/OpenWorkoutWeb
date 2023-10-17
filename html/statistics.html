@@ -218,13 +218,31 @@
     /// @function get_heat_map_data
     function get_heat_map_data()
     {
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/get_location_summary", cache: false, success: process_heat_map, dataType: "json" });
+        let api_url = "${root_url}/api/1.0/get_location_summary";
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_heat_map(records);
+            }
+        });
     }
 
     /// @function get_personal_records
     function get_personal_records()
     {
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/list_personal_records", cache: false, success: process_personal_records, dataType: "json" });
+        let api_url = "${root_url}/api/1.0/list_personal_records";
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_personal_records(records);
+            }
+        });
     }
 
     $(document).ready(function()
