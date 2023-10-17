@@ -127,8 +127,7 @@ function common_list_photos(root_url)
 {
     let api_url = root_url + "/api/1.0/list_activity_photos?activity_id=" + activity_id;
 
-    send_get_request_async(api_url, function (response_code, response_text)
-    {
+    send_get_request_async(api_url, function (response_code, response_text) {
         if (response_code == 200)
         {
             const records = JSON.parse(response_text);
@@ -149,8 +148,7 @@ function common_create_tags(root_url, tags)
         dict.push({["tag" + tag] : tags[tag]});
     }
 
-    send_post_request_async(api_url, dict, function(status, response)
-    {
+    send_post_request_async(api_url, dict, function(status, response) {
         if (status != 200)
             alert(response)
     });

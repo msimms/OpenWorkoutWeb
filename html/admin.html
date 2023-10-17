@@ -56,8 +56,7 @@
     {
         let api_url = "${root_url}/api/1.0/list_users_without_devices";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);

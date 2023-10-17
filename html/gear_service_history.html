@@ -13,7 +13,6 @@
 <meta name="keywords" content="gear list">
 
 <link rel="shortcut icon" href="${root_url}/media/favicon.ico">
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.10.0/jquery.timepicker.css" integrity="sha256-zDI1g6Yzr25YWykCOmTUeageF3RWaLnx+Ik8NqVk1xA=" crossorigin="anonymous">
 
@@ -133,8 +132,7 @@
     {
         let api_url = "${root_url}/api/1.0/get_distance_for_tag?tag=" + gear_name
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -151,8 +149,7 @@
     {
         let api_url = "${root_url}/api/1.0/list_gear"
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -204,12 +201,10 @@
         });
     }
 
-    $(document).ready(function()
-    {
+    window.onload = function() {
         // Things we need when the page is loaded.
         get_gear();
-    });
-
+    };
 </script>
 
 <section class="nav">

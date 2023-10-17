@@ -19,7 +19,6 @@
 <body>
 
 <script src="${root_url}/js/all.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 
     /// @function update_settings
@@ -226,8 +225,7 @@
     {
         let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=default%20privacy,preferred%20units,preferred%20first%20day%20of%20week";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -236,11 +234,10 @@
         });
     }
 
-    $(document).ready(function()
-    {
+    window.onload = function() {
         // Things we need when the page is loaded.
         get_user_settings();
-    });
+    };
 
 </script>
 

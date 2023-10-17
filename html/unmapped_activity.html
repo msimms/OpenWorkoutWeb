@@ -79,8 +79,7 @@ ${nav}
     {
         let api_url = "${root_url}/api/1.0/activity_sensordata?activity_id=${activityId}&sensors=accelerometer,Heart%20Rate,Temperature,Events";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -201,14 +200,13 @@ ${nav}
         common_create_tags(root_url, tags)
     }
 
-    jQuery(document).ready(function()
-    {
+    window.onload = function() {
         jQuery(".chosen").data("placeholder", "Specify tags...").chosen();
 
         jQuery('#tags').on('change', function(e) {
             create_tags(jQuery("#tags").val());
         });
-    });
+    };
 
     list_photos();
 </script>
@@ -222,57 +220,58 @@ ${summary}
 </section>
 
 <section class="analysis">
-<h3>Description</h3>
-<p>
-<table>
-${description}
-</table>
-</p>
+    <h3>Description</h3>
+    <p>${description}</p>
 </section>
 
 <section class="analysis">
-<h3>Detailed Analysis</h3>
-<p>
-<table>
-${details}
-</table>
-</p>
+    <h3>Detailed Analysis</h3>
+    <table>
+    ${details}
+    </table>
 </section>
 
 <section class="activity_control">
-<h3>Tags and Gear</h3>
-<p>
-<select name="tags" id="tags" class="chosen" multiple="true" style="width:50%;" data-placeholder="Specify tags and gear...">
-${tags}
-</select>
-</p>
+    <h3>Tags and Gear</h3>
+    <select name="tags" id="tags" class="chosen" multiple="true" style="width:100%;" data-placeholder="Specify tags and gear...">
+    ${tags}
+    </select>
+</section>
+
+<section class="activity_control">
+    <div class="empty" id="photos_div" style="display: none;">
+    <h3>Photos</h3>
+    <table id="photos">
+    </table>
+    </div>
 </section>
 
 <section class="activity_control">
 <h3>Comments</h3>
-<p>
-<table>
-${comments}
-</table>
-</p>
+    <h3>Comments</h3>
+    <table id="comments">
+    ${comments}
+    </table>
 </section>
 
 <section class="activity_control" style="${visibility}">
-<h3>Export</h3>
-<table>
-${exports}
-</table>
+    <h3>Export</h3>
+    <table>
+    ${exports}
+    </table>
 </section>
 
 <section class="activity_control" style="${visibility}">
 <h3>Edit</h3>
-<table>
-<td><button type="button" onclick="edit_activity()" style="color:black">Edit Name, Description, and Type...</button></td><tr>
-<td><button type="button" onclick="add_photos()" style="color:black">Add Photos...</button></td><tr>
-<td><button type="button" onclick="trim_activity()" style="color:black">Trim...</button></td><tr>
-<td><button type="button" onclick="refresh_analysis()" style="color:black">Refresh Analysis</button></td><tr>
-<td><button type="button" onclick="delete_activity()" style="color:red">Delete</button></td><tr>
-</table>
+    <table>
+        <tbody>
+            <tr><td><button type="button" onclick="edit_activity()" style="color:black">Edit Name, Description, and Type...</button></td></tr>
+            <tr><td><button type="button" onclick="add_photos()" style="color:black">Add Photos...</button></td></tr>
+            <tr><td><button type="button" onclick="trim_activity()" style="color:black">Trim...</button></td></tr>
+            <tr><td><button type="button" onclick="refresh_analysis()" style="color:black">Refresh Analysis</button></td></tr>
+            <tr><td><button type="button" onclick="delete_activity()" style="color:red">Delete</button></td></tr>
+        </tbody>
+    </table>
 </section>
 
 </body>

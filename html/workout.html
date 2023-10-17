@@ -15,7 +15,6 @@
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 
 <link rel="shortcut icon" href="${root_url}/media/favicon.ico">
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous">
 
 </head>
@@ -35,8 +34,7 @@
     {
         let api_url = "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=zwo";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 create_local_file(response_text, "${workout_id}.zwo", "text/plain;charset=utf-8");
@@ -50,8 +48,7 @@
     {
         let api_url = "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=ics";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 create_local_file(response_text, "${workout_id}.zwo", "text/plain;charset=utf-8");
@@ -296,8 +293,7 @@
     {
         let api_url = "${root_url}/api/1.0/list_activity_types";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 process_activity_type_list(response_text, selected_activity_type);
@@ -311,8 +307,7 @@
     {
         let api_url = "${root_url}/api/1.0/list_workout_types_for_activity?activity_type=" + selected_activity_type;
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 process_workout_type_list(response_text, selected_workout_type);
@@ -374,8 +369,7 @@
     {
         let api_url = "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=json";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 process_workout_description(response_text);
@@ -392,12 +386,10 @@
         });
     });
 
-    $(document).ready(function()
-    {
+    window.onload = function() {
         // Things we need when the page is loaded.
         get_workout_description();
-    });
-
+    };
 </script>
 
 <section class="nav">

@@ -15,7 +15,6 @@
 <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 
 <link rel="shortcut icon" href="${root_url}/media/favicon.ico">
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.0/themes/smoothness/jquery-ui.css" integrity="sha256-wiYwAtNSF3nuWFREDO5vx5cwSmngwE1pGg59NQURCUY=" crossorigin="anonymous">
 
 </head>
@@ -55,8 +54,7 @@
     {
         let api_url = "${root_url}/api/1.0/list_activity_types";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -450,8 +448,7 @@
             ftp_elem.value = ftp.toFixed(1) + " watts";
             ftp_error_elem.hidden = true;
 
-            send_get_request_async(api_url, function (response_code, response_text)
-            {
+            send_get_request_async(api_url, function (response_code, response_text) {
                 if (response_code == 200)
                 {
                     const records = JSON.parse(response_text);
@@ -484,8 +481,7 @@
     {
         let api_url = "${root_url}/api/1.0/list_personal_records";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -499,8 +495,7 @@
     {
         let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=preferred%20units,height,weight,birthday,biological%20sex,resting%20heart%20rate,max%20heart%20rate,estimated%20max%20heart%20rate";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -514,8 +509,7 @@
     {
         let api_url = "${root_url}/api/1.0/estimate_vo2_max";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -529,8 +523,7 @@
     {
         let api_url = "${root_url}/api/1.0/estimate_ftp";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -544,8 +537,7 @@
     {
         let api_url = "${root_url}/api/1.0/estimate_bmi";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -561,8 +553,7 @@
         let age_in_years = (now - birthday) / (365.25 * 24 * 60 * 60 * 1000);
         let api_url = "${root_url}/api/1.0/list_hr_zones?estimated%20max%20heart%20rate=" + estimated_max_hr + ";max%20heart%20rate=" + max_hr + ";resting%20heart%20rate=" + resting_hr + ";age%20in%20years=" + age_in_years;
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -581,16 +572,14 @@
         });
     });
 
-    $(document).ready(function()
-    {
+    window.onload = function() {
         // Things we need when the page is loaded.
         get_personal_records();
         get_user_settings();
         get_vo2_max();
         get_ftp();
         get_bmi();
-    });
-
+    };
 </script>
 
 <section class="nav">

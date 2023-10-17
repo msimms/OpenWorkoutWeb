@@ -241,8 +241,7 @@ ${nav}
     {
         let api_url = root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=0";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -296,8 +295,7 @@ ${summary}
     {
         let api_url = root_url + "/api/1.0/activity_summarydata?activity_id=" + activity_id + "&summary_items=intervals";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -318,8 +316,7 @@ ${summary}
     {
         let api_url = root_url + "/api/1.0/activity_sensordata?activity_id=" + activity_id + "&sensors=Current%20Speed,Heart%20Rate,Cadence,Power";
 
-        send_get_request_async(api_url, function (response_code, response_text)
-        {
+        send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
             {
                 const records = JSON.parse(response_text);
@@ -439,14 +436,13 @@ ${summary}
         common_create_tags(root_url, tags)
     }
     
-    jQuery(document).ready(function()
-    {
+    window.onload = function() {
         jQuery(".chosen").data("placeholder", "Specify tags...").chosen();
 
         jQuery('#tags').on('change', function(e) {
             create_tags(jQuery("#tags").val());
         });
-    });
+    };
 
     list_photos();
 </script>
