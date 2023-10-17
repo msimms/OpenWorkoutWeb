@@ -33,18 +33,30 @@
     // Request a ZWO file.
     function export_workout_to_zwo()
     {
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=zwo", cache: false, success: function(response) {
-            create_local_file(response, "${workout_id}.zwo", "text/plain;charset=utf-8");
-        }, dataType: "text" });
+        let api_url = "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=zwo";
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                create_local_file(response_text, "${workout_id}.zwo", "text/plain;charset=utf-8");
+            }
+        });
     }
 
     /// @function export_workout_to_ical
     // Request an iCal file.
     function export_workout_to_ical()
     {
-        $.ajax({ type: 'GET', url: "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=ics", cache: false, success: function(response) {
-            create_local_file(response, "${workout_id}.ical", "text/plain;charset=utf-8");
-        }, dataType: "text" });
+        let api_url = "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=ics";
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                create_local_file(response_text, "${workout_id}.zwo", "text/plain;charset=utf-8");
+            }
+        });
     }
 
     /// @function delete_workout

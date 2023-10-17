@@ -239,7 +239,16 @@ ${nav}
     /// @function initialize
     function initialize()
     {
-        $.ajax({ type: 'GET', url: root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=0", cache: false, success: append_to_track, dataType: "json" });
+        let api_url = root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=0";
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                append_to_track(records);
+            }
+        });
     };
 
     // Things we need when the page is loaded.
@@ -286,7 +295,15 @@ ${summary}
     function retrieve_summary_data()
     {
         let api_url = root_url + "/api/1.0/activity_summarydata?activity_id=" + activity_id + "&summary_items=intervals";
-        $.ajax({ type: 'GET', url: api_url, cache: false, success: process_summarydata, dataType: "json" });
+
+        send_get_request_async(api_url, function (response_code, response_text)
+        {
+            if (response_code == 200)
+            {
+                const records = JSON.parse(response_text);
+                process_summarydata(records);
+            }
+        });
     }
 
     /// @function process_sensordata - callback for when sensor data is returned
