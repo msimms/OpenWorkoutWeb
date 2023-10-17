@@ -250,8 +250,10 @@ ${nav}
         });
     };
 
-    // Things we need when the page is loaded.
-    initialize();
+    window.onload = function() {
+        // Things we need when the page is loaded.
+        initialize();
+    }
 </script>
 
 <canvas id="canvas">
@@ -274,7 +276,6 @@ ${summary}
 </div>
 
 <script>
-
     let start_time_ms = 0;
     let end_time_ms = 0;
 
