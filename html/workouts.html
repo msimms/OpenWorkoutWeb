@@ -571,7 +571,7 @@
     /// @function delete_race
     function delete_race(race_id)
     {
-        let api_url = "${root_url}/api/1.0/delete_race?Race%20Id=" + race_id;
+        let api_url = "${root_url}/api/1.0/delete_race?Race%20ID=" + race_id;
 
         send_delete_request_async(api_url, function(status, response) {
             if (status == 200)
