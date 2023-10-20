@@ -100,7 +100,14 @@ class WorkoutPlanGenerator(object):
             inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 2.4 * Units.METERS_PER_MILE
             inputs[Keys.GOAL_BIKE_DISTANCE_KEY] = 112.0 * Units.METERS_PER_MILE
             inputs[Keys.GOAL_RUN_DISTANCE_KEY] = Units.METERS_PER_MARATHON
-
+        elif goal_lower == Keys.GOAL_METRIC_CENTURY_RIDE_KEY:
+            inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 0.0
+            inputs[Keys.GOAL_BIKE_DISTANCE_KEY] = 100000.0
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 0.0
+        elif goal_lower == Keys.GOAL_STANDARD_CENTURY_RIDE_KEY:
+            inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 0.0
+            inputs[Keys.GOAL_BIKE_DISTANCE_KEY] = 100.0 * Units.METERS_PER_MILE
+            inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 0.0
         return inputs
 
     @staticmethod

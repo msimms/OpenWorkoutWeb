@@ -270,20 +270,20 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
                 goal_workout = self.gen_goal_workout(goal_distance, goal_date)
                 workouts.append(goal_workout)
 
-            # Cross training to support medium distance running
+            # Cross training to support medium distance running.
             if goal == Keys.GOAL_5K_RUN_KEY or goal == Keys.GOAL_10K_RUN_KEY or goal == Keys.GOAL_15K_RUN_KEY:
                 workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
                 workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
 
-            # Cross training to support long distance running
+            # Cross training to support long distance running.
             elif (goal == Keys.GOAL_HALF_MARATHON_RUN_KEY or goal == Keys.GOAL_MARATHON_RUN_KEY) and not in_taper:
                 workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
 
-            # Cross training to support ultra distance running
+            # Cross training to support ultra distance running.
             elif (goal == Keys.GOAL_50K_RUN_KEY or goal == Keys.GOAL_50_MILE_RUN_KEY) and not in_taper:
                 workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
 
-            # Short distance triathlons
+            # Short distance triathlons.
             elif goal == Keys.GOAL_SPRINT_TRIATHLON_KEY or goal == Keys.GOAL_OLYMPIC_TRIATHLON_KEY:
                 workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
                 if in_taper or goal_type == Keys.GOAL_TYPE_COMPLETION:
@@ -291,7 +291,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
                 else:
                     workouts.append(self.gen_interval_session(goal_distance))
 
-            # Long distance triathlons
+            # Long distance triathlons.
             elif goal == Keys.GOAL_HALF_IRON_DISTANCE_TRIATHLON_KEY or goal == Keys.GOAL_IRON_DISTANCE_TRIATHLON_KEY:
                 workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
                 if in_taper or goal_type == Keys.GOAL_TYPE_COMPLETION:
