@@ -135,7 +135,7 @@
     /// @function show_add_workout_dialog
     function show_add_workout_dialog()
     {
-        newWorkoutDialog.showModal();
+        new_workout_dlg.showModal();
     }
 
     /// @function create_planned_workout
@@ -248,8 +248,8 @@
 ${nav}
 </section>
 
-<section>
-    <dialog id="newWorkoutDialog">
+<section class="block">
+    <dialog id="new_workout_dlg">
         <form action="javascript:void(0);">
             <div class="dialog">
                 Date:<br><input type="date" name="workout_date" id="workout_date"><br>

@@ -307,7 +307,7 @@
         date_added.value = n.toLocaleDateString();
 
         new_gear_type = gear_type;
-        newGearDialog.showModal();
+        new_gear_dlg.showModal();
     }
 
     /// @function get_new_bike_info
@@ -339,7 +339,7 @@ ${nav}
 </section>
 
 <section class="block">
-    <dialog id="newGearDialog">
+    <dialog id="new_gear_dlg">
         <form action="javascript:void(0);">
             <div class="dialog">
                 Name:<br><input type="text" name="name" id="name"><br>
@@ -353,48 +353,48 @@ ${nav}
             </div>
         </form>
     </dialog>
+</section>
 
-    <div id="existing_gear">
-        <h2>Bikes</h2>
-        <table id="bikes" style="display: none;">
-            <tbody>
-                <tr>
-                    <th scope="col"><b>Name</b></th>
-                    <th scope="col"><b>Description</b></th>
-                    <th scope="col"><b>Date Added</b></th>
-                    <th scope="col"><b>Date Retired</b></th>
-                </tr>
-            </tbody>
-        </table>
-        <button type="button" onclick="get_new_bike_info()">Add New Bike</button>
+<section class="block">
+    <h2>Bikes</h2>
+    <table id="bikes" style="display: none;">
+        <tbody>
+            <tr>
+                <th scope="col"><b>Name</b></th>
+                <th scope="col"><b>Description</b></th>
+                <th scope="col"><b>Date Added</b></th>
+                <th scope="col"><b>Date Retired</b></th>
+            </tr>
+        </tbody>
+    </table>
+    <button type="button" onclick="get_new_bike_info()">Add New Bike</button>
 
-        <hr>
+    <hr>
 
-        <h2>Shoes</h2>
-        <table id="shoes" style="display: none;">
-            <tbody>
-                <tr>
-                    <th scope="col"><b>Name</b></th>
-                    <th scope="col"><b>Description</b></th>
-                    <th scope="col"><b>Date Added</b></th>
-                    <th scope="col"><b>Date Retired</b></th>
-                </tr>
-            </tbody>
-        </table>
-        <button type="button" onclick="get_new_shoes_info()">Add New Shoes</button>
+    <h2>Shoes</h2>
+    <table id="shoes" style="display: none;">
+        <tbody>
+            <tr>
+                <th scope="col"><b>Name</b></th>
+                <th scope="col"><b>Description</b></th>
+                <th scope="col"><b>Date Added</b></th>
+                <th scope="col"><b>Date Retired</b></th>
+            </tr>
+        </tbody>
+    </table>
+    <button type="button" onclick="get_new_shoes_info()">Add New Shoes</button>
 
-        <hr>
+    <hr>
 
-        <h2>Defaults</h2>
-        <table id="defaults" style="display: none;">
-            <tbody>
-                <tr>
-                    <th scope="col"><b>Sport</b></th>
-                    <th scope="col"><b>Default Gear</b></th>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <h2>Defaults</h2>
+    <table id="defaults" style="display: none;">
+        <tbody>
+            <tr>
+                <th scope="col"><b>Sport</b></th>
+                <th scope="col"><b>Default Gear</b></th>
+            </tr>
+        </tbody>
+    </table>
 </section>
 
 </body>

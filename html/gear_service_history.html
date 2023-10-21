@@ -88,7 +88,7 @@
         date_added.placeholder = n.toLocaleDateString();
         date_added.value = n.toLocaleDateString();
 
-        newServiceDialog.showModal();
+        new_service_dlg.showModal();
     }
 
     /// @function delete_service_record
@@ -213,7 +213,7 @@ ${nav}
 </section>
 
 <section class="block">
-    <dialog id="newServiceDialog">
+    <dialog id="new_service_dlg">
         <form action="javascript:void(0);">
             <div class="dialog">
                 Date Serviced:<br><input type="date" name="service_date" id="service_date"><br>
@@ -225,7 +225,9 @@ ${nav}
             </div>
         </form>
     </dialog>
+</section>
 
+<section class="block">
     <input type="text" name="gear_name" id="gear_name" value="" onchange="update_gear_name()"><br>
     <h3>Description</h3>
     <p id="gear_description"></p>
@@ -247,7 +249,6 @@ ${nav}
     <div class="block" id="new_service_record_block">
     </div>
     <button type="button" id="add_service_record_btn" onclick="get_new_service_record_info()">Add Service Record</button>
-
 </section>
 
 </body>

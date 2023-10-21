@@ -340,10 +340,13 @@ button .fa {
     max-width: 80%;
 }
 
+.block dialog {
+    width: 50%;
+    font-size: 24px;
+}
+
 .dialog input {
     width: 98%;
-    height: 30px;
-    font-size: 24px;
 }
 
 .map_canvas {
