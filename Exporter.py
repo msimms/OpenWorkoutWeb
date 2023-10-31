@@ -56,6 +56,19 @@ class Exporter(object):
             return None
         return current_reading
 
+    def nearest_loc_reading(self, time_ms, current_reading, nearest_loc, loc_iter):
+        try:
+            if current_reading is None:
+                current_reading = next(loc_iter)
+            else:
+                sensor_time = current_reading[Keys.APP_AXIS_TIME]
+                while sensor_time < time_ms:
+                    current_reading = next(loc_iter)
+                    sensor_time = current_reading[Keys.APP_AXIS_TIME]
+        except StopIteration:
+            return None
+        return nearest_loc
+
     def nearest_accel_reading(self, time_ms, current_reading, accel_iter):
         try:
             if current_reading is None:
@@ -109,14 +122,15 @@ class Exporter(object):
         done = False
         while not done:
             try:
-                # Get the next location.
-                if locations:
-                    nearest_loc = next(location_iter)
-                    current_time = nearest_loc[Keys.LOCATION_TIME_KEY]
-                    nearest_accel = self.nearest_accel_reading(current_time, nearest_accel, accel_iter)
-                else:
+                # Get the next location. If we have accelerometer data then we should key off of that
+                # timestamp since those are typically sampled at sub-second intervals.
+                if accel_readings:
                     nearest_accel = next(accel_iter)
                     current_time = nearest_accel[Keys.APP_AXIS_TIME]
+                    nearest_loc = self.nearest_loc_reading(current_time, nearest_accel, nearest_loc, location_iter)
+                else:
+                    nearest_loc = next(location_iter)
+                    current_time = nearest_loc[Keys.LOCATION_TIME_KEY]
 
                 # Get the next sensor readings.
                 nearest_cadence = self.nearest_sensor_reading(current_time, nearest_cadence, cadence_iter)
