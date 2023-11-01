@@ -1954,7 +1954,7 @@ class Api(object):
         result = self.data_mgr.delete_api_key(self.user_id, api_key)
         return result, api_key
 
-    def handle_merge_activities(self, values):
+    def handle_merge_activity_files(self, values):
         """Takes two files and attempts to merge them."""
         if self.user_id is None:
             raise ApiException.ApiNotLoggedInException()
@@ -1975,8 +1975,29 @@ class Api(object):
         if len(uploaded_file2_data) == 0:
             raise ApiException.ApiMalformedRequestException('Empty file data.')
 
+        # Parse the file and store return the result.
+        merged_data = self.data_mgr.merge_activity_files(self.user_id, uploaded_file1_data, uploaded_file2_data)
+        return True, merged_data
+
+    def handle_merge_activities(self, values):
+        """Takes multiple activities (specified by their unique id) and attempts to merge them,"""
+        """replacing the earliest activity in the list."""
+        """Returns the activity ID of the merged activity."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
+        if Keys.ACTIVITY_IDS_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity IDs not specified.")
+
+        # Decode and validate the required parameters.
+        activity_ids = json.loads(values[Keys.ACTIVITY_IDS_KEY])
+        for activity_id in activity_ids:
+            if not InputChecker.is_uuid(activity_id):
+                raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
         # Parse the file and store it's contents in the database.
-        merged_data = self.data_mgr.merge_activities(self.user_id, uploaded_file1_data, uploaded_file2_data)
+        merged_data = self.data_mgr.merge_activities(self.user_id, activity_ids)
         return True, merged_data
 
     def handle_update_planned_workout(self, values):
@@ -2882,6 +2903,8 @@ class Api(object):
             return self.handle_generate_workout_plan_from_inputs(values)
         elif request == 'generate_api_key':
             return self.handle_generate_api_key(values)
+        elif request == 'merge_activity_files':
+            return self.handle_merge_activity_files(values)
         elif request == 'merge_activities':
             return self.handle_merge_activities(values)
         return False, ""

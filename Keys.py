@@ -290,6 +290,7 @@ ACCELEROMETER_TIME_KEY = "time" # UNIX timestamp in milliseconds
 
 # Keys inherited from the web app.
 ACTIVITY_ID_KEY = "activity_id" # Unique identifier for the activity
+ACTIVITY_IDS_KEY = "activity_ids" # Indicates a list of activity IDs
 ACTIVITY_HASH_KEY = "activity_hash"
 ACTIVITY_TYPE_KEY = "activity_type"
 ACTIVITY_DESCRIPTION_KEY = "description"
@@ -306,7 +307,7 @@ ACTIVITY_COMMENT_KEY = "comment"
 ACTIVITY_COMMENTS_KEY = "comments"
 ACTIVITY_COMMENTER_ID_KEY = "commenter_id" # User ID of the user leaving the comment on an activity
 ACTIVITY_TAG_KEY = "tag"
-ACTIVITY_TAGS_KEY = "tags"
+ACTIVITY_TAGS_KEY = "tags" # A list of activities
 ACTIVITY_SUMMARY_KEY = "summary_data"
 ACTIVITY_EXPORT_FORMAT_KEY = "export_format"
 ACTIVITY_NUM_POINTS = "num_points" 
@@ -342,7 +343,7 @@ AVG_HEART_RATE = "Average Heart Rate" # Average heart rate (bpm) held during the
 AVG_CADENCE = "Average Cadence" # Average cadence (rpm or spm) held during the activity
 STEPS_PER_MINUTE = "Steps Per Minute" # Cadence for foot based activity
 AVG_STEPS_PER_MINUTE = "Average Steps Per Minute" # Average cadence for foot based activity
-NORMALIZED_POWER = "Normalized Power"
+NORMALIZED_POWER = "Normalized Power" # Normalized power
 THRESHOLD_POWER = "Threshold Power" # Functional Threshold Power (FTP)
 VARIABILITY_INDEX = "Variability Index"
 LONGEST_DISTANCE = "Longest Distance" # Longest distance, when summarizing activities

@@ -21,7 +21,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""Parses GPX and TCX files, passing the contents to a ActivityWriter object."""
+"""Parses GPX, TCX, and FIT files, passing the contents to a ActivityWriter object."""
 
 import calendar
 import csv
@@ -45,7 +45,7 @@ class ActivityWriter(object):
 
     def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time, desired_activity_id):
         """Pure virtual method for starting a location stream - creates the activity ID for the specified user."""
-        pass
+        return "", desired_activity_id
 
     def create_activity_track(self, device_str, activity_id, track_name, track_description):
         """Pure virtual method for starting a location track - creates the activity ID for the specified user."""

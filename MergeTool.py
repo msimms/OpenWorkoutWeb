@@ -25,164 +25,169 @@
 # SOFTWARE.
 
 import argparse
-import calendar
-import datetime
-import gpxpy
 import os
 import sys
-import ActivityMerge
-import GpxWriter
+import Exporter
+import Importer
+import Keys
 
-class MergeTool(ActivityMerge.ActivityMerge):
-    """Class for merging two GPX files."""
 
-    # These will keep track of where we are in each file.
-    track_index1 = 0
-    track_index2 = 0
-    segment_index1 = 0
-    segment_index2 = 0
-    point_index1 = 0
-    point_index2 = 0
+class ActivityWriterForMerging(Importer.ActivityWriter):
+    """Base class for any class that handles data read from the Importer."""
+
+    activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
+    locations = []
+    heart_rate_readings = []
+    power_readings = []
+    cadence_readings = []
+    temperature_readings = []
 
     def __init__(self):
-        ActivityMerge.ActivityMerge.__init__(self)
+        super(Importer.ActivityWriter, self).__init__()
 
-    def read_file(self, file_name):
-        """Extracts the data from the specified file."""
+    def is_duplicate_activity(self, user_id, start_time, optional_activity_id):
+        """Inherited from ActivityWriter. Returns TRUE if the activity appears to be a duplicate of another activity. Returns FALSE otherwise."""
+        return False
 
-        # The GPX parser requires a file handle and not a file name.
-        with open(file_name, 'r') as gpx_file:
+    def create_activity(self, username, user_id, stream_name, stream_description, activity_type, start_time, desired_activity_id):
+        """Pure virtual method for starting a location stream - creates the activity ID for the specified user."""
+        self.activity_type = activity_type
+        return "", desired_activity_id
 
-            # Parse the file.
-            gpx = gpxpy.parse(gpx_file)
+    def create_activity_track(self, device_str, activity_id, track_name, track_description):
+        """Pure virtual method for starting a location track - creates the activity ID for the specified user."""
+        pass
 
-            # Find the start timestamp.
-            start_time_tuple = gpx.time.timetuple()
-            temp_start_time_unix = calendar.timegm(start_time_tuple)
-            if temp_start_time_unix > self.start_time_unix:
-                self.start_time_unix = temp_start_time_unix
+    def create_activity_locations(self, device_str, activity_id, locations):
+        """Pure virtual method for processing multiple location reads. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
+        self.locations += locations
 
-            # Loop through all the data points and store them.
-            for track in gpx.tracks:
-                for segment in track.segments:
-                    for point in segment.points:
+    def create_activity_sensor_reading(self, activity_id, date_time, sensor_type, value):
+        """Pure virtual method for processing a sensor reading from the importer."""
+        if sensor_type == Keys.APP_CADENCE_KEY:
+            self.cadence_readings.append(value)
+        elif sensor_type == Keys.APP_HEART_RATE_KEY:
+            self.heart_rate_readings.append(value)
+        elif sensor_type == Keys.APP_POWER_KEY:
+            self.power_readings.append(value)
+        elif sensor_type == Keys.APP_TEMP_KEY:
+            self.temperature_readings.append(value)
 
-                        # Read the timestamp.
-                        dt_str = str(point.time) + " UTC"
-                        dt_obj = datetime.datetime.strptime(dt_str, "%Y-%m-%d %H:%M:%S %Z")
-                        dt_tuple = dt_obj.timetuple()
-                        dt_unix = calendar.timegm(dt_tuple) * 1000
+    def create_activity_sensor_readings(self, activity_id, sensor_type, values):
+        """Pure virtual method for processing multiple sensor readings. 'values' is an array of arrays in the form [time, value]."""
+        pass
 
-                        # Is this the most recent timestamp we've seen?
-                        if dt_unix > self.end_time_unix:
-                            self.end_time_unix = dt_unix
+    def create_activity_event(self, activity_id, event):
+        """Pure virtual method for processing an event reading. 'event' is a dictionary describing an event."""
+        pass
 
-                        # Store the location.
-                        location = []
-                        location.append(dt_unix)
-                        location.append(float(point.latitude))
-                        location.append(float(point.longitude))
-                        location.append(float(point.elevation))
-                        self.locations.append(location)
+    def create_activity_events(self, activity_id, events):
+        """Pure virtual method for processing multiple event readings. 'events' is an array of dictionaries in which each dictionary describes an event."""
+        pass
 
-                        # Look for other attributes.
-                        extensions = point.extensions
-                        if 'power' in extensions:
-                            reading = []
-                            reading.append(dt_unix)
-                            reading.append(float(extensions['power']))
-                            self.power_readings.append(reading)
-                        if 'gpxtpx:TrackPointExtension' in extensions:
-                            gpxtpx_extensions = extensions['gpxtpx:TrackPointExtension']
-                            if 'gpxtpx:hr' in gpxtpx_extensions:
-                                reading = []
-                                reading.append(dt_unix)
-                                reading.append(float(gpxtpx_extensions['gpxtpx:hr']))
-                                self.heart_rate_readings.append(reading)
-                            if 'gpxtpx:cad' in gpxtpx_extensions:
-                                reading = []
-                                reading.append(dt_unix)
-                                reading.append(float(gpxtpx_extensions['gpxtpx:cad']))
-                                self.cadence_readings.append(reading)
-                            if 'gpxtpx:atemp' in gpxtpx_extensions:
-                                reading = []
-                                reading.append(dt_unix)
-                                reading.append(float(gpxtpx_extensions['gpxtpx:atemp']))
-                                self.temperature_readings.append(reading)
+    def finish_activity(self, activity_id, end_time):
+        """Pure virtual method for any post-processing."""
+        pass
 
-    def write_file(self, file_name):
-        """Exports the merged data in GPX format."""
+class MergeTool(object):
+    """Class for merging two GPX files."""
 
-        location_iter = iter(self.locations)
-        if len(self.locations) == 0:
-            raise Exception("No locations for this activity.")
+    locations = []
+    heart_rate_readings = []
+    power_readings = []
+    cadence_readings = []
+    temperature_readings = []
 
-        cadence_iter = iter(self.cadence_readings)
-        hr_iter = iter(self.heart_rate_readings)
-        temp_iter = iter(self.temperature_readings)
-        power_iter = iter(self.power_readings)
+    def __init__(self):
+        super(MergeTool, self).__init__()
 
-        nearest_cadence = None
-        nearest_hr = None
-        nearest_temp = None
-        nearest_power = None
+    def sort(self, unsorted_list):
+        new_list = sorted(unsorted_list, key=lambda k: k[0]) 
+        return new_list
 
-        writer = GpxWriter.GpxWriter()
-        writer.create_gpx(file_name, "")
+    def merge(self, unmerged_list):
+        new_list = []
+        prev_item = None
+        for curr_item in unmerged_list:
 
-        start_time_ms = self.locations[0][0]
-        writer.write_metadata(start_time_ms)
+            # If this item and the previous item have the same timestamp then we need to merge them.
+            if prev_item and prev_item[0] == curr_item[0]:
+                new_item = []
+                for a,b in zip(prev_item, curr_item):
+                    new_item.append((a+b)/2)
 
-        writer.start_track()
-        writer.start_track_segment()
+                # Replace the last item in the list with the newly computed item.
+                new_list.pop()
+                new_list.append(new_item)
+                prev_item = new_item
+            else:
+                new_list.append(curr_item)
+                prev_item = curr_item
 
-        done = False
-        while not done:
+        return new_list
 
-            try:
-                # Get the next location.
-                current_location = location_iter.next()
-                current_time = current_location[0]
-                current_lat = current_location[1]
-                current_lon = current_location[2]
-                current_alt = current_location[3]
+    def nearest_sensor_reading(self, time_ms, current_reading, sensor_iter):
+        try:
+            if current_reading is None:
+                current_reading = sensor_iter.next()
+            else:
+                sensor_time = float(current_reading.keys()[0])
+                while sensor_time < time_ms:
+                    current_reading = sensor_iter.next()
+                    sensor_time = float(current_reading.keys()[0])
+        except StopIteration:
+            return None
+        return current_reading
 
-                # Get the next sensor readings.
-                nearest_cadence = self.nearest_sensor_reading(current_time, nearest_cadence, cadence_iter)
-                nearest_hr = self.nearest_sensor_reading(current_time, nearest_hr, hr_iter)
-                nearest_temp = self.nearest_sensor_reading(current_time, nearest_temp, temp_iter)
-                nearest_power = self.nearest_sensor_reading(current_time, nearest_power, power_iter)
+    def location_database_format_to_list(self, locations):
+        result = []
+        for location in locations:
+            result.append([ location[Keys.LOCATION_TIME_KEY], location[Keys.LOCATION_LAT_KEY], location[Keys.LOCATION_LON_KEY], location[Keys.LOCATION_ALT_KEY] ])
+        return result
 
-                # Write the next location.
-                writer.start_trackpoint(current_lat, current_lon, current_alt, current_time)
+    def sensor_database_format_to_list(self, readings):
+        result = []
+        for reading in readings:
+            pass
+            #result.append([ reading[0], reading[Keys.LOCATION_LAT_KEY] ])
+        return result
 
-                # Write any associated sensor readings.
-                if nearest_cadence or nearest_hr:
+    def locations_list_to_database_format(self, locations):
+        result = []
+        for location in locations:
+            temp = {}
+            temp[Keys.LOCATION_TIME_KEY] = location[0]
+            temp[Keys.LOCATION_LAT_KEY] = location[1]
+            temp[Keys.LOCATION_LON_KEY] = location[2]
+            temp[Keys.LOCATION_ALT_KEY] = location[3]
+            result.append(temp)
+        return result
 
-                    writer.start_extensions()
-                    writer.start_trackpoint_extensions()
+    def sensor_list_to_database_format(self, readings):
+        result = []
+        for reading in readings:
+            temp = {}
+            result.append(temp)
+        return result
 
-                    if nearest_cadence is not None:
-                        writer.store_cadence_rpm(nearest_cadence.values()[0])
-                    if nearest_hr is not None:
-                        writer.store_heart_rate_bpm(nearest_hr.values()[0])
+    def merge_all(self):
+        """To be called after the files have been read."""
 
-                    writer.end_trackpoint_extensions()
-                    writer.end_extensions()
+        # Sort everything.
+        self.locations = self.sort(self.locations)
+        self.heart_rate_readings = self.sort(self.heart_rate_readings)
+        self.power_readings = self.sort(self.power_readings)
+        self.cadence_readings = self.sort(self.cadence_readings)
+        self.temperature_readings = self.sort(self.temperature_readings)
 
-                writer.end_trackpoint()
-            except StopIteration:
-                done = True
+        # Merge everything, i.e. remove duplicates, etc.
+        self.locations = self.merge(self.locations)
+        self.heart_rate_readings = self.merge(self.heart_rate_readings)
+        self.power_readings = self.merge(self.power_readings)
+        self.cadence_readings = self.merge(self.cadence_readings)
+        self.temperature_readings = self.merge(self.temperature_readings)
 
-        writer.end_track_segment()
-        writer.end_track()
-        writer.close()
-
-        with open(file_name, "w") as f:
-            f.write(writer.buffer())
-            f.close()
-        
-    def merge_activities(self, file_name1, file_name2, outfile_name):
+    def merge_activity_files(self, file_name1, file_name2, outfile_name):
         """Main entry point for this class."""
 
         # Sanity check.
@@ -191,19 +196,82 @@ class MergeTool(ActivityMerge.ActivityMerge):
         if not os.path.isfile(file_name2):
             raise Exception("File does not exist.")
 
-        # Read both files
-        self.read_file(file_name1)
-        self.read_file(file_name2)
+        # Read the first file.
+        extension1 = os.path.splitext(file_name1)[1]
+        writer1 = ActivityWriterForMerging()
+        importer1 = Importer.Importer(writer1)
+        importer1.import_activity_from_file("", 0, file_name1, file_name1, extension1, 0)
+
+        # Read the second file.
+        extension2 = os.path.splitext(file_name1)[1]
+        writer2 = ActivityWriterForMerging()
+        importer2 = Importer.Importer(writer2)
+        importer2.import_activity_from_file("", 0, file_name2, file_name2, extension2, 0)
+
+        # Concatenate the first file's data to the second file's data.
+        self.locations = writer1.locations + writer2.locations
+        self.heart_rate_readings = writer1.heart_rate_readings + writer2.heart_rate_readings
+        self.power_readings = writer1.power_readings + writer2.power_readings
+        self.cadence_readings = writer1.cadence_readings + writer2.cadence_readings
+        self.temperature_readings = writer1.temperature_readings + writer2.temperature_readings
 
         # Sort and merge the data.
         self.merge_all()
 
-        # Write the merged file.
-        if len(outfile_name) > 0:
-            self.write_file(outfile_name)
-        else:
-            print(self.locations)
+        # Put all the data into a dictionary.
+        activity = {}
+        activity[Keys.ACTIVITY_TYPE_KEY] = writer1.activity_type
+        activity[Keys.APP_LOCATIONS_KEY] = self.locations_list_to_database_format(self.locations)
+        activity[Keys.APP_HEART_RATE_KEY] = self.sensor_list_to_database_format(self.heart_rate_readings)
+        activity[Keys.APP_POWER_KEY] = self.sensor_list_to_database_format(self.power_readings)
+        activity[Keys.APP_CADENCE_KEY] = self.sensor_list_to_database_format(self.cadence_readings)
+        activity[Keys.APP_TEMP_KEY] = self.sensor_list_to_database_format(self.temperature_readings)
 
+        # Write the merged file.
+        exporter = Exporter.Exporter()
+        out_data = exporter.export(activity, None, extension1[1:])
+        return out_data
+
+    def merge_activities(self, activities):
+        
+        activity_id = ""
+        activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
+
+        for activity in activities:
+
+            # Has the activity ID been set?
+            if Keys.ACTIVITY_ID_KEY in activity and len(activity_id) == 0:
+                activity_id = activity[Keys.ACTIVITY_ID_KEY]
+
+            # Has the activity type been set?
+            if Keys.ACTIVITY_TYPE_KEY in activity and activity_type == Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY:
+                activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
+
+            # Concatenate the data to any previous data that was read.
+            if Keys.APP_LOCATIONS_KEY in activity:
+                self.locations += self.location_database_format_to_list(activity[Keys.APP_LOCATIONS_KEY])
+            if Keys.APP_HEART_RATE_KEY in activity:
+                self.heart_rate_readings += self.sensor_database_format_to_list(activity[Keys.APP_HEART_RATE_KEY])
+            if Keys.APP_POWER_KEY in activity:
+                self.power_readings += self.sensor_database_format_to_list(activity[Keys.APP_POWER_KEY])
+            if Keys.APP_CADENCE_KEY in activity:
+                self.cadence_readings += self.sensor_database_format_to_list(activity[Keys.APP_CADENCE_KEY])
+            if Keys.APP_TEMP_KEY in activity:
+                self.temperature_readings += self.sensor_database_format_to_list(activity[Keys.APP_TEMP_KEY])
+
+        # Sort and merge the data.
+        self.merge_all()
+
+        # Put all the data into a dictionary.
+        activity = {}
+        activity[Keys.ACTIVITY_ID_KEY] = activity_id
+        activity[Keys.ACTIVITY_TYPE_KEY] = activity_type
+        activity[Keys.APP_LOCATIONS_KEY] = self.locations_list_to_database_format(self.locations)
+        activity[Keys.APP_HEART_RATE_KEY] = self.sensor_list_to_database_format(self.heart_rate_readings)
+        activity[Keys.APP_POWER_KEY] = self.sensor_list_to_database_format(self.power_readings)
+        activity[Keys.APP_CADENCE_KEY] = self.sensor_list_to_database_format(self.cadence_readings)
+        activity[Keys.APP_TEMP_KEY] = self.sensor_list_to_database_format(self.temperature_readings)
+        return activity
 
 def main():
     # Parse command line options.
@@ -219,7 +287,12 @@ def main():
         sys.exit(1)
 
     merge_tool = MergeTool()
-    merge_tool.merge_activities(args.file1, args.file2, args.outfile)
+    data = merge_tool.merge_activity_files(args.file1, args.file2, args.outfile)
+
+    if len(args.outfile) > 0:
+        f = open(args.outfile, "wt")
+        f.write(data)
+        f.close()
 
 if __name__ == "__main__":
     main()

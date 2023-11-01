@@ -1605,7 +1605,7 @@ class DataMgr(Importer.ActivityWriter):
             pass
         return result
 
-    def merge_activities(self, user_id, uploaded_file1_data, uploaded_file2_data):
+    def merge_activity_files(self, user_id, uploaded_file1_data, uploaded_file2_data):
         """Takes two recordings of the same activity and merges them into one."""
         if user_id is None:
             raise Exception("Bad parameter.")
@@ -1615,6 +1615,23 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         merge_tool = MergeTool.MergeTool()
+        return merge_tool.merge_activity_files(uploaded_file1_data, uploaded_file2_data)
+
+    def merge_activities(self, user_id, activity_ids):
+        """Takes two recordings of the same activity and merges them into one."""
+        """Returns the activity ID of the merged activity."""
+        if user_id is None:
+            raise Exception("Bad parameter.")
+        if activity_ids is None:
+            raise Exception("Bad parameter.")
+
+        activities = []
+        for activity_id in activity_ids:
+            activities.append(self.retrieve_activity(activity_id))
+
+        merge_tool = MergeTool.MergeTool()        
+        merged_activity = merge_tool.merge_activities(activities)
+        return merged_activity[Keys.ACTIVITY_ID_KEY]
 
     def create_race(self, user_id, race_name, race_date, race_distance, race_importance):
         """Adds a race to the user's calendar."""
