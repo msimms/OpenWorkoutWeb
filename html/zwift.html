@@ -112,11 +112,11 @@ ${nav}
     /// Converts latitude and longitude to the x,y coordinates needed for the Watopia map.
     function lat_lon_to_watopia_xy(width, height, lat, lon)
     {
-        const center_lat = -11.663;
-        const center_lon = 166.945;
+        const center_lat = -11.675;
+        const center_lon = 166.950;
 
-        let x = (width / 2) - ((center_lon - lon) * 2520.0);
-        let y = (height / 2) - ((lat - center_lat) * 1850.0);
+        let x = (width / 2) - ((center_lon - lon) * 2592.0);
+        let y = (height / 2) - ((lat - center_lat) * 1728.0);
         return [x, y];
     };
 
@@ -156,17 +156,13 @@ ${nav}
         let func = lat_lon_to_watopia_xy;
 
         if ("${map_file_name}" == "crit_city.png")
-        {
             func = lat_lon_to_crit_city_xy
-        }
         if ("${map_file_name}" == "makuri_islands.png")
-        {
             func = lat_lon_to_makuri_islands_xy
-        }
 
         ctx.beginPath();
-        ctx.lineWidth = 0.95;
-        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'blue';
 
         if (obj_list.length > 0)
         {
