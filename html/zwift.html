@@ -237,8 +237,8 @@ ${nav}
         draw_graph(root_url, activity_id, loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", get_graph_color("Elevation"), false);
     };
 
-    /// @function initialize
-    function initialize()
+    /// @function initialize_activity_track
+    function initialize_activity_track()
     {
         let api_url = root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=0";
 
@@ -250,11 +250,6 @@ ${nav}
             }
         });
     };
-
-    window.onload = function() {
-        // Things we need when the page is loaded.
-        initialize();
-    }
 </script>
 
 <canvas id="canvas">
@@ -444,9 +439,10 @@ ${summary}
         jQuery('#tags').on('change', function(e) {
             create_tags(jQuery("#tags").val());
         });
-    };
 
-    list_photos();
+        initialize_activity_track(); // starts the map
+        list_photos();
+    };
 </script>
 
 <hr>
