@@ -404,6 +404,11 @@ For instructional material, consult the [Wiki](https://github.com/msimms/OpenWor
 * Bug fixes.
 * More work on workout plan generation and scheduling.
 
+### 0.57
+* Bug fixes.
+* Added the ability to merge activities.
+* More work on workout plan generation and scheduling.
+
 ## Tech
 This software uses several other source projects to work properly:
 

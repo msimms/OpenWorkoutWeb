@@ -4,7 +4,7 @@ requirements = ['cherrypy', 'gpxpy', 'mako', 'bson', 'pymongo', 'bcrypt', 'fitpa
 
 setup(
     name='openworkoutweb',
-    version='0.26.0',
+    version='0.57.0',
     description='',
     url='https://github.com/msimms/OpenWorkoutWeb',
     author='Mike Simms',
