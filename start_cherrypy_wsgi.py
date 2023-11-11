@@ -399,6 +399,23 @@ def trim_activity(env, start_response):
     return handle_error_500(start_response)
 
 @do_auth_check
+def merge_activity(env, start_response):
+    """Renders the merge page for an activity."""
+    global g_front_end
+
+    try:
+        activity_id = env['PATH_INFO']
+        activity_id = activity_id[1:]
+        return handle_dynamic_page_request(env, start_response, g_front_end.backend.merge_activity(activity_id))
+    except App.RedirectException as e:
+        return handle_redirect_exception(e.url, start_response)
+    except:
+        # Log the error and then fall through to the error page response.
+        log_error(traceback.format_exc())
+        log_error(sys.exc_info()[0])
+    return handle_error_500(start_response)
+
+@do_auth_check
 def add_photos(env, start_response):
     """Renders the add photos page for an activity."""
     global g_front_end

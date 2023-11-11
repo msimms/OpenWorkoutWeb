@@ -894,6 +894,35 @@ class App(object):
         return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id)
 
     @Perf.statistics
+    def merge_activity(self, activity_id):
+        """Renders the merge page for an activity."""
+
+        # Sanity check the activity ID.
+        if not InputChecker.is_uuid(activity_id):
+            return self.render_error("Invalid activity ID")
+
+        # Get the logged in user.
+        username = self.user_mgr.get_logged_in_username()
+        if username is None:
+            raise RedirectException(LOGIN_URL)
+
+        # Get the details of the logged in user.
+        user_id, _, user_realname = self.user_mgr.retrieve_user(username)
+        if user_id is None:
+            self.log_error('Unknown user ID')
+            raise RedirectException(LOGIN_URL)
+
+        # Load the activity.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if activity is None:
+            return self.render_error("The requested activity does not exist.")
+
+        # Render from template.
+        html_file = os.path.join(self.root_dir, Dirs.HTML_DIR, 'merge_activity.html')
+        my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id)
+
+    @Perf.statistics
     def add_photos(self, activity_id):
         """Renders the edit page for an activity."""
 
