@@ -179,7 +179,7 @@ function draw_simple_graph(data, title, color)
         .attr("class", "line")  // I add the class line to be able to modify this line later on.
         .attr("fill", "none")
         .attr("stroke", color)
-        .attr("stroke-width", 1.5)
+        .attr("stroke-width", 3)
         .attr("d", d3.line()
             .x(function(d) { return x(d.date) })
             .y(function(d) { return y(d.value) })
