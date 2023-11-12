@@ -181,6 +181,21 @@ class CherryPyFrontEnd(object):
         return self.error()
 
     @cherrypy.expose
+    def merge_activity(self, activity_id):
+        """Renders the merge page for an activity."""
+        try:
+            return self.backend.merge_activity(activity_id)
+        except App.RedirectException as e:
+            raise cherrypy.HTTPRedirect(e.url)
+        except cherrypy.HTTPRedirect as e:
+            raise e
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+            self.log_error('Unhandled exception in ' + CherryPyFrontEnd.merge_activity.__name__)
+        return self.error()
+
+    @cherrypy.expose
     def add_photos(self, activity_id):
         """Renders the add photos page for an activity."""
         try:
