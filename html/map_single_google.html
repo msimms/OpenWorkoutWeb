@@ -475,6 +475,12 @@ ${summary}
         common_trim_activity(root_url)
     }
 
+    /// @function merge_activity
+    function merge_activity()
+    {
+        common_merge_activity(root_url)
+    }
+
     /// @function delete_activity
     function delete_activity()
     {
@@ -561,6 +567,7 @@ ${summary}
             <tr><td><button type="button" onclick="edit_activity()">Edit Name, Description, and Type...</button></td></tr>
             <tr><td><button type="button" onclick="add_photos()">Add Photos...</button></td></tr>
             <tr><td><button type="button" onclick="trim_activity()">Trim...</button></td></tr>
+            <tr><td><button type="button" onclick="merge_activity()">Merge...</button></td></tr>
             <tr><td><button type="button" onclick="refresh_analysis()">Refresh Analysis</button></td></tr>
             <tr><td><button type="button" onclick="delete_activity()" style="color:red">Delete</button></td></tr>
         </tbody>

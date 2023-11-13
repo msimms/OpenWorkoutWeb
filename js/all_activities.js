@@ -87,6 +87,13 @@ function common_trim_activity(root_url)
     window.location.assign(api_url);
 }
 
+/// @function common_merge_activity
+function common_merge_activity(root_url)
+{
+    let api_url = root_url + "/merge_activity/" + activity_id;
+    window.location.assign(api_url);
+}
+
 /// @function common_delete_activity
 function common_delete_activity(root_url)
 {
