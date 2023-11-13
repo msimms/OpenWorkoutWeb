@@ -52,6 +52,14 @@ a:active {color: #FF00CC}
 	background-size: cover;
 }
 
+.loginbackground section {
+	width: 480px;
+}
+
+.loginbackground label {
+	width: 460px;
+}
+
 .loginform {
 	width: 200px;
 	margin: 0px auto;

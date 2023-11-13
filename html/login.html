@@ -49,19 +49,25 @@
         });
     }
 
+    /// @function create_login
+    function create_login()
+    {
+        window.location.replace("${root_url}/create_login");
+    }
+
 </script>
 
 <section class="loginbackground" id="loginbackground">
-    <section class="loginform cf" style="width: 480px">
+    <section class="loginform cf">
         <form name="create_login" action="javascript:submit_login()" accept-charset="utf-8" autocomplete="on">
             <ul>
                 <li>
-                    <label for="username" style="width: 440px">Email</label>
-                    <input type="email" name="username" id="username" style="width: 440px"placeholder="yourname@email.com" required>
+                    <label for="username">Email</label>
+                    <input type="email" name="username" id="username" style="width: 460px" placeholder="yourname@email.com" required>
                 </li>
                 <li>
-                    <label for="password" style="width: 440px">Password</label>
-                    <input type="password" name="password" id="password" style="width: 440px" placeholder="password" required>
+                    <label for="password">Password</label>
+                    <input type="password" name="password" id="password" style="width: 460px" placeholder="password" required>
                 </li>
                 <li>
                     <input type="submit" value="Login">
