@@ -29,10 +29,11 @@
         let dict = [];
 
         dict.push({"activity_ids" : "${activity_id}, " + next_activity_id});
+        dict.push({"replace" : "False"});
 
         send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
-                window.location.replace('${root_url}/merge_activity/${activity_id}');
+                window.location.replace('${root_url}/activity/' + response);
             else
                 alert(response)
         });

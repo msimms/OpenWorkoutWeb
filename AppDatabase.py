@@ -1110,8 +1110,21 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def recreate_activity(self, activity):
+    def create_complete_activity(self, activity):
         """Create method for an activity."""
+        if activity is None:
+            self.log_error(MongoDatabase.create_complete_activity.__name__ + ": Unexpected empty object: activity")
+            return False
+
+        try:
+            return insert_into_collection(self.activities_collection, activity)
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
+    def recreate_activity(self, activity):
+        """Update method for a complete activity."""
         if activity is None:
             self.log_error(MongoDatabase.recreate_activity.__name__ + ": Unexpected empty object: activity")
             return False

@@ -148,8 +148,8 @@ class MergeTool(object):
     def sensor_database_format_to_list(self, readings):
         result = []
         for reading in readings:
-            pass
-            #result.append([ reading[0], reading[Keys.LOCATION_LAT_KEY] ])
+            reading_time = list(reading.keys())[0]
+            result.append([ reading_time, reading[reading_time] ])
         return result
 
     def locations_list_to_database_format(self, locations):
@@ -166,7 +166,9 @@ class MergeTool(object):
     def sensor_list_to_database_format(self, readings):
         result = []
         for reading in readings:
+            reading_time = reading[0]
             temp = {}
+            temp[reading_time] = reading[1]
             result.append(temp)
         return result
 
@@ -236,6 +238,11 @@ class MergeTool(object):
         
         activity_id = ""
         activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
+        activity_time = None
+        name = ""
+        description = ""
+        device_str = ""
+        visibility = Keys.ACTIVITY_VISIBILITY_PRIVATE
 
         for activity in activities:
 
@@ -246,6 +253,24 @@ class MergeTool(object):
             # Has the activity type been set?
             if Keys.ACTIVITY_TYPE_KEY in activity and activity_type == Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY:
                 activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
+
+            # Has the activity time been set?
+            if Keys.ACTIVITY_START_TIME_KEY in activity:
+                temp = activity[Keys.ACTIVITY_START_TIME_KEY]
+                if activity_time is None or temp < activity[Keys.ACTIVITY_START_TIME_KEY]:
+                    activity_time = temp
+
+            # Has the name been set?
+            if Keys.ACTIVITY_NAME_KEY in activity and len(name) == 0:
+                name = activity[Keys.ACTIVITY_NAME_KEY]
+
+            # Has the description been set?
+            if Keys.ACTIVITY_DESCRIPTION_KEY in activity and len(description) == 0:
+                description = activity[Keys.ACTIVITY_DESCRIPTION_KEY]
+
+            # Has the device been set?
+            if Keys.ACTIVITY_DEVICE_STR_KEY in activity and len(device_str) == 0:
+                device_str = activity[Keys.ACTIVITY_DEVICE_STR_KEY]
 
             # Concatenate the data to any previous data that was read.
             if Keys.APP_LOCATIONS_KEY in activity:
@@ -266,6 +291,11 @@ class MergeTool(object):
         activity = {}
         activity[Keys.ACTIVITY_ID_KEY] = activity_id
         activity[Keys.ACTIVITY_TYPE_KEY] = activity_type
+        activity[Keys.ACTIVITY_START_TIME_KEY] = activity_time
+        activity[Keys.ACTIVITY_NAME_KEY] = name
+        activity[Keys.ACTIVITY_DESCRIPTION_KEY] = description
+        activity[Keys.ACTIVITY_DEVICE_STR_KEY] = device_str
+        activity[Keys.ACTIVITY_VISIBILITY_KEY] = visibility
         activity[Keys.APP_LOCATIONS_KEY] = self.locations_list_to_database_format(self.locations)
         activity[Keys.APP_HEART_RATE_KEY] = self.sensor_list_to_database_format(self.heart_rate_readings)
         activity[Keys.APP_POWER_KEY] = self.sensor_list_to_database_format(self.power_readings)

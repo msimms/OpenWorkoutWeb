@@ -1992,6 +1992,13 @@ class Api(object):
         # Required parameters.
         if Keys.ACTIVITY_IDS_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Activity IDs not specified.")
+        
+        # Optional parameters.
+        replace = False
+        if Keys.REPLACE_KEY in values:
+            if not InputChecker.is_boolean(values[Keys.REPLACE_KEY]):
+                raise ApiException.ApiMalformedRequestException("Invalid parameter.")
+            replace = values[Keys.REPLACE_KEY]
 
         # Decode and validate the required parameters.
         activity_ids = list(map(str.strip, values[Keys.ACTIVITY_IDS_KEY].split(',')))
@@ -2000,8 +2007,8 @@ class Api(object):
                 raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
         # Parse the file and store it's contents in the database.
-        merged_data = self.data_mgr.merge_activities(self.user_id, activity_ids)
-        return True, merged_data
+        merged_activity_id = self.data_mgr.merge_activities(self.user_id, activity_ids, replace)
+        return merged_activity_id is not None, merged_activity_id
 
     def handle_update_planned_workout(self, values):
         if self.user_id is None:

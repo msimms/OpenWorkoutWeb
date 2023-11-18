@@ -362,6 +362,9 @@ TRIM_FROM_BEGINNING_VALUE = "Beginning"
 TRIM_FROM_END_VALUE = "End"
 TRIM_SECONDS_KEY = "Seconds"
 
+# Options when merging activities
+REPLACE_KEY = "replace"
+
 # Keys used for race time prediction.
 ESTIMATED_5K_KEY = "Estimated 5K"
 ESTIMATED_10K_KEY = "Estimated 10K"
