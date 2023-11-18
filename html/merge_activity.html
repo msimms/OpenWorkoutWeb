@@ -25,20 +25,63 @@
     function merge_activities()
     {
         let api_url = "${root_url}/api/1.0/merge_activities";
-        let next_activity_id = document.getElementById("next_activity_id").value;
+        let next_activity_id = document.getElementById("mergeable_activities").value;
         let dict = [];
 
-        dict.push({"activity_ids" : "[${activity_id}" + next_activity_id + "]"});
+        dict.push({"activity_ids" : "${activity_id}, " + next_activity_id});
 
         send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
-                window.location.replace('${root_url}/merge_activities');
+                window.location.replace('${root_url}/merge_activity/${activity_id}');
             else
                 alert(response)
         });
     }
 
+    /// @function process_activity_list
+    var process_activity_list = function(activity_list)
+    {
+        let activity_select = document.getElementById("mergeable_activities");
+
+        for (let i = 0; i < activity_list.length; i++)
+        {
+            let activity = activity_list[i];
+            if (activity.activity_id.toLowerCase() != "${activity_id}".toLowerCase())
+            {
+                let time_str = unix_time_to_local_string(activity.time);
+                let title_str = time_str + " " + activity.title;
+                let option = document.createElement("option");
+
+                option.value = activity.activity_id;
+                option.text = title_str;
+                activity_select.appendChild(option);
+            }
+        }
+    }
+
+    /// @function list_mergeable_activities
+    function list_mergeable_activities()
+    {
+        let twelve_hours = 60 * 60 * 12;
+        let earliest_time = unix_time_to_iso_date(${start_time} - twelve_hours);
+        let latest_time = unix_time_to_iso_date(${end_time} + twelve_hours);
+        let api_url = "${root_url}/api/1.0/list_my_activities?start=" + earliest_time + "&end=" + latest_time;
+
+        send_get_request_async(api_url, function(status, response) {
+            if (status == 200)
+            {
+                const records = JSON.parse(response);
+                process_activity_list(records);
+            }
+            else
+            {
+                alert(response)
+            }
+        });
+    }
+
     window.onload = function() {
+        list_mergeable_activities();
     };
 </script>
 
@@ -47,6 +90,14 @@ ${nav}
 </section>
 
 <div class="block">
+    <!-- Merge With -->
+    <h2>Merge With</h2>
+    <select id="mergeable_activities">
+    </select><br>
+
+    <!-- Merge -->
+    <h2>Merge</h2>
+    <button type="button" id="update" onclick="merge_activities()">Merge</button><br>
 </div>
 
 </body>

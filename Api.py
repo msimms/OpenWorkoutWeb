@@ -809,6 +809,7 @@ class Api(object):
                 activity_type = Keys.TYPE_UNSPECIFIED_ACTIVITY_KEY
                 activity_name = Keys.UNNAMED_ACTIVITY_TITLE
                 activity_tags = []
+                activity_id = ""
 
                 if Keys.ACTIVITY_TYPE_KEY in activity:
                     activity_type = activity[Keys.ACTIVITY_TYPE_KEY]
@@ -816,10 +817,12 @@ class Api(object):
                     activity_name = activity[Keys.ACTIVITY_NAME_KEY]
                 if Keys.ACTIVITY_TAGS_KEY in activity:
                     activity_tags = activity[Keys.ACTIVITY_TAGS_KEY]
+                if Keys.ACTIVITY_ID_KEY in activity:
+                    activity_id = activity[Keys.ACTIVITY_ID_KEY]
 
                 if Keys.ACTIVITY_START_TIME_KEY in activity and Keys.ACTIVITY_ID_KEY in activity:
                     url = self.root_url + "/activity/" + activity[Keys.ACTIVITY_ID_KEY]
-                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url':url, 'time': int(activity[Keys.ACTIVITY_START_TIME_KEY]), 'tags': activity_tags}
+                    temp_activity = {'title':'[' + activity_type + '] ' + activity_name, 'url': url, 'time': int(activity[Keys.ACTIVITY_START_TIME_KEY]), Keys.ACTIVITY_TAGS_KEY: activity_tags, Keys.ACTIVITY_ID_KEY: activity_id}
                     matched_activities.append(temp_activity)
 
         json_result = json.dumps(matched_activities, ensure_ascii=False)
@@ -1991,7 +1994,7 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Activity IDs not specified.")
 
         # Decode and validate the required parameters.
-        activity_ids = json.loads(values[Keys.ACTIVITY_IDS_KEY])
+        activity_ids = list(map(str.strip, values[Keys.ACTIVITY_IDS_KEY].split(',')))
         for activity_id in activity_ids:
             if not InputChecker.is_uuid(activity_id):
                 raise ApiException.ApiMalformedRequestException("Invalid activity ID.")

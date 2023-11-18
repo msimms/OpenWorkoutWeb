@@ -71,6 +71,13 @@ function unix_time_to_iso_time(unix_time)
     return date.toISOString();
 }
 
+/// @function unix_time_to_iso_date
+function unix_time_to_iso_date(unix_time)
+{
+    let date = new Date(unix_time * 1000);
+    return date.toISOString().split("T", 1)[0];
+}
+
 /// @function serialize_to_url_params
 function serialize_to_url_params(dict)
 {

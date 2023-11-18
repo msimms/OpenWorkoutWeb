@@ -917,10 +917,18 @@ class App(object):
         if activity is None:
             return self.render_error("The requested activity does not exist.")
 
+        # Get the activity start and end times.
+        start_time = 0
+        end_time = 0
+        if Keys.ACTIVITY_START_TIME_KEY in activity:
+            start_time = activity[Keys.ACTIVITY_START_TIME_KEY]
+        if Keys.ACTIVITY_END_TIME_KEY in activity:
+            end_time = activity[Keys.ACTIVITY_END_TIME_KEY]
+
         # Render from template.
         html_file = os.path.join(self.root_dir, Dirs.HTML_DIR, 'merge_activity.html')
         my_template = Template(filename=html_file, module_directory=self.tempmod_dir)
-        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id)
+        return my_template.render(nav=self.create_navbar(True), product=PRODUCT_NAME, root_url=self.root_url, email=username, name=user_realname, activity_id=activity_id, start_time=start_time, end_time=end_time)
 
     @Perf.statistics
     def add_photos(self, activity_id):
