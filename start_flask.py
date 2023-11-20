@@ -44,6 +44,11 @@ def login_requred(function_to_protect):
         return flask.redirect(flask.url_for('login'))
     return wrapper
 
+@g_flask_app.errorhandler(404)
+def page_not_found(e):
+    global g_app
+    return g_app.error_404(None, None, None, None)
+
 @g_flask_app.route('/css/<file_name>')
 def css(file_name):
     """Returns the CSS page."""
