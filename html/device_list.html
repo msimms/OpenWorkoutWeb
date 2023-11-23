@@ -41,10 +41,18 @@
         }
     }
 
+    /// @function device_sort
+    function device_sort(a, b)
+    {
+        return a.last_heard_from < b.last_heard_from;
+    }
+    
     // Handler for when we receive the list of registered devices from the server.
     var process_device_list = function(records)
     {
 		let device_table = document.getElementById("Devices");
+
+        records.sort(device_sort);
 
         if (records.length > 0)
         {
