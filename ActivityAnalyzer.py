@@ -193,38 +193,39 @@ class ActivityAnalyzer(object):
                 end_time_ms = self.data_mgr.compute_activity_end_time_ms(self.activity)
                 if end_time_ms is None:
                     self.log_error("Unable to determine the end time for activity id " + str(activity_id) + ".")
-                end_time_secs = end_time_ms / 1000
-                self.data_mgr.update_activity_end_time_secs(self.activity, end_time_secs)
+                else:
+                    end_time_secs = end_time_ms / 1000
+                    self.data_mgr.update_activity_end_time_secs(self.activity, end_time_secs)
 
-                # If activity duration and distance have been calculated.
-                print("Computing the intensity score and training paces...")
-                if start_time_secs > 0 and end_time_secs > 0 and end_time_secs > start_time_secs and len(location_analyzer.distance_buf) > 0:
+                    # If activity duration and distance have been calculated.
+                    print("Computing the intensity score and training paces...")
+                    if start_time_secs > 0 and end_time_secs > 0 and end_time_secs > start_time_secs and len(location_analyzer.distance_buf) > 0:
 
-                    # These are used by both cycling and running intensity calculations.
-                    distance_entry = location_analyzer.distance_buf[-1]
-                    workout_duration_secs = end_time_secs - start_time_secs
-                    avg_workout_pace_meters_per_sec =  distance_entry[1] / workout_duration_secs
-                    self.summary_data[Keys.APP_DURATION_KEY] = workout_duration_secs
+                        # These are used by both cycling and running intensity calculations.
+                        distance_entry = location_analyzer.distance_buf[-1]
+                        workout_duration_secs = end_time_secs - start_time_secs
+                        avg_workout_pace_meters_per_sec =  distance_entry[1] / workout_duration_secs
+                        self.summary_data[Keys.APP_DURATION_KEY] = workout_duration_secs
 
-                    # Running activity.
-                    if activity_type in Keys.RUNNING_ACTIVITIES:
+                        # Running activity.
+                        if activity_type in Keys.RUNNING_ACTIVITIES:
 
-                        # Compute training paces.
-                        print("* (Re)computing the training paces...")
-                        _, running_bests, _, _, _, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(activity_user_id, now2 - DataMgr.FOUR_WEEKS, now2)
-                        run_paces = self.data_mgr.compute_run_training_paces(activity_user_id, running_bests)
+                            # Compute training paces.
+                            print("* (Re)computing the training paces...")
+                            _, running_bests, _, _, _, _ = self.data_mgr.retrieve_bounded_activity_bests_for_user(activity_user_id, now2 - DataMgr.FOUR_WEEKS, now2)
+                            run_paces = self.data_mgr.compute_run_training_paces(activity_user_id, running_bests)
 
-                        # We need to know the user's threshold pace to compute the intensity score.
-                        print("* Computing the intensity score...")
-                        if Keys.FUNCTIONAL_THRESHOLD_PACE in run_paces:
-                            threshold_pace_meters_per_hour = run_paces[Keys.FUNCTIONAL_THRESHOLD_PACE] * 60.0
-                            calc = IntensityCalculator.IntensityCalculator()
-                            stress = calc.estimate_intensity_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour)
-                            self.summary_data[Keys.INTENSITY_SCORE] = stress
+                            # We need to know the user's threshold pace to compute the intensity score.
+                            print("* Computing the intensity score...")
+                            if Keys.FUNCTIONAL_THRESHOLD_PACE in run_paces:
+                                threshold_pace_meters_per_hour = run_paces[Keys.FUNCTIONAL_THRESHOLD_PACE] * 60.0
+                                calc = IntensityCalculator.IntensityCalculator()
+                                stress = calc.estimate_intensity_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour)
+                                self.summary_data[Keys.INTENSITY_SCORE] = stress
 
-                    # Cycling activity.
-                    elif activity_type in Keys.CYCLING_ACTIVITIES:
-                        pass
+                        # Cycling activity.
+                        elif activity_type in Keys.CYCLING_ACTIVITIES:
+                            pass
 
                 # Store the results.
                 print("Storing the activity summary...")
