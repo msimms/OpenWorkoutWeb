@@ -958,6 +958,7 @@ def main():
         cherrypy.tree.graft(activity, "/activity")
         cherrypy.tree.graft(edit_activity, "/edit_activity")
         cherrypy.tree.graft(trim_activity, "/trim_activity")
+        cherrypy.tree.graft(merge_activity, "/merge_activity")
         cherrypy.tree.graft(add_photos, "/add_photos")
         cherrypy.tree.graft(device, "/device")
         cherrypy.tree.graft(my_activities, "/my_activities")
