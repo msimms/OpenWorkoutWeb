@@ -299,4 +299,13 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
                 else:
                     workouts.append(self.gen_interval_session(goal_distance))
 
+            # Long bike ride / fondo.
+            elif goal == Keys.GOAL_METRIC_CENTURY_RIDE_KEY or goal == Keys.GOAL_STANDARD_CENTURY_RIDE_KEY:
+                workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
+                workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
+                if in_taper or goal_type == Keys.GOAL_TYPE_COMPLETION:
+                    workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
+                else:
+                    workouts.append(self.gen_interval_session(goal_distance))
+
         return workouts
