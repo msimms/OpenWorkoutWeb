@@ -34,7 +34,7 @@ def signal_handler(signal, frame):
         g_app.terminate()
     sys.exit(0)
 
-def login_requred(function_to_protect):
+def login_required(function_to_protect):
     @functools.wraps(function_to_protect)
     def wrapper(*args, **kwargs):
         global g_app
@@ -125,7 +125,7 @@ def error(error_str=None):
     return g_app.render_error()
 
 @g_flask_app.route('/stats')
-@login_requred
+@login_required
 def stats():
     """Renders the internal statistics page."""
     try:
@@ -170,7 +170,7 @@ def activity(activity_id):
     return error()
 
 @g_flask_app.route('/edit_activity/<activity_id>')
-@login_requred
+@login_required
 def edit_activity(activity_id):
     """Renders the edit page for an activity."""
     try:
@@ -182,7 +182,7 @@ def edit_activity(activity_id):
     return error()
 
 @g_flask_app.route('/trim_activity/<activity_id>')
-@login_requred
+@login_required
 def trim_activity(activity_id):
     """Renders the trim page for an activity."""
     try:
@@ -194,7 +194,7 @@ def trim_activity(activity_id):
     return error()
 
 @g_flask_app.route('/merge_activity/<activity_id>')
-@login_requred
+@login_required
 def merge_activity(activity_id):
     """Renders the merge page for an activity."""
     try:
@@ -206,7 +206,7 @@ def merge_activity(activity_id):
     return error()
 
 @g_flask_app.route('/add_photos/<activity_id>')
-@login_requred
+@login_required
 def add_photos(activity_id):
     """Renders the add photos page for an activity."""
     try:
@@ -229,7 +229,7 @@ def device(device_str):
     return error()
 
 @g_flask_app.route('/my_activities')
-@login_requred
+@login_required
 def my_activities():
     """Renders the list of the specified user's activities."""
     try:
@@ -243,7 +243,7 @@ def my_activities():
     return error()
 
 @g_flask_app.route('/all_activities')
-@login_requred
+@login_required
 def all_activities():
     """Renders the list of all activities the specified user is allowed to view."""
     try:
@@ -257,7 +257,7 @@ def all_activities():
     return error()
 
 @g_flask_app.route('/record_progression/<activity_type>/<record_name>')
-@login_requred
+@login_required
 def record_progression(activity_type, record_name):
     """Renders the list of records, in order of progression, for the specified user and record type."""
     try:
@@ -271,7 +271,7 @@ def record_progression(activity_type, record_name):
     return error()
 
 @g_flask_app.route('/workouts')
-@login_requred
+@login_required
 def workouts():
     """Renders the workouts view."""
     try:
@@ -285,7 +285,7 @@ def workouts():
     return error()
 
 @g_flask_app.route('/workout/<workout_id>')
-@login_requred
+@login_required
 def workout(workout_id):
     """Renders the view for an individual workout."""
     try:
@@ -299,7 +299,7 @@ def workout(workout_id):
     return error()
 
 @g_flask_app.route('/statistics')
-@login_requred
+@login_required
 def statistics():
     """Renders the statistics view."""
     try:
@@ -313,7 +313,7 @@ def statistics():
     return error()
 
 @g_flask_app.route('/gear')
-@login_requred
+@login_required
 def gear():
     """Renders the list of all gear belonging to the logged in user."""
     try:
@@ -327,7 +327,7 @@ def gear():
     return error()
 
 @g_flask_app.route('/service_history/<gear_id>')
-@login_requred
+@login_required
 def service_history(gear_id):
     """Renders the service history for a particular piece of gear."""
     try:
@@ -341,7 +341,7 @@ def service_history(gear_id):
     return error()
 
 @g_flask_app.route('/friends')
-@login_requred
+@login_required
 def friends():
     """Renders the list of users who are friends with the logged in user."""
     try:
@@ -355,7 +355,7 @@ def friends():
     return error()
 
 @g_flask_app.route('/device_list')
-@login_requred
+@login_required
 def device_list():
     """Renders the list of a user's devices."""
     try:
@@ -369,7 +369,7 @@ def device_list():
     return error()
 
 @g_flask_app.route('/manual_entry/<activity_type>')
-@login_requred
+@login_required
 def manual_entry(activity_type):
     """Called when the user selects an activity type, indicating they want to make a manual data entry."""
     try:
@@ -383,7 +383,7 @@ def manual_entry(activity_type):
     return error()
 
 @g_flask_app.route('/import_activity')
-@login_requred
+@login_required
 def import_activity():
     """Renders the import page."""
     try:
@@ -397,7 +397,7 @@ def import_activity():
     return error()
 
 @g_flask_app.route('/add_pace_plan')
-@login_requred
+@login_required
 def add_pace_plan():
     """Renders the pace plans page."""
     try:
@@ -411,7 +411,7 @@ def add_pace_plan():
     return error()
 
 @g_flask_app.route('/pace_plans')
-@login_requred
+@login_required
 def pace_plans():
     """Renders the pace plans page."""
     try:
@@ -425,7 +425,7 @@ def pace_plans():
     return error()
 
 @g_flask_app.route('/task_status')
-@login_requred
+@login_required
 def task_status():
     """Renders the import status page."""
     try:
@@ -439,7 +439,7 @@ def task_status():
     return error()
 
 @g_flask_app.route('/profile')
-@login_requred
+@login_required
 def profile():
     """Renders the user's profile page."""
     try:
@@ -453,7 +453,7 @@ def profile():
     return error()
 
 @g_flask_app.route('/settings')
-@login_requred
+@login_required
 def settings():
     """Renders the user's settings page."""
     try:
@@ -531,7 +531,7 @@ def ical(calendar_id):
     return result
 
 @g_flask_app.route('/api_keys')
-@login_requred
+@login_required
 def api_keys():
     """Renders the api key management page."""
     result = ""
@@ -542,7 +542,7 @@ def api_keys():
     return result
 
 @g_flask_app.route('/admin')
-@login_requred
+@login_required
 def admin():
     """Renders the admin page."""
     result = ""
