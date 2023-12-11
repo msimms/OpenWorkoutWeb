@@ -173,6 +173,7 @@ def activity(activity_id):
 @login_required
 def edit_activity(activity_id):
     """Renders the edit page for an activity."""
+    global g_app
     try:
         return g_app.edit_activity(activity_id)
     except:
@@ -185,6 +186,7 @@ def edit_activity(activity_id):
 @login_required
 def trim_activity(activity_id):
     """Renders the trim page for an activity."""
+    global g_app
     try:
         return g_app.trim_activity(activity_id)
     except:
@@ -197,6 +199,7 @@ def trim_activity(activity_id):
 @login_required
 def merge_activity(activity_id):
     """Renders the merge page for an activity."""
+    global g_app
     try:
         return g_app.merge_activity(activity_id)
     except:
@@ -209,6 +212,7 @@ def merge_activity(activity_id):
 @login_required
 def add_photos(activity_id):
     """Renders the add photos page for an activity."""
+    global g_app
     try:
         return g_app.add_photos(activity_id)
     except:
@@ -220,6 +224,7 @@ def add_photos(activity_id):
 @g_flask_app.route('/device/<device_str>')
 def device(device_str):
     """Renders the map page for a single device."""
+    global g_app
     try:
         return g_app.device(device_str)
     except:
@@ -232,6 +237,7 @@ def device(device_str):
 @login_required
 def my_activities():
     """Renders the list of the specified user's activities."""
+    global g_app
     try:
         return g_app.my_activities()
     except App.RedirectException as e:
@@ -246,6 +252,7 @@ def my_activities():
 @login_required
 def all_activities():
     """Renders the list of all activities the specified user is allowed to view."""
+    global g_app
     try:
         return g_app.all_activities()
     except App.RedirectException as e:
@@ -260,6 +267,7 @@ def all_activities():
 @login_required
 def record_progression(activity_type, record_name):
     """Renders the list of records, in order of progression, for the specified user and record type."""
+    global g_app
     try:
         return g_app.record_progression(activity_type, record_name)
     except App.RedirectException as e:
@@ -274,6 +282,7 @@ def record_progression(activity_type, record_name):
 @login_required
 def workouts():
     """Renders the workouts view."""
+    global g_app
     try:
         return g_app.workouts()
     except App.RedirectException as e:
@@ -288,6 +297,7 @@ def workouts():
 @login_required
 def workout(workout_id):
     """Renders the view for an individual workout."""
+    global g_app
     try:
         return g_app.workout(workout_id)
     except App.RedirectException as e:
@@ -302,6 +312,7 @@ def workout(workout_id):
 @login_required
 def statistics():
     """Renders the statistics view."""
+    global g_app
     try:
         return g_app.user_stats()
     except App.RedirectException as e:
@@ -316,6 +327,7 @@ def statistics():
 @login_required
 def gear():
     """Renders the list of all gear belonging to the logged in user."""
+    global g_app
     try:
         return g_app.gear()
     except App.RedirectException as e:
@@ -330,6 +342,7 @@ def gear():
 @login_required
 def service_history(gear_id):
     """Renders the service history for a particular piece of gear."""
+    global g_app
     try:
         return g_app.service_history(gear_id)
     except App.RedirectException as e:
@@ -344,6 +357,7 @@ def service_history(gear_id):
 @login_required
 def friends():
     """Renders the list of users who are friends with the logged in user."""
+    global g_app
     try:
         return g_app.friends()
     except App.RedirectException as e:
@@ -358,6 +372,7 @@ def friends():
 @login_required
 def device_list():
     """Renders the list of a user's devices."""
+    global g_app
     try:
         return g_app.device_list()
     except App.RedirectException as e:
@@ -372,6 +387,7 @@ def device_list():
 @login_required
 def manual_entry(activity_type):
     """Called when the user selects an activity type, indicating they want to make a manual data entry."""
+    global g_app
     try:
         return g_app.manual_entry(activity_type)
     except App.RedirectException as e:
@@ -386,6 +402,7 @@ def manual_entry(activity_type):
 @login_required
 def import_activity():
     """Renders the import page."""
+    global g_app
     try:
         return g_app.import_activity()
     except App.RedirectException as e:
@@ -400,6 +417,7 @@ def import_activity():
 @login_required
 def add_pace_plan():
     """Renders the pace plans page."""
+    global g_app
     try:
         return g_app.add_pace_plan()
     except App.RedirectException as e:
@@ -414,6 +432,7 @@ def add_pace_plan():
 @login_required
 def pace_plans():
     """Renders the pace plans page."""
+    global g_app
     try:
         return g_app.pace_plans()
     except App.RedirectException as e:
@@ -428,6 +447,7 @@ def pace_plans():
 @login_required
 def task_status():
     """Renders the import status page."""
+    global g_app
     try:
         return g_app.task_status()
     except App.RedirectException as e:
@@ -442,6 +462,7 @@ def task_status():
 @login_required
 def profile():
     """Renders the user's profile page."""
+    global g_app
     try:
         return g_app.profile()
     except App.RedirectException as e:
@@ -456,6 +477,7 @@ def profile():
 @login_required
 def settings():
     """Renders the user's settings page."""
+    global g_app
     try:
         return g_app.settings()
     except App.RedirectException as e:
@@ -469,6 +491,7 @@ def settings():
 @g_flask_app.route('/login')
 def login():
     """Renders the login page."""
+    global g_app
     try:
         return g_app.login()
     except App.RedirectException as e:
@@ -480,6 +503,7 @@ def login():
 @g_flask_app.route('/create_login')
 def create_login():
     """Renders the create login page."""
+    global g_app
     try:
         return g_app.create_login()
     except:
@@ -489,6 +513,7 @@ def create_login():
 @g_flask_app.route('/logout')
 def logout():
     """Ends the logged in session."""
+    global g_app
     try:
         return g_app.logout()
     except App.RedirectException as e:
@@ -502,6 +527,7 @@ def logout():
 @g_flask_app.route('/about')
 def about():
     """Renders the about page."""
+    global g_app
     result = ""
     try:
         result = g_app.about()
@@ -512,6 +538,7 @@ def about():
 @g_flask_app.route('/status')
 def status():
     """Renders the status page. Used as a simple way to tell if the site is up."""
+    global g_app
     result = ""
     try:
         result = g_app.status()
@@ -522,6 +549,7 @@ def status():
 @g_flask_app.route('/ical/<calendar_id>')
 def ical(calendar_id):
     """Returns the ical calendar with the specified ID."""
+    global g_app
     result = ""
     try:
         _, response = g_app.ical(calendar_id)
@@ -534,6 +562,7 @@ def ical(calendar_id):
 @login_required
 def api_keys():
     """Renders the api key management page."""
+    global g_app
     result = ""
     try:
         result = g_app.api_keys()
@@ -545,6 +574,7 @@ def api_keys():
 @login_required
 def admin():
     """Renders the admin page."""
+    global g_app
     result = ""
     try:
         result = g_app.admin()
@@ -555,6 +585,7 @@ def admin():
 @g_flask_app.route('/api/<version>/<method>', methods = ['GET','POST','DELETE'])
 def api(version, method):
     """Endpoint for API calls."""
+    global g_app
     response = ""
     code = 500
     try:
