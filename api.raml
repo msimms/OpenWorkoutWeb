@@ -713,7 +713,7 @@ types:
     description: Returns the value associated with the specified user setting.
     get:
         queryParameters:
-            requested setting: List
+            requested setting: string
         responses:
             200: The value associated with the requested setting.
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
