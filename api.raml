@@ -809,7 +809,7 @@ types:
             timestamp: number
         responsses:
             200: application/json
-/merge_activity_files
+/merge_activity_files:
     description: Takes two files and attempts to merge them.
     post:
         responses:
@@ -817,7 +817,7 @@ types:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
-/merge_activities
+/merge_activities:
     description: Takes multiple activities (specified by their unique id) and attempts to merge them, replacing the earliest activity in the list.
     post:
         responses:
