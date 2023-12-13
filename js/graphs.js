@@ -168,7 +168,7 @@ function draw_simple_graph(data, title, color)
     // Add brushing.
     let brush = d3.brushX()                   // Add the brush feature using the d3.brush function
         .extent( [ [0,0], [width, height] ] ) // initialise the brush area: start at 0,0 and finishes at width,height: it means I select the whole graph area
-        .on("end", updateChart)               // Each time the brush selection changes, trigger the 'updateChart' function
+        .on("end", update_chart)              // Each time the brush selection changes, trigger the 'update_chart' function
 
     let line = svg.append('g')
         .attr("clip-path", "url(#clip)");
@@ -195,7 +195,7 @@ function draw_simple_graph(data, title, color)
     function idled() { idle_timeout = null; }
 
     // A function that update the chart for given boundaries.
-    function updateChart() {
+    function update_chart() {
 
         // What are the selected boundaries?
         extent = d3.event.selection
@@ -220,7 +220,8 @@ function draw_simple_graph(data, title, color)
             .duration(1000)
             .attr("d", d3.line()
                 .x(function(d) { return x(d.date) })
-                .y(function(d) { return y(d.value) }))
+                .y(function(d) { return y(d.value) })
+            )
     }
 
     // If user double click, reinitialize the chart
@@ -230,9 +231,9 @@ function draw_simple_graph(data, title, color)
         line.select('.line')
             .transition()
             .attr("d", d3.line()
-            .x(function(d) { return x(d.date) })
-            .y(function(d) { return y(d.value) })
-        )
+                .x(function(d) { return x(d.date) })
+                .y(function(d) { return y(d.value) })
+            )
     });
 }
 
@@ -368,7 +369,8 @@ function draw_graph(root_url, activity_id, graph_start_time_ms, graph_end_time_m
             .transition()
             .attr("d", d3.line()
                 .x(function(d) { return x_scale(d.date) })
-                .y(function(d) { return y_scale(d.value) }));
+                .y(function(d) { return y_scale(d.value) })
+            );
     });
 
     // Add the title.
@@ -423,7 +425,8 @@ function draw_graph(root_url, activity_id, graph_start_time_ms, graph_end_time_m
             .duration(1000)
             .attr("d", d3.line()
                 .x(function(d) { return x_scale(d.date) })
-                .y(function(d) { return y_scale(d.value) }));
+                .y(function(d) { return y_scale(d.value) })
+            );
     }
 
     // Add the y axis.
@@ -447,7 +450,8 @@ function draw_graph(root_url, activity_id, graph_start_time_ms, graph_end_time_m
         .attr("stroke-width", 0.25)
         .attr("d", d3.line()
             .x(function(d) { return x_scale(d.date) })
-            .y(function(d) { return y_scale(d.value) }));
+            .y(function(d) { return y_scale(d.value) })
+        );
 
     // Add the brushing.
     let brush = d3.brushX()                        // Add the brush feature using the d3.brush function.
