@@ -466,6 +466,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         total_intensity_week_1 = inputs[Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_1_KEY] # Most recent week
         avg_run_distance = inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS]
         num_runs = inputs[Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS]
+        avg_num_runs_last_4_weeks = None
         exp_level = inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY]
 
         # Longest run in four weeks.
@@ -492,6 +493,8 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             workouts.append(self.gen_easy_run(easy_run_pace, 3000, 5000))
             workouts.append(self.gen_easy_run(easy_run_pace, 3000, 8000))
             return workouts
+        else:
+            avg_num_runs_last_4_weeks = num_runs / 4
 
         # If the long run has been increasing for the last three weeks then give the person a break.
         if longest_run_week_1 and longest_run_week_2 and longest_run_week_3 and longest_run_week_4:
@@ -587,6 +590,11 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             # Add an easy run.
             easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
             workouts.append(easy_run_workout)
+
+            # Is the athlete used to more running? If so, add some more runs.
+            if len(workouts) < avg_num_runs_last_4_weeks:
+                easy_run_workout = self.gen_easy_run(easy_run_pace, min_run_distance, max_easy_run_distance)
+                workouts.append(easy_run_workout)
 
             # Calculate the total intensity and the intensity for each workout.
             total_intensity = 0.0
