@@ -253,7 +253,7 @@ class Api(object):
 
         # Determine if the requesting user can view the activity.
         if not self.activity_can_be_viewed(activity):
-            return self.error("The requested activity is not viewable to this user.")
+            raise ApiException.ApiMalformedRequestException("The requested activity is not viewable to this user.")
 
         # Format the locations track as JSON.
         response = ""
@@ -282,7 +282,7 @@ class Api(object):
 
         # Determine if the requesting user can view the activity.
         if not self.activity_can_be_viewed(activity):
-            return self.error("The requested activity is not viewable to this user.")
+            raise ApiException.ApiMalformedRequestException("The requested activity is not viewable to this user.")
 
         # Is this is a foot based activity? Need to know so we can display steps per minute instead of revs per minute.
         is_foot_based = False
@@ -384,7 +384,7 @@ class Api(object):
 
         # Determine if the requesting user can view the activity.
         if not self.activity_can_be_viewed(activity):
-            return self.error("The requested activity is not viewable to this user.")
+            raise ApiException.ApiMalformedRequestException("The requested activity is not viewable to this user.")
 
         response = {}
 
@@ -429,7 +429,7 @@ class Api(object):
 
         # Determine if the requesting user can view the activity.
         if not self.activity_id_can_be_viewed(activity_id):
-            return self.error("The requested activity is not viewable to this user.")
+            raise ApiException.ApiMalformedRequestException("The requested activity is not viewable to this user.")
 
         # Get the activity summary from the database.
         activity_summary = self.data_mgr.retrieve_activity_summary(activity_id)
@@ -1367,7 +1367,7 @@ class Api(object):
         # Retrieve the activity and make sure it's legal to for the logged in user to have access to it.
         activity = self.data_mgr.retrieve_activity(activity_id)
         if not self.activity_can_be_viewed(activity):
-            return self.error("The requested activity is not viewable to this user.")
+            raise ApiException.ApiMalformedRequestException("The requested activity is not viewable to this user.")
 
         # Export it to the desired format.
         exporter = Exporter.Exporter()
