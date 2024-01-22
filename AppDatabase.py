@@ -2970,6 +2970,10 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    #
+    # Uploaded file methods
+    #
+
     def create_uploaded_file(self, activity_id, file_data):
         """Create method for an uploaded activity file."""
         if activity_id is None:
