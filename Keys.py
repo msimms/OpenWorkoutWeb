@@ -288,7 +288,7 @@ ACCELEROMETER_AXIS_NAME_Y = "y" # Y-axis G force
 ACCELEROMETER_AXIS_NAME_Z = "z" # Z-axis G force
 ACCELEROMETER_TIME_KEY = "time" # UNIX timestamp in milliseconds
 
-# Keys inherited from the web app.
+# Keys inherited from the mobile app.
 ACTIVITY_ID_KEY = "activity_id" # Unique identifier for the activity
 ACTIVITY_IDS_KEY = "activity_ids" # Indicates a list of activity IDs
 ACTIVITY_HASH_KEY = "activity_hash"
@@ -317,6 +317,8 @@ ACTIVITY_PHOTO_ID_KEY = "photo id" # Unique identifier for a specific photo
 ACTIVITY_PHOTO_IDS_KEY = "photo ids" # Unique identifier for activity photos
 ACTIVITY_PHOTOS_KEY = "photos" # List of all photo IDs
 ACTIVITY_LAST_UPDATED_KEY = "last updated" # Time when the activity was last updated
+ACTIVITY_LAPS_KEY = "laps" # List of lap metadata
+ACTIVITY_LAP_START_TIME = "lap start time" # Time (ms) when the lap started
 
 # Keys used to summarize activity data.
 BEST_SPEED = "Best Speed" # Highest speed seen during the activity

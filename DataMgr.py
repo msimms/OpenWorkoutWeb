@@ -328,6 +328,14 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No values.")
         return self.database.create_or_update_activity_metadata_list(activity_id, key, values)
 
+    def create_activity_lap(self, activity_id, start_time_ms):
+        """Create method for a lap on an activity."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No activity ID.")
+        return self.database.create_activity_lap(activity_id, start_time_ms)
+
     def create_activity_sets_and_reps_data(self, activity_id, sets):
         """Create method for activity set and rep data."""
         if self.database is None:

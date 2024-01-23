@@ -478,8 +478,44 @@ class Api(object):
 
         return True, ""
 
+    def handle_create_new_lap(self, values):
+        """Called when an API message to create a new lap is received."""
+        """This typically happens when the user presses the lap button while live streaming an activity."""
+        if self.user_id is None:
+            raise ApiException.ApiNotLoggedInException()
+
+        # Required parameters.
+        if Keys.ACTIVITY_ID_KEY not in values:
+            raise ApiException.ApiMalformedRequestException("Activity ID not specified.")
+        if Keys.ACTIVITY_LAP_START_TIME not in values:
+            raise ApiException.ApiMalformedRequestException("Lap start time not specified.")
+
+        # Get the activity ID from the request.
+        activity_id = values[Keys.ACTIVITY_ID_KEY]
+        if not InputChecker.is_uuid(activity_id):
+            raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
+
+        # Get the lap start time from the request.
+        lap_start_time = values[Keys.ACTIVITY_LAP_START_TIME]
+        if not InputChecker.is_unsigned_integer(lap_start_time):
+            raise ApiException.ApiMalformedRequestException("Invalid lap start time.")
+
+        # Get the activity from the database.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not activity:
+            raise ApiException.ApiMalformedRequestException("Activity not found.")
+
+        # Get the ID of the user that owns the activity and make sure it's the current user.
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
+
+        if not self.data_mgr.create_activity_lap(activity_id, lap_start_time):
+            raise Exception("Failed to create a lap on an activity.")
+
+        return True, ""
+
     def handle_login(self, values):
-        """Called when an API message to log in is received."""
+        """Called when an API message to login is received."""
         if self.user_id is not None:
             return True, ""
 
@@ -2833,6 +2869,8 @@ class Api(object):
             return self.handle_update_status(values)
         elif request == 'update_activity_metadata':
             return self.handle_update_activity_metadata(values)
+        elif request == 'create_new_lap':
+            return self.handle_create_new_lap(values)
         elif request == 'login':
             return self.handle_login(values)
         elif request == 'create_login':

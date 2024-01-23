@@ -70,6 +70,17 @@ types:
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
             403: Failed authentication. The user is not logged in.
             500: An internal exception was thrown.
+/create_new_lap:
+    description:
+    post:
+        queryParameters:
+            activity_id: UUID
+            lap start time: number
+        responses:
+            200: Empty string
+            400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
+            403: Failed authentication. The user is not logged in.
+            500: An internal exception was thrown.
 /login:
     description: Authenticates a username and password.
     post:

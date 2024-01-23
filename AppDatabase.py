@@ -1692,6 +1692,36 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
+    def create_activity_lap(self, activity_id, start_time_ms):
+        """Create method for a list of of metaadata values."""
+        if activity_id is None:
+            self.log_error(MongoDatabase.create_activity_lap.__name__ + ": Unexpected empty object: activity_id")
+            return False
+        if not InputChecker.is_uuid(activity_id):
+            self.log_error(MongoDatabase.create_activity_lap.__name__ + ": Invalid object: activity_id " + str(activity_id))
+            return False
+        if start_time_ms is None:
+            self.log_error(MongoDatabase.create_activity_lap.__name__ + ": Unexpected empty object: start_time_ms")
+            return False
+
+        try:
+            # Find the activity.
+            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+
+            # If the activity was found.
+            if activity is not None:
+                laps = []
+                if Keys.ACTIVITY_LAPS_KEY in activity:
+                    laps = activity[Keys.ACTIVITY_LAPS_KEY]
+                laps.append(start_time_ms)
+                activity[Keys.ACTIVITY_LAPS_KEY] = laps
+                update_activities_collection(self, activity)
+                return True
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return False
+
     def create_activity_sets_and_reps_data(self, activity_id, sets):
         """Create method for a list of of metaadata values."""
         if activity_id is None:
