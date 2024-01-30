@@ -275,6 +275,7 @@ APP_AXIS_TIME = "time"
 APP_AXIS_NAME_X = "x"
 APP_AXIS_NAME_Y = "y"
 APP_AXIS_NAME_Z = "z"
+APP_BATTERY_LEVEL_KEY = "Battery Level"
 
 LOCATION_LAT_KEY = "latitude"
 LOCATION_LON_KEY = "longitude"

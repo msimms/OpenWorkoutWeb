@@ -160,6 +160,7 @@ class Api(object):
         activity_id = ""
         activity_type = ""
         username = ""
+        battery_level = None
         locations = []
         sensor_readings_dict = {}
         metadata_list_dict = {}
@@ -173,6 +174,8 @@ class Api(object):
             activity_type = values[Keys.APP_TYPE_KEY]
         if Keys.APP_USERNAME_KEY in values:
             username = values[Keys.APP_USERNAME_KEY]
+        if Keys.APP_BATTERY_LEVEL_KEY in values:
+            battery_level = values[Keys.APP_BATTERY_LEVEL_KEY]
 
         if Keys.APP_LOCATIONS_KEY in values:
 
