@@ -51,6 +51,14 @@ h3 {
 a:link { color: var(--text) }
 a:visited { color: var(--text) }
 
+.readme h1 {
+    font-family: Arial, Helvetica, sans-serif;
+    text-transform: none;
+}
+.readme h2 {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
 .map h2 {
     color: var(--theme);
     background: var(--info);
