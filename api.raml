@@ -607,6 +607,16 @@ types:
 /create_pace_plan:
     description: Creates a pace plan.
     post:
+        queryParameters:
+            name: string
+            description: string
+            target distance: number
+            target distance units: number
+            target time: number
+            target splits: number
+            target splits units: number
+            route: string
+            last updated time: number
         responses:
             200: Empty string
             400: Malformed request. Either required parameters were missing or the supplied parameters were malformed.
