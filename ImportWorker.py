@@ -32,7 +32,6 @@ import os
 import sys
 import traceback
 import uuid
-import zlib
 import Config
 import DataMgr
 import Importer
@@ -79,8 +78,6 @@ def import_activity(import_str, internal_task_id):
             print("Base64 decoding...")
             uploaded_file_data = uploaded_file_data.replace(" ", "+") # Some JS base64 encoders replace plus with space, so we need to undo that.
             decoded_file_data = base64.b64decode(uploaded_file_data)
-#            print("zlib decompressing...")
-#            decoded_file_data = zlib.decompress(decoded_file_data)
             print("Writing...")
             local_file.write(decoded_file_data)
 
@@ -102,10 +99,6 @@ def import_activity(import_str, internal_task_id):
             # Update the status of the analysis in the database.
             print("Updating status...")
             data_mgr.update_deferred_task(user_id, internal_task_id, activity_id, Keys.TASK_STATUS_FINISHED)
-
-            # Schedule the activity for analysis.
-            #print("Importing was successful, performing analysis...")
-            #data_mgr.analyze_activity_by_id(activity_id, user_id)
 
         # The import failed.
         else:
