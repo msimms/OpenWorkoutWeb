@@ -571,14 +571,13 @@ class DataMgr(Importer.ActivityWriter):
 
         # List activities recorded on devices registered to the user.
         devices = self.database.retrieve_user_devices(user_id)
-        if devices is not None:
-            devices = list(set(devices)) # De-duplicate
-            device_activities = self.database.retrieve_devices_activity_list(devices, start_time, end_time, False)
-            if device_activities is not None:
-                for device_activity in device_activities:
-                    device_activity[Keys.REALNAME_KEY] = user_realname
-                    self.update_activity_start_time(device_activity)
-                activities.extend(device_activities)
+        devices = list(set(devices)) # De-duplicate
+        device_activities = self.database.retrieve_devices_activity_list(devices, start_time, end_time, False)
+        if device_activities is not None:
+            for device_activity in device_activities:
+                device_activity[Keys.REALNAME_KEY] = user_realname
+                self.update_activity_start_time(device_activity)
+            activities.extend(device_activities)
 
         # List activities with no device that are associated with the user.
         user_activities = self.database.retrieve_user_activity_list(user_id, start_time, end_time, False)
@@ -608,11 +607,9 @@ class DataMgr(Importer.ActivityWriter):
 
         # List activities recorded on devices registered to the user.
         devices = self.database.retrieve_user_devices(user_id)
-        if devices is not None:
-            devices = list(set(devices)) # De-duplicate
-            if devices is not None:
-                for device in devices:
-                    self.database.retrieve_each_device_activity(user_id, device, context, cb_func, start_time, end_time, return_all_data)
+        devices = list(set(devices)) # De-duplicate
+        for device in devices:
+            self.database.retrieve_each_device_activity(user_id, device, context, cb_func, start_time, end_time, return_all_data)
 
         # List activities with no device that are associated with the user.
         return self.database.retrieve_each_user_activity(user_id, context, cb_func, start_time, end_time, return_all_data)

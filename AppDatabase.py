@@ -394,7 +394,7 @@ class MongoDatabase(Database.Database):
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return []
 
     def retrieve_user_from_device(self, device_str):
         """Finds the user associated with the device."""
