@@ -161,23 +161,17 @@ class MongoDatabase(Database.Database):
     def create_user(self, username, realname, passhash):
         """Create method for a user."""
         if username is None:
-            self.log_error(MongoDatabase.create_user.__name__ + ": Unexpected empty object: username")
-            return False
+            raise Exception("Unexpected empty object: username")
         if realname is None:
-            self.log_error(MongoDatabase.create_user.__name__ + ": Unexpected empty object: realname")
-            return False
+            raise Exception("Unexpected empty object: realname")
         if passhash is None:
-            self.log_error(MongoDatabase.create_user.__name__ + ": Unexpected empty object: passhash")
-            return False
+            raise Exception("Unexpected empty object: passhash")
         if len(username) == 0:
-            self.log_error(MongoDatabase.create_user.__name__ + ": username too short")
-            return False
+            raise Exception("username too short")
         if len(realname) == 0:
-            self.log_error(MongoDatabase.create_user.__name__ + ": realname too short")
-            return False
+            raise Exception("realname too short")
         if len(passhash) == 0:
-            self.log_error(MongoDatabase.create_user.__name__ + ": hash too short")
-            return False
+            raise Exception("hash too short")
 
         try:
             post = { Keys.USERNAME_KEY: username, Keys.REALNAME_KEY: realname, Keys.HASH_KEY: passhash, Keys.DEVICES_KEY: [], Keys.FRIENDS_KEY: [], Keys.DEFAULT_PRIVACY_KEY: Keys.ACTIVITY_VISIBILITY_PUBLIC }
@@ -190,11 +184,9 @@ class MongoDatabase(Database.Database):
     def retrieve_user_details(self, username):
         """Retrieve method for a user."""
         if username is None:
-            self.log_error(MongoDatabase.retrieve_user_details.__name__ + ": Unexpected empty object: username")
-            return None
+            raise Exception("Unexpected empty object: username")
         if len(username) == 0:
-            self.log_error(MongoDatabase.retrieve_user_details.__name__ + ": username is empty")
-            return None
+            raise Exception("username is empty")
 
         try:
             return self.users_collection.find_one({ Keys.USERNAME_KEY: username })
@@ -206,11 +198,9 @@ class MongoDatabase(Database.Database):
     def retrieve_user(self, username):
         """Retrieve method for a user."""
         if username is None:
-            self.log_error(MongoDatabase.retrieve_user.__name__ + ": Unexpected empty object: username")
-            return None, None, None
+            raise Exception("Unexpected empty object: username")
         if len(username) == 0:
-            self.log_error(MongoDatabase.retrieve_user.__name__ + ": username is empty")
-            return None, None, None
+            raise Exception("username is empty")
 
         try:
             # Find the user.
@@ -226,11 +216,15 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None, None, None
 
+    def retrieve_user_doc_from_id(self, user_id):
+        """Retrieve method for a user."""
+        user_id_obj = ObjectId(str(user_id))
+        return self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+
     def retrieve_user_from_id(self, user_id):
         """Retrieve method for a user."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_user_from_id.__name__ + ": Unexpected empty object: user_id")
-            return None, None
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Find the user.
@@ -250,8 +244,7 @@ class MongoDatabase(Database.Database):
     def retrieve_user_from_api_key(self, api_key):
         """Retrieve method for a user."""
         if api_key is None:
-            self.log_error(MongoDatabase.retrieve_user_from_id.__name__ + ": Unexpected empty object: api_key")
-            return None, None, None
+            raise Exception("Unexpected empty object: api_key")
 
         try:
             # Find the user.
@@ -269,28 +262,26 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return None, None, None, None
 
+    def update_user_doc(self, doc):
+        """Update method for a user."""
+        return update_collection(self.users_collection, doc)
+
     def update_user(self, user_id, username, realname, passhash):
         """Update method for a user."""
         if user_id is None:
-            self.log_error(MongoDatabase.update_user.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if username is None:
-            self.log_error(MongoDatabase.update_user.__name__ + ": Unexpected empty object: username")
-            return False
+            raise Exception("Unexpected empty object: username")
         if realname is None:
-            self.log_error(MongoDatabase.update_user.__name__ + ": Unexpected empty object: realname")
-            return False
+            raise Exception("Unexpected empty object: realname")
         if len(username) == 0:
-            self.log_error(MongoDatabase.update_user.__name__ + ": username too short")
-            return False
+            raise Exception("username too short")
         if len(realname) == 0:
-            self.log_error(MongoDatabase.update_user.__name__ + ": realname too short")
-            return False
+            raise Exception("realname too short")
 
         try:
             # Find the user.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
 
             # If the user was found.
             if user is not None:
@@ -298,7 +289,7 @@ class MongoDatabase(Database.Database):
                 user[Keys.REALNAME_KEY] = realname
                 if passhash is not None:
                     user[Keys.HASH_KEY] = passhash
-                return update_collection(self.users_collection, user)
+                return self.update_user_doc(user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -307,8 +298,7 @@ class MongoDatabase(Database.Database):
     def delete_user(self, user_id):
         """Delete method for a user."""
         if user_id is None:
-            self.log_error(MongoDatabase.delete_user.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             user_id_obj = ObjectId(str(user_id))
@@ -325,11 +315,9 @@ class MongoDatabase(Database.Database):
         user_list = []
 
         if username is None:
-            self.log_error(MongoDatabase.retrieve_matched_users.__name__ + ": Unexpected empty object: username")
-            return user_list
+            raise Exception("Unexpected empty object: username")
         if len(username) == 0:
-            self.log_error(MongoDatabase.retrieve_matched_users.__name__ + ": username is empty")
-            return user_list
+            raise Exception("username is empty")
 
         try:
             # Match on usernames.
@@ -364,27 +352,26 @@ class MongoDatabase(Database.Database):
     def create_user_device(self, user_id, device_str):
         """Create method for a device."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_user_device.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if device_str is None:
-            self.log_error(MongoDatabase.create_user_device.__name__ + ": Unexpected empty object: device_str")
-            return False
+            raise Exception("Unexpected empty object: device_str")
 
         try:
             # Find the user.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return False
 
             # Read the devices list.
             devices = []
-            if user is not None and Keys.DEVICES_KEY in user:
+            if Keys.DEVICES_KEY in user:
                 devices = user[Keys.DEVICES_KEY]
 
             # Append the device to the devices list, if it is not already there.
             if device_str not in devices:
                 devices.append(device_str)
                 user[Keys.DEVICES_KEY] = devices
-                return update_collection(self.users_collection, user)
+                return self.update_user_doc(user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -393,8 +380,7 @@ class MongoDatabase(Database.Database):
     def retrieve_user_devices(self, user_id):
         """Retrieve method for a device."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_user_devices.__name__ + ": Unexpected empty object: user_id")
-            return None
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Find the user.
@@ -413,11 +399,9 @@ class MongoDatabase(Database.Database):
     def retrieve_user_from_device(self, device_str):
         """Finds the user associated with the device."""
         if device_str is None:
-            self.log_error(MongoDatabase.retrieve_user_from_device.__name__ + ": Unexpected empty object: device_str")
-            return None
+            raise Exception("Unexpected empty object: device_str")
         if len(device_str) == 0:
-            self.log_error(MongoDatabase.retrieve_user_from_device.__name__ + ": Device string not provided")
-            return None
+            raise Exception("Device string not provided")
 
         try:
             return self.users_collection.find_one({ Keys.DEVICES_KEY: device_str })
@@ -429,8 +413,9 @@ class MongoDatabase(Database.Database):
     def delete_user_device(self, device_str):
         """Deletes method for a device."""
         if device_str is None:
-            self.log_error(MongoDatabase.delete_user_device.__name__ + ": Unexpected empty object: device_str")
-            return False
+            raise Exception("Unexpected empty object: device_str")
+        if len(device_str) == 0:
+            raise Exception("Device string not provided")
 
         try:
             self.activities_collection.remove({ Keys.ACTIVITY_DEVICE_STR_KEY: device_str })
@@ -447,26 +432,24 @@ class MongoDatabase(Database.Database):
     def create_pending_friend_request(self, user_id, target_id):
         """Appends a user to the friends list of the user with the specified id."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_pending_friend_request.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if target_id is None:
-            self.log_error(MongoDatabase.create_pending_friend_request.__name__ + ": Unexpected empty object: target_id")
-            return False
+            raise Exception("Unexpected empty object: target_id")
 
         try:
             # Find the user whose friendship is being requested.
-            user_id_obj = ObjectId(str(target_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(target_id)
+            if user is None:
+                return False
 
             # If the user was found then add the target user to the pending friends list.
-            if user is not None:
-                pending_friends_list = []
-                if Keys.FRIEND_REQUESTS_KEY in user:
-                    pending_friends_list = user[Keys.FRIEND_REQUESTS_KEY]
-                if user_id not in pending_friends_list:
-                    pending_friends_list.append(user_id)
-                    user[Keys.FRIEND_REQUESTS_KEY] = pending_friends_list
-                    return update_collection(self.users_collection, user)
+            pending_friends_list = []
+            if Keys.FRIEND_REQUESTS_KEY in user:
+                pending_friends_list = user[Keys.FRIEND_REQUESTS_KEY]
+            if user_id not in pending_friends_list:
+                pending_friends_list.append(user_id)
+                user[Keys.FRIEND_REQUESTS_KEY] = pending_friends_list
+                return self.update_user_doc(user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -475,8 +458,7 @@ class MongoDatabase(Database.Database):
     def retrieve_pending_friends(self, user_id):
         """Returns the user ids for all users that are pending confirmation as friends of the specified user."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_pending_friends.__name__ + ": Unexpected empty object: user_id")
-            return []
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Only return these keys.
@@ -491,8 +473,7 @@ class MongoDatabase(Database.Database):
                 pending_friends_list.append(pending_friend)
 
             # Find the users who have requested our friendship.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
 
             # If we found ourselves.
             if user is not None:
@@ -516,26 +497,24 @@ class MongoDatabase(Database.Database):
     def delete_pending_friend_request(self, user_id, target_id):
         """Appends a user to the friends list of the user with the specified id."""
         if user_id is None:
-            self.log_error(MongoDatabase.delete_pending_friend_request.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if target_id is None:
-            self.log_error(MongoDatabase.delete_pending_friend_request.__name__ + ": Unexpected empty object: target_id")
-            return False
+            raise Exception("Unexpected empty object: target_id")
 
         try:
             # Find the user whose friendship is being requested.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return False
 
             # If the user was found then add the target user to the pending friends list.
-            if user is not None:
-                pending_friends_list = []
-                if Keys.FRIEND_REQUESTS_KEY in user:
-                    pending_friends_list = user[Keys.FRIEND_REQUESTS_KEY]
-                if target_id in pending_friends_list:
-                    pending_friends_list.remove(target_id)
-                    user[Keys.FRIEND_REQUESTS_KEY] = pending_friends_list
-                    return update_collection(self.users_collection, user)
+            pending_friends_list = []
+            if Keys.FRIEND_REQUESTS_KEY in user:
+                pending_friends_list = user[Keys.FRIEND_REQUESTS_KEY]
+            if target_id in pending_friends_list:
+                pending_friends_list.remove(target_id)
+                user[Keys.FRIEND_REQUESTS_KEY] = pending_friends_list
+                return self.update_user_doc(user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -544,20 +523,16 @@ class MongoDatabase(Database.Database):
     def create_friend(self, user_id, target_id):
         """Appends a user to the friends list of the user with the specified id."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_friend.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if target_id is None:
-            self.log_error(MongoDatabase.create_friend.__name__ + ": Unexpected empty object: target_id")
-            return False
+            raise Exception("Unexpected empty object: target_id")
 
         try:
             # Find the user.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
 
             # Find the target user.
-            target_user_id_obj = ObjectId(str(target_id))
-            target_user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: target_user_id_obj })
+            target_user = self.retrieve_user_doc_from_id(target_id)
 
             # If the users were found then add each other to their friends lists.
             if user is not None and target_user is not None:
@@ -569,7 +544,7 @@ class MongoDatabase(Database.Database):
                 if target_id not in friends_list:
                     friends_list.append(target_id)
                     user[Keys.FRIENDS_KEY] = friends_list
-                    update_collection(self.users_collection, user)
+                    self.update_user_doc(user)
 
                 # Update the target user's friends list.
                 friends_list = []
@@ -578,7 +553,7 @@ class MongoDatabase(Database.Database):
                 if user_id not in friends_list:
                     friends_list.append(user_id)
                     target_user[Keys.FRIENDS_KEY] = friends_list
-                    update_collection(self.users_collection, target_user)
+                    self.update_user_doc(target_user)
 
                 return True
         except:
@@ -589,8 +564,7 @@ class MongoDatabase(Database.Database):
     def retrieve_friends(self, user_id):
         """Returns the user ids for all users that are friends with the user who has the specified id."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_friends.__name__ + ": Unexpected empty object: user_id")
-            return []
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Only return these keys.
@@ -611,20 +585,16 @@ class MongoDatabase(Database.Database):
     def delete_friend(self, user_id, target_id):
         """Removes the users from each other's friends lists."""
         if user_id is None:
-            self.log_error(MongoDatabase.delete_friend.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if target_id is None:
-            self.log_error(MongoDatabase.delete_friend.__name__ + ": Unexpected empty object: target_id")
-            return False
+            raise Exception("Unexpected empty object: target_id")
 
         try:
             # Find the user.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
 
             # Find the target user.
-            target_user_id_obj = ObjectId(str(target_id))
-            target_user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: target_user_id_obj })
+            target_user = self.retrieve_user_doc_from_id(target_id)
 
             # If the users were found then add each other to their friends lists.
             if user is not None and target_user is not None:
@@ -636,7 +606,7 @@ class MongoDatabase(Database.Database):
                 if target_id in friends_list:
                     friends_list.remove(target_id)
                     user[Keys.FRIENDS_KEY] = friends_list
-                    update_collection(self.users_collection, user)
+                    self.update_user_doc(user)
 
                 # Update the target user's friends list.
                 friends_list = []
@@ -645,7 +615,7 @@ class MongoDatabase(Database.Database):
                 if user_id in friends_list:
                     friends_list.remove(user_id)
                     target_user[Keys.FRIENDS_KEY] = friends_list
-                    update_collection(self.users_collection, target_user)
+                    self.update_user_doc(target_user)
 
                 return True
         except:
@@ -660,36 +630,30 @@ class MongoDatabase(Database.Database):
     def update_user_setting(self, user_id, key, value, update_time):
         """Create/update method for user preferences."""
         if user_id is None:
-            self.log_error(MongoDatabase.update_user_setting.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if key is None:
-            self.log_error(MongoDatabase.update_user_setting.__name__ + ": Unexpected empty object: key")
-            return False
+            raise Exception("Unexpected empty object: key")
         if value is None:
-            self.log_error(MongoDatabase.update_user_setting.__name__ + ": Unexpected empty object: value")
-            return False
+            raise Exception("Unexpected empty object: value")
         if update_time is None:
-            self.log_error(MongoDatabase.update_user_setting.__name__ + ": Unexpected empty object: update_time")
-            return False
+            raise Exception("Unexpected empty object: update_time")
 
         try:
             # Find the user.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return False
 
-            # If the user was found.
-            if user is not None:
+            # Do not replace a newer value with an older value.
+            if Keys.USER_SETTINGS_LAST_UPDATED_KEY not in user:
+                user[Keys.USER_SETTINGS_LAST_UPDATED_KEY] = {}
+            elif key in user[Keys.USER_SETTINGS_LAST_UPDATED_KEY] and user[Keys.USER_SETTINGS_LAST_UPDATED_KEY][key] > update_time:
+                return False
 
-                # Do not replace a newer value with an older value.
-                if Keys.USER_SETTINGS_LAST_UPDATED_KEY not in user:
-                    user[Keys.USER_SETTINGS_LAST_UPDATED_KEY] = {}
-                elif key in user[Keys.USER_SETTINGS_LAST_UPDATED_KEY] and user[Keys.USER_SETTINGS_LAST_UPDATED_KEY][key] > update_time:
-                    return False
-
-                # Update.
-                user[Keys.USER_SETTINGS_LAST_UPDATED_KEY][key] = update_time
-                user[key] = value
-                return update_collection(self.users_collection, user)
+            # Update.
+            user[Keys.USER_SETTINGS_LAST_UPDATED_KEY][key] = update_time
+            user[key] = value
+            return self.update_user_doc(user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -698,16 +662,13 @@ class MongoDatabase(Database.Database):
     def retrieve_user_setting(self, user_id, key):
         """Retrieve method for user preferences."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_user_setting.__name__ + ": Unexpected empty object: user_id")
-            return None
+            raise Exception("Unexpected empty object: user_id")
         if key is None:
-            self.log_error(MongoDatabase.retrieve_user_setting.__name__ + ": Unexpected empty object: key")
-            return None
+            raise Exception("Unexpected empty object: key")
 
         try:
             # Find the user.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
 
             # Find the setting.
             if user is not None and key in user and key in Keys.USER_SETTINGS:
@@ -720,28 +681,26 @@ class MongoDatabase(Database.Database):
     def retrieve_user_settings(self, user_id, keys):
         """Retrieve method for user preferences."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_user_settings.__name__ + ": Unexpected empty object: user_id")
-            return None
+            raise Exception("Unexpected empty object: user_id")
         if keys is None:
-            self.log_error(MongoDatabase.retrieve_user_settings.__name__ + ": Unexpected empty object: keys")
-            return None
+            raise Exception("Unexpected empty object: keys")
 
         try:
             # Find the user.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return []
 
             # Find the settings.
             results = []
-            if user is not None:
-                for key in keys:
-                    if key in user and key in Keys.USER_SETTINGS:
-                        results.append({key: user[key]})
-                return results
+            for key in keys:
+                if key in user and key in Keys.USER_SETTINGS:
+                    results.append({key: user[key]})
+            return results
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return []
 
     #
     # Personal record management methods
@@ -750,11 +709,9 @@ class MongoDatabase(Database.Database):
     def create_user_personal_records(self, user_id, records):
         """Create method for a user's personal record."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_user_personal_records.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if records is None:
-            self.log_error(MongoDatabase.create_user_personal_records.__name__ + ": Unexpected empty object: records")
-            return False
+            raise Exception("Unexpected empty object: records")
 
         try:
             # Find the user's records collection.
@@ -773,11 +730,9 @@ class MongoDatabase(Database.Database):
     def update_user_personal_records(self, user_id, records):
         """Create method for a user's personal record. These are the bests across all activities. Activity records are the bests for individual activities."""
         if user_id is None:
-            self.log_error(MongoDatabase.update_user_personal_records.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if records is None or len(records) == 0:
-            self.log_error(MongoDatabase.update_user_personal_records.__name__ + ": Unexpected empty object: records")
-            return False
+            raise Exception("Unexpected empty object: records")
 
         try:
             # Find the user's records collection.
@@ -796,8 +751,7 @@ class MongoDatabase(Database.Database):
     def delete_all_user_personal_records(self, user_id):
         """Delete method for a user's personal record. Deletes the entire personal record cache."""
         if user_id is None:
-            self.log_error(MongoDatabase.delete_all_user_personal_records.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Delete the user's records collection.
@@ -817,23 +771,17 @@ class MongoDatabase(Database.Database):
     def create_activity_bests(self, user_id, activity_id, activity_type, activity_time, bests):
         """Create method for a user's personal records for a given activity."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if activity_type is None:
-            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: activity_type")
-            return False
+            raise Exception("Unexpected empty object: activity_type")
         if activity_time is None:
-            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: activity_time")
-            return False
+            raise Exception("Unexpected empty object: activity_time")
         if bests is None:
-            self.log_error(MongoDatabase.create_activity_bests.__name__ + ": Unexpected empty object: bests")
-            return False
+            raise Exception("Unexpected empty object: bests")
 
         try:
             # Find the user's records collection.
@@ -851,20 +799,20 @@ class MongoDatabase(Database.Database):
     def retrieve_activity_bests_for_user(self, user_id):
         """Retrieve method for a user's activity records."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_activity_bests_for_user.__name__ + ": Unexpected empty object: user_id")
-            return {}
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             user_records = self.records_collection.find_one({ Keys.USER_ID_KEY: user_id })
-            if user_records is not None:
-                bests = {}
+            if user_records is None:
+                return {}
 
-                # Each record is named using the activity ID of the corresponding activity.
-                for activity_id in user_records:
-                    if InputChecker.is_uuid(activity_id):
-                        activity_bests = user_records[activity_id]
-                        bests[activity_id] = activity_bests
-                return bests
+            # Each record is named using the activity ID of the corresponding activity.
+            bests = {}
+            for activity_id in user_records:
+                if InputChecker.is_uuid(activity_id):
+                    activity_bests = user_records[activity_id]
+                    bests[activity_id] = activity_bests
+            return bests
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -873,29 +821,27 @@ class MongoDatabase(Database.Database):
     def retrieve_bounded_activity_bests_for_user(self, user_id, cutoff_time_lower, cutoff_time_higher):
         """Retrieve method for a user's activity records. Only activities more recent than the specified cutoff time will be returned."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_bounded_activity_bests_for_user.__name__ + ": Unexpected empty object: user_id")
-            return {}
+            raise Exception("Unexpected empty object: user_id")
         if cutoff_time_lower is None:
-            self.log_error(MongoDatabase.retrieve_bounded_activity_bests_for_user.__name__ + ": Unexpected empty object: cutoff_time_lower")
-            return {}
+            raise Exception("Unexpected empty object: cutoff_time_lower")
         if cutoff_time_higher is None:
-            self.log_error(MongoDatabase.retrieve_bounded_activity_bests_for_user.__name__ + ": Unexpected empty object: cutoff_time_higher")
-            return {}
+            raise Exception("Unexpected empty object: cutoff_time_higher")
 
         try:
             user_records = self.records_collection.find_one({ Keys.USER_ID_KEY: user_id })
-            if user_records is not None:
-                bests = {}
+            if user_records is None:
+                return {}
 
-                # Each record is named using the activity ID of the corresponding activity.
-                for activity_id in user_records:
-                    if InputChecker.is_uuid(activity_id):
-                        activity_bests = user_records[activity_id]
-                        if Keys.ACTIVITY_START_TIME_KEY in activity_bests:
-                            activity_time = activity_bests[Keys.ACTIVITY_START_TIME_KEY]
-                            if activity_time >= cutoff_time_lower and activity_time < cutoff_time_higher:
-                                bests[activity_id] = activity_bests
-                return bests
+            # Each record is named using the activity ID of the corresponding activity.
+            bests = {}
+            for activity_id in user_records:
+                if InputChecker.is_uuid(activity_id):
+                    activity_bests = user_records[activity_id]
+                    if Keys.ACTIVITY_START_TIME_KEY in activity_bests:
+                        activity_time = activity_bests[Keys.ACTIVITY_START_TIME_KEY]
+                        if activity_time >= cutoff_time_lower and activity_time < cutoff_time_higher:
+                            bests[activity_id] = activity_bests
+            return bests
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -904,14 +850,11 @@ class MongoDatabase(Database.Database):
     def delete_activity_best_for_user(self, user_id, activity_id):
         """Delete method for a user's personal records for a given activity."""
         if user_id is None:
-            self.log_error(MongoDatabase.delete_activity_best_for_user.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if activity_id is None:
-            self.log_error(MongoDatabase.delete_activity_best_for_user.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.delete_activity_best_for_user.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
 
         try:
             user_records = self.records_collection.find_one({ Keys.USER_ID_KEY: user_id })
@@ -932,8 +875,7 @@ class MongoDatabase(Database.Database):
         """Retrieves the list of activities associated with the specified user."""
         """If return_all_data is False then only metadata is returned."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_user_activity_list.__name__ + ": Unexpected empty object: user_id")
-            return []
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Things we don't need.
@@ -956,11 +898,9 @@ class MongoDatabase(Database.Database):
         """Returns TRUE on success, FALSE if an error was encountered."""
         """If return_all_data is False then only metadata is returned."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_each_user_activity.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if callback_func is None:
-            self.log_error(MongoDatabase.retrieve_each_user_activity.__name__ + ": Unexpected empty object: callback_func")
-            return False
+            raise Exception("Unexpected empty object: callback_func")
 
         try:
             # Things we don't need.
@@ -992,8 +932,7 @@ class MongoDatabase(Database.Database):
     def retrieve_devices_activity_list(self, devices, start_time, end_time, return_all_data):
         """Retrieves the list of activities associated with the specified devices."""
         if devices is None:
-            self.log_error(MongoDatabase.retrieve_devices_activity_list.__name__ + ": Unexpected empty object: devices")
-            return []
+            raise Exception("Unexpected empty object: devices")
 
         try:
             # Things we don't need.
@@ -1025,14 +964,11 @@ class MongoDatabase(Database.Database):
         """Retrieves each device activity and calls the callback function for each one."""
         """If return_all_data is False then only metadata is returned."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_each_device_activity.__name__ + ": Unexpected empty object: device_str")
-            return None
+            raise Exception("Unexpected empty object: device_str")
         if device_str is None:
-            self.log_error(MongoDatabase.retrieve_each_device_activity.__name__ + ": Unexpected empty object: device_str")
-            return None
+            raise Exception("Unexpected empty object: device_str")
         if callback_func is None:
-            self.log_error(MongoDatabase.retrieve_each_device_activity.__name__ + ": Unexpected empty object: device_str")
-            return None
+            raise Exception("Unexpected empty object: device_str")
 
         try:
             # Things we don't need.
@@ -1063,8 +999,7 @@ class MongoDatabase(Database.Database):
     def retrieve_most_recent_activity_for_device(self, device_str, return_all_data):
         """Retrieves the ID for the most recent activity to be associated with the specified device."""
         if device_str is None:
-            self.log_error(MongoDatabase.retrieve_most_recent_activity_for_device.__name__ + ": Unexpected empty object: device_str")
-            return None
+            raise Exception("Unexpected empty object: device_str")
 
         try:
             # Things we don't need.
@@ -1083,20 +1018,15 @@ class MongoDatabase(Database.Database):
     def create_activity(self, activity_id, activity_name, date_time, device_str):
         """Create method for an activity."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if activity_name is None:
-            self.log_error(MongoDatabase.create_activity.__name__ + ": Unexpected empty object: activity_name")
-            return False
+            raise Exception("Unexpected empty object: activity_name")
         if date_time is None:
-            self.log_error(MongoDatabase.create_activity.__name__ + ": Unexpected empty object: date_time")
-            return False
+            raise Exception("Unexpected empty object: date_time")
         if device_str is None:
-            self.log_error(MongoDatabase.create_activity.__name__ + ": Unexpected empty object: device_str")
-            return False
+            raise Exception("Unexpected empty object: device_str")
 
         try:
             # Make sure the activity name is a string.
@@ -1113,8 +1043,7 @@ class MongoDatabase(Database.Database):
     def create_complete_activity(self, activity):
         """Create method for an activity."""
         if activity is None:
-            self.log_error(MongoDatabase.create_complete_activity.__name__ + ": Unexpected empty object: activity")
-            return False
+            raise Exception("Unexpected empty object: activity")
 
         try:
             return insert_into_collection(self.activities_collection, activity)
@@ -1126,8 +1055,7 @@ class MongoDatabase(Database.Database):
     def recreate_activity(self, activity):
         """Update method for a complete activity."""
         if activity is None:
-            self.log_error(MongoDatabase.recreate_activity.__name__ + ": Unexpected empty object: activity")
-            return False
+            raise Exception("Unexpected empty object: activity")
 
         try:
             deleted_result = self.activities_collection.delete_one({ Keys.ACTIVITY_ID_KEY: activity[Keys.ACTIVITY_ID_KEY] })
@@ -1143,11 +1071,9 @@ class MongoDatabase(Database.Database):
     def retrieve_activity(self, activity_id):
         """Retrieve method for an activity, specified by the activity ID."""
         if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_activity.__name__ + ": Unexpected empty object: activity_id")
-            return None
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.retrieve_activity.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return None
+            raise Exception("Invalid object: activity_id " + str(activity_id))
 
         try:
             # Find the activity.
@@ -1161,11 +1087,9 @@ class MongoDatabase(Database.Database):
     def retrieve_activity_small(self, activity_id):
         """Retrieve method for an activity, specified by the activity ID."""
         if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_activity_small.__name__ + ": Unexpected empty object: activity_id")
-            return None
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.retrieve_activity_small.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return None
+            raise Exception("Invalid object: activity_id " + str(activity_id))
 
         try:
             # Things we don't need.
@@ -1181,17 +1105,13 @@ class MongoDatabase(Database.Database):
     def update_activity(self, device_str, activity_id, locations, sensor_readings_dict, metadata_list_dict):
         """Updates locations, sensor readings, and metadata associated with a moving activity. Provided as a performance improvement over making several database updates."""
         if device_str is None:
-            self.log_error(MongoDatabase.update_activity.__name__ + ": Unexpected empty object: device_str")
-            return False
+            raise Exception("Unexpected empty object: device_str")
         if activity_id is None:
-            self.log_error(MongoDatabase.update_activity.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.update_activity.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if not locations:
-            self.log_error(MongoDatabase.update_activity.__name__ + ": Unexpected empty object: locations")
-            return False
+            raise Exception("Unexpected empty object: locations")
 
         try:
             # Find the activity.
@@ -1272,11 +1192,9 @@ class MongoDatabase(Database.Database):
     def delete_activity(self, activity_id):
         """Delete method for an activity, specified by the activity ID."""
         if activity_id is None:
-            self.log_error(MongoDatabase.delete_activity.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.delete_activity.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
 
         try:
             deleted_result = self.activities_collection.delete_one({ Keys.ACTIVITY_ID_KEY: activity_id })
@@ -1290,11 +1208,9 @@ class MongoDatabase(Database.Database):
     def activity_exists(self, activity_id):
         """Determines whether or not there is a document corresonding to the activity ID."""
         if activity_id is None:
-            self.log_error(MongoDatabase.activity_exists.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.activity_exists.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
 
         try:
             return self.activities_collection.count_documents({ Keys.ACTIVITY_ID_KEY: activity_id }, limit = 1) != 0
@@ -1306,11 +1222,9 @@ class MongoDatabase(Database.Database):
     def list_activities_with_last_updated_times_before(self, user_id, last_modified_time):
         """Returns a list of activity IDs with last modified times greater than the date provided."""
         if user_id is None:
-            self.log_error(MongoDatabase.list_activities_with_last_updated_times_before.__name__ + ": Unexpected empty object: user_id")
-            return []
+            raise Exception("Unexpected empty object: user_id")
         if last_modified_time is None:
-            self.log_error(MongoDatabase.list_activities_with_last_updated_times_before.__name__ + ": Unexpected empty object: last_modified_time")
-            return []
+            raise Exception("Unexpected empty object: last_modified_time")
 
         try:
             results = list(self.activities_collection.find({ Keys.ACTIVITY_LAST_UPDATED_KEY: {'$gt': last_modified_time} }, { Keys.DATABASE_ID_KEY: 0, Keys.ACTIVITY_ID_KEY: 1 }))
@@ -1338,17 +1252,13 @@ class MongoDatabase(Database.Database):
     def create_activity_locations(self, device_str, activity_id, locations):
         """Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
         if device_str is None:
-            self.log_error(MongoDatabase.create_activity_locations.__name__ + ": Unexpected empty object: device_str")
-            return False
+            raise Exception("Unexpected empty object: device_str")
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_locations.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_locations.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if not locations:
-            self.log_error(MongoDatabase.create_activity_locations.__name__ + ": Unexpected empty object: locations")
-            return False
+            raise Exception("Unexpected empty object: locations")
 
         try:
             # Find the activity.
@@ -1388,18 +1298,18 @@ class MongoDatabase(Database.Database):
     def retrieve_activity_locations(self, activity_id):
         """Returns all the locations for the specified activity."""
         if activity_id is None:
-            self.log_error(MongoDatabase.retrieve_activity_locations.__name__ + ": Unexpected empty object: activity_id")
-            return None
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.retrieve_activity_locations.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return None
+            raise Exception("Invalid object: activity_id " + str(activity_id))
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return None
 
             # If the activity was found and it has location data.
-            if activity is not None and Keys.ACTIVITY_LOCATIONS_KEY in activity:
+            if Keys.ACTIVITY_LOCATIONS_KEY in activity:
                 locations = activity[Keys.ACTIVITY_LOCATIONS_KEY]
                 locations.sort(key=retrieve_time_from_location)
                 return locations
@@ -1411,41 +1321,36 @@ class MongoDatabase(Database.Database):
     def create_activity_sensor_reading(self, activity_id, date_time, sensor_type, value):
         """Create method for a piece of sensor data, such as a heart rate or power meter reading."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception(" object: activity_id " + str(activity_id))
         if date_time is None:
-            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: date_time")
-            return False
+            raise Exception("Unexpected empty object: date_time")
         if sensor_type is None:
-            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: sensor_type")
-            return False
+            raise Exception("Unexpected empty object: sensor_type")
         if value is None:
-            self.log_error(MongoDatabase.create_activity_sensor_reading.__name__ + ": Unexpected empty object: value")
-            return False
+            raise Exception("Unexpected empty object: value")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found.
-            if activity is not None:
-                value_list = []
+            value_list = []
 
-                # Get the existing list.
-                if sensor_type in activity:
-                    value_list = activity[sensor_type]
+            # Get the existing list.
+            if sensor_type in activity:
+                value_list = activity[sensor_type]
 
-                time_value_pair = { str(date_time): float(value) }
-                value_list.append(time_value_pair)
-                value_list.sort(key=retrieve_time_from_time_value_pair)
+            time_value_pair = { str(date_time): float(value) }
+            value_list.append(time_value_pair)
+            value_list.sort(key=retrieve_time_from_time_value_pair)
 
-                # Save the changes.
-                activity[sensor_type] = value_list
-                update_activities_collection(self, activity)
-                return True
+            # Save the changes.
+            activity[sensor_type] = value_list
+            update_activities_collection(self, activity)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1454,40 +1359,36 @@ class MongoDatabase(Database.Database):
     def create_activity_sensor_readings(self, activity_id, sensor_type, values):
         """Create method for several pieces of sensor data, such as a heart rate or power meter reading."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if sensor_type is None:
-            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: sensor_type")
-            return False
+            raise Exception("Unexpected empty object: sensor_type")
         if values is None:
-            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: values")
-            return False
+            raise Exception("Unexpected empty object: values")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found.
-            if activity is not None:
-                value_list = []
+            value_list = []
 
-                # Get the existing list.
-                if sensor_type in activity:
-                    value_list = activity[sensor_type]
+            # Get the existing list.
+            if sensor_type in activity:
+                value_list = activity[sensor_type]
 
-                for value in values:
-                    time_value_pair = { str(value[0]): float(value[1]) }
-                    value_list.append(time_value_pair)
+            for value in values:
+                time_value_pair = { str(value[0]): float(value[1]) }
+                value_list.append(time_value_pair)
 
-                value_list.sort(key=retrieve_time_from_time_value_pair)
+            value_list.sort(key=retrieve_time_from_time_value_pair)
 
-                # Save the changes.
-                activity[sensor_type] = value_list
-                update_activities_collection(self, activity)
-                return True
+            # Save the changes.
+            activity[sensor_type] = value_list
+            update_activities_collection(self, activity)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1496,26 +1397,22 @@ class MongoDatabase(Database.Database):
     def delete_activity_sensor_readings(self, sensor_type, activity_id):
         """Create method for several pieces of sensor data, such as a heart rate or power meter reading."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if sensor_type is None:
-            self.log_error(MongoDatabase.create_activity_sensor_readings.__name__ + ": Unexpected empty object: sensor_type")
-            return False
+            raise Exception("Unexpected empty object: sensor_type")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found.
-            if activity is not None:
-
-                # Save the changes.
-                activity[sensor_type] = []
-                update_activities_collection(self, activity)
-                return True
+            # Save the changes.
+            activity[sensor_type] = []
+            update_activities_collection(self, activity)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1524,133 +1421,119 @@ class MongoDatabase(Database.Database):
     def create_activity_event(self, activity_id, event):
         """Inherited from ActivityWriter. 'events' is an array of dictionaries in which each dictionary describes an event."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_event.__name__ + ": Unexpected empty object: activity_id")
-            return None
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_event.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return None
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if event is None:
-            self.log_error(MongoDatabase.create_activity_event.__name__ + ": Unexpected empty object: event")
-            return None
+            raise Exception("Unexpected empty object: event")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found and if it has data for the specified sensor type.
-            if activity is not None:
-                events_list = []
+            events_list = []
 
-                # Get the existing list.
-                if Keys.APP_EVENTS_KEY in activity:
-                    events_list = activity[Keys.APP_EVENTS_KEY]
+            # Get the existing list.
+            if Keys.APP_EVENTS_KEY in activity:
+                events_list = activity[Keys.APP_EVENTS_KEY]
 
-                # Update the list.
-                events_list.append(event)
+            # Update the list.
+            events_list.append(event)
 
-                # Save the changes.
-                activity[Keys.APP_EVENTS_KEY] = events_list
-                update_activities_collection(self, activity)
-                return True
+            # Save the changes.
+            activity[Keys.APP_EVENTS_KEY] = events_list
+            update_activities_collection(self, activity)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return False
 
     def create_activity_events(self, activity_id, events):
         """Inherited from ActivityWriter. 'events' is an array of dictionaries in which each dictionary describes an event."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_events.__name__ + ": Unexpected empty object: activity_id")
-            return None
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_events.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return None
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if events is None:
-            self.log_error(MongoDatabase.create_activity_events.__name__ + ": Unexpected empty object: events")
-            return None
+            raise Exception("Unexpected empty object: events")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found and if it has data for the specified sensor type.
-            if activity is not None:
-                events_list = []
+            # Get the existing list.
+            events_list = []
+            if Keys.APP_EVENTS_KEY in activity:
+                events_list = activity[Keys.APP_EVENTS_KEY]
 
-                # Get the existing list.
-                if Keys.APP_EVENTS_KEY in activity:
-                    events_list = activity[Keys.APP_EVENTS_KEY]
+            # Update the list.
+            events_list.extend(events)
 
-                # Update the list.
-                events_list.extend(events)
-
-                # Save the changes.
-                activity[Keys.APP_EVENTS_KEY] = events_list
-                update_activities_collection(self, activity)
-                return True
+            # Save the changes.
+            activity[Keys.APP_EVENTS_KEY] = events_list
+            update_activities_collection(self, activity)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return None
+        return False
 
     def create_or_update_activity_metadata(self, activity_id, date_time, key, value, create_list):
         """Create method for a piece of metaadata. When dealing with a list, will append values."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_or_update_activity_metadata.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_or_update_activity_metadata.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if date_time is None and create_list:
-            self.log_error(MongoDatabase.create_or_update_activity_metadata.__name__ + ": Unexpected empty object: date_time")
-            return False
+            raise Exception("Unexpected empty object: date_time")
         if key is None:
-            self.log_error(MongoDatabase.create_or_update_activity_metadata.__name__ + ": Unexpected empty object: key")
-            return False
+            raise Exception("Unexpected empty object: key")
         if value is None:
-            self.log_error(MongoDatabase.create_or_update_activity_metadata.__name__ + ": Unexpected empty object: value")
-            return False
+            raise Exception("Unexpected empty object: value")
         if create_list is None:
-            self.log_error(MongoDatabase.create_or_update_activity_metadata.__name__ + ": Unexpected empty object: create_list")
-            return False
+            raise Exception("Unexpected empty object: create_list")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found.
-            if activity is not None:
+            # Make sure we're working with a number, if the value is supposed to be a number.
+            try:
+                if not key in [ Keys.ACTIVITY_NAME_KEY, Keys.ACTIVITY_TYPE_KEY, Keys.ACTIVITY_DESCRIPTION_KEY ]:
+                    value = float(value)
+            except ValueError:
+                pass
 
-                # Make sure we're working with a number, if the value is supposed to be a number.
-                try:
-                    if not key in [ Keys.ACTIVITY_NAME_KEY, Keys.ACTIVITY_TYPE_KEY, Keys.ACTIVITY_DESCRIPTION_KEY ]:
-                        value = float(value)
-                except ValueError:
-                    pass
+            # The metadata is a list.
+            if create_list is True:
+                value_list = []
 
-                # The metadata is a list.
-                if create_list is True:
-                    value_list = []
+                if key in activity:
+                    value_list = activity[key]
 
-                    if key in activity:
-                        value_list = activity[key]
+                time_value_pair = { str(date_time): value }
+                value_list.append(time_value_pair)
+                value_list.sort(key=retrieve_time_from_time_value_pair)
+                activity[key] = value_list
+                update_activities_collection(self, activity)
+                return True
 
-                    time_value_pair = { str(date_time): value }
-                    value_list.append(time_value_pair)
-                    value_list.sort(key=retrieve_time_from_time_value_pair)
-                    activity[key] = value_list
-                    update_activities_collection(self, activity)
-                    return True
+            # The metadata is a scalar, just make sure to only update it if it has actually changed or was previously non-existent.
+            elif key not in activity or activity[key] != value:
+                activity[key] = value
+                update_activities_collection(self, activity)
+                return True
 
-                # The metadata is a scalar, just make sure to only update it if it has actually changed or was previously non-existent.
-                elif key not in activity or activity[key] != value:
-                    activity[key] = value
-                    update_activities_collection(self, activity)
-                    return True
-
-                # It's ok if the value isn't being updated.
-                elif activity[key] == value:
-                    return True
+            # It's ok if the value isn't being updated.
+            elif activity[key] == value:
+                return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1659,34 +1542,29 @@ class MongoDatabase(Database.Database):
     def create_or_update_activity_metadata_list(self, activity_id, key, values):
         """Create method for a list of metaadata values. Will overwrite existing data."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_or_update_activity_metadata_list.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_or_update_activity_metadata_list.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if key is None:
-            self.log_error(MongoDatabase.create_or_update_activity_metadata_list.__name__ + ": Unexpected empty object: key")
-            return False
+            raise Exception("Unexpected empty object: key")
         if values is None:
-            self.log_error(MongoDatabase.create_or_update_activity_metadata_list.__name__ + ": Unexpected empty object: values")
-            return False
+            raise Exception("Unexpected empty object: values")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found.
-            if activity is not None:
-                value_list = []
+            value_list = []
+            for value in values:
+                time_value_pair = { str(value[0]): float(value[1]) }
+                value_list.append(time_value_pair)
 
-                for value in values:
-                    time_value_pair = { str(value[0]): float(value[1]) }
-                    value_list.append(time_value_pair)
-
-                value_list.sort(key=retrieve_time_from_time_value_pair)
-                activity[key] = value_list
-                update_activities_collection(self, activity)
-                return True
+            value_list.sort(key=retrieve_time_from_time_value_pair)
+            activity[key] = value_list
+            update_activities_collection(self, activity)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1695,28 +1573,25 @@ class MongoDatabase(Database.Database):
     def create_activity_lap(self, activity_id, start_time_ms):
         """Create method for a list of of metaadata values."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_lap.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_lap.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if start_time_ms is None:
-            self.log_error(MongoDatabase.create_activity_lap.__name__ + ": Unexpected empty object: start_time_ms")
-            return False
+            raise Exception("Unexpected empty object: start_time_ms")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found.
-            if activity is not None:
-                laps = []
-                if Keys.ACTIVITY_LAPS_KEY in activity:
-                    laps = activity[Keys.ACTIVITY_LAPS_KEY]
-                laps.append(start_time_ms)
-                activity[Keys.ACTIVITY_LAPS_KEY] = laps
-                update_activities_collection(self, activity)
-                return True
+            laps = []
+            if Keys.ACTIVITY_LAPS_KEY in activity:
+                laps = activity[Keys.ACTIVITY_LAPS_KEY]
+            laps.append(start_time_ms)
+            activity[Keys.ACTIVITY_LAPS_KEY] = laps
+            update_activities_collection(self, activity)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1725,24 +1600,21 @@ class MongoDatabase(Database.Database):
     def create_activity_sets_and_reps_data(self, activity_id, sets):
         """Create method for a list of of metaadata values."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_sets_and_reps_data.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_sets_and_reps_data.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if sets is None:
-            self.log_error(MongoDatabase.create_activity_sets_and_reps_data.__name__ + ": Unexpected empty object: sets")
-            return False
+            raise Exception("Unexpected empty object: sets")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found.
-            if activity is not None:
-                activity[Keys.APP_SETS_KEY] = sets
-                update_activities_collection(self, activity)
-                return True
+            activity[Keys.APP_SETS_KEY] = sets
+            update_activities_collection(self, activity)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1751,17 +1623,13 @@ class MongoDatabase(Database.Database):
     def create_activity_accelerometer_reading(self, device_str, activity_id, accels):
         """Adds several accelerometer readings to the database. 'accels' is an array of arrays in the form [time, x, y, z]."""
         if device_str is None:
-            self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Unexpected empty object: device_str")
-            return False
+            raise Exception("Unexpected empty object: device_str")
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if not accels:
-            self.log_error(MongoDatabase.create_activity_accelerometer_reading.__name__ + ": Unexpected empty object: accels")
-            return False
+            raise Exception("Unexpected empty object: accels")
 
         try:
             # Find the activity.
@@ -1805,24 +1673,21 @@ class MongoDatabase(Database.Database):
     def create_activity_summary(self, activity_id, summary_data):
         """Create method for activity summary data. Summary data is data computed from the raw data."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_summary.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_summary.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if summary_data is None:
-            self.log_error(MongoDatabase.create_activity_summary.__name__ + ": Unexpected empty object: summary_data")
-            return False
+            raise Exception("Unexpected empty object: summary_data")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found.
-            if activity is not None:
-                activity[Keys.ACTIVITY_SUMMARY_KEY] = summary_data
-                update_activities_collection(self, activity)
-                return True
+            activity[Keys.ACTIVITY_SUMMARY_KEY] = summary_data
+            update_activities_collection(self, activity)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1831,18 +1696,17 @@ class MongoDatabase(Database.Database):
     def delete_activity_summary(self, activity_id):
         """Delete method for activity summary data. Summary data is data computed from the raw data."""
         if activity_id is None:
-            self.log_error(MongoDatabase.delete_activity_summary.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.delete_activity_summary.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found.
-            if activity is not None and Keys.ACTIVITY_SUMMARY_KEY in activity:
+            if Keys.ACTIVITY_SUMMARY_KEY in activity:
                 activity[Keys.ACTIVITY_SUMMARY_KEY] = {}
                 update_activities_collection(self, activity)
                 return True
@@ -1858,28 +1722,25 @@ class MongoDatabase(Database.Database):
     def create_tag(self, activity_id, tag):
         """Adds a tag to the specified activity."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_tag.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_tag.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if tag is None:
-            self.log_error(MongoDatabase.create_tag.__name__ + ": Unexpected empty object: tag")
-            return False
+            raise Exception("Unexpected empty object: tag")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found.
-            if activity is not None:
-                data = []
-                if Keys.ACTIVITY_TAGS_KEY in activity:
-                    data = activity[Keys.ACTIVITY_TAGS_KEY]
-                data.append(tag)
-                activity[Keys.ACTIVITY_TAGS_KEY] = data
-                update_activities_collection(self, activity)
-                return True
+            data = []
+            if Keys.ACTIVITY_TAGS_KEY in activity:
+                data = activity[Keys.ACTIVITY_TAGS_KEY]
+            data.append(tag)
+            activity[Keys.ACTIVITY_TAGS_KEY] = data
+            update_activities_collection(self, activity)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1888,11 +1749,9 @@ class MongoDatabase(Database.Database):
     def create_tags_on_activity(self, activity, tags):
         """Adds a tag to the specified activity."""
         if activity is None:
-            self.log_error(MongoDatabase.create_tags_on_activity.__name__ + ": Unexpected empty object: activity")
-            return False
+            raise Exception("Unexpected empty object: activity")
         if tags is None:
-            self.log_error(MongoDatabase.create_tags_on_activity.__name__ + ": Unexpected empty object: tags")
-            return False
+            raise Exception("Unexpected empty object: tags")
 
         try:
             activity[Keys.ACTIVITY_TAGS_KEY] = tags
@@ -1906,24 +1765,21 @@ class MongoDatabase(Database.Database):
     def create_tags_on_activity_by_id(self, activity_id, tags):
         """Adds a tag to the specified activity."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_tags_on_activity_by_id.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_tags_on_activity_by_id.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if tags is None:
-            self.log_error(MongoDatabase.create_tags_on_activity_by_id.__name__ + ": Unexpected empty object: tags")
-            return False
+            raise Exception("Unexpected empty object: tags")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found then add the tags.
-            if activity is not None:
-                activity[Keys.ACTIVITY_TAGS_KEY] = tags
-                update_activities_collection(self, activity)
-                return True
+            activity[Keys.ACTIVITY_TAGS_KEY] = tags
+            update_activities_collection(self, activity)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1932,21 +1788,19 @@ class MongoDatabase(Database.Database):
     def delete_tag(self, activity_id, tag):
         """Deletes the specified tag from the activity with the given ID."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_tag.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_tag.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if tag is None:
-            self.log_error(MongoDatabase.create_tag.__name__ + ": Unexpected empty object: tag")
-            return False
+            raise Exception("Unexpected empty object: tag")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found.
-            if activity is not None and Keys.ACTIVITY_TAGS_KEY in activity:
+            if Keys.ACTIVITY_TAGS_KEY in activity:
                 data = activity[Keys.ACTIVITY_TAGS_KEY]
                 data.remove(tag)
                 activity[Keys.ACTIVITY_TAGS_KEY] = data
@@ -1964,33 +1818,29 @@ class MongoDatabase(Database.Database):
     def create_activity_comment(self, activity_id, commenter_id, comment):
         """Create method for a comment on an activity."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if commenter_id is None:
-            self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Unexpected empty object: commenter_id")
-            return False
+            raise Exception("Unexpected empty object: commenter_id")
         if comment is None:
-            self.log_error(MongoDatabase.create_activity_comment.__name__ + ": Unexpected empty object: comment")
-            return False
+            raise Exception("Unexpected empty object: comment")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found.
-            if activity is not None:
-                data = []
-                if Keys.ACTIVITY_COMMENTS_KEY in activity:
-                    data = activity[Keys.ACTIVITY_COMMENTS_KEY]
-                entry_dict = { Keys.ACTIVITY_COMMENTER_ID_KEY: commenter_id, Keys.ACTIVITY_COMMENT_KEY: comment }
-                entry_str = json.dumps(entry_dict)
-                data.append(entry_str)
-                activity[Keys.ACTIVITY_COMMENTS_KEY] = data
-                update_activities_collection(self, activity)
-                return True
+            data = []
+            if Keys.ACTIVITY_COMMENTS_KEY in activity:
+                data = activity[Keys.ACTIVITY_COMMENTS_KEY]
+            entry_dict = { Keys.ACTIVITY_COMMENTER_ID_KEY: commenter_id, Keys.ACTIVITY_COMMENT_KEY: comment }
+            entry_str = json.dumps(entry_dict)
+            data.append(entry_str)
+            activity[Keys.ACTIVITY_COMMENTS_KEY] = data
+            update_activities_collection(self, activity)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2003,38 +1853,33 @@ class MongoDatabase(Database.Database):
     def create_activity_photo(self, user_id, activity_id, photo_hash):
         """Create method for an activity photo."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if activity_id is None:
-            self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if photo_hash is None:
-            self.log_error(MongoDatabase.create_activity_photo.__name__ + ": Unexpected empty object: photo_hash")
-            return False
+            raise Exception("Unexpected empty object: photo_hash")
 
         try:
             # Find the activity.
             activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
+            if activity is None:
+                return False
 
-            # If the activity was found.
-            if activity is not None:
+            # Append the hash of the photo to the photos list.
+            photos = []
+            if Keys.ACTIVITY_PHOTOS_KEY in activity:
+                photos = activity[Keys.ACTIVITY_PHOTOS_KEY]
+            photos.append(photo_hash)
 
-                # Append the hash of the photo to the photos list.
-                photos = []
-                if Keys.ACTIVITY_PHOTOS_KEY in activity:
-                    photos = activity[Keys.ACTIVITY_PHOTOS_KEY]
-                photos.append(photo_hash)
+            # Remove duplicates.
+            photos = list(dict.fromkeys(photos))
 
-                # Remove duplicates.
-                photos = list(dict.fromkeys(photos))
-
-                # Save the updated activity.
-                activity[Keys.ACTIVITY_PHOTOS_KEY] = photos
-                update_activities_collection(self, activity)
-                return True
+            # Save the updated activity.
+            activity[Keys.ACTIVITY_PHOTOS_KEY] = photos
+            update_activities_collection(self, activity)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2043,14 +1888,11 @@ class MongoDatabase(Database.Database):
     def delete_activity_photo(self, activity_id, photo_id):
         """Deletes the specified tag from the activity with the given ID."""
         if activity_id is None:
-            self.log_error(MongoDatabase.delete_activity_photo.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if not InputChecker.is_uuid(activity_id):
-            self.log_error(MongoDatabase.delete_activity_photo.__name__ + ": Invalid object: activity_id " + str(activity_id))
-            return False
+            raise Exception("Invalid object: activity_id " + str(activity_id))
         if photo_id is None:
-            self.log_error(MongoDatabase.delete_activity_photo.__name__ + ": Unexpected empty object: photo_id")
-            return False
+            raise Exception("Unexpected empty object: photo_id")
 
         try:
             # Find the activity.
@@ -2075,11 +1917,9 @@ class MongoDatabase(Database.Database):
     def create_workout(self, user_id, workout_obj):
         """Create method for a workout."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_workout.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if workout_obj is None:
-            self.log_error(MongoDatabase.create_workout.__name__ + ": Unexpected empty object: workout_obj")
-            return False
+            raise Exception("Unexpected empty object: workout_obj")
 
         try:
             # Find the user's workouts document.
@@ -2126,11 +1966,9 @@ class MongoDatabase(Database.Database):
     def retrieve_planned_workout(self, user_id, workout_id):
         """Retrieve method for the workout with the specified user and ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_planned_workout.__name__ + ": Unexpected empty object: user_id")
-            return None
+            raise Exception("Unexpected empty object: user_id")
         if workout_id is None:
-            self.log_error(MongoDatabase.retrieve_planned_workout.__name__ + ": Unexpected empty object: workout_id")
-            return None
+            raise Exception("Unexpected empty object: workout_id")
 
         try:
             # Find the user's workouts document.
@@ -2154,8 +1992,7 @@ class MongoDatabase(Database.Database):
     def retrieve_planned_workouts_for_user(self, user_id, start_time, end_time):
         """Retrieve method for the ical calendar ID for with specified ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_planned_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
-            return None
+            raise Exception("Unexpected empty object: user_id")
 
         workouts = []
 
@@ -2182,8 +2019,7 @@ class MongoDatabase(Database.Database):
     def retrieve_planned_workouts_calendar_id_for_user(self, user_id):
         """Retrieve method for all workouts pertaining to the user with the specified ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_planned_workouts_calendar_id_for_user.__name__ + ": Unexpected empty object: user_id")
-            return None
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Find the user's workouts document.
@@ -2200,8 +2036,7 @@ class MongoDatabase(Database.Database):
     def retrieve_planned_workouts_by_calendar_id(self, calendar_id):
         """Retrieve method for all workouts pertaining to the user with the specified ID."""
         if calendar_id is None:
-            self.log_error(MongoDatabase.retrieve_planned_workouts_by_calendar_id.__name__ + ": Unexpected empty object: calendar_id")
-            return None
+            raise Exception("Unexpected empty object: calendar_id")
 
         workouts = []
 
@@ -2226,11 +2061,9 @@ class MongoDatabase(Database.Database):
     def update_planned_workouts_for_user(self, user_id, workout_objs):
         """Update method for a list of workout objects."""
         if user_id is None:
-            self.log_error(MongoDatabase.update_planned_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if workout_objs is None:
-            self.log_error(MongoDatabase.update_planned_workouts_for_user.__name__ + ": Unexpected empty object: workout_objs")
-            return False
+            raise Exception("Unexpected empty object: workout_objs")
 
         try:
             # Find the user's workouts document.
@@ -2258,11 +2091,9 @@ class MongoDatabase(Database.Database):
     def delete_planned_workout_for_user(self, user_id, workout_id):
         """Update method for a list of workout objects."""
         if user_id is None:
-            self.log_error(MongoDatabase.update_planned_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if workout_id is None:
-            self.log_error(MongoDatabase.update_planned_workouts_for_user.__name__ + ": Unexpected empty object: workout_id")
-            return False
+            raise Exception("Unexpected empty object: workout_id")
 
         try:
             # Find the user's workouts document.
@@ -2282,8 +2113,7 @@ class MongoDatabase(Database.Database):
     def delete_planned_workouts_for_user(self, user_id):
         """Update method for a list of workout objects."""
         if user_id is None:
-            self.log_error(MongoDatabase.delete_planned_workouts_for_user.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Find the user's workouts document.
@@ -2319,22 +2149,19 @@ class MongoDatabase(Database.Database):
     def retrieve_gear_defaults(self, user_id):
         """Retrieve method for the gear with the specified ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_gear_defaults.__name__ + ": Unexpected empty object: user_id")
-            return []
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return []
 
-            # If the user's document was found.
-            if user is not None:
-
-                # Read the gear list.
-                gear_defaults_list = []
-                if Keys.GEAR_DEFAULTS_KEY in user:
-                    gear_defaults_list = user[Keys.GEAR_DEFAULTS_KEY]
-                return gear_defaults_list
+            # Read the gear list.
+            gear_defaults_list = []
+            if Keys.GEAR_DEFAULTS_KEY in user:
+                gear_defaults_list = user[Keys.GEAR_DEFAULTS_KEY]
+            return gear_defaults_list
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2343,43 +2170,38 @@ class MongoDatabase(Database.Database):
     def update_gear_defaults(self, user_id, activity_type, gear_name):
         """Retrieve method for the gear with the specified ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if activity_type is None:
-            self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: activity_type")
-            return False
+            raise Exception("Unexpected empty object: activity_type")
         if gear_name is None:
-            self.log_error(MongoDatabase.update_gear_defaults.__name__ + ": Unexpected empty object: gear_name")
-            return False
+            raise Exception("Unexpected empty object: gear_name")
 
         try:
             # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return False
 
-            # If the user's document was found.
-            if user is not None:
+            # Update the gear list.
+            gear_defaults_list = []
 
-                # Update the gear list.
-                gear_defaults_list = []
+            # Remove any old items that are no longer relevant.
+            if Keys.GEAR_DEFAULTS_KEY in user:
+                gear_defaults_list = user[Keys.GEAR_DEFAULTS_KEY]
+                gear_index = 0
+                for gear in gear_defaults_list:
+                    if Keys.ACTIVITY_TYPE_KEY in gear and gear[Keys.ACTIVITY_TYPE_KEY] == activity_type:
+                        gear_defaults_list.pop(gear_index)
+                    gear_index = gear_index + 1
 
-                # Remove any old items that are no longer relevant.
-                if Keys.GEAR_DEFAULTS_KEY in user:
-                    gear_defaults_list = user[Keys.GEAR_DEFAULTS_KEY]
-                    gear_index = 0
-                    for gear in gear_defaults_list:
-                        if Keys.ACTIVITY_TYPE_KEY in gear and gear[Keys.ACTIVITY_TYPE_KEY] == activity_type:
-                            gear_defaults_list.pop(gear_index)
-                        gear_index = gear_index + 1
+            # Add the new item.
+            gear = {}
+            gear[Keys.ACTIVITY_TYPE_KEY] = activity_type
+            gear[Keys.GEAR_NAME_KEY] = gear_name
+            gear_defaults_list.append(gear)
 
-                # Add the new item.
-                gear = {}
-                gear[Keys.ACTIVITY_TYPE_KEY] = activity_type
-                gear[Keys.GEAR_NAME_KEY] = gear_name
-                gear_defaults_list.append(gear)
-
-                user[Keys.GEAR_DEFAULTS_KEY] = gear_defaults_list
-                return update_collection(self.users_collection, user)
+            user[Keys.GEAR_DEFAULTS_KEY] = gear_defaults_list
+            return self.update_user_doc(user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2392,48 +2214,42 @@ class MongoDatabase(Database.Database):
     def create_gear(self, user_id, gear_id, gear_type, gear_name, description, add_time, retire_time, last_updated_time):
         """Create method for gear."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_gear.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if gear_id is None:
-            self.log_error(MongoDatabase.create_gear.__name__ + ": Unexpected empty object: gear_id")
-            return False
+            raise Exception("Unexpected empty object: gear_id")
         if gear_type is None:
-            self.log_error(MongoDatabase.create_gear.__name__ + ": Unexpected empty object: gear_type")
-            return False
+            raise Exception("Unexpected empty object: gear_type")
         if gear_name is None:
-            self.log_error(MongoDatabase.create_gear.__name__ + ": Unexpected empty object: gear_name")
-            return False
+            raise Exception("Unexpected empty object: gear_name")
 
         try:
             # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return False
 
-            # If the user's document was found.
-            if user is not None:
+            # Find the gear list.
+            gear_list = []
+            if Keys.GEAR_KEY in user:
+                gear_list = user[Keys.GEAR_KEY]
 
-                # Find the gear list.
-                gear_list = []
-                if Keys.GEAR_KEY in user:
-                    gear_list = user[Keys.GEAR_KEY]
+            # Make sure we don't already have an item with this ID.
+            for gear in gear_list:
+                if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
+                    return False
 
-                # Make sure we don't already have an item with this ID.
-                for gear in gear_list:
-                    if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
-                        return False
-
-                # Update the gear list.
-                new_gear = {}
-                new_gear[Keys.GEAR_ID_KEY] = str(gear_id)
-                new_gear[Keys.GEAR_TYPE_KEY] = gear_type
-                new_gear[Keys.GEAR_NAME_KEY] = gear_name
-                new_gear[Keys.GEAR_DESCRIPTION_KEY] = description
-                new_gear[Keys.GEAR_ADD_TIME_KEY] = int(add_time)
-                new_gear[Keys.GEAR_RETIRE_TIME_KEY] = int(retire_time)
-                new_gear[Keys.GEAR_LAST_UPDATED_TIME_KEY] = int(last_updated_time)
-                gear_list.append(new_gear)
-                user[Keys.GEAR_KEY] = gear_list
-                return update_collection(self.users_collection, user)
+            # Update the gear list.
+            new_gear = {}
+            new_gear[Keys.GEAR_ID_KEY] = str(gear_id)
+            new_gear[Keys.GEAR_TYPE_KEY] = gear_type
+            new_gear[Keys.GEAR_NAME_KEY] = gear_name
+            new_gear[Keys.GEAR_DESCRIPTION_KEY] = description
+            new_gear[Keys.GEAR_ADD_TIME_KEY] = int(add_time)
+            new_gear[Keys.GEAR_RETIRE_TIME_KEY] = int(retire_time)
+            new_gear[Keys.GEAR_LAST_UPDATED_TIME_KEY] = int(last_updated_time)
+            gear_list.append(new_gear)
+            user[Keys.GEAR_KEY] = gear_list
+            return self.update_user_doc(user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2442,13 +2258,11 @@ class MongoDatabase(Database.Database):
     def retrieve_gear(self, user_id):
         """Retrieve method for the gear with the specified ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_gear.__name__ + ": Unexpected empty object: user_id")
-            return None
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
 
             # If the user's document was found.
             if user is not None and Keys.GEAR_KEY in user:
@@ -2461,44 +2275,42 @@ class MongoDatabase(Database.Database):
     def update_gear(self, user_id, gear_id, gear_type, gear_name, description, add_time, retire_time, updated_time):
         """Retrieve method for the gear with the specified ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if gear_id is None:
-            self.log_error(MongoDatabase.update_gear.__name__ + ": Unexpected empty object: gear_id")
-            return False
+            raise Exception("Unexpected empty object: gear_id")
 
         try:
             # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return False
 
-            # If the user's document was found.
-            if user is not None:
+            # Is there any gear?
+            if Keys.GEAR_KEY not in user:
+                return False
 
-                # Update the gear list.
-                gear_list = []
-                if Keys.GEAR_KEY in user:
-                    gear_list = user[Keys.GEAR_KEY]
-                    gear_index = 0
-                    for gear in gear_list:
-                        if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
-                            if gear_type is not None:
-                                gear[Keys.GEAR_TYPE_KEY] = gear_type
-                            if gear_name is not None:
-                                gear[Keys.GEAR_NAME_KEY] = gear_name
-                            if description is not None:
-                                gear[Keys.GEAR_DESCRIPTION_KEY] = description
-                            if add_time is not None:
-                                gear[Keys.GEAR_ADD_TIME_KEY] = int(add_time)
-                            if retire_time is not None:
-                                gear[Keys.GEAR_RETIRE_TIME_KEY] = int(retire_time)
-                            if updated_time is not None:
-                                gear[Keys.GEAR_LAST_UPDATED_TIME_KEY] = int(updated_time)
-                            gear_list.pop(gear_index)
-                            gear_list.append(gear)
-                            user[Keys.GEAR_KEY] = gear_list
-                            return update_collection(self.users_collection, user)
-                        gear_index = gear_index + 1
+            # Update the gear list.
+            gear_list = user[Keys.GEAR_KEY]
+            gear_index = 0
+            for gear in gear_list:
+                if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
+                    if gear_type is not None:
+                        gear[Keys.GEAR_TYPE_KEY] = gear_type
+                    if gear_name is not None:
+                        gear[Keys.GEAR_NAME_KEY] = gear_name
+                    if description is not None:
+                        gear[Keys.GEAR_DESCRIPTION_KEY] = description
+                    if add_time is not None:
+                        gear[Keys.GEAR_ADD_TIME_KEY] = int(add_time)
+                    if retire_time is not None:
+                        gear[Keys.GEAR_RETIRE_TIME_KEY] = int(retire_time)
+                    if updated_time is not None:
+                        gear[Keys.GEAR_LAST_UPDATED_TIME_KEY] = int(updated_time)
+                    gear_list.pop(gear_index)
+                    gear_list.append(gear)
+                    user[Keys.GEAR_KEY] = gear_list
+                    return self.update_user_doc(user)
+                gear_index = gear_index + 1
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2507,31 +2319,29 @@ class MongoDatabase(Database.Database):
     def delete_gear(self, user_id, gear_id):
         """Delete method for the gear with the specified ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if gear_id is None:
-            self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: gear_id")
-            return False
+            raise Exception("Unexpected empty object: gear_id")
 
         try:
             # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return False
 
-            # If the user's document was found.
-            if user is not None:
+            # Is there any gear?
+            if Keys.GEAR_KEY not in user:
+                return False
 
-                # Update the gear list.
-                gear_list = []
-                if Keys.GEAR_KEY in user:
-                    gear_list = user[Keys.GEAR_KEY]
-                    gear_index = 0
-                    for gear in gear_list:
-                        if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
-                            gear_list.pop(gear_index)
-                            user[Keys.GEAR_KEY] = gear_list
-                            return update_collection(self.users_collection, user)
-                        gear_index = gear_index + 1
+            # Update the gear list.
+            gear_list = user[Keys.GEAR_KEY]
+            gear_index = 0
+            for gear in gear_list:
+                if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
+                    gear_list.pop(gear_index)
+                    user[Keys.GEAR_KEY] = gear_list
+                    return self.update_user_doc(user)
+                gear_index = gear_index + 1
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2540,73 +2350,69 @@ class MongoDatabase(Database.Database):
     def delete_all_gear(self, user_id):
         """Delete method for the gear with the specified ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.delete_gear.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return False
 
-            # If the user's document was found.
-            if user is not None:
-
-                # Update the gear list.
-                if Keys.GEAR_KEY in user:
-                    user[Keys.GEAR_KEY] = []
-                    update_collection(self.users_collection, user)
-                return True
+            # Update the gear list.
+            if Keys.GEAR_KEY in user:
+                user[Keys.GEAR_KEY] = []
+                self.update_user_doc(user)
+            return True
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return False
         
+    #
+    # Management methods for gear service records
+    #
+
     def create_service_record(self, user_id, gear_id, service_record_id, record_date, record_description):
         """Create method for gear service records."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if gear_id is None:
-            self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: gear_id")
-            return False
+            raise Exception("Unexpected empty object: gear_id")
         if service_record_id is None:
-            self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: service_record_id")
-            return False
+            raise Exception("Unexpected empty object: service_record_id")
         if record_date is None:
-            self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: record_date")
-            return False
+            raise Exception("Unexpected empty object: record_date")
         if record_description is None:
-            self.log_error(MongoDatabase.create_service_record.__name__ + ": Unexpected empty object: record_description")
-            return False
+            raise Exception("Unexpected empty object: record_description")
 
         try:
             # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return False
 
-            # If the user's document was found.
-            if user is not None:
+            # Is there any gear?
+            if Keys.GEAR_KEY not in user:
+                return False
 
-                # Find the gear list.
-                gear_list = []
-                if Keys.GEAR_KEY in user:
-                    gear_list = user[Keys.GEAR_KEY]
+            # Find the gear list.
+            gear_list = user[Keys.GEAR_KEY]
 
-                    # Find the gear.
-                    for gear in gear_list:
-                        if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
-                            service_rec = {}
-                            service_rec[Keys.SERVICE_RECORD_ID_KEY] = str(service_record_id)
-                            service_rec[Keys.SERVICE_RECORD_DATE_KEY] = int(record_date)
-                            service_rec[Keys.SERVICE_RECORD_DESCRIPTION_KEY] = record_description
+            # Find the gear.
+            for gear in gear_list:
+                if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
+                    service_rec = {}
+                    service_rec[Keys.SERVICE_RECORD_ID_KEY] = str(service_record_id)
+                    service_rec[Keys.SERVICE_RECORD_DATE_KEY] = int(record_date)
+                    service_rec[Keys.SERVICE_RECORD_DESCRIPTION_KEY] = record_description
 
-                            service_history = []
-                            if Keys.GEAR_SERVICE_HISTORY_KEY in gear:
-                                service_history = gear[Keys.GEAR_SERVICE_HISTORY_KEY]
-                            service_history.append(service_rec)
-                            gear[Keys.GEAR_SERVICE_HISTORY_KEY] = service_history
+                    service_history = []
+                    if Keys.GEAR_SERVICE_HISTORY_KEY in gear:
+                        service_history = gear[Keys.GEAR_SERVICE_HISTORY_KEY]
+                    service_history.append(service_rec)
+                    gear[Keys.GEAR_SERVICE_HISTORY_KEY] = service_history
 
-                            return update_collection(self.users_collection, user)
+                    return self.update_user_doc(user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2615,49 +2421,40 @@ class MongoDatabase(Database.Database):
     def delete_service_record(self, user_id, gear_id, service_record_id):
         """Delete method for the service record with the specified user and gear ID."""
         if user_id is None:
-            self.log_error(MongoDatabase.delete_service_record.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if gear_id is None:
-            self.log_error(MongoDatabase.delete_service_record.__name__ + ": Unexpected empty object: gear_id")
-            return False
+            raise Exception("Unexpected empty object: gear_id")
         if service_record_id is None:
-            self.log_error(MongoDatabase.delete_service_record.__name__ + ": Unexpected empty object: service_record_id")
-            return False
+            raise Exception("Unexpected empty object: service_record_id")
 
         try:
             # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return []
 
-            # If the user's document was found.
-            if user is not None:
+            # Is there any gear?
+            if Keys.GEAR_KEY not in user:
+                return []
 
-                # Find the gear list.
-                gear_list = []
-                if Keys.GEAR_KEY in user:
-                    gear_list = user[Keys.GEAR_KEY]
+            # Find the gear list.
+            gear_list = user[Keys.GEAR_KEY]
 
-                    # Find the gear.
-                    for gear in gear_list:
-                        if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id):
-                            if Keys.GEAR_SERVICE_HISTORY_KEY in gear:
-
-                                service_history = gear[Keys.GEAR_SERVICE_HISTORY_KEY]
-                                record_index = 0
-
-                                for service_record in service_history:
-                                    if Keys.SERVICE_RECORD_ID_KEY in service_record and service_record[Keys.SERVICE_RECORD_ID_KEY] == service_record_id:
-
-                                        service_history.pop(record_index)
-                                        gear[Keys.GEAR_SERVICE_HISTORY_KEY] = service_history
-
-                                        return update_collection(self.users_collection, user)
-
-                                    record_index = record_index + 1
+            # Find the gear.
+            for gear in gear_list:
+                if Keys.GEAR_ID_KEY in gear and gear[Keys.GEAR_ID_KEY] == str(gear_id) and Keys.GEAR_SERVICE_HISTORY_KEY in gear:
+                    service_history = gear[Keys.GEAR_SERVICE_HISTORY_KEY]
+                    record_index = 0
+                    for service_record in service_history:
+                        if Keys.SERVICE_RECORD_ID_KEY in service_record and service_record[Keys.SERVICE_RECORD_ID_KEY] == service_record_id:
+                            service_history.pop(record_index)
+                            gear[Keys.GEAR_SERVICE_HISTORY_KEY] = service_history
+                            return self.update_user_doc(user)
+                        record_index = record_index + 1
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
-        return False
+        return []
 
     #
     # Pace plan management methods
@@ -2666,65 +2463,54 @@ class MongoDatabase(Database.Database):
     def create_pace_plan(self, user_id, plan_id, plan_name, plan_description, target_distance, target_distance_units, target_time, target_splits, target_splits_units, last_updated_time):
         """Create method for a pace plan associated with the specified user."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if plan_id is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: plan_id")
-            return False
+            raise Exception("Unexpected empty object: plan_id")
         if plan_name is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: plan_name")
-            return False
+            raise Exception("Unexpected empty object: plan_name")
         if target_distance is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_distance")
-            return False
+            raise Exception("Unexpected empty object: target_distance")
         if target_distance_units is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_distance_units")
-            return False
+            raise Exception("Unexpected empty object: target_distance_units")
         if target_time is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_time")
-            return False
+            raise Exception("Unexpected empty object: target_time")
         if target_splits is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_splits")
-            return False
+            raise Exception("Unexpected empty object: target_splits")
         if target_splits_units is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: target_splits_units")
-            return False
+            raise Exception("Unexpected empty object: target_splits_units")
         if last_updated_time is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: last_updated_time")
-            return False
+            raise Exception("Unexpected empty object: last_updated_time")
 
         try:
             # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return False
 
-            # If the user's document was found.
-            if user is not None:
+            # Find the pace plans list.
+            pace_plan_list = []
+            if Keys.PACE_PLANS_KEY in user:
+                pace_plan_list = user[Keys.PACE_PLANS_KEY]
 
-                # Fidn the pace plans list.
-                pace_plan_list = []
-                if Keys.PACE_PLANS_KEY in user:
-                    pace_plan_list = user[Keys.PACE_PLANS_KEY]
+            # Make sure we don't already have a pace plan with this ID.
+            for pace_plan in pace_plan_list:
+                if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(plan_id):
+                    return False
 
-                # Make sure we don't already have a pace plan with this ID.
-                for pace_plan in pace_plan_list:
-                    if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(plan_id):
-                        return False
-
-                # Update the pace plans list.
-                new_pace_plan = {}
-                new_pace_plan[Keys.PACE_PLAN_ID_KEY] = str(plan_id)
-                new_pace_plan[Keys.PACE_PLAN_NAME_KEY] = plan_name
-                new_pace_plan[Keys.PACE_PLAN_DESCRIPTION_KEY] = plan_description
-                new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance)
-                new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY] = target_distance_units
-                new_pace_plan[Keys.PACE_PLAN_TARGET_TIME_KEY] = target_time
-                new_pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_KEY] = int(float(target_splits))
-                new_pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY] = target_splits_units
-                new_pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
-                pace_plan_list.append(new_pace_plan)
-                user[Keys.PACE_PLANS_KEY] = pace_plan_list
-                return update_collection(self.users_collection, user)
+            # Update the pace plans list.
+            new_pace_plan = {}
+            new_pace_plan[Keys.PACE_PLAN_ID_KEY] = str(plan_id)
+            new_pace_plan[Keys.PACE_PLAN_NAME_KEY] = plan_name
+            new_pace_plan[Keys.PACE_PLAN_DESCRIPTION_KEY] = plan_description
+            new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance)
+            new_pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY] = target_distance_units
+            new_pace_plan[Keys.PACE_PLAN_TARGET_TIME_KEY] = target_time
+            new_pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_KEY] = int(float(target_splits))
+            new_pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY] = target_splits_units
+            new_pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
+            pace_plan_list.append(new_pace_plan)
+            user[Keys.PACE_PLANS_KEY] = pace_plan_list
+            return self.update_user_doc(user)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2733,22 +2519,20 @@ class MongoDatabase(Database.Database):
     def retrieve_pace_plans(self, user_id):
         """Retrieve method for pace plans associated with the specified user."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_pace_plan.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return []
 
-            # If the user's document was found.
-            if user is not None:
+            # Are there any pace plans?
+            if Keys.PACE_PLANS_KEY not in user:
+                return []
 
-                # Read the pace plans list.
-                pace_plan_list = []
-                if Keys.PACE_PLANS_KEY in user:
-                    pace_plan_list = user[Keys.PACE_PLANS_KEY]
-                return pace_plan_list
+            # Read the pace plans list.
+            return user[Keys.PACE_PLANS_KEY]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2757,64 +2541,54 @@ class MongoDatabase(Database.Database):
     def update_pace_plan(self, user_id, plan_id, plan_name, plan_description, target_distance, target_distance_units, target_time, target_splits, target_splits_units, last_updated_time):
         """Update method for a pace plan associated with the specified user."""
         if user_id is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if plan_id is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: plan_id")
-            return False
+            raise Exception("Unexpected empty object: plan_id")
         if plan_name is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: plan_name")
-            return False
+            raise Exception("Unexpected empty object: plan_name")
         if plan_description is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: plan_description")
-            return False
+            raise Exception("Unexpected empty object: plan_description")
         if target_distance is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_distance")
-            return False
+            raise Exception("Unexpected empty object: target_distance")
         if target_distance_units is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_distance_units")
-            return False
+            raise Exception("Unexpected empty object: target_distance_units")
         if target_time is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_time")
-            return False
+            raise Exception("Unexpected empty object: target_time")
         if target_splits is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_splits")
-            return False
+            raise Exception("Unexpected empty object: target_splits")
         if target_splits_units is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: target_splits_units")
-            return False
+            raise Exception("Unexpected empty object: target_splits_units")
         if last_updated_time is None:
-            self.log_error(MongoDatabase.create_pace_plan.__name__ + ": Unexpected empty object: last_updated_time")
-            return False
+            raise Exception("Unexpected empty object: last_updated_time")
 
         try:
             # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return False
 
-            # If the user's document was found.
-            if user is not None:
+            # Are there any pace plans?
+            if Keys.PACE_PLANS_KEY not in user:
+                return False
 
-                # Update the pace plans list.
-                pace_plan_list = []
-                if Keys.PACE_PLANS_KEY in user:
-                    pace_plan_list = user[Keys.PACE_PLANS_KEY]
-                    pace_plan_index = 0
-                    for pace_plan in pace_plan_list:
-                        if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(plan_id):
-                            pace_plan[Keys.PACE_PLAN_NAME_KEY] = plan_name
-                            pace_plan[Keys.PACE_PLAN_DESCRIPTION_KEY] = plan_description
-                            pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance)
-                            pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY] = target_distance_units
-                            pace_plan[Keys.PACE_PLAN_TARGET_TIME_KEY] = target_time
-                            pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_KEY] = int(float(target_splits))
-                            pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY] = target_splits_units
-                            pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
-                            pace_plan_list.pop(pace_plan_index)
-                            pace_plan_list.append(pace_plan)
-                            user[Keys.PACE_PLANS_KEY] = pace_plan_list
-                            return update_collection(self.users_collection, user)
-                        pace_plan_index = pace_plan_index + 1
+            # Update the pace plans list.
+            pace_plan_list = user[Keys.PACE_PLANS_KEY]
+            pace_plan_index = 0
+            for pace_plan in pace_plan_list:
+                if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(plan_id):
+                    pace_plan[Keys.PACE_PLAN_NAME_KEY] = plan_name
+                    pace_plan[Keys.PACE_PLAN_DESCRIPTION_KEY] = plan_description
+                    pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_KEY] = float(target_distance)
+                    pace_plan[Keys.PACE_PLAN_TARGET_DISTANCE_UNITS_KEY] = target_distance_units
+                    pace_plan[Keys.PACE_PLAN_TARGET_TIME_KEY] = target_time
+                    pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_KEY] = int(float(target_splits))
+                    pace_plan[Keys.PACE_PLAN_TARGET_SPLITS_UNITS_KEY] = target_splits_units
+                    pace_plan[Keys.PACE_PLAN_LAST_UPDATED_KEY] = int(last_updated_time)
+                    pace_plan_list.pop(pace_plan_index)
+                    pace_plan_list.append(pace_plan)
+                    user[Keys.PACE_PLANS_KEY] = pace_plan_list
+                    return self.update_user_doc(user)
+                pace_plan_index = pace_plan_index + 1
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2823,31 +2597,29 @@ class MongoDatabase(Database.Database):
     def delete_pace_plan(self, user_id, pace_plan_id):
         """Delete method for a pace plan associated with the specified user."""
         if user_id is None:
-            self.log_error(MongoDatabase.delete_pace_plan.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if pace_plan_id is None:
-            self.log_error(MongoDatabase.update_pace_plan.__name__ + ": Unexpected empty object: pace_plan_id")
-            return False
+            raise Exception("Unexpected empty object: pace_plan_id")
 
         try:
             # Find the user's document.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
+            user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return False
 
-            # If the user's document was found.
-            if user is not None:
+            # Are there any pace plans?
+            if Keys.PACE_PLANS_KEY not in user:
+                return False
 
-                # Update the pace plans list.
-                pace_plan_list = []
-                if Keys.PACE_PLANS_KEY in user:
-                    pace_plan_list = user[Keys.PACE_PLANS_KEY]
-                    pace_plan_index = 0
-                    for pace_plan in pace_plan_list:
-                        if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(pace_plan_id):
-                            pace_plan_list.pop(pace_plan_index)
-                            user[Keys.PACE_PLANS_KEY] = pace_plan_list
-                            return update_collection(self.users_collection, user)
-                        pace_plan_index = pace_plan_index + 1
+            # Update the pace plans list.
+            pace_plan_list = user[Keys.PACE_PLANS_KEY]
+            pace_plan_index = 0
+            for pace_plan in pace_plan_list:
+                if Keys.PACE_PLAN_ID_KEY in pace_plan and pace_plan[Keys.PACE_PLAN_ID_KEY] == str(pace_plan_id):
+                    pace_plan_list.pop(pace_plan_index)
+                    user[Keys.PACE_PLANS_KEY] = pace_plan_list
+                    return self.update_user_doc(user)
+                pace_plan_index = pace_plan_index + 1
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -2860,20 +2632,15 @@ class MongoDatabase(Database.Database):
     def create_deferred_task(self, user_id, task_type, celery_task_id, internal_task_id, details, status):
         """Create method for tracking a deferred task, such as a file import or activity analysis."""
         if user_id is None:
-            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if task_type is None:
-            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: task_type")
-            return False
+            raise Exception("Unexpected empty object: task_type")
         if celery_task_id is None:
-            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: celery_task_id")
-            return False
+            raise Exception("Unexpected empty object: celery_task_id")
         if internal_task_id is None:
-            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: internal_task_id")
-            return False
+            raise Exception("Unexpected empty object: internal_task_id")
         if status is None:
-            self.log_error(MongoDatabase.create_deferred_task.__name__ + ": Unexpected empty object: status")
-            return False
+            raise Exception("Unexpected empty object: status")
 
         try:
             # Make sure we're dealing with a string.
@@ -2918,8 +2685,7 @@ class MongoDatabase(Database.Database):
     def retrieve_deferred_tasks(self, user_id):
         """Retrieve method for returning all the deferred tasks for a given user."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_deferred_tasks.__name__ + ": Unexpected empty object: user_id")
-            return None
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Make sure we're dealing with a string.
@@ -2939,14 +2705,11 @@ class MongoDatabase(Database.Database):
     def update_deferred_task(self, user_id, internal_task_id, activity_id, status):
         """Updated method for deferred task status."""
         if user_id is None:
-            self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: user_id")
-            return False
+            raise Exception("Unexpected empty object: user_id")
         if internal_task_id is None:
-            self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: internal_task_id")
-            return False
+            raise Exception("Unexpected empty object: internal_task_id")
         if status is None:
-            self.log_error(MongoDatabase.update_deferred_task.__name__ + ": Unexpected empty object: status")
-            return False
+            raise Exception("Unexpected empty object: status")
 
         try:
             # Make sure we're dealing with strings.
@@ -3007,11 +2770,9 @@ class MongoDatabase(Database.Database):
     def create_uploaded_file(self, activity_id, file_data):
         """Create method for an uploaded activity file."""
         if activity_id is None:
-            self.log_error(MongoDatabase.create_uploaded_file.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
         if file_data is None:
-            self.log_error(MongoDatabase.create_uploaded_file.__name__ + ": Unexpected empty object: file_data")
-            return False
+            raise Exception("Unexpected empty object: file_data")
 
         try:
             post = { Keys.ACTIVITY_ID_KEY: activity_id, Keys.UPLOADED_FILE_DATA_KEY: bytes(file_data) }
@@ -3024,8 +2785,7 @@ class MongoDatabase(Database.Database):
     def delete_uploaded_file(self, activity_id):
         """Delete method for an uploaded file associated with an activity."""
         if activity_id is None:
-            self.log_error(MongoDatabase.delete_uploaded_file.__name__ + ": Unexpected empty object: activity_id")
-            return False
+            raise Exception("Unexpected empty object: activity_id")
 
         try:
             deleted_result = self.uploads_collection.delete_one({ Keys.ACTIVITY_ID_KEY: str(activity_id) })
@@ -3040,42 +2800,10 @@ class MongoDatabase(Database.Database):
     # API key management methods
     #
 
-    def create_api_key(self, user_id, key, rate):
-        """Create method for an API key."""
-        if user_id is None:
-            self.log_error(MongoDatabase.create_api_key.__name__ + ": Unexpected empty object: user_id")
-            return False
-        if key is None:
-            self.log_error(MongoDatabase.create_api_key.__name__ + ": Unexpected empty object: key")
-            return False
-        if rate is None:
-            self.log_error(MongoDatabase.create_api_key.__name__ + ": Unexpected empty object: rate")
-            return False
-
-        try:
-            # Find the user.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
-
-            # If the user was found.
-            if user is not None:
-                key_list = []
-                if Keys.API_KEYS in user:
-                    key_list = user[Keys.API_KEYS]
-                key_dict = { Keys.API_KEY: str(key), Keys.API_KEY_RATE: int(rate) }
-                key_list.append(key_dict)
-                user[Keys.API_KEYS] = key_list
-                return update_collection(self.users_collection, user)
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return False
-
     def retrieve_api_keys(self, user_id):
         """Retrieve method for API keys."""
         if user_id is None:
-            self.log_error(MongoDatabase.retrieve_api_keys.__name__ + ": Unexpected empty object: user_id")
-            return None
+            raise Exception("Unexpected empty object: user_id")
 
         try:
             # Find the user.
@@ -3091,50 +2819,13 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return []
 
-    def delete_api_key(self, user_id, key):
-        """Delete method for an API key."""
-        if user_id is None:
-            self.log_error(MongoDatabase.delete_api_key.__name__ + ": Unexpected empty object: user_id")
-            return False
-        if key is None:
-            self.log_error(MongoDatabase.delete_api_key.__name__ + ": Unexpected empty object: key")
-            return False
-
-        try:
-            # Find the user.
-            user_id_obj = ObjectId(str(user_id))
-            user = self.users_collection.find_one({ Keys.DATABASE_ID_KEY: user_id_obj })
-
-            # If the user was found.
-            if user is not None and Keys.API_KEYS in user:
-
-                # Make sure we're dealing with a string.
-                key_str = str(key)
-
-                # Search the key list and remove the specified key.
-                found = False
-                key_list = user[Keys.API_KEYS]
-                for item in key_list:
-                    if item[Keys.API_KEY] == key_str:
-                        key_list.remove(item)
-                        found = True
-                        break
-                if found:
-                    user[Keys.API_KEYS] = key_list
-                    return update_collection(self.users_collection, user)
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return False
-
     #
     # Admin methods
     #
 
     def enumerate_all_users(self, callback_func):
         if callback_func is None:
-            self.log_error(MongoDatabase.enumerate_all_users.__name__ + ": Unexpected empty object: callback_func")
-            return False
+            raise Exception("Unexpected empty object: callback_func")
 
         try:
             # Get an iterator to the activities.
@@ -3156,8 +2847,7 @@ class MongoDatabase(Database.Database):
     
     def enumerate_all_activities(self, callback_func):
         if callback_func is None:
-            self.log_error(MongoDatabase.enumerate_all_activities.__name__ + ": Unexpected empty object: callback_func")
-            return False
+            raise Exception("Unexpected empty object: callback_func")
 
         try:
             # Things we don't need.
@@ -3187,14 +2877,11 @@ class MongoDatabase(Database.Database):
     def create_session_token(self, token, user, expiry):
         """Create method for a session token."""
         if token is None:
-            self.log_error(MongoDatabase.create_session_token.__name__ + ": Unexpected empty object: token")
-            return False
+            raise Exception("Unexpected empty object: token")
         if user is None:
-            self.log_error(MongoDatabase.create_session_token.__name__ + ": Unexpected empty object: user")
-            return False
+            raise Exception("Unexpected empty object: user")
         if expiry is None:
-            self.log_error(MongoDatabase.create_session_token.__name__ + ": Unexpected empty object: expiry")
-            return False
+            raise Exception("Unexpected empty object: expiry")
 
         try:
             post = { Keys.SESSION_TOKEN_KEY: token, Keys.SESSION_USER_KEY: user, Keys.SESSION_EXPIRY_KEY: expiry }
@@ -3207,8 +2894,7 @@ class MongoDatabase(Database.Database):
     def retrieve_session_data(self, token):
         """Retrieve method for session data."""
         if token is None:
-            self.log_error(MongoDatabase.retrieve_session_data.__name__ + ": Unexpected empty object: token")
-            return (None, None)
+            raise Exception("Unexpected empty object: token")
 
         try:
             session_data = self.sessions_collection.find_one({ Keys.SESSION_TOKEN_KEY: token })
@@ -3222,8 +2908,7 @@ class MongoDatabase(Database.Database):
     def delete_session_token(self, token):
         """Delete method for a session token."""
         if token is None:
-            self.log_error(MongoDatabase.delete_session_token.__name__ + ": Unexpected empty object: token")
-            return False
+            raise Exception("Unexpected empty object: token")
 
         try:
             deleted_result = self.sessions_collection.delete_one({ Keys.SESSION_TOKEN_KEY: token })

@@ -1496,6 +1496,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if record_description is None:
             raise Exception("Bad parameter.")
+
         service_record_id = uuid.uuid4()
         return self.database.create_service_record(user_id, gear_id, service_record_id, record_date, record_description)
 
@@ -1538,7 +1539,22 @@ class DataMgr(Importer.ActivityWriter):
 
         key = str(uuid.uuid4()) # Create the API key
         rate = 100 # Only allow 100 requests per day
-        return self.database.create_api_key(user_id, key, rate), key
+
+        try:
+            # Find the user.
+            user = self.database.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return False
+
+            key_list = []
+            if Keys.API_KEYS in user:
+                key_list = user[Keys.API_KEYS]
+            key_dict = { Keys.API_KEY: str(key), Keys.API_KEY_RATE: int(rate) }
+            key_list.append(key_dict)
+            user[Keys.API_KEYS] = key_list
+            return self.database.update_user_doc(user)
+        except:
+            raise Exception("Could not generate an API key.")
 
     def delete_api_key(self, user_id, api_key):
         if self.database is None:
@@ -1547,7 +1563,29 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if api_key is None:
             raise Exception("Bad parameter.")
-        return self.database.delete_api_key(user_id, api_key)
+
+        # Find the user.
+        user = self.database.retrieve_user_doc_from_id(user_id)
+        if user is None:
+            return False
+        if Keys.API_KEYS not in user:
+            return False
+
+        # Make sure we're dealing with a string.
+        key_str = str(api_key)
+
+        # Search the key list and remove the specified key.
+        found = False
+        key_list = user[Keys.API_KEYS]
+        for item in key_list:
+            if item[Keys.API_KEY] == key_str:
+                key_list.remove(item)
+                found = True
+                break
+        if found:
+            user[Keys.API_KEYS] = key_list
+            return self.database.update_user_doc(user)
+        return False
 
     def check_api_rate(self, api_key, max_rate):
         """Verifies that the API key is not being overused."""
