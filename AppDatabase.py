@@ -1514,7 +1514,6 @@ class MongoDatabase(Database.Database):
             # The metadata is a list.
             if create_list is True:
                 value_list = []
-
                 if key in activity:
                     value_list = activity[key]
 
@@ -1557,6 +1556,8 @@ class MongoDatabase(Database.Database):
                 return False
 
             value_list = []
+            if key in activity:
+                value_list = activity[key]
             for value in values:
                 time_value_pair = { str(value[0]): float(value[1]) }
                 value_list.append(time_value_pair)

@@ -352,12 +352,25 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity ID.")
         return self.database.create_activity_accelerometer_reading(device_str, activity_id, accels)
 
+    def create_activity_battery_level_reading(self, activity_id, battery_level):
+        """Adds the latest battery level reading to the database."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity_id is None:
+            raise Exception("No activity ID.")
+        if battery_level is None:
+            raise Exception("No battery level.")
+        values = [time.time(), battery_level]
+        return self.database.create_or_update_activity_metadata_list(activity_id, Keys.APP_BATTERY_LEVEL_KEY, [values])
+
     def finish_activity(self, activity_id, end_time_ms):
         """Inherited from ActivityWriter. Called for post-processing."""
         if self.database is None:
             raise Exception("No database.")
         if activity_id is None:
             raise Exception("No activity ID.")
+        if end_time_ms is None:
+            raise Exception("No timestamp.")
         return self.database.create_or_update_activity_metadata(activity_id, int(end_time_ms), Keys.ACTIVITY_END_TIME_KEY, int(end_time_ms / 1000), False)
 
     def create_deferred_task(self, user_id, task_type, celery_task_id, internal_task_id, details):

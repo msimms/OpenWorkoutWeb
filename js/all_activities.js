@@ -225,6 +225,10 @@ function common_process_sensordata(root_url, activity_id, sensordata, is_foot_ba
         {
             draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "Threat Count", get_graph_color(key), deletable);
         }
+        else if (key == "Battery Level")
+        {
+            draw_graph(root_url, activity_id, start_time_ms, end_time_ms, new_data, key, "Battery Level", get_graph_color(key), deletable);
+        }
         else if (key == "Events")
         {
             let events = sensordata[key];

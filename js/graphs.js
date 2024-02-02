@@ -76,6 +76,8 @@ function get_graph_color(key)
         return "LightSteelBlue";
     if (key == "Threat Count")
         return "FireBrick";
+    if (key == "Battery Level")
+        return "FireBrick";
     if (key == "Intervals")
         return "Silver";
     return "Gray";

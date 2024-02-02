@@ -226,6 +226,10 @@ class Api(object):
                 if activity_type_updated:
                     self.data_mgr.create_default_tags_on_activity(self.user_id, activity_type, activity_id)
 
+        # Battery level?
+        if battery_level is not None:
+            self.data_mgr.create_activity_battery_level_reading(activity_id, battery_level)
+
         # Analysis is now obsolete, so delete it.
         self.data_mgr.delete_activity_summary(activity_id)
 
