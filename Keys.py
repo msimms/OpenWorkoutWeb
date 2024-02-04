@@ -32,8 +32,6 @@ USER_ID_KEY = "user_id" # Unique identifier for a user
 PASSWORD_KEY = "password" # User's password
 PASSWORD1_KEY = "password1" # User's password when creating an account
 PASSWORD2_KEY = "password2" # User's confirmation password when creating an account
-DEVICE_KEY = "device" # Unique identifier for the device which is recording the activity
-DEVICES_KEY = "devices" # List of device identifiers
 REALNAME_KEY = "realname" # User's real name
 HASH_KEY = "hash" # Password hash
 FRIEND_REQUESTS_KEY = "friend_requests"
@@ -46,6 +44,10 @@ TIMESTAMP_KEY = "timestamp" # Some app messages have timestamps on them
 API_KEYS = "api keys" # List of API keys belonging to the user
 API_KEY = "key" # API key being provided
 API_KEY_RATE = "rate" # The maximum number of requests allowed per day for the provided key
+
+# Keys associated with device management.
+DEVICE_KEY = "device" # Unique identifier for the device which is recording the activity
+DEVICES_KEY = "devices" # List of device identifiers
 
 # Keys associated with session management.
 SESSION_TOKEN_KEY = "cookie"
