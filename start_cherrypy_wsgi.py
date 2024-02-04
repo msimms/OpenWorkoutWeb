@@ -878,7 +878,7 @@ def index(env, start_response):
     """Renders the index page."""
     return login(env, start_response)
 
-def create_server(config, port_num):
+def create_server(port_num):
     """Returns a cherrypy server object."""
 
     # Instantiate a new server object.
@@ -888,22 +888,6 @@ def create_server(config, port_num):
     server.socket_host = "0.0.0.0"
     server.socket_port = port_num
     server.thread_pool = 30
-    
-    # HTTPS stuff.
-    if config.is_https_enabled():
-
-        cert_file = config.get_certificate_file()
-        privkey_file = config.get_private_key_file()
-
-        if len(cert_file) > 0 and len(privkey_file) > 0:
-            print("Certificate File: " + cert_file)
-            print("Private Key File: " + privkey_file)
-
-            server.ssl_module = 'pyopenssl'
-            server.ssl_certificate = cert_file
-            server.ssl_private_key = privkey_file
-        else:
-            print("No certs provided.")
 
     # Subscribe this server.
     server.subscribe()
@@ -1006,7 +990,7 @@ def main():
         if num_servers <= 0:
             num_servers = 1
         for i in range(0, num_servers):
-            servers.append(create_server(config, port_num + i))
+            servers.append(create_server(port_num + i))
 
         cherrypy.config.update(cherrypy_config)
         cherrypy.engine.start()
