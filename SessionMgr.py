@@ -88,6 +88,8 @@ class CustomSessionMgr(SessionMgr):
 
     def get_logged_in_username(self):
         """Returns the username associated with the current session."""
+        if self.current_session_cookie is None:
+            return None
         return self.get_logged_in_username_from_cookie(self.current_session_cookie)
 
     def get_logged_in_username_from_cookie(self, session_cookie):
