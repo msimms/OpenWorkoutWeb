@@ -93,15 +93,8 @@ class WorkoutScheduler(object):
             # If this workout is not currently scheduled.
             if workout.scheduled_time is None:
 
-                # Walk the weeks list and find a list of possible days on which to do the workout.
-                possible_days = self.list_schedulable_days(scheduled_week)
-
-                # Pick one of the days from the candidate list.
-                # If all the days are booked, then pick a random day.
-                if len(possible_days) > 0:
-                    day_index = random.choice(possible_days)
-                else:
-                    day_index = random.randint(0,6)
+                # Pick a random day.
+                day_index = random.randint(0,6)
                 workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
                 scheduled_week[day_index].append(workout)
 
