@@ -1182,8 +1182,7 @@ class MongoDatabase(Database.Database):
                         activity[metadata_type] = old_value_list
 
                 # Write out the changes.
-                update_activities_collection(self, activity)
-                return True
+                return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1288,8 +1287,7 @@ class MongoDatabase(Database.Database):
 
                 # Save the changes.
                 activity[Keys.ACTIVITY_LOCATIONS_KEY] = location_list
-                update_activities_collection(self, activity)
-                return True
+                return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1349,8 +1347,7 @@ class MongoDatabase(Database.Database):
 
             # Save the changes.
             activity[sensor_type] = value_list
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1387,8 +1384,7 @@ class MongoDatabase(Database.Database):
 
             # Save the changes.
             activity[sensor_type] = value_list
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1411,8 +1407,7 @@ class MongoDatabase(Database.Database):
 
             # Save the changes.
             activity[sensor_type] = []
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1444,8 +1439,7 @@ class MongoDatabase(Database.Database):
 
             # Save the changes.
             activity[Keys.APP_EVENTS_KEY] = events_list
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1476,8 +1470,7 @@ class MongoDatabase(Database.Database):
 
             # Save the changes.
             activity[Keys.APP_EVENTS_KEY] = events_list
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1521,14 +1514,12 @@ class MongoDatabase(Database.Database):
                 value_list.append(time_value_pair)
                 value_list.sort(key=retrieve_time_from_time_value_pair)
                 activity[key] = value_list
-                update_activities_collection(self, activity)
-                return True
+                return update_activities_collection(self, activity)
 
             # The metadata is a scalar, just make sure to only update it if it has actually changed or was previously non-existent.
             elif key not in activity or activity[key] != value:
                 activity[key] = value
-                update_activities_collection(self, activity)
-                return True
+                return update_activities_collection(self, activity)
 
             # It's ok if the value isn't being updated.
             elif activity[key] == value:
@@ -1564,8 +1555,7 @@ class MongoDatabase(Database.Database):
 
             value_list.sort(key=retrieve_time_from_time_value_pair)
             activity[key] = value_list
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1591,8 +1581,7 @@ class MongoDatabase(Database.Database):
                 laps = activity[Keys.ACTIVITY_LAPS_KEY]
             laps.append(start_time_ms)
             activity[Keys.ACTIVITY_LAPS_KEY] = laps
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1614,8 +1603,7 @@ class MongoDatabase(Database.Database):
                 return False
 
             activity[Keys.APP_SETS_KEY] = sets
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1660,8 +1648,7 @@ class MongoDatabase(Database.Database):
                         accel_list.append(value)
 
                 activity[Keys.APP_ACCELEROMETER_KEY] = accel_list
-                update_activities_collection(self, activity)
-                return True
+                return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1687,8 +1674,7 @@ class MongoDatabase(Database.Database):
                 return False
 
             activity[Keys.ACTIVITY_SUMMARY_KEY] = summary_data
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1709,8 +1695,7 @@ class MongoDatabase(Database.Database):
 
             if Keys.ACTIVITY_SUMMARY_KEY in activity:
                 activity[Keys.ACTIVITY_SUMMARY_KEY] = {}
-                update_activities_collection(self, activity)
-                return True
+                return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1740,8 +1725,7 @@ class MongoDatabase(Database.Database):
                 data = activity[Keys.ACTIVITY_TAGS_KEY]
             data.append(tag)
             activity[Keys.ACTIVITY_TAGS_KEY] = data
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1756,8 +1740,7 @@ class MongoDatabase(Database.Database):
 
         try:
             activity[Keys.ACTIVITY_TAGS_KEY] = tags
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1779,8 +1762,7 @@ class MongoDatabase(Database.Database):
                 return False
 
             activity[Keys.ACTIVITY_TAGS_KEY] = tags
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1805,8 +1787,7 @@ class MongoDatabase(Database.Database):
                 data = activity[Keys.ACTIVITY_TAGS_KEY]
                 data.remove(tag)
                 activity[Keys.ACTIVITY_TAGS_KEY] = data
-                update_activities_collection(self, activity)
-                return True
+                return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1840,8 +1821,7 @@ class MongoDatabase(Database.Database):
             entry_str = json.dumps(entry_dict)
             data.append(entry_str)
             activity[Keys.ACTIVITY_COMMENTS_KEY] = data
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1879,8 +1859,7 @@ class MongoDatabase(Database.Database):
 
             # Save the updated activity.
             activity[Keys.ACTIVITY_PHOTOS_KEY] = photos
-            update_activities_collection(self, activity)
-            return True
+            return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -1904,8 +1883,7 @@ class MongoDatabase(Database.Database):
                 photos = activity[Keys.ACTIVITY_PHOTOS_KEY]
                 photos.remove(photo_id)
                 activity[Keys.ACTIVITY_PHOTOS_KEY] = photos
-                update_activities_collection(self, activity)
-                return True
+                return update_activities_collection(self, activity)
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
