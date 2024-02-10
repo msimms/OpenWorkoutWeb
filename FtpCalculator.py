@@ -54,18 +54,22 @@ class FtpCalculator(object):
 
     def power_training_zones(self, ftp):
         """Returns the power training zones as a function of FTP."""
+        # Dr. Andy Coggan 7 zone model
         # Zone 1 - Active Recovery - Less than 55% of FTP
         # Zone 2 - Endurance - 55% to 74% of FTP
         # Zone 3 - Tempo - 75% to 89% of FTP
         # Zone 4 - Lactate Threshold - 90% to 104% of FTP
         # Zone 5 - VO2 Max - 105% to 120% of FTP
         # Zone 6 - Anaerobic Capacity - More than 120% of FTP
+        # Zone 6 is really anything over 120%,
+        # Zone 7 is neuromuscular (i.e., shorts sprints at no specific power)
         zones = []
-        zones.append(ftp * 0.54)
-        zones.append(ftp * 0.74)
-        zones.append(ftp * 0.89)
-        zones.append(ftp * 1.04)
+        zones.append(ftp * 0.549)
+        zones.append(ftp * 0.75)
+        zones.append(ftp * 0.90)
+        zones.append(ftp * 1.05)
         zones.append(ftp * 1.20)
+        zones.append(ftp * 1.50)
         return zones
 
     def compute_power_zone_distribution(self, ftp, powers):

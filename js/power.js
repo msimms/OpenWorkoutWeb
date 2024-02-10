@@ -26,19 +26,22 @@
 /// Returns the power training zones as a function of FTP.
 function power_training_zones(ftp)
 {
+    // Dr. Andy Coggan 7 zone model
     // Zone 1 - Active Recovery - Less than 55% of FTP
     // Zone 2 - Endurance - 55% to 74% of FTP
     // Zone 3 - Tempo - 75% to 89% of FTP
     // Zone 4 - Lactate Threshold - 90% to 104% of FTP
     // Zone 5 - VO2 Max - 105% to 120% of FTP
     // Zone 6 - Anaerobic Capacity - More than 120% of FTP
-    let zones = [];
-
-    zones.push(ftp * 0.54);
-    zones.push(ftp * 0.74);
-    zones.push(ftp * 0.89);
-    zones.push(ftp * 1.04);
+    // Zone 6 is really anything over 120%,
+    // Zone 7 is neuromuscular (i.e., shorts sprints at no specific power)
+    zones = [];
+    zones.push(ftp * 0.549);
+    zones.push(ftp * 0.75);
+    zones.push(ftp * 0.90);
+    zones.push(ftp * 1.05);
     zones.push(ftp * 1.20);
+    zones.push(ftp * 1.50);
     return zones;
 }
 
