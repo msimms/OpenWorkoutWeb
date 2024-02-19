@@ -533,7 +533,7 @@
     {
         let now = Date.now();
         let age_in_years = (now - birthday) / (365.25 * 24 * 60 * 60 * 1000);
-        let api_url = "${root_url}/api/1.0/list_hr_zones?estimated%20max%20heart%20rate=" + estimated_max_hr + ";max%20heart%20rate=" + max_hr + ";resting%20heart%20rate=" + resting_hr + ";age%20in%20years=" + age_in_years;
+        let api_url = "${root_url}/api/1.0/list_hr_zones?estimated%20max%20heart%20rate=" + estimated_max_hr + "&max%20heart%20rate=" + max_hr + "&resting%20heart%20rate=" + resting_hr + "&age%20in%20years=" + age_in_years;
 
         send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
