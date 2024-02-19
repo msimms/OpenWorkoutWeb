@@ -2700,7 +2700,7 @@ class Api(object):
             max_hr = float(max_hr)
         if Keys.USER_RESTING_HEART_RATE_KEY in values:
             resting_hr = values[Keys.USER_RESTING_HEART_RATE_KEY]
-            if not InputChecker.is_float(max_hr):
+            if not InputChecker.is_float(resting_hr):
                 raise ApiException.ApiMalformedRequestException("Invalid parameter.")
             resting_hr = float(resting_hr)
         if Keys.USER_AGE_IN_YEARS in values:
