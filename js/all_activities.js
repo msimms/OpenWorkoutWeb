@@ -162,7 +162,7 @@ function common_create_tags(root_url, tags)
 }
 
 /// @function common_process_sensordata
-function common_process_sensordata(root_url, activity_id, sensordata, is_foot_based_activity, start_time_ms, max_hr, ftp, deletable)
+function common_process_sensordata(root_url, activity_id, sensordata, is_foot_based_activity, start_time_ms, resting_hr, max_hr, ftp, deletable)
 {
     for (key in sensordata)
     {
@@ -190,7 +190,7 @@ function common_process_sensordata(root_url, activity_id, sensordata, is_foot_ba
         }
         else if (key == "Heart Rate")
         {
-            let hr_zones = compute_heart_rate_zone_distribution(max_hr, new_data);
+            let hr_zones = compute_heart_rate_zone_distribution(resting_hr, max_hr, new_data);
 
             if (hr_zones.length > 0 && Math.max.apply(Math, hr_zones) > 0)
             {

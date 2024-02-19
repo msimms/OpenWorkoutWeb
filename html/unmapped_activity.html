@@ -63,7 +63,7 @@ ${nav}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script>
 
-    let activity_id = "${activityId}";
+    let activity_id = "${activity_id}";
     let root_url = "${root_url}";
     let start_time_ms = 0;
 
@@ -71,13 +71,13 @@ ${nav}
     var process_sensordata = function(sensordata)
     {
         let deletable = "${visibility}".length == 0;
-        common_process_sensordata(root_url, activity_id, sensordata, false, start_time_ms, ${max_hr}, 0.0, deletable);
+        common_process_sensordata(root_url, activity_id, sensordata, false, start_time_ms, ${resting_hr}, ${max_hr}, 0.0, deletable);
     }
 
     /// @function retrieve_sensor_data
     function retrieve_sensor_data()
     {
-        let api_url = "${root_url}/api/1.0/activity_sensordata?activity_id=${activityId}&sensors=accelerometer,Heart%20Rate,Temperature,Events";
+        let api_url = "${root_url}/api/1.0/activity_sensordata?activity_id=" + activity_id + "&sensors=accelerometer,Heart%20Rate,Temperature,Events";
 
         send_get_request_async(api_url, function (response_code, response_text) {
             if (response_code == 200)
@@ -117,7 +117,7 @@ ${nav}
 
             for (let i = 0; i < photo_ids.length; ++i)
             {
-                let photo_url = root_url + "/photos/${userId}/" + photo_ids[i];
+                let photo_url = root_url + "/photos/${user_id}/" + photo_ids[i];
                 let img_td = document.createElement("td");
                 let img = document.createElement("img");
                 let delete_td = document.createElement("td");

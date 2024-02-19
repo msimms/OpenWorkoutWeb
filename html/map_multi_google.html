@@ -182,7 +182,7 @@ ${route}
     /// @function check_for_updates
     var check_for_updates = function()
     {
-        $.ajax({ type: 'POST', url: "${root_url}/updatefollowing/${userId}/${routeLen}", success: append_to_track, dataType: "application/json" });
+        $.ajax({ type: 'POST', url: "${root_url}/updatefollowing/${user_id}/${routeLen}", success: append_to_track, dataType: "application/json" });
     };
 
     setInterval(check_for_updates, 30000);

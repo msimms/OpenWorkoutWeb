@@ -29,7 +29,7 @@
             let api_url = "${root_url}/api/1.0/delete_activity";
             let dict = [];
 
-            dict.push({["activity_id"] : "${activityId}"});
+            dict.push({["activity_id"] : "${activity_id}"});
 
             send_post_request_async(api_url, dict, function(status, response) {
                 if (status == 200)

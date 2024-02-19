@@ -470,33 +470,21 @@ class UserMgr(object):
         if keys is None or len(keys) == 0:
             raise Exception("Bad parameter.")
 
-        # What's in the database?
-        results = self.database.retrieve_user_settings(user_id, keys)
+        results = []
 
-        # Are we looking for the estimated max heart rate, because that is computed rather than stored?
-        if Keys.ESTIMATED_MAX_HEART_RATE_KEY in keys:
-            max_hr = self.estimate_max_heart_rate(user_id)
-            if max_hr is not None:
-                results.append({ Keys.ESTIMATED_MAX_HEART_RATE_KEY: max_hr })
-
-        # Are we looking for the estimated FTP value, because that is computed rather than stored?
-        if Keys.ESTIMATED_CYCLING_FTP_KEY in keys:
-            ftp = self.estimate_ftp(user_id)
-            if ftp is not None:
-                results.append({ Keys.BEST_CYCLING_20_MINUTE_POWER_LIST_KEY: ftp })
-
-        # Add defaults for anything no in the database.
         for key in keys:
-            found = False
-            for result in results:
-                if key in result.keys():
-                    found = True
-                    break
-            if not found:
-                result = self.default_user_setting(key)
-                results.append({key:result})
-
+            result = self.retrieve_user_setting(user_id, key)
+            results.append({key:result})
         return results
+
+    def retrieve_best_max_hr(self, user_id):
+        """Returns either the user's specified maximum heart rate, or the calculated (estimated) max hr."""
+        """The user specified heart rate takes priority over the estimation."""
+        user_max_hr = self.retrieve_user_setting(user_id, Keys.USER_MAXIMUM_HEART_RATE_KEY)
+        if user_max_hr is not None:
+            return user_max_hr
+        estimated_max_hr = self.retrieve_user_setting(user_id, Keys.ESTIMATED_MAX_HEART_RATE_KEY)
+        return estimated_max_hr
 
     def retrieve_api_keys(self, user_id):
         """Retrieve method for the user's API keys."""
