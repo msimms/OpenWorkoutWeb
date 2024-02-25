@@ -669,10 +669,17 @@ class MongoDatabase(Database.Database):
         try:
             # Find the user.
             user = self.retrieve_user_doc_from_id(user_id)
+            if user is None:
+                return None
+
+            # We want to search for keys in a case insensitive manner.
+            user_lower = { k.lower():v for k,v in user.items() }
+            key_lower = key.lower()
+            valid_settings = set(k.lower() for k in Keys.USER_SETTINGS)
 
             # Find the setting.
-            if user is not None and key in user and key in Keys.USER_SETTINGS:
-                return user[key]
+            if user_lower is not None and key_lower in user_lower and key_lower in valid_settings:
+                return user_lower[key_lower]
         except:
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
@@ -691,11 +698,16 @@ class MongoDatabase(Database.Database):
             if user is None:
                 return []
 
+            # We want to search for keys in a case insensitive manner.
+            user_lower = { k.lower():v for k,v in user.items() }
+            keys_lower = set(k.lower() for k in keys)
+            valid_settings = set(k.lower() for k in Keys.USER_SETTINGS)
+
             # Find the settings.
             results = []
-            for key in keys:
-                if key in user and key in Keys.USER_SETTINGS:
-                    results.append({key: user[key]})
+            for key in keys_lower:
+                if key in user_lower and key in valid_settings:
+                    results.append({key: user_lower[key]})
             return results
         except:
             self.log_error(traceback.format_exc())
