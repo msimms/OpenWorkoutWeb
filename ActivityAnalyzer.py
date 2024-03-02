@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 # Copyright 2018 Michael J Simms
 """Handles computationally expensive analysis tasks. Implements a celery worker."""
 

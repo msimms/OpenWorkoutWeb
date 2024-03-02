@@ -7,7 +7,7 @@ setup(
     version='0.57.0',
     description='',
     url='https://github.com/msimms/OpenWorkoutWeb',
-    author='Mike Simms',
+    author='Michael J Simms',
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
     install_requires=requirements,
 )

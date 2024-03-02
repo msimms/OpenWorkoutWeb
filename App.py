@@ -2,7 +2,7 @@
 # 
 # # MIT License
 # 
-# Copyright (c) 2017-2020 Mike Simms
+# Copyright (c) 2017-2020 Michael J Simms
 # 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -34,11 +34,6 @@ import traceback
 import cProfile
 import pstats
 
-try:
-    from StringIO import StringIO ## for Python 2
-except ImportError:
-    from io import StringIO ## for Python 3
-
 import Keys
 import Api
 import Config
@@ -48,7 +43,7 @@ import InputChecker
 import Perf
 import Units
 
-from dateutil.tz import tzlocal
+from io import StringIO ## for Python 3
 from mako.template import Template
 
 # Locate and load the Distance calculations module.
