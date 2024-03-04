@@ -360,7 +360,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("No activity ID.")
         if battery_level is None:
             raise Exception("No battery level.")
-        values = [time.time(), battery_level]
+        values = [time.time() * 1000, battery_level]
         return self.database.create_or_update_activity_metadata_list(activity_id, Keys.APP_BATTERY_LEVEL_KEY, [values])
 
     def finish_activity(self, activity_id, end_time_ms):
