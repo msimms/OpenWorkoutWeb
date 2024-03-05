@@ -51,10 +51,16 @@ class Api(object):
         self.user_id = user_id
         self.root_url = root_url
 
+    def log_api_call(self, request, values):
+        """Writes an info message to the log file."""
+        log_str = request + json.dumps(values)
+        logger = logging.getLogger()
+        logger.debug(log_str)
+
     def log_error(self, log_str):
         """Writes an error message to the log file."""
         logger = logging.getLogger()
-        logger.debug(log_str)
+        logger.error(log_str)
 
     def activity_belongs_to_logged_in_user(self, activity):
         """Returns True if the specified activity belongs to the logged in user."""
@@ -2995,12 +3001,15 @@ class Api(object):
                     self.user_id, _, _ = self.user_mgr.retrieve_user(username)
 
         if verb == 'GET':
+            self.log_api_call(request, values)
             return self.handle_api_1_0_get_request(request, values)
         elif verb == 'DELETE':
+            self.log_api_call(request, values)
             return self.handle_api_1_0_delete_request(request, values)
         elif verb == 'POST':
             # Flatten the array of dictionaries into a single dictionary.
             if isinstance(values, list):
                 values = {k: v for d in values for k, v in d.items()}
+            self.log_api_call(request, values)
             return self.handle_api_1_0_post_request(request, values)
         return False, ""

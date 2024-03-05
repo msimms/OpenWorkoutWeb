@@ -64,13 +64,13 @@ class Config(object):
 
     def get_log_level(self):
         level_str = self.get_str('General', 'Log Level')
-        if level_str.lower == "error":
+        if level_str.lower() == "error":
             return logging.ERROR
-        if level_str.lower == "warning":
+        if level_str.lower() == "warning":
             return logging.WARNING
-        if level_str.lower == "info":
+        if level_str.lower() == "info":
             return logging.INFO
-        if level_str.lower == "debug":
+        if level_str.lower() == "debug":
             return logging.DEBUG
         return logging.DEBUG
 
