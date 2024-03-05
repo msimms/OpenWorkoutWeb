@@ -40,10 +40,8 @@ import Keys
 
 def log_error(log_str):
     """Writes an error message to the log file."""
-    print(log_str)
     logger = logging.getLogger()
-    if logger is not None:
-        logger.debug(log_str)
+    logger.error(log_str)
 
 @celery_worker.task(ignore_result=True)
 def import_activity(import_str, internal_task_id):

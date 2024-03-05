@@ -25,7 +25,7 @@
 """The example configuration file documents the purpose of each item."""
 
 import configparser
-
+import logging
 
 class Config(object):
     """Class that abstracts the configuration file."""
@@ -61,6 +61,18 @@ class Config(object):
         if len(value) > 0:
             return int(value)
         return 0
+
+    def get_log_level(self):
+        level_str = self.get_str('General', 'Log Level')
+        if level_str.lower == "error":
+            return logging.ERROR
+        if level_str.lower == "warning":
+            return logging.WARNING
+        if level_str.lower == "info":
+            return logging.INFO
+        if level_str.lower == "debug":
+            return logging.DEBUG
+        return logging.DEBUG
 
     def is_debug_enabled(self):
         return self.get_bool('General', 'Debug')

@@ -42,12 +42,15 @@ class WorkoutPlanGenerator(object):
         self.user_mgr = UserMgr.UserMgr(config=config, session_mgr=None)
         super(WorkoutPlanGenerator, self).__init__()
 
+    def log_info(self, log_str):
+        """Writes an error message to the log file."""
+        logger = logging.getLogger()
+        logger.info(log_str)
+
     def log_error(self, log_str):
         """Writes an error message to the log file."""
-        print(log_str)
         logger = logging.getLogger()
-        if logger is not None:
-            logger.debug(log_str)
+        logger.error(log_str)
     
     @staticmethod
     def calculate_goal_distances(inputs):
@@ -451,7 +454,7 @@ class WorkoutPlanGenerator(object):
             self.log_error("User information not provided.")
             return []
         if model is None:
-            self.log_error("Model not provided. Will use non-ML algorithm instead.")
+            self.log_info("Model not provided. Will use non-ML algorithm instead.")
 
         workouts = []
 
@@ -490,7 +493,7 @@ class WorkoutPlanGenerator(object):
 
         # Sanity check.
         if model is None:
-            self.log_error("Model not provided. Will use non-ML algorithm instead.")
+            self.log_info("Model not provided. Will use non-ML algorithm instead.")
 
         workouts = []
 
