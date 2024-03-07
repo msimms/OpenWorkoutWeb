@@ -480,13 +480,15 @@ class Api(object):
             raise ApiException.ApiAuthenticationException("Not activity owner.")
 
         if Keys.ACTIVITY_NAME_KEY in values:
-            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, values[Keys.ACTIVITY_NAME_KEY], False):
+            activity_name = values[Keys.ACTIVITY_NAME_KEY].strip()
+            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_NAME_KEY, activity_name, False):
                 raise Exception("Failed to update activity name.")
         if Keys.ACTIVITY_TYPE_KEY in values:
             if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_TYPE_KEY, values[Keys.ACTIVITY_TYPE_KEY], False):
                 raise Exception("Failed to update activity type.")
         if Keys.ACTIVITY_DESCRIPTION_KEY in values:
-            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_DESCRIPTION_KEY, values[Keys.ACTIVITY_DESCRIPTION_KEY], False):
+            activity_description = values[Keys.ACTIVITY_DESCRIPTION_KEY].strip()
+            if not self.data_mgr.create_activity_metadata(activity_id, 0, Keys.ACTIVITY_DESCRIPTION_KEY, activity_description, False):
                 raise Exception("Failed to update activity description.")
 
         return True, ""
@@ -1545,10 +1547,10 @@ class Api(object):
         gear_type = values[Keys.GEAR_TYPE_KEY]
         if not InputChecker.is_valid_decoded_str(gear_type):
             raise ApiException.ApiMalformedRequestException("Invalid gear type.")
-        gear_name = values[Keys.GEAR_NAME_KEY]
+        gear_name = values[Keys.GEAR_NAME_KEY].strip()
         if not InputChecker.is_valid_decoded_str(gear_name):
             raise ApiException.ApiMalformedRequestException("Invalid gear name.")
-        gear_description = values[Keys.GEAR_DESCRIPTION_KEY]
+        gear_description = values[Keys.GEAR_DESCRIPTION_KEY].strip()
         if not InputChecker.is_valid_decoded_str(gear_description):
             raise ApiException.ApiMalformedRequestException("Invalid gear description.")
         add_time = values[Keys.GEAR_ADD_TIME_KEY]
@@ -2219,7 +2221,7 @@ class Api(object):
         if Keys.RACE_IMPORTANCE_KEY not in values:
             raise ApiException.ApiMalformedRequestException("Race importance not specified.")
 
-        race_name = values[Keys.RACE_NAME_KEY]
+        race_name = values[Keys.RACE_NAME_KEY].strip()
         race_date = values[Keys.RACE_DATE_KEY]
         race_distance = values[Keys.RACE_DISTANCE_KEY]
         race_importance = values[Keys.RACE_IMPORTANCE_KEY]
@@ -2290,10 +2292,10 @@ class Api(object):
             raise ApiException.ApiMalformedRequestException("Pace plan target splits units not specified.")
 
         # Decode and validate the required parameters.
-        plan_name = values[Keys.PACE_PLAN_NAME_KEY]
+        plan_name = values[Keys.PACE_PLAN_NAME_KEY].strip()
         if not InputChecker.is_valid_decoded_str(plan_name):
             raise ApiException.ApiMalformedRequestException("Invalid pace plan name.")
-        plan_description = values[Keys.PACE_PLAN_DESCRIPTION_KEY]
+        plan_description = values[Keys.PACE_PLAN_DESCRIPTION_KEY].strip()
         if not InputChecker.is_valid_decoded_str(plan_description):
             raise ApiException.ApiMalformedRequestException("Invalid pace plan description.")
         target_distance = values[Keys.PACE_PLAN_TARGET_DISTANCE_KEY]
