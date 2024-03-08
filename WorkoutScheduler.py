@@ -67,19 +67,19 @@ class WorkoutScheduler(object):
         stdev_smoothed_scores = statistics.stddev(smoothed_scores, avg_smoothed_scores)
         return stdev_smoothed_scores
 
-    def list_schedulable_days(self, week):
+    def list_schedulable_days(self, unscheduleable_days, week):
         """Utility function for listing the days of the week for which no workout is currently schedule."""
         possible_days = []
 
         # Walk the weeks list and find a list of possible days on which to do the workout.
         day_index = 0
         for day in week:
-            if len(day) == 0:
+            if len(day) == 0 and day_index not in unscheduleable_days:
                 possible_days.append(day_index)
             day_index = day_index + 1
         return possible_days
 
-    def deterministic_scheduler(self, workouts, week, start_time):
+    def deterministic_scheduler(self, workouts, week, unscheduleable_days, start_time):
         """Simple deterministic algorithm for scheduling workouts."""
 
         scheduled_workouts = copy.deepcopy(workouts)
@@ -91,7 +91,7 @@ class WorkoutScheduler(object):
             if workout.scheduled_time is None:
 
                 # Walk the weeks list and find a list of possible days on which to do the workout.
-                possible_days = self.list_schedulable_days(scheduled_week)
+                possible_days = self.list_schedulable_days(unscheduleable_days, scheduled_week)
 
                 # Pick one of the days from the candidate list.
                 # If all the days are booked, then pick a random day.
@@ -131,11 +131,15 @@ class WorkoutScheduler(object):
         # This will serve as our calendar for next week.
         week = [[] for _ in range(7)]
 
+        # Do not schedule anything on these days.
+        unscheduleable_days = []
+
         # Are there any events this week? If so, add them to the schedule first.
         for workout in workouts:
             if workout.type == Keys.WORKOUT_TYPE_EVENT:
                 day_index = (workout.scheduled_time.timetuple().tm_wday + 1) % 7
                 week[day_index].append(workout)
+                unscheduleable_days.append(day_index)
 
         # When does the user want to do their long run?
         # Long runs should be the next priority after events.
@@ -159,11 +163,12 @@ class WorkoutScheduler(object):
                         if len(week[day_index]) == 0:
                             workout.scheduled_time = start_time + datetime.timedelta(days=day_index)
                             week[day_index].append(workout)
+                            unscheduleable_days.append(day_index)
                         break
 
         # Assign workouts to days. Keep track of the one with the best score.
         # Start with a simple deterministic algorithm and then try to beat it.
-        best_schedule, new_week = self.deterministic_scheduler(workouts, week, start_time)
+        best_schedule, new_week = self.deterministic_scheduler(workouts, week, unscheduleable_days, start_time)
         best_schedule_score = self.score_schedule(new_week)
 
         # Try and best the first arrangement, by randomly re-arranging the schedule
