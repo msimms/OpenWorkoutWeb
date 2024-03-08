@@ -433,7 +433,7 @@
     {
         let race_table = document.getElementById("Races");
         let sorted_race_list = race_list.sort(function(a,b) {
-            return a["Race Date"] > b["Race Date"];
+            return a["race date"] > b["race date"];
         });
 
         if (sorted_race_list.length > 0)
@@ -443,7 +443,7 @@
 
             for (let race of sorted_race_list)
             {
-                if (race["Race Date"] >= one_day_ago)
+                if (race["race date"] >= one_day_ago)
                 {
                     append_to_race_table(race_table, race);
                 }
