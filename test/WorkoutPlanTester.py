@@ -31,6 +31,7 @@ import inspect
 import logging
 import os
 import sys
+import uuid
 
 # Locate and load modules from the main source directory.
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -42,6 +43,37 @@ import WorkoutPlanGenerator
 import WorkoutScheduler
 
 ERROR_LOG = 'error.log'
+
+def generate_temp_file_name(extension):
+    """Utility function for generating a temporary file name."""
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+    tempfile_dir = os.path.join(root_dir, 'tempfile')
+    if not os.path.exists(tempfile_dir):
+        os.makedirs(tempfile_dir)
+    tempfile_dir = os.path.normpath(tempfile_dir)
+    tempfile_name = os.path.join(tempfile_dir, str(uuid.uuid4()))
+    tempfile_name = tempfile_name + extension
+    return tempfile_name
+
+def export_workouts(workouts, format):
+    """Writes the workouts to disk in the specified format."""
+    for workout in workouts:
+        if format == 'text':
+            print(workout.export_to_text(Keys.UNITS_METRIC_KEY))
+        elif format == 'json':
+            print(workout.export_to_json_str(Keys.UNITS_METRIC_KEY))
+        elif format == 'ics':
+            tempfile_name = generate_temp_file_name(".ics")
+            ics_str = workout.export_to_ics(Keys.UNITS_METRIC_KEY)
+            with open(tempfile_name, 'wt') as local_file:
+                local_file.write(ics_str)
+            print("Exported a workout to " + tempfile_name + ".")
+        elif format == 'zwo':
+            tempfile_name = generate_temp_file_name(".zwo")
+            zwo_str = workout.export_to_zwo(tempfile_name)
+            with open(tempfile_name, 'wt') as local_file:
+                local_file.write(zwo_str)
+            print("Exported a workout to " + tempfile_name + ".")
 
 def run_unit_test_from_file(config, input_file_name):
     """Entry point for the unit tests that come from running input sets from a csv file"""
@@ -56,6 +88,7 @@ def run_unit_test_from_file(config, input_file_name):
 
         today = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0).date()
         start_time = today + datetime.timedelta(days=7-today.weekday())
+        goal_date = today + datetime.timedelta(days=48)
         column_names = {}
 
         # Generate a plan for each test input.
@@ -76,8 +109,15 @@ def run_unit_test_from_file(config, input_file_name):
                     except:
                         sanitized_inputs.append(item)
 
+                # Print the inputs for debugging purposes.
                 inputs = dict(zip(column_names, sanitized_inputs))
-                print(inputs)
+
+                # Add the goal date.
+                inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY] = goal_date
+
+                # Validate the inputs.
+                if not generator.validate_inputs(inputs):
+                    raise Exception("Invalid inputs to the workout generator.")
 
                 # Run the inputs through the workout generator.
                 print("-" * 40)
@@ -91,7 +131,7 @@ def run_unit_test_from_file(config, input_file_name):
                 print("-" * 40)
                 print("Exporting workouts...")
                 print("-" * 40)
-                WorkoutPlanGenerator.export_workouts(workouts, 'text')
+                export_workouts(workouts, 'text')
                 print("-" * 40)
                 print("Scheduling workouts...")
                 print("-" * 40)
@@ -120,7 +160,8 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
     swim_intensity_by_week = [0.0] * 4 # Total training intensity for each of the recent four weeks
     running_paces = {}
 
-    today = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0).date()
+    now = datetime.datetime.utcnow()
+    today = now.replace(hour=0, minute=0, second=0, microsecond=0).date()
     start_time = today + datetime.timedelta(days=7-today.weekday())
 
     input_values = [0.0] * len(input_names)
@@ -132,7 +173,7 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
     inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
     inputs[Keys.PLAN_INPUT_GOAL_KEY] = goal
     inputs[Keys.GOAL_TYPE_KEY] = goal_type
-    inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY] = datetime.utcnow() + (weeks_until_goal * 7 * 86400)
+    inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY] = now + datetime.timedelta(days=weeks_until_goal * 7 * 86400)
 
     # Adds the goal distances to the inputs.
     inputs = WorkoutPlanGenerator.WorkoutPlanGenerator.calculate_goal_distances(inputs)
@@ -174,14 +215,23 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
             inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = 0.0
 
         print("Input:")
+        print("------")
         print(inputs)
         workouts = generator.generate_plan_from_inputs(None, inputs)
 
+        # Validate the inputs.
+        if not generator.validate_inputs(inputs):
+            raise Exception("Invalid inputs to the workout generator.")
+
         # Run the workouts through the scheduler.
         print("Output:")
+        print("-------")
         schedule = scheduler.schedule_workouts(workouts, start_time)
-        for workout in schedule:
-            print(workout.export_to_text(Keys.UNITS_METRIC_KEY))
+        if len(schedule) > 0:
+            for workout in schedule:
+                print(workout.export_to_json_str(Keys.UNITS_METRIC_KEY))
+        else:
+            raise Exception("No schedule generated.")
 
         # Compute next week's inputs.
         longest_runs_by_week[3] = longest_runs_by_week[2]
@@ -244,11 +294,11 @@ def main():
 
     # Do the tests.
     try:
-        print("Tests using the CSV file.")
+        print("Tests using the CSV file:")
         print("-" * 40)
         column_names = run_unit_test_from_file(config, args.file)
         print("-" * 40)
-        print("Tests using algorithmic inputs.")
+        print("Tests using algorithmic inputs:")
         print("-" * 40)
         run_algorithmic_unit_tests(config, column_names, 40.0, 5, 5, Keys.GOAL_FITNESS_KEY, 3, Keys.GOAL_TYPE_COMPLETION)
         run_algorithmic_unit_tests(config, column_names, 40.0, 5, 5, Keys.GOAL_5K_RUN_KEY, 3, Keys.GOAL_TYPE_COMPLETION)

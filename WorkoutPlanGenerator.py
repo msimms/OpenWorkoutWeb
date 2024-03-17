@@ -58,7 +58,7 @@ class WorkoutPlanGenerator(object):
         goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
         goal_lower = goal.lower()
 
-        # Initialize
+        # Initialize.
         inputs[Keys.GOAL_SWIM_DISTANCE_KEY] = 0.0
         inputs[Keys.GOAL_BIKE_DISTANCE_KEY] = 0.0
         inputs[Keys.GOAL_RUN_DISTANCE_KEY] = 0.0
@@ -132,7 +132,7 @@ class WorkoutPlanGenerator(object):
         return 0.0
 
     def calculate_inputs(self, user_id):
-        """Looks through the user's data and calculates the algorithm's inputs."""
+        """Looks through the user's data and calculates the inputs for the workout generation algorithm."""
 
         now = time.time()
         weeks_until_goal = None # Number of weeks until the goal, or None if not applicable
@@ -324,8 +324,61 @@ class WorkoutPlanGenerator(object):
         # Adds the goal distances to the inputs.
         inputs = WorkoutPlanGenerator.calculate_goal_distances(inputs)
 
-        print("Inputs: " + str(inputs))
         return inputs
+
+    def validate_inputs(self, inputs):
+        """Sanity checks the input dictionary."""
+        
+        # List of all the required keys.
+        keys = []
+        keys.append(Keys.SHORT_INTERVAL_RUN_PACE)
+        keys.append(Keys.SPEED_RUN_PACE)
+        keys.append(Keys.TEMPO_RUN_PACE)
+        keys.append(Keys.FUNCTIONAL_THRESHOLD_PACE)
+        keys.append(Keys.LONG_RUN_PACE)
+        keys.append(Keys.EASY_RUN_PACE)
+        keys.append(Keys.PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY)
+        keys.append(Keys.PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY)
+        keys.append(Keys.PLAN_INPUT_LONGEST_RUN_WEEK_3_KEY)
+        keys.append(Keys.PLAN_INPUT_LONGEST_RUN_WEEK_4_KEY)
+        keys.append(Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_1_KEY)
+        keys.append(Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_2_KEY)
+        keys.append(Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_3_KEY)
+        keys.append(Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_4_KEY)
+        keys.append(Keys.PLAN_INPUT_LONGEST_SWIM_WEEK_1_KEY)
+        keys.append(Keys.PLAN_INPUT_LONGEST_SWIM_WEEK_2_KEY)
+        keys.append(Keys.PLAN_INPUT_LONGEST_SWIM_WEEK_3_KEY)
+        keys.append(Keys.PLAN_INPUT_LONGEST_SWIM_WEEK_4_KEY)
+        keys.append(Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_1_KEY)
+        keys.append(Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_2_KEY)
+        keys.append(Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_3_KEY)
+        keys.append(Keys.PLAN_INPUT_TOTAL_INTENSITY_WEEK_4_KEY)
+        keys.append(Keys.PLAN_INPUT_AGE_YEARS_KEY)
+        keys.append(Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY)
+        keys.append(Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY)
+        keys.append(Keys.PLAN_INPUT_GOAL_KEY)
+        keys.append(Keys.PLAN_INPUT_GOAL_DATE_KEY)
+        keys.append(Keys.GOAL_TYPE_KEY)
+        keys.append(Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY)
+        keys.append(Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS)
+        keys.append(Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS)
+        keys.append(Keys.PLAN_INPUT_AVG_CYCLING_DURATION_IN_FOUR_WEEKS)
+        keys.append(Keys.PLAN_INPUT_AVG_SWIMMING_DISTANCE_IN_FOUR_WEEKS)
+        keys.append(Keys.PLAN_INPUT_NUM_RUNS_LAST_FOUR_WEEKS)
+        keys.append(Keys.PLAN_INPUT_NUM_RIDES_LAST_FOUR_WEEKS)
+        keys.append(Keys.PLAN_INPUT_NUM_SWIMS_LAST_FOUR_WEEKS)
+        keys.append(Keys.THRESHOLD_POWER)
+        keys.append(Keys.USER_HAS_SWIMMING_POOL_ACCESS)
+        keys.append(Keys.USER_HAS_OPEN_WATER_SWIM_ACCESS)
+        keys.append(Keys.USER_HAS_BICYCLE)
+
+        # Make sure all the required keys are in the dictionary.
+        for key in keys:
+            if key not in inputs:
+                print(key)
+                self.log_error(key + " not in the input dictionary.")
+                return False
+        return True
 
     def generate_workouts(self, user_id, inputs):
         """Generates workouts for the specified user to perform in the next week."""
@@ -433,7 +486,7 @@ class WorkoutPlanGenerator(object):
 
         # Remove any existing workouts that cover the time period in question.
         if not self.data_mgr.delete_workouts_for_date_range(user_id, start_time, end_time):
-            print("Failed to remove old workouts from the database.")
+            self.log_error("Failed to remove old workouts from the database.")
 
         # Schedule the new workouts.
         scheduler = WorkoutScheduler.WorkoutScheduler(user_id)
@@ -444,7 +497,7 @@ class WorkoutPlanGenerator(object):
         for scheduled_workout in scheduled_workouts:
             result = self.data_mgr.create_workout(user_id, scheduled_workout)
             if not result:
-                print("Failed to save a workout to the database.")
+                self.log_error("Failed to save a workout to the database.")
 
     def generate_plan_for_user(self, model):
         """Entry point for workout plan generation. If a model is not provided then a simpler algorithm is used instead."""
@@ -534,7 +587,6 @@ def generate_model(training_file_name):
             # Transform the input JSON into something we can use in the model.
             dataframe = pandas.DataFrame(input_data)
             train_labels = dataframe.pop('plan_number')
-            print("Number of training samples: " + str(len(dataframe)))
             dataset = tf.data.Dataset.from_tensor_slices((dict(dataframe), train_labels))
             dataset = dataset.shuffle(buffer_size=len(dataframe))
 
@@ -553,37 +605,6 @@ def generate_model(training_file_name):
             print("Incomplete training data.")
 
     return model
-
-def generate_temp_file_name(extension):
-    """Utility function for generating a temporary file name."""
-    root_dir = os.path.dirname(os.path.abspath(__file__))
-    tempfile_dir = os.path.join(root_dir, 'tempfile')
-    if not os.path.exists(tempfile_dir):
-        os.makedirs(tempfile_dir)
-    tempfile_dir = os.path.normpath(tempfile_dir)
-    tempfile_name = os.path.join(tempfile_dir, str(uuid.uuid4()))
-    tempfile_name = tempfile_name + extension
-    return tempfile_name
-
-def export_workouts(workouts, format):
-    """Writes the workouts to disk in the specified format."""
-    for workout in workouts:
-        if format == 'text':
-            print(workout.export_to_text(Keys.UNITS_METRIC_KEY))
-        elif format == 'json':
-            print(workout.export_to_json_str(Keys.UNITS_METRIC_KEY))
-        elif format == 'ics':
-            tempfile_name = generate_temp_file_name(".ics")
-            ics_str = workout.export_to_ics(Keys.UNITS_METRIC_KEY)
-            with open(tempfile_name, 'wt') as local_file:
-                local_file.write(ics_str)
-            print("Exported a workout to " + tempfile_name + ".")
-        elif format == 'zwo':
-            tempfile_name = generate_temp_file_name(".zwo")
-            zwo_str = workout.export_to_zwo(tempfile_name)
-            with open(tempfile_name, 'wt') as local_file:
-                local_file.write(zwo_str)
-            print("Exported a workout to " + tempfile_name + ".")
 
 @celery_worker.task(ignore_result=True)
 def generate_workout_plan_for_user(user_str, internal_task_id):

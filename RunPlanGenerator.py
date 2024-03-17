@@ -315,6 +315,9 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             long_run_distance = 5000
         interval_distance_meters = RunPlanGenerator.round_distance(long_run_distance)
 
+        # Consider long runs closer to the event, with either a race pace effort at the end
+        # or a 5K repeats alternating between easy and race pace.
+
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_LONG_RUN, self.user_id)
         workout.activity_type = Keys.TYPE_RUNNING_KEY
