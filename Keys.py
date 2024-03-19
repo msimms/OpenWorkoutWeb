@@ -74,7 +74,6 @@ GOAL_METRIC_CENTURY_RIDE_KEY = "100K Bike Ride"
 GOAL_STANDARD_CENTURY_RIDE_KEY = "100 Mile Bike Ride"
 
 # Goal types.
-GOAL_TYPE_KEY = "goal type" # Extra info about the user's goal, such as whether they care about speed or just finishing a race
 GOAL_TYPE_COMPLETION = "Completion"
 GOAL_TYPE_SPEED = "Speed"
 
@@ -85,6 +84,7 @@ GOAL_RUN_DISTANCE_KEY = "Goal Run Distance"
 
 # User settings that are exclusive to the workout plan generator.
 PLAN_INPUT_GOAL_KEY = "Goal"
+PLAN_INPUT_GOAL_TYPE_KEY = "goal type" # Extra info about the user's goal, such as whether they care about speed or just finishing a race
 PLAN_INPUT_GOAL_DATE_KEY = "Goal Date" # Goal date in Unix time
 PLAN_INPUT_LONGEST_RUN_WEEK_1_KEY = "Longest Run Week 1" # Most recent week
 PLAN_INPUT_LONGEST_RUN_WEEK_2_KEY = "Longest Run Week 2" # Second most recent week
@@ -154,7 +154,7 @@ USER_RACES = "races" # List of races the user intends to do
 ACTIVITY_HEAT_MAP = "heat map" # Dictionary mapping an activity location (i.e., Florida) to a count
 USER_SETTINGS = [ DEFAULT_PRIVACY_KEY, USER_PREFERRED_UNITS_KEY, USER_PREFERRED_FIRST_DAY_OF_WEEK_KEY, USER_BIRTHDAY_KEY, USER_HEIGHT_KEY, USER_WEIGHT_KEY, \
     USER_BIOLOGICAL_SEX_KEY, USER_RESTING_HEART_RATE_KEY, USER_MAXIMUM_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_KEY, ESTIMATED_MAX_HEART_RATE_LIST_KEY, \
-    BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, GOAL_TYPE_KEY, PLAN_INPUT_EXPERIENCE_LEVEL_KEY, PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, \
+    BEST_CYCLING_20_MINUTE_POWER_LIST_KEY, ESTIMATED_CYCLING_FTP_KEY, PLAN_INPUT_GOAL_TYPE_KEY, PLAN_INPUT_EXPERIENCE_LEVEL_KEY, PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, \
     PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY, GEN_WORKOUTS_WHEN_RACE_CAL_IS_EMPTY, USER_CAN_UPLOAD_PHOTOS_KEY, USER_IS_ADMIN_KEY, \
     USER_HAS_SWIMMING_POOL_ACCESS, USER_HAS_OPEN_WATER_SWIM_ACCESS, USER_HAS_BICYCLE, USER_PLAN_LAST_GENERATED_TIME, USER_ACTIVITY_SUMMARY_CACHE_LAST_PRUNED, \
     USER_RACES, ACTIVITY_HEAT_MAP ]
@@ -355,8 +355,8 @@ LONGEST_DISTANCE = "Longest Distance" # Longest distance, when summarizing activ
 TOTAL_DISTANCE = "Total Distance" # Distance for an activity
 TOTAL_DURATION = "Total Duration" # Number of seconds for the activity/activities
 TOTAL_ACTIVITIES = "Total Activities" # Number of activities logged over the specified time
-INTENSITY_SCORE = "Intensity Score" # Intensity score, represents the intensity of the workout
-ESTIMATED_INTENSITY_SCORE = "Estimated Intensity Score" # Estimated intensity score, for activities that don't have power data
+INTENSITY_SCORE = "Intensity Score" # Intensity score, represents the intensity of the workout, higher is more intense
+ESTIMATED_INTENSITY_SCORE = "Estimated Intensity Score" # Estimated intensity score, for activities that don't have power data, higher is more intense
 TOTAL_INTENSITY_SCORE = "Total Intensity Score" # Sum of the intensity scores for each activity within the specified time
 MILE_SPLITS = "Mile Splits" # List of mile splits
 KM_SPLITS = "KM Splits" # List of kilometer splits
@@ -506,6 +506,8 @@ CADENCE_KEYS = [ APP_CADENCE_KEY, AVG_CADENCE, MAX_CADENCE ]
 RUNNING_CADENCE_KEYS = [ STEPS_PER_MINUTE, AVG_STEPS_PER_MINUTE ]
 GOALS = [ GOAL_FITNESS_KEY, GOAL_5K_RUN_KEY, GOAL_10K_RUN_KEY, GOAL_15K_RUN_KEY, GOAL_HALF_MARATHON_RUN_KEY, GOAL_MARATHON_RUN_KEY, GOAL_50K_RUN_KEY, \
     GOAL_50_MILE_RUN_KEY, GOAL_SPRINT_TRIATHLON_KEY, GOAL_OLYMPIC_TRIATHLON_KEY, GOAL_HALF_IRON_DISTANCE_TRIATHLON_KEY, GOAL_IRON_DISTANCE_TRIATHLON_KEY, \
+    GOAL_METRIC_CENTURY_RIDE_KEY, GOAL_STANDARD_CENTURY_RIDE_KEY ]
+GOAL_THAT_REQUIRE_A_BIKE = [ GOAL_SPRINT_TRIATHLON_KEY, GOAL_OLYMPIC_TRIATHLON_KEY, GOAL_HALF_IRON_DISTANCE_TRIATHLON_KEY, GOAL_IRON_DISTANCE_TRIATHLON_KEY, \
     GOAL_METRIC_CENTURY_RIDE_KEY, GOAL_STANDARD_CENTURY_RIDE_KEY ]
 INTENSITY_SCORES = [ INTENSITY_SCORE, ESTIMATED_INTENSITY_SCORE, TOTAL_INTENSITY_SCORE ]
 

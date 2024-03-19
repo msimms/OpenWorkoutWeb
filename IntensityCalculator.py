@@ -30,7 +30,7 @@ class IntensityCalculator(object):
         super(IntensityCalculator, self).__init__()
 
     @staticmethod
-    def estimate_intensity_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour):
+    def estimate_intensity_score_from_pace(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour):
         intensity_score = ((workout_duration_secs * avg_workout_pace_meters_per_sec) / threshold_pace_meters_per_hour) * 100.0
         return intensity_score
 

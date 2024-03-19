@@ -420,6 +420,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         return Units.METERS_PER_HALF_MARATHON
 
     def gen_workouts_for_next_week_fitness_goal(self, inputs):
+        """Generates run workouts for the next week if the user's goal is simple fitness."""
         workouts = []
 
         # Extract the necessary inputs.
@@ -444,6 +445,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         return workouts
 
     def gen_workouts_for_next_week_event_goal(self, inputs, easy_week, in_taper):
+        """Generates run workouts for the next week if the user is targeting an event."""
         workouts = []
         best_workouts = []
         best_intensity_distribution_score = None
@@ -453,7 +455,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         # Extract the necessary inputs.
         goal_distance = inputs[Keys.GOAL_RUN_DISTANCE_KEY]
         goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
-        goal_type = inputs[Keys.GOAL_TYPE_KEY]
+        goal_type = inputs[Keys.PLAN_INPUT_GOAL_TYPE_KEY]
         goal_date = inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY]
         weeks_until_goal = inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY]
         short_interval_run_pace = inputs[Keys.SHORT_INTERVAL_RUN_PACE]
@@ -517,19 +519,17 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             max_distance_needed = self.max_long_run_distance(goal_distance)
             max_attainable_distance = self.max_attainable_distance(longest_run_in_four_weeks, weeks_until_goal)
             stretch_factor = max_attainable_distance / max_distance_needed # Gives us an idea as to how much the user is ahead of schedule.
-            max_long_run_distance = self.max_long_run_distance(goal_distance / stretch_factor)
+            if stretch_factor < 1.0:
+                stretch_factor = 1.0
+            max_long_run_distance = self.max_long_run_distance(goal_distance) * stretch_factor
 
         # Handle situation in which the user is already meeting or exceeding the goal distance.
         if longest_run_in_four_weeks >= max_long_run_distance:
             longest_run_in_four_weeks = max_long_run_distance
 
         # Distance ceilings for easy and tempo runs.
-        if exp_level <= 5:
-            max_easy_run_distance = longest_run_in_four_weeks * 0.60
-            max_tempo_run_distance = longest_run_in_four_weeks * 0.40
-        else:
-            max_easy_run_distance = longest_run_in_four_weeks * 0.75
-            max_tempo_run_distance = longest_run_in_four_weeks * 0.50
+        max_easy_run_distance = longest_run_in_four_weeks * 0.90
+        max_tempo_run_distance = longest_run_in_four_weeks * 0.50
 
         # Don't make any runs (other than intervals, tempo runs, etc.) shorter than this.
         min_run_distance = avg_run_distance * 0.5
@@ -602,7 +602,7 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
             # Calculate the total intensity and the intensity for each workout.
             total_intensity = 0.0
             for workout in workouts:
-                workout.calculate_estimated_intensity_score(functional_threshold_pace)
+                workout.calculate_estimated_intensity_score_for_running(functional_threshold_pace)
                 total_intensity = total_intensity + workout.estimated_intensity_score
 
             # If this is supposed to be an easy week then the total intensity should be less than last week's intensity.

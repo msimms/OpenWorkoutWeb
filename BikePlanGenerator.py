@@ -237,7 +237,7 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         # Extract the necessary inputs.
         goal_distance = inputs[Keys.GOAL_BIKE_DISTANCE_KEY]
         goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
-        goal_type = inputs[Keys.GOAL_TYPE_KEY]
+        goal_type = inputs[Keys.PLAN_INPUT_GOAL_TYPE_KEY]
         goal_date = inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY]
         weeks_until_goal = inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY]
         longest_ride_week_1 = inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_1_KEY] # Most recent week
@@ -245,10 +245,13 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
         longest_ride_week_3 = inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_3_KEY]
         longest_ride_week_4 = inputs[Keys.PLAN_INPUT_LONGEST_RIDE_WEEK_4_KEY]
         avg_bike_duration = inputs[Keys.PLAN_INPUT_AVG_CYCLING_DURATION_IN_FOUR_WEEKS]
+        threshold_power = inputs[Keys.THRESHOLD_POWER]
         has_bicycle = inputs[Keys.USER_HAS_BICYCLE]
 
-        # The user doesn't have a bicycle, so return.
+        # The user doesn't have a bicycle, so either return or thrown an exception based on whether it's needed.
         if not has_bicycle:
+            if goal in Keys.GOAL_THAT_REQUIRE_A_BIKE:
+                raise Exception("The goal cannot be met without access to a bicycle.")
             return workouts
 
         # Longest ride in four weeks.
@@ -307,5 +310,11 @@ class BikePlanGenerator(PlanGenerator.PlanGenerator):
                     workouts.append(self.gen_easy_aerobic_ride(goal_distance, longest_ride_in_four_weeks, avg_bike_duration))
                 else:
                     workouts.append(self.gen_interval_session(goal_distance))
+
+        # Calculate the total intensity and the intensity for each workout.
+        total_intensity = 0.0
+        for workout in workouts:
+            workout.calculate_estimated_intensity_score_for_cycling(threshold_power)
+            total_intensity = total_intensity + workout.estimated_intensity_score
 
         return workouts

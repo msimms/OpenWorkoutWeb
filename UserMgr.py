@@ -398,7 +398,7 @@ class UserMgr(object):
             return {}
         if key.casefold() == Keys.ESTIMATED_CYCLING_FTP_KEY.casefold():
             return 0
-        if key.casefold() == Keys.GOAL_TYPE_KEY.casefold():
+        if key.casefold() == Keys.PLAN_INPUT_GOAL_TYPE_KEY.casefold():
             return Keys.GOAL_TYPE_COMPLETION
         if key.casefold() == Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY.casefold():
             return 5

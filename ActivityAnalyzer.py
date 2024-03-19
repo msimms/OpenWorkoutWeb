@@ -220,11 +220,14 @@ class ActivityAnalyzer(object):
                             if Keys.FUNCTIONAL_THRESHOLD_PACE in run_paces:
                                 threshold_pace_meters_per_hour = run_paces[Keys.FUNCTIONAL_THRESHOLD_PACE] * 60.0
                                 calc = IntensityCalculator.IntensityCalculator()
-                                stress = calc.estimate_intensity_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour)
+                                stress = calc.estimate_intensity_score_from_pace(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_hour)
                                 self.summary_data[Keys.INTENSITY_SCORE] = stress
 
                         # Cycling activity.
                         elif activity_type in Keys.CYCLING_ACTIVITIES:
+
+                            # We need to know the user's threshold power to compute the intensity score.
+                            print("* Computing the intensity score...")
                             pass
 
                 # Store the results.
@@ -264,7 +267,7 @@ def analyze_activity(activity_str, internal_task_id):
     activity_obj = json.loads(activity_str)
     analyzer = ActivityAnalyzer(activity_obj, internal_task_id)
     analyzer.perform_analysis()
-    print("Activity analysis finished")
+    print("Activity analysis finished!")
 
 @celery_worker.task(ignore_result=True)
 def analyze_personal_records(user_str, internal_task_id):
@@ -274,7 +277,7 @@ def analyze_personal_records(user_str, internal_task_id):
     config = Config.Config()
     data_mgr = DataMgr.DataMgr(config=config, root_url="file://" + root_dir, analysis_scheduler=analysis_scheduler, import_scheduler=None)
     data_mgr.refresh_personal_records_cache(user_str)
-    print("Personal record analysis finished")
+    print("Personal record analysis finished!")
 
 def main():
     """Entry point for an analysis worker."""

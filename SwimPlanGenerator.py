@@ -69,7 +69,7 @@ class SwimPlanGenerator(PlanGenerator.PlanGenerator):
         # Extract the necessary inputs.
         goal_distance = inputs[Keys.GOAL_SWIM_DISTANCE_KEY]
         goal = inputs[Keys.PLAN_INPUT_GOAL_KEY]
-        goal_type = inputs[Keys.GOAL_TYPE_KEY]
+        goal_type = inputs[Keys.PLAN_INPUT_GOAL_TYPE_KEY]
         goal_date = inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY]
         weeks_until_goal = inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY]
         has_swimming_pool_access = inputs[Keys.USER_HAS_SWIMMING_POOL_ACCESS]

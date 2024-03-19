@@ -305,7 +305,6 @@ class Workout(object):
             # Add the interval duration.
             elif interval_duration > 0:
                 result += Units.convert_seconds_to_mins_or_secs(int(interval_duration))
-                result += " "
 
             # Add the interval pace.
             if interval_pace > 0:
@@ -397,6 +396,12 @@ class Workout(object):
         elif self.type == Keys.WORKOUT_TYPE_TECHNIQUE_SWIM:
             result += "Purpose: Develop proper swimming technique.\n"
 
+        # Scheduled time.
+        if self.scheduled_time is not None:
+            result += "Scheduled Time: "
+            result += str(self.scheduled_time)
+            result += "\n"
+
         # Add the intensity score, if it's been computed.
         if self.estimated_intensity_score is not None:
             stress_str = "{:.1f}".format(self.estimated_intensity_score)
@@ -422,16 +427,47 @@ class Workout(object):
         """Returns the total workout distance, in meters."""
         total_meters = 0.0
         for interval in self.intervals:
-            total_meters = total_meters + interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY]
-            total_meters = total_meters + interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY]
+            total_meters += interval[Keys.INTERVAL_WORKOUT_DISTANCE_KEY]
+            total_meters += interval[Keys.INTERVAL_WORKOUT_RECOVERY_DISTANCE_KEY]
         return total_meters
 
-    def calculate_interval_duration(self, interval_meters, interval_pace_meters_per_minute):
+    def calculate_interval_duration_secs(self, interval_meters, interval_pace_meters_per_minute):
         """Utility function for calculating the number of seconds for an interval."""
         interval_duration_secs = interval_meters / (interval_pace_meters_per_minute / 60.0)
         return interval_duration_secs
 
-    def calculate_estimated_intensity_score(self, threshold_pace_meters_per_minute):
+    def calculate_estimated_intensity_score_for_cycling(self, threshold_power):
+        """Computes the estimated intensity for this workout."""
+        """May be overridden by child classes, depending on the type of workout."""
+        workout_duration_secs = 0.0
+        np_buf = []
+
+        # Calculate the estimated normalized power.
+        for interval in self.intervals:
+            interval_duration_secs = interval[Keys.INTERVAL_WORKOUT_DURATION_KEY]
+            interval_power = (interval[Keys.INTERVAL_WORKOUT_POWER_KEY] / 100.0) * threshold_power
+            np_buf.extend([interval_power] * int(interval_duration_secs / 30))
+            recovery_interval_duration_secs = interval[Keys.INTERVAL_WORKOUT_RECOVERY_DURATION_KEY]
+            recovery_interval_power = (interval[Keys.INTERVAL_WORKOUT_RECOVERY_POWER_KEY] / 100.0) * threshold_power
+            np_buf.extend([recovery_interval_power] * int(interval_duration_secs / 30))
+            workout_duration_secs += interval_duration_secs
+            workout_duration_secs += recovery_interval_duration_secs
+
+        # Raise all items to the fourth power.
+        for idx, item in enumerate(np_buf):
+            item = pow(item, 4)
+            np_buf[idx] = item
+
+        # Average the values that were raised to the fourth.
+        ap2 = sum(np_buf) / len(np_buf)
+
+        # Take the fourth root.
+        normalized_power = pow(ap2, 0.25)
+
+        calc = IntensityCalculator.IntensityCalculator()
+        self.estimated_intensity_score = calc.calculate_intensity_score_from_power(workout_duration_secs, normalized_power, threshold_power)
+
+    def calculate_estimated_intensity_score_for_running(self, threshold_pace_meters_per_minute):
         """Computes the estimated intensity for this workout."""
         """May be overridden by child classes, depending on the type of workout."""
         workout_duration_secs = 0.0
@@ -448,11 +484,11 @@ class Workout(object):
 
             # Compute the work duration and the average pace.
             if interval_meters > 0 and interval_pace_meters_per_minute > 0.0:
-                interval_duration_secs = num_repeats * self.calculate_interval_duration(interval_meters, interval_pace_meters_per_minute)
+                interval_duration_secs = num_repeats * self.calculate_interval_duration_secs(interval_meters, interval_pace_meters_per_minute)
                 workout_duration_secs += interval_duration_secs
                 avg_workout_pace_meters_per_sec += (interval_pace_meters_per_minute * (interval_duration_secs / 60.0))
             if recovery_meters > 0 and recovery_pace_meters_per_minute > 0.0:
-                interval_duration_secs = num_repeats * self.calculate_interval_duration(recovery_meters, recovery_pace_meters_per_minute)
+                interval_duration_secs = num_repeats * self.calculate_interval_duration_secs(recovery_meters, recovery_pace_meters_per_minute)
                 workout_duration_secs += interval_duration_secs
                 avg_workout_pace_meters_per_sec += (recovery_pace_meters_per_minute * (interval_duration_secs / 60.0))
 
@@ -460,4 +496,4 @@ class Workout(object):
             avg_workout_pace_meters_per_sec = avg_workout_pace_meters_per_sec / workout_duration_secs
 
         calc = IntensityCalculator.IntensityCalculator()
-        self.estimated_intensity_score = calc.estimate_intensity_score(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_minute * 60.0)
+        self.estimated_intensity_score = calc.estimate_intensity_score_from_pace(workout_duration_secs, avg_workout_pace_meters_per_sec, threshold_pace_meters_per_minute * 60.0)

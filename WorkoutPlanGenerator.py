@@ -166,7 +166,7 @@ class WorkoutPlanGenerator(object):
             weeks_until_goal = int((goal_date - now) / (7 * 24 * 60 * 60))
 
         # Is the user interested in just completion, or do they care about performance (i.e. pace/speed)?
-        goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.GOAL_TYPE_KEY)
+        goal_type = self.user_mgr.retrieve_user_setting(user_id, Keys.PLAN_INPUT_GOAL_TYPE_KEY)
 
         # Analyze any unanalyzed activities.
         now = time.time()
@@ -306,8 +306,8 @@ class WorkoutPlanGenerator(object):
         inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY] = experience_level
         inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
         inputs[Keys.PLAN_INPUT_GOAL_KEY] = goal
+        inputs[Keys.PLAN_INPUT_GOAL_TYPE_KEY] = goal_type
         inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY] = goal_date
-        inputs[Keys.GOAL_TYPE_KEY] = goal_type
         inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY] = weeks_until_goal
         inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS] = avg_running_distance
         inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS] = avg_cycling_distance
@@ -358,7 +358,7 @@ class WorkoutPlanGenerator(object):
         keys.append(Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY)
         keys.append(Keys.PLAN_INPUT_GOAL_KEY)
         keys.append(Keys.PLAN_INPUT_GOAL_DATE_KEY)
-        keys.append(Keys.GOAL_TYPE_KEY)
+        keys.append(Keys.PLAN_INPUT_GOAL_TYPE_KEY)
         keys.append(Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY)
         keys.append(Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS)
         keys.append(Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS)
@@ -461,7 +461,7 @@ class WorkoutPlanGenerator(object):
         model_inputs.append(inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_GOAL_KEY])
-        model_inputs.append(inputs[Keys.GOAL_TYPE_KEY])
+        model_inputs.append(inputs[Keys.PLAN_INPUT_GOAL_TYPE_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_WEEKS_UNTIL_GOAL_KEY])
         model_inputs.append(inputs[Keys.PLAN_INPUT_AVG_RUNNING_DISTANCE_IN_FOUR_WEEKS])
         model_inputs.append(inputs[Keys.PLAN_INPUT_AVG_CYCLING_DISTANCE_IN_FOUR_WEEKS])

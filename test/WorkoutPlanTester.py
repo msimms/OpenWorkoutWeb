@@ -86,9 +86,12 @@ def run_unit_test_from_file(config, input_file_name):
         generator = WorkoutPlanGenerator.WorkoutPlanGenerator(config, None)
         scheduler = WorkoutScheduler.WorkoutScheduler(None)
 
-        today = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0).date()
+        # Need to fudge dates from the input file, since time keeps moving forward.
+        today = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
         start_time = today + datetime.timedelta(days=7-today.weekday())
         goal_date = today + datetime.timedelta(days=48)
+        goal_date_ts = goal_date.timestamp()
+
         column_names = {}
 
         # Generate a plan for each test input.
@@ -113,7 +116,7 @@ def run_unit_test_from_file(config, input_file_name):
                 inputs = dict(zip(column_names, sanitized_inputs))
 
                 # Add the goal date.
-                inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY] = goal_date
+                inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY] = goal_date_ts
 
                 # Validate the inputs.
                 if not generator.validate_inputs(inputs):
@@ -160,9 +163,11 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
     swim_intensity_by_week = [0.0] * 4 # Total training intensity for each of the recent four weeks
     running_paces = {}
 
-    now = datetime.datetime.utcnow()
-    today = now.replace(hour=0, minute=0, second=0, microsecond=0).date()
+    # Need to fudge dates from the input file, since time keeps moving forward.
+    today = datetime.datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
     start_time = today + datetime.timedelta(days=7-today.weekday())
+    goal_date = today + datetime.timedelta(days=48)
+    goal_date_ts = goal_date.timestamp()
 
     input_values = [0.0] * len(input_names)
     inputs = dict(zip(input_names, input_values))
@@ -172,8 +177,8 @@ def run_algorithmic_unit_tests(config, input_names, age_years, experience_level,
     inputs[Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY] = experience_level
     inputs[Keys.PLAN_INPUT_STRUCTURED_TRAINING_COMFORT_LEVEL_KEY] = comfort_level
     inputs[Keys.PLAN_INPUT_GOAL_KEY] = goal
-    inputs[Keys.GOAL_TYPE_KEY] = goal_type
-    inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY] = now + datetime.timedelta(days=weeks_until_goal * 7 * 86400)
+    inputs[Keys.PLAN_INPUT_GOAL_TYPE_KEY] = goal_type
+    inputs[Keys.PLAN_INPUT_GOAL_DATE_KEY] = goal_date_ts
 
     # Adds the goal distances to the inputs.
     inputs = WorkoutPlanGenerator.WorkoutPlanGenerator.calculate_goal_distances(inputs)
@@ -280,6 +285,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="", help="The configuration file.", type=str, action="store", required=True)
     parser.add_argument("--file", help="CSV test file to process", type=str, action="store", required=True)
+    parser.add_argument("--algorithmic-tests", action="store_true", default=False, help="Additional test cases are autonatically generated", required=False)
 
     try:
         args = parser.parse_args()
@@ -294,15 +300,19 @@ def main():
 
     # Do the tests.
     try:
+        # Tests using inputs provided in the CSV file.
         print("Tests using the CSV file:")
         print("-" * 40)
         column_names = run_unit_test_from_file(config, args.file)
-        print("-" * 40)
-        print("Tests using algorithmic inputs:")
-        print("-" * 40)
-        run_algorithmic_unit_tests(config, column_names, 40.0, 5, 5, Keys.GOAL_FITNESS_KEY, 3, Keys.GOAL_TYPE_COMPLETION)
-        run_algorithmic_unit_tests(config, column_names, 40.0, 5, 5, Keys.GOAL_5K_RUN_KEY, 3, Keys.GOAL_TYPE_COMPLETION)
-        run_algorithmic_unit_tests(config, column_names, 40.0, 5, 5, Keys.GOAL_HALF_MARATHON_RUN_KEY, 3, Keys.GOAL_TYPE_COMPLETION)
+
+        # Tests generated algorithmically.
+        if args.algorithmic_tests:
+            print("-" * 40)
+            print("Tests using algorithmic inputs:")
+            print("-" * 40)
+            run_algorithmic_unit_tests(config, column_names, 40.0, 5, 5, Keys.GOAL_FITNESS_KEY, 3, Keys.GOAL_TYPE_COMPLETION)
+            run_algorithmic_unit_tests(config, column_names, 40.0, 5, 5, Keys.GOAL_5K_RUN_KEY, 3, Keys.GOAL_TYPE_COMPLETION)
+            run_algorithmic_unit_tests(config, column_names, 40.0, 5, 5, Keys.GOAL_HALF_MARATHON_RUN_KEY, 3, Keys.GOAL_TYPE_COMPLETION)
     except Exception as e:
         print("Test aborted!\n")
         print(e)

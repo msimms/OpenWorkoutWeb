@@ -1803,11 +1803,11 @@ class Api(object):
             result = self.user_mgr.update_user_setting(self.user_id, Keys.PLAN_INPUT_PREFERRED_LONG_RUN_DAY_KEY, preferred_long_run_day, update_time)
 
         # Goal type.
-        if Keys.GOAL_TYPE_KEY in values:
-            goal_type = values[Keys.GOAL_TYPE_KEY]
+        if Keys.PLAN_INPUT_GOAL_TYPE_KEY in values:
+            goal_type = values[Keys.PLAN_INPUT_GOAL_TYPE_KEY]
             if not (goal_type == Keys.GOAL_TYPE_COMPLETION or goal_type == Keys.GOAL_TYPE_SPEED):
                 raise ApiException.ApiMalformedRequestException("Invalid goal type.")
-            result = self.user_mgr.update_user_setting(self.user_id, Keys.GOAL_TYPE_KEY, goal_type, update_time)
+            result = self.user_mgr.update_user_setting(self.user_id, Keys.PLAN_INPUT_GOAL_TYPE_KEY, goal_type, update_time)
 
         # Experience level.
         if Keys.PLAN_INPUT_EXPERIENCE_LEVEL_KEY in values:
