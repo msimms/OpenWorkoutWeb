@@ -1780,21 +1780,14 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def delete_tag_from_activity(self, activity_id, tag):
+    def delete_tag_from_activity(self, activity, tag):
         """Deletes the specified tag from the activity with the given ID."""
-        if activity_id is None:
-            raise Exception("Unexpected empty object: activity_id")
-        if not InputChecker.is_uuid(activity_id):
-            raise Exception("Invalid object: activity_id " + str(activity_id))
+        if activity is None:
+            raise Exception("Unexpected empty object: activity")
         if tag is None:
             raise Exception("Unexpected empty object: tag")
 
         try:
-            # Find the activity.
-            activity = self.activities_collection.find_one({ Keys.ACTIVITY_ID_KEY: activity_id })
-            if activity is None:
-                return False
-
             if Keys.ACTIVITY_TAGS_KEY in activity:
                 data = activity[Keys.ACTIVITY_TAGS_KEY]
                 data.remove(tag)
