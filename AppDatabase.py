@@ -1780,7 +1780,7 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def delete_tag(self, activity_id, tag):
+    def delete_tag_from_activity(self, activity_id, tag):
         """Deletes the specified tag from the activity with the given ID."""
         if activity_id is None:
             raise Exception("Unexpected empty object: activity_id")

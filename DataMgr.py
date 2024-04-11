@@ -975,6 +975,16 @@ class DataMgr(Importer.ActivityWriter):
                 return self.database.create_tags_on_activity_by_id(activity_id, tags)
         return False
 
+    def delete_tag_from_activity(self, activity, tag):
+        """Delete a tag from an activity."""
+        if self.database is None:
+            raise Exception("No database.")
+        if activity is None:
+            raise Exception("Bad parameter.")
+        if tag is None:
+            raise Exception("Bad parameter.")
+        return self.database.delete_tag_from_activity(activity, tag)
+
     @staticmethod
     def distance_for_activity(activity):
         if Keys.APP_DISTANCE_KEY in activity:

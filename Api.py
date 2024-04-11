@@ -1183,6 +1183,7 @@ class Api(object):
         if not InputChecker.is_uuid(activity_id):
             raise ApiException.ApiMalformedRequestException("Invalid activity ID.")
 
+        # Validate the tags.
         tags = []
         tag_index = 0
         tag_name = Keys.ACTIVITY_TAG_KEY + str(tag_index)
@@ -1224,7 +1225,12 @@ class Api(object):
         if not InputChecker.is_valid_decoded_str(tag):
             raise ApiException.ApiMalformedRequestException("Invalid tag.")
 
-        result = self.data_mgr.delete_tag(activity_id, tag)
+        # Only the activity's owner should be able to do this.
+        activity = self.data_mgr.retrieve_activity(activity_id)
+        if not self.activity_belongs_to_logged_in_user(activity):
+            raise ApiException.ApiAuthenticationException("Not activity owner.")
+
+        result = self.data_mgr.delete_tag_from_activity(activity, tag)
         return result, ""
 
     def handle_delete_sensor_data(self, values):
