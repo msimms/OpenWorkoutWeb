@@ -173,11 +173,11 @@ class WorkoutScheduler(object):
 
         # Try and best the first arrangement, by randomly re-arranging the schedule
         # and seeing if we can get a better score.
-        for _ in range(1, 10):
-            new_schedule, new_week = self.random_scheduler(workouts, week, start_time)
-            new_schedule_score = self.score_schedule(new_week)
-            if new_schedule_score < best_schedule_score:
-                best_schedule = new_schedule
-                best_schedule_score = new_schedule_score
+        #for _ in range(1, 10):
+        #    new_schedule, new_week = self.random_scheduler(workouts, week, start_time)
+        #    new_schedule_score = self.score_schedule(new_week)
+        #    if new_schedule_score < best_schedule_score:
+        #        best_schedule = new_schedule
+        #        best_schedule_score = new_schedule_score
 
         return best_schedule
