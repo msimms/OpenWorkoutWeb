@@ -46,6 +46,10 @@
                 trim_amount = 300;
             if (quick_trim_selection.indexOf("ten_minutes") > 0)
                 trim_amount = 600;
+            if (quick_trim_selection.indexOf("thirty_minutes") > 0)
+                trim_amount = 1800;
+            if (quick_trim_selection.indexOf("sixty_minutes") > 0)
+                trim_amount = 3600;
 
             dict.push({"activity_id" : "${activity_id}"});
             dict.push({"Trim From" : trim_from});
@@ -75,12 +79,16 @@ ${nav}
         <option value="first_one_minute">First Minute</option>
         <option value="first_five_minutes">First Five Minutes</option>
         <option value="first_ten_minutes">First Ten Minutes</option>
+        <option value="first_thirty_minutes">First Thirty Minutes</option>
+        <option value="first_sixty_minutes">First Sixty Minutes</option>
         <option value="last_one_second">Last Second</option>
         <option value="last_five_seconds">Last Five Seconds</option>
         <option value="last_thirty_seconds">Last Thirty Seconds</option>
         <option value="last_one_minute">Last Minute</option>
         <option value="last_five_minutes">Last Five Minutes</option>
         <option value="last_ten_minutes">Last Ten Minutes</option>
+        <option value="last_thirty_minutes">Last Thirty Minutes</option>
+        <option value="last_sixty_minutes">Last Sixty Minutes</option>
     </select><br>
     <button type="button" onclick="trim_activity()">Trim</button>
 </div>
