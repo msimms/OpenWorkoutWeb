@@ -45,7 +45,7 @@ a:active {color: #FF00CC}
 }
 
 .loginbackground {
-    margin: 0px 0px 0px 0px;
+    margin: 0px;
     padding: 250px;
     width: auto;
     height: auto;
@@ -61,7 +61,7 @@ a:active {color: #FF00CC}
 }
 
 .loginform {
-    width: 200px;
+    width: 480px;
     margin: 0px auto;
     padding: 25px;
     background-color: rgba(250,250,250,0.8);
@@ -81,6 +81,7 @@ a:active {color: #FF00CC}
 }
 
 .loginform input:not([type=submit]) {
+    width: 460px;
     padding: 5px;
     margin-right: 10px;
     border: 1px solid rgba(0, 0, 0, 0.7);
