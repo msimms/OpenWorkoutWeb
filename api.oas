@@ -1,4 +1,4 @@
-{
+    {
     "openapi": "3.0.0",
     "info": {
         "title": "OpenWorkout",
@@ -16,47 +16,2392 @@
     ],
     "paths": {
         "/update_status": {
-            "post": {
-                "responses": {
-                    "200": {
-                        "description": ""
-                    },
-                    "500": {
-                        "description": ""
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_update_status",
+            "parameters": [
+                {
+                    "name": "DeviceId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
                     }
                 },
-                "operationId": "POST_update_status",
-                "parameters": [
-                    {
-                        "name": "DeviceId",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
+                {
+                    "name": "ActivityId",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
                         "$ref": "#/components/schemas/UUID"
-                        }
-                    },
-                    {
-                        "name": "ActivityId",
-                        "in": "query",
-                        "required": true,
-                        "schema": {
-                        "$ref": "#/components/schemas/UUID"
-                        }
                     }
-                ]
+                }
+            ]
+        }
+        },
+        "/activity_track": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "401": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_activity_track",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                },
+                {
+                    "name": "num_points",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                }
+            ]
+        }
+        },
+        "/activity_metadata": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_activity_metadata",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/activity_sensordata": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_activity_sensordata",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                    "$ref": "#/components/schemas/UUID"
+                    }
+                },
+                {
+                    "name": "sensors",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                    "$ref": "#/components/schemas/List"
+                    }
+                }
+            ]
+        }
+        },
+        "/activity_summarydata": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_activity_summarydata",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                },
+                {
+                    "name": "summary_items",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/List"
+                    }
+                }
+            ]
+        }
+        },
+        "/update_activity_metadata": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_update_activity_metadata",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/create_new_lap": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_create_new_lap",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                },
+                {
+                    "name": "lap start time",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                }
+            ]
+        }
+        },
+        "/login": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "401": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_login",
+            "parameters": [
+                {
+                    "name": "username",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "password",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+        },
+        "/create_login": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "401": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_create_login",
+            "parameters": [
+            {
+                "name": "username",
+                "in": "query",
+                "required": true,
+                "schema": {
+                    "type": "string"
+                }
+            },
+            {
+                "name": "realname",
+                "in": "query",
+                "required": true,
+                "schema": {
+                    "type": "string"
+                }
+            },
+            {
+                "name": "password1",
+                "in": "query",
+                "required": true,
+                "schema": {
+                    "type": "string"
+                }
+            },
+            {
+                "name": "password2",
+                "in": "query",
+                "required": true,
+                "schema": {
+                    "type": "string"
+                }
             }
+            ]
+        }
+        },
+        "/login_status": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_login_status"
+        }
+        },
+        "/logout": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_logout"
+        }
+        },
+        "/update_email": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_update_email",
+            "parameters": [
+                {
+                    "name": "email",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+        },
+        "/update_password": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_update_password",
+            "parameters": [
+                {
+                    "name": "old_password",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "new_password1",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "new_password2",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+        },
+        "/delete_users_gear": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_delete_users_gear",
+            "parameters": [
+                {
+                    "name": "password",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+        },
+        "/delete_users_activities": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_delete_users_activities",
+            "parameters": [
+                {
+                    "name": "password",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+        },
+        "/delete_user": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_delete_user",
+            "parameters": [
+                {
+                    "name": "password",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+        },
+        "/list_devices": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_devices"
+        }
+        },
+        "/list_all_activities": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_all_activities",
+            "parameters": [
+                {
+                    "name": "start",
+                    "in": "query",
+                    "schema": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                },
+                {
+                    "name": "end",
+                    "in": "query",
+                    "schema": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                },
+                {
+                    "name": "start_time",
+                    "in": "query",
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "name": "end_time",
+                    "in": "query",
+                    "schema": {
+                        "type": "number"
+                    }
+                }
+            ]
+        }
+        },
+        "/list_my_activities": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_my_activities",
+            "parameters": [
+                {
+                    "name": "start",
+                    "in": "query",
+                    "schema": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                },
+                {
+                    "name": "end",
+                    "in": "query",
+                    "schema": {
+                        "type": "string",
+                        "format": "date"
+                    }
+                },
+                {
+                    "name": "start_time",
+                    "in": "query",
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "name": "end_time",
+                    "in": "query",
+                    "schema": {
+                        "type": "number"
+                    }
+                }
+            ]
+        }
+        },
+        "/delete_activity": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_delete_activity",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/add_activity": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_add_activity",
+            "parameters": [
+                {
+                    "name": "Distance",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "name": "Duration",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "name": "time",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "name": "activity_type",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+        },
+        "/upload_activity_file": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_upload_activity_file"
+        }
+        },
+        "/upload_activity_photo": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_upload_activity_photo",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/list_activity_photos": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_activity_photos",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/delete_activity_photo": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_delete_activity_photo",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                },
+                {
+                    "name": "photo_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/create_tags_on_activity": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_create_tags_on_activity",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/delete_tag_from_activity": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_delete_tag_from_activity",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/delete_sensor_data": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_delete_sensor_data"
+        }
+        },
+        "/list_matched_users": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_list_matched_users"
+        }
+        },
+        "/list_pending_friends": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_pending_friends"
+        }
+        },
+        "/list_friends": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_friends"
+        }
+        },
+        "/request_to_be_friends": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_request_to_be_friends"
+        }
+        },
+        "/confirm_request_to_be_friends": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_confirm_request_to_be_friends"
+        }
+        },
+        "/unfriend": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_unfriend"
+        }
+        },
+        "/trim_activity": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_trim_activity",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/export_activity": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_export_activity",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                },
+                {
+                    "name": "export_format",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/export_format_type"
+                    }
+                }
+            ]
+        }
+        },
+        "/export_workout": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": ""
+                }
+            },
+            "operationId": "GET_export_workout",
+            "parameters": [
+                {
+                    "name": "workout_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/claim_device": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_claim_device"
+        }
+        },
+        "/list_tags": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_tags",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/create_comment": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_create_comment",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/list_comments": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_comments",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/create_gear": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_create_gear"
+        }
+        },
+        "/list_gear": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_gear"
+        }
+        },
+        "/list_gear_defaults": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_gear_defaults"
+        }
+        },
+        "/update_gear": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_update_gear"
+        }
+        },
+        "/update_gear_defaults": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_update_gear_defaults",
+            "parameters": [
+                {
+                    "name": "activity_type",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "gear_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/delete_gear": {
+        "delete": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "DELETE_delete_gear",
+            "parameters": [
+                {
+                    "name": "gear_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                    "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/retire_gear": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_retire_gear",
+            "parameters": [
+            {
+                "name": "gear_id",
+                "in": "query",
+                "required": true,
+                "schema": {
+                    "$ref": "#/components/schemas/UUID"
+                }
+            }
+            ]
+        }
+        },
+        "/create_service_record": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_create_service_record"
+        }
+        },
+        "/delete_service_record": {
+        "delete": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "401": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "DELETE_delete_service_record"
+        }
+        },
+        "/create_race": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_create_race"
+        }
+        },
+        "/delete_race": {
+        "delete": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "401": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "DELETE_delete_race"
+        }
+        },
+        "/update_settings": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_update_settings"
+        }
+        },
+        "/update_profile": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_update_profile"
+        }
+        },
+        "/update_visibility": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_update_visibility"
+        }
+        },
+        "/refresh_analysis": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_refresh_analysis"
+        }
+        },
+        "/refresh_personal_records": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_refresh_personal_records"
+        }
+        },
+        "/generate_workout_plan": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_generate_workout_plan"
+        }
+        },
+        "/list_planned_workouts": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_planned_workouts"
+        }
+        },
+        "/update_planned_workouts": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_update_planned_workouts"
+        }
+        },
+        "/delete_planned_workout": {
+        "delete": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "DELETE_delete_planned_workout"
+        }
+        },
+        "/delete_planned_workouts": {
+        "delete": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "DELETE_delete_planned_workouts",
+            "parameters": [
+            {
+                "name": "workout_id",
+                "in": "query",
+                "required": true,
+                "schema": {
+                    "$ref": "#/components/schemas/UUID"
+                }
+            }
+            ]
+        }
+        },
+        "/list_interval_workouts": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_interval_workouts"
+        }
+        },
+        "/create_pace_plan": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_create_pace_plan",
+            "parameters": [
+                {
+                    "name": "name",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "description",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "target distance",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "name": "target distance units",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "name": "target time",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "name": "target splits",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "name": "target splits units",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "name": "route",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "last updated time",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                }
+            ]
+        }
+        },
+        "/list_pace_plans": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_pace_plans"
+        }
+        },
+        "/delete_pace_plan": {
+        "delete": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "DELETE_delete_pace_plan",
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/get_workout_ical_url": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_get_workout_ical_url"
+        }
+        },
+        "/get_location_description": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_get_location_description",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/get_location_summary": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_get_location_summary"
+        }
+        },
+        "/activity_hash_from_id": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_activity_hash_from_id",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/has_activity": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_has_activity",
+            "parameters": [
+                {
+                    "name": "activity_id",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/list_personal_records": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_personal_records"
+        }
+        },
+        "/get_running_paces": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_get_running_paces"
+        }
+        },
+        "/get_distance_for_tag": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_get_distance_for_tag",
+            "parameters": [
+                {
+                    "name": "tag",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+        },
+        "/get_task_statuses": {
+        "get": {
+            "responses": {
+            "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_get_task_statuses"
+        }
+        },
+        "/get_record_progression": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_get_record_progression",
+            "parameters": [
+                {
+                    "name": "activity_type",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "name": "record_name",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+        },
+        "/get_user_setting": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_get_user_setting",
+            "parameters": [
+                {
+                    "name": "requested setting",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ]
+        }
+        },
+        "/get_user_settings": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_get_user_settings",
+            "parameters": [
+                {
+                    "name": "requested settings",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/List"
+                    }
+                }
+            ]
+        }
+        },
+        "/estimate_vo2_max": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_estimate_vo2_max"
+        }
+        },
+        "/estimate_bmi": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_estimate_bmi"
+        }
+        },
+        "/list_power_zones": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_power_zones",
+            "parameters": [
+                {
+                    "name": "estimated ftp",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                }
+            ]
+        }
+        },
+        "/list_hr_zones": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_hr_zones",
+            "parameters": [
+                {
+                    "name": "max heart rate",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                },
+                {
+                    "name": "estimated max heart rate",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "type": "number"
+                    }
+                }
+            ]
+        }
+        },
+        "/generate_api_key": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_generate_api_key"
+        }
+        },
+        "/delete_api_key": {
+        "delete": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "DELETE_delete_api_key",
+            "parameters": [
+                {
+                    "name": "key",
+                    "in": "query",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/components/schemas/UUID"
+                    }
+                }
+            ]
+        }
+        },
+        "/list_api_keys": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_api_keys"
+        }
+        },
+        "/list_activity_types": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_activity_types"
+        }
+        },
+        "/list_workout_types_for_activity": {
+        "get": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "GET_list_workout_types_for_activity"
+        }
+        },
+        "/list_unsynched_activities": {
+        "get": {
+            "responses": {
+                "default": {
+                    "description": ""
+                }
+            },
+            "operationId": "GET_list_unsynched_activities",
+            "parameters": [
+            {
+                "name": "timestamp",
+                "in": "query",
+                "required": true,
+                "schema": {
+                    "type": "number"
+                }
+            }
+            ]
+        }
+        },
+        "/merge_activity_files": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_merge_activity_files"
+        }
+        },
+        "/merge_activities": {
+        "post": {
+            "responses": {
+                "200": {
+                    "description": ""
+                },
+                "400": {
+                    "description": ""
+                },
+                "403": {
+                    "description": ""
+                },
+                "500": {
+                    "description": "Internal error"
+                }
+            },
+            "operationId": "POST_merge_activities"
+        }
         }
     },
     "components": {
         "schemas": {
-            "UUID": {
-                "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
-                "type": "string"
-            },
-            "export_format_type": {
-                "pattern": "('csv'|'gpx'|'tcx')",
-                "type": "string"
-            }
+        "UUID": {
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+            "type": "string"
+        },
+        "export_format_type": {
+            "pattern": "('csv'|'gpx'|'tcx')",
+            "type": "string"
+        }
         },
         "responses": {},
         "parameters": {},
@@ -67,4 +2412,4 @@
         "links": {},
         "callbacks": {}
     }
-}
+    }
