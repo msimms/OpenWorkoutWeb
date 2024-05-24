@@ -202,7 +202,20 @@ tr {
     stroke: var(--theme);
     stroke-width: 1;
 }
+.axis text {
+    fill: none;
+    stroke: var(--text);
+}
 .axis {
+    fill: none;
+    stroke: var(--text);
+}
+.x_axis {
+    fill: none;
+    stroke: var(--text);
+}
+.y_axis {
+    fill: none;
     stroke: var(--text);
 }
 

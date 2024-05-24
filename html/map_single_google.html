@@ -122,7 +122,7 @@ ${nav}
         });
 
         if (new_splits.length > 0)
-            $(function() { draw_bar_chart(new_splits, "Split Times (seconds)", "LightSteelBlue") });
+            draw_bar_chart(new_splits, "Split Times (seconds)", "LightSteelBlue");
     }
 
     /// @function add_current_location_marker
@@ -271,7 +271,7 @@ ${nav}
         draw_split_times_chart();
 
         // Draw the elevation graph.
-        draw_graph(root_url, activity_id, loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", get_graph_color("Elevation"), false);
+        draw_sensor_graph(root_url, activity_id, elevation_graph, "Elevation", "", get_graph_color("Elevation"), false);
 
         // Draw all the other graphs.
         draw_sensor_and_interval_graphs();
@@ -338,7 +338,6 @@ ${summary}
 </div>
 
 <script>
-
     let start_time_ms = 0;
     let end_time_ms = 0;
 
@@ -349,7 +348,7 @@ ${summary}
         {
             if (key == "intervals")
             {
-                draw_intervals_graph(start_time_ms, end_time_ms, summarydata[key]);
+                draw_intervals_graph(start_time_ms, summarydata[key]);
             }
         }
     }

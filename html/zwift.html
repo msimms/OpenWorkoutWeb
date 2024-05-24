@@ -105,7 +105,7 @@ ${nav}
         });
 
         if (new_splits.length > 0)
-            $(function() { draw_bar_chart(new_splits, "Split Times (seconds)", "LightSteelBlue") });
+            draw_bar_chart(new_splits, "Split Times (seconds)", "LightSteelBlue");
     }
 
     /// @function lat_lon_to_watopia_xy
@@ -230,7 +230,7 @@ ${nav}
         draw_split_times_chart();
 
         // Draw the elevation graph.
-        draw_graph(root_url, activity_id, loc_start_time_ms, loc_end_time_ms, elevation_graph, "Elevation", "", get_graph_color("Elevation"), false);
+        draw_sensor_graph(root_url, activity_id, elevation_graph, "Elevation", "", get_graph_color("Elevation"), false);
     };
 
     /// @function initialize_activity_track
@@ -278,7 +278,7 @@ ${summary}
         {
             if (key == "intervals")
             {
-                draw_intervals_graph(start_time_ms, end_time_ms, summarydata[key]);
+                draw_intervals_graph(start_time_ms, summarydata[key]);
             }
         }
     }
