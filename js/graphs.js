@@ -95,7 +95,7 @@ function draw_graph(root_url, activity_id, data, title, units, color, deleteable
     let parent = "#charts";
     let parent_width = document.getElementById("charts").offsetWidth;
 
-    let margin = { top: 20, right: 20, bottom: 40, left: 40 },
+    let margin = { top: 20, right: 20, bottom: 40, left: 50 },
         width = parent_width - margin.left - margin.right,
         height = 260 - margin.top - margin.bottom;
 
@@ -230,16 +230,21 @@ function draw_graph(root_url, activity_id, data, title, units, color, deleteable
 
     // Function to update chart.
     function update(new_data) {
-        x_scale.domain([0, d3.max(new_data, d => d.x)]);
-        y_scale.domain([0, d3.max(new_data, d => d.y)]);
-
         data = data.concat(new_data);
+        x_scale.domain([0, d3.max(data, d => d.x)]);
+        y_scale.domain([d3.min(data, d => d.y), d3.max(data, d => d.y)]);
 
         // Update the line and area.
         svg.select("path")
             .datum(new_data)
             .attr("d", line)
             .attr("d", area);
+
+        // Update the axis scales.
+        svg.select(".y_axis")
+            .call(d3.axisLeft(y_scale));
+        svg.select(".x_axis")
+            .call(d3.axisBottom(x_scale));
     }
     
     if (deleteable)
