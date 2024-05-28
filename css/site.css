@@ -199,7 +199,7 @@ tr {
 }
 .axis-grid line {
     fill: none;
-    stroke: var(--theme);
+    stroke: lightgray;
     stroke-width: 1;
 }
 .axis text {
