@@ -53,7 +53,9 @@
         let name = document.getElementById("name").value;
         let description = document.getElementById("description").value;
 
-        if (!isNaN(add_time))
+        if (isNaN(add_time))
+            add_time = Date.now() / 1000;
+        else
             add_time = add_time / 1000;
         if (!isNaN(retired_time))
             retired_time = retired_time / 1000;
