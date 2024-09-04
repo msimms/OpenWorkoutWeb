@@ -10,7 +10,7 @@ lxml
 markdown
 requests
 scipy
-sklearn
+scikit-learn
 unidecode
 Celery
 tensorflow
