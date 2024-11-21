@@ -30,13 +30,11 @@
 
     /// @function export_workout_to_zwo
     // Request a ZWO file.
-    function export_workout_to_zwo()
-    {
+    function export_workout_to_zwo() {
         let api_url = "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=zwo";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 create_local_file(response_text, "${workout_id}.zwo", "text/plain;charset=utf-8");
             }
         });
@@ -44,23 +42,19 @@
 
     /// @function export_workout_to_ical
     // Request an iCal file.
-    function export_workout_to_ical()
-    {
+    function export_workout_to_ical() {
         let api_url = "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=ics";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 create_local_file(response_text, "${workout_id}.zwo", "text/plain;charset=utf-8");
             }
         });
     }
 
     /// @function delete_workout
-    function delete_workout()
-    {
-        if (confirm('Are you sure you want to do this? This cannot be undone.'))
-        {
+    function delete_workout() {
+        if (confirm('Are you sure you want to do this? This cannot be undone.')) {
             let api_url = "${root_url}/api/1.0/delete_planned_workout?workout_id=${workout_id}";
 
             send_delete_request_async(api_url, function(status, response) {
@@ -74,8 +68,7 @@
 
     /// @function change_scheduled_time
     // Shows the date picker and submits a change to the workout date.
-    function change_scheduled_time()
-    {
+    function change_scheduled_time() {
         let api_url = "${root_url}/api/1.0/update_planned_workout";
         let scheduled_time = document.getElementById("scheduled_time").value;
         let dict = [];
@@ -91,8 +84,7 @@
     }
 
     /// @function change_activity_type
-    function change_activity_type()
-    {
+    function change_activity_type() {
         let api_url = "${root_url}/api/1.0/update_planned_workout";
         let activity_type = document.getElementById("activity_type").value;
         let dict = [];
@@ -108,8 +100,7 @@
     }
 
     /// @function change_workout_type
-    function change_workout_type()
-    {
+    function change_workout_type() {
         let api_url = "${root_url}/api/1.0/update_planned_workout";
         let workout_type = document.getElementById("workout_type").value;
         let dict = [];
@@ -125,8 +116,7 @@
     }
 
     /// @function create_point
-    function create_point(current_time, obj)
-    {
+    function create_point(current_time, obj) {
         let new_point = {};
 
         new_point["date"] = new Date(Number(current_time * 1000));
@@ -135,16 +125,14 @@
     }
 
     /// @function next_y
-    function next_y(pace, power)
-    {
+    function next_y(pace, power) {
         if (pace > 0)
             return pace;
         return power;
     }
 
     /// @function next_x
-    function next_x(current_x, distance, pace, duration)
-    {
+    function next_x(current_x, distance, pace, duration) {
         if (distance > 0 && pace > 0)
             current_x += (distance / pace) * 60;
         else
@@ -153,8 +141,7 @@
     }
 
     /// @function draw_workout_graph
-    function draw_workout_graph(description)
-    {
+    function draw_workout_graph(description) {
         let scheduled_time = description["scheduled time"];
         let warmup = description["warmup"];
         let cooldown = description["cooldown"];
@@ -163,22 +150,19 @@
         let graph_data = [];
 
         // Sanity check - nothing worth displaying.
-        if (intervals.length < 1)
-        {
+        if (intervals.length < 1) {
             return;
         }
 
         // Add the warmup.
-        if (warmup.length > 0)
-        {
+        if (warmup.length > 0) {
             let new_point = create_point(current_x, next_y(warmup.pace, warmup.PowerHigh));
             current_x += warmup.Duration;
             graph_data.push(new_point);
         }
 
         // Add the main set.
-        for (let i = 0; i < intervals.length - 1; ++i)
-        {
+        for (let i = 0; i < intervals.length - 1; ++i) {
             let interval = intervals[i];
             let num_repeats = interval["repeat"];
             let distance = interval["distance"]; // meters
@@ -190,8 +174,7 @@
             let recovery_pace = interval["recovery pace"];
             let recovery_power = interval["recovery power"]; // % of threshold power
 
-            for (let j = 0; j < num_repeats; ++j)
-            {
+            for (let j = 0; j < num_repeats; ++j) {
                 // Main
                 let y = next_y(pace, power);
                 let new_point = create_point(current_x, y);
@@ -202,8 +185,7 @@
                 graph_data.push(new_point);
 
                 // Recovery (last interval doesn't get a recovery)
-                if (j < num_repeats - 1)
-                {
+                if (j < num_repeats - 1) {
                     y = next_y(recovery_pace, recovery_power * 100.0);
                     new_point = create_point(current_x, y);
                     current_x = next_x(current_x, recovery_distance, recovery_pace, recovery_duration) - 1;
@@ -216,8 +198,7 @@
         }
 
         // Add the cooldown.
-        if (cooldown.length > 0)
-        {
+        if (cooldown.length > 0) {
             new_point = create_point(current_x, next_y(cooldown.pace, cooldown.PowerHigh * 100));
             graph_data.push(new_point);
             current_x += cooldown.Duration;
@@ -230,8 +211,7 @@
     }
 
     /// @function process_activity_type_list
-    function process_activity_type_list(response, selected_activity_type)
-    {
+    function process_activity_type_list(response, selected_activity_type) {
         let activity_type_list = JSON.parse(response);
         if (activity_type_list == null)
             return;
@@ -239,8 +219,7 @@
 
         let activity_type_obj = document.getElementById("activity_type");
 
-        for (let i = 0; i < activity_type_list.length - 1; i++)
-        {
+        for (let i = 0; i < activity_type_list.length - 1; i++) {
             let activity_type = activity_type_list[i];
             let option = document.createElement("option");
 
@@ -263,22 +242,18 @@
         workout_type_list.sort();
 
         let workout_type_obj = document.getElementById("workout_type");
-        if (workout_type_list.length == 0)
-        {
+        if (workout_type_list.length == 0) {
             workout_type_obj.hidden = true;
         }
-        else
-        {
-            for (let i = 0; i < workout_type_list.length - 1; i++)
-            {
+        else {
+            for (let i = 0; i < workout_type_list.length - 1; i++) {
                 let workout_type = workout_type_list[i];
                 let option = document.createElement("option");
 
                 option.value = workout_type;
                 option.text = workout_type;
 
-                if (selected_workout_type == workout_type)
-                {
+                if (selected_workout_type == workout_type) {
                     option.selected = true;
                 }
 
@@ -289,13 +264,11 @@
 
     /// @function list_activity_types
     // Get the list of all possible activity types. Needed to populate the activity type combo box.
-    function list_activity_types(selected_activity_type)
-    {
+    function list_activity_types(selected_activity_type) {
         let api_url = "${root_url}/api/1.0/list_activity_types";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 process_activity_type_list(response_text, selected_activity_type);
             }
         });
@@ -303,21 +276,18 @@
 
     /// @function list_workout_types
     // Get the list of all possible activity types. Needed to populate the activity type combo box.
-    function list_workout_types(selected_activity_type, selected_workout_type)
-    {
+    function list_workout_types(selected_activity_type, selected_workout_type) {
         let api_url = "${root_url}/api/1.0/list_workout_types_for_activity?activity_type=" + selected_activity_type;
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 process_workout_type_list(response_text, selected_workout_type);
             }
         });
     }
 
     // Called when the workout description is returned.
-    function process_workout_description(response)
-    {
+    function process_workout_description(response) {
         let obj_list = JSON.parse(response);
         if (obj_list == null)
             return;
@@ -327,19 +297,15 @@
         let activity_type_obj = document.getElementById("activity_type");
         let workout_type = obj_list["workout type"]
         let activity_type = obj_list["activity type"]
-        if (workout_type.length == 0)
-        {
+        if (workout_type.length == 0) {
         }
-        else
-        {
+        else {
             workout_type_obj.textContent = workout_type;
         }
-        if (activity_type.length == 0)
-        {
+        if (activity_type.length == 0) {
             activity_type.hidden = true;
         }
-        else
-        {
+        else {
             activity_type.textContent = activity_type;
         }
 
@@ -365,8 +331,7 @@
 
     /// @function get_workout_description
     // Request the URL that allows iCal to subscribe to the workouts calendar.
-    function get_workout_description()
-    {
+    function get_workout_description() {
         let api_url = "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=json";
 
         send_get_request_async(api_url, function (response_code, response_text) {
@@ -377,8 +342,7 @@
         });
     };
 
-    $(function()
-    {
+    $(function() {
         $('#scheduled_time').datepicker({
             value: new Date(),
             changeYear: true,

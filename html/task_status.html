@@ -22,8 +22,7 @@
 <script>
 
     /// @function append_to_table
-    function append_to_table(table, task_id, task_type, task_details, task_status)
-    {
+    function append_to_table(table, task_id, task_type, task_details, task_status) {
         let new_row = table.insertRow();
 
         cell = new_row.insertCell();
@@ -44,24 +43,20 @@
     }
 
     /// @function process_task_statuses
-    var process_task_statuses = function(records)
-    {
+    var process_task_statuses = function(records) {
         let table = document.getElementById("task_statuses");
 
-        for (let record of records)
-        {
+        for (let record of records) {
             append_to_table(table, record["internal task id"], record["task type"], record["task details"], record["task status"]);
         }
     }
 
     /// @function get_task_statuses
-    function get_task_statuses()
-    {
+    function get_task_statuses() {
         let api_url = "${root_url}/api/1.0/get_task_statuses";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_task_statuses(records);
             }

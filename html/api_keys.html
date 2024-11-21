@@ -22,8 +22,7 @@
 
     /// @function delete_api_key
     // Button handler for when the user requests to delete an API key.
-    function delete_api_key(key)
-    {
+    function delete_api_key(key) {
         if (confirm('Are you sure you want to do this?'))
         {
             let api_url = "${root_url}/api/1.0/delete_api_key?key=" + key;
@@ -39,8 +38,7 @@
 
     /// @function generate_new_api_key
     // Button handler for when the user requests a new API key.
-    function generate_new_api_key()
-    {
+    function generate_new_api_key() {
         let api_url = "${root_url}/api/1.0/generate_api_key";
         let dict = [];
 
@@ -53,8 +51,7 @@
     }
 
     // Handler for when we receive the list of API keys from the server.
-    var process_keys = function(records)
-    {
+    var process_keys = function(records) {
         let keys_table = document.getElementById("Keys");
         let new_row = keys_table.insertRow();
         let cell = new_row.insertCell();
@@ -63,8 +60,7 @@
         cell = new_row.insertCell();
         cell.appendChild(document.createTextNode("Maximum Queries Per Day"));
 
-        for (let key_record of records)
-        {
+        for (let key_record of records) {
             let new_row = keys_table.insertRow();
             let cell = new_row.insertCell();
             let btn = document.createElement('button');
@@ -86,13 +82,11 @@
 
     /// @function get_keys
     // Request the user's API keys.
-    function get_keys()
-    {
+    function get_keys() {
         let api_url = "${root_url}/api/1.0/list_api_keys";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_keys(records);
             }

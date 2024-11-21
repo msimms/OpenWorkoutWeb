@@ -22,10 +22,8 @@
 
     /// @function delete_activity
     // Button handler for when the user requests to delete the activity.
-    function delete_activity()
-    {
-        if (confirm('Are you sure you want to do this?'))
-        {
+    function delete_activity() {
+        if (confirm('Are you sure you want to do this?')) {
             let api_url = "${root_url}/api/1.0/delete_activity";
             let dict = [];
 

@@ -23,8 +23,7 @@
 
     /// @function update_settings
     // Button handler for when the user wants to update their preference settings.
-    function update_settings()
-    {
+    function update_settings() {
         let api_url = "${root_url}/api/1.0/update_settings";
         let privacy = document.getElementById("privacy_options").value;
         let units = document.getElementById("units").value;
@@ -43,8 +42,7 @@
 
     /// @function update_email
     // Button handler for when the user wants to update their email.
-    function update_email()
-    {
+    function update_email() {
         let api_url = "${root_url}/api/1.0/update_email";
         let new_email = document.getElementById("new_email").value;
         let dict = [];
@@ -59,8 +57,7 @@
 
     /// @function update_password
     // Button handler for when the user wants to update their password.
-    function update_password()
-    {
+    function update_password() {
         let api_url = "${root_url}/api/1.0/update_password";
         let current_pword = document.getElementById("current_password").value;
         let new_pword1 = document.getElementById("new_password1").value;
@@ -79,22 +76,18 @@
 
     /// @function manage_api_keys
     // Button handler for when the user wants to navigate to the API management page.
-    function manage_api_keys()
-    {
+    function manage_api_keys() {
         window.location.replace("${root_url}/api_keys");
     }
 
     /// @function delete_gear
     // Button handler for when the user wants to delete their gear.
-    function delete_gear()
-    {
-        if (confirm('Are you sure you want to do this?'))
-        {
+    function delete_gear() {
+        if (confirm('Are you sure you want to do this?')) {
             let api_url = "${root_url}/api/1.0/delete_users_gear";
             let pword = document.getElementById("password").value;
 
-            if (pword.length > 0)
-            {
+            if (pword.length > 0) {
                 let dict = [];
 
                 dict.push({["password"] : pword});
@@ -106,8 +99,7 @@
                         alert(response)
                 });
             }
-            else
-            {
+            else {
                 alert("Please enter your password.");
             }
         }
@@ -115,15 +107,12 @@
 
     /// @function delete_activities
     // Button handler for when the user wants to delete their activities.
-    function delete_activities()
-    {
-        if (confirm('Are you sure you want to do this?'))
-        {
+    function delete_activities() {
+        if (confirm('Are you sure you want to do this?')) {
             let api_url = "${root_url}/api/1.0/delete_users_activities";
             let pword = document.getElementById("password").value;
 
-            if (pword.length > 0)
-            {
+            if (pword.length > 0) {
                 let dict = [];
 
                 dict.push({["password"] : pword});
@@ -135,8 +124,7 @@
                         alert(response)
                 });
             }
-            else
-            {
+            else {
                 alert("Please enter your password.");
             }
         }
@@ -144,15 +132,12 @@
 
     /// @function delete_user
     // Button handler for when the user wants to delete their account.
-    function delete_user()
-    {
-        if (confirm('Are you sure you want to do this?'))
-        {
+    function delete_user() {
+        if (confirm('Are you sure you want to do this?')) {
             let api_url = "${root_url}/api/1.0/delete_user";
             let pword = document.getElementById("password").value;
 
-            if (pword.length > 0)
-            {
+            if (pword.length > 0) {
                 let dict = [];
 
                 dict.push({["password"] : pword});
@@ -164,23 +149,19 @@
                         alert(response)
                 });
             }
-            else
-            {
+            else {
                 alert("Please enter your password.");
             }
         }
     }
 
     // Handler for when the server returns the user's settings.
-    var process_user_settings = function(records)
-    {
-        for (let record of records)
-        {
+    var process_user_settings = function(records) {
+        for (let record of records) {
             let key = Object.keys(record)[0];
             let value = record[key].toLowerCase();
 
-            if (key == "default privacy")
-            {
+            if (key == "default privacy") {
                 let element = document.getElementById("privacy_options");
 
                 if (value == "public")
@@ -188,8 +169,7 @@
                 else
                     element.selectedIndex = 1;
             }
-            else if (key == "preferred units")
-            {
+            else if (key == "preferred units") {
                 let element = document.getElementById("units");
 
                 if (value == "metric")
@@ -197,8 +177,7 @@
                 else
                     element.selectedIndex = 1;
             }
-            else if (key == "preferred first day of week")
-            {
+            else if (key == "preferred first day of week") {
                 let element = document.getElementById("week_start");
 
                 if (value == "sunday")

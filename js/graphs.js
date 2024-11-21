@@ -24,16 +24,14 @@
 
 /// @function pad
 /// Utility function for padding a number with leading zeroes.
-function pad(num, size)
-{
+function pad(num, size) {
     var s = "000000000" + num;
     return s.substr(s.length - size);
 }
 
 /// @function convert_seconds_to_hours_mins_secs
 /// Converts seconds to HH:MM:SS format.
-function convert_seconds_to_hours_mins_secs(seconds_in)
-{
+function convert_seconds_to_hours_mins_secs(seconds_in) {
     minutes = Math.trunc(seconds_in / 60);
     hours = Math.trunc(minutes / 60);
     minutes = Math.trunc(minutes % 60);
@@ -42,8 +40,7 @@ function convert_seconds_to_hours_mins_secs(seconds_in)
 }
 
 /// @function get_graph_color
-function get_graph_color(key)
-{
+function get_graph_color(key) {
     if (key == "Speed" || key == "Current Speed")
         return "DodgerBlue";
     if (key == "Pace")
@@ -85,10 +82,8 @@ function get_graph_color(key)
 
 /// @function draw_graph
 /// Graph is filled under the line.
-function draw_graph(root_url, activity_id, data, title, units, color, deleteable)
-{
-    if (data.length <= 1)
-    {
+function draw_graph(root_url, activity_id, data, title, units, color, deleteable) {
+    if (data.length <= 1) {
         return;
     }
 
@@ -247,8 +242,7 @@ function draw_graph(root_url, activity_id, data, title, units, color, deleteable
             .call(d3.axisBottom(x_scale));
     }
     
-    if (deleteable)
-    {
+    if (deleteable) {
         // Create a div for the delete button.
         let div_name = "delete_" + title
         d3.select("#charts")
@@ -272,8 +266,7 @@ function draw_graph(root_url, activity_id, data, title, units, color, deleteable
 
 /// @function draw_accelerometer_graph
 /// A simple line graph with x data, a title, and a color.
-function draw_accelerometer_graph(data, title, color)
-{
+function draw_accelerometer_graph(data, title, color) {
     data = data.map(function(currentValue, index, array) {
         return {"x": index, "y": currentValue.value};
     });
@@ -282,8 +275,7 @@ function draw_accelerometer_graph(data, title, color)
 }
 
 /// @function draw_sensor_graph
-function draw_sensor_graph(root_url, activity_id, data, title, units, color, deleteable)
-{
+function draw_sensor_graph(root_url, activity_id, data, title, units, color, deleteable) {
     data = data.map(function(currentValue, index, array) {
         return {"x": index, "y": currentValue.value};
     });
@@ -292,10 +284,8 @@ function draw_sensor_graph(root_url, activity_id, data, title, units, color, del
 }
 
 /// @function draw_bar_chart
-function draw_bar_chart(data, title, color)
-{
-    if (data.length <= 1)
-    {
+function draw_bar_chart(data, title, color) {
+    if (data.length <= 1) {
         return;
     }
 
@@ -315,8 +305,7 @@ function draw_bar_chart(data, title, color)
         let coordinates = d3.mouse(this);
         let x = Math.floor((coordinates[0] / width) * data.length);
 
-        if (x < data.length)
-        {
+        if (x < data.length) {
             tooltip
                 .html("<b>" + convert_seconds_to_hours_mins_secs(data[x]) + "</b>")
                 .style("top", (event.pageY) + "px")
@@ -375,14 +364,11 @@ function draw_bar_chart(data, title, color)
 }
 
 /// @function draw_intervals_graph
-function draw_intervals_graph(start_time_ms, interval_data)
-{
+function draw_intervals_graph(start_time_ms, interval_data) {
     interval_graph = [];
 
-    if (interval_data.length > 0)
-    {
-        for (let i in interval_data)
-        {
+    if (interval_data.length > 0) {
+        for (let i in interval_data) {
             let interval = interval_data[i];
             let start_interval_time = interval[0];
             let end_interval_time = interval[1];
@@ -410,25 +396,21 @@ function draw_intervals_graph(start_time_ms, interval_data)
 }
 
 /// @function draw_speed_graph
-function draw_speed_graph(start_time_ms, end_time_ms, data)
-{
+function draw_speed_graph(start_time_ms, end_time_ms, data) {
     let unit_system = "${unit_system}";
     let speed_units = ""
     let pace_units = ""
 
-    if (unit_system == "metric")
-    {
+    if (unit_system == "metric") {
         speed_units = "kph";
         pace_units = "mins/km";
     }
-    else
-    {
+    else {
         speed_units = "mph";
         pace_units = "mins/mile";
     }
 
-    if (is_foot_based_activity)
-    {
+    if (is_foot_based_activity) {
         let speed_data = convert_speed_graph_to_display_units(unit_system, data);
         let pace_data = convert_speed_graph_to_pace_graph(unit_system, data);
         let gap_data = compute_grade_adjusted_pace(gradient_curve, pace_data);
@@ -437,8 +419,7 @@ function draw_speed_graph(start_time_ms, end_time_ms, data)
         draw_sensor_graph(root_url, activity_id, pace_data, "Pace", pace_units, get_graph_color(key), false);
         draw_sensor_graph(root_url, activity_id, gap_data, "Grade Adjusted Pace", pace_units, get_graph_color(key), false);
     }
-    else
-    {
+    else {
         let speed_data = convert_speed_graph_to_display_units(unit_system, data);
 
         draw_sensor_graph(root_url, activity_id, speed_data, "Speed", speed_units, get_graph_color(key), false);
@@ -446,8 +427,7 @@ function draw_speed_graph(start_time_ms, end_time_ms, data)
 }
 
 /// @function clear_graphs
-function clear_graphs()
-{
+function clear_graphs() {
     let svg = d3.select("#charts");
     svg.selectAll("*").remove();
 }

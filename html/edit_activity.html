@@ -22,8 +22,7 @@
 <script>
 
     /// @function update_activity_metadata
-    function update_activity_metadata()
-    {
+    function update_activity_metadata() {
         let api_url = "${root_url}/api/1.0/update_activity_metadata";
         let activity_name = document.getElementById("activity_name").value;
         let activity_type = document.getElementById("activity_type").value;
@@ -44,22 +43,19 @@
     }
 
     /// @function process_activity_type_list
-    var process_activity_type_list = function(activity_type_list)
-    {
+    var process_activity_type_list = function(activity_type_list) {
         let activity_type_select = document.getElementById("activity_type");
 
         activity_type_list.sort();
 
-        for (let i = 0; i < activity_type_list.length; i++)
-        {
+        for (let i = 0; i < activity_type_list.length; i++) {
             let activity_type = activity_type_list[i];
             let option = document.createElement("option");
 
             option.value = activity_type;
             option.text = activity_type;
 
-            if (activity_type == "${activity_type}")
-            {
+            if (activity_type == "${activity_type}") {
                 option.selected = true;
             }
             activity_type_select.appendChild(option);
@@ -73,8 +69,7 @@
         let api_url = "${root_url}/api/1.0/list_activity_types";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_activity_type_list(records);
             }

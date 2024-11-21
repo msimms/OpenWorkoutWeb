@@ -33,14 +33,12 @@
     var birthday = 0
 
     /// @function process_activity_type_list
-    var process_activity_type_list = function(activity_type_list)
-    {
+    var process_activity_type_list = function(activity_type_list) {
         let activity_type_select = document.getElementById("activity_type");
 
         activity_type_list.sort();
 
-        for (let i = 0; i < activity_type_list.length; i++)
-        {
+        for (let i = 0; i < activity_type_list.length; i++) {
             let activity_type = activity_type_list[i];
             let option = document.createElement("option");
 
@@ -51,13 +49,11 @@
     }
 
     /// @function list_activity_types
-    function list_activity_types()
-    {
+    function list_activity_types() {
         let api_url = "${root_url}/api/1.0/list_activity_types";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_activity_type_list(records);
             }
@@ -66,8 +62,7 @@
 
     /// @function update_birthday
     // Button handler for when the user updates their birthday.
-    function update_birthday()
-    {
+    function update_birthday() {
         let api_url = "${root_url}/api/1.0/update_profile";
         let birthday = document.getElementById("birthday").value;
         let dict = [];
@@ -83,16 +78,14 @@
 
     /// @function update_height
     // Button handler for when the user updates their height.
-    function update_height()
-    {
+    function update_height() {
         let api_url = "${root_url}/api/1.0/update_profile";
         let height = parseFloat(document.getElementById("height").value);
         let height_units = document.getElementById("height_units").innerHTML;
         let dict = [];
 
         // Convert to metric.
-        if (height_units == "inches")
-        {
+        if (height_units == "inches") {
             height *= 0.0254;
         }
 
@@ -106,16 +99,14 @@
 
     /// @function update_weight
     // Button handler for when the user updates their weight.
-    function update_weight()
-    {
+    function update_weight() {
         let api_url = "${root_url}/api/1.0/update_profile";
         let weight = parseFloat(document.getElementById("weight").value);
         let weight_units = document.getElementById("weight_units").innerHTML;
         let dict = [];
 
         // Convert to metric.
-        if (weight_units == "pounds")
-        {
+        if (weight_units == "pounds") {
             weight /= 2.2;
         }
 
@@ -129,8 +120,7 @@
 
     /// @function update_biological_sex
     // Button handler for when the user updates their biological sex.
-    function update_biological_sex()
-    {
+    function update_biological_sex() {
         let api_url = "${root_url}/api/1.0/update_profile";
         let biological_sex = document.getElementById("biological_sex").value;
         let dict = [];
@@ -145,8 +135,7 @@
 
     /// @function update_resting_hr
     // Button handler for when the user updates their resting heart rate.
-    function update_resting_hr()
-    {
+    function update_resting_hr() {
         let api_url = "${root_url}/api/1.0/update_profile";
         let resting_hr = document.getElementById("resting heart rate").value;
         let dict = [];
@@ -161,8 +150,7 @@
 
     /// @function update_maximum_hr
     // Button handler for when the user updates their maximum heart rate.
-    function update_maximum_hr()
-    {
+    function update_maximum_hr() {
         let api_url = "${root_url}/api/1.0/update_profile";
         let max_hr = document.getElementById("max heart rate").value;
         let dict = [];
@@ -176,16 +164,14 @@
     }
 
     /// @function append_to_pr_table
-    function append_to_pr_table(table, row_name, row_value)
-    {
+    function append_to_pr_table(table, row_name, row_value) {
         let new_row = table.insertRow();
         let cell = new_row.insertCell();
         let text = document.createTextNode(row_name);
 
         cell.appendChild(text);
 
-        if (row_value.length > 0)
-        {
+        if (row_value.length > 0) {
             let a = document.createElement('a');
 
             a.appendChild(document.createTextNode(row_value[0]));
@@ -197,45 +183,37 @@
     }
 
     /// @function process_personal_records
-    var process_personal_records = function(records)
-    {
+    var process_personal_records = function(records) {
         let cycling_table = document.getElementById("Cycling");
         let running_table = document.getElementById("Running");
 
         let sorted_cycling_keys = Object.keys(records.Cycling).sort()
         let sorted_running_keys = Object.keys(records.Running).sort()
 
-        if (sorted_cycling_keys.length > 0)
-        {
-            for (let key of sorted_cycling_keys)
-            {
+        if (sorted_cycling_keys.length > 0) {
+            for (let key of sorted_cycling_keys) {
                 append_to_pr_table(cycling_table, key, records.Cycling[key]);
             }
         }
-        else
-        {
+        else {
             append_to_pr_table(cycling_table, "None", "");
         }
 
-        if (sorted_running_keys.length > 0)
-        {
+        if (sorted_running_keys.length > 0) {
             run_prs = {}
-            for (let key of sorted_running_keys)
-            {
+            for (let key of sorted_running_keys) {
                 if (key.includes("Best 5K"))
                     run_prs[key] = records.Running[key][2];
                 append_to_pr_table(running_table, key, records.Running[key]);
             }
         }
-        else
-        {
+        else {
             append_to_pr_table(running_table, "None", "");
         }
     }
 
     /// @function append_to_defaults_table
-    function append_to_defaults_table(table, default_info)
-    {
+    function append_to_defaults_table(table, default_info) {
         let new_row = table.insertRow();
         let cell = new_row.insertCell();
 
@@ -248,8 +226,7 @@
     }
 
     /// @function append_to_power_zones_table
-    function append_to_power_zones_table(table, zone_num, zone_low, zone_high)
-    {
+    function append_to_power_zones_table(table, zone_num, zone_low, zone_high) {
         let new_row = table.insertRow();
         let cell = new_row.insertCell();
 
@@ -259,8 +236,7 @@
     }
 
     /// @function append_to_hr_zones_table
-    function append_to_hr_zones_table(table, zone_num, zone_low, zone_high)
-    {
+    function append_to_hr_zones_table(table, zone_num, zone_low, zone_high) {
         let new_row = table.insertRow();
         let cell = new_row.insertCell();
 
@@ -270,88 +246,70 @@
     }
 
     /// @function process_user_settings
-    var process_user_settings = function(records)
-    {
+    var process_user_settings = function(records) {
         let units = "metric";
         let height_units_obj = document.getElementById("height_units");
         let weight_units_obj = document.getElementById("weight_units");
         let refresh_hr_zones = false;
 
         // We need to know the unit system first.
-        for (let record of records)
-        {
+        for (let record of records) {
             let key = Object.keys(record)[0];
 
-            if (key == "preferred units")
-            {
+            if (key == "preferred units") {
                 units = record[key];
             }
         }
     
-        for (let record of records)
-        {
+        for (let record of records) {
             let key = Object.keys(record)[0];
             let value = record[key];
             let element = document.getElementById(key);
 
-            if (element)
-            {
-                if (key == "height")
-                {
-                    if (!isNaN(value))
-                    {
-                        if (units == "standard")
-                        {
+            if (element) {
+                if (key == "height") {
+                    if (!isNaN(value)) {
+                        if (units == "standard") {
                             value *= 39.37008;
                             height_units_obj.innerHTML = "inches";
                         }
-                        else
-                        {
+                        else {
                             height_units_obj.innerHTML = "meters";
                         }
                         element.value = value.toFixed(1);
                     }
                 }
-                else if (key == "weight")
-                {
-                    if (!isNaN(value))
-                    {
-                        if (units == "standard")
-                        {
+                else if (key == "weight") {
+                    if (!isNaN(value)) {
+                        if (units == "standard") {
                             value *= 2.2;
                             weight_units_obj.innerHTML = "pounds";
                         }
-                        else
-                        {
+                        else {
                             weight_units_obj.innerHTML = "kilograms";
                         }
                         element.value = value.toFixed(1);
                     }
                 }
-                else if (key == "birthday")
-                {
+                else if (key == "birthday") {
                     birthday = value * 1000;
                     let n = new Date(birthday);
                     element.placeholder = n.toLocaleDateString();
                 }
-                else if (key == "biological sex")
-                {
+                else if (key == "biological sex") {
                     if (value == "male")
                         element.selectedIndex = 0;
                     else
                         element.selectedIndex = 1;
                 }
-                else if (key == "resting heart rate")
-                {
-                    if (!isNaN(value) && value > 1.0)
-                    {
+                else if (key == "resting heart rate") {
+                    if (!isNaN(value) && value > 1.0) {
                         element.value = value.toFixed(1);
                         resting_hr = value;
                         refresh_hr_zones = true;
                     }
                 }
-                else if (key == "max heart rate")
-                {
+                else if (key == "max heart rate") {
                     if (!isNaN(value) && value > 1.0)
                     {
                         element.value = value.toFixed(1);
@@ -359,10 +317,8 @@
                         refresh_hr_zones = true;
                     }
                 }
-                else if (key == "estimated max heart rate")
-                {
-                    if (!isNaN(value) && value > 1.0)
-                    {
+                else if (key == "estimated max heart rate") {
+                    if (!isNaN(value) && value > 1.0) {
                         element.value = value.toFixed(1);
                         estimated_max_hr = value;
                         refresh_hr_zones = true;
@@ -371,15 +327,13 @@
             }
         }
 
-        if (refresh_hr_zones)
-        {
+        if (refresh_hr_zones) {
             get_hr_zones();
         }
     }
 
     // Handler for when the server returns the user's VO2Max.
-    var process_vo2_max = function(vo2max)
-    {
+    var process_vo2_max = function(vo2max) {
         let vo2_max_elem = document.getElementById("vo2_max");
 
         if (vo2max == 0)
@@ -389,18 +343,15 @@
     }
 
     // Handler for when the server returns the user's heart rate zones.
-    var process_hr_zones = function(zones)
-    {
+    var process_hr_zones = function(zones) {
         let zones_elem = document.getElementById("hr_zones");
         zones_elem.innerHTML = "";
 
-        if (zones && zones.length > 0)
-        {
+        if (zones && zones.length > 0) {
             let zone_num = 1;
             let zone_low = 1;
 
-            for (let zone of zones)
-            {
+            for (let zone of zones) {
                 append_to_hr_zones_table(zones_elem, zone_num, zone_low, zone);
                 zone_num++;
                 zone_low = zone;
@@ -409,18 +360,15 @@
     }
 
     // Handler for when the server fails to return the user's heart rate zones.
-    var process_hr_zones_error = function()
-    {
+    var process_hr_zones_error = function() {
     }
 
     // Handler for when the server returns the user's FTP.
-    var process_ftp = function(ftp)
-    {
+    var process_ftp = function(ftp) {
         let ftp_elem = document.getElementById("ftp");
         let ftp_error_elem = document.getElementById("ftp_error");
 
-        if (ftp)
-        {
+        if (ftp) {
             // Update the FTP element.
             ftp_elem.value = ftp.toFixed(1) + " watts";
             ftp_error_elem.hidden = true;
@@ -431,15 +379,13 @@
             let zone_low = 1;
             let zones_elem = document.getElementById("power_zones");
 
-            for (let zone of zones)
-            {
+            for (let zone of zones) {
                 append_to_power_zones_table(zones_elem, zone_num, zone_low, zone);
                 zone_num++;
                 zone_low = zone;
             }
         }
-        else
-        {
+        else {
             let error_str = "Cycling activities with power data that was recorded in the last six months must be uploaded before your FTP can be estimated.";
 
             ftp_error_elem.innerHTML = error_str;
@@ -448,8 +394,7 @@
     }
 
     // Handler for when the server returns the user's BMI.
-    var process_bmi = function(bmi)
-    {
+    var process_bmi = function(bmi) {
         let bmi_elem = document.getElementById("bmi");
 
         if (bmi == 0)
@@ -459,13 +404,11 @@
     }
 
     /// @function get_personal_records
-    function get_personal_records()
-    {
+    function get_personal_records() {
         let api_url = "${root_url}/api/1.0/list_personal_records";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_personal_records(records);
             }
@@ -473,13 +416,11 @@
     }
 
     /// @function get_user_settings
-    function get_user_settings()
-    {
+    function get_user_settings() {
         let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=preferred%20units,height,weight,birthday,biological%20sex,resting%20heart%20rate,max%20heart%20rate,estimated%20max%20heart%20rate";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_user_settings(records);
             }
@@ -487,13 +428,11 @@
     }
 
     // Request the user's VO2Max.
-    function get_vo2_max()
-    {
+    function get_vo2_max() {
         let api_url = "${root_url}/api/1.0/estimate_vo2_max";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_vo2_max(records);
             }
@@ -501,13 +440,11 @@
     }
 
     // Request the user's FTP.
-    function get_ftp()
-    {
+    function get_ftp() {
         let api_url = "${root_url}/api/1.0/estimate_ftp";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_ftp(records);
             }
@@ -515,13 +452,11 @@
     }
 
     // Request the user's BMI.
-    function get_bmi()
-    {
+    function get_bmi() {
         let api_url = "${root_url}/api/1.0/estimate_bmi";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_bmi(records);
             }
@@ -529,23 +464,20 @@
     }
 
     // Request the user's heart rate zones.
-    function get_hr_zones()
-    {
+    function get_hr_zones() {
         let now = Date.now();
         let age_in_years = (now - birthday) / (365.25 * 24 * 60 * 60 * 1000);
         let api_url = "${root_url}/api/1.0/list_hr_zones?estimated%20max%20heart%20rate=" + estimated_max_hr + "&max%20heart%20rate=" + max_hr + "&resting%20heart%20rate=" + resting_hr + "&age%20in%20years=" + age_in_years;
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_hr_zones(records);
             }
         });
     }
 
-    $(function()
-    {
+    $(function() {
         $('#birthday').datepicker({
             value: new Date(),
             yearRange: '1910:2020',

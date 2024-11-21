@@ -21,8 +21,7 @@
 <script>
 
     /// @function append_to_gear_table
-    function append_to_user_table(table, username)
-    {
+    function append_to_user_table(table, username) {
         let new_row = table.insertRow();
         cell = new_row.insertCell();
         cell.appendChild(document.createTextNode(username));
@@ -41,24 +40,20 @@
     }
 
     /// @function process_user_list
-    var process_user_list = function(records)
-    {
+    var process_user_list = function(records) {
         let users_table = document.getElementById("users");
 
-        for (let record of records)
-        {
+        for (let record of records) {
             append_to_user_table(users_table, record);
         }
     }
 
     /// @function delete_users_without_devices
-    function list_users_without_devices(key)
-    {
+    function list_users_without_devices(key) {
         let api_url = "${root_url}/api/1.0/list_users_without_devices";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_user_list(records);
             }
@@ -66,10 +61,8 @@
     }
 
     /// @function delete_orphaned_activities
-    function delete_orphaned_activities(key)
-    {
-        if (confirm('Are you sure you want to do this?'))
-        {
+    function delete_orphaned_activities(key) {
+        if (confirm('Are you sure you want to do this?')) {
             let api_url = "${root_url}/api/1.0/delete_orphaned_activities";
 
             send_delete_request_async(api_url, function(status, response) {

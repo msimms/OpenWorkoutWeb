@@ -24,10 +24,8 @@
 <script>
     /// @function delete_pace_plan
     // Button handler for when the user requests pace plan deletion.
-    function delete_pace_plan(pace_plan_id)
-    {
-        if (confirm('Are you sure you want to do this?'))
-        {
+    function delete_pace_plan(pace_plan_id) {
+        if (confirm('Are you sure you want to do this?')) {
             let api_url = "${root_url}/api/1.0/delete_pace_plan?id=" + pace_plan_id;
 
             send_delete_request_async(api_url, function(status, response) {
@@ -41,8 +39,7 @@
 
     /// @function append_to_pace_plans_table
     // Handler for when the server returns the user's pace plan list.
-    function append_to_pace_plans_table(table, id, name, description, target_distance, target_distance_units, target_time, target_splits, target_splits_units, last_updated_time)
-    {
+    function append_to_pace_plans_table(table, id, name, description, target_distance, target_distance_units, target_time, target_splits, target_splits_units, last_updated_time) {
         let new_row = table.insertRow();
 
         // Name
@@ -55,12 +52,10 @@
 
         // Target distance.
         let target_distance_str = target_distance.toFixed(2).toString();
-        if (target_distance_units == "standard")
-        {
+        if (target_distance_units == "standard") {
             target_distance_str += " mile(s)";
         }
-        else
-        {
+        else {
             target_distance_str += " km(s)";
         }
         cell = new_row.insertCell();
@@ -72,16 +67,13 @@
 
         // Splits.
         let splits_str = target_splits.toFixed(2).toString();
-        if (target_splits == 0)
-        {
+        if (target_splits == 0) {
             splits_str = "Even splits";
         }
-        else if (target_splits_units == "standard")
-        {
+        else if (target_splits_units == "standard") {
             splits_str += " seconds/mile";
         }
-        else
-        {
+        else {
             splits_str += " seconds/km";
         }
         cell = new_row.insertCell();
@@ -103,25 +95,21 @@
     }
 
     // Process a list of pace plans returned from the server.
-    var process_pace_plans = function(records)
-    {
+    var process_pace_plans = function(records) {
         let table = document.getElementById("pace_plans");
 
-        for (let record of records)
-        {
+        for (let record of records) {
             append_to_pace_plans_table(table, record.id, record.name, record.description, record["target distance"], record["target distance units"], record["target time"], record["target splits"], record["target splits units"], record["last updated time"])
         }
     }
 
     /// @function list_pace_plans
     // Request the pace plans.
-    function list_pace_plans()
-    {
+    function list_pace_plans() {
         let api_url = "${root_url}/api/1.0/list_pace_plans";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_pace_plans(records);
             }

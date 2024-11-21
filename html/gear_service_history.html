@@ -29,14 +29,12 @@
     var gear_name = ""
 
     /// @function service_sort
-    function service_sort(a, b)
-    {
+    function service_sort(a, b) {
         return a.date < b.date ? -1 : 1;
     }
 
     /// @function update_gear_name
-    function update_gear_name()
-    {
+    function update_gear_name() {
         let api_url = "${root_url}/api/1.0/update_gear";
         let dict = [];
         let result_text = {};
@@ -52,8 +50,7 @@
     }
 
     /// @function create_service_record
-    function create_service_record()
-    {
+    function create_service_record() {
         let api_url = "${root_url}/api/1.0/create_service_record";
         let dict = [];
         let service_date_elem = document.getElementById("service_date");
@@ -74,14 +71,12 @@
     }
 
     /// @function cancel_service_record_creation
-    function cancel_service_record_creation()
-    {
+    function cancel_service_record_creation() {
         window.location.reload();
     }
 
     /// @function get_new_service_record_info
-    function get_new_service_record_info()
-    {
+    function get_new_service_record_info() {
         let date_added = document.getElementById("service_date");
         let n = new Date();
 
@@ -92,10 +87,8 @@
     }
 
     /// @function delete_service_record
-    function delete_service_record(service_id)
-    {
-        if (confirm('Are you sure you want to do this?'))
-        {
+    function delete_service_record(service_id) {
+        if (confirm('Are you sure you want to do this?')) {
             let api_url = "${root_url}/api/1.0/delete_service_record?gear_id=${gear_id}&service_id=" + service_id;
 
             send_delete_request_async(api_url, function(status, response) {
@@ -108,8 +101,7 @@
     }
 
     /// @function append_to_service_history_table
-    function append_to_service_history_table(table, service_date, description, service_id)
-    {
+    function append_to_service_history_table(table, service_date, description, service_id) {
         let new_row = table.insertRow();
         let cell = new_row.insertCell();
         cell.appendChild(document.createTextNode(unix_time_to_local_date_string(service_date)));
@@ -129,13 +121,11 @@
     }
 
     /// @function get_gear_distance
-    function get_gear_distance(gear_name)
-    {
+    function get_gear_distance(gear_name) {
         let api_url = "${root_url}/api/1.0/get_distance_for_tag?tag=" + gear_name
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 let gear_distance_elem = document.getElementById("gear_distance");
 
@@ -146,20 +136,16 @@
 
     /// @function get_gear
     // List all the gear associated with the current user.
-    function get_gear()
-    {
+    function get_gear() {
         let api_url = "${root_url}/api/1.0/list_gear"
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 let history_table = document.getElementById("service_history");
 
-                for (let gear_record of records)
-                {
-                    if (gear_record.gear_id == "${gear_id}")
-                    {
+                for (let gear_record of records) {
+                    if (gear_record.gear_id == "${gear_id}") {
                         // Add the title.
                         let gear_name_title = document.getElementById("gear_name");
                         gear_name = gear_record.name
@@ -184,12 +170,10 @@
                             gear_desc_title.innerText = "Not retired";
 
                         // Add the service records.
-                        if (gear_record.hasOwnProperty('service_history'))
-                        {
+                        if (gear_record.hasOwnProperty('service_history')) {
                             let sorted_service_records = gear_record.service_history.sort(service_sort)
 
-                            for (let service_record of sorted_service_records)
-                            {
+                            for (let service_record of sorted_service_records) {
                                 append_to_service_history_table(history_table, service_record.date, service_record.description, service_record.service_id);
                             }
                         }

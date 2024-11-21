@@ -22,10 +22,8 @@
 <script>
 
     /// @function trim_activity
-    function trim_activity()
-    {
-        if (confirm('Are you sure you want to do this? This cannot be undone.'))
-        {
+    function trim_activity() {
+        if (confirm('Are you sure you want to do this? This cannot be undone.')) {
             let api_url = "${root_url}/api/1.0/trim_activity";
             let dict = [];
             let quick_trim_selection = document.getElementById("quick_trim_options").value;

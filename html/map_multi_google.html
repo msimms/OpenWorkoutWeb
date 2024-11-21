@@ -22,16 +22,14 @@
     div { margin: 0px }
     #map_canvas { height: 75% }
 
-    div.bar
-    {
+    div.bar {
         display: inline-block;
         width: 20px;
         height: 75px;	/* Gets overriden by D3-assigned height below */
         background-color: teal;
     }
 
-    path
-    {
+    path {
         stroke: steelblue;
         stroke-width: 2;
         fill: none;
@@ -51,20 +49,17 @@
     var info_window = null
     var last_lat = ${lastLat}
     var last_lon = ${lastLon}
-    var route_coordinates =
-    [
+    var route_coordinates = [
 ${route}
     ];
 
     /// @function new_coord
-    function new_coord(x, y)
-    {
+    function new_coord(x, y) {
         return new google.maps.LatLng(x, y);
     }
 
     /// @function add_route
-    function add_route(route)
-    {
+    function add_route(route) {
         var route_path = new google.maps.Polyline
         ({
             path: route,
@@ -78,8 +73,7 @@ ${route}
     }
 
     /// @function initialize
-    function initialize()
-    {
+    function initialize() {
         var mapOptions =
         {
             center: new google.maps.LatLng(${lastLat}, ${lastLon}),
@@ -103,15 +97,13 @@ ${route}
     google.maps.event.addDomListener(window, 'load', initialize);
 
     /// @function append_to_track
-    var append_to_track = function(obj_list)
-    {
+    var append_to_track = function(obj_list) {
         if (obj_list == null)
             return;
         if (obj_list.length == 0)
             return;
 
-        for (let i = 0; i < obj_list.length; ++i)
-        {
+        for (let i = 0; i < obj_list.length; ++i) {
             let path = route_path.getPath();
             routeCoordinates.push(new google.maps.LatLng(obj_list[i].latitude, obj_list[i].longitude));
             route_path.setPath(routeCoordinates);
@@ -123,8 +115,7 @@ ${route}
     };
 
     /// @function update_metadata
-    var update_metadata = function(obj_list)
-    {
+    var update_metadata = function(obj_list) {
         if (obj_list == null)
             return;
 
@@ -135,10 +126,8 @@ ${route}
             '<div id="bodyContent">' +
             '<p>';
 
-        for (let i = 0; i < obj_list.length; ++i)
-        {
-            if ((obj_list[i].name != "name") && (obj_list[i].name != "Avg. Speed"))
-            {
+        for (let i = 0; i < obj_list.length; ++i) {
+            if ((obj_list[i].name != "name") && (obj_list[i].name != "Avg. Speed")) {
                 content_string += obj_list[i].name;
                 content_string += " = ";
                 content_string += obj_list[i].value;
@@ -148,31 +137,26 @@ ${route}
 
         content_string += '</p></div></div>';
 
-        if (info_window)
-        {
+        if (info_window) {
             info_window.close();
             info_window = null;
         }
-        if (marker)
-        {
+        if (marker) {
             marker.setMap(null);
             marker = null;
         }
 
-        info_window = new google.maps.InfoWindow
-        ({
+        info_window = new google.maps.InfoWindow({
             content: content_string
         });
 
-        marker = new google.maps.Marker
-        ({
+        marker = new google.maps.Marker({
             position: new google.maps.LatLng(last_lat, last_lon),
             map: map,
             title: 'Current Position'
         });
 
-        google.maps.event.addListener(marker, 'click', function()
-        {
+        google.maps.event.addListener(marker, 'click', function() {
             info_window.open(map, marker);
         });
 
@@ -180,8 +164,7 @@ ${route}
     };
 
     /// @function check_for_updates
-    var check_for_updates = function()
-    {
+    var check_for_updates = function() {
         $.ajax({ type: 'POST', url: "${root_url}/updatefollowing/${user_id}/${routeLen}", success: append_to_track, dataType: "application/json" });
     };
 

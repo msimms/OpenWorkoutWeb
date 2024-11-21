@@ -22,8 +22,7 @@
 <script>
 
     /// @function merge_activities
-    function merge_activities()
-    {
+    function merge_activities() {
         let api_url = "${root_url}/api/1.0/merge_activities";
         let next_activity_id = document.getElementById("mergeable_activities").value;
         let dict = [];
@@ -40,15 +39,12 @@
     }
 
     /// @function process_activity_list
-    var process_activity_list = function(activity_list)
-    {
+    var process_activity_list = function(activity_list) {
         let activity_select = document.getElementById("mergeable_activities");
 
-        for (let i = 0; i < activity_list.length; i++)
-        {
+        for (let i = 0; i < activity_list.length; i++) {
             let activity = activity_list[i];
-            if (activity.activity_id.toLowerCase() != "${activity_id}".toLowerCase())
-            {
+            if (activity.activity_id.toLowerCase() != "${activity_id}".toLowerCase()) {
                 let time_str = unix_time_to_local_string(activity.time);
                 let title_str = time_str + " " + activity.title;
                 let option = document.createElement("option");
@@ -61,21 +57,18 @@
     }
 
     /// @function list_mergeable_activities
-    function list_mergeable_activities()
-    {
+    function list_mergeable_activities() {
         let twelve_hours = 60 * 60 * 12;
         let earliest_time = unix_time_to_iso_date(${start_time} - twelve_hours);
         let latest_time = unix_time_to_iso_date(${end_time} + twelve_hours);
         let api_url = "${root_url}/api/1.0/list_my_activities?start=" + earliest_time + "&end=" + latest_time;
 
         send_get_request_async(api_url, function(status, response) {
-            if (status == 200)
-            {
+            if (status == 200) {
                 const records = JSON.parse(response);
                 process_activity_list(records);
             }
-            else
-            {
+            else {
                 alert(response)
             }
         });

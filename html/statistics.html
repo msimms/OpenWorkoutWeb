@@ -33,8 +33,7 @@
     var canadian_provinces = [];
 
     /// @function latlon_to_xy
-    function latlon_to_xy(canvas, lat, lon, x_offset, y_offset, x_scale, y_scale)
-    {
+    function latlon_to_xy(canvas, lat, lon, x_offset, y_offset, x_scale, y_scale) {
         let width = canvas.width;
         let height = canvas.height;
 
@@ -45,22 +44,18 @@
     }
 
     /// @function draw_coordinate_list
-    function draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, x_scale, y_scale)
-    {
+    function draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, x_scale, y_scale) {
         let is_first = true;
 
         ctx.beginPath();
-        for (let coordinate of coordinate_list)
-        {
+        for (let coordinate of coordinate_list) {
             [x, y] = latlon_to_xy(canvas, coordinate[1], coordinate[0], x_offset, y_offset, x_scale, y_scale);
 
-            if (is_first)
-            {
+            if (is_first) {
                 ctx.moveTo(x, y);
                 is_first = false;
             }
-            else
-            {
+            else {
                 ctx.lineTo(x, y);
             }
         }
@@ -69,19 +64,15 @@
     }
 
     /// @function draw_geo_polygon
-    function draw_geo_polygon(canvas, ctx, polygon_objects, x_offset, y_offset, x_scale, y_scale)
-    {
-        for (let coordinate_list of polygon_objects)
-        {
+    function draw_geo_polygon(canvas, ctx, polygon_objects, x_offset, y_offset, x_scale, y_scale) {
+        for (let coordinate_list of polygon_objects) {
             draw_coordinate_list(canvas, ctx, coordinate_list, x_offset, y_offset, x_scale, y_scale);
         }
     }
 
     /// @function draw_region
-    function draw_region(canvas, ctx, region_objects, heat_map, x_offset, y_offset, x_scale, y_scale)
-    {
-        for (let region_object of region_objects.features)
-        {
+    function draw_region(canvas, ctx, region_objects, heat_map, x_offset, y_offset, x_scale, y_scale) {
+        for (let region_object of region_objects.features) {
             let name = region_object.properties.name;
 
             if (heat_map.indexOf(name) == -1)
@@ -89,14 +80,11 @@
             else
                 ctx.fillStyle = '#00aa00';
 
-            if (region_object.geometry.type == "Polygon")
-            {
+            if (region_object.geometry.type == "Polygon") {
                 draw_geo_polygon(canvas, ctx, region_object.geometry.coordinates, x_offset, y_offset, x_scale, y_scale);
             }
-            else if (region_object.geometry.type == "MultiPolygon")
-            {
-                for (polygon_objects of region_object.geometry.coordinates)
-                {
+            else if (region_object.geometry.type == "MultiPolygon") {
+                for (polygon_objects of region_object.geometry.coordinates) {
                     draw_geo_polygon(canvas, ctx, polygon_objects, x_offset, y_offset, x_scale, y_scale);
                 }
             }
@@ -104,8 +92,7 @@
     }
 
     /// @function draw_world_map
-    function draw_world_map(region_objects)
-    {
+    function draw_world_map(region_objects) {
         let canvas = document.getElementById("worldCanvas");
         let ctx = canvas.getContext("2d");
 
@@ -113,8 +100,7 @@
     }
 
     /// @function draw_us_canada_map
-    function draw_us_canada_map(us_region_objects, canada_region_objects)
-    {
+    function draw_us_canada_map(us_region_objects, canada_region_objects) {
         let canvas = document.getElementById("usCanadaCanvas");
         let ctx = canvas.getContext("2d");
 
@@ -123,8 +109,7 @@
     }
 
     /// @function get_map_data
-    function get_map_data()
-    {
+    function get_map_data() {
         let map_store = {world:null, us:null, canada:null}; 
 
         $.when(
@@ -138,37 +123,28 @@
     }
 
     /// @function process_heat_map
-    var process_heat_map = function(heat_map)
-    {
-        for (let location_description in heat_map)
-        {
+    var process_heat_map = function(heat_map) {
+        for (let location_description in heat_map) {
             let location_array = location_description.split(',');
 
-            if (location_array.length > 0)
-            {
+            if (location_array.length > 0) {
                 let country = location_array[location_array.length - 1].trim();
 
-                if (countries.indexOf(country) == -1)
-                {
+                if (countries.indexOf(country) == -1) {
                     countries.push(country);
                 }
-                if (location_array.length >= 2)
-                {
-                    if (country == "United States")
-                    {
+                if (location_array.length >= 2) {
+                    if (country == "United States") {
                         let state = location_array[location_array.length - 2].trim();
 
-                        if (us_states.indexOf(state) == -1)
-                        {
+                        if (us_states.indexOf(state) == -1) {
                             us_states.push(state);
                         }
                     }
-                    else if (country == "Canada")
-                    {
+                    else if (country == "Canada") {
                         let province = location_array[location_array.length - 2].trim();
 
-                        if (canadian_provinces.indexOf(province) == -1)
-                        {
+                        if (canadian_provinces.indexOf(province) == -1) {
                             canadian_provinces.push(province);
                         }
                     }
@@ -179,8 +155,7 @@
     }
 
     /// @function append_to_table
-    function append_to_table(table, row_name, row_value)
-    {
+    function append_to_table(table, row_name, row_value) {
         let new_row = table.insertRow();
         let cell = new_row.insertCell();
         let text = document.createTextNode(row_name);
@@ -196,20 +171,17 @@
     }
 
     /// @function process_personal_records
-    var process_personal_records = function(records)
-    {
+    var process_personal_records = function(records) {
         let cycling_table = document.getElementById("Cycling");
         let running_table = document.getElementById("Running");
 
         let sorted_cycling_keys = Object.keys(records.Cycling).sort()
         let sorted_running_keys = Object.keys(records.Running).sort()
 
-        for (let key of sorted_cycling_keys)
-        {
+        for (let key of sorted_cycling_keys) {
             append_to_table(cycling_table, key, records.Cycling[key]);
         }
-        for (let key of sorted_running_keys)
-        {
+        for (let key of sorted_running_keys) {
             append_to_table(running_table, key, records.Running[key]);
         }
     }
@@ -220,8 +192,7 @@
         let api_url = "${root_url}/api/1.0/get_location_summary";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_heat_map(records);
             }
@@ -229,13 +200,11 @@
     }
 
     /// @function get_personal_records
-    function get_personal_records()
-    {
+    function get_personal_records() {
         let api_url = "${root_url}/api/1.0/list_personal_records";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_personal_records(records);
             }

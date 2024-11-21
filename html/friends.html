@@ -24,8 +24,7 @@
 <script>
 
     /// @function request_to_be_friends
-    function request_to_be_friends(target)
-    {
+    function request_to_be_friends(target) {
         let api_url = "${root_url}/api/1.0/request_to_be_friends";
         let dict = [];
 
@@ -40,8 +39,7 @@
     }
 
     /// @function confirm_friend
-    function confirm_friend(useremail)
-    {
+    function confirm_friend(useremail) {
         let api_url = "${root_url}/api/1.0/confirm_request_to_be_friends";
         let dict = [];
 
@@ -56,10 +54,8 @@
     }
 
     /// @function unfriend
-    function unfriend(useremail)
-    {
-        if (confirm('Are you sure you want to do this?'))
-        {
+    function unfriend(useremail) {
+        if (confirm('Are you sure you want to do this?')) {
             let api_url = "${root_url}/api/1.0/unfriend";
             let dict = [];
 
@@ -75,8 +71,7 @@
     }
 
     /// @function search
-    function search()
-    {
+    function search() {
         let api_url = "${root_url}/api/1.0/list_matched_users";
         let searchname = document.getElementById("searchname").value;
         let dict = [];
@@ -84,13 +79,11 @@
         dict.push({["searchname"] : searchname});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status == 200)
-            {
+            if (status == 200) {
                 let table = document.getElementById('search_results');
                 let obj = JSON.parse(response);
 
-                for (let i = 0; i < obj.length; ++i)
-                {
+                for (let i = 0; i < obj.length; ++i) {
                     let tr = document.createElement('tr');   
                     let td1 = document.createElement('td');
                     let td2 = document.createElement('td');
@@ -112,16 +105,14 @@
                     table.appendChild(tr);
                 }
             }
-            else
-            {
+            else {
                 alert(response)
             }
         });
     }
 
     /// @function append_to_friends_table
-    function append_to_friends_table(table, username, useremail, requesting_user, is_pending_request)
-    {
+    function append_to_friends_table(table, username, useremail, requesting_user, is_pending_request) {
         let new_row = table.insertRow();
         let cell = new_row.insertCell();
         let text = document.createTextNode(username);
@@ -132,16 +123,13 @@
         text = document.createTextNode(useremail);
         cell.appendChild(text);
 
-        if (is_pending_request)
-        {
-            if (requesting_user == "self")
-            {
+        if (is_pending_request) {
+            if (requesting_user == "self") {
                 cell = new_row.insertCell();
                 text = document.createTextNode("Pending");
                 cell.appendChild(text);
             }
-            else
-            {
+            else {
                 let btn = document.createElement('button');
                 let btn_txt = document.createTextNode('Confirm');
 
@@ -165,22 +153,18 @@
     }
 
     /// @function process_friends_list
-    function process_friends_list(records, is_pending_request)
-    {
-        if (records.length > 0)
-        {
+    function process_friends_list(records, is_pending_request) {
+        if (records.length > 0) {
             let friends_table = document.getElementById("Friends");
 
-            for (let friend of records)
-            {
+            for (let friend of records) {
                 append_to_friends_table(friends_table, friend.realname, friend.username, friend.requesting_user, is_pending_request);
             }
         }
     }
 
     /// @function get_friends_lists
-    function get_friends_lists()
-    {
+    function get_friends_lists() {
         let pending_friends = null;
         let friends = null;
 
@@ -188,23 +172,19 @@
             $.get("${root_url}/api/1.0/list_pending_friends", function(users) { pending_friends = users; }),
             $.get("${root_url}/api/1.0/list_friends", function(users) { friends = users; }),
         ).then(function() {
-            if (pending_friends.length == 0 && friends.length == 0)
-            {
+            if (pending_friends.length == 0 && friends.length == 0) {
                 let para = document.getElementById("description");
                 para.innerHTML = "You have no friends.";
             }
-            else
-            {
+            else {
                 process_friends_list(JSON.parse(pending_friends), true);
                 process_friends_list(JSON.parse(friends), false);
             }
         });
     }
 
-    function search_text_click_press(event)
-    {
-        if (event.keyCode == 13)
-        {
+    function search_text_click_press(event) {
+        if (event.keyCode == 13) {
             search();
         }
     }

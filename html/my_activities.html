@@ -30,42 +30,35 @@
     var first_day_of_the_week = 1;
 
     /// @function process_activity_obj
-    function process_activity_obj(activity_obj)
-    {
+    function process_activity_obj(activity_obj) {
         // Item is a scheduled workout.
-        if ('scheduled time' in activity_obj)
-        {
+        if ('scheduled time' in activity_obj) {
             let d = new Date();
             let tz_offset = d.getTimezoneOffset() * 60;
 
             activity_obj['start'] = unix_time_to_iso_time(activity_obj['scheduled time'] + tz_offset);
-            if (activity_obj['workout type'].length > 0)
-            {
+            if (activity_obj['workout type'].length > 0) {
                 activity_obj['title'] = activity_obj['workout type'];
             }
-            else
-            {
+            else {
                 activity_obj['title'] = activity_obj['activity type'];
             }
         }
 
         // Item is a race.
-        else if ('race date' in activity_obj)
-        {
+        else if ('race date' in activity_obj) {
             activity_obj['start'] = unix_time_to_iso_time(activity_obj['race date']);
             activity_obj['title'] = activity_obj['race name'];
             activity_obj['backgroundColor'] = "Gold";
         }
 
         // Item is a recorded activity.
-        else
-        {
+        else {
             activity_obj['start'] = unix_time_to_iso_time(activity_obj['time']);
         }
 
         // Certain activity tags get special colors.
-        if ('tags' in activity_obj)
-        {
+        if ('tags' in activity_obj) {
             if (activity_obj['tags'].includes('Race'))
                 activity_obj['backgroundColor'] = "FireBrick";
             if (activity_obj['tags'].includes('Commute'))
@@ -76,15 +69,12 @@
 
     /// @function get_preferred_first_day_of_week
     // What's the user's preference for the first day of the week? Need to know this before rendering the calendar.
-    function get_preferred_first_day_of_week()
-    {
-        return new Promise(function(resolve, reject)
-        {
+    function get_preferred_first_day_of_week() {
+        return new Promise(function(resolve, reject) {
             let api_url = "${root_url}/api/1.0/get_user_setting?requested%20setting=preferred%20first%20day%20of%20week";
 
             send_get_request_async(api_url, function (response_code, response_text) {
-                if (response_code == 200)
-                {
+                if (response_code == 200) {
                     if (response_text.localeCompare("sunday") == 0)
                         first_day_of_the_week = 0;
                     else if (response_text.localeCompare("monday") == 0)
@@ -101,8 +91,7 @@
                         first_day_of_the_week = 6;
                     resolve();
                 }
-                else
-                {
+                else {
                     reject();
                 }
             });
@@ -111,21 +100,17 @@
 
     /// @function list_activity_types
     // Get the list of all possible activity types. Needed to populate the activity type combo box.
-    function list_activity_types()
-    {
-        return new Promise(function(resolve, reject)
-        {
+    function list_activity_types() {
+        return new Promise(function(resolve, reject) {
             let api_url = "${root_url}/api/1.0/list_activity_types";
 
             send_get_request_async(api_url, function (response_code, response_text) {
-                if (response_code == 200)
-                {
+                if (response_code == 200) {
                     let obj = JSON.parse(response_text);
                     process_activity_type_list(obj);
                     resolve();
                 }
-                else
-                {
+                else {
                     reject();
                 }
             });
@@ -133,14 +118,12 @@
     }
 
     /// @function show_add_workout_dialog
-    function show_add_workout_dialog()
-    {
+    function show_add_workout_dialog() {
         new_workout_dlg.showModal();
     }
 
     /// @function create_planned_workout
-    function create_planned_workout()
-    {
+    function create_planned_workout() {
         let activity_type = document.getElementById("activity_type").value;
         let workout_date_obj = new Date(document.getElementById("workout_date").value);
         let workout_date = workout_date_obj.getTime() / 1000;
@@ -151,24 +134,20 @@
         dict.push({["activity type"] : activity_type});
         dict.push({["scheduled time"] : workout_date});
 
-        if (!isNaN(workout_date))
-        {
+        if (!isNaN(workout_date)) {
             send_post_request_async(api_url, dict, function (response_code, response_text) {
-                if (response_code == 200)
-                {
+                if (response_code == 200) {
                     window.location.reload();
                 }
             });
         }
-        else
-        {
+        else {
             alert("The date cannot be blank.");
         }
     }
 
     /// @function request_all_the_things
-    function request_all_the_things()
-    {
+    function request_all_the_things() {
         let promises = [];
 
         let first_day_promise = get_preferred_first_day_of_week();
@@ -182,8 +161,7 @@
     }
 
     /// @function draw_calendar
-    function draw_calendar()
-    {
+    function draw_calendar() {
         $('#calendar').fullCalendar({
             customButtons: {
                 add_workout_event: {
@@ -222,14 +200,12 @@
     }
 
     /// @function process_activity_type_list
-    var process_activity_type_list = function(activity_type_list)
-    {
+    var process_activity_type_list = function(activity_type_list) {
         let activity_type_select = document.getElementById("activity_type");
 
         activity_type_list.sort();
 
-        for (let i = 0; i < activity_type_list.length; i++)
-        {
+        for (let i = 0; i < activity_type_list.length; i++) {
             let activity_type = activity_type_list[i];
             let option = document.createElement("option");
 

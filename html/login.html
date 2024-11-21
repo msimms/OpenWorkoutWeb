@@ -23,8 +23,7 @@
     <script>
 
         /// @function submit_login
-        function submit_login()
-        {
+        function submit_login() {
             let api_url = "/api/1.0/login";
             let username = document.getElementById("username").value;
             let password = document.getElementById("password").value;
@@ -34,24 +33,21 @@
             dict.push({["password"] : password});
 
             send_post_request_async(api_url, dict, function(status, response) {
-                if (status == 200)
-                {
+                if (status == 200) {
                     if (response.length > 0) {
                         let obj_list = JSON.parse(response);
                         document.cookie = "session_cookie=" + obj_list.cookie + "; ";
                     }
                     window.location.replace("${root_url}/all_activities");
                 }
-                else
-                {
+                else {
                     alert("Authentication failed!");
                 }
             });
         }
 
         /// @function create_login
-        function create_login()
-        {
+        function create_login() {
             window.location.replace("${root_url}/create_login");
         }
 

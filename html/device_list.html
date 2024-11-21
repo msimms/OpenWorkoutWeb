@@ -22,8 +22,7 @@
 <script>
 
     /// @function append_to_devices_table
-    function append_to_devices_table(table, device_id, last_heard_from)
-    {
+    function append_to_devices_table(table, device_id, last_heard_from) {
         let new_row = table.insertRow();
         let cell = new_row.insertCell();
         let a = document.createElement('a');
@@ -33,8 +32,7 @@
         a.href = "${root_url}/device/" + device_id;
         cell.appendChild(a);
 
-        if (last_heard_from > 0)
-        {
+        if (last_heard_from > 0) {
             cell = new_row.insertCell();
             let text = document.createTextNode(unix_time_to_local_string(last_heard_from));
             cell.appendChild(text);
@@ -42,20 +40,17 @@
     }
 
     /// @function device_sort
-    function device_sort(a, b)
-    {
+    function device_sort(a, b) {
         return a.last_heard_from < b.last_heard_from;
     }
     
     // Handler for when we receive the list of registered devices from the server.
-    var process_device_list = function(records)
-    {
+    var process_device_list = function(records) {
 		let device_table = document.getElementById("Devices");
 
         records.sort(device_sort);
 
-        if (records.length > 0)
-        {
+        if (records.length > 0) {
             let new_row = device_table.insertRow();
             let cell = new_row.insertCell();
 
@@ -63,8 +58,7 @@
             cell = new_row.insertCell();
             cell.appendChild(document.createTextNode("Last Heard From"));
 
-            for (let record of records)
-            {
+            for (let record of records) {
                 append_to_devices_table(device_table, record.DeviceId, record.last_heard_from);
             }
         }
@@ -72,13 +66,11 @@
 
     /// @function get_device_list
     // Request the list of devices registered to this user.
-    function get_device_list()
-    {
+    function get_device_list() {
         let api_url = "${root_url}/api/1.0/list_devices";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_device_list(records);
             }

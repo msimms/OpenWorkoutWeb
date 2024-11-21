@@ -23,8 +23,7 @@
 // SOFTWARE.
 
 /// @function common_refresh_analysis
-function common_refresh_analysis(root_url)
-{
+function common_refresh_analysis(root_url) {
     let api_url = root_url + "/api/1.0/refresh_analysis";
     let dict = [];
 
@@ -39,8 +38,7 @@ function common_refresh_analysis(root_url)
 }
 
 /// @function common_create_comment
-function common_create_comment(root_url)
-{
+function common_create_comment(root_url) {
     let api_url = root_url + "/api/1.0/create_comment";
     let comment = document.getElementById("comment").value;
     let dict = [];
@@ -57,8 +55,7 @@ function common_create_comment(root_url)
 }
 
 /// @function common_export_activity
-function common_export_activity(root_url)
-{
+function common_export_activity(root_url) {
     let api_url = root_url + "/api/1.0/export_activity?activity_id=";
     api_url += activity_id
     api_url += "&export_format="
@@ -67,38 +64,32 @@ function common_export_activity(root_url)
 }
 
 /// @function common_edit_activity
-function common_edit_activity(root_url)
-{
+function common_edit_activity(root_url) {
     let api_url = root_url + "/edit_activity/" + activity_id;
     window.location.assign(api_url);
 }
 
 /// @function common_add_photos
-function common_add_photos(root_url)
-{
+function common_add_photos(root_url) {
     let api_url = root_url + "/add_photos/" + activity_id;
     window.location.assign(api_url);
 }
 
 /// @function common_trim_activity
-function common_trim_activity(root_url)
-{
+function common_trim_activity(root_url) {
     let api_url = root_url + "/trim_activity/" + activity_id;
     window.location.assign(api_url);
 }
 
 /// @function common_merge_activity
-function common_merge_activity(root_url)
-{
+function common_merge_activity(root_url) {
     let api_url = root_url + "/merge_activity/" + activity_id;
     window.location.assign(api_url);
 }
 
 /// @function common_delete_activity
-function common_delete_activity(root_url)
-{
-    if (confirm('Are you sure you want to do this? This cannot be undone.'))
-    {
+function common_delete_activity(root_url) {
+    if (confirm('Are you sure you want to do this? This cannot be undone.')) {
         let api_url = root_url + "/api/1.0/delete_activity";
         let dict = [];
 
@@ -114,10 +105,8 @@ function common_delete_activity(root_url)
 }
 
 /// @function common_delete_photo
-function common_delete_photo(root_url, photo_id)
-{
-    if (confirm('Are you sure you want to delete the above photo?'))
-    {
+function common_delete_photo(root_url, photo_id) {
+    if (confirm('Are you sure you want to delete the above photo?')) {
         let api_url = root_url + "/api/1.0/delete_activity_photo?activity_id=" + activity_id + "&photo%20id=" + photo_id;
 
         send_delete_request_async(api_url, function(status, response) {
@@ -130,13 +119,11 @@ function common_delete_photo(root_url, photo_id)
 }
 
 /// @function common_list_photos
-function common_list_photos(root_url)
-{
+function common_list_photos(root_url) {
     let api_url = root_url + "/api/1.0/list_activity_photos?activity_id=" + activity_id;
 
     send_get_request_async(api_url, function (response_code, response_text) {
-        if (response_code == 200)
-        {
+        if (response_code == 200) {
             const records = JSON.parse(response_text);
             process_photos_list(records);
         }
@@ -144,14 +131,12 @@ function common_list_photos(root_url)
 }
 
 /// @function common_create_tags
-function common_create_tags(root_url, tags)
-{
+function common_create_tags(root_url, tags) {
     let api_url = root_url + "/api/1.0/create_tags_on_activity";
     let dict = [];
 
     dict.push({["activity_id"] : activity_id});
-    for (let tag in tags)
-    {
+    for (let tag in tags) {
         dict.push({["tag" + tag] : tags[tag]});
     }
 
@@ -162,10 +147,8 @@ function common_create_tags(root_url, tags)
 }
 
 /// @function common_process_sensordata
-function common_process_sensordata(root_url, activity_id, sensordata, is_foot_based_activity, start_time_ms, resting_hr, max_hr, ftp, deletable)
-{
-    for (key in sensordata)
-    {
+function common_process_sensordata(root_url, activity_id, sensordata, is_foot_based_activity, start_time_ms, resting_hr, max_hr, ftp, deletable) {
+    for (key in sensordata) {
         let old_data = sensordata[key];
         let new_data = old_data.map(function(e) {
             let new_e = {};
@@ -178,59 +161,47 @@ function common_process_sensordata(root_url, activity_id, sensordata, is_foot_ba
             return new_e;
         });
 
-        if (new_data.length > 1 && start_time_ms == 0)
-        {
+        if (new_data.length > 1 && start_time_ms == 0) {
             start_time_ms = new_data[0].date;
             end_time_ms = new_data[new_data.length-1].date;
         }
 
-        if (key == "Current Speed")
-        {
+        if (key == "Current Speed") {
             draw_speed_graph(start_time_ms, end_time_ms, new_data);
         }
-        else if (key == "Heart Rate")
-        {
+        else if (key == "Heart Rate") {
             let hr_zones = compute_heart_rate_zone_distribution(resting_hr, max_hr, new_data);
 
-            if (hr_zones.length > 0 && Math.max.apply(Math, hr_zones) > 0)
-            {
+            if (hr_zones.length > 0 && Math.max.apply(Math, hr_zones) > 0) {
                 graph_name = "Heart Rate Zone Distribution"
                 draw_bar_chart(hr_zones, "Heart Rate Zone Distribution", get_graph_color(graph_name));
             }
             draw_sensor_graph(root_url, activity_id, new_data, key, "BPM", get_graph_color(key), deletable);
         }
-        else if (key == "Cadence")
-        {
+        else if (key == "Cadence") {
             draw_sensor_graph(root_url, activity_id, new_data, key, "RPM", get_graph_color(key), deletable);
         }
-        else if (key == "Power")
-        {
+        else if (key == "Power") {
             let power_zones = compute_power_zone_distribution(ftp, new_data);
 
-            if (!is_foot_based_activity)
-            {
-                if (power_zones.length > 0 && Math.max.apply(Math, power_zones) > 0)
-                {
+            if (!is_foot_based_activity) {
+                if (power_zones.length > 0 && Math.max.apply(Math, power_zones) > 0) {
                     graph_name = "Power Zone Distribution"
                     draw_bar_chart(power_zones, "Power Zone Distribution", get_graph_color(graph_name));
                 }
             }
             draw_sensor_graph(root_url, activity_id, new_data, key, "Watts", get_graph_color(key), deletable);
         }
-        else if (key == "Temperature")
-        {
+        else if (key == "Temperature") {
             draw_sensor_graph(root_url, activity_id, new_data, key, "Temperature", get_graph_color(key), deletable);
         }
-        else if (key == "Threat Count")
-        {
+        else if (key == "Threat Count") {
             draw_sensor_graph(root_url, activity_id, new_data, key, "Threat Count", get_graph_color(key), deletable);
         }
-        else if (key == "Battery Level")
-        {
+        else if (key == "Battery Level") {
             draw_sensor_graph(root_url, activity_id, new_data, key, "Battery Level", get_graph_color(key), deletable);
         }
-        else if (key == "Events")
-        {
+        else if (key == "Events") {
             let events = sensordata[key];
             let total_strokes = [];
             let total_timer_time = [];
@@ -238,14 +209,11 @@ function common_process_sensordata(root_url, activity_id, sensordata, is_foot_ba
             events.forEach((item, index) => {
                 let time = item["timestamp"] * 1000;
 
-                if ("event" in item && item["event"] == "length")
-                {
-                    if ("total_strokes" in item && item["total_strokes"] != null)
-                    {
+                if ("event" in item && item["event"] == "length") {
+                    if ("total_strokes" in item && item["total_strokes"] != null) {
                         total_strokes.push(item["total_strokes"]);
                     }
-                    if ("total_timer_time" in item && item["total_timer_time"] != null)
-                    {
+                    if ("total_timer_time" in item && item["total_timer_time"] != null) {
                         total_timer_time.push({ date: new Date(time), value:item["total_timer_time"] });
                     }
                 }
@@ -254,8 +222,7 @@ function common_process_sensordata(root_url, activity_id, sensordata, is_foot_ba
             draw_bar_chart(total_strokes, "Total Strokes", "LightSteelBlue");
             draw_sensor_graph(root_url, activity_id, total_timer_time, "Lap Time", "Lap Time", get_graph_color("Lap Time"), false);
         }
-        else if (key == "accelerometer")
-        {
+        else if (key == "accelerometer") {
             let accel_data = sensordata[key];
             let x_data = [];
             let y_data = [];
@@ -276,10 +243,9 @@ function common_process_sensordata(root_url, activity_id, sensordata, is_foot_ba
     }
 }
 
-function common_delete_sensor_data(root_url, activity_id, sensor_name)
-{
-    if (confirm('Are you sure you want to do delete this sensor data? It cannot be undone.'))
-    {
+/// @function common_delete_sensor_data
+function common_delete_sensor_data(root_url, activity_id, sensor_name) {
+    if (confirm('Are you sure you want to do delete this sensor data? It cannot be undone.')) {
         let api_url = root_url + "/api/1.0/delete_sensor_data";
         let dict = [];
 

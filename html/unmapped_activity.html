@@ -19,9 +19,7 @@
     html { height: 100% }
     body { height: 100%; margin: 0; padding: 0 }
     div { margin: 0px }
-
-    div.bar
-    {
+    div.bar {
         display: inline-block;
         width: 20px;
         height: 75px;	/* Gets overriden by D3-assigned height below */
@@ -52,20 +50,17 @@ ${nav}
     let start_time_ms = 0;
 
     /// @function process_sensordata - callback for when sensor data is returned
-    var process_sensordata = function(sensordata)
-    {
+    var process_sensordata = function(sensordata) {
         let deletable = "${visibility}".length == 0;
         common_process_sensordata(root_url, activity_id, sensordata, false, start_time_ms, ${resting_hr}, ${max_hr}, 0.0, deletable);
     }
 
     /// @function retrieve_sensor_data
-    function retrieve_sensor_data()
-    {
+    function retrieve_sensor_data() {
         let api_url = "${root_url}/api/1.0/activity_sensordata?activity_id=" + activity_id + "&sensors=accelerometer,Heart%20Rate,Temperature,Events";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_sensordata(records);
             }
@@ -73,8 +68,7 @@ ${nav}
     }
 
     /// @function draw_graphs
-    function draw_graphs()
-    {
+    function draw_graphs() {
         retrieve_sensor_data();
     }
 
@@ -85,22 +79,19 @@ ${nav}
 <script src="${root_url}/js/all_activities.js"></script>
 <script>
     /// @function process_photos_list
-    var process_photos_list = function(photos_list)
-    {
+    var process_photos_list = function(photos_list) {
         let photo_ids = photos_list["photo ids"]
 
         if (photo_ids == null)
             return;
 
-        if (photo_ids.length > 0)
-        {
+        if (photo_ids.length > 0) {
             let photo_table = document.getElementById("photos");
             let div = document.getElementById('photos_div');
 
             div.style = "display: inline-block;";
 
-            for (let i = 0; i < photo_ids.length; ++i)
-            {
+            for (let i = 0; i < photo_ids.length; ++i) {
                 let photo_url = root_url + "/photos/${user_id}/" + photo_ids[i];
                 let img_td = document.createElement("td");
                 let img = document.createElement("img");
@@ -125,68 +116,57 @@ ${nav}
     }
 
     /// @function refresh_analysis
-    function refresh_analysis()
-    {
+    function refresh_analysis() {
         common_refresh_analysis(root_url)
     }
 
     /// @function create_comment
-    function create_comment()
-    {
+    function create_comment() {
         common_create_comment(root_url)
     }
 
     /// @function export_activity
-    function export_activity()
-    {
+    function export_activity() {
         common_export_activity(root_url)
     }
 
     /// @function edit_activity
-    function edit_activity()
-    {
+    function edit_activity() {
         common_edit_activity(root_url)
     }
 
     /// @function add_photos
-    function add_photos()
-    {
+    function add_photos() {
         common_add_photos(root_url)
     }
 
     /// @function trim_activity
-    function trim_activity()
-    {
+    function trim_activity() {
         common_trim_activity(root_url)
     }
 
     /// @function merge_activity
-    function merge_activity()
-    {
+    function merge_activity() {
         common_merge_activity(root_url)
     }
 
     /// @function delete_activity
-    function delete_activity()
-    {
+    function delete_activity() {
         common_delete_activity(root_url)
     }
 
     /// @function delete_photo
-    function delete_photo(photo_id)
-    {
+    function delete_photo(photo_id) {
         common_delete_photo(root_url, photo_id)
     }
 
     /// @function list_photos
-    function list_photos()
-    {
+    function list_photos() {
         common_list_photos(root_url)
     }
 
     /// @function create_tags
-    function create_tags(tags)
-    {
+    function create_tags(tags) {
         common_create_tags(root_url, tags)
     }
 

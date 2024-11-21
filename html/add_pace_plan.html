@@ -25,61 +25,47 @@
 
     /// @function parse_HHMMSS
     // Parses the string for a time value in the format of HH:MM:SS where MM and SS ranges from 0 to 59.
-    function parse_HHMMSS(str)
-    {
+    function parse_HHMMSS(str) {
 		let listItems = str.split(":");
 		let reversedList = listItems.reverse();
 		let numItems = reversedList.length;
 
-        if (numItems == 0)
-        {
+        if (numItems == 0) {
             return false;
         }
-        if (numItems >= 3)
-        {
+        if (numItems >= 3) {
             let tempHours = parseInt(reversedList[2]);
 
-            if (!isNaN(tempHours))
-            {
-                if (tempHours < 0)
-                {
+            if (!isNaN(tempHours)) {
+                if (tempHours < 0) {
                     return false;
                 }
             }
-            else
-            {
+            else {
                 return false;
             }
         }
-        if (numItems >= 2)
-        {
+        if (numItems >= 2) {
             let tempMinutes = parseInt(reversedList[1]);
 
-            if (!isNaN(tempMinutes))
-            {
-                if (tempMinutes < 0 || tempMinutes > 59)
-                {
+            if (!isNaN(tempMinutes)) {
+                if (tempMinutes < 0 || tempMinutes > 59) {
                     return false;
                 }
             }
-            else
-            {
+            else {
                 return false;
             }
         }
-        if (numItems >= 1)
-        {
+        if (numItems >= 1) {
             let tempSeconds = parseInt(reversedList[0]);
 
-            if (!isNaN(tempSeconds))
-            {
-                if (tempSeconds < 0 || tempSeconds > 59)
-                {
+            if (!isNaN(tempSeconds)) {
+                if (tempSeconds < 0 || tempSeconds > 59) {
                     return false;
                 }
             }
-            else
-            {
+            else {
                 return false;
             }
         }
@@ -88,8 +74,7 @@
 
     /// @function save_pace_plan
     // Button handler for when the user saves the pace plan.
-    function save_pace_plan()
-    {
+    function save_pace_plan() {
         let api_url = "${root_url}/api/1.0/create_pace_plan";
         let name = document.getElementById("pace_plan_name").value;
         let description = document.getElementById("description").value;
@@ -101,34 +86,29 @@
         let dict = [];
 
         // Validate the name.
-        if (name.length == 0)
-        {
+        if (name.length == 0) {
             alert("The name cannot be empty!");
             return;
         }
 
         // Validate the distance.
-        if (isNaN(distance))
-        {
+        if (isNaN(distance)) {
             alert("The distance must be a number!");
             return;
         }
-        else if (distance <= 0.0)
-        {
+        else if (distance <= 0.0) {
             alert("The distance cannot be negative!");
             return;
         }
     
         // Validate the target time.
-        if (!parse_HHMMSS(target_time))
-        {
+        if (!parse_HHMMSS(target_time)) {
             alert("The target time should be in the form of HH:HH:SS!");
             return;
         }
 
         // Validate the splits.
-        if (isNaN(splits))
-        {
+        if (isNaN(splits)) {
             alert("The splits must be a number!");
             return;
         }

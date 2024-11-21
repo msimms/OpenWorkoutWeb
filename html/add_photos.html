@@ -36,16 +36,13 @@ ${nav}
         let selected_photo_list = [];
 
         /// @function update_file_status
-        function update_file_status(file_name, status_text)
-        {
+        function update_file_status(file_name, status_text) {
             let upload_table = document.getElementById("upload_table");
 
             upload_table.style = "display: inline-block;";
 
-            for (let i = 0, row; row = upload_table.rows[i]; i++)
-            {
-                if (row.cells[0].innerText.localeCompare(file_name) == 0)
-                {
+            for (let i = 0, row; row = upload_table.rows[i]; i++) {
+                if (row.cells[0].innerText.localeCompare(file_name) == 0) {
                     row.cells[1].innerText = status_text;
                     break;
                 }
@@ -54,16 +51,12 @@ ${nav}
 
         /// @function upload_file
         // Sends the chosen photos to the cloud.
-        function upload_file(file_obj)
-        {
-            return new Promise(function(resolve, reject)
-            {
+        function upload_file(file_obj) {
+            return new Promise(function(resolve, reject) {
                 let reader = new FileReader();
 
-                reader.onerror = function(e)
-                {
-                    switch(e.target.error.code) 
-                    {
+                reader.onerror = function(e) {
+                    switch(e.target.error.code)  {
                         case e.target.error.NOT_FOUND_ERR:
                             alert("File Not Found!");
                             break;
@@ -78,13 +71,11 @@ ${nav}
                     reader.abort();
                     reject();
                 };
-                reader.onabort = function(e) 
-                {
+                reader.onabort = function(e)  {
                     alert('File read cancelled');
                     reject();
                 };
-                reader.onload = function(e)
-                {
+                reader.onload = function(e) {
                     let api_url = "${root_url}/api/1.0/upload_activity_photo";
                     let dict = [];
                     let encoded_data = btoa(reader.result);
@@ -93,13 +84,11 @@ ${nav}
                     dict.push({["activity_id"] : "${activity_id}"});
 
                     send_post_request_async(api_url, dict, function(status, response) {
-                        if (status == 200)
-                        {
+                        if (status == 200) {
                             update_file_status(file_obj.name, "Uploading....");
                             resolve();
                         }
-                        else
-                        {
+                        else {
                             alert(result_text.value);
                             reject();
                         }
@@ -110,16 +99,13 @@ ${nav}
         }
 
         /// @function upload_selected_files
-        function upload_selected_files()
-        {
-            if (selected_photo_list.length > 0)
-            {
+        function upload_selected_files() {
+            if (selected_photo_list.length > 0) {
                 let promises = [];
 
                 document.body.style.cursor = "wait";
 
-                for (let i = 0; i < selected_photo_list.length; i++)
-                {
+                for (let i = 0; i < selected_photo_list.length; i++) {
                     let promise = upload_file(selected_photo_list[i]);
                     promises.push(promise);
                 }
@@ -129,8 +115,7 @@ ${nav}
                         window.location.replace("${root_url}/activity/${activity_id}")
                     });
             }
-            else
-            {
+            else {
                 alert("No files have been specified.");
             }
         }
@@ -138,8 +123,7 @@ ${nav}
         picker.addEventListener('change', e => {
             let upload_table = document.getElementById("upload_table");
 
-            for (let file of Array.from(e.target.files))
-            {
+            for (let file of Array.from(e.target.files)) {
                 let new_row = upload_table.insertRow();
                 let cell = new_row.insertCell();
                 let text = document.createTextNode(file.name);

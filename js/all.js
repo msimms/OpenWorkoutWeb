@@ -23,8 +23,7 @@
 // SOFTWARE.
 
 /// @function set_background_style
-function set_background_style(root_url, background_id)
-{
+function set_background_style(root_url, background_id) {
     let section = document.getElementById(background_id);
     let img_index = Math.floor(Math.random() * 7) + 1;
     let img_str = 'url("' + root_url + '/images/main_background' + img_index + '.jpg")';
@@ -32,8 +31,7 @@ function set_background_style(root_url, background_id)
 }
 
 /// @function set_background_style_for_error
-function set_background_style_for_error(root_url, background_id, error_code)
-{
+function set_background_style_for_error(root_url, background_id, error_code) {
     let section = document.getElementById(background_id);
     switch (error_code)
     {
@@ -51,36 +49,31 @@ function set_background_style_for_error(root_url, background_id, error_code)
 }
 
 /// @function unix_time_to_local_string
-function unix_time_to_local_string(unix_time)
-{
+function unix_time_to_local_string(unix_time) {
     let date = new Date(unix_time * 1000);
     return date.toLocaleString();
 }
 
 /// @function unix_time_to_local_date_string
-function unix_time_to_local_date_string(unix_time)
-{
+function unix_time_to_local_date_string(unix_time) {
     let date = new Date(unix_time * 1000);
     return date.toLocaleDateString();
 }
 
 /// @function unix_time_to_iso_time
-function unix_time_to_iso_time(unix_time)
-{
+function unix_time_to_iso_time(unix_time) {
     let date = new Date(unix_time * 1000);
     return date.toISOString();
 }
 
 /// @function unix_time_to_iso_date
-function unix_time_to_iso_date(unix_time)
-{
+function unix_time_to_iso_date(unix_time) {
     let date = new Date(unix_time * 1000);
     return date.toISOString().split("T", 1)[0];
 }
 
 /// @function serialize_to_url_params
-function serialize_to_url_params(dict)
-{
+function serialize_to_url_params(dict) {
     let str = [];
     for (let p in dict)
         str.push(encodeURIComponent(p) + "=" + encodeURIComponent(dict[p]));
@@ -88,17 +81,14 @@ function serialize_to_url_params(dict)
 }
 
 /// @function Sends an HTTP GET request and waits for the response.
-function send_get_request_async(url, callback)
-{
+function send_get_request_async(url, callback) {
     let xml_http = new XMLHttpRequest();
     let content_type = "application/json; charset=utf-8";
 
     xml_http.open("GET", url, true);
     xml_http.setRequestHeader('Content-Type', content_type);
-    xml_http.onreadystatechange = function()
-    {
-        if (xml_http.readyState == XMLHttpRequest.DONE)
-        {
+    xml_http.onreadystatechange = function() {
+        if (xml_http.readyState == XMLHttpRequest.DONE) {
             callback(xml_http.status, xml_http.responseText);
         }
     }
@@ -106,17 +96,14 @@ function send_get_request_async(url, callback)
 }
 
 /// @function Sends an HTTP POST request and waits for the response.
-function send_post_request_async(url, params, callback)
-{
+function send_post_request_async(url, params, callback) {
     let xml_http = new XMLHttpRequest();
     let content_type = "application/json; charset=utf-8";
 
     xml_http.open("POST", url, false);
     xml_http.setRequestHeader('Content-Type', content_type);
-    xml_http.onreadystatechange = function()
-    {
-        if (xml_http.readyState == XMLHttpRequest.DONE)
-        {
+    xml_http.onreadystatechange = function() {
+        if (xml_http.readyState == XMLHttpRequest.DONE) {
             callback(xml_http.status, xml_http.responseText);
         }
     }
@@ -125,17 +112,14 @@ function send_post_request_async(url, params, callback)
 }
 
 /// @function Sends an HTTP DELETE request and waits for the response.
-function send_delete_request_async(url, callback)
-{
+function send_delete_request_async(url, callback) {
     let xml_http = new XMLHttpRequest();
     let content_type = "application/json; charset=utf-8";
 
     xml_http.open("DELETE", url, false);
     xml_http.setRequestHeader('Content-Type', content_type);
-    xml_http.onreadystatechange = function()
-    {
-        if (xml_http.readyState == XMLHttpRequest.DONE)
-        {
+    xml_http.onreadystatechange = function() {
+        if (xml_http.readyState == XMLHttpRequest.DONE) {
             callback(xml_http.status, xml_http.responseText);
         }
     }
@@ -143,16 +127,13 @@ function send_delete_request_async(url, callback)
 }
 
 /// @function create_local_file
-function create_local_file(data, filename, type)
-{
+function create_local_file(data, filename, type) {
     let file = new Blob([data], {type: type});
 
-    if (window.navigator.msSaveOrOpenBlob)
-    {
+    if (window.navigator.msSaveOrOpenBlob) {
         window.navigator.msSaveOrOpenBlob(file, filename);
     }
-    else
-    {
+    else {
         let a = document.createElement("a"),
             url = URL.createObjectURL(file);
         a.href = url;
@@ -167,8 +148,7 @@ function create_local_file(data, filename, type)
 }
 
 /// @function add_number_entry_node
-function add_number_entry_node(div, name)
-{
+function add_number_entry_node(div, name) {
     let label = document.createTextNode(name + " ");
     div.appendChild(label);
 
@@ -187,8 +167,7 @@ function add_number_entry_node(div, name)
 }
 
 /// @function add_text_entry_node
-function add_text_entry_node(div, name)
-{
+function add_text_entry_node(div, name) {
     let label = document.createTextNode(name + " ");
     div.appendChild(label);
 
@@ -207,8 +186,7 @@ function add_text_entry_node(div, name)
 }
 
 /// @function add_text_area_node
-function add_text_area_node(div, name)
-{
+function add_text_area_node(div, name) {
     let label = document.createTextNode(name + " ");
     div.appendChild(label);
 

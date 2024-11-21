@@ -24,8 +24,7 @@
 
 /// @function power_training_zones
 /// Returns the power training zones as a function of FTP.
-function power_training_zones(ftp)
-{
+function power_training_zones(ftp) {
     // Dr. Andy Coggan 7 zone model
     // Zone 1 - Active Recovery - Less than 55% of FTP
     // Zone 2 - Endurance - 55% to 74% of FTP
@@ -47,8 +46,7 @@ function power_training_zones(ftp)
 
 /// @function compute_power_zone_distribution
 /// Takes the list of power readings and determines how many belong in each power zone, based on the user's FTP.
-function compute_power_zone_distribution(ftp, powers)
-{
+function compute_power_zone_distribution(ftp, powers) {
     let zones = power_training_zones(ftp);
     let distribution = Array.apply(null, Array(zones.length)).map(function (x, i) { return 0; });
 
@@ -57,10 +55,8 @@ function compute_power_zone_distribution(ftp, powers)
         let index = 0;
         let found = false;
 
-        for (index = 0; index < zones.length; index++)
-        {
-            if (value <= zones[index])
-            {
+        for (index = 0; index < zones.length; index++) {
+            if (value <= zones[index]) {
                 distribution[index] = distribution[index] + 1;
                 found = true;
                 break;

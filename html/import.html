@@ -28,8 +28,7 @@
 
     /// @function save
     /// Called when the user saves a manual entry.
-    function save(target)
-    {
+    function save(target) {
         let api_url = "${root_url}/api/1.0/add_activity";
         let dict = [];
         let sets = [];
@@ -40,16 +39,13 @@
         let activity_start = activity_start_obj.getTime() / 1000;
         let activity_type = document.getElementById("activity_type").value;
 
-        for (let i = 0; i < inner_div.children.length; i++)
-        {
+        for (let i = 0; i < inner_div.children.length; i++) {
             let divChild = inner_div.children[i];
 
-            if (divChild.name == "Repetitions")
-            {
+            if (divChild.name == "Repetitions") {
                 sets.push(parseInt(divChild.value));
             }
-            else if ((divChild.name == "Duration") || (divChild.name == "Distance"))
-            {
+            else if ((divChild.name == "Duration") || (divChild.name == "Distance")) {
                 dict.push({[divChild.name] : parseFloat(divChild.value)});
             }
         }
@@ -65,8 +61,7 @@
 
     /// @function show_manual_entry_options
     /// Displays the controls for manually adding an activity.
-    function show_manual_entry_options()
-    {
+    function show_manual_entry_options() {
         let activity_type = document.getElementById("activity_type").value;
         let outer_div = document.getElementById("manual_entry_div");
         let inner_div = document.createElement('div');
@@ -74,15 +69,13 @@
         inner_div.id = "manual_entry_div";
 
         // Remove existing items, if any.
-        while (outer_div.firstChild)
-        {
+        while (outer_div.firstChild) {
             outer_div.removeChild(outer_div.firstChild);
         }
 
         // Determine which data fields are needed.
         let fields = ["Duration", "Distance"];
-        switch (activity_type)
-        {
+        switch (activity_type) {
             case "Push Up":
             case "Pull Up":
                 fields = ["Repetitions", "Repetitions", "Repetitions"];
@@ -120,8 +113,7 @@
         inner_div.appendChild(br);
 
         // Add the data fields.
-        for (i = 0, len = fields.length; i < len; i++)
-        {
+        for (i = 0, len = fields.length; i < len; i++) {
             add_number_entry_node(inner_div, fields[i]);
         }
 
@@ -167,18 +159,14 @@ ${nav}
         let file_tasks = {}; // Associates the task ID returned by the server with the file being uploaded
 
         /// @function update_file_status
-        function update_file_status(file_name, status_text, activity_id)
-        {
+        function update_file_status(file_name, status_text, activity_id) {
             let upload_table = document.getElementById("upload_table");
 
             upload_table.style = "display: inline-block;";
 
-            for (let i = 0, row; row = upload_table.rows[i]; i++)
-            {
-                if (row.cells[0].innerText.localeCompare(file_name) == 0)
-                {
-                    if (status_text == "Finished")
-                    {
+            for (let i = 0, row; row = upload_table.rows[i]; i++) {
+                if (row.cells[0].innerText.localeCompare(file_name) == 0) {
+                    if (status_text == "Finished") {
                         let link = document.createElement("a");
                         let link_text = document.createTextNode(file_name);
 
@@ -195,14 +183,12 @@ ${nav}
         }
 
         /// @function monitor_file_status
-        function monitor_file_status(file_name, task_id)
-        {
+        function monitor_file_status(file_name, task_id) {
             file_tasks[task_id] = file_name;
         }
 
         /// @function add_select_option
-        function add_select_option(select, option_text)
-        {
+        function add_select_option(select, option_text) {
             let option = document.createElement("option");
 
             option.value = option_text;
@@ -211,14 +197,12 @@ ${nav}
         }
 
         /// @function process_activity_type_list
-        var process_activity_type_list = function(activity_type_list)
-        {
+        var process_activity_type_list = function(activity_type_list) {
             let activity_type_select = document.getElementById("activity_type_select");
 
             activity_type_list.sort();
 
-            for (let i = 0; i < activity_type_list.length; i++)
-            {
+            for (let i = 0; i < activity_type_list.length; i++) {
                 let activity_type = activity_type_list[i];
                 let option = document.createElement("option");
 
@@ -231,13 +215,11 @@ ${nav}
 
         /// @function list_activity_types
         // Get the list of all possible activity types. Needed to populate the activity type combo box.
-        function list_activity_types()
-        {
+        function list_activity_types() {
             let api_url = "${root_url}/api/1.0/list_activity_types";
 
             send_get_request_async(api_url, function (response_code, response_text) {
-                if (response_code == 200)
-                {
+                if (response_code == 200) {
                     const records = JSON.parse(response_text);
                     process_activity_type_list(records);
                 }
@@ -245,16 +227,13 @@ ${nav}
         }
 
         /// @function parse_csv_file
-        function parse_csv_file(file_obj)
-        {
+        function parse_csv_file(file_obj) {
             let reader = new FileReader();
 
-            reader.onerror = function(event)
-            {
+            reader.onerror = function(event) {
                 reader.abort();
             };
-            reader.onload = function(e)
-            {
+            reader.onload = function(e) {
                 let line_data = reader.result.split("\n");
                 let csv_table = document.getElementById("parsed_csv_table");
                 let upload_button = document.getElementById("upload_button");
@@ -305,16 +284,12 @@ ${nav}
     
         /// @function upload_file
         // Sends a file to the cloud.
-        function upload_file(file_obj)
-        {
-            return new Promise(function(resolve, reject)
-            {
+        function upload_file(file_obj) {
+            return new Promise(function(resolve, reject) {
                 let reader = new FileReader();
 
-                reader.onerror = function(e)
-                {
-                    switch(e.target.error.code) 
-                    {
+                reader.onerror = function(e) {
+                    switch(e.target.error.code)  {
                         case e.target.error.NOT_FOUND_ERR:
                             alert("File Not Found!");
                             break;
@@ -329,13 +304,11 @@ ${nav}
                     reader.abort();
                     reject();
                 };
-                reader.onabort = function(e) 
-                {
+                reader.onabort = function(e) {
                     alert('File read cancelled');
                     reject();
                 };
-                reader.onload = function(e)
-                {
+                reader.onload = function(e) {
                     let api_url = "${root_url}/api/1.0/upload_activity_file";
                     let dict = [];
                     let encoded_data = btoa(reader.result);
@@ -344,14 +317,12 @@ ${nav}
                     dict.push({["uploaded_file_data"] : encoded_data});
 
                     send_post_request_async(api_url, dict, function(status, response) {
-                        if (status == 200)
-                        {
+                        if (status == 200) {
                             update_file_status(file_obj.name, "Uploaded (Queued For Processing)", null);
                             monitor_file_status(file_obj.name, response);
                             resolve();
                         }
-                        else
-                        {
+                        else {
                             alert(response);
                             reject();
                         }
@@ -362,25 +333,20 @@ ${nav}
         }
 
         /// @function upload_selected_files
-        function upload_selected_files()
-        {
-            if (file_list.length > 0)
-            {
+        function upload_selected_files() {
+            if (file_list.length > 0) {
                 let promises = [];
 
-                for (let i = 0; i < file_list.length; i++)
-                {
+                for (let i = 0; i < file_list.length; i++) {
                     let file_obj = file_list[i];
                     let file_name = file_obj.name;
                     let file_ext = file_name.substr(file_name.lastIndexOf('.') + 1);
 
-                    if (file_ext == "csv")
-                    {
+                    if (file_ext == "csv") {
                         list_activity_types();
                         parse_csv_file(file_obj);
                     }
-                    else
-                    {
+                    else {
                         let promise = upload_file(file_obj);
                         promises.push(promise);
                     }
@@ -391,43 +357,34 @@ ${nav}
                 Promise.allSettled(promises).
                     then((results) => { document.body.style.cursor = "default"; });
             }
-            else
-            {
+            else {
                 alert("No files have been specified.");
             }
         }
 
         /// @function confirm_selections
         // Called after the user has selected the data to import from a CSV file.
-        function confirm_selections()
-        {
+        function confirm_selections() {
             let csv_table = document.getElementById("parsed_csv_table");
             let titles = [];
 
-            for (let row_index = 0, row; row = csv_table.rows[row_index]; ++row_index)
-            {
+            for (let row_index = 0, row; row = csv_table.rows[row_index]; ++row_index) {
                 let activity_start = 0;
                 let sets = []; // The values are the reps for each set.
 
-                for (let col_index = 0, col; col = row.cells[col_index]; ++col_index)
-                {
-                    if (row_index == 0)
-                    {
+                for (let col_index = 0, col; col = row.cells[col_index]; ++col_index) {
+                    if (row_index == 0) {
                         let select = document.getElementById(col_index.toString());
                         titles.push(select.value);
                     }
-                    else
-                    {
-                        if (titles[col_index] == DATE_TITLE)
-                        {
+                    else {
+                        if (titles[col_index] == DATE_TITLE) {
                             let activity_start_obj = new Date(col.innerText);
                             activity_start = activity_start_obj.getTime() / 1000;
                         }
-                        else
-                        {
+                        else {
                             let str_offset = titles[col_index].search(SET_TITLE);
-                            if (str_offset == 0)
-                            {
+                            if (str_offset == 0) {
                                 let set_num = titles[col_index].substring(str_offset + 4);
                                 let rep_count = parseInt(col.innerText);
                                 sets[set_num - 1] = rep_count;
@@ -437,8 +394,7 @@ ${nav}
                 }  
 
                 // If we found data then add it.
-                if (activity_start > 0)
-                {
+                if (activity_start > 0) {
                     let api_url = "${root_url}/api/1.0/add_activity";
                     let dict = [];
                     let activity_type = document.getElementById("activity_type_select").value;
@@ -458,8 +414,7 @@ ${nav}
         picker.addEventListener('change', e => {
             let upload_table = document.getElementById("upload_table");
 
-            for (let file of Array.from(e.target.files))
-            {
+            for (let file of Array.from(e.target.files)) {
                 let new_row = upload_table.insertRow();
                 let cell = new_row.insertCell();
                 let text = document.createTextNode(file.name);
@@ -474,12 +429,9 @@ ${nav}
         });
 
         /// @function process_task_statuses
-        var process_task_statuses = function(records)
-        {
-            for (let record of records)
-            {
-                if (record['internal task id'] in file_tasks)
-                {
+        var process_task_statuses = function(records) {
+            for (let record of records) {
+                if (record['internal task id'] in file_tasks) {
                     if ("activity id" in record)
                         activity_id = record["activity id"];
                     else
@@ -491,13 +443,11 @@ ${nav}
 
         /// @function check_for_updates
         // Pings the cloud service to know the status of files that have been uploaded.
-        var check_for_updates = function()
-        {
+        var check_for_updates = function() {
             let api_url = "${root_url}/api/1.0/get_task_statuses";
 
             send_get_request_async(api_url, function (response_code, response_text) {
-                if (response_code == 200)
-                {
+                if (response_code == 200) {
                     const records = JSON.parse(response_text);
                     process_task_statuses(records);
                 }

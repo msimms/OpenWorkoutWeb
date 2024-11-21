@@ -22,8 +22,7 @@
 <script>
 
     /// @function append_to_table
-    function append_to_table(table, record_time, activity_id)
-    {
+    function append_to_table(table, record_time, activity_id) {
         let new_row = table.insertRow();
         let a = document.createElement('a');
         let link_text = document.createTextNode(activity_id);
@@ -40,17 +39,14 @@
     }
 
     /// @function list_records
-    function list_records()
-    {
+    function list_records() {
         let api_url = "${root_url}/api/1.0/get_record_progression?activity_type=${activity_type}&record_name=${record_name}";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 let table = document.getElementById("records");
 
-                for (let record_index in response_text)
-                {
+                for (let record_index in response_text) {
                     append_to_table(table, records[record_index][0], records[record_index][1]);
                 }
             }
