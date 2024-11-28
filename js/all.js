@@ -80,7 +80,8 @@ function serialize_to_url_params(dict) {
     return str.join("&");
 }
 
-/// @function Sends an HTTP GET request and waits for the response.
+/// @function send_get_request_async
+/// Sends an HTTP GET request and waits for the response.
 function send_get_request_async(url, callback) {
     let xml_http = new XMLHttpRequest();
     let content_type = "application/json; charset=utf-8";
@@ -95,7 +96,8 @@ function send_get_request_async(url, callback) {
     xml_http.send();
 }
 
-/// @function Sends an HTTP POST request and waits for the response.
+/// @function send_post_request_async
+/// Sends an HTTP POST request and waits for the response.
 function send_post_request_async(url, params, callback) {
     let xml_http = new XMLHttpRequest();
     let content_type = "application/json; charset=utf-8";
@@ -111,7 +113,8 @@ function send_post_request_async(url, params, callback) {
     xml_http.send(json_data);
 }
 
-/// @function Sends an HTTP DELETE request and waits for the response.
+/// @function send_delete_request_async
+/// Sends an HTTP DELETE request and waits for the response.
 function send_delete_request_async(url, callback) {
     let xml_http = new XMLHttpRequest();
     let content_type = "application/json; charset=utf-8";
