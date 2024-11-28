@@ -176,8 +176,12 @@ class CherryPySessionMgr(SessionMgr):
 class FlaskSessionMgr(SessionMgr):
     """Class for managing sessions when using the flask framework. A user may have more than one session."""
 
-    def __init__(self):
+    def __init__(self, config):
         super(SessionMgr, self).__init__()
+        assert config is not None
+        self.current_session_cookie = None
+        self.database = AppDatabase.MongoDatabase()
+        self.database.connect(config)
 
     def get_logged_in_username(self):
         """Returns the username associated with the current session."""

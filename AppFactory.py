@@ -184,7 +184,7 @@ def create_flask(config, root_dir):
     mako.directories = "templates"
 
     # Create all the objects that actually implement the functionality.
-    session_mgr = SessionMgr.FlaskSessionMgr()
+    session_mgr = SessionMgr.FlaskSessionMgr(config)
     user_mgr = UserMgr.UserMgr(config=config, session_mgr=session_mgr)
     analysis_scheduler = AnalysisScheduler.AnalysisScheduler()
     import_scheduler = ImportScheduler.ImportScheduler()
