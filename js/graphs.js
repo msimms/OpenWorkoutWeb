@@ -110,8 +110,7 @@ function draw_graph(root_url, activity_id, data, title, units, color, deleteable
         let coordinates = d3.mouse(this);
         let x = Math.floor((coordinates[0] / width) * data.length);
 
-        if (x < data.length)
-        {
+        if (x < data.length) {
             tooltip
                 .html("<b>" + data[x].x + " secs = " + data[x].y.toFixed(2) + " " + units + "</b>")
                 .style("top", (event.pageY) + "px")
@@ -193,8 +192,7 @@ function draw_graph(root_url, activity_id, data, title, units, color, deleteable
         .call(d3.axisBottom(x_scale));
 
     // Add the title.
-    if (title.length > 0)
-    {
+    if (title.length > 0) {
         // Add the X axis label.
         svg.append("text")
             .attr("class", "axis")
@@ -210,8 +208,7 @@ function draw_graph(root_url, activity_id, data, title, units, color, deleteable
         .call(d3.axisLeft(y_scale));
 
     // Add the Y axis units.
-    if (units.length > 0)
-    {
+    if (units.length > 0) {
         // Add the Y axis label.
         svg.append("text")
             .attr("class", "axis")
