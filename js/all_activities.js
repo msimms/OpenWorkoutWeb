@@ -33,7 +33,7 @@ function common_refresh_analysis(root_url) {
         if (status == 200)
             window.location.reload();
         else
-            alert(response)
+            alert(response);
     });
 }
 
@@ -50,7 +50,7 @@ function common_create_comment(root_url) {
         if (status == 200)
             window.location.reload();
         else
-            alert(response)
+            alert(response);
     });
 }
 
@@ -99,7 +99,7 @@ function common_delete_activity(root_url) {
             if (status == 200)
                 window.location.replace(root_url + "/all_activities/");
             else
-                alert(response)
+                alert(response);
         });
     }
 }
@@ -142,7 +142,7 @@ function common_create_tags(root_url, tags) {
 
     send_post_request_async(api_url, dict, function(status, response) {
         if (status != 200)
-            alert(response)
+            alert(response);
     });
 }
 
@@ -256,7 +256,7 @@ function common_delete_sensor_data(root_url, activity_id, sensor_name) {
             if (status == 200)
                 window.location.reload();
             else
-                alert(response)
+                alert(response);
         });
     }
 }
