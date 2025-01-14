@@ -25,7 +25,7 @@
 /// @function set_background_style
 function set_background_style(root_url, background_id) {
     let section = document.getElementById(background_id);
-    let img_index = Math.floor(Math.random() * 7) + 1;
+    let img_index = Math.floor(Math.random() * 9) + 1;
     let img_str = 'url("' + root_url + '/images/main_background' + img_index + '.jpg")';
     section.style.backgroundImage = img_str;
 }
