@@ -974,11 +974,11 @@ class MongoDatabase(Database.Database):
         """Retrieves each device activity and calls the callback function for each one."""
         """If return_all_data is False then only metadata is returned."""
         if user_id is None:
-            raise Exception("Unexpected empty object: device_str")
+            raise Exception("Unexpected empty object: user_id")
         if device_str is None:
             raise Exception("Unexpected empty object: device_str")
         if callback_func is None:
-            raise Exception("Unexpected empty object: device_str")
+            raise Exception("Unexpected empty object: callback_func")
 
         try:
             # Things we don't need.
