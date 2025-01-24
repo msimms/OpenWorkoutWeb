@@ -122,14 +122,6 @@ class UserMgr(object):
             self.database.create_user_device(user_id, device_str)
         return True
 
-    def retrieve_user_details(self, email):
-        """Retrieve method for a user."""
-        if self.database is None:
-            raise Exception("No database.")
-        if email is None or len(email) == 0:
-            raise Exception("Bad parameter.")
-        return self.database.retrieve_user_details(email)
-
     def retrieve_user(self, email):
         """Retrieve method for a user."""
         if self.database is None:
@@ -137,6 +129,14 @@ class UserMgr(object):
         if email is None or len(email) == 0:
             raise Exception("Bad parameter.")
         return self.database.retrieve_user(email)
+
+    def retrieve_user_from_username(self, email):
+        """Retrieve method for a user."""
+        if self.database is None:
+            raise Exception("No database.")
+        if email is None or len(email) == 0:
+            raise Exception("Bad parameter.")
+        return self.database.retrieve_user_from_username(email)
 
     def retrieve_user_from_id(self, user_id):
         """Retrieve method for a user."""

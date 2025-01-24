@@ -760,7 +760,7 @@ class App(object):
             return self.render_error()
 
         # Look up the user.
-        user = self.user_mgr.retrieve_user_details(user_str)
+        user = self.user_mgr.retrieve_user_from_username(user_str)
 
         # Make sure the user has registered devies.
         if not Keys.DEVICES_KEY in user:

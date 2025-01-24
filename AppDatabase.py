@@ -98,7 +98,7 @@ class MongoDatabase(Database.Database):
         try:
             # If we weren't given a database URL then assume localhost and default port.
             database_url = config.get_database_url()
-            self.conn = pymongo.MongoClient('mongodb://' + database_url + '/?uuidRepresentation=pythonLegacy')
+            self.conn = pymongo.MongoClient(database_url)
 
             # Database.
             self.database = self.conn['openworkoutdb']
@@ -179,20 +179,6 @@ class MongoDatabase(Database.Database):
             self.log_error(sys.exc_info()[0])
         return False
 
-    def retrieve_user_details(self, username):
-        """Retrieve method for a user."""
-        if username is None:
-            raise Exception("Unexpected empty object: username")
-        if len(username) == 0:
-            raise Exception("username is empty")
-
-        try:
-            return self.users_collection.find_one({ Keys.USERNAME_KEY: username })
-        except:
-            self.log_error(traceback.format_exc())
-            self.log_error(sys.exc_info()[0])
-        return None
-
     def retrieve_user(self, username):
         """Retrieve method for a user."""
         if username is None:
@@ -213,6 +199,20 @@ class MongoDatabase(Database.Database):
             self.log_error(traceback.format_exc())
             self.log_error(sys.exc_info()[0])
         return None, None, None
+
+    def retrieve_user_from_username(self, username):
+        """Retrieve method for a user."""
+        if username is None:
+            raise Exception("Unexpected empty object: username")
+        if len(username) == 0:
+            raise Exception("username is empty")
+
+        try:
+            return self.users_collection.find_one({ Keys.USERNAME_KEY: username })
+        except:
+            self.log_error(traceback.format_exc())
+            self.log_error(sys.exc_info()[0])
+        return None
 
     def retrieve_user_doc_from_id(self, user_id):
         """Retrieve method for a user."""
