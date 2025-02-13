@@ -49,7 +49,7 @@ class SessionMgr(object):
         """Returns the username associated with the current session."""
         return None
 
-    def get_logged_in_username_from_cookie(self, auth_cookie):
+    def get_logged_in_username_from_cookie(self, _auth_cookie):
         """Returns the username associated with the specified authentication cookie."""
         return None
 
