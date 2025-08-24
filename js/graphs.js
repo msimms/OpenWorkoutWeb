@@ -125,8 +125,8 @@ function draw_graph(root_url, activity_id, data, title, units, color, deleteable
         .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-            .on('mouseover', mousemove)
-            .on('mousemove', mouseover)
+            .on('mouseover', mouseover)
+            .on('mousemove', mousemove)
             .on('mouseleave', mouseleave)
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -325,8 +325,8 @@ function draw_bar_chart(data, title, color) {
         .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
-            .on('mouseover', mousemove)
-            .on('mousemove', mouseover)
+            .on('mouseover', mouseover)
+            .on('mousemove', mousemove)
             .on('mouseleave', mouseleave)
         .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
