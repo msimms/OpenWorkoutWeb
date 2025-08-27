@@ -2,7 +2,7 @@ CherryPy>=10.2.1
 gpxpy
 Mako>=1.0.6
 bson>=0.4.7
-pymongo>=3.7.2
+pymongo
 bcrypt
 fitparse
 flask
