@@ -318,6 +318,10 @@ class RunPlanGenerator(PlanGenerator.PlanGenerator):
         # Consider long runs closer to the event, with either a race pace effort at the end
         # or a 5K repeats alternating between easy and race pace.
 
+        # Possible long run variations in last two blocks:
+        # Over/under marathon pace
+        # 2x10K at 90% marathon pace
+
         # Create the workout object.
         workout = WorkoutFactory.create(Keys.WORKOUT_TYPE_LONG_RUN, self.user_id)
         workout.activity_type = Keys.TYPE_RUNNING_KEY
