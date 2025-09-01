@@ -193,7 +193,7 @@ function common_process_sensordata(root_url, activity_id, sensordata, is_foot_ba
             draw_sensor_graph(root_url, activity_id, new_data, key, "Watts", get_graph_color(key), deletable);
         }
         else if (key == "Temperature") {
-            draw_sensor_graph(root_url, activity_id, new_data, key, "Temperature", get_graph_color(key), deletable);
+            draw_sensor_graph(root_url, activity_id, new_data, key, "C", get_graph_color(key), deletable);
         }
         else if (key == "Threat Count") {
             draw_sensor_graph(root_url, activity_id, new_data, key, "Threat Count", get_graph_color(key), deletable);

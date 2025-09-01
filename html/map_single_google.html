@@ -115,8 +115,9 @@ ${nav}
             return (item / 1000.0) - (split_times[index-1] / 1000.0);
         });
 
-        if (new_splits.length > 0)
+        if (new_splits.length > 0) {
             draw_bar_chart(new_splits, "Split Times (seconds)", "LightSteelBlue");
+        }
     }
 
     /// @function add_current_location_marker
