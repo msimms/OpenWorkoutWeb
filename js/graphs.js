@@ -2,7 +2,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2020-2021 Michael J Simms
+// Copyright (c) 2020-2025 Michael J Simms
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -112,7 +112,7 @@ function draw_graph(root_url, activity_id, data, title, units, color, deleteable
 
         if (x < data.length) {
             tooltip
-                .html("<b>" + data[x].x + " secs = " + data[x].y.toFixed(2) + " " + units + "</b>")
+                .html("<b>" + convert_seconds_to_hours_mins_secs(data[x].x) + " = " + data[x].y.toFixed(2) + " " + units + "</b>")
                 .style("top", (event.pageY) + "px")
                 .style("left", (event.pageX) + "px")
         }
