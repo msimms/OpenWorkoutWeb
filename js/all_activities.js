@@ -97,7 +97,7 @@ function common_delete_activity(root_url) {
 
         send_post_request_async(api_url, dict, function(status, response) {
             if (status == 200)
-                window.location.replace(root_url + "/all_activities/");
+                window.location.assign(root_url + "/all_activities/");
             else
                 alert(response);
         });

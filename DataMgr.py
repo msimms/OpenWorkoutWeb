@@ -709,7 +709,7 @@ class DataMgr(Importer.ActivityWriter):
             self.database.delete_uploaded_file(activity_id)
 
             # Recreate the user's all-time PR list as the previous one could have contained data from the now deleted activity.
-            result = self.schedule_personal_records_refresh(user_id)
+            self.schedule_personal_records_refresh(user_id)
 
         return result
 
