@@ -7,10 +7,12 @@ fitparse
 flask
 lxml
 markdown
+pillow
 requests
 scipy
 scikit-learn
 unidecode
+waitress
 Celery
 tensorflow
 pandas
