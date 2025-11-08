@@ -34,6 +34,7 @@ import AppDatabase
 import BmiCalculator
 import FtpCalculator
 import HeartRateCalculator
+import Image
 import Importer
 import InputChecker
 import Keys
@@ -483,9 +484,12 @@ class DataMgr(Importer.ActivityWriter):
         if len(decoded_file_data) > self.config.get_photos_max_file_size():
             raise Exception("The file is too large.")
 
+        # Convert the image to webp.
+        webp_file_data = Image.to_webp_scaled_50(decoded_file_data)
+
         # Hash the photo. This will prevent duplicates as well as give us a unique name.
         h = hashlib.sha512()
-        h.update(str(decoded_file_data).encode('utf-8'))
+        h.update(str(webp_file_data).encode('utf-8'))
         hash_str = h.hexdigest()
 
         # Where are we storing photos?
@@ -496,7 +500,7 @@ class DataMgr(Importer.ActivityWriter):
             local_file_name = os.path.join(user_photos_dir, hash_str)
             if not os.path.isfile(local_file_name):
                 with open(local_file_name, 'wb') as local_file:
-                    local_file.write(decoded_file_data)
+                    local_file.write(webp_file_data)
         except:
             raise Exception("Could not save the photo.")
 
