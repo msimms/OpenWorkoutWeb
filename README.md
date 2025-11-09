@@ -129,6 +129,10 @@ The software is written in python. It was started in python2 and later converted
 
 ![Architecture Diagram](https://github.com/msimms/OpenWorkoutWeb/blob/master/docs/architecture/Architecture.png?raw=true)
 
+## API
+
+[API Documentation](https://htmlpreview.github.io/?https://github.com/msimms/OpenWorkoutWeb/blob/master/api.html)
+
 ## Workout Plans
 
 This feature is very much under development and will go through several iterations before being ready for general use. The idea is to use the athlete's existing data to generate workouts to help in reaching future goals.
