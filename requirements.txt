@@ -1,6 +1,6 @@
-CherryPy>=10.2.1
+CherryPy
 gpxpy
-Mako>=1.0.6
+Mako
 pymongo
 bcrypt
 fitparse
@@ -17,3 +17,4 @@ Celery
 tensorflow
 pandas
 python-dateutil
+pillow
