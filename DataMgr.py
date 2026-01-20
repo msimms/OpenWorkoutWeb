@@ -1735,7 +1735,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
 
         new_race = {}
-        new_race[Keys.RACE_ID_KEY] = uuid.uuid4()
+        new_race[Keys.RACE_ID_KEY] = str(uuid.uuid4())
         new_race[Keys.RACE_NAME_KEY] = race_name
         new_race[Keys.RACE_DATE_KEY] = race_date
         new_race[Keys.RACE_DISTANCE_KEY] = race_distance
