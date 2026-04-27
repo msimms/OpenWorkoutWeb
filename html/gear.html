@@ -231,7 +231,7 @@
 
         select.appendChild(none_option);
         select.onchange = function() {
-            set_gear_default("${root_url}", activity_type, this.value);
+            set_gear_default(activity_type, this.value);
         };
 
         all_gear_records.forEach( gear_record => {
