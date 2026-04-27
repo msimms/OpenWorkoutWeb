@@ -1363,7 +1363,7 @@ class DataMgr(Importer.ActivityWriter):
             raise Exception("Bad parameter.")
         if last_updated_time is None:
             raise Exception("Bad parameter.")
-        plan_id = uuid.uuid4()
+        plan_id = str(uuid.uuid4())
         return self.database.create_pace_plan(user_id, plan_id, plan_name, plan_description, target_distance, target_distance_units, target_time, target_splits, target_splits_units, last_updated_time)
 
     def retrieve_pace_plans_for_user(self, user_id):
@@ -1421,7 +1421,7 @@ class DataMgr(Importer.ActivityWriter):
         if gear_name is None:
             raise Exception("Bad parameter.")
 
-        gear_id = uuid.uuid4()
+        gear_id = str(uuid.uuid4())
         return self.database.create_gear(user_id, gear_id, gear_type, gear_name, description, add_time, retire_time, last_updated_time)
 
     def retrieve_gear(self, user_id):
@@ -1521,7 +1521,7 @@ class DataMgr(Importer.ActivityWriter):
         if record_description is None:
             raise Exception("Bad parameter.")
 
-        service_record_id = uuid.uuid4()
+        service_record_id = str(uuid.uuid4())
         return self.database.create_service_record(user_id, gear_id, service_record_id, record_date, record_description)
 
     def delete_service_record(self, user_id, gear_id, service_record_id):

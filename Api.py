@@ -2102,7 +2102,7 @@ class Api(object):
         
         # Optional parameters.
         if Keys.WORKOUT_ID_KEY not in values:
-            workout_id = uuid.uuid4()
+            workout_id = str(uuid.uuid4())
         else:
             workout_id = values[Keys.WORKOUT_ID_KEY]
             if not InputChecker.is_uuid(workout_id):
