@@ -35,8 +35,9 @@
         dict.push({["preferred first day of week"] : week_start});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status != 200)
+            if (status != 200) {
                 alert(response);
+            }
         });
     }
 
@@ -50,8 +51,9 @@
         dict.push({["email"] : new_email});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status != 200)
+            if (status != 200) {
                 alert(response);
+            }
         });
     }
 
@@ -69,8 +71,9 @@
         dict.push({["new_password2"] : new_pword2});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status != 200)
+            if (status != 200) {
                 alert(response);
+            }
         });
     }
 
@@ -93,10 +96,12 @@
                 dict.push({["password"] : pword});
 
                 send_post_request_async(api_url, dict, function(status, response) {
-                    if (status == 200)
+                    if (status == 200) {
                         window.location.replace("${root_url}");
-                    else
+                    }
+                    else {
                         alert(response);
+                    }
                 });
             }
             else {
@@ -118,10 +123,12 @@
                 dict.push({["password"] : pword});
 
                 send_post_request_async(api_url, dict, function(status, response) {
-                    if (status == 200)
+                    if (status == 200) {
                         window.location.replace("${root_url}");
-                    else
+                    }
+                    else {
                         alert(response);
+                    }
                 });
             }
             else {
@@ -143,10 +150,12 @@
                 dict.push({["password"] : pword});
 
                 send_post_request_async(api_url, dict, function(status, response) {
-                    if (status == 200)
+                    if (status == 200) {
                         window.location.replace("${root_url}");
-                    else
+                    }
+                    else {
                         alert(response);
+                    }
                 });
             }
             else {
@@ -205,8 +214,7 @@
         let api_url = "${root_url}/api/1.0/get_user_settings?requested%20settings=default%20privacy,preferred%20units,preferred%20first%20day%20of%20week";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 const records = JSON.parse(response_text);
                 process_user_settings(records);
             }

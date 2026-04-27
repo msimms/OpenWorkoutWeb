@@ -71,8 +71,9 @@
         dict.push({["birthday"] : timestamp});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status != 200)
+            if (status != 200) {
                 alert(response);
+            }
         });
     }
 
@@ -92,8 +93,9 @@
         dict.push({["height"] : height});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status != 200)
+            if (status != 200) {
                 alert(response);
+            }
         });
     }
 
@@ -113,8 +115,9 @@
         dict.push({["weight"] : weight});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status != 200)
+            if (status != 200) {
                 alert(response);
+            }
         });
     }
 
@@ -128,8 +131,9 @@
         dict.push({["biological sex"] : biological_sex});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status != 200)
+            if (status != 200) {
                 alert(response);
+            }
         });
     }
 
@@ -143,8 +147,9 @@
         dict.push({["resting heart rate"] : resting_hr});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status != 200)
+            if (status != 200) {
                 alert(response);
+            }
         });
     }
 
@@ -158,8 +163,9 @@
         dict.push({["max heart rate"] : max_hr});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status != 200)
+            if (status != 200) {
                 alert(response);
+            }
         });
     }
 
@@ -202,8 +208,9 @@
         if (sorted_running_keys.length > 0) {
             run_prs = {}
             for (let key of sorted_running_keys) {
-                if (key.includes("Best 5K"))
+                if (key.includes("Best 5K")) {
                     run_prs[key] = records.Running[key][2];
+                }
                 append_to_pr_table(running_table, key, records.Running[key]);
             }
         }
@@ -219,10 +226,12 @@
 
         cell.appendChild(document.createTextNode(default_info.activity_type));
         cell = new_row.insertCell();
-        if (default_info.name.length == 0)
+        if (default_info.name.length == 0) {
             cell.appendChild(document.createTextNode("Not Set"));
-        else
+        }
+        else {
             cell.appendChild(document.createTextNode(default_info.name));
+        }
     }
 
     /// @function append_to_power_zones_table
@@ -297,10 +306,12 @@
                     element.placeholder = n.toLocaleDateString();
                 }
                 else if (key == "biological sex") {
-                    if (value == "male")
+                    if (value == "male") {
                         element.selectedIndex = 0;
-                    else
+                    }
+                    else {
                         element.selectedIndex = 1;
+                    }
                 }
                 else if (key == "resting heart rate") {
                     if (!isNaN(value) && value > 1.0) {
@@ -310,8 +321,7 @@
                     }
                 }
                 else if (key == "max heart rate") {
-                    if (!isNaN(value) && value > 1.0)
-                    {
+                    if (!isNaN(value) && value > 1.0) {
                         element.value = value.toFixed(1);
                         max_hr = value;
                         refresh_hr_zones = true;
@@ -336,10 +346,12 @@
     var process_vo2_max = function(vo2max) {
         let vo2_max_elem = document.getElementById("vo2_max");
 
-        if (vo2max == 0)
+        if (vo2max == 0) {
             vo2_max_elem.value = "Not calculated.";
-        else
+        }
+        else {
             vo2_max_elem.value = vo2max.toFixed(1);
+        }
     }
 
     // Handler for when the server returns the user's heart rate zones.
@@ -397,10 +409,12 @@
     var process_bmi = function(bmi) {
         let bmi_elem = document.getElementById("bmi");
 
-        if (bmi == 0)
+        if (bmi == 0) {
             bmi_elem.value = "Not calculated";
-        else
+        }
+        else {
             bmi_elem.value = bmi.toFixed(1);
+        }
     }
 
     /// @function get_personal_records

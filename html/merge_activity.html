@@ -31,10 +31,12 @@
         dict.push({"replace" : "False"});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status == 200)
+            if (status == 200) {
                 window.location.replace('${root_url}/activity/' + response);
-            else
+            }
+            else {
                 alert(response);
+            }
         });
     }
 
@@ -44,6 +46,7 @@
 
         for (let i = 0; i < activity_list.length; i++) {
             let activity = activity_list[i];
+
             if (activity.activity_id.toLowerCase() != "${activity_id}".toLowerCase()) {
                 let time_str = unix_time_to_local_string(activity.time);
                 let title_str = time_str + " " + activity.title;
@@ -69,7 +72,7 @@
                 process_activity_list(records);
             }
             else {
-                alert(response)
+                alert(response);
             }
         });
     }

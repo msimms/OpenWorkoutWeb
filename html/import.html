@@ -262,8 +262,7 @@ ${nav}
 
                             add_select_option(select, "---");
                             add_select_option(select, DATE_TITLE);
-                            for (let i = 1; i <= column_data.length; ++i)
-                            {
+                            for (let i = 1; i <= column_data.length; ++i) {
                                 add_select_option(select, SET_TITLE + i.toString());
                             }
                             cell.appendChild(select);
@@ -404,8 +403,9 @@ ${nav}
                     dict.push({["activity_type"] : activity_type});
 
                     send_post_request_async(api_url, dict, function(status, response) {
-                        if (status != 200)
+                        if (status != 200) {
                             alert(response);
+                        }
                     });
                 }
             }
@@ -432,10 +432,12 @@ ${nav}
         var process_task_statuses = function(records) {
             for (let record of records) {
                 if (record['internal task id'] in file_tasks) {
-                    if ("activity id" in record)
+                    if ("activity id" in record) {
                         activity_id = record["activity id"];
-                    else
+                    }
+                    else {
                         activity_id = null;
+                    }
                     update_file_status(record["task details"], record["task status"], activity_id);
                 }
             }

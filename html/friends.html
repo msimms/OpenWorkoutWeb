@@ -31,10 +31,12 @@
         dict.push({["target_email"] : target.name});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status == 200)
+            if (status == 200) {
                 window.location.reload();
-            else
+            }
+            else {
                 alert(response);
+            }
         });
     }
 
@@ -46,10 +48,12 @@
         dict.push({["target_email"] : useremail});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status == 200)
+            if (status == 200) {
                 window.location.reload();
-            else
+            }
+            else {
                 alert(response);
+            }
         });
     }
 
@@ -62,10 +66,12 @@
             dict.push({["target_email"] : useremail});
 
             send_post_request_async(api_url, dict, function(status, response) {
-                if (status == 200)
+                if (status == 200) {
                     window.location.reload();
-                else
+                }
+                else {
                     alert(response);
+                }
             });
         }
     }

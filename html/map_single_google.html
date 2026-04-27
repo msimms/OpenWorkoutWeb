@@ -110,8 +110,9 @@ ${nav}
     /// @function draw_split_times_chart
     function draw_split_times_chart() {
         let new_splits = split_times.map(function(item, index) {
-            if (index == 0)
+            if (index == 0) {
                 return item / 1000.0;
+            }
             return (item / 1000.0) - (split_times[index-1] / 1000.0);
         });
 
@@ -150,6 +151,7 @@ ${nav}
         info_window.open(map, marker);
     };
 
+    /// @function append_to_track
     var append_to_track = function(obj_list) {
         if (obj_list == null)
             return;
@@ -189,10 +191,12 @@ ${nav}
 
                 // Update split times.
                 total_ms_traveled = obj_list[i].time - loc_start_time_ms;
-                if ("${unit_system}" == "metric")
+                if ("${unit_system}" == "metric") {
                     do_split_check(1000.0);
-                else
+                }
+                else {
                     do_split_check(1609.34);
+                }
 
                 total_meters_traveled = new_meters_traveled;
 

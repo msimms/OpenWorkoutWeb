@@ -50,12 +50,15 @@
         let name = document.getElementById("name").value;
         let description = document.getElementById("description").value;
 
-        if (isNaN(add_time))
+        if (isNaN(add_time)) {
             add_time = Date.now() / 1000;
-        else
+        }
+        else {
             add_time = add_time / 1000;
-        if (!isNaN(retired_time))
+        }
+        if (!isNaN(retired_time)) {
             retired_time = retired_time / 1000;
+        }
 
         dict.push({["type"] : gear_type});
         dict.push({["add_time"] : add_time});
@@ -64,10 +67,12 @@
         dict.push({["description"] : description});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status == 200)
+            if (status == 200) {
                 window.location.reload();
-            else
+            }
+            else {
                 alert(response);
+            }
         });
     }
 
@@ -82,10 +87,12 @@
         let name = document.getElementById("name").value;
         let description = document.getElementById("description").value;
 
-        if (!isNaN(add_time))
+        if (!isNaN(add_time)) {
             add_time = add_time / 1000;
-        if (!isNaN(retired_time))
+        }
+        if (!isNaN(retired_time)) {
             retired_time = retired_time / 1000;
+        }
 
         dict.push({["type"] : gear_type});
         dict.push({["add_time"] : add_time});
@@ -94,10 +101,12 @@
         dict.push({["description"] : description});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status == 200)
+            if (status == 200) {
                 window.location.reload();
-            else
+            }
+            else {
                 alert(response);
+            }
         });
     }
 
@@ -107,10 +116,12 @@
             let api_url = "${root_url}/api/1.0/delete_gear?gear_id=" + gear_id;
 
             send_delete_request_async(api_url, function(status, response) {
-                if (status == 200)
+                if (status == 200) {
                     window.location.reload();
-                else
-                    alert(response)
+                }
+                else {
+                    alert(response);
+                }
             });
         }
     }
@@ -124,10 +135,12 @@
             dict.push({["gear_id"] : gear_id});
 
             send_post_request_async(api_url, dict, function(status, response) {
-                if (status == 200)
+                if (status == 200) {
                     window.location.reload();
-                else
+                }
+                else {
                     alert(response);
+                }
             });
         }
     }
@@ -141,8 +154,9 @@
         dict.push({["name"] : gear_name});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status != 200)
+            if (status != 200) {
                 alert(response);
+            }
         });
     }
 
@@ -162,10 +176,12 @@
         cell.appendChild(document.createTextNode(description));
 
         cell = new_row.insertCell();
-        if (add_time > 0)
+        if (add_time > 0) {
             text = document.createTextNode(unix_time_to_local_date_string(add_time));
-        else
+        }
+        else {
             text = document.createTextNode("");
+        }
         cell.appendChild(text);
 
         cell = new_row.insertCell();

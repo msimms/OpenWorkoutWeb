@@ -30,10 +30,12 @@
             dict.push({["activity_id"] : "${activity_id}"});
 
             send_post_request_async(api_url, dict, function(status, response) {
-                if (status == 200)
+                if (status == 200) {
                     window.location.replace('${root_url}');
-                else
+                }
+                else {
                     alert(response);
+                }
             });
         }
     }

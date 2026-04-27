@@ -86,17 +86,20 @@ ${nav}
         let units_traveled = total_meters_traveled / split_meters;
         let whole_units_traveled = parseInt(units_traveled);
 
-        if (split_times.length < whole_units_traveled + 1)
-            split_times.push(total_ms_traveled)
-        else
-            split_times[whole_units_traveled] = total_ms_traveled
+        if (split_times.length < whole_units_traveled + 1) {
+            split_times.push(total_ms_traveled);
+        }
+        else {
+            split_times[whole_units_traveled] = total_ms_traveled;
+        }
     }
 
     /// @function draw_split_times_chart
     function draw_split_times_chart() {
         let new_splits = split_times.map(function(item, index) {
-            if (index == 0)
+            if (index == 0) {
                 return item / 1000.0;
+            }
             return (item / 1000.0) - (split_times[index-1] / 1000.0);
         });
 
@@ -138,6 +141,7 @@ ${nav}
         return [x, y];
     };
 
+    /// @function append_to_track
     var append_to_track = function(obj_list) {
         if (obj_list == null)
             return;
@@ -148,10 +152,12 @@ ${nav}
         let ctx = can.getContext('2d');
         let func = lat_lon_to_watopia_xy;
 
-        if ("${map_file_name}" == "crit_city.png")
-            func = lat_lon_to_crit_city_xy
-        if ("${map_file_name}" == "makuri_islands.png")
-            func = lat_lon_to_makuri_islands_xy
+        if ("${map_file_name}" == "crit_city.png") {
+            func = lat_lon_to_crit_city_xy;
+        }
+        if ("${map_file_name}" == "makuri_islands.png") {
+            func = lat_lon_to_makuri_islands_xy;
+        }
 
         ctx.beginPath();
         ctx.lineWidth = 1;
@@ -181,10 +187,12 @@ ${nav}
 
                 // Update split times.
                 total_ms_traveled = obj_list[i].time - loc_start_time_ms;
-                if ("${unit_system}" == "metric")
+                if ("${unit_system}" == "metric") {
                     do_split_check(1000.0);
-                else
+                }
+                else {
                     do_split_check(1609.34);
+                }
 
                 total_meters_traveled = new_meters_traveled;
 

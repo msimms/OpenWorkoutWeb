@@ -28,10 +28,12 @@
             let api_url = "${root_url}/api/1.0/delete_api_key?key=" + key;
 
             send_delete_request_async(api_url, function(status, response) {
-                if (status == 200)
+                if (status == 200) {
                     window.location.reload();
-                else
-                    alert(response)
+                }
+                else {
+                    alert(response);
+                }
             });
         }
     }
@@ -43,10 +45,12 @@
         let dict = [];
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status == 200)
+            if (status == 200) {
                 window.location.reload();
-            else
+            }
+            else {
                 alert(response);
+            }
         });
     }
 

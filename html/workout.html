@@ -58,10 +58,12 @@
             let api_url = "${root_url}/api/1.0/delete_planned_workout?workout_id=${workout_id}";
 
             send_delete_request_async(api_url, function(status, response) {
-                if (status == 200)
+                if (status == 200) {
                     window.location.replace("${root_url}/my_activities/");
-                else
-                    alert(response)
+                }
+                else {
+                    alert(response);
+                }
             });
         }
     }
@@ -78,8 +80,9 @@
         dict.push({["scheduled time"] : timestamp});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status != 200)
+            if (status != 200) {
                 alert(response);
+            }
         });
     }
 
@@ -94,8 +97,9 @@
         dict.push({["activity type"] : activity_type});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status != 200)
+            if (status != 200) {
                 alert(response);
+            }
         });
     }
 
@@ -110,8 +114,9 @@
         dict.push({["workout type"] : workout_type});
 
         send_post_request_async(api_url, dict, function(status, response) {
-            if (status != 200)
+            if (status != 200) {
                 alert(response);
+            }
         });
     }
 
@@ -126,17 +131,20 @@
 
     /// @function next_y
     function next_y(pace, power) {
-        if (pace > 0)
+        if (pace > 0) {
             return pace;
+        }
         return power;
     }
 
     /// @function next_x
     function next_x(current_x, distance, pace, duration) {
-        if (distance > 0 && pace > 0)
+        if (distance > 0 && pace > 0) {
             current_x += (distance / pace) * 60;
-        else
+        }
+        else {
             current_x += duration;
+        }
         return current_x;
     }
 
@@ -226,16 +234,16 @@
             option.value = activity_type;
             option.text = activity_type;
 
-            if (selected_activity_type == activity_type)
+            if (selected_activity_type == activity_type) {
                 option.selected = true;
+            }
 
             activity_type_obj.appendChild(option);
         }
     }
 
     /// @function process_workout_type_list
-    function process_workout_type_list(response, selected_workout_type)
-    {
+    function process_workout_type_list(response, selected_workout_type) {
         let workout_type_list = JSON.parse(response);
         if (workout_type_list == null)
             return;
@@ -335,8 +343,7 @@
         let api_url = "${root_url}/api/1.0/export_workout?workout_id=${workout_id}&format=json";
 
         send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200)
-            {
+            if (response_code == 200) {
                 process_workout_description(response_text);
             }
         });
