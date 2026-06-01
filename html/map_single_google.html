@@ -305,13 +305,15 @@ ${nav}
 </div>
 
 <section class="summary">
-<ul id="summary">
-${summary}
-</ul>
+    <ul id="summary">
+    ${summary}
+    </ul>
 </section>
 
-<div id="charts">
-</div>
+<section class="charts">
+    <div id="charts">
+    </div>
+</section>
 
 <script>
     let start_time_ms = 0;
@@ -484,9 +486,11 @@ ${summary}
 
 <section class="activity_control">
     <h3>Tags and Gear</h3>
-    <select name="tags" id="tags" class="chosen" multiple="true" style="width:100%;" data-placeholder="Specify tags and gear...">
+    <div style="margin-left: 1rem;width: 90%">
+    <select class="chosen" id="tags" name="tags" multiple="true" data-placeholder="Specify tags and gear...">
     ${tags}
     </select>
+    </div>
 </section>
 
 <section class="activity_control">
