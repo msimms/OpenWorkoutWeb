@@ -88,7 +88,8 @@ class TestActivityWriter(Importer.ActivityWriter):
     def create_activity_locations(self, device_str, activity_id, locations):
         """Inherited from ActivityWriter. Adds several locations to the database. 'locations' is an array of arrays in the form [time, lat, lon, alt]."""
         for location in locations:
-            self.location_analyzer.append_location(location[0], location[1], location[2], location[3], None, None)
+            if len(location) >= 4:
+                self.location_analyzer.append_location(location[0], location[1], location[2], location[3], None, None)
         self.location_analyzer.update_speeds()
 
     def create_activity_sensor_reading(self, activity_id, date_time, sensor_type, value):
@@ -126,11 +127,7 @@ class TestActivityWriter(Importer.ActivityWriter):
 
         # Do sensor analysis.
         for sensor_analyzer in self.sensor_analyzers:
-            title_str = sensor_analyzer.type + ":"
-            print(title_str)
-            print("-" * len(title_str))
             sensor_analysis = sensor_analyzer.analyze()
-            print(sensor_analysis)
             self.summarizer.add_activity_data(self.current_activity_id, self.current_activity_type, self.current_activity_start_time, sensor_analysis)
 
         print("Location-Based Calculations:")
@@ -245,10 +242,10 @@ def run_unit_tests(test_files_dir_name):
     # Process each file in the specified directory as well as its subdirectories.
     total_time = 0
     num_files_processed = 0
-    for subdir, _, files in os.walk(test_files_dir_name):
+    expanded_path = os.path.expanduser(test_files_dir_name)
+    for subdir, _, files in os.walk(expanded_path):
 
-        title_str = "Processing all files in " + test_files_dir_name + ":"
-        print(title_str + "\n")
+        print("Processing all files in " + expanded_path + "...\n")
         for current_file in files:
 
             # My test file repo has a description file that we should skip.
@@ -257,7 +254,7 @@ def run_unit_tests(test_files_dir_name):
 
             full_path = os.path.join(subdir, current_file)
             _, temp_file_ext = os.path.splitext(full_path)
-            if temp_file_ext in ['.gpx', '.tcx', '.csv']:
+            if temp_file_ext in ['.gpx', '.tcx', '.csv', '.fit']:
 
                 try:
                     title_str = "Processing: " + full_path
@@ -282,28 +279,19 @@ def run_unit_tests(test_files_dir_name):
                     print("Test failed!\n")
                     print(e)
 
-    # Print the summary data.
-    print_records(store, Keys.TYPE_RUNNING_KEY)
-    print_records(store, Keys.TYPE_CYCLING_KEY)
-    print_records(store, Keys.TYPE_OPEN_WATER_SWIMMING_KEY)
-    print_records(store, Keys.TYPE_POOL_SWIMMING_KEY)
-
-    # Print the maximum heart rate and heart rate zone calculators.
-    max_hr = store.summarizer.hr_calc.estimate_max_hr(45)
-    print("Estimated Maximum Heart Rate: {:.2f} bpm\n".format(max_hr))
-
-    # Print the success and failure summary.
-    title_str = "Summary:"
-    print(title_str)
-    print("=" * len(title_str))
-    print("Num successful imports: " + str(len(successes)))
-    print("Num failed imports: " + str(len(failures)))
-    for failure in failures:
-        print("- " + failure)
-
     # Print the time summary.
     if num_files_processed > 0:
-        print("Average time per sample: " + str(total_time / num_files_processed) + " seconds\n")
+
+        # Print the success and failure summary.
+        title_str = "Summary:"
+        print(title_str)
+        print("=" * len(title_str))
+        print("Num successful imports: " + str(len(successes)))
+        print("Num failed imports: " + str(len(failures)))
+        for failure in failures:
+            print("- " + failure)
+
+            print("Average time per sample: " + str(total_time / num_files_processed) + " seconds\n")
     else:
         print("No files processed.\n")
 

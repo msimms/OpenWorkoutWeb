@@ -18,3 +18,5 @@ tensorflow
 pandas
 python-dateutil
 pillow
+numpy
+scikit-learn

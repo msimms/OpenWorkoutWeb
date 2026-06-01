@@ -153,8 +153,9 @@ class Summarizer(object):
         old_value = self.get_best_time_from_record_set(record_set, summary_data_key)
 
         # If the old record is not set or this is better, then update.
-        if old_value is None or Summarizer.is_better(summary_data_key, summary_data_value, old_value):
-            record_set[summary_data_key] = [ summary_data_value, activity_id ]
+        if summary_data_value:
+            if old_value is None or Summarizer.is_better(summary_data_key, summary_data_value, old_value):
+                record_set[summary_data_key] = [ summary_data_value, activity_id ]
 
         # Update the record set.
         self.set_record_dictionary(activity_type, record_set)
@@ -173,8 +174,9 @@ class Summarizer(object):
         old_value = self.get_best_time_from_record_set(annual_record_set, summary_data_key)
 
         # If the old record is not set or this is better, then update.
-        if old_value is None or Summarizer.is_better(summary_data_key, summary_data_value, old_value):
-            annual_record_set[summary_data_key] = [ summary_data_value, activity_id ]
+        if summary_data_value:
+            if old_value is None or Summarizer.is_better(summary_data_key, summary_data_value, old_value):
+                annual_record_set[summary_data_key] = [ summary_data_value, activity_id ]
 
         # Update the record set.
         self.set_annual_record_dictionary(activity_type, ts.tm_year, annual_record_set)
