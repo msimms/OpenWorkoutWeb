@@ -437,8 +437,10 @@ class Importer(object):
                 location.append(dt_unix)
                 location.append(float(message_data['position_lat']))
                 location.append(float(message_data['position_long']))
-                if 'enhanced_altitude' in message_data and message_data['enhanced_altitude']:
+                if 'enhanced_altitude' in message_data and message_data['enhanced_altitude'] is not None:
                     location.append(float(message_data['enhanced_altitude']))
+                else:
+                    location.append(0.0)
                 locations.append(location)
             if 'cadence' in message_data and message_data['cadence'] is not None:
                 reading = []
