@@ -217,27 +217,29 @@ ${nav}
 </section>
 
 <section class="block">
-    <input type="text" name="gear_name" id="gear_name" value="" onchange="update_gear_name()"><br>
-    <h3>Description</h3>
-    <p id="gear_description"></p>
-    <h3>Distance</h3>
-    <p id="gear_distance"></p>
-    <h3>Date Added</h3>
-    <p id="gear_added"></p>
-    <h3>Date Retired</h3>
-    <p id="gear_retired"></p>
-    <h3>Service History</h3>
-    <table id="service_history">
-        <tbody>
-            <tr>
-                <th scope="col"><b>Date</b></th>
-                <th scope="col"><b>Description</b></th>
-            </tr>
-        </tbody>
-    </table>
-    <div class="block" id="new_service_record_block">
+    <div>
+        <input type="text" name="gear_name" id="gear_name" value="" onchange="update_gear_name()"><br>
+        <h3>Description</h3>
+        <p id="gear_description"></p>
+        <h3>Distance</h3>
+        <p id="gear_distance"></p>
+        <h3>Date Added</h3>
+        <p id="gear_added"></p>
+        <h3>Date Retired</h3>
+        <p id="gear_retired"></p>
+        <h3>Service History</h3>
+        <table id="service_history">
+            <tbody>
+                <tr>
+                    <th scope="col"><b>Date</b></th>
+                    <th scope="col"><b>Description</b></th>
+                </tr>
+            </tbody>
+        </table>
+        <div class="block" id="new_service_record_block">
+        </div>
+        <button type="button" id="add_service_record_btn" onclick="get_new_service_record_info()">Add Service Record</button>
     </div>
-    <button type="button" id="add_service_record_btn" onclick="get_new_service_record_info()">Add Service Record</button>
 </section>
 
 </body>
