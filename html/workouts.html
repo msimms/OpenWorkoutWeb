@@ -560,133 +560,123 @@ ${nav}
 </section>
 
 <section class="block">
-    <div>
 
+    <div>
         <h2>Race Calendar</h2>
         <table id="Races">
         </table>
+    </div>
 
-        <div id="new_race" style="display: none;">
-            <h2>Add a Race</h2>
-            <p>Name<br><input type="text" name="race_name" id="race_name"><br></p>
-            <p>Date<br><input type="text" name="race_date" id="race_date"><br></p>
-            <p>Distance<br>
-                <select name="race_distance" id="race_distance" class="right">
-                    <option value="5K Run">5K Run</option>
-                    <option value="10K Run">10K Run</option>
-                    <option value="15K Run">15K Run</option>
-                    <option value="Half Marathon">Half Marathon</option>
-                    <option value="Marathon">Marathon</option>
-                    <option value="50K Run">50K Run</option>
-                    <option value="50 Mile Run">50 Mile Run</option>
-                    <option value="Sprint Triathlon">Sprint Triathlon</option>
-                    <option value="Olympic Triathlon">Olympic Triathlon</option>
-                    <option value="Half Iron Distance Triathlon">Half Iron Distance Triathlon</option>
-                    <option value="Iron Distance Triathlon">Iron Distance Triathlon</option>
-                    <option value="100K Bike Ride">100K Bike Ride</option>
-                    <option value="100 Mile Bike Ride">100 Mile Bike Ride</option>
-                </select><br>
-            </p>
-            <p>Importance<br>
-                <select name="race_importance" id="race_importance" class="right">
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C">C</option>
-                </select><br>
-            </p>
-            <button type="button" onclick="create_race()">Save</button>
-            <button type="button" onclick="cancel_create_race()">Cancel</button>
-            <hr>
-        </div>
+    <div id="new_race" style="display: none;">
+        <h2>Add a Race</h2>
+        <p>Name<br><input type="text" name="race_name" id="race_name"><br></p>
+        <p>Date<br><input type="text" name="race_date" id="race_date"><br></p>
+        <p>Distance<br>
+            <select name="race_distance" id="race_distance" class="right">
+                <option value="5K Run">5K Run</option>
+                <option value="10K Run">10K Run</option>
+                <option value="15K Run">15K Run</option>
+                <option value="Half Marathon">Half Marathon</option>
+                <option value="Marathon">Marathon</option>
+                <option value="50K Run">50K Run</option>
+                <option value="50 Mile Run">50 Mile Run</option>
+                <option value="Sprint Triathlon">Sprint Triathlon</option>
+                <option value="Olympic Triathlon">Olympic Triathlon</option>
+                <option value="Half Iron Distance Triathlon">Half Iron Distance Triathlon</option>
+                <option value="Iron Distance Triathlon">Iron Distance Triathlon</option>
+                <option value="100K Bike Ride">100K Bike Ride</option>
+                <option value="100 Mile Bike Ride">100 Mile Bike Ride</option>
+            </select><br>
+        </p>
+        <p>Importance<br>
+            <select name="race_importance" id="race_importance" class="right">
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+            </select><br>
+        </p>
+        <button type="button" onclick="create_race()">Save</button>
+        <button type="button" onclick="cancel_create_race()">Cancel</button>
+        <hr>
+    </div>
 
+    <div>
         <button type="button" onclick="add_race()">Add Race</button>
+    </div>
 
-        <hr>
+    <hr>
 
+    <div>
         <h2>Preferences</h2>
-        <p>
-            Which day of the week is most suitable for doing long runs?<br>
-            <select name="preferred_long_run_day" id="preferred_long_run_day" class="right" value="Weekday" onchange="set_preferred_long_run_day()">
-                <option value="Sunday">Sunday</option>
-                <option value="Monday">Monday</option>
-                <option value="Tuesday">Tuesday</option>
-                <option value="Wednesday">Wednesday</option>
-                <option value="Thursday">Thursday</option>
-                <option value="Friday">Friday</option>
-                <option value="Saturday">Saturday</option>
-            </select><br>
-        </p>
-        <p>
-            Are you interested in speed/pace or just finishing?<br>
-            <select name="goal_type" id="goal_type" class="right" onchange="set_goal_type()">
-                <option value="Completion">Completion</option>
-                <option value="Speed">Speed</option>
-            </select><br>
-        </p>
-        <p>
-            Generate Workouts Even When the Race Calendar Is Empty?<br>
-            <select name="always_gen_workouts" id="always_gen_workouts" class="right" onchange="set_always_gen_workouts()">
-                <option value="True">Yes</option>
-                <option value="False">No</option>
-            </select><br>
-        </p>
-        <p>
-            Do you have access to a swimming pool?<br>
-            <select name="has_swimming_pool_access" id="has_swimming_pool_access" class="right" onchange="set_has_swimming_pool_access()">
-                <option value="True">Yes</option>
-                <option value="False">No</option>
-            </select><br>
-        </p>
-        <p>
-            Do you have access to an open water swim location?<br>
-            <select name="has_open_water_swim_access" id="has_open_water_swim_access" class="right" onchange="set_has_open_water_swim_access()">
-                <option value="True">Yes</option>
-                <option value="False">No</option>
-            </select><br>
-        </p>
-        <p>
-            Do you have a bicycle or access to an indoor bike trainer?<br>
-            <select name="has_bicycle" id="has_bicycle" class="right" onchange="set_has_bicycle()">
-                <option value="True">Yes</option>
-                <option value="False">No</option>
-            </select><br>
-        </p>
-        <p>
-            Experience Level: <br><input type="range" min="1" max="10" value="5" class="slider" id="exp_level" style="height:10px" onchange="set_exp_level()"><br>
-        </p>
-        <p>
-            Comfort Level With Structured Training: <br><input type="range" min="1" max="10" value="5" class="slider" id="structured_training_comfort_level" style="height:10px" onchange="set_structured_training_comfort_level()"><br>
-        </p>
+        <p>Which day of the week is most suitable for doing long runs?</p>
+        <select name="preferred_long_run_day" id="preferred_long_run_day" class="right" value="Weekday" onchange="set_preferred_long_run_day()">
+            <option value="Sunday">Sunday</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+        </select><br>
+        <p>Are you interested in speed/pace or just finishing?</p>
+        <select name="goal_type" id="goal_type" class="right" onchange="set_goal_type()">
+            <option value="Completion">Completion</option>
+            <option value="Speed">Speed</option>
+        </select><br>
+        <p>Generate Workouts Even When the Race Calendar Is Empty?</p>
+        <select name="always_gen_workouts" id="always_gen_workouts" class="right" onchange="set_always_gen_workouts()">
+            <option value="True">Yes</option>
+            <option value="False">No</option>
+        </select><br>
+        <p>Do you have access to a swimming pool?</p>
+        <select name="has_swimming_pool_access" id="has_swimming_pool_access" class="right" onchange="set_has_swimming_pool_access()">
+            <option value="True">Yes</option>
+            <option value="False">No</option>
+        </select><br>
+        <p>Do you have access to an open water swim location?</p>
+        <select name="has_open_water_swim_access" id="has_open_water_swim_access" class="right" onchange="set_has_open_water_swim_access()">
+            <option value="True">Yes</option>
+            <option value="False">No</option>
+        </select><br>
+        <p>Do you have a bicycle or access to an indoor bike trainer?</p>
+        <select name="has_bicycle" id="has_bicycle" class="right" onchange="set_has_bicycle()">
+            <option value="True">Yes</option>
+            <option value="False">No</option>
+        </select><br>
+        <p>Experience Level: <br><input type="range" min="1" max="10" value="5" class="slider" id="exp_level" style="height:10px" onchange="set_exp_level()"></p>
+        <p>Comfort Level With Structured Training: <br><input type="range" min="1" max="10" value="5" class="slider" id="structured_training_comfort_level" style="height:10px" onchange="set_structured_training_comfort_level()"></p>
         <button type="button" onclick="generate_workout_plan()">Regenerate the Workout Plan</button>
+    </div>
 
-        <hr>
+    <hr>
 
+    <div>
         <h2>Training Paces For Running</h2>
-        <p>
-            Run workouts will reference these paces, calculated from the last four weeks of activity.
-        </p>
+        <p>Run workouts will reference these paces, calculated from the last four weeks of activity.</p>
         <table id="RunPaces">
         </table>
+    </div>
 
-        <hr>
+    <hr>
 
+    <div>
         <h2>Calendar</h2>
-        <p>
-            Planned workouts will be added to the <a href="${root_url}/my_activities"><b>My Activities</b></a> calendar, along with races from the race calendar.
-        </p>
+        <p>Planned workouts will be added to the <a href="${root_url}/my_activities"><b>My Activities</b></a> calendar, along with races from the race calendar.</p>
         <p id="calendar_url">
         </p>
+    </div>
 
-        <hr>
+    <hr>
 
+    <div>
         <h2>Four Week Bests</h2>
-        <p>
-            Workouts are calculated using paces computed from the last four weeks of activity.
-        </p>
+        <p>Workouts are calculated using paces computed from the last four weeks of activity.</p>
         <h3>Cycling</h3>
         <table id="Cycling">
         </table>
+    </div>
 
+    <div>
         <h3>Running</h3>
         <table id="Running">
         </table>
