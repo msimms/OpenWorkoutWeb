@@ -38,6 +38,13 @@ import DataMgr
 import Importer
 import Keys
 
+ERROR_LOG = 'error.log'
+
+def log_info(self, log_str):
+    """Writes an info message to the log file."""
+    logger = logging.getLogger()
+    logger.info(log_str)
+
 def log_error(log_str):
     """Writes an error message to the log file."""
     logger = logging.getLogger()
@@ -58,7 +65,7 @@ def import_activity(import_str, internal_task_id):
         importer = Importer.Importer(data_mgr)
 
         # Generate a random name for the local file.
-        print("Generating local file name...")
+        log_info("Generating local file name...")
         root_dir = os.path.dirname(os.path.abspath(__file__))
         tempfile_dir = os.path.join(root_dir, 'tempfile')
         if not os.path.exists(tempfile_dir):
@@ -69,41 +76,41 @@ def import_activity(import_str, internal_task_id):
         local_file_name = local_file_name + uploaded_file_ext
 
         # Decode and write the file.
-        print("Writing the data to a local file...")
+        log_info("Writing the data to a local file...")
         with open(local_file_name, 'wb') as local_file:
 
             # Data to import is expected to be Base 64 encoded. This is because, at this point, we don't distinguish between
             # text and binary files.
-            print("Base64 decoding...")
+            log_info("Base64 decoding...")
             uploaded_file_data = uploaded_file_data.replace(" ", "+") # Some JS base64 encoders replace plus with space, so we need to undo that.
             decoded_file_data = base64.b64decode(uploaded_file_data)
-            print("Writing...")
+            log_info("Writing...")
             local_file.write(decoded_file_data)
 
         # Update the status of the analysis in the database.
-        print("Updating status...")
+        log_info("Updating status...")
         data_mgr.update_deferred_task(user_id, internal_task_id, None, Keys.TASK_STATUS_STARTED)
 
         # Import the file into the database.
-        print("Importing the data to the database...")
+        log_info("Importing the data to the database...")
         success, _, activity_id = importer.import_activity_from_file(username, user_id, local_file_name, uploaded_file_name, uploaded_file_ext, desired_activity_id)
 
         # The import was successful, do more stuff.
         if success:
 
             # Save the file to the database.
-            print("Saving the file to the database...")
+            log_info("Saving the file to the database...")
             data_mgr.create_uploaded_file(activity_id, decoded_file_data)
 
             # Update the status of the analysis in the database.
-            print("Updating status...")
+            log_info("Updating status...")
             data_mgr.update_deferred_task(user_id, internal_task_id, activity_id, Keys.TASK_STATUS_FINISHED)
 
         # The import failed.
         else:
 
             # Update the status of the analysis in the database.
-            print("Import was not successful.")
+            log_info("Import was not successful.")
             data_mgr.update_deferred_task(user_id, internal_task_id, activity_id, Keys.TASK_STATUS_ERROR)
     except:
         log_error("Exception when importing activity data: " + str(import_str))
@@ -112,12 +119,14 @@ def import_activity(import_str, internal_task_id):
     finally:
         # Remove the local file.
         if len(local_file_name) > 0:
-            print("Removing local file...")
+            log_info("Removing local file...")
             os.remove(local_file_name)
 
 def main():
     """Entry point for an import worker."""
-    pass
+
+    # Setup the logger.
+    logging.basicConfig(filename=ERROR_LOG, filemode='w', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
 if __name__ == "__main__":
     main()

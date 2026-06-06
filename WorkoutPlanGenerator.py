@@ -43,7 +43,7 @@ class WorkoutPlanGenerator(object):
         super(WorkoutPlanGenerator, self).__init__()
 
     def log_info(self, log_str):
-        """Writes an error message to the log file."""
+        """Writes an info message to the log file."""
         logger = logging.getLogger()
         logger.info(log_str)
 
