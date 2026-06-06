@@ -314,19 +314,24 @@ ${nav}
 
     /// @function check_for_updates
     var check_for_updates = function() {
-        let route_len = route_coordinates.length;
-        let api_url = root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=" + route_len;
 
-        send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200) {
-                const records = JSON.parse(response_text);
-                append_to_track(records);
-            }
-        });
+        // Don't check for old activities.
+        if (Date.now() - loc_end_time_ms < 86400 * 1000) {
+            let route_len = route_coordinates.length;
+            let api_url = root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=" + route_len;
+
+            send_get_request_async(api_url, function (response_code, response_text) {
+                if (response_code == 200) {
+                    const records = JSON.parse(response_text);
+                    append_to_track(records);
+                }
+                setTimeout(check_for_updates, 60000);
+            });
+        }
     };
 
     initialize();
-    setInterval(check_for_updates, 60000);
+    setTimeout(check_for_updates, 60000);
 </script>
 
 </div>
