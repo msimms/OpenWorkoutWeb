@@ -162,6 +162,10 @@ tr {
     margin-left: 1rem;
 }
 
+.analysis h3 {
+    margin-left: 1rem;
+}
+
 .analysis table {
     font-family: arial, sans-serif;
     background: linear-gradient(to left, var(--theme) , var(--theme));
@@ -198,6 +202,10 @@ tr {
 
 .activity_control tr {
     opacity: 0.7;
+}
+
+.activity_control h3 {
+    margin-left: 1rem;
 }
 
 tr:hover {
