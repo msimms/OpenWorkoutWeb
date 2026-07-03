@@ -40,7 +40,7 @@ import Keys
 
 ERROR_LOG = 'error.log'
 
-def log_info(self, log_str):
+def log_info(log_str):
     """Writes an info message to the log file."""
     logger = logging.getLogger()
     logger.info(log_str)
