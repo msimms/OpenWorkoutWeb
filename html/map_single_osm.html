@@ -41,16 +41,16 @@ ${nav}
 
 <div class="map_canvas" id="map_canvas">
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script src="${root_url}/js/all.js"></script>
 <script src="${root_url}/js/graphs.js"></script>
 <script src="${root_url}/js/coordinates.js"></script>
 <script src="${root_url}/js/heart_rate.js"></script>
 <script src="${root_url}/js/power.js"></script>
 <script src="${root_url}/js/OpenStreetMap.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.js" integrity="sha512-n/4gHW3atM3QqRcbCn6ewmpxcLAHGaDjpEBu4xZd47N0W2oQ+6q7oc3PXstrJYXcbNU1OHdQ1T7pAP+gi5Yu8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.js" integrity="sha256-TDtzz+WOGufaQuQzqpEnnxdJQW5xrU+pzjznwBtaWs4=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/openlayers/2.13.1/OpenLayers.js" integrity="sha256-/SzuLhIQJr2lXrXlvjX3aLOEEt2UkhqSc8mmYblwqwc=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.min.js" integrity="sha512-RJJ1NNC88QhN7dwpCY8rm/6OxI+YdQP48DrLGe/eSAd+n+s1PXwQkkpzzAgoJe4cZFW2GALQoxox61gSY2yQfg==" crossorigin="anonymous"></script>
 <script>
 
     let activity_id = "${activity_id}";
@@ -314,19 +314,24 @@ ${nav}
 
     /// @function check_for_updates
     var check_for_updates = function() {
-        let route_len = route_coordinates.length;
-        let api_url = root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=" + route_len;
 
-        send_get_request_async(api_url, function (response_code, response_text) {
-            if (response_code == 200) {
-                const records = JSON.parse(response_text);
-                append_to_track(records);
-            }
-        });
+        // Don't check for old activities.
+        if (Date.now() - loc_end_time_ms < 86400 * 1000) {
+            let route_len = route_coordinates.length;
+            let api_url = root_url + "/api/1.0/activity_track?activity_id=" + activity_id + "&num_points=" + route_len;
+
+            send_get_request_async(api_url, function (response_code, response_text) {
+                if (response_code == 200) {
+                    const records = JSON.parse(response_text);
+                    append_to_track(records);
+                }
+                setTimeout(check_for_updates, 60000);
+            });
+        }
     };
 
     initialize();
-    setInterval(check_for_updates, 60000);
+    setTimeout(check_for_updates, 60000);
 </script>
 
 </div>
